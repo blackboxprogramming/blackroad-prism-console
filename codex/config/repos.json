@@ -1,0 +1,17 @@
+{
+  "base_dir": "codex/repos",
+  "git_ssh_key": "~/.ssh/id_ed25519",
+  "git_ssh_strict_hostkey": true,
+  "default_branch": "main",
+  "repositories": [
+    // Add via wizard; example:
+    // {
+    //   "name": "blackboxprogramming",
+    //   "url": "git@github.com:blackboxprogramming/blackboxprogramming.git",
+    //   "branch": "main",
+    //   "auth": "ssh",
+    //   "read_only": false,
+    //   "shallow": true
+    // }
+  ]
+}
