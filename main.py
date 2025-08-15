@@ -51,8 +51,12 @@ if user_input:
         st.markdown(f"**Venture Console AI:** {assistant_reply}")
 
         try:
-            result = eval(user_input.split(',')[0])
-        except:
+            # Safely evaluate numerical input without executing arbitrary code
+            import ast
+            result = ast.literal_eval(user_input.split(',')[0])
+            if not isinstance(result, (int, float)):
+                raise ValueError("Result is not numeric")
+        except Exception:
             result = 1
 
         fig = plt.figure(figsize=(6, 4))
@@ -67,7 +71,9 @@ if user_input:
 
         buf = io.BytesIO()
         plt.savefig(buf, format="png")
+        buf.seek(0)
         st.image(buf)
+        plt.close(fig)
 
     except Exception as e:
         st.error(f"Error: {e}")
