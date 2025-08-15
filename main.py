@@ -2,12 +2,11 @@ import streamlit as st
 import openai
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import io
 import os
-import base64
 import tempfile
 import whisper
+import ast
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -51,8 +50,11 @@ if user_input:
         st.markdown(f"**Venture Console AI:** {assistant_reply}")
 
         try:
-            result = eval(user_input.split(',')[0])
-        except:
+            # Safely evaluate numerical input without executing arbitrary code
+            result = ast.literal_eval(user_input.split(',')[0])
+            if not isinstance(result, (int, float)):
+                raise ValueError("Result is not numeric")
+        except Exception:
             result = 1
 
         fig = plt.figure(figsize=(6, 4))
@@ -65,9 +67,11 @@ if user_input:
         ax.plot_surface(X, Y, Z, cmap='plasma')
         ax.axis('off')
 
-        buf = io.BytesIO()
-        plt.savefig(buf, format="png")
-        st.image(buf)
+        with io.BytesIO() as buf:
+            plt.savefig(buf, format="png")
+            buf.seek(0)
+            st.image(buf)
+        plt.close(fig)
 
     except Exception as e:
         st.error(f"Error: {e}")
