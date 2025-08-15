@@ -1,0 +1,11 @@
+{
+  "alert_on": ["repo.sync.errors", "repo.audit.baseline"],
+  "quiet_kinds": [],
+  "max_events_per_cycle": 1000,
+  "report_sections": ["summary", "repos", "recent_events"],
+  "recent_event_limit": 50,
+  "webhook_url": "",
+  "issue_tracker": "",
+  "issue_repo": "",
+  "issue_token_env": ""
+}
