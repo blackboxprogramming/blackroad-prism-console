@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Optional: GitHub token (needed for private repos & higher rate limits)
+# export GITHUB_TOKEN=ghp_xxx
+
+# Optional: your SSH key/known_hosts are already wired by the wizard; nothing else needed here.
+
+python3 codex/tools/codex_repo_discover.py "$@"
