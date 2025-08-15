@@ -1,0 +1,31 @@
+{
+  "$schema": "https://blackroad.io/schemas/codex-repos.schema.json",
+  "base_dir": "./repos",
+  "git_ssh_key": "./secrets/id_ed25519",
+  "git_ssh_strict_hostkey": true,
+  "default_branch": "main",
+  "repositories": [
+    {
+      "name": "blackroad-main",
+      "url": "git@github.com:blackboxprogramming/blackroad-main.git",
+      "branch": "main",
+      "auth": "ssh",
+      "read_only": true,
+      "shallow": true
+    },
+    {
+      "name": "blackboxprogramming",
+      "url": "https://github.com/blackboxprogramming/blackboxprogramming.git",
+      "branch": "main",
+      "auth": "https",
+      "read_only": false
+    },
+    {
+      "name": "new-codex-module",
+      "url": "git@github.com:blackboxprogramming/new-codex-module.git",
+      "branch": "main",
+      "auth": "ssh",
+      "read_only": false
+    }
+  ]
+}
