@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Optional identity (for commits/merges)
+export CODEX_GIT_USER_NAME="${CODEX_GIT_USER_NAME:-Lucidia Codex}"
+export CODEX_GIT_USER_EMAIL="${CODEX_GIT_USER_EMAIL:-codex@blackroad.io}"
+
+# Optional token for any HTTPS auth=token repos (repo wizard handles SSH env)
+if [ -f ".env" ]; then
+  # shellcheck disable=SC2046
+  export $(grep -v '^#' .env | xargs -I {} echo {})
+fi
+
+python3 codex/agents/merge_agent.py
