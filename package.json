@@ -11,7 +11,8 @@
   "scripts": {
     "prepare": "husky install",
     "lint": "eslint . --ext .js,.mjs,.cjs",
-    "format": "prettier -w ."
+    "format": "prettier -w .",
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "lint-staged": {
     "**/*.{js,mjs,cjs,html,css,md,yml,yaml,json}": [
