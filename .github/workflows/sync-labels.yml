@@ -1,8 +1,8 @@
 name: Sync Labels
 on:
   push:
-    branches: [ main ]
-    paths: [ ".github/labels.yml", ".github/workflows/sync-labels.yml" ]
+    branches: [main]
+    paths: ['.github/labels.yml', '.github/workflows/sync-labels.yml']
   workflow_dispatch:
 permissions:
   contents: read

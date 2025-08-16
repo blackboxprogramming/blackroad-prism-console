@@ -7,14 +7,14 @@ pull_request_rules:
       - status-success=Deploy Quantum App (safe)
       - check-success>=1
       - base=main
-      - "#approved-reviews-by>=1"
+      - '#approved-reviews-by>=1'
     actions:
       merge:
         method: squash
       delete_head_branch: {}
   - name: Label and request review
     conditions:
-      - "#files-changed>0"
+      - '#files-changed>0'
     actions:
       label:
-        add: ["needs-review"]
+        add: ['needs-review']

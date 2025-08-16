@@ -2,7 +2,7 @@
 const fs = require('fs');
 
 const files = danger.git.modified_files.concat(danger.git.created_files);
-const big = files.filter(f => f.endsWith('.html') || f.endsWith('.js'));
+const big = files.filter((f) => f.endsWith('.html') || f.endsWith('.js'));
 
 if (big.length > 0) {
   message(`🧪 Files to focus review on:\n- ${big.join('\n- ')}`);
@@ -18,6 +18,6 @@ if (!danger.github.pr.body || danger.github.pr.body.length < 20) {
 }
 
 const hasScreenshot = /!\[.*\]\(.*\)/.test(danger.github.pr.body || '');
-if (!hasScreenshot && files.some(f => f.endsWith('.html'))) {
+if (!hasScreenshot && files.some((f) => f.endsWith('.html'))) {
   warn('UI change detected, but no screenshot in the PR body.');
 }

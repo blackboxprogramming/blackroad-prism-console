@@ -4,8 +4,8 @@ import path from 'path';
 
 const app = express();
 const PORT = process.env.PORT || 8088;
-const API_ROOT = process.env.API_ROOT || "/var/www/blackroad/api";
-const HEALTH_FILE = path.join(API_ROOT, "health.json");
+const API_ROOT = process.env.API_ROOT || '/var/www/blackroad/api';
+const HEALTH_FILE = path.join(API_ROOT, 'health.json');
 
 // simple cache-control for JSON
 app.use((_req, res, next) => {
@@ -16,19 +16,19 @@ app.use((_req, res, next) => {
 // GET /api/health  (primary)
 app.get('/api/health', (_req, res) => {
   let body = {
-    status: "ok",
-    app: "quantum-v3",
-    version: "v3.0.0",
-    commit: process.env.COMMIT_SHA || "unknown",
-    ts: new Date().toISOString()
+    status: 'ok',
+    app: 'quantum-v3',
+    version: 'v3.0.0',
+    commit: process.env.COMMIT_SHA || 'unknown',
+    ts: new Date().toISOString(),
   };
   try {
     if (fs.existsSync(HEALTH_FILE)) {
       const file = JSON.parse(fs.readFileSync(HEALTH_FILE, 'utf8'));
-      body = { ...file, status: "ok" };
+      body = { ...file, status: 'ok' };
     }
   } catch (e) {
-    body.status = "degraded";
+    body.status = 'degraded';
     body.error = String(e?.message || e);
   }
   res.json(body);

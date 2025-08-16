@@ -1,0 +1,7 @@
+extends: default
+rules:
+  line-length: disable
+  truthy:
+    level: warning
+  comments:
+    min-spaces-from-content: 1

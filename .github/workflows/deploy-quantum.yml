@@ -1,7 +1,7 @@
 name: Deploy Quantum App
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'apps/quantum/**'
       - '.github/workflows/deploy-quantum.yml'
