@@ -9,3 +9,4 @@ export function telemetryInit() {
   }
   } catch {}
 }
+export function telemetryInit() {}
