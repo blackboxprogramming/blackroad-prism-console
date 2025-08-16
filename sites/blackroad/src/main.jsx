@@ -1,6 +1,10 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './ui/App.jsx'
+import { RouterProvider } from 'react-router-dom'
+import { router } from './router.jsx'
 import './ui/styles.css'
+import { telemetryInit } from './lib/telemetry.ts'
 
-createRoot(document.getElementById('root')).render(<App />)
+telemetryInit()
+
+createRoot(document.getElementById('root')).render(<RouterProvider router={router} />)
