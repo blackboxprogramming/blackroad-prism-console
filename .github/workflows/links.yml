@@ -1,0 +1,14 @@
+name: Broken Links
+on:
+  pull_request:
+  schedule: [ { cron: "0 2 * * *" } ]
+jobs:
+  lychee:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: lycheeverse/lychee-action@v2
+        with:
+          args: --verbose --no-progress --max-concurrency 8 --retry-wait-time 2 --timeout 20s "apps/quantum/ternary_consciousness_v3.html"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,6 @@
+{
+  "doctype-first": false,
+  "tagname-lowercase": true,
+  "attr-no-duplication": true,
+  "id-unique": true
+}

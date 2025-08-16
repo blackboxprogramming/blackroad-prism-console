@@ -1,0 +1,24 @@
+name: Super-Linter
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+permissions:
+  contents: read
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Run Super-Linter
+        uses: github/super-linter/slim@v6
+        env:
+          DEFAULT_BRANCH: main
+          VALIDATE_ALL_CODEBASE: true
+          LOG_LEVEL: warn
+          FILTER_REGEX_EXCLUDE: "node_modules/|\\.husky/"
+          VALIDATE_MARKDOWN: true
+          VALIDATE_HTML: true
+          VALIDATE_YAML: true
+          VALIDATE_JSON: true
