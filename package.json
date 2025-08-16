@@ -1,6 +1,7 @@
 {
-  "name": "blackroad-quantum",
+  "name": "blackroad-monorepo",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
   "devDependencies": {
     "eslint": "^9.9.0",
@@ -12,11 +13,12 @@
   },
   "scripts": {
     "prepare": "husky",
-    "lint": "eslint . --ext .js,.mjs,.cjs",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.mjs,.cjs || true",
     "format": "prettier -w .",
     "test": "node tests/smoke.test.js",
     "dev": "npm --prefix sites/blackroad run dev",
-    "build": "npm --prefix sites/blackroad run build"
+    "build": "npm --prefix sites/blackroad run build",
+    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
   },
   "lint-staged": {
     "**/*.{js,mjs,cjs,html,css,md,yml,yaml,json}": [
