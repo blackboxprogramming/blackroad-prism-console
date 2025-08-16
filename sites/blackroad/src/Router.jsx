@@ -11,6 +11,7 @@ import Tutorials from './pages/Tutorials.jsx';
 import Roadmap from './pages/Roadmap.jsx';
 import Changelog from './pages/Changelog.jsx';
 import Blog from './pages/Blog.jsx';
+import Deploys from './pages/Deploys.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 const routes = {
@@ -25,6 +26,7 @@ const routes = {
   '/roadmap': <Roadmap />,
   '/changelog': <Changelog />,
   '/blog': <Blog />,
+  '/deploys': <Deploys />,
 };
 
 export default function Router() {
