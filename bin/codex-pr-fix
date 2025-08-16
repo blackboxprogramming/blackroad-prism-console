@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Wrapper to run the PR Fix Agent
+set -euo pipefail
+python3 codex/agents/pr_fix_agent.py "$@"
