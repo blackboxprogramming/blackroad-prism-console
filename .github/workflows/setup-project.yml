@@ -1,0 +1,46 @@
+name: Ensure Repo Project
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+permissions:
+  contents: read
+  repository-projects: write
+jobs:
+  ensure-project:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            // list existing projects
+            const { data: projects } = await github.request('GET /repos/{owner}/{repo}/projects', {
+              owner, repo, headers: { 'Accept': 'application/vnd.github.inertia-preview+json' }
+            });
+            let project = projects.find(p => p.name === 'Quantum Auto');
+            if (!project) {
+              const { data: created } = await github.request('POST /repos/{owner}/{repo}/projects', {
+                owner, repo, name: 'Quantum Auto', body: 'Automanaged board',
+                headers: { 'Accept': 'application/vnd.github.inertia-preview+json' }
+              });
+              project = created;
+              core.info(`Created project id=${project.id}`);
+            } else {
+              core.info(`Project exists id=${project.id}`);
+            }
+            // ensure columns
+            const { data: cols } = await github.request('GET /projects/{project_id}/columns', {
+              project_id: project.id, headers: { 'Accept': 'application/vnd.github.inertia-preview+json' }
+            });
+            const want = ['Backlog','To do','In progress','Done'];
+            for (const name of want) {
+              if (!cols.find(c => c.name === name)) {
+                await github.request('POST /projects/{project_id}/columns', {
+                  project_id: project.id, name,
+                  headers: { 'Accept': 'application/vnd.github.inertia-preview+json' }
+                });
+                core.info(`Added column ${name}`);
+              }
+            }
