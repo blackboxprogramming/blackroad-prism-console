@@ -7,3 +7,4 @@ export function telemetryInit() {
     // ignore
   }
 }
+export function telemetryInit() {}
