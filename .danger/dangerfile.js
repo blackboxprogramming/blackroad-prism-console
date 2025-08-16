@@ -1,5 +1,6 @@
 /* Dangerfile: comment on PRs with quick quality checks */
-const fs = require('fs');
+/* eslint-env node */
+/* global danger, message, warn */
 
 const files = danger.git.modified_files.concat(danger.git.created_files);
 const big = files.filter((f) => f.endsWith('.html') || f.endsWith('.js'));
