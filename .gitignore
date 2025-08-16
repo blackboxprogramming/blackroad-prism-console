@@ -22,3 +22,12 @@ repos/
 runtime/
 __pycache__/
 codex/runtime/
+
+# Lucidia artifacts
+secrets/
+datasets/
+models/
+checkpoints/
+outputs/
+rag/index/*.faiss
+rag/index/meta.json
