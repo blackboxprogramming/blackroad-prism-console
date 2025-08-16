@@ -9,7 +9,7 @@
     "prettier": "^3.3.3"
   },
   "scripts": {
-    "prepare": "husky install",
+    "prepare": "husky",
     "lint": "eslint . --ext .js,.mjs,.cjs",
     "format": "prettier -w .",
     "test": "echo \"No tests specified\" && exit 0"

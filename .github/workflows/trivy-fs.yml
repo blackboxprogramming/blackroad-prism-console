@@ -1,0 +1,12 @@
+name: Trivy FS Scan
+on: { pull_request: {}, workflow_dispatch: {} }
+permissions: { contents: read }
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy via Docker (skip-safe)
+        run: |
+          docker --version >/dev/null 2>&1 || { echo "::notice::Docker missing; skipping"; exit 0; }
+          docker run --rm -v "$PWD:/src" aquasec/trivy:latest fs --security-checks vuln,secret --exit-code 0 /src || true

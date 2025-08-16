@@ -1,12 +1,6 @@
 name: Calm ChatOps
-on:
-  issue_comment:
-    types: [created]
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  actions: read
+on: { issue_comment: { types: [created] } }
+permissions: { contents: write, pull-requests: write, issues: write, actions: read }
 jobs:
   chatops:
     if: startsWith(github.event.comment.body, '/')
@@ -17,205 +11,166 @@ jobs:
       OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL || 'llama3.1:8b' }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - name: Set bot identity
-        run: |
+        with: { persist-credentials: false, fetch-depth: 0 }
+      - run: |
           git config user.name  "${{ secrets.BOT_USER || 'blackroad-bot' }}"
           git config user.email "${{ secrets.BOT_USER || 'blackroad-bot' }}@users.noreply.github.com"
-
-      - name: Parse command
-        id: parse
+      - id: parse
         run: |
-          echo "cmd<<EOF" >> $GITHUB_OUTPUT
-          echo "${{ github.event.comment.body }}" | tr -d '\r' >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          c="$(echo "${{ github.event.comment.body }}" | tr -d '\r')"
+          echo "cmd=$c" >> $GITHUB_OUTPUT
 
-      - name: Helpers
-        id: helpers
-        run: |
-          echo "PR_NUMBER=${{ github.event.issue.pull_request && github.event.issue.number || '' }}" >> $GITHUB_OUTPUT
-          echo "BRANCH=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_OUTPUT
-
-      - name: /help
-        if: contains(steps.parse.outputs.cmd, '/help')
+      # help
+      - if: contains(steps.parse.outputs.cmd,'/help')
         uses: actions/github-script@v7
         with:
           script: |
-            const cmds = [
+            const list = [
               "`/fix` run auto-heal",
               "`/format` prettier write",
               "`/lint` eslint --fix",
-              "`/labels +a -b` add/remove labels",
-              "`/assign @user` assign user",
-              "`/sync main` merge main into this branch",
-              "`/run <bash>` run short shell (guarded)",
-              "`/summarize` Ollama summary of diff/issue",
-              "`/review` Ollama code review notes",
-              "`/commit auto` generate commit message via Ollama",
-              "`/gen readme` create/update README via Ollama",
-              "`/rerun <workflow>` re-run workflow",
-              "`/deploy` dispatch Deploy workflow"
+              "`/bump deps` npm deps bump (ncu) + commit",
+              "`/changelog` generate changelog from commits",
+              "`/snapshot` attach repo zip",
+              "`/backport <branch>` backport current PR",
+              "`/size` label PR size",
+              "`/automerge on|off` toggle auto-merge label",
+              "`/semantic` check/repair PR title",
+              "`/snyk` run Snyk (if token)",
+              "`/trivy` run Trivy fs scan",
+              "`/gitleaks` run secret scan"
             ].join("\n");
-            await github.issues.createComment({
-              owner: context.repo.owner, repo: context.repo.repo,
-              issue_number: context.payload.issue.number,
-              body: "### Calm ChatOps\n" + cmds
-            });
+            await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.issue.number, body: "### ChatOps commands\n"+list});
 
-      - name: /fix (Auto-Heal)
-        if: contains(steps.parse.outputs.cmd, '/fix')
+      # /fix (trigger auto-heal)
+      - if: contains(steps.parse.outputs.cmd,'/fix')
         uses: actions/github-script@v7
         with:
           script: |
-            await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner, repo: context.repo.repo,
-              workflow_id: 'auto-heal.yml',
-              ref: context.payload.issue.pull_request ? context.payload.issue.pull_request.head.ref : (process.env.GITHUB_REF_NAME || 'main')
-            });
+            await github.actions.createWorkflowDispatch({owner: context.repo.owner, repo: context.repo.repo, workflow_id: 'auto-heal.yml', ref: context.payload.issue.pull_request ? context.payload.issue.pull_request.head.ref : (process.env.GITHUB_REF_NAME || 'main')});
             await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.issue.number, body: "🚑 Auto-Heal triggered."});
 
-      - name: /format
-        if: contains(steps.parse.outputs.cmd, '/format')
+      # /format
+      - if: contains(steps.parse.outputs.cmd,'/format')
         run: |
           npm i -D prettier >/dev/null 2>&1 || true
           npx --yes prettier -w . || true
           if ! git diff --quiet; then
-            git add -A
-            git commit -m "chore(chatops): prettier format"
-            [ -n "$BOT_TOKEN" ] && git push "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:$(git rev-parse --abbrev-ref HEAD)" || echo "::notice::No BOT_TOKEN; not pushing."
+            git add -A && git commit -m "chore(chatops): prettier format" || true
+            [ -n "${BOT_TOKEN:-}" ] && git push "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:$(git rev-parse --abbrev-ref HEAD)" || echo "::notice::No BOT_TOKEN"
           fi
 
-      - name: /lint
-        if: contains(steps.parse.outputs.cmd, '/lint')
+      # /lint
+      - if: contains(steps.parse.outputs.cmd,'/lint')
         run: |
           npm i -D eslint eslint-config-prettier >/dev/null 2>&1 || true
           [ -f eslint.config.js ] || echo 'export default [];' > eslint.config.js
           npx --yes eslint . --ext .js,.mjs,.cjs --fix || true
           if ! git diff --quiet; then
-            git add -A
-            git commit -m "chore(chatops): eslint --fix"
-            [ -n "$BOT_TOKEN" ] && git push "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:$(git rev-parse --abbrev-ref HEAD)" || echo "::notice::No BOT_TOKEN; not pushing."
+            git add -A && git commit -m "chore(chatops): eslint --fix" || true
+            [ -n "${BOT_TOKEN:-}" ] && git push "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:$(git rev-parse --abbrev-ref HEAD)" || echo "::notice::No BOT_TOKEN"
           fi
 
-      - name: /labels
-        if: startsWith(steps.parse.outputs.cmd, '/labels')
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const cmd = `${{ toJSON(steps.parse.outputs.cmd) }}`;
-            const adds=[...cmd.matchAll(/\+([^\s]+)/g)].map(m=>m[1]);
-            const rems=[...cmd.matchAll(/-([^\s]+)/g)].map(m=>m[1]);
-            const {owner, repo} = context.repo;
-            const issue_number = context.payload.issue.number;
-            if (adds.length) await github.issues.addLabels({owner,repo,issue_number,labels:adds});
-            for (const l of rems) { try { await github.issues.removeLabel({owner,repo,issue_number,name:l}); } catch(e){} }
-            await github.issues.createComment({owner,repo,issue_number,body:"labels updated ✅"});
-
-      - name: /assign
-        if: startsWith(steps.parse.outputs.cmd, '/assign')
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const m = `${{ toJSON(steps.parse.outputs.cmd) }}`.match(/@([A-Za-z0-9_-]+)/);
-            if (!m) return;
-            const {owner, repo} = context.repo;
-            await github.issues.addAssignees({owner,repo,issue_number:context.payload.issue.number,assignees:[m[1]]});
-            await github.issues.createComment({owner,repo,issue_number:context.payload.issue.number,body:`assigned @${m[1]} ✅`});
-
-      - name: /sync main
-        if: contains(steps.parse.outputs.cmd, '/sync main')
+      # /bump deps (npm-check-updates)
+      - if: contains(steps.parse.outputs.cmd,'/bump deps')
         run: |
-          git fetch origin main || true
-          git merge --no-edit origin/main || true
+          npm i -D npm-check-updates >/dev/null 2>&1 || true
+          npx --yes ncu -u || true
+          npm i || npm i --package-lock-only || true
           if ! git diff --quiet; then
-            [ -n "$BOT_TOKEN" ] && git push "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:$(git rev-parse --abbrev-ref HEAD)" || echo "::notice::No BOT_TOKEN; not pushing."
+            git add -A && git commit -m "chore(deps): bump with ncu" || true
+            [ -n "${BOT_TOKEN:-}" ] && git push "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:$(git rev-parse --abbrev-ref HEAD)" || true
           fi
 
-      - name: /run (guarded)
-        if: startsWith(steps.parse.outputs.cmd, '/run ')
-        run: |
-          cmd="${{ steps.parse.outputs.cmd }}"
-          cmd="${cmd#'/run '}"
-          echo "Running: $cmd"
-          timeout 60 bash -lc "$cmd" || true
-
-      - name: Prepare diff text for AI
-        id: diff
-        if: contains(steps.parse.outputs.cmd, '/summarize') || contains(steps.parse.outputs.cmd, '/review') || contains(steps.parse.outputs.cmd, '/commit auto') || contains(steps.parse.outputs.cmd, '/gen readme')
-        run: |
-          git fetch origin
-          base=$(git rev-parse HEAD~1 2>/dev/null || echo HEAD)
-          git diff --unified=0 "$base"...HEAD | sed -e 's/`/\\`/g' | head -c 90000 > /tmp/diff.txt
-          echo "ready=1" >> $GITHUB_OUTPUT
-
-      - name: Ollama summarize/review/commit/gen
-        if: steps.diff.outputs.ready == '1'
-        env:
-          OLLAMA_URL: ${{ env.OLLAMA_URL }}
-          OLLAMA_MODEL: ${{ env.OLLAMA_MODEL }}
-        run: |
-          prompt=""
-          if echo "${{ steps.parse.outputs.cmd }}" | grep -q "/summarize"; then
-            prompt="Summarize these changes for a PR description, concise, bullet list:\n$(cat /tmp/diff.txt)"
-          elif echo "${{ steps.parse.outputs.cmd }}" | grep -q "/review"; then
-            prompt="Code review this diff. List concrete fixes and security gotchas:\n$(cat /tmp/diff.txt)"
-          elif echo "${{ steps.parse.outputs.cmd }}" | grep -q "/commit auto"; then
-            prompt="Write a short conventional commit subject and body for this diff. Subject <= 72 chars:\n$(cat /tmp/diff.txt)"
-          elif echo "${{ steps.parse.outputs.cmd }}" | grep -q "/gen readme"; then
-            tree -a -I '.git|node_modules|dist|build|.github' > /tmp/tree.txt || true
-            prompt="Generate a README.md for this repo based on the file tree and this diff. Keep it sober and accurate.\n\nTREE:\n$(cat /tmp/tree.txt)\n\nDIFF:\n$(cat /tmp/diff.txt)"
-          fi
-          if [ -z "$prompt" ]; then exit 0; fi
-          out=$(.github/tools/ollama_call.sh "$prompt" || true)
-          echo "OLLAMA_OUT<<EOF" >> $GITHUB_ENV
-          echo "${out}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: Act on AI output
-        if: env.OLLAMA_OUT != ''
-        run: |
-          if echo "${{ steps.parse.outputs.cmd }}" | grep -q "/commit auto"; then
-            msg="$(printf "%s" "$OLLAMA_OUT" | head -n 30)"
-            git add -A || true
-            git commit -m "$msg" || true
-            [ -n "$BOT_TOKEN" ] && git push "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:$(git rev-parse --abbrev-ref HEAD)" || echo "::notice::No BOT_TOKEN; not pushing."
-          elif echo "${{ steps.parse.outputs.cmd }}" | grep -q "/gen readme"; then
-            echo "$OLLAMA_OUT" > README.md
-            git add README.md && git commit -m "docs(readme): generate via chatops" || true
-            [ -n "$BOT_TOKEN" ] && git push "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:$(git rev-parse --abbrev-ref HEAD)" || echo "::notice::No BOT_TOKEN; not pushing."
-          fi
-
-      - name: Comment result
-        if: env.OLLAMA_OUT != ''
+      # /changelog
+      - if: contains(steps.parse.outputs.cmd,'/changelog')
         uses: actions/github-script@v7
         with:
           script: |
-            const body = process.env.OLLAMA_OUT || "(no output; Ollama not available)";
-            await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.issue.number, body});
-      
-      - name: /rerun <workflow>
-        if: startsWith(steps.parse.outputs.cmd, '/rerun ')
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const target = `${{ steps.parse.outputs.cmd }}`.replace('/rerun ','').trim();
-            await github.actions.createWorkflowDispatch({owner: context.repo.owner, repo: context.repo.repo, workflow_id: target + '.yml', ref: context.ref.replace('refs/heads/','')});
-            await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.issue.number, body:`Requested rerun: **${target}**`});
-
-      - name: /deploy
-        if: contains(steps.parse.outputs.cmd, '/deploy')
-        uses: actions/github-script@v7
-        with:
-          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.issue.pull_request;
+            let body = "No diff.";
             try {
-              await github.actions.createWorkflowDispatch({
-                owner: context.repo.owner, repo: context.repo.repo,
-                workflow_id: 'deploy-quantum.yml',
-                ref: context.payload.issue.pull_request ? context.payload.issue.pull_request.head.ref : (process.env.GITHUB_REF_NAME || 'main')
-              });
-              await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.issue.number, body:"Deploy dispatched ▶️"});
-            } catch (e) {
-              await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.issue.number, body:"Deploy not available (workflow missing or permissions). Skipping softly."});
-            }
+              const base = pr ? (await github.pulls.get({owner,repo,pull_number: pr.number})).data.base.sha : (await github.repos.get({owner,repo})).data.default_branch;
+              const head = pr ? (await github.pulls.get({owner,repo,pull_number: pr.number})).data.head.sha : 'HEAD';
+              const resp = await github.repos.compareCommits({owner,repo,base,head});
+              body = resp.data.commits.map(c=>`- ${c.commit.message.split('\n')[0]} (${c.sha.slice(0,7)})`).join('\n') || "No commits found.";
+            } catch(e){ body = "Could not generate changelog."; }
+            await github.issues.createComment({owner,repo,issue_number: context.payload.issue.number, body: "### Changelog\n"+body});
+
+      # /snapshot
+      - if: contains(steps.parse.outputs.cmd,'/snapshot')
+        run: |
+          .github/tools/zip_snapshot.sh repo-snapshot.zip
+      - if: contains(steps.parse.outputs.cmd,'/snapshot')
+        uses: actions/upload-artifact@v4
+        with: { name: repo-snapshot, path: repo-snapshot.zip, if-no-files-found: ignore }
+
+      # /backport <branch>
+      - if: startsWith(steps.parse.outputs.cmd,'/backport ')
+        shell: bash
+        run: |
+          tgt="$(echo "${{ steps.parse.outputs.cmd }}" | awk '{print $2}')"
+          git fetch origin
+          src="$(git rev-parse --abbrev-ref HEAD)"
+          new="backport/${tgt}-$(date +%s)"
+          git checkout -b "$new"
+          git cherry-pick -m 1 "$(git rev-parse HEAD~0)" 2>/dev/null || true
+          git push "https://${BOT_TOKEN:-x}@github.com/${{ github.repository }}.git" "HEAD:$new" || true
+          echo "Opened backport branch $new -> $tgt"
+
+      # /size (labels XS..XXL)
+      - if: contains(steps.parse.outputs.cmd,'/size')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner,repo} = context.repo; const num=context.payload.issue.number;
+            const pr = (await github.pulls.get({owner,repo,pull_number:num})).data;
+            const changes = pr.additions + pr.deletions;
+            const bucket = changes<50?'size/XS':changes<150?'size/S':changes<300?'size/M':changes<600?'size/L':'size/XL';
+            const all = ['size/XS','size/S','size/M','size/L','size/XL'];
+            await github.issues.addLabels({owner,repo,issue_number:num,labels:[bucket]});
+            for (const l of all.filter(x=>x!==bucket)) { try { await github.issues.removeLabel({owner,repo,issue_number:num,name:l}); } catch(e){} }
+            await github.issues.createComment({owner,repo,issue_number:num,body:`PR size: **${bucket}** (~${changes} changes)`});
+
+      # /automerge on|off  (label toggle)
+      - if: contains(steps.parse.outputs.cmd,'/automerge ')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const on = `${{ steps.parse.outputs.cmd }}`.trim().endsWith('on');
+            const {owner,repo} = context.repo; const num=context.payload.issue.number;
+            if (on) { await github.issues.addLabels({owner,repo,issue_number:num,labels:['automerge']}); }
+            else { try { await github.issues.removeLabel({owner,repo,issue_number:num,name:'automerge'}); } catch(e){} }
+            await github.issues.createComment({owner,repo,issue_number:num,body:`automerge ${on?'enabled':'disabled'}`});
+
+      # /semantic (fix PR title if missing type/scope)
+      - if: contains(steps.parse.outputs.cmd,'/semantic')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner,repo} = context.repo; const num=context.payload.issue.number;
+            const pr = (await github.pulls.get({owner,repo,pull_number:num})).data;
+            let t = pr.title.trim();
+            if(!/^(feat|fix|chore|docs|refactor|test|ci)(\(.+\))?:/.test(t)) t = "chore: " + t;
+            await github.pulls.update({owner,repo,pull_number:num,title:t});
+            await github.issues.createComment({owner,repo,issue_number:num,body:`semantic title set to:\n\n> ${t}`});
+
+      # /snyk (dispatch)
+      - if: contains(steps.parse.outputs.cmd,'/snyk')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try { await github.actions.createWorkflowDispatch({owner: context.repo.owner, repo: context.repo.repo, workflow_id: 'snyk.yml', ref: context.payload.issue.pull_request ? context.payload.issue.pull_request.head.ref : (process.env.GITHUB_REF_NAME || 'main')}); 
+              await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.issue.number, body: "Snyk dispatched ▶️"}); } 
+            catch(e){ await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.issue.number, body: "Snyk not configured; skipping softly."}); }
+
+      # /trivy • /gitleaks — run ad-hoc (non-blocking)
+      - if: contains(steps.parse.outputs.cmd,'/trivy')
+        run: |
+          docker --version >/dev/null 2>&1 || { echo "::notice::Docker not available; skipping Trivy"; exit 0; }
+          docker run --rm -v "$PWD:/src" aquasec/trivy:latest fs --security-checks vuln,secret --exit-code 0 /src || true
+      - if: contains(steps.parse.outputs.cmd,'/gitleaks')
+        run: |
+          docker --version >/dev/null 2>&1 || { echo "::notice::Docker not available; skipping Gitleaks"; exit 0; }
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest detect -s /repo --no-git -v --redact --exit-code 0 || true
