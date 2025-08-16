@@ -1,0 +1,17 @@
+name: 🐛 Bug report
+description: Report a bug in the quantum app
+labels: [bug]
+body:
+  - type: input
+    id: url
+    attributes: { label: Page URL, placeholder: "https://…" }
+  - type: textarea
+    id: what
+    attributes: { label: What happened?, placeholder: Steps to reproduce, actual vs expected }
+    validations: { required: true }
+  - type: textarea
+    id: logs
+    attributes: { label: Console logs / screenshots }
+  - type: dropdown
+    id: browsers
+    attributes: { label: Browsers, multiple: true, options: [Chrome, Firefox, Safari, Edge] }

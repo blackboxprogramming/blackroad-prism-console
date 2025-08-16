@@ -1,4 +1,11 @@
 # Ternary Quantum Consciousness (v3)
+
+<!-- BADGES START -->
+[![Deploy](https://github.com/blackboxprogramming/BlackRoad/actions/workflows/deploy-quantum.yml/badge.svg)](../../actions/workflows/deploy-quantum.yml)
+[![CodeQL](https://github.com/blackboxprogramming/BlackRoad/actions/workflows/codeql.yml/badge.svg)](../../actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/blackboxprogramming/BlackRoad/badge)](https://securityscorecards.dev/viewer/?uri=github.com/blackboxprogramming/BlackRoad)
+<!-- BADGES END -->
+
 Interactive qutrit lab: Lindbladian dynamics (γφ, γrel), von Neumann entropy S(ρ), selectable observables (Pauli-like/Gell-Mann), Hamiltonian editor, session recording + CSV, barycentric visualization.
 
 ## Run

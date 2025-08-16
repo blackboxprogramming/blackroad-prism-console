@@ -1,0 +1,12 @@
+frontend:
+  - apps/quantum/**.html
+workflow:
+  - .github/workflows/**.yml
+docs:
+  - "**/*.md"
+security:
+  - ".mergify.yml"
+  - ".github/**"
+deps:
+  - "package.json"
+  - "package-lock.json"
