@@ -1,20 +1,21 @@
-name: Stale (soft)
+name: Mark stale issues and PRs
 on:
-  schedule: [ { cron: "0 9 * * 1-5" } ]
-permissions: { issues: write, pull-requests: write }
+  schedule: [{ cron: "0 3 * * *" }]
+
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/stale@v9
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          days-before-issue-stale: 45
-          days-before-pr-stale: 30
-          days-before-close: -1
-          exempt-issue-labels: pinned,security
-          exempt-pr-labels: work-in-progress,do-not-close
-          stale-issue-label: stale
-          stale-pr-label: stale
-          stale-issue-message: "This issue is getting a little dusty — comment to keep it fresh ✨"
-          stale-pr-message: "This PR is stale — push commits or comment to keep it active."
+          days-before-stale: 30
+          days-before-close: 7
+          stale-issue-message: "This issue is stale due to inactivity. It will auto-close in 7 days."
+          stale-pr-message: "This PR is stale due to inactivity. It will auto-close in 7 days."
+          exempt-issue-labels: "security,blocked"
+          exempt-pr-labels: "security,blocked"
+
