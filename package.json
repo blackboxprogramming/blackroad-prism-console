@@ -13,7 +13,9 @@
     "prepare": "husky",
     "lint": "eslint . --ext .js,.mjs,.cjs",
     "format": "prettier -w .",
-    "test": "echo \"No tests specified\" && exit 0"
+    "test": "node tests/smoke.test.js",
+    "dev": "npm --prefix sites/blackroad run dev",
+    "build": "npm --prefix sites/blackroad run build"
   },
   "lint-staged": {
     "**/*.{js,mjs,cjs,html,css,md,yml,yaml,json}": [
