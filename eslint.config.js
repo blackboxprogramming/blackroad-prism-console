@@ -40,6 +40,7 @@ export default [
         setTimeout: 'readonly',
       },
     },
+    ignores: ['node_modules/', 'dist/', 'build/', '.github/', '.tools/', '**/*.ts'],
     rules: {
       'no-unused-vars': [
         'warn',
