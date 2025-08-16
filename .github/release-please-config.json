@@ -1,0 +1,14 @@
+{
+  "bootstrap-sha": "",
+  "plugins": ["node-workspace"],
+  "release-type": "node",
+  "changelog-sections": [
+    {"type":"feat","section":"Features"},
+    {"type":"fix","section":"Fixes"},
+    {"type":"chore","section":"Chores"},
+    {"type":"docs","section":"Docs"},
+    {"type":"refactor","section":"Refactors"},
+    {"type":"perf","section":"Performance"},
+    {"type":"test","section":"Tests"}
+  ]
+}

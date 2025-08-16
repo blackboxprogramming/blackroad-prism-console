@@ -1,0 +1,11 @@
+name: Security report
+description: Private security disclosure
+title: "SECURITY: "
+labels: [security]
+body:
+  - type: textarea
+    id: details
+    attributes:
+      label: Vulnerability details
+      description: Please include steps to reproduce (no secrets).
+    validations: { required: true }
