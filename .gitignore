@@ -3,3 +3,6 @@ runtime/
 .env
 __pycache__/
 codex/runtime/
+node_modules/
+services/health-sidecar/node_modules/
+services/health-sidecar/.env
