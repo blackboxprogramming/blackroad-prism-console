@@ -1,0 +1,14 @@
+name: HTML Validate
+on:
+  pull_request:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate HTML
+        uses: Cyb3r-Jak3e/html5validator-action@v7
+        with:
+          root: .
+          paths: apps/quantum/ternary_consciousness_v3.html
+          blacklist: node_modules
