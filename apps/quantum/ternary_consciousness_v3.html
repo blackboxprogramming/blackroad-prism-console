@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -13,38 +12,32 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #333;
             line-height: 1.6;
         }
-
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
-
         .header {
             text-align: center;
             color: white;
             padding: 30px 0;
             margin-bottom: 30px;
         }
-
         .header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-
         .header p {
             font-size: 1.2rem;
             opacity: 0.9;
         }
-
         .controls {
             background: white;
             border-radius: 15px;
@@ -52,25 +45,21 @@
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-
         .control-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 20px;
         }
-
         .control-group {
             display: flex;
             flex-direction: column;
         }
-
         .control-group label {
             font-weight: bold;
             color: #5a67d8;
             margin-bottom: 5px;
         }
-
         .control-group input, .control-group select {
             padding: 10px;
             border: 2px solid #e2e8f0;
@@ -78,19 +67,16 @@
             font-size: 14px;
             transition: border-color 0.3s;
         }
-
         .control-group input:focus, .control-group select:focus {
             outline: none;
             border-color: #5a67d8;
         }
-
         .preset-buttons {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
             margin-top: 15px;
         }
-
         .preset-btn {
             padding: 8px 16px;
             background: linear-gradient(45deg, #667eea, #764ba2);
@@ -101,19 +87,16 @@
             font-size: 14px;
             transition: transform 0.3s, box-shadow 0.3s;
         }
-
         .preset-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
-
         .dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
-
         .card {
             background: white;
             border-radius: 15px;
@@ -121,56 +104,47 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             transition: transform 0.3s, box-shadow 0.3s;
         }
-
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
-
         .card h3 {
             color: #5a67d8;
             margin-bottom: 15px;
             font-size: 1.3rem;
         }
-
         .chart-container {
             position: relative;
             height: 300px;
             margin-bottom: 15px;
         }
-
         .metrics {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-top: 15px;
         }
-
         .metric {
             background: linear-gradient(135deg, #f7fafc, #edf2f7);
             padding: 15px;
             border-radius: 10px;
             text-align: center;
         }
-
         .metric-value {
             font-size: 1.5rem;
             font-weight: bold;
             color: #5a67d8;
         }
-
         .metric-label {
             font-size: 0.9rem;
             color: #666;
             margin-top: 5px;
         }
-
         .ternary-display {
             display: flex;
             justify-content: space-around;
             margin: 20px 0;
         }
-
         .ternary-state {
             text-align: center;
             padding: 15px;
@@ -179,33 +153,27 @@
             flex: 1;
             margin: 0 5px;
         }
-
         .ternary-state.active {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
         }
-
         .state-label {
             font-weight: bold;
             margin-bottom: 5px;
         }
-
         .state-probability {
             font-size: 1.2rem;
             color: #5a67d8;
         }
-
         .ternary-state.active .state-probability {
             color: white;
         }
-
         .evolution-controls {
             display: flex;
             gap: 10px;
             justify-content: center;
             margin: 15px 0;
         }
-
         .btn {
             padding: 10px 20px;
             background: linear-gradient(45deg, #667eea, #764ba2);
@@ -216,19 +184,16 @@
             font-size: 14px;
             transition: all 0.3s;
         }
-
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
-
         .btn:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
-
         .creative-energy-viz {
             background: white;
             border-radius: 15px;
@@ -236,7 +201,6 @@
             margin-bottom: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-
         .energy-surface {
             width: 100%;
             height: 400px;
@@ -244,7 +208,6 @@
             border-radius: 10px;
             background: linear-gradient(45deg, #f0f8ff, #e6f3ff);
         }
-
         .consciousness-nav {
             background: white;
             border-radius: 15px;
@@ -252,13 +215,11 @@
             margin-bottom: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-
         .nav-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
         }
-
         @media (max-width: 768px) {
             .dashboard {
                 grid-template-columns: 1fr;
@@ -272,7 +233,6 @@
                 grid-template-columns: 1fr;
             }
         }
-
         .formula {
             background: #f8f9fa;
             padding: 15px;
@@ -281,11 +241,9 @@
             margin: 10px 0;
             border-left: 4px solid #5a67d8;
         }
-
         .highlight {
             animation: glow 2s ease-in-out infinite alternate;
         }
-
         @keyframes glow {
             from { box-shadow: 0 0 5px rgba(102, 126, 234, 0.3); }
             to { box-shadow: 0 0 20px rgba(102, 126, 234, 0.6); }
@@ -298,7 +256,6 @@
             <h1>🧠 Ternary Quantum Consciousness Framework</h1>
             <p>Interactive exploration of three-state quantum systems for consciousness navigation</p>
         </div>
-
         <div class="controls">
             <h3>🎛️ Quantum State Configuration</h3>
             <div class="control-grid">
@@ -331,7 +288,6 @@
                 <button class="preset-btn" onclick="setPreset('meditative')">Meditative State</button>
             </div>
         </div>
-
         <div class="dashboard">
             <div class="card">
                 <h3>🔬 Quantum State Probabilities</h3>
@@ -353,7 +309,6 @@
                     <canvas id="probabilityChart"></canvas>
                 </div>
             </div>
-
             <div class="card">
                 <h3>📊 Information Measures</h3>
                 <div class="metrics">
@@ -380,7 +335,6 @@
                     ΔA·ΔB·ΔC ≥ ℏ³/8
                 </div>
             </div>
-
             <div class="card">
                 <h3>⚡ Boundary Creative Energy</h3>
                 <div class="chart-container">
@@ -400,7 +354,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="card">
                 <h3>🔄 Quantum Evolution</h3>
                 <div class="evolution-controls">
@@ -412,7 +365,6 @@
                 </div>
             </div>
         </div>
-
         <div class="consciousness-nav">
             <h3>🧭 Consciousness Navigation</h3>
             <div class="nav-grid">
@@ -430,7 +382,6 @@
                 </div>
             </div>
         </div>
-
         <div class="creative-energy-viz">
             <h3>🌊 Creative Energy Landscape</h3>
             <div class="chart-container">
@@ -438,35 +389,29 @@
             </div>
         </div>
     </div>
-
     <script>
         // Core ternary quantum system implementation
         class TernaryQubit {
             constructor(amplitudes) {
                 this.amplitudes = this.normalize(amplitudes);
             }
-
             normalize(amplitudes) {
                 const norm = Math.sqrt(amplitudes.reduce((sum, a) => sum + a * a, 0));
                 return norm > 0 ? amplitudes.map(a => a / norm) : amplitudes;
             }
-
             get probabilities() {
                 return this.amplitudes.map(a => a * a);
             }
-
             get vonNeumannEntropy() {
                 const probs = this.probabilities;
                 return -probs.reduce((sum, p) => {
                     return sum + (p > 1e-10 ? p * Math.log(p) : 0);
                 }, 0);
             }
-
             get purity() {
                 const probs = this.probabilities;
                 return probs.reduce((sum, p) => sum + p * p, 0);
             }
-
             measure() {
                 const probs = this.probabilities;
                 const rand = Math.random();
@@ -481,7 +426,6 @@
                 return 1;
             }
         }
-
         class BoundaryCreativeEnergy {
             static calculate(sigmaC, gamma, chi, lambda, deltaU) {
                 const numerator = sigmaC * (1 + gamma) * (1 + chi * Math.abs(deltaU));
@@ -489,27 +433,22 @@
                 return numerator / denominator;
             }
         }
-
         class TernaryLogicGates {
             static TAND(a, b) {
                 return Math.min(a, b);
             }
-
             static TOR(a, b) {
                 return Math.max(a, b);
             }
-
             static TNOT(a) {
                 return -a;
             }
         }
-
         // Global state
         let currentState = new TernaryQubit([1/Math.sqrt(3), 1/Math.sqrt(3), 1/Math.sqrt(3)]);
         let evolutionAnimation = null;
         let isPlaying = false;
         let charts = {};
-
         // Initialize the application
         function initializeApp() {
             setupCharts();
@@ -518,7 +457,6 @@
             generateCreativeEnergyLandscape();
             generateNavigationData();
         }
-
         function setupControls() {
             ['alpha', 'beta', 'gamma', 'time'].forEach(id => {
                 const slider = document.getElementById(id);
@@ -534,7 +472,6 @@
                 });
             });
         }
-
         function setupCharts() {
             // Probability chart
             const probCtx = document.getElementById('probabilityChart').getContext('2d');
@@ -559,14 +496,12 @@
                     }
                 }
             });
-
             // Creative energy chart
             const energyCtx = document.getElementById('creativeEnergyChart').getContext('2d');
             const deltaRange = Array.from({length: 50}, (_, i) => i * 0.1);
             const energyData = deltaRange.map(delta => 
                 BoundaryCreativeEnergy.calculate(1.0, 0.5, 0.3, 0.2, delta)
             );
-
             charts.creativeEnergy = new Chart(energyCtx, {
                 type: 'line',
                 data: {
@@ -600,13 +535,11 @@
                     }
                 }
             });
-
             // Update creative energy metrics
             const maxEnergy = Math.max(...energyData);
             const optimalDelta = deltaRange[energyData.indexOf(maxEnergy)];
             document.getElementById('maxCreative').textContent = maxEnergy.toFixed(3);
             document.getElementById('optimalDelta').textContent = optimalDelta.toFixed(3);
-
             // Evolution chart
             const evolutionCtx = document.getElementById('evolutionChart').getContext('2d');
             charts.evolution = new Chart(evolutionCtx, {
@@ -662,16 +595,13 @@
                 }
             });
         }
-
         function updateQuantumState() {
             const alpha = parseFloat(document.getElementById('alpha').value);
             const beta = parseFloat(document.getElementById('beta').value);
             const gamma = parseFloat(document.getElementById('gamma').value);
-
             currentState = new TernaryQubit([alpha, beta, gamma]);
             updateDisplay();
         }
-
         function updateDisplay() {
             const probs = currentState.probabilities;
             
@@ -679,7 +609,6 @@
             document.getElementById('prob-1').textContent = probs[0].toFixed(3);
             document.getElementById('prob0').textContent = probs[1].toFixed(3);
             document.getElementById('prob1').textContent = probs[2].toFixed(3);
-
             // Highlight dominant state
             ['state-1', 'state0', 'state1'].forEach((id, index) => {
                 const element = document.getElementById(id);
@@ -689,24 +618,19 @@
                     element.classList.remove('active');
                 }
             });
-
             // Update chart
             charts.probability.data.datasets[0].data = probs;
             charts.probability.update('none');
-
             // Update metrics
             document.getElementById('entropy').textContent = currentState.vonNeumannEntropy.toFixed(3);
             document.getElementById('purity').textContent = currentState.purity.toFixed(3);
-
             // Calculate uncertainty product (simplified)
             const uncertaintyProduct = calculateUncertaintyProduct(currentState);
             document.getElementById('uncertainty').textContent = uncertaintyProduct.toFixed(3);
-
             // Calculate consciousness score
             const consciousnessScore = calculateConsciousnessScore(currentState);
             document.getElementById('consciousness').textContent = consciousnessScore.toFixed(3);
         }
-
         function calculateUncertaintyProduct(state) {
             // Simplified three-way uncertainty calculation
             const probs = state.probabilities;
@@ -714,7 +638,6 @@
             // Approximate uncertainty based on entropy and purity
             return Math.max(0.125, entropy * state.purity * 0.2);
         }
-
         function calculateConsciousnessScore(state) {
             const entropy = state.vonNeumannEntropy;
             const purity = state.purity;
@@ -723,7 +646,6 @@
             // Weighted combination
             return 0.4 * entropy + 0.3 * (1 - purity) + 0.3 * uncertainty;
         }
-
         function setPreset(type) {
             let amplitudes;
             
@@ -754,7 +676,6 @@
             
             updateQuantumState();
         }
-
         function updateEvolution() {
             const time = parseFloat(document.getElementById('time').value);
             
@@ -784,7 +705,6 @@
             charts.probability.data.datasets[0].data = probs;
             charts.probability.update('none');
         }
-
         function toggleEvolution() {
             if (isPlaying) {
                 stopEvolution();
@@ -792,7 +712,6 @@
                 startEvolution();
             }
         }
-
         function startEvolution() {
             isPlaying = true;
             document.getElementById('playBtn').innerHTML = '⏸️ Pause';
@@ -842,7 +761,6 @@
                 currentTime += timeStep;
             }, 100);
         }
-
         function stopEvolution() {
             isPlaying = false;
             document.getElementById('playBtn').innerHTML = '▶️ Play';
@@ -852,7 +770,6 @@
                 evolutionAnimation = null;
             }
         }
-
         function resetEvolution() {
             stopEvolution();
             document.getElementById('time').value = 0;
@@ -864,7 +781,6 @@
             
             updateQuantumState();
         }
-
         function generateCreativeEnergyLandscape() {
             const ctx = document.getElementById('energyLandscape').getContext('2d');
             
@@ -936,7 +852,6 @@
                 ctx.stroke();
             });
         }
-
         function generateNavigationData() {
             // Consciousness states in 3D space
             const consciousnessStates = {
@@ -1054,7 +969,6 @@
                 }
             });
         }
-
         // Quantum measurement simulation
         function performMeasurement() {
             const result = currentState.measure();
@@ -1096,7 +1010,6 @@
                 document.head.removeChild(style);
             }, 1000);
         }
-
         // Add measurement button functionality
         function addMeasurementButton() {
             const measureBtn = document.createElement('button');
@@ -1108,7 +1021,6 @@
             const evolutionControls = document.querySelector('.evolution-controls');
             evolutionControls.appendChild(measureBtn);
         }
-
         // Ternary logic gate testing
         function testTernaryLogic() {
             const gates = TernaryLogicGates;
@@ -1129,7 +1041,6 @@
             console.log('Ternary Logic Gate Results:', testResults);
             return testResults;
         }
-
         // Enhanced consciousness scoring
         function updateConsciousnessMetrics() {
             const state = currentState;
@@ -1149,7 +1060,6 @@
             document.getElementById('consciousness').textContent = 
                 (0.3 * entropy + 0.25 * phi + 0.25 * globalIntegration + 0.2 * (1-purity)).toFixed(3);
         }
-
         function calculatePhi(probabilities) {
             // Simplified integrated information measure
             // Based on the KL divergence between full system and parts
@@ -1164,7 +1074,6 @@
             
             return Math.max(0, kl_div);
         }
-
         function calculateGlobalIntegration(probabilities) {
             // Measure of how well information is integrated across states
             const maxProb = Math.max(...probabilities);
@@ -1173,7 +1082,6 @@
             // Higher integration when probabilities are more balanced
             return 1 - (maxProb - minProb);
         }
-
         // Real-time parameter exploration
         function setupRealTimeExploration() {
             const params = ['sigma_c', 'gamma_param', 'chi', 'lambda'];
@@ -1192,12 +1100,10 @@
                 // Add to controls (if there was space)
             });
         }
-
         function updateCreativeEnergyParams() {
             // This would update the creative energy visualization in real-time
             // Implementation would depend on having the parameter controls
         }
-
         // Enhanced evolution with realistic Hamiltonian
         function createRealisticHamiltonian() {
             // Create a more realistic 3x3 Hamiltonian with interesting dynamics
@@ -1207,7 +1113,6 @@
                 [0.05, 0.1, 2.0]
             ];
         }
-
         function calculateQuantumEvolution(hamiltonian, state, time) {
             // Simplified quantum evolution calculation
             // In practice, this would involve matrix exponentiation
@@ -1220,7 +1125,6 @@
             
             return new TernaryQubit(evolvedAmps);
         }
-
         // Add keyboard shortcuts
         function setupKeyboardShortcuts() {
             document.addEventListener('keydown', (e) => {
@@ -1250,7 +1154,6 @@
                 }
             });
         }
-
         // Initialize everything when the page loads
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp();
@@ -1268,7 +1171,6 @@
             console.log('  M: Measure quantum state');
             console.log('  1-4: Set presets (Focused, Balanced, Creative, Meditative)');
         });
-
         function addTooltips() {
             // Add helpful tooltips to explain the concepts
             const tooltips = {
@@ -1285,7 +1187,6 @@
                 }
             });
         }
-
         // Export data functionality
         function exportData() {
             const data = {
@@ -1310,7 +1211,6 @@
             
             URL.revokeObjectURL(url);
         }
-
         // Add export button
         function addExportButton() {
             const exportBtn = document.createElement('button');
@@ -1322,11 +1222,202 @@
             const evolutionControls = document.querySelector('.evolution-controls');
             evolutionControls.appendChild(exportBtn);
         }
-
         // Call this after DOM loads
         setTimeout(() => {
             addExportButton();
         }, 100);
     </script>
+<!-- ==== RUNTIME BADGE START (Block J) ==== -->
+<style id="runtimeCheckStyles">
+  #runtimeSelfCheck {
+    position: fixed; right: 14px; top: 14px; z-index: 9999;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px; line-height: 1.3;
+    background: #0f172a; color: #e2e8f0; padding: 8px 10px;
+    border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.25);
+    opacity: .95; cursor: pointer;
+  }
+  #runtimeSelfCheck.ok     { border: 2px solid #22c55e; }
+  #runtimeSelfCheck.warn   { border: 2px solid #f59e0b; }
+  #runtimeSelfCheck.error  { border: 2px solid #ef4444; }
+  #runtimeSelfCheck details { max-width: 320px; }
+  #runtimeSelfCheck summary { outline: none; }
+</style>
+<div id="runtimeSelfCheck" class="warn">
+  <details>
+    <summary>Runtime checks…</summary>
+    <div id="runtimeSelfCheckBody">running…</div>
+  </details>
+</div>
+
+<script>
+(function(){
+  const el = document.getElementById('runtimeSelfCheck');
+  const out = document.getElementById('runtimeSelfCheckBody');
+  let fail = 0, warn = 0, logs = [];
+  const log = (icon, msg) => logs.push(`${icon} ${msg}`);
+  const setState = () => {
+    el.classList.remove('ok','warn','error');
+    el.classList.add(fail ? 'error' : (warn ? 'warn' : 'ok'));
+    el.querySelector('summary').textContent = fail ? `Runtime: FAIL (${fail})` : (warn ? `Runtime: WARN` : 'Runtime: OK');
+    out.innerHTML = logs.map(l => `<div>${l}</div>`).join('');
+  };
+  const approxEqual = (a,b,eps=1e-6) => Math.abs(a-b) <= eps;
+
+  try {
+    if (!window.Chart) { fail++; log('❌','Chart.js not found'); } else { log('✅','Chart.js present'); }
+    if (!window.math)  { fail++; log('❌','math.js not found'); }  else { log('✅','math.js present'); }
+
+    if (window.math && math.expm) {
+      const H = math.matrix([[1,0.2,0],[0.2,0,-0.1],[0,-0.1,-0.8]]);
+      const U  = math.expm(math.multiply(math.complex(0,-1), H));
+      const Ud = math.ctranspose(U);
+      const I  = math.identity(3);
+      const UU = math.multiply(Ud, U);
+      const diff = math.subtract(UU, I);
+      const frob = Math.sqrt(math.sum(math.dotMultiply(diff, math.conj(diff))));
+      if (frob > 1e-6) { warn++; log('⚠️',`Unitary borderline (||U†U−I||≈${frob.toExponential(2)})`); }
+      else { log('✅','Unitary check passed'); }
+    } else {
+      warn++; log('⚠️','math.expm unavailable');
+    }
+
+    if (window.math) {
+      const psi = math.divide(math.matrix([1,1,1]), Math.sqrt(3));
+      const rho = math.multiply(math.reshape(psi,[3,1]), math.ctranspose(math.reshape(psi,[3,1])));
+      const tr  = math.trace(rho);
+      const pur = math.trace(math.multiply(rho, rho));
+      if (Math.abs((tr.re ?? tr)-1) > 1e-8) { fail++; log('❌',`Tr(ρ)=${(tr.re ?? tr)} ≠ 1`); }
+      else log('✅','Tr(ρ)=1');
+      const pval = (pur.re ?? pur);
+      if (pval < 1/3 - 1e-6 || pval > 1 + 1e-6) { fail++; log('❌',`Purity out of bounds: ${pval}`); }
+      else log('✅',`Purity sane (${pval.toFixed(4)})`);
+    }
+
+    if (window.Chart) {
+      const c = document.createElement('canvas'); c.width = 200; c.height = 80; c.style.display='none'; document.body.appendChild(c);
+      let ok = true;
+      try {
+        const ctx = c.getContext('2d');
+        const tmp = new Chart(ctx,{type:'line',data:{labels:[0,1],datasets:[{data:[0,1]}]},options:{animation:false}});
+        tmp.destroy();
+      } catch (e) { ok = false; console.error(e); }
+      if (!ok) { fail++; log('❌','Chart.js failed to render'); } else { log('✅','Chart render ok'); }
+      c.remove();
+    }
+
+    let rafHit = false;
+    const p1 = new Promise(res => requestAnimationFrame(()=>{ rafHit=true; res(); }));
+    const p2 = new Promise(res => setTimeout(res, 50));
+    Promise.race([p1, p2]).then(()=>{
+      if (!rafHit) { warn++; log('⚠️','requestAnimationFrame slow/blocked'); }
+      else { log('✅','Animation tick ok'); }
+      setState();
+    });
+
+    window.onerror = function(msg, src, line, col){
+      fail++; log('❌',`JS error: ${String(msg)} (${src}:${line}:${col})`); setState();
+    };
+  } catch (e) {
+    fail++; log('❌',`Self-check exception: ${e && e.message || e}`); setState();
+  }
+
+  el.addEventListener('click', () => {
+    const det = el.querySelector('details');
+    if (!det.open) det.open = true;
+  });
+  setState();
+})();
+</script>
+<!-- ==== RUNTIME BADGE END ==== -->
+<script>// ==== PERF BUDGET START (Block M) ====
+(function(){
+  const B = { fp_ms: 2000, fcp_ms: 2500, longtask_ms: 100, total_long_ms: 600 };
+  let longTaskTotal = 0;
+
+  function markBadgeWarn(msg){
+    const badge = document.getElementById('runtimeSelfCheck');
+    if (!badge) return;
+    badge.classList.remove('ok');
+    if (!badge.classList.contains('error')) badge.classList.add('warn');
+    const body = document.getElementById('runtimeSelfCheckBody');
+    if (body) body.insertAdjacentHTML('beforeend', `<div>⚠️ ${msg}</div>`);
+  }
+
+  try {
+    new PerformanceObserver((list) => {
+      list.getEntries().forEach((e) => {
+        if (e.name === 'first-paint' && e.startTime > B.fp_ms) {
+          console.warn(`[perf] FP ${e.startTime.toFixed(0)}ms > ${B.fp_ms}ms`);
+          markBadgeWarn(`FP ${e.startTime.toFixed(0)}ms > ${B.fp_ms}ms`);
+        }
+        if (e.name === 'first-contentful-paint' && e.startTime > B.fcp_ms) {
+          console.warn(`[perf] FCP ${e.startTime.toFixed(0)}ms > ${B.fcp_ms}ms`);
+          markBadgeWarn(`FCP ${e.startTime.toFixed(0)}ms > ${B.fcp_ms}ms`);
+        }
+      });
+    }).observe({ type: 'paint', buffered: true });
+  } catch {}
+
+  if ('PerformanceObserver' in window && 'PerformanceLongTaskTiming' in window) {
+    try {
+      new PerformanceObserver((list) => {
+        list.getEntries().forEach((t) => {
+          const d = t.duration;
+          if (d >= B.longtask_ms) {
+            longTaskTotal += d;
+            console.warn(`[perf] Long task ${d.toFixed(0)}ms (total ${longTaskTotal.toFixed(0)}ms)`);
+            if (longTaskTotal > B.total_long_ms) {
+              markBadgeWarn(`Long tasks total ${longTaskTotal.toFixed(0)}ms > ${B.total_long_ms}ms`);
+            }
+          }
+        });
+      }).observe({entryTypes:['longtask']});
+    } catch {}
+  }
+})();
+/// ==== PERF BUDGET END ====</script>
+<script>// ==== CONSOLE-ONLY CHECKS START (Block N) ====
+(function(){
+  const log = console.log.bind(console, '[runtime]');
+  const warn = console.warn.bind(console, '[runtime]');
+  const error = console.error.bind(console, '[runtime]');
+  try {
+    if (!window.Chart) error('Chart.js missing'); else log('Chart.js OK');
+    if (!window.math || !math.expm) error('math.js missing or no expm'); else {
+      const H = math.matrix([[1,0.1,0],[0.1,0,-0.2],[0,-0.2,-0.9]]);
+      const U  = math.expm(math.multiply(math.complex(0,-1), H));
+      const Ud = math.ctranspose(U);
+      const I  = math.identity(3);
+      const D  = math.subtract(math.multiply(Ud,U), I);
+      const frob = Math.sqrt(math.sum(math.dotMultiply(D, math.conj(D))));
+      if (frob > 1e-6) warn(`Unitary borderline: ||U†U−I||≈${frob.toExponential(2)}`); else log('Unitary OK');
+    }
+    if (window.math) {
+      const psi = math.divide(math.matrix([1,1,1]), Math.sqrt(3));
+      const rho = math.multiply(math.reshape(psi,[3,1]), math.ctranspose(math.reshape(psi,[3,1])));
+      const tr  = math.trace(rho); const pur = math.trace(math.multiply(rho,rho));
+      if (Math.abs((tr.re ?? tr)-1) > 1e-8) error(`Tr(ρ)=${tr}`); else log('Tr(ρ)=1 OK');
+      const p = (pur.re ?? pur);
+      if (p<1/3-1e-6 || p>1+1e-6) error(`Purity out-of-bounds: ${p}`); else log(`Purity OK (${p.toFixed(4)})`);
+    }
+    try {
+      new PerformanceObserver((list) => {
+        list.getEntries().forEach((e) => {
+          if (e.name === 'first-contentful-paint') {
+            const t = e.startTime.toFixed(0);
+            if (e.startTime > 2500) warn(`FCP ${t}ms (slow)`); else log(`FCP ${t}ms`);
+          }
+        });
+      }).observe({ type: 'paint', buffered: true });
+    } catch {}
+  } catch (e) {
+    error('Self-check error', e);
+  }
+  window.onerror = function(msg, src, line, col){
+    console.error('[runtime] Global error:', msg, src, line, col);
+  };
+})();
+/// ==== CONSOLE-ONLY CHECKS END ====</script>
 </body>
 </html>
