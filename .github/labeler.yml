@@ -1,13 +1,19 @@
 frontend:
-  - 'apps/**'
+  - changed-files:
+      - 'apps/**'
 workflows:
-  - '.github/workflows/**'
+  - changed-files:
+      - '.github/workflows/**'
 docs:
-  - '**/*.md'
+  - changed-files:
+      - '**/*.md'
 infra:
-  - 'Dockerfile'
-  - '.dockerignore'
+  - changed-files:
+      - 'Dockerfile'
+      - '.dockerignore'
 python:
-  - '**/*.py'
+  - changed-files:
+      - '**/*.py'
 javascript:
-  - '**/*.js'
+  - changed-files:
+      - '**/*.js'
