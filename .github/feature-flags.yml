@@ -1,0 +1,3 @@
+ai_tools: true
+security_scans: true
+heavy_linters: true

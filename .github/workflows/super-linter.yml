@@ -1,28 +1,26 @@
-name: Super-Linter
-on:
-  pull_request:
-  push:
-    branches: [ main ]
-permissions:
-  contents: read
+name: Super-Linter (flag-aware)
+on: { pull_request: {}, push: {} }
+permissions: { contents: read }
 jobs:
+  flags:
+    uses: ./.github/workflows/flags.yml
   lint:
+    needs: flags
+    if: needs.flags.outputs.heavy_linters == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
       - uses: github/super-linter/slim@v6
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BRANCH: main
           VALIDATE_ALL_CODEBASE: true
           LOG_LEVEL: warn
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FILTER_REGEX_EXCLUDE: "node_modules/|\\.husky/|dist/|build/"
-          VALIDATE_JAVASCRIPT_STANDARD: false
-          VALIDATE_JAVASCRIPT_ES: true
-          VALIDATE_TYPESCRIPT_ES: false
+          FILTER_REGEX_EXCLUDE: "node_modules/|dist/|build/"
           VALIDATE_MARKDOWN: true
-          VALIDATE_HTML: true
           VALIDATE_YAML: true
           VALIDATE_JSON: true
-
+          VALIDATE_JAVASCRIPT_ES: true
+          VALIDATE_TYPESCRIPT: false
+          VALIDATE_HTML: true
