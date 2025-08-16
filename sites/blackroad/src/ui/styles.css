@@ -10,3 +10,7 @@ code {
 .card {
   @apply rounded-2xl border border-white/10 bg-white/5 p-5;
 }
+
+.btn {
+  @apply bg-sky-600 hover:bg-sky-500 text-white px-3 py-1 rounded;
+}

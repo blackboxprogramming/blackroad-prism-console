@@ -13,6 +13,9 @@ import Changelog from './pages/Changelog.jsx';
 import Blog from './pages/Blog.jsx';
 import MathLab from './pages/MathLab.jsx';
 import Deploys from './pages/Deploys.jsx';
+import Metrics from './pages/Metrics.jsx';
+import AgentInbox from './pages/AgentInbox.jsx';
+import Observability from './pages/Observability.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 const routes = {
@@ -29,6 +32,9 @@ const routes = {
   '/blog': <Blog />,
   '/math': <MathLab />,
   '/deploys': <Deploys />,
+  '/metrics': <Metrics />,
+  '/inbox': <AgentInbox />,
+  '/observability': <Observability />,
 };
 
 export default function Router() {
