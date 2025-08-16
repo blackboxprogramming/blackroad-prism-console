@@ -12,6 +12,9 @@ import Roadmap from './pages/Roadmap.jsx';
 import Changelog from './pages/Changelog.jsx';
 import Blog from './pages/Blog.jsx';
 import Deploys from './pages/Deploys.jsx';
+import MathLab from './pages/MathLab.jsx';
+import UncertaintyLab from './pages/UncertaintyLab.jsx';
+import GeodesicLab from './pages/GeodesicLab.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 const routes = {
@@ -27,6 +30,9 @@ const routes = {
   '/changelog': <Changelog />,
   '/blog': <Blog />,
   '/deploys': <Deploys />,
+  '/math': <MathLab />,
+  '/uncertainty': <UncertaintyLab />,
+  '/geodesic': <GeodesicLab />,
 };
 
 export default function Router() {

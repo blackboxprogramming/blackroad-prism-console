@@ -11,6 +11,9 @@ const links = [
   { to: '/changelog', label: 'Changelog' },
   { to: '/blog', label: 'Blog' },
   { to: '/deploys', label: 'Deploys' },
+  { to: '/math', label: 'MathLab' },
+  { to: '/uncertainty', label: 'Uncertainty' },
+  { to: '/geodesic', label: 'Geodesic' },
 ];
 
 function navigate(e, to) {
