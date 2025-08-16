@@ -32,3 +32,12 @@ npm test
 ```
 
 Additional operational docs live in the [`docs/`](docs) folder.
+
+## ChatOps — Talk to Agents
+- `/ask <question>` — AI answers in-thread (OpenAI or Ollama).
+- `/say <message>` — post to the public **Agent Inbox** at `/inbox`.
+
+## Metrics
+- CI history regenerated hourly → `/metrics/ci.json`
+- Lighthouse scores appended daily and on main pushes → `/metrics/lh.json`
+- View charts at **/metrics**.

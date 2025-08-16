@@ -14,6 +14,8 @@ import Blog from './pages/Blog.jsx';
 import MathLab from './pages/MathLab.jsx';
 import Deploys from './pages/Deploys.jsx';
 import NotFound from './pages/NotFound.jsx';
+import Metrics from './pages/Metrics.jsx';
+import AgentInbox from './pages/AgentInbox.jsx';
 
 const routes = {
   '/': <Home />,
@@ -29,6 +31,8 @@ const routes = {
   '/blog': <Blog />,
   '/math': <MathLab />,
   '/deploys': <Deploys />,
+  '/metrics': <Metrics />,
+  '/inbox': <AgentInbox />,
 };
 
 export default function Router() {
