@@ -20,4 +20,11 @@ export default function StatusPage(){
       <p className="opacity-80">Status details coming soon.</p>
     </div>
   )
+export default function StatusPage() {
+  return (
+    <div className="card">
+      <h2 className="text-xl font-semibold mb-2">Status</h2>
+      <p>All systems nominal.</p>
+    </div>
+  );
 }

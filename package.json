@@ -59,6 +59,9 @@
     "build": "npm --prefix sites/blackroad run build",
     "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true",
     "start": "next start"
+    "test": "node tests/smoke.test.js",
+    "dev": "npm --prefix sites/blackroad run dev",
+    "build": "npm --prefix sites/blackroad run build"
   },
   "lint-staged": {
     "**/*.{js,mjs,cjs,html,css,md,yml,yaml,json}": [

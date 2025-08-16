@@ -1,3 +1,4 @@
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import ErrorBoundary from './ui/ErrorBoundary.jsx';
 import Router from './Router.jsx';
@@ -18,3 +19,9 @@ import { telemetryInit } from './lib/telemetry.ts'
 telemetryInit()
 
 createRoot(document.getElementById('root')).render(<RouterProvider router={router} />)
+
+createRoot(document.getElementById('root')).render(
+  <ErrorBoundary>
+    <Router />
+  </ErrorBoundary>
+);

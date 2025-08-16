@@ -112,3 +112,37 @@ For Secure Boot environments, sign modules with your Machine Owner Key (MOK) and
 ## License
 
 Kernel modules in this repository are dual licensed under MIT/GPLv2. Proprietary NVIDIA userspace components are **not** distributed here.
+# BlackRoad Prism Console
+
+This repository powers the BlackRoad Prism console and a Vite/React site under `sites/blackroad`.
+
+## Quickstart
+
+Install dependencies:
+
+```bash
+npm ci
+(cd sites/blackroad && npm i --package-lock-only)
+```
+
+## Development
+
+```bash
+cd sites/blackroad
+npm run dev
+```
+
+## Build
+
+```bash
+cd sites/blackroad
+npm run build
+```
+
+## Tests
+
+```bash
+npm test
+```
+
+Additional operational docs live in the [`docs/`](docs) folder.
