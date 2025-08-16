@@ -52,7 +52,17 @@ jobs:
             JSON
             echo "Deployed OK; backup → $TS_DIR; health.json updated."
 
+      - name: Update sidecar COMMIT_SHA and restart
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            sudo systemctl set-environment COMMIT_SHA=${{ github.sha }}
+            sudo systemctl restart health-sidecar
+
       - name: Verify /api/health
         run: |
-          curl -fsS "https://${{ secrets.SITE_DOMAIN }}/api/health.json" | tee /tmp/health.json
+          curl -fsS "https://${{ secrets.SITE_DOMAIN }}/api/health" | tee /tmp/health.json
           node -e "const h=require('fs').readFileSync('/tmp/health.json','utf8'); const j=JSON.parse(h); if(j.status!=='ok') {console.error('Bad status', j); process.exit(1)}; console.log('Health OK:', j)"
