@@ -13,8 +13,6 @@ export default [
       '**/*.tsx',
     ],
   },
-  js.configs.recommended,
-  prettier,
   {
     ignores: [
       'node_modules/',
