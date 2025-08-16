@@ -1,9 +1,7 @@
 name: Release Please
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 permissions:
   contents: write
@@ -15,4 +13,6 @@ jobs:
       - uses: google-github-actions/release-please-action@v4
         with:
           release-type: simple
-          package-name: blackroad-quantum
+          bump-minor-pre-major: true
+          changelog-types: '[{"type":"feat","section":"Features"},{"type":"fix","section":"Bug Fixes"},{"type":"chore","section":"Chores","hidden":false}]'
+

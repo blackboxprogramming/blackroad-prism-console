@@ -1,12 +1,11 @@
-name: 'BlackRoad CodeQL JS config'
-disable-default-queries: false
+name: CodeQL JS config
 paths:
   - apps/quantum
 paths-ignore:
   - node_modules
-  - public/vendor
   - dist
   - build
-  - .husky
+  - public/vendor
   - .tools
   - .github
+
