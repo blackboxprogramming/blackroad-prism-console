@@ -1,0 +1,11 @@
+# Simple examples; expand as you like
+frontend:
+  - '/\b(ui|react|component|css|style|layout)\b/i'
+backend:
+  - '/\b(api|service|database|python|go|latency)\b/i'
+security:
+  - '/\b(secret|token|xss|csrf|vuln|cve|leak)\b/i'
+tests:
+  - '/\btest(s)?|jest|pytest|coverage\b/i'
+docs:
+  - '/\breadme|doc(s)?|guide|how-to|tutorial\b/i'

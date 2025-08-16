@@ -1,23 +1,20 @@
 name: CodeQL
 on:
   push: { branches: [ main ] }
-  pull_request: { branches: [ main ] }
+  pull_request:
+  schedule:
+    - cron: '0 2 * * 1'
+
 permissions:
-  security-events: write
   contents: read
+  security-events: write
+
 jobs:
   analyze:
     runs-on: ubuntu-latest
-    strategy:
-      matrix: { language: [ 'javascript' ] }
+    strategy: { language: [ 'javascript', 'python' ] }
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
-          build-mode: none
-          config-file: ./.github/codeql/config.yml
-          queries: security-and-quality
+        with: { languages: ${{ matrix.language }} }
       - uses: github/codeql-action/analyze@v3
-        with: { category: "/language:${{ matrix.language }}" }
-

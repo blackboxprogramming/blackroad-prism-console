@@ -11,9 +11,12 @@
     "prettier": "^3.3.3"
   },
   "scripts": {
+    "format": "prettier -w .",
+    "lint:js": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:js:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "typecheck": "tsc -p . || true",
     "prepare": "husky",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.mjs,.cjs || true",
-    "format": "prettier -w .",
     "test": "node tests/smoke.test.js",
     "dev": "npm --prefix sites/blackroad run dev",
     "build": "npm --prefix sites/blackroad run build",

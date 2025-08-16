@@ -1,3 +1,5 @@
-*       @blackroad-owners
-/sites/blackroad/**  @blackroad-web
-.github/**           @blackroad-ci
+/sites/blackroad/     @blackboxprogramming
+/api/                 @blackboxprogramming
+/services/            @blackboxprogramming
+/**/*.py              @blackboxprogramming
+/**/*.ts              @blackboxprogramming
