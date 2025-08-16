@@ -13,6 +13,19 @@ export default [
       '**/*.tsx',
     ],
   },
+  js.configs.recommended,
+  prettier,
+  {
+    ignores: [
+      'node_modules/',
+      'dist/',
+      'build/',
+      '.github/',
+      '.tools/',
+      '**/*.ts',
+      '**/*.tsx',
+    ],
+  },
   {
     files: ['**/*.{js,jsx,mjs,cjs}'],
     ...js.configs.recommended,
@@ -40,7 +53,6 @@ export default [
         setTimeout: 'readonly',
       },
     },
-    ignores: ['node_modules/', 'dist/', 'build/', '.github/', '.tools/', '**/*.ts'],
     rules: {
       'no-unused-vars': [
         'warn',
