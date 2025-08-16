@@ -13,9 +13,16 @@ export default [
       '**/*.tsx',
     ],
   },
-  js.configs.recommended,
-  prettier,
   {
+    files: ['**/*.{js,jsx,mjs,cjs}'],
+    ...js.configs.recommended,
+  },
+  {
+    files: ['**/*.{js,jsx,mjs,cjs}'],
+    ...prettier,
+  },
+  {
+    files: ['**/*.{js,jsx,mjs,cjs}'],
     languageOptions: {
       parserOptions: {
         ecmaFeatures: { jsx: true },
@@ -34,7 +41,10 @@ export default [
       },
     },
     rules: {
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      'no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_|^[A-Z]' },
+      ],
       'no-undef': 'warn',
     },
   },
