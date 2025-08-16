@@ -1,4 +1,4 @@
-name: Deploy Quantum App
+name: Deploy Quantum App (safe)
 on:
   push:
     branches: [ main ]
@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Copy to server
+
+      - name: Upload build to server (staging dir)
         uses: burnett01/rsync-deployments@6.0
         with:
           switches: -avzr --delete
@@ -19,6 +20,46 @@ jobs:
           remote_host: ${{ secrets.SSH_HOST }}
           remote_user: ${{ secrets.SSH_USER }}
           remote_key: ${{ secrets.SSH_KEY }}
-      - name: Health check
+
+      - name: Safe activate + verify (backup & rollback + write health.json)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -euo pipefail
+            SRC_DIR="/var/www/blackroad/apps/quantum"
+            LIVE_DIR="/var/www/blackroad/apps/quantum_live"
+            API_DIR="/var/www/blackroad/api"
+            URL="https://${{ secrets.SITE_DOMAIN }}/apps/quantum/ternary_consciousness_v3.html"
+            TS="$(date -u +%FT%TZ)"
+            SHA="${{ github.sha }}"
+            VER="v3.0.0"
+            mkdir -p "$LIVE_DIR" "$API_DIR"
+            BACKUP_DIR="/var/www/blackroad/backups/quantum-$(date +%Y%m%d-%H%M%S)"
+            mkdir -p "$BACKUP_DIR"
+            rsync -a --delete "$LIVE_DIR/" "$BACKUP_DIR/"
+            rsync -a --delete "$SRC_DIR/" "$LIVE_DIR/"
+            nginx -t && systemctl reload nginx
+            set +e
+            curl -fsS "$URL" -o /tmp/q.html
+            STATUS=$?
+            TITLE_OK=$(grep -c "Ternary Quantum Consciousness Framework" /tmp/q.html || true)
+            SIZE_OK=$( [ "$(wc -c </tmp/q.html)" -ge 10000 ] && echo 1 || echo 0 )
+            set -e
+            if [ "$STATUS" -ne 0 ] || [ "$TITLE_OK" -lt 1 ] || [ "$SIZE_OK" -ne 1 ]; then
+              echo "Health check failed — rolling back"
+              rsync -a --delete "$BACKUP_DIR/" "$LIVE_DIR/"
+              nginx -t && systemctl reload nginx
+              exit 1
+            fi
+            cat > "$API_DIR/health.json" <<JSON
+            { "status": "ok", "app": "quantum-v3", "version": "$VER", "commit": "$SHA", "ts": "$TS" }
+            JSON
+            echo "Deployed OK; backup → $BACKUP_DIR; health.json updated."
+
+      - name: Verify /api/health
         run: |
-          curl -fsS "https://${{ secrets.SITE_DOMAIN }}/apps/quantum/ternary_consciousness_v3.html" >/dev/null
+          curl -fsS "https://${{ secrets.SITE_DOMAIN }}/api/health.json" | tee /tmp/health.json
+          node -e "const h=require('fs').readFileSync('/tmp/health.json','utf8'); const j=JSON.parse(h); if(j.status!=='ok') {console.error('Bad status', j); process.exit(1)}; console.log('Health OK:', j)"
