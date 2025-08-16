@@ -1,1 +1,3 @@
-*  @blackroad-prism-console
+*       @blackroad-owners
+/sites/blackroad/**  @blackroad-web
+.github/**           @blackroad-ci
