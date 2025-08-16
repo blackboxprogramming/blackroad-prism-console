@@ -1,3 +1,5 @@
+/* eslint-env node */
+/* global process, console */
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
@@ -48,3 +50,4 @@ app.get('/readyz', (_req, res) => {
 app.listen(PORT, () => {
   console.log(`[health-sidecar] listening on :${PORT}`);
 });
+
