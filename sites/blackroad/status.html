@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Status | blackroad.io</title>
+  </head>
+  <body>
+    <h1>Status</h1>
+    <pre id="status">Loading...</pre>
+    <script>
+      async function load() {
+        try {
+          const res = await fetch('https://blackroad.io/api/health.json', {cache:'no-store'});
+          const json = await res.json();
+          document.getElementById('status').textContent = JSON.stringify(json, null, 2);
+        } catch (err) {
+          document.getElementById('status').textContent = 'Error fetching status';
+        }
+      }
+      load();
+    </script>
+  </body>
+</html>
