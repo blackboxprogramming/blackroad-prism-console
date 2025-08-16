@@ -15,6 +15,7 @@ import MathLab from './pages/MathLab.jsx';
 import Deploys from './pages/Deploys.jsx';
 import Metrics from './pages/Metrics.jsx';
 import ExperimentsDash from './pages/ExperimentsDash.jsx';
+import Deploys from './pages/Deploys.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 const routes = {
@@ -33,6 +34,7 @@ const routes = {
   '/deploys': <Deploys />,
   '/metrics': <Metrics />,
   '/experiments': <ExperimentsDash />,
+  '/deploys': <Deploys />,
 };
 
 export default function Router() {

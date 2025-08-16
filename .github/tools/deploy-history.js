@@ -15,6 +15,7 @@ try {
 } catch {
   /* ignore errors when file is missing or invalid JSON */
 }
+} catch {}
 if (!Array.isArray(j.history)) j.history = [];
 j.history.unshift({ ts: new Date().toISOString(), channel, sha, ref });
 j.history = j.history.slice(0, 25);
