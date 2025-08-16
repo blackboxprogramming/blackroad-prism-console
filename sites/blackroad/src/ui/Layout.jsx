@@ -10,6 +10,7 @@ const links = [
   { to: '/roadmap', label: 'Roadmap' },
   { to: '/changelog', label: 'Changelog' },
   { to: '/blog', label: 'Blog' },
+  { to: '/deploys', label: 'Deploys' },
 ];
 
 function navigate(e, to) {
