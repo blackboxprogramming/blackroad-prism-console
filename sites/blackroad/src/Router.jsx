@@ -13,6 +13,7 @@ import Changelog from './pages/Changelog.jsx';
 import Blog from './pages/Blog.jsx';
 import MathLab from './pages/MathLab.jsx';
 import Deploys from './pages/Deploys.jsx';
+import Metrics from './pages/Metrics.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 const routes = {
@@ -27,9 +28,10 @@ const routes = {
   '/roadmap': <Roadmap />,
   '/changelog': <Changelog />,
   '/blog': <Blog />,
-  '/math': <MathLab />,
-  '/deploys': <Deploys />,
-};
+    '/math': <MathLab />,
+    '/deploys': <Deploys />,
+    '/metrics': <Metrics />,
+  };
 
 export default function Router() {
   const [path, setPath] = useState(window.location.pathname);

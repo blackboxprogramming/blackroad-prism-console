@@ -12,6 +12,7 @@ const links = [
   { to: '/blog', label: 'Blog' },
   { to: '/math', label: 'MathLab' },
   { to: '/deploys', label: 'Deploys' },
+  { to: '/metrics', label: 'Metrics' },
 ];
 
 function navigate(e, to) {
