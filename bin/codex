@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# === Codex: single entrypoint ===
+# Subcommands:
+#   up            -> pin hosts (if needed) + discover + grab + merge + operator --watch
+#   discover      -> discover all repos for owner/org and sync
+#   merge         -> auto pull/rebase/ff-merge + push (non-read-only)
+#   watch         -> operator --watch (live alerts + report)
+#   once          -> operator --once (process new events then exit)
+#   report        -> operator --report (rewrite report)
+#   audit         -> re-run baseline audits via repo wizard (manifest needed)
+#   issues        -> open issues for failed audits (GitHub token required)
+#   help          -> show help
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Source .env if present (tokens, etc.)
+if [ -f "$ROOT/.env" ]; then
+  # shellcheck disable=SC2046
+  export $(grep -v '^#' "$ROOT/.env" | xargs -I {} echo {})
+fi
+
+# Defaults
+export CODEX_SSH_KEY="${CODEX_SSH_KEY:-$HOME/.ssh/id_ed25519}"
+export GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-${PERSONAL_ACCESS_TOKEN:-}}}"
+
+OWNER="$(python3 - <<'PY'
+import json,sys,os
+from pathlib import Path
+cfg = Path("codex/config/codex.yml")
+owner = "blackboxprogramming"
+try:
+    import yaml
+    d=yaml.safe_load(cfg.read_text())
+    owner=d.get("owner",owner)
+except Exception:
+    pass
+print(owner)
+PY
+)"
+
+cmd="${1:-help}"
+
+run() { ( set -x; "$@" ); }
+
+case "$cmd" in
+  up)
+    # If known_hosts missing, ask wizard to pin hosts once (non-interactive accepts defaults)
+    if [ ! -f "$ROOT/codex/secrets/known_hosts" ]; then
+      echo ">> Pinning hosts via repo wizard (one-time)…"
+      python3 "$ROOT/codex/tools/codex_repo_wizard.py" <<'WIZ'
+./codex/repos
+~/.ssh/id_ed25519
+y
+main
+y
+
+WIZ
+    fi
+    echo ">> Discover + grab all repos for $OWNER"
+    run python3 "$ROOT/codex/tools/codex_repo_discover.py" --owner "$OWNER" --exclude-forks ${INCLUDE_PRIVATE:+--include-private}
+    echo ">> Merge + push (where allowed)"
+    run python3 "$ROOT/codex/agents/merge_agent.py"
+    echo ">> Operator watch (Ctrl+C to stop)"
+    exec python3 "$ROOT/codex/agents/codex_operator.py" --watch
+    ;;
+
+  discover)
+    run python3 "$ROOT/codex/tools/codex_repo_discover.py" --owner "$OWNER" --exclude-forks ${INCLUDE_PRIVATE:+--include-private}
+    ;;
+
+  merge)
+    run python3 "$ROOT/codex/agents/merge_agent.py"
+    ;;
+
+  watch)
+    exec python3 "$ROOT/codex/agents/codex_operator.py" --watch
+    ;;
+
+  once)
+    run python3 "$ROOT/codex/agents/codex_operator.py" --once
+    ;;
+
+  report)
+    run python3 "$ROOT/codex/agents/codex_operator.py" --report
+    ;;
+
+  audit)
+    # re-use the wizard’s baseline audit emitter
+    run python3 "$ROOT/codex/tools/codex_repo_wizard.py" --audit
+    ;;
+
+  issues)
+    # opens GitHub issues for any baseline audit failures found in recent events
+    run python3 "$ROOT/codex/agents/issue_opener.py"
+    ;;
+
+  help|*)
+    cat <<'HELP'
+Usage: ./bin/codex <subcommand>
+
+  up         Pin hosts (if needed) -> discover -> sync -> merge -> operator --watch
+  discover   Discover & sync all repos for owner (from codex/config/codex.yml)
+  merge      Auto pull/merge/rebase and push (non-read-only)
+  watch      Operator live mode (alerts + rolling report)
+  once       Operator one-shot
+  report     Rewrite operator report now
+  audit      Re-run baseline audits (emits events)
+  issues     Open GitHub issues for audit failures (GITHUB_TOKEN required)
+
+Env:
+  CODEX_SSH_KEY          SSH private key path (default: ~/.ssh/id_ed25519)
+  GITHUB_TOKEN|GH_TOKEN  GitHub token (private repos, opening issues)
+  INCLUDE_PRIVATE=1      Include private repos during discover
+
+HELP
+    ;;
+esac
