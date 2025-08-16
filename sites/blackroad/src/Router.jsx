@@ -11,6 +11,7 @@ import Tutorials from './pages/Tutorials.jsx';
 import Roadmap from './pages/Roadmap.jsx';
 import Changelog from './pages/Changelog.jsx';
 import Blog from './pages/Blog.jsx';
+import MathLab from './pages/MathLab.jsx';
 import Deploys from './pages/Deploys.jsx';
 import NotFound from './pages/NotFound.jsx';
 
@@ -26,6 +27,7 @@ const routes = {
   '/roadmap': <Roadmap />,
   '/changelog': <Changelog />,
   '/blog': <Blog />,
+  '/math': <MathLab />,
   '/deploys': <Deploys />,
 };
 

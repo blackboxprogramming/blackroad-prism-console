@@ -4,5 +4,7 @@ export function telemetryInit() {
   try {
     const t = { ts: Date.now(), event: 'pageview', path: location.pathname };
     console.log('[telemetry]', t);
-  } catch {}
+  } catch {
+    // ignore
+  }
 }
