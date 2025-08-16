@@ -1,3 +1,4 @@
+![Build](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/monorepo-matrix.yml/badge.svg) ![E2E](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/playwright.yml/badge.svg) ![Deploy](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/deploy-blackroad.yml/badge.svg)
 # BlackRoad Prism Console
 
 This repository powers the BlackRoad Prism console and a Vite/React site under `sites/blackroad`.
