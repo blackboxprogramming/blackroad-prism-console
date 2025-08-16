@@ -2,6 +2,11 @@ name: PR Size Labels
 on:
   pull_request:
     types: [opened, reopened, synchronize]
+
+permissions:
+  pull-requests: write
+  contents: read
+
 jobs:
   size:
     runs-on: ubuntu-latest
@@ -10,5 +15,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IGNORED: "package-lock.json"
-          SIZES: >
-            0:XS,10:S,100:M,500:L,1000:XL,2000:XXL
+          SIZES: "0:XS,10:S,100:M,500:L,1000:XL,2000:XXL"
+
