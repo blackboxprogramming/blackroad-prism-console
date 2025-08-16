@@ -46,7 +46,7 @@ export default [
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_|^[A-Z]' },
       ],
     },
-    ignores: ['node_modules/', 'dist/', 'build/', '.github/', '.tools/'],
+    ignores: ['node_modules/', 'dist/', 'build/', '.github/', '.tools/', '**/*.ts'],
     rules: {
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       'no-undef': 'warn',
