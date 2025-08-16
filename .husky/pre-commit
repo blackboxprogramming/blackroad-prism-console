@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+# Quick, quiet pre-commit polish (never hard-fail CI)
+npm run format --if-present
+npm run lint --if-present || true

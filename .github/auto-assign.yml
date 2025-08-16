@@ -1,0 +1,5 @@
+addReviewers: true
+addAssignees: false
+reviewers:
+  - blackroad-bot
+numberOfReviewers: 1
