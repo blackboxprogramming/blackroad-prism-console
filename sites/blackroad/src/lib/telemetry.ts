@@ -7,4 +7,5 @@ export function telemetryInit() {
   } catch {
     // ignore
   }
+  } catch {}
 }
