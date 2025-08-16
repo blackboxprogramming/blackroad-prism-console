@@ -1,13 +1,11 @@
-frontend:
-  - 'apps/**'
-workflows:
-  - '.github/workflows/**'
-docs:
+'area:web':
+  - 'sites/blackroad/**'
+'area:ci':
+  - '.github/**'
+'area:math':
+  - 'sites/blackroad/src/lib/**'
+'docs':
   - '**/*.md'
-infra:
-  - 'Dockerfile'
-  - '.dockerignore'
-python:
-  - '**/*.py'
-javascript:
-  - '**/*.js'
+'security':
+  - '.github/workflows/**'
+  - '**/wrangler.toml'
