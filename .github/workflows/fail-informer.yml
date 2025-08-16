@@ -1,7 +1,15 @@
 name: Fail Informer
 on:
   workflow_run:
-    workflows: ["Deploy Quantum App (safe)", "Super-Linter", "CodeQL", "Snyk Scan", "Trivy FS Scan", "Gitleaks (secrets)"]
+    workflows:
+      [
+        'Deploy Quantum App (safe)',
+        'Super-Linter',
+        'CodeQL',
+        'Snyk Scan',
+        'Trivy FS Scan',
+        'Gitleaks (secrets)',
+      ]
     types: [completed]
 permissions:
   pull-requests: write

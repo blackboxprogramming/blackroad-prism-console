@@ -1,4 +1,4 @@
-name: "BlackRoad CodeQL JS config"
+name: 'BlackRoad CodeQL JS config'
 disable-default-queries: false
 paths:
   - apps/quantum

@@ -1,7 +1,7 @@
 name: Broken Links
 on:
   pull_request:
-  schedule: [ { cron: "0 2 * * *" } ]
+  schedule: [{ cron: '0 2 * * *' }]
 jobs:
   lychee:
     runs-on: ubuntu-latest

@@ -1,9 +1,10 @@
 name: OSSF Scorecard
 on:
-  schedule:
-    - cron: "0 8 * * 1" # Mondays
+  pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
+  schedule:
+    - cron: '0 8 * * 1' # Mondays
 permissions:
   security-events: write
   id-token: write

@@ -1,3 +1,4 @@
 default: true
-MD013: false   # line length
-MD033: false   # inline HTML
+MD013: false # line length
+MD033: false # inline HTML
+MD041: false # first header should be H1
