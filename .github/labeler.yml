@@ -1,0 +1,13 @@
+frontend:
+  - 'apps/**'
+workflows:
+  - '.github/workflows/**'
+docs:
+  - '**/*.md'
+infra:
+  - 'Dockerfile'
+  - '.dockerignore'
+python:
+  - '**/*.py'
+javascript:
+  - '**/*.js'
