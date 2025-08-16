@@ -2,11 +2,38 @@ name: CodeQL
 on:
   push: { branches: [ main ] }
   pull_request: { branches: [ main ] }
+  workflow_dispatch:
+permissions:
+  security-events: write
+  contents: read
 jobs:
   analyze:
+    name: Analyze (JavaScript)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript' ]
     steps:
-      - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
-        with: { languages: javascript }
-      - uses: github/codeql-action/analyze@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Optional: show what CodeQL thinks the languages are
+      - name: Debug: list JS files
+        run: |
+          echo "First 20 JS-like files:"
+          git ls-files '**/*.js' '**/*.mjs' '**/*.cjs' | head -n 20 || true
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          config-file: ./.github/codeql/config.yml
+          queries: security-and-quality
+
+      # For JS we don't build; analysis runs directly
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
