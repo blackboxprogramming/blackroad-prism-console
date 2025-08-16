@@ -12,7 +12,9 @@ const file = path.join(process.cwd(), 'sites', 'blackroad', 'public', 'deploys.j
 let j = { history: [] };
 try {
   j = JSON.parse(fs.readFileSync(file, 'utf8'));
-} catch {}
+} catch {
+  /* ignore errors when file is missing or invalid JSON */
+}
 if (!Array.isArray(j.history)) j.history = [];
 j.history.unshift({ ts: new Date().toISOString(), channel, sha, ref });
 j.history = j.history.slice(0, 25);
