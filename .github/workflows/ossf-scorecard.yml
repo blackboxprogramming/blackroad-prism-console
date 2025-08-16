@@ -1,7 +1,7 @@
 name: OSSF Scorecard
 on:
-  push: { branches: [ main ] }
-  schedule: [ { cron: "0 8 * * 1" } ]
+  push: { branches: [main] }
+  schedule: [{ cron: '0 8 * * 1' }]
   workflow_dispatch:
 permissions:
   actions: read
@@ -20,4 +20,3 @@ jobs:
       - uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
-

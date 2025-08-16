@@ -1,3 +1,6 @@
-command -v npx >/dev/null 2>&1 || exit 0
-npx prettier -w . >/dev/null 2>&1 || true
-npx eslint . --ext .js,.mjs,.cjs --fix >/dev/null 2>&1 || true
+#!/usr/bin/env bash
+. "$(dirname "$0")/_/husky.sh" 2>/dev/null || true
+npx --yes prettier -c . || npx --yes prettier -w .
+npx --yes eslint . --ext .js,.jsx,.ts,.tsx || true
+# lightweight secret scan (skip-safe)
+( git diff --cached | grep -E -i 'AKIA|SECRET|PRIVATE KEY' && echo '⚠️ possible secret in staged diff' ) || true

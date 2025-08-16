@@ -6,7 +6,7 @@ on:
       - 'apps/quantum/**'
       - '.github/workflows/deploy-quantum.yml'
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'apps/quantum/**'
       - '.github/workflows/deploy-quantum.yml'

@@ -1,7 +1,7 @@
 name: Release Please
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: write
@@ -15,4 +15,3 @@ jobs:
           release-type: simple
           bump-minor-pre-major: true
           changelog-types: '[{"type":"feat","section":"Features"},{"type":"fix","section":"Bug Fixes"},{"type":"chore","section":"Chores","hidden":false}]'
-

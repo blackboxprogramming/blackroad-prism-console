@@ -1,6 +1,6 @@
 name: Apply Branch Protection (best-effort)
 on:
-  push: { branches: [ main ] }
+  push: { branches: [main] }
   workflow_dispatch:
 permissions:
   contents: read
@@ -38,4 +38,3 @@ jobs:
       - name: Summary
         if: steps.pre.outputs.go != 'yes'
         run: echo "ℹ️ Skipping branch protection (no ADMIN_TOKEN secret)." >> $GITHUB_STEP_SUMMARY
-

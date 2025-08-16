@@ -17,7 +17,7 @@ jobs:
           DEFAULT_BRANCH: main
           VALIDATE_ALL_CODEBASE: true
           LOG_LEVEL: warn
-          FILTER_REGEX_EXCLUDE: "node_modules/|dist/|build/"
+          FILTER_REGEX_EXCLUDE: 'node_modules/|dist/|build/'
           VALIDATE_MARKDOWN: true
           VALIDATE_YAML: true
           VALIDATE_JSON: true
