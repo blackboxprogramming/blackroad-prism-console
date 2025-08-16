@@ -1,9 +1,12 @@
-### Summary
+## Summary
 
--
+- What this PR does
 
-### Checks
+## Checks
 
-- [ ] Page loads locally without errors
-- [ ] S(ρ), Tr(ρ²) sane on presets
-- [ ] No console errors; controls responsive
+- [ ] Builds locally (`npm run build` in `sites/blackroad`)
+- [ ] Lints/format runs (`npm run format`)
+
+## Flags
+
+- [ ] Security scans needed

@@ -1,6 +1,10 @@
-name: ChatOps: Train Bots
-on: { issue_comment: { types: [created] } }
-permissions: { contents: write, pull-requests: write }
+name: 'ChatOps: Train Bots'
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: write
+  pull-requests: write
 jobs:
   train:
     if: startsWith(github.event.comment.body, '/train')
@@ -11,7 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with:
+          node-version: 20
       - name: Parse lesson IDs
         id: parse
         run: |
@@ -20,7 +25,7 @@ jobs:
       - name: Run Bot School (IDs or random)
         env:
           LESSON_IDS: ${{ steps.parse.outputs.ids }}
-          LESSON_COUNT: "4"
+          LESSON_COUNT: '4'
         run: node .github/tools/bot-school-run.js
       - uses: actions/github-script@v7
         with:

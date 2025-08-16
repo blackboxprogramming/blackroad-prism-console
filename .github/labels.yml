@@ -1,10 +1,10 @@
-- name: priority: high
+- name: 'priority: high'
   color: d73a4a
   description: Must-do soon
-- name: priority: medium
+- name: 'priority: medium'
   color: fbca04
   description: Should-do
-- name: priority: low
+- name: 'priority: low'
   color: c2e0c6
   description: Nice-to-have
 - name: deps

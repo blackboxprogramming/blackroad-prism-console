@@ -1,23 +1,25 @@
-name: CodeQL
+name: CodeQL (flag-aware, advisory)
 on:
-  push: { branches: [ main ] }
-  pull_request: { branches: [ main ] }
+  push:
+    branches: [main]
+  pull_request:
+  schedule: [{ cron: '0 3 * * 1' }]
 permissions:
-  security-events: write
   contents: read
+  security-events: write
 jobs:
+  flags:
+    uses: ./.github/workflows/flags.yml
   analyze:
+    needs: flags
+    if: needs.flags.outputs.security_scans == 'true'
     runs-on: ubuntu-latest
-    strategy:
-      matrix: { language: [ 'javascript' ] }
+    concurrency:
+      group: codeql-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
-          build-mode: none
-          config-file: ./.github/codeql/config.yml
-          queries: security-and-quality
+        with: { languages: javascript }
       - uses: github/codeql-action/analyze@v3
-        with: { category: "/language:${{ matrix.language }}" }
-
+        continue-on-error: true

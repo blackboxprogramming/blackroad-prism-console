@@ -1,0 +1,10 @@
+services:
+  web:
+    build: .
+    ports: ['8080:8080']
+    environment:
+      - VITE_SITE_URL=http://localhost:8080
+  yjs:
+    image: node:22-alpine
+    command: sh -c "npx y-websocket --port 1234"
+    ports: ['1234:1234']
