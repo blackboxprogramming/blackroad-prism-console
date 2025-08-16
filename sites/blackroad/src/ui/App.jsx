@@ -1,4 +1,10 @@
+import { useEffect } from 'react'
+import { telemetryInit } from '../lib/telemetry.ts'
+
 export default function App() {
+  useEffect(() => {
+    telemetryInit()
+  }, [])
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
       <div className="max-w-5xl mx-auto p-6">
