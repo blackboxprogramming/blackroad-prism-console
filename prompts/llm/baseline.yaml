@@ -1,0 +1,17 @@
+# Minimal baseline prompt tasks
+tasks:
+  - id: sum-001
+    prompt: |
+      Summarize: "The quick brown fox jumps over the lazy dog." Keep it under 10 words.
+    expect_keywords: [summarize, fox, dog]
+
+  - id: extract-001
+    prompt: |
+      Extract the two animals mentioned in the sentence: "A cat chased a mouse around the barn."
+      Return as JSON array of strings.
+    expect_keywords: [",", "[", "]"]
+
+  - id: steps-001
+    prompt: |
+      Give 3 numbered steps to make a sandwich.
+    expect_keywords: [1., 2., 3.]

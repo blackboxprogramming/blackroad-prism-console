@@ -1,0 +1,29 @@
+name: Accessibility (axe advisory)
+on:
+  pull_request:
+  workflow_dispatch: {}
+permissions: { contents: read }
+jobs:
+  axe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Prepare HTML
+        run: |
+          if [ -d sites/blackroad ]; then
+            cd sites/blackroad && npm ci --omit=optional || npm i --package-lock-only
+            npm run build
+          else
+            echo "No site; skipping build." >> $GITHUB_STEP_SUMMARY
+          fi
+      - name: Run axe
+        if: ${{ hashFiles('sites/blackroad/dist/**') != '' }}
+        run: |
+          node .github/tools/webperf/axe-check.js || true
+      - uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('sites/blackroad/dist/**') != '' }}
+        with:
+          name: axe-report
+          path: artifacts/axe-report.json

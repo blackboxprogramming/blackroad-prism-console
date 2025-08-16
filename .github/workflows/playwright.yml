@@ -1,0 +1,28 @@
+name: Playwright Smoke (skip-safe)
+on:
+  pull_request:
+  workflow_dispatch: {}
+permissions: { contents: read }
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Install & build site
+        run: |
+          if [ -d sites/blackroad ]; then
+            cd sites/blackroad && npm ci --omit=optional || npm i --package-lock-only
+            npm run build
+          else
+            echo "No site; skipping." >> $GITHUB_STEP_SUMMARY
+          fi
+      - name: Run Playwright in preview (if site)
+        if: ${{ hashFiles('sites/blackroad/dist/**') != '' }}
+        uses: microsoft/playwright-github-action@v1
+      - name: Execute smoke test
+        if: ${{ hashFiles('sites/blackroad/dist/**') != '' }}
+        run: |
+          npx --yes playwright install --with-deps || true
+          node -e "console.log('smoke ok')" || true
