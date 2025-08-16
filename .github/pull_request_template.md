@@ -1,9 +1,10 @@
-### Summary
+## Summary
+- What changed?
+- Why?
 
--
+## Checks
+- [ ] Build passes locally
+- [ ] Lint passes
+- [ ] E2E basic (if site changed)
 
-### Checks
-
-- [ ] Page loads locally without errors
-- [ ] S(ρ), Tr(ρ²) sane on presets
-- [ ] No console errors; controls responsive
+> Label `automerge` if safe to auto-merge after checks.
