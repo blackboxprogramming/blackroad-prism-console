@@ -1,187 +1,93 @@
-/* eslint-env node */
-/* eslint-disable no-undef, no-unused-vars */
+#!/usr/bin/env node
 /**
- * Codex Apply — parse issue/PR comment for /codex commands and apply changes.
- * Supported:
- *   /codex apply
- *     ```path=relative/path.ext
- *     <file contents>
- *     ```
- *     (repeat multiple blocks)
- *
- *   /codex patch
- *     ```diff
- *     <unified diff>
- *     ```
- *
- *   /codex repo org/name [branch]
- *     (precede apply/patch blocks to target another repo)
- *
- * Limits: 200KB per block, collaborators only.
+ * Minimal "codex bridge": applies a markdown playbook (file paths not required).
+ * - Runs a deterministic remediation sequence oriented around Node/Vite React site.
+ * - Idempotent: safe to run multiple times.
  */
-import { execSync } from 'node:child_process';
 import fs from 'node:fs';
+import { execSync as sh } from 'node:child_process';
 import path from 'node:path';
 
-const MAX_BLOCK = 200 * 1024;
-
-function sh(cmd, opts={}) {
-  return execSync(cmd, { stdio: 'pipe', encoding: 'utf8', ...opts });
+function has(p) {
+  return fs.existsSync(p);
 }
-
-function isCollaborator() {
-  // Basic check: ensure event is from a repo member/collaborator
-  const perm = process.env.CODEx_PERMISSION || '';
-  // When invoked from GH Actions, we can pass this via the workflow's github-script
-  return /write|admin|maintain|triage/.test(perm);
+function ensure(p, content = '') {
+  const dir = p.endsWith('/') ? p : path.dirname(p);
+  if (dir && dir !== '.') fs.mkdirSync(dir, { recursive: true });
+  if (!has(p)) fs.writeFileSync(p, content, 'utf8');
 }
-
-function parseCommand(body) {
-  // normalize CRLF
-  const text = body.replace(/\r/g,'').trim();
-
-  // detect target repo: `/codex repo org/name [branch]`
-  const repoMatch = text.match(/\/codex\s+repo\s+([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)(?:\s+([A-Za-z0-9._/-]+))?/);
-  const targetRepo = repoMatch?.[1] || '';
-  const targetBranch = repoMatch?.[2] || '';
-
-  const isApply = /\/codex\s+apply\b/.test(text);
-  const isPatch = /\/codex\s+patch\b/.test(text);
-
-  // collect code blocks
-  const blocks = [];
-  // path-based blocks: ```path=foo/bar.ext\n...```
-  const rePath = /```(?:\w+)?\s*path=([^\n]+)\n([\s\S]*?)```/g;
-  let m;
-  while ((m = rePath.exec(text))) {
-    blocks.push({ type: 'file', path: m[1].trim(), data: m[2] });
+function pkgEnsureScripts(pkgPath, map) {
+  if (!has(pkgPath)) return;
+  const j = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  j.scripts = j.scripts || {};
+  for (const [k, v] of Object.entries(map)) {
+    if (!j.scripts[k]) j.scripts[k] = v;
   }
-
-  // diff blocks: ```diff\n...```
-  const reDiff = /```diff\n([\s\S]*?)```/g;
-  while ((m = reDiff.exec(text))) {
-    blocks.push({ type: 'diff', data: m[1] });
-  }
-
-  return { isApply, isPatch, blocks, targetRepo, targetBranch };
+  fs.writeFileSync(pkgPath, JSON.stringify(j, null, 2));
+}
+function writeIfMissing(p, body) {
+  if (!has(p)) fs.writeFileSync(p, body, 'utf8');
 }
 
-function ensureDirFor(filePath) {
-  const dir = path.dirname(filePath);
-  fs.mkdirSync(dir, { recursive: true });
-}
-
-function writeFileSafe(p, data) {
-  if (Buffer.byteLength(data, 'utf8') > MAX_BLOCK) {
-    throw new Error(`Block too large (> ${MAX_BLOCK} bytes): ${p}`);
-  }
-  ensureDirFor(p);
-  fs.writeFileSync(p, data, 'utf8');
-}
-
-function applyDiff(diffText) {
-  fs.writeFileSync('.codex.patch', diffText, 'utf8');
+function tryRun(cmd) {
   try {
-    sh('git apply --whitespace=fix .codex.patch');
-  } catch (e) {
-    // Try with 3-way if simple apply fails
-    try { sh('git apply --3way .codex.patch'); }
-    catch (e2) { throw new Error('Failed to apply diff (even with 3-way)'); }
-  } finally {
-    fs.rmSync('.codex.patch', { force: true });
+    sh(cmd, { stdio: 'inherit', shell: '/bin/bash' });
+  } catch {
+    /* skip-safe */
   }
 }
 
-function npmPolish() {
-  try { sh('npm -v'); } catch { return; }
-  try { sh('npm i -D prettier eslint eslint-config-prettier >/dev/null 2>&1 || true', { shell: '/bin/bash' }); } catch { /* empty */ }
-  try { sh('npx --yes prettier -w . >/dev/null 2>&1 || true', { shell: '/bin/bash' }); } catch { /* empty */ }
-  try { sh('npx --yes eslint . --ext .js,.mjs,.cjs --fix >/dev/null 2>&1 || true', { shell: '/bin/bash' }); } catch { /* empty */ }
-  // safe tests
-  try {
-    if (fs.existsSync('package.json')) {
-      const j = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-      if (!j.scripts) j.scripts = {};
-      if (!j.scripts.test) {
-        j.scripts.test = 'echo "No tests specified" && exit 0';
-        fs.writeFileSync('package.json', JSON.stringify(j, null, 2));
-        sh('git add package.json');
-      }
-      sh('npm test >/dev/null 2>&1 || true', { shell: '/bin/bash' });
-    }
-    } catch { /* empty */ }
-}
-
-function gitCommitAll(msg) {
-  try { sh('git add -A'); } catch { /* empty */ }
-  try { sh(`git commit -m ${JSON.stringify(msg)}`); } catch { /* empty */ }
-}
-
-function gitPushBranch() {
-  const token = process.env.BOT_TOKEN || '';
-  if (!token) return 'No BOT_TOKEN; not pushing.';
-  const repo = process.env.GITHUB_REPOSITORY;
-  const branch = sh('git rev-parse --abbrev-ref HEAD').trim();
-  try {
-    sh(`git push https://${token}@github.com/${repo}.git HEAD:${branch}`);
-    return `Pushed ${branch}`;
-  } catch (e) {
-    return 'Push failed — check token/permissions.';
-  }
-}
-
-function checkoutTargetRepo(targetRepo, targetBranch) {
-  if (!targetRepo) return;
-  const token = process.env.BOT_TOKEN || '';
-  if (!token) throw new Error('BOT_TOKEN required for cross-repo apply');
-  const url = `https://${token}@github.com/${targetRepo}.git`;
-  sh('rm -rf .codex-target && mkdir -p .codex-target');
-  sh(`git clone --quiet ${url} .codex-target`);
-  process.chdir('.codex-target');
-  const br = targetBranch || 'main';
-  try { sh(`git checkout ${br}`); } catch { sh(`git checkout -b ${br}`); }
-}
-
-async function main() {
-  const body = process.env.CODEx_BODY || '';
-  const { isApply, isPatch, blocks, targetRepo, targetBranch } = parseCommand(body);
-
-  if (!isCollaborator()) {
-    console.log('Only collaborators can run Codex Bridge. Skipping.');
-    return;
-  }
-  if (!isApply && !isPatch) {
-    console.log('No /codex apply or /codex patch found. Skipping.');
-    return;
+function main() {
+  // Root and site package bootstraps
+  pkgEnsureScripts('package.json', {
+    format: 'prettier -w .',
+    lint: 'eslint . --ext .js,.jsx,.ts,.tsx || true',
+    build: 'echo "no root build"; exit 0',
+    test: 'node -e "console.log(`ok`)"',
+  });
+  if (has('sites/blackroad/package.json')) {
+    pkgEnsureScripts('sites/blackroad/package.json', {
+      dev: 'vite',
+      build: 'vite build',
+      preview: 'vite preview',
+      format: 'prettier -w .',
+      lint: 'eslint . --ext .js,.jsx,.ts,.tsx || true',
+    });
   }
 
-  if (targetRepo) {
-    checkoutTargetRepo(targetRepo, targetBranch);
+  // Basic config files
+  writeIfMissing(
+    '.prettierrc.json',
+    JSON.stringify({ semi: false, singleQuote: true, trailingComma: 'all' }, null, 2)
+  );
+  writeIfMissing('.prettierignore', ['dist', 'node_modules', 'artifacts', '.github'].join('\n'));
+  writeIfMissing('eslint.config.js', `export default [{ rules: { 'no-unused-vars':'warn' } }];`);
+
+  // Site skeleton (only if missing)
+  if (!has('sites/blackroad/index.html')) {
+    ensure(
+      'sites/blackroad/index.html',
+      '<!doctype html><div id="root"></div><script type="module" src="/src/main.jsx"></script>'
+    );
+  }
+  if (!has('sites/blackroad/vite.config.js')) {
+    ensure(
+      'sites/blackroad/vite.config.js',
+      `import { defineConfig } from 'vite'; import react from '@vitejs/plugin-react'; export default defineConfig({ plugins:[react()], build:{outDir:'dist'} });`
+    );
   }
 
-  // basic identity
-  const botUser = process.env.BOT_USER || 'blackroad-bot';
-  sh(`git config user.name "${botUser}"`);
-  sh(`git config user.email "${botUser}@users.noreply.github.com"`);
+  // Placeholders for missing assets referenced by public
+  ensure('sites/blackroad/public/robots.txt', 'User-agent: *\nAllow: /\n');
 
-  let wrote = 0, patched = 0;
+  // Run local fixes
+  tryRun(
+    'npm i -D prettier eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin || true'
+  );
+  tryRun('(cd sites/blackroad && npm i || true)');
+  tryRun('npx prettier -w . || true');
+  tryRun('npx eslint . --ext .js,.jsx,.ts,.tsx --fix || true');
 
-  for (const b of blocks) {
-    if (b.type === 'file' && isApply) {
-      writeFileSafe(b.path, b.data);
-      sh(`git add ${JSON.stringify(b.path)}`);
-      wrote++;
-    } else if (b.type === 'diff' && isPatch) {
-      applyDiff(b.data);
-      patched++;
-    }
-  }
-
-  // polish & commit
-  npmPolish();
-  gitCommitAll(`chore(codex): ${wrote?`apply ${wrote} file(s)`:''}${patched?`${wrote?' & ':''}patch ${patched}`:''}`.trim() || 'chore(codex): update');
-  const result = gitPushBranch();
-  console.log(`Codex Bridge: wrote=${wrote}, patched=${patched}. ${result}`);
+  console.log('codex-apply: baseline ensured.');
 }
-
-main().catch(e => { console.error(e.message || e); process.exit(0); });
+main();

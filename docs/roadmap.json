@@ -1,0 +1,8 @@
+{
+  "milestones": [
+    { "name": "PR Previews on all providers", "when": "Q3", "status": "done" },
+    { "name": "Status & Snapshot UI", "when": "Q3", "status": "done" },
+    { "name": "Blog & Content Loader", "when": "Q4", "status": "planned" },
+    { "name": "Per-PR screenshots & diffs", "when": "Q4", "status": "planned" }
+  ]
+}
