@@ -1,5 +1,7 @@
 /* Dangerfile: comment on PRs with quick quality checks */
-const fs = require('fs');
+/* global danger, message, warn */
+
+// Removed unused fs import; Danger provides necessary context.
 
 const files = danger.git.modified_files.concat(danger.git.created_files);
 const big = files.filter((f) => f.endsWith('.html') || f.endsWith('.js'));
