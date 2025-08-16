@@ -101,3 +101,19 @@ jobs:
             }catch(e){
               await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.issue.number, body:"No deploy workflow found (deploy-blackroad.yml)."});
             }
+
+      # LLM evaluation / safety report
+      - name: Run LLM eval
+        if: contains(steps.parse.outputs.cmd, '/eval') || contains(steps.parse.outputs.cmd, '/safety report')
+        run: |
+          node .github/tools/llm/prompt-eval.js || true
+          node .github/tools/llm/hallucination-check.js || true
+      - name: Comment LLM report
+        if: contains(steps.parse.outputs.cmd, '/eval') || contains(steps.parse.outputs.cmd, '/safety report')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let body = 'No eval results found.';
+            try { body = fs.readFileSync('artifacts/llm-eval/SUMMARY.md','utf8'); } catch {}
+            await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.issue.number, body});
