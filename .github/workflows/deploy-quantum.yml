@@ -5,6 +5,11 @@ on:
     paths:
       - 'apps/quantum/**'
       - '.github/workflows/deploy-quantum.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'apps/quantum/**'
+      - '.github/workflows/deploy-quantum.yml'
 jobs:
   deploy:
     runs-on: ubuntu-latest
