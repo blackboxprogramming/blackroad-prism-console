@@ -3,3 +3,4 @@ runtime/
 .env
 __pycache__/
 codex/runtime/
+node_modules/
