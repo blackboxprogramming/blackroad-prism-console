@@ -1,6 +1,7 @@
 {
   "name": "blackroad-quantum",
   "private": true,
+  "type": "module",
   "devDependencies": {
     "eslint": "^9.9.0",
     "eslint-config-prettier": "^9.1.0",
