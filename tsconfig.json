@@ -15,5 +15,5 @@
   "include": ["types.d.ts", "src/**/*.ts", "app/**/*", "lib/**/*"]
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["types.d.ts"]
+  "include": ["types.d.ts", "src/**/*.ts"]
 }
