@@ -42,8 +42,9 @@ vllm-chat:
 
 ## link nginx config and enable site
 nginx-link:
-	sudo ln -sf $(CURDIR)/config/nginx/llm.conf $(NGINX_CONF)
-	sudo ln -sf $(NGINX_CONF) /etc/nginx/sites-enabled/llm.conf
+        sudo ln -sf $(CURDIR)/config/nginx/llm.conf $(NGINX_CONF)
+        sudo ln -sf $(NGINX_CONF) /etc/nginx/sites-enabled/llm.conf
+        sudo ln -sf $(CURDIR)/config/nginx/http.conf /etc/nginx/conf.d/llm-http.conf
 
 ## reload nginx after config changes
 nginx-reload:
