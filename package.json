@@ -1,7 +1,9 @@
 {
   "name": "blackroad-quantum",
   "private": true,
+  "type": "module",
   "devDependencies": {
+    "@eslint/js": "^9.10.0",
     "eslint": "^9.9.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.3.3",
@@ -11,10 +13,16 @@
   "scripts": {
     "prepare": "husky install",
     "format": "prettier -w \"apps/**/*.html\"",
-    "lint": "eslint --ext .js,.mjs,.cjs . || true"
+    "lint": "eslint --ext .js,.mjs,.cjs .",
+    "test": "npm run lint"
   },
   "lint-staged": {
-    "apps/**/*.html": ["prettier -w"],
-    "*.js": ["eslint --fix", "prettier -w"]
+    "apps/**/*.html": [
+      "prettier -w"
+    ],
+    "*.js": [
+      "eslint --fix",
+      "prettier -w"
+    ]
   }
 }
