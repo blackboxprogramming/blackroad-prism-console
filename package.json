@@ -36,6 +36,7 @@
     "typescript": "^5.5.4",
     "@types/node": "^20.11.30"
     "globals": "^14.0.0"
+    "typescript": "^5.5.4"
   },
   "scripts": {
     "format": "prettier -w .",
