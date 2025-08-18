@@ -5,3 +5,4 @@ numpy==1.26.4
 whisper
 torch
 
+requests==2.32.3
