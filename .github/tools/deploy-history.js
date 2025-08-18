@@ -10,9 +10,9 @@ const sha = process.argv[3] || process.env.GITHUB_SHA || '';
 const ref = process.argv[4] || '';
 const file = path.join(process.cwd(), 'sites', 'blackroad', 'public', 'deploys.json');
 let j = { history: [] };
-try {
+if (fs.existsSync(file)) {
   j = JSON.parse(fs.readFileSync(file, 'utf8'));
-} catch {}
+}
 if (!Array.isArray(j.history)) j.history = [];
 j.history.unshift({ ts: new Date().toISOString(), channel, sha, ref });
 j.history = j.history.slice(0, 25);
