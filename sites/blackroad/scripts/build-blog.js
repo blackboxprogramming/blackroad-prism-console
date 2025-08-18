@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+/* eslint-env node */
+/* global process, console */
 /**
  * Build-time blog generator (skip-safe).
  * - Reads Markdown from sites/blackroad/content/blog/ (recursive .md files)
