@@ -8,7 +8,11 @@ import fs from 'fs';
 import path from 'path';
 const dir = 'artifacts/llm-eval';
 if (!fs.existsSync(dir)) { console.log('No eval artifacts; skipping.'); process.exit(0); }
-try { sh('git fetch origin main:refs/remotes/origin/main', {stdio:'ignore'}); } catch {}
+try {
+  sh('git fetch origin main:refs/remotes/origin/main', { stdio: 'ignore' });
+} catch {
+  /* ignore errors if the main branch isn't available */
+}
 const tmp='.llm-eval-main'; fs.rmSync(tmp,{recursive:true,force:true}); fs.mkdirSync(tmp,{recursive:true});
 try { sh(`git show origin/main:${dir} 1>/dev/null 2>&1`); } catch { console.log('No prior artifacts on main; skipping diff.'); process.exit(0); }
 let md = '### LLM Eval Diff (advisory)\n';

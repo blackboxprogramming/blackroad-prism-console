@@ -2,14 +2,23 @@ import js from "@eslint/js";
 import prettier from "eslint-config-prettier";
 
 export default [
+  {
+    ignores: [
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      ".github/**",
+      ".tools/**"
+    ]
+  },
   js.configs.recommended,
   prettier,
-  { 
-    ignores: ["node_modules/", "dist/", "build/", ".github/", ".tools/"],
+  {
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
-      parserOptions: { ecmaFeatures: { jsx: true } }
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      globals: { console: "readonly", process: "readonly" }
     },
     rules: {
       "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
