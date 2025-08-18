@@ -27,19 +27,21 @@ import puppeteer from 'puppeteer';
   await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
 const fs = require('fs'); const path = require('path');
 (async () => {
-  const puppeteer = require('puppeteer');
   const base =
     process.env.BLACKROAD_URL ||
     (process.env.BLACKROAD_DOMAIN ? `https://${process.env.BLACKROAD_DOMAIN}` : '') ||
-    `https://${(process.env.GITHUB_REPOSITORY||'user/repo').split('/')[0]}.github.io`;
-  const url = base.replace(/\/$/,'') + '/';
+    `https://${(process.env.GITHUB_REPOSITORY || 'user/repo').split('/')[0]}.github.io`;
+  const url = base.replace(/\/$/, '') + '/';
   const outDir = path.join(process.cwd(), 'artifacts', 'site-screenshots');
   fs.mkdirSync(outDir, { recursive: true });
-  const ts = new Date().toISOString().replace(/[:.]/g,'-');
+  const ts = new Date().toISOString().replace(/[:.]/g, '-');
   const file = path.join(outDir, `home-${ts}.png`);
-  const browser = await puppeteer.launch({headless: 'new', args:['--no-sandbox','--disable-setuid-sandbox']});
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
   const page = await browser.newPage();
-  page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
+  await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
   try {
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
     await page.screenshot({ path: file, fullPage: true });

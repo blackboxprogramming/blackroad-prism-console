@@ -37,6 +37,7 @@
     "@types/node": "^20.11.30"
     "globals": "^14.0.0"
     "typescript": "^5.5.4"
+    "puppeteer": "^22.10.0"
   },
   "scripts": {
     "format": "prettier -w .",
