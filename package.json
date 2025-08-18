@@ -1,6 +1,9 @@
 {
   "name": "blackroad-quantum",
   "private": true,
+  "dependencies": {
+    "express": "^4.19.2"
+  },
   "devDependencies": {
     "eslint": "^9.9.0",
     "eslint-config-prettier": "^9.1.0",
