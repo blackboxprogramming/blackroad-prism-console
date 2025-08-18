@@ -17,7 +17,8 @@ export default [
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
-      parserOptions: { ecmaFeatures: { jsx: true } }
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      globals: { console: "readonly", process: "readonly" }
     },
     rules: {
       "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
