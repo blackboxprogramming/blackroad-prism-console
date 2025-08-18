@@ -1,3 +1,4 @@
-command -v npx >/dev/null 2>&1 || exit 0
-npx prettier -w . >/dev/null 2>&1 || true
-npx eslint . --ext .js,.mjs,.cjs --fix >/dev/null 2>&1 || true
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npx lint-staged
