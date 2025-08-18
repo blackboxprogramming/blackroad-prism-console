@@ -28,3 +28,29 @@ jobs:
           main_branch: main
           recency_days: 7
 
+name: lucidia-ci
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  sanity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Basic tree + sizes
+        run: |
+          echo "Disk usage (top 50):"
+          du -h --max-depth=2 | sort -h | tail -n 50
+          echo "Git status:"
+          git status
+      - name: Create build artifact (tar)
+        run: |
+          mkdir -p build
+          tar -czf build/lucidia-src.tar.gz .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lucidia-src
+          path: build/lucidia-src.tar.gz
