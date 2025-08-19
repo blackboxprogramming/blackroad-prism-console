@@ -11,6 +11,7 @@
     "README.md",
     "LICENSE"
   ],
+  "files": ["dist", "src", "README.md", "LICENSE"],
   "scripts": {
     "start": "node dist/comprehensive-lucidia-system.js",
     "dev": "nodemon src/comprehensive-lucidia-system.js",
@@ -123,6 +124,7 @@
     "extensionsToTreatAsEsm": [
       ".mjs"
     ],
+    "extensionsToTreatAsEsm": [".mjs"],
     "collectCoverageFrom": [
       "src/**/*.{js,mjs}",
       "!src/**/*.test.{js,mjs}",
@@ -134,6 +136,7 @@
       "lcov",
       "html"
     ],
+    "coverageReporters": ["text", "lcov", "html"],
     "testMatch": [
       "**/tests/**/*.test.{js,mjs}",
       "**/?(*.)+(spec|test).{js,mjs}"
@@ -152,6 +155,12 @@
       "jest",
       "node"
     ],
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "transform": {}
+  },
+  "eslintConfig": {
+    "extends": ["eslint:recommended", "prettier"],
+    "plugins": ["jest", "node"],
     "env": {
       "node": true,
       "es2022": true,
@@ -168,6 +177,7 @@
         {
           "argsIgnorePattern": "^_"
         }
+        { "argsIgnorePattern": "^_" }
       ],
       "prefer-const": "error",
       "no-var": "error"
@@ -196,6 +206,11 @@
       "coverage/**",
       "dist/**"
     ]
+    "*.{js,mjs}": ["eslint --fix", "prettier --write"],
+    "*.{json,md}": ["prettier --write"]
+  },
+  "nyc": {
+    "exclude": ["tests/**", "coverage/**", "dist/**"]
   },
   "config": {
     "lucidia": {
@@ -207,6 +222,7 @@
         "trinary",
         "42-state"
       ]
+      "supportedLogics": ["binary", "trinary", "42-state"]
     }
   }
 }
