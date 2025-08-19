@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Lucidia Create Contraption",
+  "type": "object",
+  "required": ["version", "nodes", "edges"],
+  "properties": {
+    "version": {"type": "string"},
+    "nodes": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/node"}
+    },
+    "edges": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/edge"}
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": ["id", "type", "cfg"],
+      "properties": {
+        "id": {"type": "string"},
+        "type": {"type": "string"},
+        "cfg": {"type": "object"},
+        "state": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "edge": {
+      "type": "object",
+      "required": ["from", "to"],
+      "properties": {
+        "from": {
+          "type": "object",
+          "required": ["node", "port"],
+          "properties": {
+            "node": {"type": "string"},
+            "port": {"type": "string"}
+          },
+          "additionalProperties": false
+        },
+        "to": {
+          "type": "object",
+          "required": ["node", "port"],
+          "properties": {
+            "node": {"type": "string"},
+            "port": {"type": "string"}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

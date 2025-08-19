@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "test": "node tests/smoke.test.js"
+    "build:lucidia-create": "npx tsc -p packages/lucidia-create/tsconfig.json",
+    "test": "npm run build:lucidia-create && node tests/smoke.test.js && node --test tests/*.mjs"
   }
 }
