@@ -20,6 +20,7 @@ make ingest && make dbt-run && make dbt-test && make validate
 
 ## Extending
 - Add S3/MinIO storage and Apache Iceberg to extend the lakehouse.
+- Integrate OpenLineage for end-to-end lineage tracking.
 
 ## Acceptance Checks
 1. `make up` brings all services healthy on a 4 vCPU / 8 GB droplet.
