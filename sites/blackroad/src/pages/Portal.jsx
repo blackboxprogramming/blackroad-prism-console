@@ -11,6 +11,11 @@ export default function Portal(){
     <div className="card">
       <h2 className="text-xl font-semibold mb-2">{t('navPortal')}</h2>
       <p className="opacity-80">Co-coding portal coming soon.</p>
+export default function Portal(){
+  return (
+    <div className="card">
+      <h2 className="text-xl font-semibold mb-2">Portal</h2>
+      <p>Content coming soon.</p>
     </div>
   )
 }

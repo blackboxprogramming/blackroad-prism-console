@@ -14,6 +14,8 @@ try {
   /* ignore fetch errors */
 }
 try { sh('git fetch origin main:refs/remotes/origin/main', {stdio:'ignore'}); } catch {}
+  /* ignore errors if the main branch isn't available */
+}
 const tmp='.llm-eval-main'; fs.rmSync(tmp,{recursive:true,force:true}); fs.mkdirSync(tmp,{recursive:true});
 try { sh(`git show origin/main:${dir} 1>/dev/null 2>&1`); } catch { console.log('No prior artifacts on main; skipping diff.'); process.exit(0); }
 let md = '### LLM Eval Diff (advisory)\n';

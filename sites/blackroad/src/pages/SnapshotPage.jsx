@@ -11,6 +11,11 @@ export default function SnapshotPage(){
     <div className="card">
       <h2 className="text-xl font-semibold mb-2">{t('snapshot')}</h2>
       <p className="opacity-80">Snapshot content coming soon.</p>
+export default function SnapshotPage(){
+  return (
+    <div className="card">
+      <h2 className="text-xl font-semibold mb-2">SnapshotPage</h2>
+      <p>Content coming soon.</p>
     </div>
   )
 }
