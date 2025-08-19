@@ -54,6 +54,7 @@
     "@types/node": "^20.11.30"
     "gray-matter": "^4.0.3",
     "marked": "^14.1.1"
+    "globals": "^14.0.0"
   },
   "scripts": {
     "prepare": "husky",

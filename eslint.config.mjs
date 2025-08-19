@@ -7,6 +7,13 @@ export default [
     ignores: ["node_modules/", "dist/", "build/", "public/vendor/", ".tools/", ".github/"]
   },
   js.configs.recommended,
+import js from '@eslint/js';
+import eslintConfigPrettier from 'eslint-config-prettier';
+import globals from 'globals';
+
+export default [
+  js.configs.recommended,
+  eslintConfigPrettier,
   {
     languageOptions: {
       globals: {
@@ -24,4 +31,11 @@ export default [
     }
   },
   prettier
+        math: 'readonly',
+      },
+    },
+    rules: {
+      'no-empty': 'off',
+    },
+  },
 ];
