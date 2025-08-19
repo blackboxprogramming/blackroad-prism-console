@@ -1,5 +1,7 @@
 # BlackRoad Prism Console
 
+🔒 Mirrored & indexed for Lucidia (BlackRoad). Upstream MIT.
+
 This repository powers the BlackRoad Prism console and a Vite/React site under `sites/blackroad`.
 
 ## Quickstart

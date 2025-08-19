@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Mirror upstream awesome AI data list and add indexing workflow.
+
 ## 0.1.0
 
 - Initial multi-page site scaffold (Home, Docs, Status, Snapshot, Portal, Playground, Contact, Tutorials, Roadmap, Changelog, Blog).
