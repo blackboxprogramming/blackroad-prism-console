@@ -7,4 +7,5 @@ torch
 anthropic
 boto3
 python-dotenv
+requests>=2.31.0
 
