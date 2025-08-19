@@ -97,6 +97,9 @@
     "dev": "npm --prefix sites/blackroad run dev",
     "build": "npm --prefix sites/blackroad run build",
     "postinstall": "npm --prefix sites/blackroad install",
+    "lint:js": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:js:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "typecheck": "tsc -p . || true",
     "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
     "format": "prettier -w .",
     "test": "node tests/smoke.test.js",

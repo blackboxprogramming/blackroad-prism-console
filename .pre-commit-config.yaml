@@ -41,3 +41,4 @@ repos:
       - id: prettier
         additional_dependencies: []
         additional_dependencies: ['prettier@3.3.3']
+

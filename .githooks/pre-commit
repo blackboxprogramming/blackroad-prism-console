@@ -3,6 +3,7 @@ set -euo pipefail
 FILES=$(git diff --cached --name-only)
 
 # Block large/binary types often committed by mistake
+# Block large binaries commonly committed by mistake
 if echo "$FILES" | grep -E '\.(zip|tar|gz|7z|mp4|mov|iso|bin|dmg|exe)$' >/dev/null; then
   echo "❌ Large/binary file staged. Use Releases or LFS."
   exit 1
@@ -13,3 +14,4 @@ if echo "$FILES" | grep -E '^secrets/' >/dev/null; then
   echo "❌ 'secrets/' must not be committed. Use GitHub secrets or a vault."
   exit 1
 fi
+

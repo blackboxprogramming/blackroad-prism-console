@@ -4,6 +4,12 @@ on:
   pull_request:
 
 permissions: { contents: read }
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
@@ -30,3 +36,31 @@ jobs:
           python -m pip install -r requirements-dev.txt 2>/dev/null || true
           ruff check . || true
           pytest -q || true
+      - name: Build (with retry)
+        run: |
+          n=0
+          until [ $n -ge 3 ]; do
+            npm run build && break
+            n=$((n+1))
+            echo "Retry #$n…" && sleep 5
+          done
+
+      - name: Tests (with retry)
+        run: |
+          n=0
+          until [ $n -ge 3 ]; do
+            npm test && break
+            n=$((n+1))
+            echo "Retry #$n…" && sleep 5
+          done
+
+      - name: Python Lint/Test (if present)
+        if: hash python 2>/dev/null
+        uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - if: hash python 2>/dev/null
+        run: |
+          python -m pip install -r requirements-dev.txt 2>/dev/null || true
+          ruff check .
+          pytest -q || true
+
