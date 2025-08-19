@@ -541,3 +541,14 @@ Pass a specific date if needed:
 ```bash
 python scripts/lucidia_awaken_code.py --date 2025-08-19
 ```
+
+## Quantum ML (optional)
+
+An experimental `lucidia.quantum` module provides local Qiskit-based
+neural networks and quantum kernel methods. It is disabled by default
+and can be enabled via the environment variable `LUCIDIA_QML=on`.
+
+Pinned versions:
+
+- `qiskit-machine-learning==0.8.3`
+- `qiskit-aer==0.17.1`
