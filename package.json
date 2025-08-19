@@ -6,7 +6,11 @@
   "dependencies": {
     "fast-json-stable-stringify": "^2.1.0",
     "prom-client": "^15.0.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "ai": "latest",
+    "@ai-sdk/xai": "latest",
+    "@ai-sdk/openai": "latest",
+    "@ai-sdk/anthropic": "latest"
   },
   "devDependencies": {
     "eslint": "^9.9.0",
