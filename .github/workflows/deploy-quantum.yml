@@ -14,6 +14,13 @@ on:
     paths:
       - 'apps/quantum/**'
       - '.github/workflows/deploy-quantum.yml'
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
@@ -25,6 +32,31 @@ jobs:
       - name: Upload build to server (staging dir)
       - uses: actions/checkout@v5
       - name: Copy to server
+      - name: Preflight (secrets present?)
+        id: preflight
+        run: |
+          missing=()
+          for v in SSH_HOST SSH_USER SSH_KEY SITE_DOMAIN; do
+            [ -n "${!v:-}" ] || missing+=("$v")
+          done
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "Missing secrets: ${missing[*]}"
+            echo "status=skip" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=ok" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY:  ${{ secrets.SSH_KEY }}
+          SITE_DOMAIN: ${{ secrets.SITE_DOMAIN }}
+
+      - name: Checkout
+        if: steps.preflight.outputs.status == 'ok'
+        uses: actions/checkout@v4
+
+      - name: Upload app to server (staging dir)
+        if: steps.preflight.outputs.status == 'ok'
         uses: burnett01/rsync-deployments@6.0
         with:
           switches: -avzr --delete
@@ -36,6 +68,7 @@ jobs:
 
       - name: Safe activate + verify + write /api/health.json
       - name: Safe activate + verify (backup & rollback + write health.json)
+        if: steps.preflight.outputs.status == 'ok'
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -98,5 +131,8 @@ jobs:
           curl -fsS "https://${{ secrets.SITE_DOMAIN }}/apps/quantum/ternary_consciousness_v3.html" >/dev/null
 
       - name: Health check
+      - name: Summary (skipped)
+        if: steps.preflight.outputs.status == 'skip'
         run: |
-          curl -fsS "https://${{ secrets.SITE_DOMAIN }}/apps/quantum/ternary_consciousness_v3.html" >/dev/null
+          echo "🚧 Deploy skipped — missing required secrets (SSH_HOST/SSH_USER/SSH_KEY/SITE_DOMAIN)." >> $GITHUB_STEP_SUMMARY
+
