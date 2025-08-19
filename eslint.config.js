@@ -20,6 +20,9 @@ export default [
       parserOptions: { ecmaFeatures: { jsx: true } },
       globals: { console: "readonly", process: "readonly" }
     },
+      parserOptions: { ecmaVersion: "latest", sourceType: "module", ecmaFeatures: { jsx: true } }
+    },
+    ignores: ["node_modules/", "dist/", "build/", ".github/", ".tools/"],
     rules: {
       "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "no-undef": "warn"
