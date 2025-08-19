@@ -4,3 +4,8 @@ LocationID,Borough,Zone,service_zone
 3,Bronx,Allerton/Pelham Gardens,Bronx
 4,Manhattan,Alphabet City,Manhattan
 5,Staten Island,Arden Heights,Staten Island
+100,Bronx,Parkchester,Green
+142,Manhattan,Times Sq/Theatre District,Yellow
+236,Brooklyn,Sunset Park West,Boro Zone
+237,Brooklyn,Sunset Park East,Boro Zone
+249,Queens,Jamaica Bay,Yellow
