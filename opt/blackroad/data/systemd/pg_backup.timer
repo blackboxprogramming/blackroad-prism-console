@@ -1,0 +1,10 @@
+# /opt/blackroad/data/systemd/pg_backup.timer
+[Unit]
+Description=Nightly PG backup
+
+[Timer]
+OnCalendar=02:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,35 @@
+# /opt/blackroad/mirrors/docker-compose.yml
+version: "3.9"
+services:
+  verdaccio:
+    image: verdaccio/verdaccio:5
+    environment:
+      - VERDACCIO_PORT=4873
+    volumes:
+      - verdaccio_data:/verdaccio/storage
+    ports:
+      - "4873:4873"
+  devpi:
+    image: devpi/devpi:6
+    volumes:
+      - devpi_data:/data
+    ports:
+      - "3141:3141"
+  registry:
+    image: registry:2
+    environment:
+      - REGISTRY_STORAGE_DELETE_ENABLED=true
+    volumes:
+      - registry_data:/var/lib/registry
+    ports:
+      - "5001:5000"
+  aptmirror:
+    image: apt-mirror:latest
+    volumes:
+      - apt_data:/var/spool/apt-mirror
+    command: /bin/sh -c "crond -f && apt-mirror"
+volumes:
+  verdaccio_data:
+  devpi_data:
+  registry_data:
+  apt_data:
