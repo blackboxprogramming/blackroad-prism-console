@@ -1,68 +1,26 @@
-name: deploy_quantum_v3
-
+name: deploy
 on:
-  workflow_dispatch:
-
+  push:
+    branches: [ main ]
+concurrency:
+  group: deploy-prod-${{ github.ref }}
+  cancel-in-progress: true
+permissions: {}
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - name: Checkout
+      - name: Checkout (full history required for push)
         uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
 
-      - name: Safe activate + verify (backup & rollback + write health.json)
-        uses: appleboy/ssh-action@v1.2.2
+      - name: Deploy to Dokku
+        uses: dokku/github-action@v1.8.0
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            set -euo pipefail
-            SRC_DIR="/var/www/blackroad/apps/quantum"
-            LIVE_DIR="/var/www/blackroad/apps/quantum_live"
-            API_DIR="/var/www/blackroad/api"
-            URL="https://${{ secrets.SITE_DOMAIN }}/apps/quantum/ternary_consciousness_v3.html"
-            TS="$(date -u +%FT%TZ)"
-            SHA="${{ github.sha }}"
-            VER="v3.0.0"
-            mkdir -p "$LIVE_DIR" "$API_DIR"
-            # backup live
-            TS_DIR="/var/www/blackroad/backups/quantum-$(date +%Y%m%d-%H%M%S)"
-            mkdir -p "$TS_DIR"
-            rsync -a --delete "$LIVE_DIR/" "$TS_DIR/"
-            # promote
-            rsync -a --delete "$SRC_DIR/" "$LIVE_DIR/"
-            nginx -t && systemctl reload nginx
-            # verify page
-            set +e
-            curl -fsS "$URL" -o /tmp/q.html
-            STATUS=$?
-            TITLE_OK=$(grep -c "Ternary Quantum Consciousness Framework" /tmp/q.html || true)
-            SIZE_OK=$( [ "$(wc -c </tmp/q.html)" -ge 10000 ] && echo 1 || echo 0 )
-            set -e
-            if [ "$STATUS" -ne 0 ] || [ "$TITLE_OK" -lt 1 ] || [ "$SIZE_OK" -ne 1 ]; then
-              echo "Health check failed — rolling back"
-              rsync -a --delete "$TS_DIR/" "$LIVE_DIR/"
-              nginx -t && systemctl reload nginx
-              exit 1
-            fi
-            # write /api/health.json
-            cat > "$API_DIR/health.json" <<JSON
-            { "status":"ok", "app":"quantum-v3", "version":"$VER", "commit":"$SHA", "ts":"$TS" }
-            JSON
-            echo "Deployed OK; backup → $TS_DIR; health.json updated."
+          git_remote_url: "ssh://dokku@${{ secrets.DOKKU_HOST }}:22/blackroad"
+          branch: "main"
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_host_key: ${{ secrets.SSH_HOST_KEY }}
+          # enable verbose client logs if needed:
+          # git_push_flags: "-vvv"
 
-      - name: Update sidecar COMMIT_SHA and restart
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            sudo systemctl set-environment COMMIT_SHA=${{ github.sha }}
-            sudo systemctl restart health-sidecar
-
-      - name: Verify /api/health
-        run: |
-          curl -fsS "https://${{ secrets.SITE_DOMAIN }}/api/health" | tee /tmp/health.json
-          node -e "const h=require('fs').readFileSync('/tmp/health.json','utf8'); const j=JSON.parse(h); if(j.status!=='ok') {console.error('Bad status', j); process.exit(1)}; console.log('Health OK:', j)"
