@@ -7,6 +7,10 @@ on:
       - '.github/workflows/deploy-quantum.yml'
   pull_request:
     branches: [main]
+name: Deploy Quantum App
+on:
+  push:
+    branches: [ main ]
     paths:
       - 'apps/quantum/**'
       - '.github/workflows/deploy-quantum.yml'
@@ -19,6 +23,7 @@ jobs:
 
       - name: Upload app to server (staging dir)
       - name: Upload build to server (staging dir)
+      - name: Copy to server
         uses: burnett01/rsync-deployments@6.0
         with:
           switches: -avzr --delete
@@ -86,3 +91,7 @@ jobs:
         run: |
           curl -fsS "https://${{ secrets.SITE_DOMAIN }}/api/health/health.json" | tee /tmp/health.json
           node -e "const j=require('fs').readFileSync('/tmp/health.json','utf8'); const o=JSON.parse(j); if(o.status!=='ok'){process.exit(1)}; console.log('Health OK', o)"
+      - name: Health check
+        run: |
+          set -e
+          curl -fsS "https://${{ secrets.SITE_DOMAIN }}/apps/quantum/ternary_consciousness_v3.html" >/dev/null
