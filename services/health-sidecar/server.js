@@ -67,3 +67,4 @@ app.get('/readyz', (_req, res) => {
 app.listen(PORT, () => {
   console.log(`[health-sidecar] listening on :${PORT}`);
 });
+
