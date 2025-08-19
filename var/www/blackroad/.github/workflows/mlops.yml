@@ -1,0 +1,38 @@
+name: mlops
+
+on:
+  push:
+    paths:
+      - 'var/www/blackroad/**'
+  pull_request:
+    paths:
+      - 'var/www/blackroad/**'
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    env:
+      GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastapi uvicorn[standard] pydantic pytest black flake8
+      - name: Lint
+        run: flake8 var/www/blackroad || true
+      - name: Format Check
+        run: black --check var/www/blackroad || true
+      - name: Test
+        run: pytest var/www/blackroad
+      - name: Build image
+        run: docker build -t ghcr.io/${{ env.GHCR_USERNAME }}/blackroad-inference:latest var/www/blackroad/backend/services/inference
+      - name: Push image
+        if: env.GHCR_USERNAME != '' && env.GHCR_TOKEN != ''
+        run: |
+          echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin
+          docker push ghcr.io/${GHCR_USERNAME}/blackroad-inference:latest
