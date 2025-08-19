@@ -1,0 +1,14 @@
+[Unit]
+Description=BlackRoad Codex API (local-LLM streaming)
+After=network.target
+
+[Service]
+Environment=NODE_ENV=production
+EnvironmentFile=/srv/blackroad/codex-api/.env
+WorkingDirectory=/srv/blackroad/codex-api
+ExecStart=/usr/bin/node /srv/blackroad/codex-api/index.js
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
