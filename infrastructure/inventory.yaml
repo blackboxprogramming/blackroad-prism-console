@@ -1,0 +1,14 @@
+all:
+  children:
+    core:
+      hosts:
+        core1:
+    edge:
+      hosts:
+        edge1:
+    build:
+      hosts:
+        build1:
+    backup:
+      hosts:
+        backup1:

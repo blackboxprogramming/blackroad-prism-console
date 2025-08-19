@@ -14,7 +14,9 @@ pnpm-debug.log*
 Thumbs.db
 
 # Artifacts
-artifacts/
+artifacts/*
+!artifacts/review/
+!artifacts/review/**
 coverage/
 
 # Project-specific
@@ -46,5 +48,18 @@ secrets/
 *.enc
 # Codex CI kit
 /tests/_codex_autogen/
+.tmp/
+*.out.md
+# Codex artifacts
+tests/_codex_autogen/
+.tmp/
+*.out.md
+
+# Allow random field datasets
+!lucidia/modules/random_fields/datasets/
+!lucidia/modules/random_fields/datasets/*.py
+lucidia/modules/random_fields/datasets/__pycache__/
+# Codex CI artifacts
+tests/_codex_autogen/
 .tmp/
 *.out.md

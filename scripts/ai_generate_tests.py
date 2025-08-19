@@ -1,4 +1,9 @@
 import argparse, pathlib, os
+import argparse
+import pathlib
+import argparse
+from pathlib import Path
+
 import tools.llm as llm
 
 SYSTEM = """You are Codex, writing high-value unit tests.
@@ -25,6 +30,7 @@ Output format:
   <contents>
 """
 
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--context", required=True)
@@ -35,6 +41,10 @@ def main():
     reply = llm.chat(PROMPT.format(ctx=ctx), SYSTEM)
 
     outdir = pathlib.Path(args.out)
+    ctx = Path(args.context).read_text()
+    reply = llm.chat(PROMPT.format(ctx=ctx), SYSTEM)
+
+    outdir = Path(args.out)
     outdir.mkdir(parents=True, exist_ok=True)
     # Save raw AI output so it can be reviewed or parsed downstream
     (outdir / "AI_TESTS.out.md").write_text(reply)
@@ -48,6 +58,7 @@ def main():
         path = outdir / rel
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(body)
+
 
 if __name__ == "__main__":
     main()

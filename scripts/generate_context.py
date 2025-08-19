@@ -3,10 +3,21 @@ Collects minimal repo context for AI: base..HEAD diff, touched files, and projec
 """
 import os, subprocess, sys, pathlib
 
+import os
+import pathlib
+import subprocess
+
+import os
+import subprocess
+from pathlib import Path
+
+
 def sh(cmd: str) -> str:
     return subprocess.check_output(cmd, shell=True, text=True, stderr=subprocess.DEVNULL).strip()
 
+
 root = pathlib.Path(".").resolve()
+root = Path(".").resolve()
 base = os.getenv("GITHUB_BASE_REF", "main")
 try:
     diff = sh(f"git diff --unified=0 {base}...HEAD || git diff --unified=0")
@@ -14,6 +25,9 @@ except Exception:
     diff = sh("git diff --unified=0")
 
 touched = sh("git diff --name-only " + (base + "...HEAD" if base else "") + " || git diff --name-only")
+touched = sh(
+    "git diff --name-only " + (base + "...HEAD" if base else "") + " || git diff --name-only"
+)
 
 contract = ""
 p = root / "prompts" / "codex.project.md"

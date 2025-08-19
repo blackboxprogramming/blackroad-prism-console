@@ -1,4 +1,9 @@
 import argparse, json, pathlib, os
+import argparse
+import pathlib
+import argparse
+from pathlib import Path
+
 import tools.llm as llm
 
 SYSTEM = """You are Codex, a no-nonsense CI triage engineer.
@@ -19,6 +24,7 @@ Deliverables:
 3) If obvious, a minimal patch as unified diff
 """
 
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--meta", required=True)
@@ -28,6 +34,10 @@ def main():
     meta = pathlib.Path(args.meta).read_text()
     result = llm.chat(PROMPT.format(meta=meta), SYSTEM)
     pathlib.Path(args.out).write_text(result)
+    meta = Path(args.meta).read_text()
+    result = llm.chat(PROMPT.format(meta=meta), SYSTEM)
+    Path(args.out).write_text(result)
+
 
 if __name__ == "__main__":
     main()

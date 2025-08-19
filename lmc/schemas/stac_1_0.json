@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "STAC 1.0 Placeholder",
+  "description": "Simplified placeholder for the STAC 1.0 JSON schema.",
+  "type": "object",
+  "properties": {}
+}
