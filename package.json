@@ -25,6 +25,9 @@
   "type": "module",
   "devDependencies": {
     "@types/node": "^20.11.30",
+  "type": "module",
+  "devDependencies": {
+    "@eslint/js": "^9.10.0",
     "eslint": "^9.9.0",
     "eslint-config-prettier": "^9.1.0",
     "@eslint/js": "^9.33.0",
@@ -107,6 +110,12 @@
   },
   "lint-staged": {
     "**/*.{js,mjs,cjs,html,css,md,yml,yaml,json}": [
+    "prepare": "husky install",
+    "format": "prettier -w \"apps/**/*.html\"",
+    "lint": "eslint --ext .js,.mjs,.cjs .",
+    "test": "npm run lint"
+  },
+  "lint-staged": {
     "apps/**/*.html": [
       "prettier -w"
     ],

@@ -30,3 +30,4 @@ node_modules/
 node_modules/
 services/health-sidecar/node_modules/
 services/health-sidecar/.env
+node_modules/

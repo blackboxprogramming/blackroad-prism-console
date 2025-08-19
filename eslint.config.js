@@ -25,4 +25,8 @@ export default [
       "no-undef": "warn"
     }
   }
+    ignores: ["node_modules/**"],
+  },
+  js.configs.recommended,
+  prettier,
 ];

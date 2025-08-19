@@ -1,0 +1,18 @@
+name: SLSA Provenance (Releases)
+on:
+  release:
+    types: [published]
+permissions:
+  actions: read
+  id-token: write
+  contents: write
+jobs:
+  provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate build provenance
+        uses: slsa-framework/slsa-github-generator@v2.0.0
+        with:
+          base64-subjects: ""
+          upload-assets: true
