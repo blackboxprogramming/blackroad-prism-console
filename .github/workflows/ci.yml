@@ -1,6 +1,5 @@
 name: CI
 on:
-  push: { branches: [ main ] }
   pull_request:
 
 permissions: { contents: read }
@@ -11,10 +10,10 @@ permissions: { contents: read }
 permissions:
   contents: read
 
+  push: { branches: ["main"] }
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -64,3 +63,16 @@ jobs:
           ruff check .
           pytest -q || true
 
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml','**/requirements*.txt') }}
+      - run: pip install -U pip && pip install -r requirements.txt || true
+      - run: pip install pre-commit pytest pytest-cov mypy ruff black
+      - name: Pre-commit
+        run: pre-commit run --all-files
+      - name: Test
+        run: pytest --maxfail=1 --disable-warnings -q

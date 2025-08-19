@@ -77,3 +77,17 @@ List how you tested this change (commands, screenshots, logs).
 - [ ] Page loads locally without errors
 - [ ] S(ρ), Tr(ρ²) sane on presets
 - [ ] No console errors; controls responsive
+## What & Why
+- [ ] Problem / user story:
+- [ ] Proposed change:
+- [ ] Acceptance criteria:
+
+## Checklists
+- [ ] Tests added/updated
+- [ ] Docs updated
+- [ ] Backwards compatible
+
+## Notes for AI Review
+- Key files:
+- Risk areas:
+- Constraints:
