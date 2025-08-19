@@ -1,0 +1,20 @@
+FROM pytorch/pytorch:2.3.1-cuda11.8-cudnn8-runtime
+WORKDIR /app
+
+# basic deps
+RUN apt-get update && apt-get install -y git ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
+
+# python deps
+RUN pip install --no-cache-dir fastapi uvicorn[standard] pillow pydantic==1.10.14 \
+    torchvision einops
+
+# vendor a PyTorch Glow impl (MIT)
+RUN mkdir -p /app/vendor && \
+    git clone --depth=1 https://github.com/rosinality/glow-pytorch /app/vendor/glow-pytorch
+
+# our agent code
+COPY glow_agent /app/glow_agent
+
+# allow both CPU and GPU runs
+ENV TORCH_HOME=/app/.torch
+ENV PYTHONUNBUFFERED=1
