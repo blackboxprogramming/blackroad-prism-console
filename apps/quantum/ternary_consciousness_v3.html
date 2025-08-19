@@ -83,6 +83,7 @@
 
       body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: #333;
         line-height: 1.6;
@@ -351,6 +352,7 @@
         padding: 15px;
         border-radius: 8px;
         font-family: 'Courier New', monospace;
+        font-family: "Courier New", monospace;
         margin: 10px 0;
         border-left: 4px solid #5a67d8;
       }
@@ -374,6 +376,10 @@
       <div class="header">
         <h1>🧠 Ternary Quantum Consciousness Framework</h1>
         <p>Interactive exploration of three-state quantum systems for consciousness navigation</p>
+        <p>
+          Interactive exploration of three-state quantum systems for
+          consciousness navigation
+        </p>
       </div>
 
       <div class="controls">
@@ -382,21 +388,53 @@
           <div class="control-group">
             <label>Amplitude α (|-1⟩ state):</label>
             <input type="range" id="alpha" min="0" max="1" step="0.01" value="0.577" />
+            <input
+              type="range"
+              id="alpha"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.577"
+            />
             <span id="alphaValue">0.577</span>
           </div>
           <div class="control-group">
             <label>Amplitude β (|0⟩ state):</label>
             <input type="range" id="beta" min="0" max="1" step="0.01" value="0.577" />
+            <input
+              type="range"
+              id="beta"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.577"
+            />
             <span id="betaValue">0.577</span>
           </div>
           <div class="control-group">
             <label>Amplitude γ (|+1⟩ state):</label>
             <input type="range" id="gamma" min="0" max="1" step="0.01" value="0.577" />
+            <input
+              type="range"
+              id="gamma"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.577"
+            />
             <span id="gammaValue">0.577</span>
           </div>
           <div class="control-group">
             <label>Evolution Time:</label>
             <input type="range" id="time" min="0" max="6.28" step="0.1" value="0" />
+            <input
+              type="range"
+              id="time"
+              min="0"
+              max="6.28"
+              step="0.1"
+              value="0"
+            />
             <span id="timeValue">0.0</span>
           </div>
         </div>
@@ -406,6 +444,18 @@
           <button class="preset-btn" onclick="setPreset('focused')">Focused State</button>
           <button class="preset-btn" onclick="setPreset('creative')">Creative State</button>
           <button class="preset-btn" onclick="setPreset('meditative')">Meditative State</button>
+          <button class="preset-btn" onclick="setPreset('balanced')">
+            Balanced State
+          </button>
+          <button class="preset-btn" onclick="setPreset('focused')">
+            Focused State
+          </button>
+          <button class="preset-btn" onclick="setPreset('creative')">
+            Creative State
+          </button>
+          <button class="preset-btn" onclick="setPreset('meditative')">
+            Meditative State
+          </button>
         </div>
       </div>
 
@@ -473,6 +523,11 @@
               <div class="metric-value" id="optimalDelta">1.500</div>
               <div class="metric-label">Optimal δu</div>
             </div>
+            </div>
+            <div class="metric">
+              <div class="metric-value" id="optimalDelta">1.500</div>
+              <div class="metric-label">Optimal δu</div>
+            </div>
           </div>
         </div>
 
@@ -480,6 +535,9 @@
           <h3>🔄 Quantum Evolution</h3>
           <div class="evolution-controls">
             <button class="btn" id="playBtn" onclick="toggleEvolution()">▶️ Play</button>
+            <button class="btn" id="playBtn" onclick="toggleEvolution()">
+              ▶️ Play
+            </button>
             <button class="btn" onclick="resetEvolution()">🔄 Reset</button>
           </div>
           <div class="chart-container">
@@ -503,6 +561,15 @@
               <canvas id="capabilityChart"></canvas>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div class="creative-energy-viz">
+        <h3>🌊 Creative Energy Landscape</h3>
+        <div class="chart-container">
+          <canvas id="energyLandscape"></canvas>
+        </div>
+      </div>
         </div>
       </div>
 
@@ -568,7 +635,50 @@
       class TernaryLogicGates {
         static TAND(a, b) {
           return Math.min(a, b);
+
+        normalize(amplitudes) {
+          const norm = Math.sqrt(amplitudes.reduce((sum, a) => sum + a * a, 0));
+          return norm > 0 ? amplitudes.map((a) => a / norm) : amplitudes;
         }
+
+        get probabilities() {
+          return this.amplitudes.map((a) => a * a);
+        }
+
+        get vonNeumannEntropy() {
+          const probs = this.probabilities;
+          return -probs.reduce((sum, p) => {
+            return sum + (p > 1e-10 ? p * Math.log(p) : 0);
+          }, 0);
+        }
+
+        get purity() {
+          const probs = this.probabilities;
+          return probs.reduce((sum, p) => sum + p * p, 0);
+        }
+
+        measure() {
+          const probs = this.probabilities;
+          const rand = Math.random();
+          let cumulative = 0;
+
+          for (let i = 0; i < probs.length; i++) {
+            cumulative += probs[i];
+            if (rand <= cumulative) {
+              return [-1, 0, 1][i];
+            }
+          }
+          return 1;
+        }
+      }
+
+      class BoundaryCreativeEnergy {
+        static calculate(sigmaC, gamma, chi, lambda, deltaU) {
+          const numerator = sigmaC * (1 + gamma) * (1 + chi * Math.abs(deltaU));
+          const denominator = 1 + lambda * Math.abs(deltaU);
+          return numerator / denominator;
+        }
+      }
 
         static TOR(a, b) {
           return Math.max(a, b);
@@ -1006,6 +1116,481 @@
           const threshold = level * maxEnergy;
           ctx.beginPath();
 
+      class TernaryLogicGates {
+        static TAND(a, b) {
+          return Math.min(a, b);
+        }
+
+        static TOR(a, b) {
+          return Math.max(a, b);
+        }
+
+        static TNOT(a) {
+          return -a;
+        }
+      }
+
+      // Global state
+      let currentState = new TernaryQubit([
+        1 / Math.sqrt(3),
+        1 / Math.sqrt(3),
+        1 / Math.sqrt(3),
+      ]);
+      let evolutionAnimation = null;
+      let isPlaying = false;
+      let charts = {};
+
+      // Initialize the application
+      function initializeApp() {
+        setupCharts();
+        setupControls();
+        updateDisplay();
+        generateCreativeEnergyLandscape();
+        generateNavigationData();
+      }
+
+      function setupControls() {
+        ["alpha", "beta", "gamma", "time"].forEach((id) => {
+          const slider = document.getElementById(id);
+          const valueSpan = document.getElementById(id + "Value");
+
+          slider.addEventListener("input", (e) => {
+            valueSpan.textContent = parseFloat(e.target.value).toFixed(3);
+            if (id !== "time") {
+              updateQuantumState();
+            } else {
+              updateEvolution();
+            }
+          });
+        });
+      }
+
+      function setupCharts() {
+        // Probability chart
+        const probCtx = document
+          .getElementById("probabilityChart")
+          .getContext("2d");
+        charts.probability = new Chart(probCtx, {
+          type: "doughnut",
+          data: {
+            labels: ["|-1⟩", "|0⟩", "|+1⟩"],
+            datasets: [
+              {
+                data: [0.333, 0.333, 0.333],
+                backgroundColor: ["#ff6b6b", "#4ecdc4", "#45b7d1"],
+                borderWidth: 2,
+                borderColor: "#fff",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+            },
+          },
+        });
+
+        // Creative energy chart
+        const energyCtx = document
+          .getElementById("creativeEnergyChart")
+          .getContext("2d");
+        const deltaRange = Array.from({ length: 50 }, (_, i) => i * 0.1);
+        const energyData = deltaRange.map((delta) =>
+          BoundaryCreativeEnergy.calculate(1.0, 0.5, 0.3, 0.2, delta),
+        );
+
+        charts.creativeEnergy = new Chart(energyCtx, {
+          type: "line",
+          data: {
+            labels: deltaRange,
+            datasets: [
+              {
+                label: "Creative Energy K_c",
+                data: energyData,
+                borderColor: "#9c27b0",
+                backgroundColor: "rgba(156, 39, 176, 0.1)",
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: "Boundary Displacement (δu)",
+                },
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: "Creative Energy (K_c)",
+                },
+              },
+            },
+          },
+        });
+
+        // Update creative energy metrics
+        const maxEnergy = Math.max(...energyData);
+        const optimalDelta = deltaRange[energyData.indexOf(maxEnergy)];
+        document.getElementById("maxCreative").textContent =
+          maxEnergy.toFixed(3);
+        document.getElementById("optimalDelta").textContent =
+          optimalDelta.toFixed(3);
+
+        // Evolution chart
+        const evolutionCtx = document
+          .getElementById("evolutionChart")
+          .getContext("2d");
+        charts.evolution = new Chart(evolutionCtx, {
+          type: "line",
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: "|-1⟩",
+                data: [],
+                borderColor: "#ff6b6b",
+                backgroundColor: "rgba(255, 107, 107, 0.1)",
+                borderWidth: 2,
+              },
+              {
+                label: "|0⟩",
+                data: [],
+                borderColor: "#4ecdc4",
+                backgroundColor: "rgba(78, 205, 196, 0.1)",
+                borderWidth: 2,
+              },
+              {
+                label: "|+1⟩",
+                data: [],
+                borderColor: "#45b7d1",
+                backgroundColor: "rgba(69, 183, 209, 0.1)",
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: "Time",
+                },
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: "Probability",
+                },
+                min: 0,
+                max: 1,
+              },
+            },
+            animation: {
+              duration: 0,
+            },
+          },
+        });
+      }
+
+      function updateQuantumState() {
+        const alpha = parseFloat(document.getElementById("alpha").value);
+        const beta = parseFloat(document.getElementById("beta").value);
+        const gamma = parseFloat(document.getElementById("gamma").value);
+
+        currentState = new TernaryQubit([alpha, beta, gamma]);
+        updateDisplay();
+      }
+
+      function updateDisplay() {
+        const probs = currentState.probabilities;
+
+        // Update probability displays
+        document.getElementById("prob-1").textContent = probs[0].toFixed(3);
+        document.getElementById("prob0").textContent = probs[1].toFixed(3);
+        document.getElementById("prob1").textContent = probs[2].toFixed(3);
+
+        // Highlight dominant state
+        ["state-1", "state0", "state1"].forEach((id, index) => {
+          const element = document.getElementById(id);
+          if (probs[index] === Math.max(...probs)) {
+            element.classList.add("active");
+          } else {
+            element.classList.remove("active");
+          }
+        });
+
+        // Update chart
+        charts.probability.data.datasets[0].data = probs;
+        charts.probability.update("none");
+
+        // Update metrics
+        document.getElementById("entropy").textContent =
+          currentState.vonNeumannEntropy.toFixed(3);
+        document.getElementById("purity").textContent =
+          currentState.purity.toFixed(3);
+
+        // Calculate uncertainty product (simplified)
+        const uncertaintyProduct = calculateUncertaintyProduct(currentState);
+        document.getElementById("uncertainty").textContent =
+          uncertaintyProduct.toFixed(3);
+
+        // Calculate consciousness score
+        const consciousnessScore = calculateConsciousnessScore(currentState);
+        document.getElementById("consciousness").textContent =
+          consciousnessScore.toFixed(3);
+      }
+
+      function calculateUncertaintyProduct(state) {
+        // Simplified three-way uncertainty calculation
+        const probs = state.probabilities;
+        const entropy = state.vonNeumannEntropy;
+        // Approximate uncertainty based on entropy and purity
+        return Math.max(0.125, entropy * state.purity * 0.2);
+      }
+
+      function calculateConsciousnessScore(state) {
+        const entropy = state.vonNeumannEntropy;
+        const purity = state.purity;
+        const uncertainty = calculateUncertaintyProduct(state);
+
+        // Weighted combination
+        return 0.4 * entropy + 0.3 * (1 - purity) + 0.3 * uncertainty;
+      }
+
+      function setPreset(type) {
+        let amplitudes;
+
+        switch (type) {
+          case "balanced":
+            amplitudes = [1 / Math.sqrt(3), 1 / Math.sqrt(3), 1 / Math.sqrt(3)];
+            break;
+          case "focused":
+            amplitudes = [0.8, 0.1, 0.1];
+            break;
+          case "creative":
+            amplitudes = [0.2, 0.3, 0.5];
+            break;
+          case "meditative":
+            amplitudes = [0.1, 0.8, 0.1];
+            break;
+        }
+
+        // Update sliders
+        document.getElementById("alpha").value = amplitudes[0];
+        document.getElementById("beta").value = amplitudes[1];
+        document.getElementById("gamma").value = amplitudes[2];
+
+        // Update displays
+        document.getElementById("alphaValue").textContent =
+          amplitudes[0].toFixed(3);
+        document.getElementById("betaValue").textContent =
+          amplitudes[1].toFixed(3);
+        document.getElementById("gammaValue").textContent =
+          amplitudes[2].toFixed(3);
+
+        updateQuantumState();
+      }
+
+      function updateEvolution() {
+        const time = parseFloat(document.getElementById("time").value);
+
+        // Simulate quantum evolution with simple oscillation
+        const omega1 = 1.0,
+          omega2 = 2.0,
+          omega3 = 3.0;
+        const initialAmps = [
+          parseFloat(document.getElementById("alpha").value),
+          parseFloat(document.getElementById("beta").value),
+          parseFloat(document.getElementById("gamma").value),
+        ];
+
+        // Simple evolution simulation
+        const evolvedAmps = [
+          initialAmps[0] * Math.cos(omega1 * time),
+          initialAmps[1] * Math.cos(omega2 * time),
+          initialAmps[2] * Math.cos(omega3 * time),
+        ];
+
+        const evolvedState = new TernaryQubit(evolvedAmps);
+
+        // Update temporary display
+        const probs = evolvedState.probabilities;
+        document.getElementById("prob-1").textContent = probs[0].toFixed(3);
+        document.getElementById("prob0").textContent = probs[1].toFixed(3);
+        document.getElementById("prob1").textContent = probs[2].toFixed(3);
+
+        charts.probability.data.datasets[0].data = probs;
+        charts.probability.update("none");
+      }
+
+      function toggleEvolution() {
+        if (isPlaying) {
+          stopEvolution();
+        } else {
+          startEvolution();
+        }
+      }
+
+      function startEvolution() {
+        isPlaying = true;
+        document.getElementById("playBtn").innerHTML = "⏸️ Pause";
+
+        const timeSlider = document.getElementById("time");
+        const startTime = parseFloat(timeSlider.value);
+        const maxTime = parseFloat(timeSlider.max);
+
+        let currentTime = startTime;
+        const timeStep = 0.1;
+
+        charts.evolution.data.labels = [];
+        charts.evolution.data.datasets.forEach(
+          (dataset) => (dataset.data = []),
+        );
+
+        evolutionAnimation = setInterval(() => {
+          if (currentTime >= maxTime) {
+            currentTime = 0;
+            charts.evolution.data.labels = [];
+            charts.evolution.data.datasets.forEach(
+              (dataset) => (dataset.data = []),
+            );
+          }
+
+          timeSlider.value = currentTime;
+          document.getElementById("timeValue").textContent =
+            currentTime.toFixed(1);
+
+          updateEvolution();
+
+          // Add data to evolution chart
+          const probs = [
+            parseFloat(document.getElementById("prob-1").textContent),
+            parseFloat(document.getElementById("prob0").textContent),
+            parseFloat(document.getElementById("prob1").textContent),
+          ];
+
+          charts.evolution.data.labels.push(currentTime.toFixed(1));
+          charts.evolution.data.datasets[0].data.push(probs[0]);
+          charts.evolution.data.datasets[1].data.push(probs[1]);
+          charts.evolution.data.datasets[2].data.push(probs[2]);
+
+          // Keep only last 50 points
+          if (charts.evolution.data.labels.length > 50) {
+            charts.evolution.data.labels.shift();
+            charts.evolution.data.datasets.forEach((dataset) =>
+              dataset.data.shift(),
+            );
+          }
+
+          charts.evolution.update("none");
+
+          currentTime += timeStep;
+        }, 100);
+      }
+
+      function stopEvolution() {
+        isPlaying = false;
+        document.getElementById("playBtn").innerHTML = "▶️ Play";
+
+        if (evolutionAnimation) {
+          clearInterval(evolutionAnimation);
+          evolutionAnimation = null;
+        }
+      }
+
+      function resetEvolution() {
+        stopEvolution();
+        document.getElementById("time").value = 0;
+        document.getElementById("timeValue").textContent = "0.0";
+
+        charts.evolution.data.labels = [];
+        charts.evolution.data.datasets.forEach(
+          (dataset) => (dataset.data = []),
+        );
+        charts.evolution.update("none");
+
+        updateQuantumState();
+      }
+
+      function generateCreativeEnergyLandscape() {
+        const ctx = document.getElementById("energyLandscape").getContext("2d");
+
+        // Create a heatmap-style visualization
+        const width = 400;
+        const height = 300;
+        const imageData = ctx.createImageData(width, height);
+
+        let maxEnergy = 0;
+        const energyValues = [];
+
+        // Calculate energy landscape
+        for (let y = 0; y < height; y++) {
+          energyValues[y] = [];
+          for (let x = 0; x < width; x++) {
+            const deltaU1 = (x - width / 2) / (width / 4);
+            const deltaU2 = (y - height / 2) / (height / 4);
+            const deltaU = Math.sqrt(deltaU1 * deltaU1 + deltaU2 * deltaU2);
+
+            // Vary parameters for interesting landscape
+            const sigmaC = 1.0 + 0.3 * Math.sin(deltaU1);
+            const gamma = 0.5 + 0.2 * Math.cos(deltaU2);
+
+            const energy = BoundaryCreativeEnergy.calculate(
+              sigmaC,
+              gamma,
+              0.3,
+              0.2,
+              deltaU,
+            );
+            energyValues[y][x] = energy;
+            maxEnergy = Math.max(maxEnergy, energy);
+          }
+        }
+
+        // Convert to colors
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const energy = energyValues[y][x];
+            const normalized = energy / maxEnergy;
+
+            const pixelIndex = (y * width + x) * 4;
+
+            // Plasma-like colormap
+            const r = Math.floor(255 * Math.sin(normalized * Math.PI));
+            const g = Math.floor(255 * Math.sin(normalized * Math.PI + 2));
+            const b = Math.floor(255 * Math.sin(normalized * Math.PI + 4));
+
+            imageData.data[pixelIndex] = Math.abs(r);
+            imageData.data[pixelIndex + 1] = Math.abs(g);
+            imageData.data[pixelIndex + 2] = Math.abs(b);
+            imageData.data[pixelIndex + 3] = 255;
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        // Add contour lines
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+        ctx.lineWidth = 1;
+
+        const contourLevels = [0.2, 0.4, 0.6, 0.8];
+        contourLevels.forEach((level) => {
+          const threshold = level * maxEnergy;
+          ctx.beginPath();
+
           // Simple contour tracing (simplified)
           for (let y = 1; y < height - 1; y += 5) {
             for (let x = 1; x < width - 1; x += 5) {
@@ -1042,11 +1627,30 @@
                 })),
                 backgroundColor: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#ffa726'],
                 borderColor: ['#ff5252', '#26a69a', '#1e88e5', '#ff9800'],
+        const navCtx = document
+          .getElementById("navigationChart")
+          .getContext("2d");
+        charts.navigation = new Chart(navCtx, {
+          type: "scatter",
+          data: {
+            datasets: [
+              {
+                label: "Consciousness States",
+                data: Object.entries(consciousnessStates).map(
+                  ([name, pos]) => ({
+                    x: pos[0],
+                    y: pos[1],
+                    label: name,
+                  }),
+                ),
+                backgroundColor: ["#ff6b6b", "#4ecdc4", "#45b7d1", "#ffa726"],
+                borderColor: ["#ff5252", "#26a69a", "#1e88e5", "#ff9800"],
                 borderWidth: 2,
                 pointRadius: 8,
               },
               {
                 label: 'Navigation Paths',
+                label: "Navigation Paths",
                 data: [
                   { x: 2.0, y: -1.5 },
                   { x: 0.0, y: 0.0 }, // Anxious to Calm
@@ -1057,6 +1661,8 @@
                 ],
                 borderColor: '#9c27b0',
                 backgroundColor: 'rgba(156, 39, 176, 0.1)',
+                borderColor: "#9c27b0",
+                backgroundColor: "rgba(156, 39, 176, 0.1)",
                 borderWidth: 2,
                 pointRadius: 0,
                 showLine: true,
@@ -1072,12 +1678,14 @@
                 title: {
                   display: true,
                   text: 'Consciousness Dimension 1',
+                  text: "Consciousness Dimension 1",
                 },
               },
               y: {
                 title: {
                   display: true,
                   text: 'Consciousness Dimension 2',
+                  text: "Consciousness Dimension 2",
                 },
               },
             },
@@ -1087,6 +1695,11 @@
                   label: function (context) {
                     if (context.dataset.label === 'Consciousness States') {
                       return context.parsed.label || `(${context.parsed.x}, ${context.parsed.y})`;
+                    if (context.dataset.label === "Consciousness States") {
+                      return (
+                        context.parsed.label ||
+                        `(${context.parsed.x}, ${context.parsed.y})`
+                      );
                     }
                     return `(${context.parsed.x}, ${context.parsed.y})`;
                   },
@@ -1103,11 +1716,20 @@
           'Calm→Focused',
           'Focused→Creative',
           'Anxious→Creative',
+        const capCtx = document
+          .getElementById("capabilityChart")
+          .getContext("2d");
+        const transitions = [
+          "Anxious→Calm",
+          "Calm→Focused",
+          "Focused→Creative",
+          "Anxious→Creative",
         ];
         const capabilityRatios = [1.2, 0.8, 1.5, 2.1]; // Example values
 
         charts.capability = new Chart(capCtx, {
           type: 'bar',
+          type: "bar",
           data: {
             labels: transitions,
             datasets: [
@@ -1121,6 +1743,15 @@
                   'rgba(255, 167, 38, 0.7)',
                 ],
                 borderColor: ['#ff5252', '#26a69a', '#1e88e5', '#ff9800'],
+                label: "Capability Ratio",
+                data: capabilityRatios,
+                backgroundColor: [
+                  "rgba(255, 107, 107, 0.7)",
+                  "rgba(78, 205, 196, 0.7)",
+                  "rgba(69, 183, 209, 0.7)",
+                  "rgba(255, 167, 38, 0.7)",
+                ],
+                borderColor: ["#ff5252", "#26a69a", "#1e88e5", "#ff9800"],
                 borderWidth: 2,
               },
             ],
@@ -1133,6 +1764,7 @@
                 title: {
                   display: true,
                   text: 'Capability Ratio',
+                  text: "Capability Ratio",
                 },
                 beginAtZero: true,
               },
@@ -1147,6 +1779,13 @@
 
         // Visual feedback
         const resultElement = document.createElement('div');
+
+      // Quantum measurement simulation
+      function performMeasurement() {
+        const result = currentState.measure();
+
+        // Visual feedback
+        const resultElement = document.createElement("div");
         resultElement.style.cssText = `
                 position: fixed;
                 top: 50%;
@@ -1165,6 +1804,7 @@
 
         // Add CSS animation
         const style = document.createElement('style');
+        const style = document.createElement("style");
         style.textContent = `
                 @keyframes measurementPop {
                     0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
@@ -1249,6 +1889,83 @@
         for (let i = 0; i < probabilities.length; i++) {
           if (probabilities[i] > 0) {
             kl_div += probabilities[i] * Math.log(probabilities[i] / uniform[i]);
+
+        resultElement.textContent = `Measured: |${result}⟩`;
+        document.body.appendChild(resultElement);
+
+        setTimeout(() => {
+          document.body.removeChild(resultElement);
+          document.head.removeChild(style);
+        }, 1000);
+      }
+
+      // Add measurement button functionality
+      function addMeasurementButton() {
+        const measureBtn = document.createElement("button");
+        measureBtn.textContent = "🎯 Measure State";
+        measureBtn.className = "btn";
+        measureBtn.style.margin = "10px";
+        measureBtn.onclick = performMeasurement;
+
+        const evolutionControls = document.querySelector(".evolution-controls");
+        evolutionControls.appendChild(measureBtn);
+      }
+
+      // Ternary logic gate testing
+      function testTernaryLogic() {
+        const gates = TernaryLogicGates;
+        const testResults = [];
+
+        for (let a of [-1, 0, 1]) {
+          for (let b of [-1, 0, 1]) {
+            testResults.push({
+              a: a,
+              b: b,
+              tand: gates.TAND(a, b),
+              tor: gates.TOR(a, b),
+              tnot_a: gates.TNOT(a),
+            });
+          }
+        }
+
+        console.log("Ternary Logic Gate Results:", testResults);
+        return testResults;
+      }
+
+      // Enhanced consciousness scoring
+      function updateConsciousnessMetrics() {
+        const state = currentState;
+        const probs = state.probabilities;
+
+        // Advanced metrics
+        const entropy = state.vonNeumannEntropy;
+        const purity = state.purity;
+
+        // Information integration (simplified Φ)
+        const phi = calculatePhi(probs);
+
+        // Global workspace integration
+        const globalIntegration = calculateGlobalIntegration(probs);
+
+        // Update display with enhanced metrics
+        document.getElementById("consciousness").textContent = (
+          0.3 * entropy +
+          0.25 * phi +
+          0.25 * globalIntegration +
+          0.2 * (1 - purity)
+        ).toFixed(3);
+      }
+
+      function calculatePhi(probabilities) {
+        // Simplified integrated information measure
+        // Based on the KL divergence between full system and parts
+        const uniform = [1 / 3, 1 / 3, 1 / 3];
+        let kl_div = 0;
+
+        for (let i = 0; i < probabilities.length; i++) {
+          if (probabilities[i] > 0) {
+            kl_div +=
+              probabilities[i] * Math.log(probabilities[i] / uniform[i]);
           }
         }
 
@@ -1278,6 +1995,18 @@
           slider.value = param === 'sigma_c' ? '1.0' : '0.5';
 
           slider.addEventListener('input', updateCreativeEnergyParams);
+        const params = ["sigma_c", "gamma_param", "chi", "lambda"];
+
+        params.forEach((param) => {
+          const slider = document.createElement("input");
+          slider.type = "range";
+          slider.id = param;
+          slider.min = "0";
+          slider.max = "2";
+          slider.step = "0.1";
+          slider.value = param === "sigma_c" ? "1.0" : "0.5";
+
+          slider.addEventListener("input", updateCreativeEnergyParams);
 
           // Add to controls (if there was space)
         });
@@ -1336,6 +2065,29 @@
               break;
             case '4':
               setPreset('meditative');
+        document.addEventListener("keydown", (e) => {
+          switch (e.key) {
+            case " ":
+              e.preventDefault();
+              toggleEvolution();
+              break;
+            case "r":
+              resetEvolution();
+              break;
+            case "m":
+              performMeasurement();
+              break;
+            case "1":
+              setPreset("focused");
+              break;
+            case "2":
+              setPreset("balanced");
+              break;
+            case "3":
+              setPreset("creative");
+              break;
+            case "4":
+              setPreset("meditative");
               break;
           }
         });
@@ -1343,6 +2095,40 @@
 
       // Initialize everything when the page loads
       document.addEventListener('DOMContentLoaded', () => {
+      // Basic runtime self-test for math.js and Chart.js
+      function runtimeSelfCheck() {
+        let ok = true;
+        try {
+          if (!window.math || math.add(1, 1) !== 2)
+            throw new Error("math.js malfunction");
+          console.log("%cmath.js ok", "color: green");
+        } catch (err) {
+          ok = false;
+          console.error("%cmath.js failed: " + err, "color: red");
+        }
+        try {
+          if (!window.Chart) throw new Error("Chart.js not loaded");
+          const c = document.createElement("canvas");
+          const ctx = c.getContext("2d");
+          new Chart(ctx, {
+            type: "bar",
+            data: { labels: ["x"], datasets: [{ data: [1] }] },
+            options: { animation: false },
+          });
+          console.log("%cChart.js ok", "color: green");
+        } catch (err) {
+          ok = false;
+          console.error("%cChart.js failed: " + err, "color: red");
+        }
+        if (ok) {
+          console.log("%cRuntime self-check passed", "color: green");
+        } else {
+          console.log("%cRuntime self-check failed", "color: red");
+        }
+      }
+
+      // Initialize everything when the page loads
+      document.addEventListener("DOMContentLoaded", () => {
         initializeApp();
         addMeasurementButton();
         setupKeyboardShortcuts();
@@ -1357,6 +2143,17 @@
         console.log('  R: Reset evolution');
         console.log('  M: Measure quantum state');
         console.log('  1-4: Set presets (Focused, Balanced, Creative, Meditative)');
+        // Verify runtime libraries
+        runtimeSelfCheck();
+
+        console.log("🧠 Ternary Quantum Consciousness Framework Initialized!");
+        console.log("Keyboard shortcuts:");
+        console.log("  Space: Play/Pause evolution");
+        console.log("  R: Reset evolution");
+        console.log("  M: Measure quantum state");
+        console.log(
+          "  1-4: Set presets (Focused, Balanced, Creative, Meditative)",
+        );
       });
 
       function addTooltips() {
@@ -1366,6 +2163,11 @@
           purity: 'Quantum purity indicates how "mixed" the state is',
           uncertainty: 'Three-way uncertainty product ΔA·ΔB·ΔC',
           consciousness: 'Integrated consciousness score combining multiple measures',
+          entropy: "Von Neumann entropy measures quantum uncertainty",
+          purity: 'Quantum purity indicates how "mixed" the state is',
+          uncertainty: "Three-way uncertainty product ΔA·ΔB·ΔC",
+          consciousness:
+            "Integrated consciousness score combining multiple measures",
         };
 
         Object.entries(tooltips).forEach(([id, text]) => {
@@ -1397,6 +2199,17 @@
         const link = document.createElement('a');
         link.href = url;
         link.download = 'consciousness_state_data.json';
+          framework: "Ternary Quantum Consciousness",
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "consciousness_state_data.json";
         link.click();
 
         URL.revokeObjectURL(url);
@@ -1411,6 +2224,13 @@
         exportBtn.onclick = exportData;
 
         const evolutionControls = document.querySelector('.evolution-controls');
+        const exportBtn = document.createElement("button");
+        exportBtn.textContent = "💾 Export Data";
+        exportBtn.className = "btn";
+        exportBtn.style.margin = "10px";
+        exportBtn.onclick = exportData;
+
+        const evolutionControls = document.querySelector(".evolution-controls");
         evolutionControls.appendChild(exportBtn);
       }
 
@@ -1671,4 +2491,6 @@
 /// ==== CONSOLE-ONLY CHECKS END ====
 </script>
 </body>
+    </script>
+  </body>
 </html>
