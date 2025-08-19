@@ -46,6 +46,10 @@ const routes = {
   '/inbox': <AgentInbox />,
   '/observability': <Observability />,
 };
+    '/math': <MathLab />,
+    '/deploys': <Deploys />,
+    '/metrics': <Metrics />,
+  };
 
 export default function Router() {
   const [path, setPath] = useState(window.location.pathname);
