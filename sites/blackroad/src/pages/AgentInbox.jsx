@@ -20,4 +20,11 @@ export default function AgentInbox(){
       <p className="text-xs opacity-60 mt-3">Add a message via ChatOps: <code>/say Hello team</code></p>
     </div>
   )
+export default function AgentInbox() {
+  return (
+    <div className="card">
+      <h2 className="text-xl font-semibold mb-3">Agent Inbox</h2>
+      <p className="text-sm">No messages.</p>
+    </div>
+  );
 }

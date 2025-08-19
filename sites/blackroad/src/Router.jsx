@@ -17,6 +17,8 @@ import Metrics from './pages/Metrics.jsx';
 import ExperimentsDash from './pages/ExperimentsDash.jsx';
 import News from './pages/News.jsx';
 import Deploys from './pages/Deploys.jsx';
+import AgentInbox from './pages/AgentInbox.jsx';
+import Observability from './pages/Observability.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Metrics from './pages/Metrics.jsx';
 import AgentInbox from './pages/AgentInbox.jsx';
@@ -41,6 +43,8 @@ const routes = {
   '/deploys': <Deploys />,
   '/inbox': <AgentInbox />,
   '/deploys': <Deploys />,
+  '/inbox': <AgentInbox />,
+  '/observability': <Observability />,
 };
 
 export default function Router() {

@@ -18,6 +18,8 @@ const links = [
   { to: '/deploys', label: 'Deploys' },
   { to: '/inbox', label: 'Inbox' },
   { to: '/deploys', label: 'Deploys' },
+  { to: '/inbox', label: 'Inbox' },
+  { to: '/observability', label: 'Observability' },
 ];
 
 function navigate(e, to) {
@@ -38,7 +40,7 @@ export default function Layout({ children }) {
       <div className="max-w-5xl mx-auto p-6">
         <header className="py-8">
           <h1 className="text-4xl font-bold">blackroad.io</h1>
-          <nav className="mt-4 flex flex-wrap gap-4">
+          <nav className="mt-4 flex flex-wrap gap-2 text-sm items-center">
             {links.map((l) => (
               <a key={l.to} href={l.to} onClick={(e) => navigate(e, l.to)} className="underline">
                 {l.label}

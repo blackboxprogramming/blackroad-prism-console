@@ -30,8 +30,14 @@ repos:
     hooks:
       - id: gitleaks
         args: ["protect", "--staged", "--redact"]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.3.3
     hooks:
       - id: prettier
         additional_dependencies: []
+        additional_dependencies: ['prettier@3.3.3']
