@@ -1,6 +1,8 @@
 name: OSSF Scorecard
 on:
   schedule: [ { cron: "0 7 * * 1" } ]
+  push: { branches: [main] }
+  schedule: [{ cron: '0 8 * * 1' }]
   workflow_dispatch:
 permissions:
   security-events: write
@@ -17,3 +19,5 @@ jobs:
           publish_results: true
       - uses: github/codeql-action/upload-sarif@v3
         with: { sarif_file: results.sarif }
+        with:
+          sarif_file: results.sarif

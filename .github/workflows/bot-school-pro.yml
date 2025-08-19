@@ -3,14 +3,14 @@ on:
   workflow_dispatch:
     inputs:
       lessons:
-        description: "Comma-separated lesson IDs (optional)"
+        description: 'Comma-separated lesson IDs (optional)'
         required: false
       count:
-        description: "Random pick count if no IDs (1-10)"
+        description: 'Random pick count if no IDs (1-10)'
         required: false
-        default: "5"
+        default: '5'
   schedule:
-    - cron: "17 3 * * 5" # Fridays
+    - cron: '17 3 * * 5' # Fridays
 permissions:
   contents: write
   pull-requests: write

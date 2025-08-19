@@ -6,6 +6,8 @@ on:
     - cron: '0 2 * * 1'
     - cron: '0 2 * * 1'  # Mondays 02:00 UTC
 
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
 permissions:
   contents: read
   security-events: write
@@ -14,6 +16,8 @@ jobs:
   analyze:
     runs-on: ubuntu-latest
     strategy: { language: [ 'javascript', 'python' ] }
+    strategy:
+      matrix: { language: ['javascript'] }
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3
@@ -36,3 +40,8 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@df559355d593797519d70b90fc8edd5db049e7a2
+          build-mode: none
+          config-file: ./.github/codeql/config.yml
+          queries: security-and-quality
+      - uses: github/codeql-action/analyze@v3
+        with: { category: '/language:${{ matrix.language }}' }

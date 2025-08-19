@@ -9,3 +9,9 @@ command -v gitleaks >/dev/null 2>&1 && gitleaks protect --staged --redact || tru
 # Quick, quiet pre-commit polish (never hard-fail CI)
 npm run format --if-present
 npm run lint --if-present || true
+#!/usr/bin/env bash
+. "$(dirname "$0")/_/husky.sh" 2>/dev/null || true
+npx --yes prettier -c . || npx --yes prettier -w .
+npx --yes eslint . --ext .js,.jsx,.ts,.tsx || true
+# lightweight secret scan (skip-safe)
+( git diff --cached | grep -E -i 'AKIA|SECRET|PRIVATE KEY' && echo '⚠️ possible secret in staged diff' ) || true

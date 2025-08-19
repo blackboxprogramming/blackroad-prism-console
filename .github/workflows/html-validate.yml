@@ -14,7 +14,7 @@ jobs:
           [ -f "$f" ] && echo "ok=1" >> $GITHUB_OUTPUT || echo "ok=0" >> $GITHUB_OUTPUT
       - uses: Cyb3r-Jak3/html5validator-action@v7
         if: steps.chk.outputs.ok == '1'
-        with: { root: ., paths: apps/quantum/ternary_consciousness_v3.html, blacklist: node_modules }
+        with:
+          { root: ., paths: apps/quantum/ternary_consciousness_v3.html, blacklist: node_modules }
       - run: echo "ℹ️ HTML file missing, skipping." >> $GITHUB_STEP_SUMMARY
         if: steps.chk.outputs.ok != '1'
-
