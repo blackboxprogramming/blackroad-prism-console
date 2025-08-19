@@ -1,0 +1,12 @@
+# <!-- FILE: /srv/blackroads/elt/dbt/dbt_project.yml -->
+name: 'blackroads'
+version: '1.0'
+config-version: 2
+profile: 'blackroads'
+
+model-paths: ['models']
+seed-paths: ['seeds']
+
+models:
+  blackroads:
+    +schema: core

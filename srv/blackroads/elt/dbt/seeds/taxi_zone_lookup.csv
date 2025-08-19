@@ -1,0 +1,6 @@
+LocationID,Borough,Zone,service_zone
+100,Bronx,Parkchester,Green
+142,Manhattan,Times Sq/Theatre District,Yellow
+236,Brooklyn,Sunset Park West,Boro Zone
+237,Brooklyn,Sunset Park East,Boro Zone
+249,Queens,Jamaica Bay,Yellow

@@ -1,0 +1,30 @@
+# <!-- FILE: /srv/blackroads/elt/dbt/models/schema.yml -->
+version: 2
+
+models:
+  - name: stg_trips
+    columns:
+      - name: vendorid
+        tests:
+          - not_null
+      - name: pickup_datetime
+        tests:
+          - not_null
+  - name: dim_zone
+    columns:
+      - name: zone_id
+        tests:
+          - not_null
+          - unique
+      - name: service_zone
+        tests:
+          - accepted_values:
+              values: ['Yellow', 'Green', 'Boro Zone', 'Airports']
+  - name: fact_trips
+    columns:
+      - name: trip_date
+        tests:
+          - not_null
+      - name: zone_id
+        tests:
+          - not_null

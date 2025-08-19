@@ -1,0 +1,10 @@
+# <!-- FILE: /srv/blackroads/elt/pipelines/requirements.txt -->
+dlt==0.4.7
+pandas==2.1.4
+psycopg2-binary==2.9.9
+python-dotenv==1.0.1
+prefect==2.16.5
+great-expectations==0.18.12
+pydantic==2.5.3
+requests==2.31.0
+ruff==0.1.5

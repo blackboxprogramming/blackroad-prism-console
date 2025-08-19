@@ -1,0 +1,30 @@
+# <!-- FILE: /srv/blackroads/elt/great_expectations/great_expectations.yml -->
+datasources:
+  postgres_default:
+    class_name: Datasource
+    execution_engine:
+      class_name: SqlAlchemyExecutionEngine
+      connection_string: postgresql+psycopg2://{{ env_var('POSTGRES_USER') }}:{{ env_var('POSTGRES_PASSWORD') }}@{{ env_var('POSTGRES_HOST') }}:{{ env_var('POSTGRES_PORT') }}/{{ env_var('POSTGRES_DB') }}
+    data_connectors:
+      default_runtime_data_connector_name:
+        class_name: RuntimeDataConnector
+        assets:
+          raw_trips:
+            class_name: RuntimeAsset
+            batch_identifiers:
+              - default_identifier_name
+
+expectations_store_name: expectations_store
+expectations_store:
+  class_name: InMemoryStore
+
+validation_results_store_name: validation_results_store
+validation_results_store:
+  class_name: InMemoryStore
+
+checkpoint_store_name: checkpoint_store
+checkpoint_store:
+  class_name: InMemoryStore
+
+anonymous_usage_statistics:
+  enabled: false
