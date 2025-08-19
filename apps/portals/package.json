@@ -12,7 +12,13 @@
     "next": "14.2.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "@radix-ui/react-icons": "1.3.0"
+    "@radix-ui/react-icons": "1.3.0",
+    "ai": "latest",
+    "@ai-sdk/openai": "latest",
+    "@ai-sdk/openai-compatible": "latest",
+    "@ai-sdk/react": "latest",
+    "zod": "latest",
+    "ollama-ai-provider-v2": "latest"
   },
   "devDependencies": {
     "autoprefixer": "10.4.16",
