@@ -114,6 +114,7 @@ patch-runtime:
      -v perf="<script>$$(sed -e 's/[\/&]/\\&/g' $(SCRIPTS)/perf_budget_snippet.js)</script>" \
      -v cons="<script>$$(sed -e 's/[\/&]/\\&/g' $(SCRIPTS)/console_only_snippet.js)</script>" \
      '{gsub(/<\/body>/, badge "\n" perf "\n" cons "\n<\/body>"); print;}' $(HTML) > $(HTML).tmp && mv $(HTML).tmp $(HTML) && echo "Patched.")
+     '{gsub(/<\/body>/, badge "\n" perf "\n" cons "\n</body>"); print;}' $(HTML) > $(HTML).tmp && mv $(HTML).tmp $(HTML) && echo "Patched.")
 @git add $(HTML)
 
 sri:

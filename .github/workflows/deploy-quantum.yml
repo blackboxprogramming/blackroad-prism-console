@@ -83,3 +83,6 @@ jobs:
         run: |
           curl -fsS "https://${{ secrets.SITE_DOMAIN }}/api/health.json" | tee /tmp/health.json
           node -e "const h=require('fs').readFileSync('/tmp/health.json','utf8'); const j=JSON.parse(h); if(j.status!=='ok') {console.error('Bad status', j); process.exit(1)}; console.log('Health OK:', j)"
+        run: |
+          curl -fsS "https://${{ secrets.SITE_DOMAIN }}/api/health/health.json" | tee /tmp/health.json
+          node -e "const j=require('fs').readFileSync('/tmp/health.json','utf8'); const o=JSON.parse(j); if(o.status!=='ok'){process.exit(1)}; console.log('Health OK', o)"
