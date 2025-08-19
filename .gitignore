@@ -25,3 +25,5 @@ codex/runtime/
 
 !opt/blackroad/tdb/.env
 node_modules/
+node_modules/
+**/node_modules/
