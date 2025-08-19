@@ -25,4 +25,7 @@ createRoot(document.getElementById('root')).render(
     <Router />
   </ErrorBoundary>
 );
+
+telemetryInit()
+
 createRoot(document.getElementById('root')).render(<RouterProvider router={router} />)
