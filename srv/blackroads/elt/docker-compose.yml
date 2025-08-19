@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  blackroads-postgres:
+    image: postgres:15
+    container_name: blackroads-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      TZ: America/Chicago
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pgdata_blackroads:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    secrets:
+      - postgres_password
+    networks:
+      - blackroads_net
+
+  blackroads-prefect:
+    image: prefecthq/prefect:2.14.10-python3.11
+    container_name: blackroads-prefect
+    command: prefect server start --host 0.0.0.0 --port 4200
+    environment:
+      PREFECT_UI_API_URL: http://blackroads-prefect:4200/api
+      TZ: America/Chicago
+    healthcheck:
+      test: ['CMD', 'prefect', 'version']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    ports:
+      - '4200:4200'
+    networks:
+      - blackroads_net
+
+  blackroads-prefect-agent:
+    image: prefecthq/prefect:2.14.10-python3.11
+    container_name: blackroads-prefect-agent
+    depends_on:
+      - blackroads-prefect
+    environment:
+      PREFECT_API_URL: http://blackroads-prefect:4200/api
+      TZ: America/Chicago
+    command: prefect agent start -q default
+    networks:
+      - blackroads_net
+
+  blackroads-pipelines:
+    build:
+      context: .
+      dockerfile: docker/pipelines.Dockerfile
+    image: blackroads-pipelines:latest
+    container_name: blackroads-pipelines
+    env_file: .env
+    volumes:
+      - .:/srv/blackroads/elt
+    depends_on:
+      - blackroads-postgres
+    networks:
+      - blackroads_net
+
+  blackroads-dbt:
+    build:
+      context: .
+      dockerfile: docker/pipelines.Dockerfile
+    image: blackroads-dbt:latest
+    container_name: blackroads-dbt
+    env_file: .env
+    working_dir: /srv/blackroads/elt/dbt
+    command: tail -f /dev/null
+    volumes:
+      - .:/srv/blackroads/elt
+    depends_on:
+      - blackroads-postgres
+    networks:
+      - blackroads_net
+
+  blackroads-ge:
+    build:
+      context: .
+      dockerfile: docker/pipelines.Dockerfile
+    image: blackroads-ge:latest
+    container_name: blackroads-ge
+    env_file: .env
+    volumes:
+      - .:/srv/blackroads/elt
+    depends_on:
+      - blackroads-postgres
+    networks:
+      - blackroads_net
+
+  blackroads-metabase:
+    image: metabase/metabase:v0.46.6
+    container_name: blackroads-metabase
+    depends_on:
+      - blackroads-postgres
+    environment:
+      TZ: America/Chicago
+    ports:
+      - '3000:3000'
+    networks:
+      - blackroads_net
+
+networks:
+  blackroads_net:
+    driver: bridge
+
+volumes:
+  pgdata_blackroads:
+
+secrets:
+  postgres_password:
+    file: docker/secrets/postgres_password.txt
