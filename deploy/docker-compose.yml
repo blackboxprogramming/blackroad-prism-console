@@ -1,0 +1,190 @@
+version: "3.9"
+
+services:
+  traefik:
+    image: "traefik:v2.10"
+    command:
+      - "--providers.docker=true"
+      - "--entryPoints.web.address=:80"
+    ports:
+      - "80:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks: [internal]
+
+  ollama:
+    image: "ollama/ollama:0.1.26"
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "ps"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks: [internal]
+
+  qdrant:
+    image: "qdrant/qdrant:v1.10.0"
+    volumes:
+      - qdrant-data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks: [internal]
+
+  postgres:
+    image: "postgres:16-alpine"
+    environment:
+      POSTGRES_DB: lucidia
+      POSTGRES_USER: lucidia
+      POSTGRES_PASSWORD: lucidia
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lucidia -d lucidia"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks: [internal]
+
+  meilisearch:
+    image: "getmeili/meilisearch:v1.7.3"
+    environment:
+      MEILI_MASTER_KEY: "insecure_dev_key"
+    volumes:
+      - meili-data:/meili_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks: [internal]
+
+  minio:
+    image: "quay.io/minio/minio:RELEASE.2024-01-18T22-31-29Z"
+    command: ["server", "/data"]
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    ports:
+      - "9000:9000"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks: [internal]
+
+  keycloak:
+    image: "quay.io/keycloak/keycloak:24.0.3"
+    command: ["start-dev"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks: [internal]
+
+  nats:
+    image: "nats:2.10-alpine"
+    ports:
+      - "4222:4222"
+    healthcheck:
+      test: ["CMD", "nats-server", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks: [internal]
+
+  vault:
+    image: "hashicorp/vault:1.15.3"
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+    cap_add: ["IPC_LOCK"]
+    command: ["server", "-dev"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8200/v1/sys/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks: [internal]
+
+  prometheus:
+    image: "prom/prometheus:v2.49.1"
+    volumes:
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    networks: [internal]
+
+  grafana:
+    image: "grafana/grafana:10.3.1"
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks: [internal]
+
+  loki:
+    image: "grafana/loki:2.9.5"
+    command: ["-config.file=/etc/loki/config.yml"]
+    volumes:
+      - loki-data:/loki
+    networks: [internal]
+
+  nexus:
+    image: "sonatype/nexus3:3.68.0"
+    ports:
+      - "8081:8081"
+    volumes:
+      - nexus-data:/nexus-data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks: [internal]
+
+  gitea:
+    image: "gitea/gitea:1.21.4"
+    environment:
+      USER_UID: 1000
+      USER_GID: 1000
+    ports:
+      - "3001:3000"
+      - "222:22"
+    volumes:
+      - gitea-data:/data
+    networks: [internal]
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  ollama-data:
+  qdrant-data:
+  postgres-data:
+  meili-data:
+  minio-data:
+  prometheus-data:
+  grafana-data:
+  loki-data:
+  nexus-data:
+  gitea-data:

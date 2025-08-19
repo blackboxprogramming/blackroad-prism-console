@@ -1,0 +1,9 @@
+FROM nvcr.io/nvidia/l4t-pytorch:r35.2.1-pth2.0-py3
+WORKDIR /app
+RUN apt-get update && apt-get install -y git ffmpeg libsm6 libxext6 && rm -rf /var/lib/apt/lists/*
+RUN pip3 install --no-cache-dir fastapi uvicorn[standard] pillow pydantic==1.10.14 einops
+RUN mkdir -p /app/vendor && \
+    git clone --depth=1 https://github.com/rosinality/glow-pytorch /app/vendor/glow-pytorch
+COPY glow_agent /app/glow_agent
+ENV TORCH_HOME=/app/.torch
+ENV PYTHONUNBUFFERED=1

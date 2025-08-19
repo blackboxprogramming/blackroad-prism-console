@@ -10,9 +10,18 @@ const sha = process.argv[3] || process.env.GITHUB_SHA || '';
 const ref = process.argv[4] || '';
 const file = path.join(process.cwd(), 'sites', 'blackroad', 'public', 'deploys.json');
 let j = { history: [] };
+if (fs.existsSync(file)) {
+  j = JSON.parse(fs.readFileSync(file, 'utf8'));
+} catch {
+  /* ignore errors when file is missing or invalid JSON */
+}
+} catch {}
+}
 try {
   j = JSON.parse(fs.readFileSync(file, 'utf8'));
-} catch {}
+} catch {
+  // Ignore malformed or missing deploy history file
+}
 if (!Array.isArray(j.history)) j.history = [];
 j.history.unshift({ ts: new Date().toISOString(), channel, sha, ref });
 j.history = j.history.slice(0, 25);

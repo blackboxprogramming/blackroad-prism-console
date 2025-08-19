@@ -1,0 +1,4 @@
+---
+- name: Configure WireGuard mesh (placeholder)
+  debug:
+    msg: "WireGuard configuration would be applied here"

@@ -1,0 +1,7 @@
+scenario: simple_tag
+episodes: 3
+seed: null
+render: off
+policy: random
+log_dir: /var/log/blackroad/mpe
+meta_dir: /opt/blackroad/lucidia/memory/mpe

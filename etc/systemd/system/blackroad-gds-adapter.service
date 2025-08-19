@@ -1,0 +1,18 @@
+[Unit]
+Description=BlackRoad GDS Adapter
+After=network.target lucidia-fprime-bridge.service
+
+[Service]
+User=lucidia
+Group=lucidia
+ExecStart=/usr/bin/env python3 /opt/blackroad/gds_adapter/main.py
+Restart=on-failure
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=yes
+AmbientCapabilities=
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

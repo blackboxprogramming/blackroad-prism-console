@@ -1,0 +1,8 @@
+addReviewers: true
+addAssignees: author
+reviewers:
+  - blackboxprogramming
+addAssignees: false
+reviewers:
+  - blackroad-bot
+numberOfReviewers: 1

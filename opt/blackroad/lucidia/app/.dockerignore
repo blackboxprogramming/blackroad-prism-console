@@ -1,0 +1,4 @@
+# /opt/blackroad/lucidia/app/.dockerignore
+__pycache__
+.git
+*.pyc

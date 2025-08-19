@@ -1,0 +1,4 @@
+NASA Open Source Agreement Version 1.3
+
+The full license text is available from NASA and Open Source Initiative websites.
+A copy was not bundled here due to environment constraints.

@@ -1,0 +1,21 @@
+pipeline:
+  lint:
+    image: python:3.11-slim
+    commands:
+      - echo lint
+  test:
+    image: python:3.11-slim
+    commands:
+      - echo test
+  build:
+    image: docker:24
+    commands:
+      - echo build image
+  sign:
+    image: alpine:3.19
+    commands:
+      - echo sign
+  push:
+    image: docker:24
+    commands:
+      - echo push to registry

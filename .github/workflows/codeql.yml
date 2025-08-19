@@ -1,23 +1,94 @@
-name: CodeQL
+name: Security • CodeQL
 on:
-  push: { branches: [ main ] }
-  pull_request: { branches: [ main ] }
+  push:
+    branches: [$default-branch]
+  pull_request:
+    branches: [$default-branch]
+  schedule:
+    - cron: '0 2 * * 1'
+    - cron: '0 2 * * 1'  # Mondays 02:00 UTC
+
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+    - cron: "0 9 * * 1"
+name: CodeQL (flag-aware, advisory)
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule: [{ cron: '0 3 * * 1' }]
 permissions:
-  security-events: write
   contents: read
+  security-events: write
 jobs:
+  flags:
+    uses: ./.github/workflows/flags.yml
   analyze:
+    name: CodeQL
     runs-on: ubuntu-latest
+    strategy: { language: [ 'javascript', 'python' ] }
     strategy:
-      matrix: { language: [ 'javascript' ] }
+      matrix: { language: ['javascript'] }
+    needs: flags
+    if: needs.flags.outputs.security_scans == 'true'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: codeql-${{ github.ref }}
+      cancel-in-progress: true
+    strategy: { language: [ 'javascript', 'python', 'cpp' ] }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: github/codeql-action/init@v3
         with:
+          languages: javascript, python, go, java, ruby, csharp, cpp
+          # packs: | 
+          #   codeql/javascript-queries@latest
+      - uses: github/codeql-action/autobuild@v3
+      - uses: github/codeql-action/analyze@v3
+    strategy:
+      matrix:
+        language: [ 'javascript', 'python' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@df559355d593797519d70b90fc8edd5db049e7a2
+        with:
           languages: ${{ matrix.language }}
+          # build-mode: autobuild | manual | none (default autodetect)
+          # build-mode: autobuild
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@df559355d593797519d70b90fc8edd5db049e7a2
           build-mode: none
           config-file: ./.github/codeql/config.yml
           queries: security-and-quality
       - uses: github/codeql-action/analyze@v3
-        with: { category: "/language:${{ matrix.language }}" }
-
+        with: { category: '/language:${{ matrix.language }}' }
+        with:
+          category: "/language:multi"
+# (CodeQL v3 is current.) 
+# Ref: https://github.com/github/codeql-action (latest v3) and advanced setup docs. 
+# (Edit the languages list to what you actually use.)
+#
+name: CodeQL
+on:
+  push: { branches: [ main ] }
+  pull_request: { branches: [ main ] }
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: github/codeql-action/init@v3
+        with: { languages: javascript }
+      - uses: github/codeql-action/analyze@v3
+        with: { languages: javascript }
+      - uses: github/codeql-action/analyze@v3
+        continue-on-error: true
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with: { languages: javascript }
+      - uses: github/codeql-action/analyze@v3

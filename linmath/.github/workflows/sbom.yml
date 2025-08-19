@@ -1,0 +1,11 @@
+name: sbom
+on: [push, workflow_dispatch]
+jobs:
+  syft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anchore/sbom-action@v0.17.5
+        with:
+          format: spdx-json
+          artifact-name: sbom.spdx.json

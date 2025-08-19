@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Lucidia • Chit Chat (BlackRoad)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Inter,
+          Arial;
+      }
+      body {
+        margin: 0;
+        background: #0b0c10;
+        color: #e8e8e8;
+      }
+      header {
+        padding: 16px 20px;
+        background: #111318;
+        border-bottom: 1px solid #1f2230;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      header .badge {
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #1a1d29;
+        border: 1px solid #2b2f42;
+      }
+      .wrap {
+        display: grid;
+        grid-template-columns: 1.4fr 0.6fr;
+        gap: 16px;
+        padding: 16px;
+      }
+      .panel {
+        background: #10131a;
+        border: 1px solid #1d2030;
+        border-radius: 16px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .messages {
+        padding: 16px;
+        overflow: auto;
+        height: calc(100vh - 220px);
+        line-height: 1.45;
+      }
+      .msg {
+        padding: 12px 14px;
+        margin: 8px 0;
+        border-radius: 14px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+      .user {
+        background: #172032;
+        border: 1px solid #24304a;
+      }
+      .assistant {
+        background: #141e26;
+        border: 1px solid #203043;
+      }
+      .controls {
+        padding: 12px;
+        border-top: 1px solid #1f2230;
+        display: flex;
+        gap: 10px;
+      }
+      textarea {
+        flex: 1;
+        background: #0f1320;
+        color: #e6e6e6;
+        border: 1px solid #23304a;
+        border-radius: 12px;
+        padding: 12px;
+        min-height: 60px;
+      }
+      button {
+        background: #2b59ff;
+        color: white;
+        border: 0;
+        padding: 10px 14px;
+        border-radius: 12px;
+        cursor: pointer;
+      }
+      select,
+      input[type='text'] {
+        width: 100%;
+        background: #0f1320;
+        color: #e6e6e6;
+        border: 1px solid #23304a;
+        border-radius: 10px;
+        padding: 10px;
+      }
+      label {
+        font-size: 12px;
+        opacity: 0.8;
+      }
+      .kv {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 12px;
+      }
+      .meta {
+        padding: 12px;
+        border-top: 1px solid #1f2230;
+        font-size: 12px;
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="badge">BlackRoad • Lucidia</div>
+      <div class="badge" id="backend"></div>
+      <div class="badge" id="status">idle</div>
+    </header>
+
+    <div class="wrap">
+      <div class="panel">
+        <div class="messages" id="messages"></div>
+        <div class="controls">
+          <textarea
+            id="input"
+            placeholder="chit chat cadillac… ask or build. Shift+Enter = newline"
+          ></textarea>
+          <button id="send">Send</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="kv">
+          <div>
+            <label>Preset</label>
+            <select id="preset">
+              <option value="codex">codex</option>
+              <option value="lucidia">lucidia</option>
+              <option value="chit_chat">chit_chat</option>
+            </select>
+          </div>
+          <div>
+            <label>Model (backend-specific)</label>
+            <input type="text" id="model" placeholder="phi3:mini (ollama) / llama3.1 (llamacpp)" />
+          </div>
+          <div>
+            <label>Temperature</label>
+            <input type="text" id="temp" value="0.7" />
+          </div>
+          <div>
+            <label>Top-p</label>
+            <input type="text" id="topp" value="0.9" />
+          </div>
+          <div>
+            <label>Max tokens</label>
+            <input type="text" id="maxtok" value="1024" />
+          </div>
+        </div>
+        <div class="meta">
+          <div>
+            GET <code>/health</code> to verify; POST <code>/api/chitchat</code> streams SSE deltas.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const elMsgs = document.getElementById('messages');
+      const elInput = document.getElementById('input');
+      const elSend = document.getElementById('send');
+      const elPreset = document.getElementById('preset');
+      const elModel = document.getElementById('model');
+      const elTemp = document.getElementById('temp');
+      const elTopP = document.getElementById('topp');
+      const elMaxTok = document.getElementById('maxtok');
+      const elBackend = document.getElementById('backend');
+      const elStatus = document.getElementById('status');
+
+      let history = [];
+
+      async function boot() {
+        try {
+          const r = await fetch('/health');
+          const j = await r.json();
+          elBackend.textContent = `${j.backend.backend} • models: ${(j.backend.models || []).slice(0, 3).join(', ') || 'n/a'}`;
+        } catch (e) {
+          elBackend.textContent = 'backend: unknown';
+        }
+      }
+
+      function addMsg(role, content) {
+        const d = document.createElement('div');
+        d.className = 'msg ' + (role === 'user' ? 'user' : 'assistant');
+        d.textContent = content;
+        elMsgs.appendChild(d);
+        elMsgs.scrollTop = elMsgs.scrollHeight;
+      }
+
+      async function send() {
+        const text = elInput.value.trim();
+        if (!text) return;
+        addMsg('user', text);
+        history.push({ role: 'user', content: text });
+        elInput.value = '';
+        elStatus.textContent = 'streaming…';
+
+        const payload = {
+          preset: elPreset.value,
+          messages: history.slice(-20), // last 20 msgs
+          model: elModel.value || undefined,
+          temperature: parseFloat(elTemp.value || '0.7'),
+          top_p: parseFloat(elTopP.value || '0.9'),
+          max_tokens: parseInt(elMaxTok.value || '1024'),
+          stream: true,
+        };
+
+        const res = await fetch('/api/chitchat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let acc = '';
+        let assistantDiv = document.createElement('div');
+        assistantDiv.className = 'msg assistant';
+        elMsgs.appendChild(assistantDiv);
+
+        function flushSSE() {
+          const parts = buffer.split('\n\n');
+          buffer = parts.pop() || '';
+          for (const p of parts) {
+            const lines = p.split('\n');
+            let event = 'delta';
+            let data = '';
+            for (const line of lines) {
+              if (line.startsWith('event:')) event = line.slice(6).trim();
+              if (line.startsWith('data:')) data += line.slice(5).trim();
+            }
+            if (!data) continue;
+            try {
+              const j = JSON.parse(data);
+              if (event === 'delta' && j.content) {
+                acc += j.content;
+                assistantDiv.textContent = acc;
+                elMsgs.scrollTop = elMsgs.scrollHeight;
+              }
+              if (event === 'done') {
+                elStatus.textContent = 'idle';
+                history.push({ role: 'assistant', content: acc });
+              }
+            } catch {}
+          }
+        }
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          flushSSE();
+        }
+        flushSSE();
+      }
+
+      elSend.addEventListener('click', send);
+      elInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          send();
+        }
+      });
+
+      boot();
+    </script>
+  </body>
+</html>

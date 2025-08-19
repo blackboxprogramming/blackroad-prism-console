@@ -1,0 +1,8 @@
+version: '3'
+services:
+  devpi:
+    image: devpi/devpi:6.9.0
+    volumes:
+      - /srv/devpi:/devpi
+    ports:
+      - "3141:3141"
