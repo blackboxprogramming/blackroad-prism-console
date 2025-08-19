@@ -1,0 +1,23 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: lucidia-api
+  namespace: blackroad
+spec:
+  destination:
+    name: lucidia-api
+  sources:
+    - name: blackroad-ui
+      action: allow
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: lucidia-api-canary
+  namespace: blackroad
+spec:
+  destination:
+    name: lucidia-api-canary
+  sources:
+    - name: blackroad-ui
+      action: allow
