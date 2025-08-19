@@ -1,10 +1,26 @@
-
-
-__pycache__/
-.venv/
+# Node
+node_modules/
+dist/
+.cache/
 .env
-*.pyc
-logs/
-data/
-.DS_Store
 
+# Logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Artifacts
+artifacts/
+coverage/
+
+# Project-specific
+repos/
+runtime/
+__pycache__/
+codex/runtime/
+
+!opt/blackroad/tdb/.env
