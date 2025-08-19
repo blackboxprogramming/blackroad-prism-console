@@ -50,3 +50,48 @@ nginx-link:
 nginx-reload:
 	sudo nginx -t
 	sudo systemctl reload nginx
+
+.PHONY: gm-install gm-doctor sv4d2 sv4d sv3d_u sv3d_p demo-svd demo-sv3d demo-turbo weights-%
+
+VIDEO ?= path/to/video.mp4
+IMAGE ?= path/to/image.png
+
+## install Stability AI generative models stack and gm helper
+gm-install:
+	bash codex/jobs/setup-stability-generative-models.sh install
+
+## run gm doctor to verify setup
+gm-doctor:
+	gm doctor
+
+## generate 4D output from a video using SV4D 2.0
+sv4d2:
+	gm sv4d2 --input_path $(VIDEO)
+
+## generate 4D output from a video using the original SV4D pipeline
+sv4d:
+	gm sv4d --input_path $(VIDEO)
+
+## create multi-view orbit video from an image using SV3D_u
+sv3d_u:
+	gm sv3d_u --input_path $(IMAGE)
+
+## create multi-view orbit video from an image using SV3D_p
+sv3d_p:
+	gm sv3d_p --input_path $(IMAGE)
+
+## launch the SVD demo UI
+demo-svd:
+	gm demo svd
+
+## launch the SV3D demo UI
+demo-sv3d:
+	gm demo sv3d
+
+## launch the SDXL-Turbo demo UI
+demo-turbo:
+	gm demo turbo
+
+## download model weights with gm (e.g. make weights-sv4d2)
+weights-%:
+	gm weights $*
