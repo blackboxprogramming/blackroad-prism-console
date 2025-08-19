@@ -7,3 +7,6 @@ about: Request a new capability
 **Acceptance Criteria**
 **Notes/Dependencies**
 **Acceptance**
+**What/Why**
+**Acceptance Criteria**
+**Notes/Dependencies**

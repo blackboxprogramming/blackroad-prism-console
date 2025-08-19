@@ -136,3 +136,22 @@
   },
   "main": "src/comprehensive-lucidia-system.js"
 }
+  "name": "blackroad-quantum",
+  "private": true,
+  "devDependencies": {
+    "eslint": "^9.9.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "husky": "^9.1.5",
+    "lint-staged": "^15.2.8"
+  },
+  "scripts": {
+    "prepare": "husky install",
+    "format": "prettier -w \"apps/**/*.html\"",
+    "lint": "eslint --ext .js,.mjs,.cjs . || true"
+  },
+  "lint-staged": {
+    "apps/**/*.html": ["prettier -w"],
+    "*.js": ["eslint --fix", "prettier -w"]
+  }
+}
