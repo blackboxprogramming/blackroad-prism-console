@@ -6,6 +6,7 @@ import io
 import os
 import tempfile
 import whisper
+import ast
 
 api_key = os.getenv("OPENAI_API_KEY")
 if api_key:
@@ -87,6 +88,10 @@ if user_input:
         plt.savefig(buf, format="png")
         buf.seek(0)
         st.image(buf)
+        with io.BytesIO() as buf:
+            plt.savefig(buf, format="png")
+            buf.seek(0)
+            st.image(buf)
         plt.close(fig)
 
     except Exception as e:
