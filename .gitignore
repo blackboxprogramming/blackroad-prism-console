@@ -55,3 +55,7 @@ tests/_codex_autogen/
 .tmp/
 *.out.md
 
+# Allow random field datasets
+!lucidia/modules/random_fields/datasets/
+!lucidia/modules/random_fields/datasets/*.py
+lucidia/modules/random_fields/datasets/__pycache__/
