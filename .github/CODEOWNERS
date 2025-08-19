@@ -3,3 +3,4 @@
 /services/            @blackboxprogramming
 /**/*.py              @blackboxprogramming
 /**/*.ts              @blackboxprogramming
+/droplet-manager-macos/ @blackboxprogramming

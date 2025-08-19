@@ -12,7 +12,7 @@ permissions:
 jobs:
   analyze:
     runs-on: ubuntu-latest
-    strategy: { language: [ 'javascript', 'python' ] }
+    strategy: { language: [ 'javascript', 'python', 'cpp' ] }
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3
