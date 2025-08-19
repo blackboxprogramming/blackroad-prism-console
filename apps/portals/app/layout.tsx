@@ -1,8 +1,10 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 import BlackRoadCopilot from "@/components/BlackRoadCopilot";
+import type { Metadata } from "next";
+import BlackRoadCopilot from "../components/BlackRoadCopilot";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "BlackRoad Portals",
   description: "BlackRoad.io portal hub",
 };
