@@ -16,6 +16,7 @@ import Deploys from './pages/Deploys.jsx';
 import Metrics from './pages/Metrics.jsx';
 import ExperimentsDash from './pages/ExperimentsDash.jsx';
 import News from './pages/News.jsx';
+import Deploys from './pages/Deploys.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 const routes = {
@@ -35,6 +36,7 @@ const routes = {
   '/metrics': <Metrics />,
   '/experiments': <ExperimentsDash />,
   '/news': <News />,
+  '/deploys': <Deploys />,
 };
 
 export default function Router() {

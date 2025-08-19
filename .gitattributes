@@ -1,2 +1,4 @@
 * text=auto eol=lf
 *.sh text eol=lf
+*.md diff=markdown
+*.{js,jsx,ts,tsx} linguist-language=JavaScript

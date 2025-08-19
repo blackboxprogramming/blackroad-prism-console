@@ -5,3 +5,6 @@
 /**/*.ts              @blackboxprogramming
 
 * @blackroadprogramming/secops @blackroadprogramming/kernel
+*       @blackroad-owners
+/sites/blackroad/**  @blackroad-web
+.github/**           @blackroad-ci
