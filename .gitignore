@@ -22,3 +22,4 @@ repos/
 runtime/
 __pycache__/
 codex/runtime/
+/benchmarks/
