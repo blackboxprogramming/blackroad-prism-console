@@ -1,3 +1,4 @@
+![Build](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/monorepo-matrix.yml/badge.svg) ![E2E](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/playwright.yml/badge.svg) ![Deploy](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/deploy-blackroad.yml/badge.svg)
 # NVIDIA Open GPU Kernel Modules
 ![Build](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/monorepo-matrix.yml/badge.svg) ![E2E](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/playwright.yml/badge.svg) ![Deploy](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/deploy-blackroad.yml/badge.svg)
 # BlackRoad Prism Console
