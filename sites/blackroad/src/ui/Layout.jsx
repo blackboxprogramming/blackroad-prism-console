@@ -17,6 +17,7 @@ const links = [
   { to: '/news', label: 'News' },
   { to: '/deploys', label: 'Deploys' },
   { to: '/inbox', label: 'Inbox' },
+  { to: '/deploys', label: 'Deploys' },
 ];
 
 function navigate(e, to) {

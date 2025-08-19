@@ -40,6 +40,7 @@ const routes = {
   '/news': <News />,
   '/deploys': <Deploys />,
   '/inbox': <AgentInbox />,
+  '/deploys': <Deploys />,
 };
 
 export default function Router() {

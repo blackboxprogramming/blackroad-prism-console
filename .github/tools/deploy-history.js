@@ -17,6 +17,9 @@ if (fs.existsSync(file)) {
 }
 } catch {}
 }
+try {
+  j = JSON.parse(fs.readFileSync(file, 'utf8'));
+} catch {}
 if (!Array.isArray(j.history)) j.history = [];
 j.history.unshift({ ts: new Date().toISOString(), channel, sha, ref });
 j.history = j.history.slice(0, 25);
