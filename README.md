@@ -216,3 +216,11 @@ recordConversion('signup_success', 1, { plan: 'pro' })
 - **Auto-merge**: merges labeled PRs when checks pass.
 - **CodeQL/Snyk/Scorecard**: security analysis.
 Kernel modules in this repository are dual licensed under MIT/GPLv2. Proprietary NVIDIA userspace components are **not** distributed here.
+## ChatOps — Talk to Agents
+- `/ask <question>` — AI answers in-thread (OpenAI or Ollama).
+- `/say <message>` — post to the public **Agent Inbox** at `/inbox`.
+
+## Metrics
+- CI history regenerated hourly → `/metrics/ci.json`
+- Lighthouse scores appended daily and on main pushes → `/metrics/lh.json`
+- View charts at **/metrics**.

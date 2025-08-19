@@ -58,7 +58,7 @@
   },
   "scripts": {
     "prepare": "husky",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.mjs,.cjs || true",
+    "lint": "eslint . --ext .js,.jsx,.tsx,.mjs,.cjs || true",
     "format": "prettier -w .",
     "lint:js": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:js:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",

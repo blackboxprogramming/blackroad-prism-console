@@ -18,6 +18,14 @@ export default function Metrics(){
   const lh = useJson('/metrics/lh.json', { history: [] })
   const convBase = getAnalyticsBase()
   const funnels = useJson('/funnels.json', { funnels: [] })
+function useJson(url, fallback){ const [d,setD]=useState(fallback); useEffect(()=>{ fetch(url,{cache:'no-cache'}).then(r=>r.json()).then(setD).catch(()=>setD(fallback)) },[url]); return d }
+
+function fmtTs(s){ try{ return new Date(s).toLocaleString() }catch{ return s } }
+function msToMin(ms){ return (ms/60000).toFixed(2) }
+
+export default function Metrics(){
+  const ci = useJson('/metrics/ci.json', { runs: [] })
+  const lh = useJson('/metrics/lh.json', { history: [] })
 
   const byWF = useMemo(()=> {
     const m = {}
@@ -76,11 +84,19 @@ export default function Metrics(){
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="ts" hide/>
                   <YAxis yAxisId="left" label={{ value: 'min', angle:-90, position:'insideLeft' }}/>
+                  <YAxis yAxisId="right" orientation="right" domain={[0,1]} hide/>
                   <Tooltip />
                   <Legend />
                   <Bar yAxisId="left" dataKey="min" name="duration (min)" fill="currentColor" />
                 </BarChart>
               </ResponsiveContainer>
+              <ul className="text-xs mt-2 space-y-1">
+                {runs.slice(-5).reverse().map((r,i)=>(
+                  <li key={i}>
+                    <code>{(r.sha||'').slice(0,7)}</code> — {r.conclusion || r.status} — {msToMin(r.duration_ms)} min — <span className="opacity-70">{fmtTs(r.updated_at||r.started_at)}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>

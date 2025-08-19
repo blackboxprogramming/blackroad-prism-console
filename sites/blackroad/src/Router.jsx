@@ -18,6 +18,8 @@ import ExperimentsDash from './pages/ExperimentsDash.jsx';
 import News from './pages/News.jsx';
 import Deploys from './pages/Deploys.jsx';
 import NotFound from './pages/NotFound.jsx';
+import Metrics from './pages/Metrics.jsx';
+import AgentInbox from './pages/AgentInbox.jsx';
 
 const routes = {
   '/': <Home />,
@@ -37,6 +39,7 @@ const routes = {
   '/experiments': <ExperimentsDash />,
   '/news': <News />,
   '/deploys': <Deploys />,
+  '/inbox': <AgentInbox />,
 };
 
 export default function Router() {

@@ -4,6 +4,7 @@
   "version": "0.3.0",
   "version": "0.2.0",
   "type": "module",
+  "version": "0.3.1",
   "scripts": {
     "prebuild": "node ./scripts/build-blog.js",
     "dev": "vite",
@@ -13,6 +14,9 @@
     "format": "prettier -w ."
     "format": "prettier -w .",
     "lint": "eslint . --ext .js,.jsx || true"
+    "format": "prettier -w .",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx || true",
+    "test": "echo \"(add Playwright later)\""
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -36,5 +40,14 @@
     "vite": "^7.1.2"
     "vite": "^5.4.2"
     "tailwindcss": "^3.4.10"
+    "react-router-dom": "^6.26.1",
+    "recharts": "^2.12.7"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.4",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^9.9.0",
+    "prettier": "^3.3.3",
+    "vite": "^5.4.0"
   }
 }
