@@ -19,7 +19,7 @@ Emits:
 import os, re, json, base64, time
 from pathlib import Path
 from datetime import datetime
-import urllib.request, urllib.error
+import urllib.request, urllib.error, urllib.parse
 
 BASE = Path("codex")
 EVENTS = BASE/"runtime"/"events"
@@ -78,6 +78,36 @@ def ensure_issue(owner, repo, title, body):
     # create
     created = gh_api(f"/repos/{owner}/{repo}/issues", method="POST", body={"title": title, "body": body})
     return {"owner": owner, "repo": repo, "title": title, "number": created.get("number"), "url": created.get("html_url"), "existing": False}
+
+
+def open_issue(issue_tracker: str, issue_repo: str, title: str, body: str, token_env: str | None = None):
+    """Open an issue on the given tracker.
+
+    Currently only the GitHub tracker is supported. ``issue_repo`` should be in
+    ``owner/repo`` form. ``token_env`` may specify an alternative environment
+    variable containing an access token; otherwise the default ``TOKEN`` is
+    used.
+    """
+
+    tracker = (issue_tracker or "").lower()
+    if tracker != "github":
+        raise NotImplementedError("Only GitHub is supported")
+
+    token = os.getenv(token_env) if token_env else TOKEN
+    if not token:
+        raise RuntimeError("GITHUB_TOKEN is required to open issues.")
+
+    owner, repo = issue_repo.split("/", 1)
+    url = f"https://api.github.com/repos/{owner}/{repo}/issues"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "codex-issue-opener/1.0",
+        "Authorization": f"Bearer {token}",
+    }
+    data = json.dumps({"title": title, "body": body}).encode("utf-8")
+    req = urllib.request.Request(url, headers=headers, data=data, method="POST")
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read().decode("utf-8"))
 
 def load_manifest():
     try:

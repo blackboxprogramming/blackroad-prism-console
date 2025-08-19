@@ -2,10 +2,8 @@ import streamlit as st
 from openai import OpenAI
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import io
 import os
-import base64
 import tempfile
 import whisper
 
@@ -15,6 +13,7 @@ if api_key:
 else:
     client = None
     st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")
