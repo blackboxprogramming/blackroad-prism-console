@@ -1,0 +1,13 @@
+diff --git a/remote.py b/remote.py
+index 1111111..2222222 100644
+--- a/remote.py
++++ b/remote.py
+@@
+-    parser.add_argument('--ec2', action='store_true', help='launch on EC2')
++    parser.add_argument('--ec2', action='store_true', help='launch on EC2 (disabled locally)')
+@@
+-    if args.ec2:
+-        launch_ec2()
+-        return
++    if args.ec2:
++        raise RuntimeError('EC2 launching is disabled for local usage. Run without --ec2.')
