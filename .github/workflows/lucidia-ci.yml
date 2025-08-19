@@ -299,7 +299,7 @@ jobs:
           sleep 60
           npm run test:smoke -- --baseUrl=https://staging.blackroad.io
       - name: Notify Slack
-        if: always()
+        if: failure()
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
@@ -342,11 +342,12 @@ jobs:
           curl -f https://blackroad.io/health
           curl -f https://blackroadinc.us/health
       - name: Notify Slack
+        if: always()
         uses: 8398a7/action-slack@v3
         with:
-          status: success
+          status: ${{ job.status }}
           channel: '#deployments'
-          text: '🚀 Lucidia deployed to production!'
+          text: 'Lucidia production deploy ${{ job.status }}'
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   # ---------- Scheduled Security Scan ----------
