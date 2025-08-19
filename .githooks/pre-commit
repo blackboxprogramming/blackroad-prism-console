@@ -15,3 +15,7 @@ if echo "$FILES" | grep -E '^secrets/' >/dev/null; then
   exit 1
 fi
 
+if git diff --cached --name-only | grep -E '\.(zip|tar|gz|mp4|mov|iso|bin)$' >/dev/null; then
+  echo "❌ Large/binary file detected. Use Releases/LFS." >&2
+  exit 1
+fi

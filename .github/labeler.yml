@@ -101,3 +101,20 @@ security:
 deps:
   - "package.json"
   - "package-lock.json"
+      - 'apps/**'
+workflows:
+  - changed-files:
+      - '.github/workflows/**'
+docs:
+  - changed-files:
+      - '**/*.md'
+infra:
+  - changed-files:
+      - 'Dockerfile'
+      - '.dockerignore'
+python:
+  - changed-files:
+      - '**/*.py'
+javascript:
+  - changed-files:
+      - '**/*.js'
