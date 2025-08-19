@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+sudo mkdir -p /var/lib/blackroad/queue/chem/{inbox,outbox,processed,failed}
+if id -u blackroad >/dev/null 2>&1; then
+  sudo chown -R blackroad:blackroad /var/lib/blackroad/queue
+fi
+echo "Queue ready at /var/lib/blackroad/queue/chem"
