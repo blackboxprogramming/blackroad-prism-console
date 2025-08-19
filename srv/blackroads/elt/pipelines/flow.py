@@ -1,10 +1,8 @@
-from prefect import flow
-from prefect.tasks import task_input_hash
-from prefect.server.schemas.schedules import CronSchedule
-from datetime import timedelta
 
 from download_full import download
 from ingest_nyc_taxi import main as ingest
+from prefect import flow
+from prefect.server.schemas.schedules import CronSchedule
 from validate import main as validate
 
 

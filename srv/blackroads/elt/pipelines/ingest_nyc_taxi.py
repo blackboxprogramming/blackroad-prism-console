@@ -1,6 +1,6 @@
 import glob
 import os
-from typing import Iterator, Dict, Any
+from typing import Any, Dict, Iterator
 
 import dlt
 import pandas as pd
