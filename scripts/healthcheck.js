@@ -24,4 +24,22 @@ const timeout = setTimeout(() => abort.abort(), 4000);
     console.error(`Healthcheck error: ${err && err.message ? err.message : err}`);
     process.exit(1);
   }
+try {
+const res = await fetch(endpoint, { signal: abort.signal });
+clearTimeout(timeout);
+if (!res.ok) {
+console.error(`Healthcheck: HTTP ${res.status}`);
+process.exit(2);
+}
+const body = await res.text().catch(() => '');
+if (!body || !/ok/i.test(body)) {
+console.error(`Healthcheck: unexpected body: ${body}`);
+process.exit(3);
+}
+console.log('ok');
+process.exit(0);
+} catch (err) {
+console.error(`Healthcheck error: ${err && err.message ? err.message : err}`);
+process.exit(1);
+}
 })();

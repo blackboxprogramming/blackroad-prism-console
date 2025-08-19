@@ -33,3 +33,4 @@ services/health-sidecar/.env
 node_modules/
 /benchmarks/
 **/node_modules/
+benchmarks/

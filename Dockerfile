@@ -10,6 +10,7 @@ RUN [ -f package.json ] && npm ci || true
 COPY . .
 
 # If you have a build step, enable: RUN npm run build
+If you have a build step, enable: RUN npm run build
 
 FROM node:18-alpine AS production
 WORKDIR /app
@@ -20,5 +21,6 @@ USER lucidia
 EXPOSE 8000
 
 # Adjust entrypoint if your app uses a server wrapper
+Adjust entrypoint if your app uses a server wrapper
 
 CMD ["node", "src/comprehensive-lucidia-system.js"]
