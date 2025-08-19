@@ -1,0 +1,30 @@
+{
+  "$schema": "/data/requests/schema.json",
+  "version": "2025-08-18",
+  "id": "2025-08-18-psi-sha-infinity-library",
+  "title": "Truth: PS-SHA∞ reference library (client+server)",
+  "summary": "Create a minimal PS-SHA∞ lib for Python/JS: deterministic content signature w/ daily salt via 𝔅(t).",
+  "problem": "We need a canonical, content-addressed signature that encodes Lucidia’s truth state. Use HMAC-SHA256 with a rotating daily salt derived from 𝔅(t) seed and date; expose `ps_sha_infinity(payload, date)`.",
+  "constraints": "Do not hardcode secrets in client build; read from env on server and from meta tag at runtime in the browser.",
+  "acceptance_criteria": [
+    "Identical signatures for same payload+date across Python and JS",
+    "CLI: `psi-sign path/to.json` outputs signature",
+    "Server automatically signs LRfR records on submit"
+  ],
+  "tags": ["ps-sha∞", "truth", "crypto", "library"],
+  "agent": "truth",
+  "difficulty": "intermediate",
+  "status": "open",
+  "bounty": { "roadcoin": 250, "usd": 200 },
+  "owner": { "name": "Alexa Louise", "contact": "you@blackroad.io" },
+  "machine_decomposition": {
+    "tasks": ["Python lib", "JS lib (Web Crypto)", "CLI wrapper", "Server wiring"],
+    "skills": ["python", "javascript", "crypto", "devops"],
+    "datasets": [],
+    "interfaces": ["codex", "api"]
+  },
+  "thread": [],
+  "created_at": "2025-08-18T22:12:00Z",
+  "updated_at": "2025-08-18T22:12:00Z",
+  "signing": { "algorithm": "PS-SHA∞", "signature": "" }
+}
