@@ -1,4 +1,4 @@
-name: Lucidia CI
+name: BlackRoad CI
 on:
   pull_request:
     branches: ["*"]
@@ -9,7 +9,7 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: lucidia-ci-${{ github.ref }}
+  group: blackroad-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -19,12 +19,14 @@ jobs:
       - uses: actions/checkout@v4
 
       # ❗️ Your real build/test steps go here
-      - run: echo "Run Lucidia build/tests here"
+      - run: echo "Run BlackRoad build/tests here"
 
+      # Policy gate: require this workflow to be green on main
       - name: Main Branch Check (local)
         uses: ./.github/actions/main-branch-check
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           main_branch: main
-          recency_days: 7
+          recency_days: 7            # optional: require a recent passing run
+          verbose: "true"
 
