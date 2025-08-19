@@ -23,6 +23,7 @@ jobs:
 
       - name: Upload app to server (staging dir)
       - name: Upload build to server (staging dir)
+      - uses: actions/checkout@v5
       - name: Copy to server
         uses: burnett01/rsync-deployments@6.0
         with:
