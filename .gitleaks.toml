@@ -1,0 +1,7 @@
+title = "BlackRoad Secrets Policy"
+[[rules]]
+id = "generic-api-key"
+description = "Generic API key"
+regex = '''(?i)(api[_-]?key|secret|token)\s*[:=]\s*['"][0-9a-zA-Z_\-]{16,}['"]'''
+entropy = 3.5
+

@@ -1,11 +1,11 @@
 {
-  "env": { "browser": true, "es2021": true, "node": true },
-  "extends": ["eslint:recommended", "prettier"],
-  "parserOptions": { "ecmaVersion": 2022, "sourceType": "module" },
-  "ignorePatterns": ["node_modules/", "dist/", "build/", "public/vendor/", ".tools/", ".github/"],
-  "rules": {
-    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
-    "no-undef": "warn",
-    "no-console": "off"
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module"
   }
 }

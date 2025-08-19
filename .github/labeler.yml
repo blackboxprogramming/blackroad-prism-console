@@ -1,0 +1,120 @@
+frontend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'sites/blackroad/**'
+          - 'apps/quantum/**'
+          - '**/*.tsx'
+          - '**/*.ts'
+          - '**/*.jsx'
+          - '**/*.js'
+          - '**/*.css'
+          - '**/*.html'
+
+backend:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'api/**'
+          - 'services/**'
+          - '**/*.py'
+          - '**/*.go'
+          - 'main.py'
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'docs/**'
+          - 'README.md'
+          - 'CHANGELOG.md'
+          - '**/*.md'
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'tests/**'
+          - '**/*.test.*'
+          - '**/*.spec.*'
+
+prompts:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'prompts/**'
+          - 'prompts/llm/**'
+          - 'codex/**'
+
+templates:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'templates/**'
+
+devops:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**'
+          - '.devcontainer/**'
+          - '.husky/**'
+          - 'config/**'
+          - 'scripts/**'
+          - 'tools/**'
+          - 'bin/**'
+          - 'Makefile'
+          - '.nvmrc'
+          - '.tool-versions'
+          - '.yamllint.yaml'
+          - '.markdownlint.yaml'
+          - '.htmlhintrc'
+          - '.prettierrc.*'
+          - '.prettierignore'
+          - '.editorconfig'
+          - '.gitattributes'
+          - '.gitignore'
+
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'secrets/**'
+          - '.mergify.yml'
+
+site-assets:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'sites/blackroad/public/**'
+          - 'sites/blackroad/assets/**'
+'area:web':
+  - 'sites/blackroad/**'
+'area:ci':
+  - '.github/**'
+'area:math':
+  - 'sites/blackroad/src/lib/**'
+'docs':
+  - '**/*.md'
+'security':
+  - '.github/workflows/**'
+  - '**/wrangler.toml'
+  - apps/quantum/**.html
+workflow:
+  - .github/workflows/**.yml
+docs:
+  - "**/*.md"
+security:
+  - ".mergify.yml"
+  - ".github/**"
+deps:
+  - "package.json"
+  - "package-lock.json"
+      - 'apps/**'
+workflows:
+  - changed-files:
+      - '.github/workflows/**'
+docs:
+  - changed-files:
+      - '**/*.md'
+infra:
+  - changed-files:
+      - 'Dockerfile'
+      - '.dockerignore'
+python:
+  - changed-files:
+      - '**/*.py'
+javascript:
+  - changed-files:
+      - '**/*.js'

@@ -1,0 +1,6 @@
+ai_tools: true
+security_scans: true
+web_performance: true
+heavy_linters: false
+web_performance: false
+heavy_linters: true

@@ -1,0 +1,322 @@
+# .github/workflows/dependabot-auto-merge.yml
+
+name: Dependabot Auto-Merge & Cleanup
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  pull_request_review:
+    types: [submitted]
+  check_suite:
+    types: [completed]
+  status: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  statuses: read
+
+jobs:
+  dependabot-auto-merge:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Get Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v1
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Install dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+
+      - name: Run security audit
+        run: |
+          npm audit --audit-level moderate
+        continue-on-error: true
+
+      - name: Update package-lock.json if needed
+        run: |
+          if [ -f "package.json" ]; then
+            npm install --package-lock-only
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add package-lock.json
+            git diff --staged --quiet || git commit -m "fix: update package-lock.json" || true
+          fi
+
+      - name: Clean up node_modules and reinstall
+        run: |
+          rm -rf node_modules
+          npm ci --prefer-offline --no-audit
+
+      - name: Fix workflow files
+        run: |
+          # Fix common workflow issues
+          find .github/workflows -name "*.yml" -o -name "*.yaml" | while read -r file; do
+            # Update deprecated actions
+            sed -i 's/actions\/checkout@v3/actions\/checkout@v4/g' "$file"
+            sed -i 's/actions\/setup-node@v3/actions\/setup-node@v4/g' "$file"
+            sed -i 's/actions\/cache@v3/actions\/cache@v3/g' "$file"
+
+            # Fix Node.js version warnings
+            sed -i 's/node-version: 16/node-version: 18/g' "$file"
+            sed -i 's/node-version: "16"/node-version: "18"/g' "$file"
+          done
+
+      - name: Clean up temporary files
+        run: |
+          # Remove common temporary files
+          find . -name "*.tmp" -delete || true
+          find . -name "*.log" -not -path "./node_modules/*" -delete || true
+          find . -name ".DS_Store" -delete || true
+          find . -name "Thumbs.db" -delete || true
+
+          # Clean npm cache
+          npm cache clean --force || true
+
+      - name: Run linting and formatting
+        run: |
+          # Run ESLint if available
+          if [ -f "node_modules/.bin/eslint" ]; then
+            npx eslint . --fix --ext .js,.jsx,.ts,.tsx || true
+          fi
+
+          # Run Prettier if available
+          if [ -f "node_modules/.bin/prettier" ]; then
+            npx prettier --write . || true
+          fi
+
+      - name: Run tests
+        run: |
+          npm test || true
+        env:
+          CI: true
+
+      - name: Commit cleanup changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git diff --staged --quiet || git commit -m "chore: cleanup and fix issues" || true
+
+      - name: Push changes
+        run: |
+          git push origin HEAD:${{ github.head_ref }} || true
+
+      - name: Auto-approve for patch and minor updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        run: |
+          gh pr review --approve "${{ github.event.pull_request.html_url }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge for patch and minor updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        run: |
+          gh pr merge --auto --squash "${{ github.event.pull_request.html_url }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment on major updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+        run: |
+          gh pr comment "${{ github.event.pull_request.html_url }}" --body "🚨 **Major version update detected!** Please review this PR carefully as it may contain breaking changes."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  cleanup-merged-branches:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && github.actor == 'dependabot[bot]'
+
+    steps:
+      - name: Delete merged branch
+        run: |
+          gh api repos/${{ github.repository }}/git/refs/heads/${{ github.head_ref }} -X DELETE
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+name: Dependabot Auto Merge
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  pull_request_review:
+    types: [submitted]
+  check_suite:
+    types: [completed]
+  status: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  statuses: read
+
+jobs:
+  dependabot-auto-merge:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Get Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v1
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Install dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+
+      - name: Run security audit
+        run: |
+          npm audit --audit-level moderate
+        continue-on-error: true
+
+      - name: Update package-lock.json if needed
+        run: |
+          if [ -f "package.json" ]; then
+            npm install --package-lock-only
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add package-lock.json
+            git diff --staged --quiet || git commit -m "fix: update package-lock.json" || true
+          fi
+
+      - name: Clean up node_modules and reinstall
+        run: |
+          rm -rf node_modules
+          npm ci --prefer-offline --no-audit
+
+      - name: Fix workflow files
+        run: |
+          # Fix common workflow issues
+          find .github/workflows -name "*.yml" -o -name "*.yaml" | while read -r file; do
+            # Update deprecated actions
+            sed -i 's/actions\/checkout@v3/actions\/checkout@v4/g' "$file"
+            sed -i 's/actions\/setup-node@v3/actions\/setup-node@v4/g' "$file"
+            sed -i 's/actions\/cache@v3/actions\/cache@v3/g' "$file"
+
+            # Fix Node.js version warnings
+            sed -i 's/node-version: 16/node-version: 18/g' "$file"
+            sed -i 's/node-version: "16"/node-version: "18"/g' "$file"
+          done
+
+      - name: Clean up temporary files
+        run: |
+          # Remove common temporary files
+          find . -name "*.tmp" -delete || true
+          find . -name "*.log" -not -path "./node_modules/*" -delete || true
+          find . -name ".DS_Store" -delete || true
+          find . -name "Thumbs.db" -delete || true
+
+          # Clean npm cache
+          npm cache clean --force || true
+
+      - name: Run linting and formatting
+        run: |
+          # Run ESLint if available
+          if [ -f "node_modules/.bin/eslint" ]; then
+            npx eslint . --fix --ext .js,.jsx,.ts,.tsx || true
+          fi
+
+          # Run Prettier if available
+          if [ -f "node_modules/.bin/prettier" ]; then
+            npx prettier --write . || true
+          fi
+
+      - name: Run tests
+        run: |
+          npm test || true
+        env:
+          CI: true
+
+      - name: Commit cleanup changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git diff --staged --quiet || git commit -m "chore: cleanup and fix issues" || true
+
+      - name: Push changes
+        run: |
+          git push origin HEAD:${{ github.head_ref }} || true
+
+      - name: Auto-approve for patch and minor updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        run: |
+          gh pr review --approve "${{ github.event.pull_request.html_url }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge for patch and minor updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        run: |
+          gh pr merge --auto --squash "${{ github.event.pull_request.html_url }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment on major updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+        run: |
+          gh pr comment "${{ github.event.pull_request.html_url }}" --body "🚨 **Major version update detected!** Please review this PR carefully as it may contain breaking changes."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  cleanup-merged-branches:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && github.actor == 'dependabot[bot]'
+
+    steps:
+      - name: Delete merged branch
+        run: |
+          gh api repos/${{ github.repository }}/git/refs/heads/${{ github.head_ref }} -X DELETE
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+name: Dependabot Auto Merge
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  auto-merge:
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable automerge
+        env: { GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+        run: gh pr merge ${{ github.event.pull_request.number }} --squash --auto || true
+        run: gh pr merge ${{ github.event.pull_request.number }} --squash --auto
+

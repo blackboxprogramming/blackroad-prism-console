@@ -1,0 +1,6 @@
+{
+  "name": "linmath",
+  "version-string": "0.1.0",
+  "description": "Header-only linear algebra for graphics",
+  "homepage": "https://github.com/blackboxprogramming/linmath.h"
+}

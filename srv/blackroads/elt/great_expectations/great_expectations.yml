@@ -1,0 +1,67 @@
+config_version: 3.0
+
+plugins_directory: plugins/
+datasources:
+  postgres:
+    class_name: Datasource
+    execution_engine:
+      class_name: SqlAlchemyExecutionEngine
+      connection_string: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    data_connectors:
+      default_runtime_data_connector:
+        class_name: RuntimeDataConnector
+        batch_identifiers:
+          - default_identifier_name
+validation_operators:
+  action_list_operator:
+    class_name: ActionListValidationOperator
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+stores:
+  expectations_store:
+    class_name: ExpectationsStore
+    store_backend:
+      class_name: InMemoryStoreBackend
+  validations_store:
+    class_name: ValidationsStore
+    store_backend:
+      class_name: InMemoryStoreBackend
+data_docs_sites: {}
+# <!-- FILE: /srv/blackroads/elt/great_expectations/great_expectations.yml -->
+datasources:
+  postgres_default:
+    class_name: Datasource
+    execution_engine:
+      class_name: SqlAlchemyExecutionEngine
+      connection_string: postgresql+psycopg2://{{ env_var('POSTGRES_USER') }}:{{ env_var('POSTGRES_PASSWORD') }}@{{ env_var('POSTGRES_HOST') }}:{{ env_var('POSTGRES_PORT') }}/{{ env_var('POSTGRES_DB') }}
+    data_connectors:
+      default_runtime_data_connector_name:
+        class_name: RuntimeDataConnector
+        assets:
+          raw_trips:
+            class_name: RuntimeAsset
+            batch_identifiers:
+              - default_identifier_name
+
+expectations_store_name: expectations_store
+expectations_store:
+  class_name: InMemoryStore
+
+validation_results_store_name: validation_results_store
+validation_results_store:
+  class_name: InMemoryStore
+
+checkpoint_store_name: checkpoint_store
+checkpoint_store:
+  class_name: InMemoryStore
+
+anonymous_usage_statistics:
+  enabled: false

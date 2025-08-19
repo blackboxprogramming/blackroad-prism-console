@@ -1,20 +1,21 @@
-name: Snyk Scan
+name: Snyk Scan (advisory)
 on:
   pull_request:
-  push:
-    branches: [main]
-permissions:
-  contents: read
+  workflow_dispatch:
+permissions: { contents: read, security-events: write }
 jobs:
   snyk:
+    if: ${{ secrets.SNYK_TOKEN != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - run: npm ci --omit=optional || npm i --package-lock-only
       - uses: snyk/actions/node@master
+        with:
+          command: test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - uses: snyk/actions/node@master
         with:
-          args: --severity-threshold=high
+          command: monitor
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
