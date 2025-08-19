@@ -34,3 +34,11 @@ node_modules/
 /benchmarks/
 **/node_modules/
 benchmarks/
+# Lucidia artifacts
+secrets/
+datasets/
+models/
+checkpoints/
+outputs/
+rag/index/*.faiss
+rag/index/meta.json
