@@ -1,0 +1,11 @@
+<!-- FILE: /infra/wireguard/wg0.conf.template -->
+[Interface]
+Address = ${WG_ADDRESS}
+ListenPort = ${WG_PORT:-51820}
+PrivateKey = ${WG_PRIVATE_KEY}
+SaveConfig = true
+
+PostUp   = ufw route allow in on wg0 out on eth0; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = ufw route delete allow in on wg0 out on eth0; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+# Peers are appended by gen-peers.sh
