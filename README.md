@@ -94,3 +94,21 @@ Design
 •Breath 𝔅(t) & PS-SHA∞ seed line included (configurable).
 
 ---
+
+## DKMS Packages
+
+After building, create DKMS packages (.deb and .rpm):
+
+```bash
+./.codex/make-dkms.sh 580.76.05
+```
+
+Packages are placed in `dist/`.
+
+## Secure Boot
+
+For Secure Boot environments, sign modules with your Machine Owner Key (MOK) and enroll the certificate using `mokutil --import`.
+
+## License
+
+Kernel modules in this repository are dual licensed under MIT/GPLv2. Proprietary NVIDIA userspace components are **not** distributed here.
