@@ -19,6 +19,8 @@
     "@ai-sdk/xai": "latest",
     "@ai-sdk/openai": "latest",
     "@ai-sdk/anthropic": "latest"
+  "dependencies": {
+    "express": "^4.19.2"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",
