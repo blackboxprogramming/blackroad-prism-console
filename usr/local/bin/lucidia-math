@@ -1,0 +1,4 @@
+#!/usr/bin/env python3
+# Launch Roadie AI Math Agent without installing a package.
+import runpy
+runpy.run_path("/opt/blackroad/lucidia/agents/roadie_ai_math.py", run_name="__main__")
