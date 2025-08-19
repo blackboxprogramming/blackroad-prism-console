@@ -114,36 +114,37 @@ For Secure Boot environments, sign modules with your Machine Owner Key (MOK) and
 Kernel modules in this repository are dual licensed under MIT/GPLv2. Proprietary NVIDIA userspace components are **not** distributed here.
 # BlackRoad Prism Console
 
-This repository powers the BlackRoad Prism console and a Vite/React site under `sites/blackroad`.
+This repository mirrors NVIDIA's open source GPU kernel modules and provides hardened build and packaging tooling.
 
-## Quickstart
+## How to Build
 
-Install dependencies:
-
-```bash
-npm ci
-(cd sites/blackroad && npm i --package-lock-only)
-```
-
-## Development
+Use the provided container image for reproducible builds:
 
 ```bash
-cd sites/blackroad
-npm run dev
+docker build -f .codex/Dockerfile.kmod -t nvidia-open-kmod .
+docker run --rm -v "$PWD:/src" -w /src nvidia-open-kmod make modules -j"$(nproc)"
 ```
 
-## Build
+## Supported Kernels / Architectures
+
+- Kernels: 5.15, 6.1, 6.6
+- Architectures: x86_64, aarch64
+
+## DKMS Packages
+
+After building, create DKMS packages (.deb and .rpm):
 
 ```bash
-cd sites/blackroad
-npm run build
+./.codex/make-dkms.sh 580.76.05
 ```
 
-## Tests
+Packages are placed in `dist/`.
 
-```bash
-npm test
-```
+## Secure Boot
+
+For Secure Boot environments, sign modules with your Machine Owner Key (MOK) and enroll the certificate using `mokutil --import`.
+
+## License
 
 Additional operational docs live in the [`docs/`](docs) folder.
 
@@ -214,3 +215,4 @@ recordConversion('signup_success', 1, { plan: 'pro' })
 - **Labeler/Stale/Lock**: repo hygiene.
 - **Auto-merge**: merges labeled PRs when checks pass.
 - **CodeQL/Snyk/Scorecard**: security analysis.
+Kernel modules in this repository are dual licensed under MIT/GPLv2. Proprietary NVIDIA userspace components are **not** distributed here.

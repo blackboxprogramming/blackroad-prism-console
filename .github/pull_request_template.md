@@ -38,3 +38,11 @@ List how you tested this change (commands, screenshots, logs).
 - [ ] E2E basic (if site changed)
 
 > Label `automerge` if safe to auto-merge after checks.
+## Summary
+Describe changes.
+
+## Testing
+Steps run.
+
+## Linked Issues
+Closes #
