@@ -1,0 +1,16 @@
+FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 python3-pip python3-venv git build-essential curl && rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m venv /venv
+ENV PATH=/venv/bin:$PATH
+
+RUN pip install --no-cache-dir torch==2.4.0+cu121 --index-url https://download.pytorch.org/whl/cu121
+RUN pip install --no-cache-dir "transformers>=4.41.0" "uvicorn>=0.30" "fastapi>=0.112" "numpy" "scipy"
+
+RUN mkdir -p /app /models /root/.cache/huggingface
+WORKDIR /app
+
+# Editable install from mounted repo on start
+CMD ["bash", "-lc", "pip install -e ./transformer-debugger && sleep infinity"]
