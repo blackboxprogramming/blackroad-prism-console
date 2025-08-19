@@ -50,3 +50,8 @@ secrets/
 /tests/_codex_autogen/
 .tmp/
 *.out.md
+# Codex artifacts
+tests/_codex_autogen/
+.tmp/
+*.out.md
+

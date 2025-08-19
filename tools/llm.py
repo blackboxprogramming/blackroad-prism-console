@@ -1,5 +1,10 @@
 import os, json, requests, sys
 from typing import List, Dict
+import json
+import os
+
+import requests
+
 
 def _openai_chat(prompt: str, system: str = "", model: str | None = None) -> str:
     base = os.getenv("OPENAI_BASE", "https://api.openai.com/v1")
@@ -14,6 +19,13 @@ def _openai_chat(prompt: str, system: str = "", model: str | None = None) -> str
     r.raise_for_status()
     return r.json()["choices"][0]["message"]["content"]
 
+    r = requests.post(
+        f"{base}/chat/completions", headers=headers, data=json.dumps(payload), timeout=120
+    )
+    r.raise_for_status()
+    return r.json()["choices"][0]["message"]["content"]
+
+
 def _ollama(prompt: str, system: str = "", model: str | None = None) -> str:
     model = model or os.getenv("MODEL", "llama3.1")
     payload = {"model": model, "prompt": (system + "\n\n" + prompt).strip(), "stream": False}
@@ -22,6 +34,7 @@ def _ollama(prompt: str, system: str = "", model: str | None = None) -> str:
     data = r.json()
     # Ollama returns text in 'response'
     return data.get("response", "")
+
 
 def chat(prompt: str, system: str = "") -> str:
     backend = os.getenv("AI_BACKEND", "openai").lower()
