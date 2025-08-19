@@ -19,7 +19,9 @@ if (fs.existsSync(file)) {
 }
 try {
   j = JSON.parse(fs.readFileSync(file, 'utf8'));
-} catch {}
+} catch {
+  // Ignore malformed or missing deploy history file
+}
 if (!Array.isArray(j.history)) j.history = [];
 j.history.unshift({ ts: new Date().toISOString(), channel, sha, ref });
 j.history = j.history.slice(0, 25);

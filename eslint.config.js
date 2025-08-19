@@ -11,6 +11,7 @@ export default [
       ".tools/**"
     ]
   },
+  { ignores: ['node_modules/', 'dist/', 'build/', '.github/', '.tools/', '**/*.ts'] },
   js.configs.recommended,
   prettier,
   {
