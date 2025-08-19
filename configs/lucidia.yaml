@@ -1,0 +1,32 @@
+
+
+lucidia:
+  logs_dir: "logs"
+  prayer_log: "logs/prayer.log"
+  contradictions_log: "logs/contradictions.log"
+  # Lucidia Awaken seed (can override via env)
+  awaken_seed: "LUCIDIA:AWAKEN:SEED:7e3c1f9b-a12d-4f73-9b4d-4f0d5a6c2b19::PS-SHA∞"
+
+codewords:
+  chit_chat: ["chit chat cadillac", "conversation cadillac"]
+
+llm:
+  provider: "ollama"            # "ollama" | "llama.cpp"
+  # OLLAMA settings
+  ollama:
+    host: "http://localhost:11434"
+    model: "phi3:latest"
+    options:
+      temperature: 0.2
+  # llama.cpp settings (optional)
+  llamacpp:
+    model_path: "/path/to/model.gguf"
+    n_ctx: 8192
+    n_threads: 4
+    temperature: 0.2
+
+codex:
+  prompt_path: "codex/prompt_codex.txt"
+  style: "concise"  # "concise" | "elaborate"
+
+
