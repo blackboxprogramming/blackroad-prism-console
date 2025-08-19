@@ -95,3 +95,15 @@ demo-turbo:
 ## download model weights with gm (e.g. make weights-sv4d2)
 weights-%:
 	gm weights $*
+
+.PHONY: bootstrap fmt lint type test cov fix review gen docs
+bootstrap: ; pip install -U pip pre-commit && pre-commit install
+fmt: ; black .
+lint: ; ruff check .
+type: ; mypy .
+test: ; pytest -q
+cov: ; pytest --cov --cov-report=term-missing
+fix: fmt lint
+review: ; python scripts/ai_review.py --diff
+gen: ; python scripts/ai_codegen.py --task "$(t)"
+docs: ; python scripts/ai_docs.py --from-diff

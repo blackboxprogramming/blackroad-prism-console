@@ -1,8 +1,14 @@
-## Summary
-Describe changes.
+## What & Why
+- [ ] Problem / user story:
+- [ ] Proposed change:
+- [ ] Acceptance criteria:
 
-## Testing
-Steps run.
+## Checklists
+- [ ] Tests added/updated
+- [ ] Docs updated
+- [ ] Backwards compatible
 
-## Linked Issues
-Closes #
+## Notes for AI Review
+- Key files:
+- Risk areas:
+- Constraints:
