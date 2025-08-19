@@ -6,6 +6,8 @@ permissions:
   issues: write
   pull-requests: write
 
+  schedule: [{ cron: '0 6 * * *' }]
+permissions: { issues: write, discussions: write }
 jobs:
   lock:
     runs-on: ubuntu-latest
@@ -15,3 +17,5 @@ jobs:
           issue-lock-inactive-days: '7'
           pr-lock-inactive-days: '7'
           add-lock-labels: 'locked'
+          issue-lock-inactive-days: '30'
+          pr-lock-inactive-days: '30'

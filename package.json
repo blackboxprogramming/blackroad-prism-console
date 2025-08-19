@@ -67,6 +67,7 @@
     "dev": "npm --prefix sites/blackroad run dev",
     "build": "npm --prefix sites/blackroad run build",
     "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
+    "format": "prettier -w .",
     "test": "node tests/smoke.test.js",
     "dev": "npm --prefix sites/blackroad run dev",
     "build": "npm --prefix sites/blackroad run build",

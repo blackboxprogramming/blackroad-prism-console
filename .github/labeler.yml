@@ -79,3 +79,14 @@ site-assets:
       - any-glob-to-any-file:
           - 'sites/blackroad/public/**'
           - 'sites/blackroad/assets/**'
+'area:web':
+  - 'sites/blackroad/**'
+'area:ci':
+  - '.github/**'
+'area:math':
+  - 'sites/blackroad/src/lib/**'
+'docs':
+  - '**/*.md'
+'security':
+  - '.github/workflows/**'
+  - '**/wrangler.toml'
