@@ -14,6 +14,7 @@ else:
     client = None
     st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=api_key) if api_key else None
 
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")
@@ -51,6 +52,10 @@ if user_input:
         # GPT response with full history
         response = client.chat.completions.create(
             model="gpt-4o-mini",
+        if client is None:
+            raise ValueError("OpenAI API key is not configured")
+        response = client.chat.completions.create(
+            model="gpt-4",
             messages=st.session_state.chat_history,
         )
         assistant_reply = response.choices[0].message.content
