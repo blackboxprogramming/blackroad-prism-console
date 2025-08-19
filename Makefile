@@ -141,3 +141,16 @@ health-remote:
 health-local:
 @url="http://localhost:8080/apps/quantum/ternary_consciousness_v3.html"; \
 curl -fsS "$$url" >/dev/null && echo "Local page OK: $$url" || (echo "Local page not reachable"; exit 1)
+.PHONY: dev build site up lint format
+dev:
+	cd sites/blackroad && npm run dev
+build:
+	cd sites/blackroad && npm run build
+site:
+	xdg-open http://localhost:5173 || open http://localhost:5173 || true
+up:
+	docker compose up --build -d
+lint:
+	npm run lint
+format:
+	npm run format

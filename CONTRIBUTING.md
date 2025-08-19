@@ -52,3 +52,8 @@ Thank you for your interest in contributing to this project!
 - Provide clear descriptions of the changes in your pull request.
 
 We appreciate your time and look forward to your contributions.
+- Open an issue first for large changes.
+- Use conventional commits (feat:, fix:, chore:).
+- For docs-only PRs, add label `docs` to allow auto-merge.
+- To ask bots to remediate:  
+  `/codex apply .github/prompts/codex-fix-anything.md`

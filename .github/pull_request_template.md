@@ -59,3 +59,15 @@ List how you tested this change (commands, screenshots, logs).
 - [ ] Page loads locally
 - [ ] No console errors
 - [ ] S(ρ), Tr(ρ²) values sane on presets
+## Summary
+
+- What this PR does
+
+## Checks
+
+- [ ] Builds locally (`npm run build` in `sites/blackroad`)
+- [ ] Lints/format runs (`npm run format`)
+
+## Flags
+
+- [ ] Security scans needed

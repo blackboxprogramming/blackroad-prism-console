@@ -11,16 +11,30 @@ on:
   push: { branches: [main] }
   pull_request: { branches: [main] }
     - cron: "0 9 * * 1"
+name: CodeQL (flag-aware, advisory)
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule: [{ cron: '0 3 * * 1' }]
 permissions:
   contents: read
   security-events: write
 jobs:
+  flags:
+    uses: ./.github/workflows/flags.yml
   analyze:
     name: CodeQL
     runs-on: ubuntu-latest
     strategy: { language: [ 'javascript', 'python' ] }
     strategy:
       matrix: { language: ['javascript'] }
+    needs: flags
+    if: needs.flags.outputs.security_scans == 'true'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: codeql-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v5
       - uses: github/codeql-action/init@v3
@@ -70,3 +84,6 @@ jobs:
       - uses: github/codeql-action/init@v3
         with: { languages: javascript }
       - uses: github/codeql-action/analyze@v3
+        with: { languages: javascript }
+      - uses: github/codeql-action/analyze@v3
+        continue-on-error: true

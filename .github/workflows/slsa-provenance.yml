@@ -16,3 +16,21 @@ jobs:
         with:
           base64-subjects: ""
           upload-assets: true
+name: SLSA Provenance (optional)
+on:
+  workflow_run:
+    workflows: ['Container — Build & Push (GHCR)']
+    types: [completed]
+permissions:
+  id-token: write
+  packages: write
+  contents: read
+jobs:
+  attest:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate provenance (placeholder)
+        run: echo "Provenance would be generated here (enable SLSA generator when ready)."
+      - name: Summary
+        run: echo "Advisory provenance step complete." >> $GITHUB_STEP_SUMMARY

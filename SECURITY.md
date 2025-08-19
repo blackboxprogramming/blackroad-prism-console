@@ -20,3 +20,6 @@ Send an email to [security@blackroad.io](mailto:security@blackroad.io) with the 
 Please do not disclose the vulnerability publicly until it has been addressed.
 If you discover a security issue, please email [security@blackroad.app](mailto:security@blackroad.app).
 Please report security issues to [security@blackroad.io](mailto:security@blackroad.io).
+- Report vulnerabilities via private issue (label: security) or email security@blackroad.io (placeholder).
+- Do not include PII or secrets in reports.
+- We use advisory scans (Semgrep/Trivy/Gitleaks/Checkov, CodeQL) behind feature flags.
