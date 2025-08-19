@@ -1,0 +1,134 @@
+{
+  "id": "ai-math-roadmap",
+  "version": "1.0.0",
+  "owner": "blackroad/lucidia",
+  "style": {
+    "mode": "machine_chit_chat",
+    "truth_marks": {"pos":"✓","zero":"0","neg":"–1"},
+    "difficulty_scale": ["seed","sprout","branch","canopy"]
+  },
+  "blocks": [
+    {
+      "id": "algebra",
+      "title": "Algebra Foundations",
+      "why": "Symbol manipulation for optimization and probabilistic reasoning.",
+      "units": [
+        {
+          "id": "exponents-radicals",
+          "concept": "Exponents & radicals",
+          "objectives": [
+            "Laws of exponents, radicals, rationals",
+            "Transform expressions for numerical stability"
+          ],
+          "tasks": [
+            "Reduce expressions using exponent laws",
+            "Stabilize (1+x)^n for small x via log-exp"
+          ],
+          "check": ["Prove a^m * a^n = a^(m+n) from definition"],
+          "resources": [
+            {"name": "Primer", "url": "https://en.wikipedia.org/wiki/Exponent"},
+            {"name": "Stability Notes", "url": "https://en.wikipedia.org/wiki/Numerical_stability"}
+          ]
+        },
+        {
+          "id": "factorials-sigma-pi",
+          "concept": "Factorials, Σ/Π notation",
+          "objectives": [
+            "Manipulate finite sums/products",
+            "Use Stirling approximation for large n"
+          ],
+          "tasks": ["Transform nested sums to closed forms when possible"],
+          "check": ["Derive Stirling n! ~ sqrt(2πn)(n/e)^n (outline)"],
+          "resources": [
+            {"name": "Sigma/Pi", "url": "https://en.wikipedia.org/wiki/Summation"},
+            {"name": "Stirling", "url": "https://en.wikipedia.org/wiki/Stirling%27s_approximation"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "linear-algebra",
+      "title": "Linear Algebra",
+      "why": "Vectors, matrices, eigen methods; backbone of ML.",
+      "units": [
+        {
+          "id": "vec-mat-ops",
+          "concept": "Vectors, matrices, norms, dot/Hadamard",
+          "objectives": ["Operator vs elementwise views", "Conditioning & norms"],
+          "tasks": ["Compute ||Ax - b||_2 and reason about conditioning κ(A)"],
+          "check": ["Show why orthogonal matrices preserve 2-norm"]
+        },
+        {
+          "id": "eigs-svd-pca",
+          "concept": "Eigenvalues, SVD, PCA",
+          "objectives": ["Dekompositions for compression/denoising", "PCA as SVD"],
+          "tasks": ["Implement PCA from scratch"],
+          "check": ["Prove best rank-k approximation from SVD (Eckart–Young)"]
+        }
+      ]
+    },
+    {
+      "id": "calculus",
+      "title": "Calculus for Optimization",
+      "why": "Gradients drive learning; curvature shapes steps.",
+      "units": [
+        {
+          "id": "gradients",
+          "concept": "Partial derivatives, gradient/Jacobian/Hessian",
+          "objectives": ["Chain rule in vector form", "Hessian PSD checks"],
+          "tasks": ["Derive gradient of logistic loss"],
+          "check": ["When is a stationary point a saddle? Use Hessian signs."]
+        },
+        {
+          "id": "opt",
+          "concept": "Optimization basics",
+          "objectives": ["GD vs Newton vs quasi-Newton", "Step size & line search"],
+          "tasks": ["Implement GD with backtracking on convex quadratic"],
+          "check": ["Explain why Newton is affine invariant"]
+        }
+      ]
+    },
+    {
+      "id": "prob-stats",
+      "title": "Probability & Statistics",
+      "why": "Uncertainty, inference, estimators.",
+      "units": [
+        {
+          "id": "rv-bayes-mle",
+          "concept": "Random variables, Bayes, MLE",
+          "objectives": ["Likelihood vs posterior", "Conjugacy intuition"],
+          "tasks": ["MLE for Gaussian mean/variance, closed form"],
+          "check": ["When is MLE biased? Give a counterexample."]
+        },
+        {
+          "id": "distributions",
+          "concept": "Core distributions",
+          "objectives": ["Gaussian, Bernoulli, Categorical, Exponential, Gamma"],
+          "tasks": ["Map data generating processes to distributions"],
+          "check": ["Show exponential is memoryless"]
+        }
+      ]
+    },
+    {
+      "id": "information-theory",
+      "title": "Information Theory",
+      "why": "Losses, coding, and divergence in ML.",
+      "units": [
+        {
+          "id": "entropy-xent-kl",
+          "concept": "Entropy, cross-entropy, KL",
+          "objectives": ["Axes: H, H(p,q), D_KL", "Relate x-entropy to NLL"],
+          "tasks": ["Train a tiny softmax classifier and track losses"],
+          "check": ["Prove D_KL(p||q) ≥ 0 via Gibbs inequality"]
+        },
+        {
+          "id": "viterbi-encdec",
+          "concept": "Sequences: Viterbi & encoder–decoder intuition",
+          "objectives": ["Dynamic programming view", "Codec intuition"],
+          "tasks": ["Run a Viterbi on a toy HMM"],
+          "check": ["Explain why Viterbi is MAP over paths"]
+        }
+      ]
+    }
+  ]
+}
