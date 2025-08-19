@@ -1,18 +1,27 @@
-/* eslint-env node */
-/* global process */
-// Minimal Node healthcheck: exits 0 if server answers < 500 on /health (or /)
-import http from 'http';
+/* FILE: scripts/healthcheck.js */
+const DEFAULT_PORT = process.env.PORT || 8000;
+const endpoint = process.env.HEALTH_ENDPOINT || `http://localhost:${DEFAULT_PORT}/healthz`;
 
-const host = '127.0.0.1';
-const port = Number(process.env.PORT || 8000);
-const path = process.env.HEALTH_PATH || '/health';
+const abort = new AbortController();
+const timeout = setTimeout(() => abort.abort(), 4000);
 
-function check() {
-  const req = http.request({ host, port, path, timeout: 3000 }, (res) => {
-    if (res.statusCode && res.statusCode < 500) process.exit(0);
-    else process.exit(1);
-  });
-  req.on('error', () => process.exit(1));
-  req.end();
-}
-check();
+(async () => {
+  try {
+    const res = await fetch(endpoint, { signal: abort.signal });
+    clearTimeout(timeout);
+    if (!res.ok) {
+      console.error(`Healthcheck: HTTP ${res.status}`);
+      process.exit(2);
+    }
+    const body = await res.text().catch(() => '');
+    if (!body || !/ok/i.test(body)) {
+      console.error(`Healthcheck: unexpected body: ${body}`);
+      process.exit(3);
+    }
+    console.log('ok');
+    process.exit(0);
+  } catch (err) {
+    console.error(`Healthcheck error: ${err && err.message ? err.message : err}`);
+    process.exit(1);
+  }
+})();
