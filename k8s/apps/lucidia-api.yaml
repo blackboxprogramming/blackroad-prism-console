@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: lucidia-api
+  namespace: blackroad
+spec:
+  selector:
+    app: lucidia-api
+    track: stable
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lucidia-api
+  namespace: blackroad
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lucidia-api
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: lucidia-api
+        track: stable
+      annotations:
+        consul.hashicorp.com/connect-inject: "true"
+        consul.hashicorp.com/connect-service: "lucidia-api"
+        consul.hashicorp.com/transparent-proxy: "true"
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/yourorg/lucidia-api:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
