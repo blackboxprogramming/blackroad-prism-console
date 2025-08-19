@@ -9,10 +9,9 @@
     "fast-json-stable-stringify": "^2.1.0",
     "prom-client": "^15.0.0",
     "zod": "^3.23.8",
-    "ai": "latest",
-    "@ai-sdk/xai": "latest",
-    "@ai-sdk/openai": "latest",
-    "@ai-sdk/anthropic": "latest"
+    "next": "14.2.5",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",
@@ -34,10 +33,10 @@
     "prepare": "husky",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.mjs,.cjs || true",
     "test": "node tests/smoke.test.js",
-    "dev": "npm --prefix sites/blackroad run dev",
-    "build": "npm --prefix sites/blackroad run build",
+    "dev": "next dev",
+    "build": "next build",
     "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true",
-    "start": "node src/server.js"
+    "start": "next start"
   },
   "lint-staged": {
     "**/*.{js,mjs,cjs,html,css,md,yml,yaml,json}": [
