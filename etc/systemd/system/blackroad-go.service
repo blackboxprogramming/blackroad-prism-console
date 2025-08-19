@@ -1,0 +1,15 @@
+[Unit]
+Description=BlackRoad Go Service (Pachi GTP wrapper)
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/blackroad
+Environment=PYTHONPATH=/opt/blackroad
+ExecStart=/usr/bin/uvicorn services.go_service:app --host 0.0.0.0 --port 8088
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

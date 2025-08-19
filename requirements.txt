@@ -8,3 +8,7 @@ anthropic
 boto3
 python-dotenv
 
+fastapi
+uvicorn
+pydantic
+requests
