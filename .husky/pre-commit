@@ -5,3 +5,7 @@ npx lint-staged
 
 npx lint-staged
 command -v gitleaks >/dev/null 2>&1 && gitleaks protect --staged --redact || true
+. "$(dirname "$0")/_/husky.sh"
+# Quick, quiet pre-commit polish (never hard-fail CI)
+npm run format --if-present
+npm run lint --if-present || true
