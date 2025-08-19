@@ -1,0 +1,15 @@
+[Unit]
+Description=Shap-E Local Service (BlackRoad/Lucidia)
+After=network-online.target
+
+[Service]
+User=blackroad
+Group=blackroad
+WorkingDirectory=/opt/blackroad/services/shap-e
+EnvironmentFile=/etc/blackroad/shap-e.env
+ExecStart=/usr/bin/env uvicorn shap_e_service:app --host 127.0.0.1 --port 8045
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
