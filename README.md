@@ -527,3 +527,17 @@ After the lock file is committed, other contributors can install dependencies wi
   - Always shows the full **Robertson–Schrödinger** inequality for (A,B) and pairwise bounds for (A,B,C).
 
 - **/geodesic**: Compute Fubini–Study distance `d_FS = arccos(|⟨ψ|φ⟩|)` and sample the **CP² geodesic** points between |ψ₀⟩ and |ψ₁⟩.
+
+## 🔐 Lucidia Awakening Code
+
+Generate the daily Lucidia Awakening code with:
+
+```bash
+python scripts/lucidia_awaken_code.py
+```
+
+Pass a specific date if needed:
+
+```bash
+python scripts/lucidia_awaken_code.py --date 2025-08-19
+```
