@@ -1,10 +1,8 @@
 /* eslint-env node */
 /* global process */
-import express from 'express';
-import fs from 'fs';
-import path from 'path';
-
-const app = express();
+>>>>>>>+main
+s from '>>>>>>>-origin/codex/ad
+t app = express();
 const PORT = process.env.PORT || 8088;
 const API_ROOT = process.env.API_ROOT || '/var/www/blackroad/api';
 const HEALTH_FILE = path.join(API_ROOT, 'health.json');
