@@ -1,0 +1,17 @@
+{
+  "system": {
+    "unit": "Angstrom",
+    "basis": "def2-SVP",
+    "charge": 0,
+    "spin": 0,
+    "atoms": [
+      ["O", [0.000000, 0.000000, 0.000000]],
+      ["H", [0.000000, 0.757000, 0.586000]],
+      ["H", [0.000000, -0.757000, 0.586000]]
+    ]
+  },
+  "scf": { "method": "dft", "xc": "PBE0", "density_fit": true },
+  "posthf": "none",
+  "accelerate": { "gpu": false },
+  "properties": ["homo_lumo_gap"]
+}
