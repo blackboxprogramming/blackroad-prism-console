@@ -1,6 +1,13 @@
 name: Gitleaks (secrets)
 on: [push, pull_request]
 permissions: { contents: read }
+name: gitleaks
+on:
+  push:
+    paths: ["droplet-manager-macos/**"]
+  pull_request:
+    paths: ["droplet-manager-macos/**"]
+
 jobs:
   scan:
     runs-on: ubuntu-latest
@@ -10,3 +17,6 @@ jobs:
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: gitleaks/gitleaks-action@v2
+        with:
+          config: .gitleaks.toml
