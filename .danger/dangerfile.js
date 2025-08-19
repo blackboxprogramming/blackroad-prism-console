@@ -31,3 +31,4 @@ const hasScreenshot = /!\[.*\]\(.*\)/.test(danger.github.pr.body || '');
 if (!hasScreenshot && files.some((f) => f.endsWith('.html'))) {
   warn('UI change detected, but no screenshot in the PR body.');
 }
+
