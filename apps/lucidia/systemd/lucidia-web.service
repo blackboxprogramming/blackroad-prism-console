@@ -1,0 +1,14 @@
+# <!-- FILE: /apps/lucidia/systemd/lucidia-web.service -->
+[Unit]
+Description=Lucidia Web
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+WatchdogSec=30
+ExecStart=/usr/local/bin/docker compose -f /srv/blackroad/stack/docker-compose.yml up -d lucidia-web
+ExecStop=/usr/local/bin/docker compose -f /srv/blackroad/stack/docker-compose.yml stop lucidia-web
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+# <!-- FILE: /infra/wireguard/wg0.conf.template -->
+[Interface]
+Address = 10.10.0.1/32
+ListenPort = 51820
+PrivateKey = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+
+# Peer example
+#[Peer]
+#PublicKey = BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=
+#AllowedIPs = 10.10.0.2/32
+#Endpoint = peer.example.com:51820
