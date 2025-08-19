@@ -5,6 +5,7 @@ s from '>>>>>>>-origin/codex/ad
 t app = express();
 /* global process, console */
 
+/* global process, console */
 import express from 'express';
 import fs from 'fs';
 import path from 'path';

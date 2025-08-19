@@ -15,6 +15,7 @@ else:
     st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 client = OpenAI(api_key=api_key) if api_key else None
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")

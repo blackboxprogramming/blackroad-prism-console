@@ -8,6 +8,8 @@
 /* global danger, warn, message */
 
 // Quick quality checks for pull requests
+/* eslint-env node */
+/* global danger, warn, message */
 
 const files = danger.git.modified_files.concat(danger.git.created_files);
 const big = files.filter((f) => f.endsWith('.html') || f.endsWith('.js'));
