@@ -1,0 +1,20 @@
+flask
+flask-cors
+pydantic
+requests
+uvicorn
+python-dotenv
+# ASR
+faster-whisper
+# Image generation (local)
+torch
+torchvision
+torchaudio
+accelerate
+diffusers
+transformers
+safetensors
+# Utils
+numpy
+Pillow
+opencv-python
