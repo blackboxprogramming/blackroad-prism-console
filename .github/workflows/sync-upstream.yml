@@ -1,0 +1,21 @@
+name: Sync upstream
+on:
+  schedule: [{ cron: '17 3 * * *' }]
+  workflow_dispatch: {}
+permissions: { contents: write }
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Add upstream & fetch
+        run: |
+          git remote add upstream https://github.com/argoproj/argo-workflows.git || true
+          git fetch --prune upstream
+          git push origin --tags
+          # Mirror main and release branches
+          for b in main $(git branch -r | awk -F/ '/upstream\/release-/{print $2}'); do
+            git switch -C "$b" "upstream/$b"
+            git push -u origin "$b"
+          done
