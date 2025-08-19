@@ -513,3 +513,14 @@ After the lock file is committed, other contributors can install dependencies wi
 3. Fire a test conversion:
    - Hit the Home page and click “Demo: Record Conversion”.
    - Open `/metrics` → Conversions should light up with `cta_click`.
+
+## Math Labs
+
+### Uncertainty & Geodesics
+
+- **/uncertainty**: Pick observable packs:
+  - *Spin-1 (SU(2))*: Sx, Sy, Sz (+ S±). Shows exact spin-1 sum-of-variances bound ∑Var ≥ 1.
+  - *Weyl qutrit (d=3)*: X, Z and their Hermitian parts (position/momentum-like).
+  - Always shows the full **Robertson–Schrödinger** inequality for (A,B) and pairwise bounds for (A,B,C).
+
+- **/geodesic**: Compute Fubini–Study distance `d_FS = arccos(|⟨ψ|φ⟩|)` and sample the **CP² geodesic** points between |ψ₀⟩ and |ψ₁⟩.

@@ -20,6 +20,9 @@ const links = [
   { to: '/deploys', label: 'Deploys' },
   { to: '/inbox', label: 'Inbox' },
   { to: '/observability', label: 'Observability' },
+  { to: '/math', label: 'MathLab' },
+  { to: '/uncertainty', label: 'Uncertainty' },
+  { to: '/geodesic', label: 'Geodesic' },
 ];
 
 function navigate(e, to) {
