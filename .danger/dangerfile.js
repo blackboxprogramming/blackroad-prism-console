@@ -1,4 +1,15 @@
 /* Dangerfile: comment on PRs with quick quality checks */
+/* global danger, message, warn */
+
+// Removed unused fs import; Danger provides necessary context.
+/* eslint-env node */
+/* global danger, message, warn */
+/* eslint-env node */
+/* global danger, warn, message */
+
+// Quick quality checks for pull requests
+/* eslint-env node */
+/* global danger, warn, message */
 /* global danger, warn, message */
 
 // PR quality checks executed by Danger.js

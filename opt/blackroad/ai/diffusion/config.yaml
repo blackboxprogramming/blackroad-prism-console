@@ -1,0 +1,23 @@
+# Core paths
+MODEL_DIR: /opt/blackroad/ai/diffusion/models
+RUNS_DIR: /opt/blackroad/ai/diffusion/runs
+
+# Default sampling params (overridable per request)
+defaults:
+  image_size: 256
+  batch_size: 4
+  num_samples: 16
+  seed: 42
+  timestep_respacing: '250' # <= fewer steps than 1000, faster
+  classifier_scale: 1.0
+
+# Hardware
+device: 'cuda' # set "cpu" if no GPU; works but slower
+
+# Model filenames (replace with the ones you actually have)
+model_paths:
+  diffusion_256: '256x256_diffusion.pt'
+  classifier_256: '256x256_classifier.pt'
+
+# Label mapping file (optional; see text_label_map.py)
+label_map_json: '/opt/blackroad/ai/diffusion/imagenet_class_index.json'

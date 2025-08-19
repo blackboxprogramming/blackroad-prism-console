@@ -1,0 +1,17 @@
+name: "lucidia-ollama"
+backend: "ollama"
+backend_params:
+  host: "http://localhost:11434"
+  model: "codellama:7b-instruct-q4_K_M"   # <-- set your local Ollama model tag
+  timeout_s: 60
+  max_tokens: 256
+  temperature: 0.2
+  top_p: 0.95
+  stop: ["\n\n\n", "\n# End", "\nif __name__ == '__main__':"]
+sampling:
+  n_samples_per_task: 20
+  tasks: "all"      # or list: ["HumanEval/0","HumanEval/1",...]
+prompt:
+  template_path: "prompts/codex_prompt.txt"
+paths:
+  output_dir: "outputs"

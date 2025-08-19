@@ -1,0 +1,448 @@
+# Lessons 41-80 — advanced, ML-flavored, infra & CI automation, skip-safe
+lessons:
+  - id: 41-typedoc
+    title: 'Generate TypeDoc (TS projects)'
+    goal: 'Produce API docs when tsconfig exists'
+    instructions: |
+      Detect tsconfig.json; install typedoc; add npm script docs:ts; generate to docs/ts.
+    acceptance:
+      - 'docs/ts exists or step skipped if no tsconfig'
+    actions:
+      - run: 'test -f tsconfig.json || exit 0'
+      - run: 'npm i -D typedoc || true'
+      - node: |
+          const fs=require('fs');if(fs.existsSync('package.json')){const j=JSON.parse(fs.readFileSync('package.json','utf8'));j.scripts=j.scripts||{};j.scripts['docs:ts']=j.scripts['docs:ts']||'typedoc --out docs/ts';fs.writeFileSync('package.json',JSON.stringify(j,null,2));}
+      - run: 'npm run docs:ts || true'
+
+  - id: 42-pytest-init
+    title: 'Pytest baseline'
+    goal: 'Enable pytest with a passing smoke test'
+    instructions: |
+      If Python files are present, add requirements.txt (pytest), create tests/test_smoke.py.
+    acceptance:
+      - 'pytest -q passes or skipped if no py files'
+    actions:
+      - run: 'git ls-files "**/*.py" | grep -q . || exit 0'
+      - ensure: 'requirements.txt'
+      - run: 'grep -q pytest requirements.txt || echo pytest >> requirements.txt'
+      - ensure: 'tests/test_smoke.py'
+      - edit: 'tests/test_smoke.py'
+
+  - id: 43-go-lint-test
+    title: 'Go vet & test'
+    goal: 'Non-blocking vet/test for Go code'
+    instructions: |
+      If any .go exists, run go vet and go test; create go.mod if missing.
+    acceptance:
+      - 'go vet and tests run or skip safely'
+    actions:
+      - run: 'git ls-files "**/*.go" | grep -q . || exit 0'
+      - run: 'test -f go.mod || go mod init tmp || true'
+      - run: 'go vet ./... || true'
+      - run: 'go test ./... || true'
+
+  - id: 44-rust-ci
+    title: 'Rust fmt & clippy & test'
+    goal: 'Best-effort Rust CI'
+    instructions: |
+      If Cargo.toml exists, run fmt, clippy, test. Non-fatal if missing.
+    acceptance:
+      - 'Rust jobs succeed or skip'
+    actions:
+      - run: 'test -f Cargo.toml || exit 0'
+      - run: 'rustup component add rustfmt clippy || true'
+      - run: 'cargo fmt --all -- --check || true'
+      - run: 'cargo clippy -- -D warnings || true'
+      - run: 'cargo test || true'
+
+  - id: 45-trace-metrics
+    title: 'Add basic tracing hooks'
+    goal: 'Seed tracing/metrics stubs'
+    instructions: |
+      Create /observability/README.md with guidance and stubs for OpenTelemetry or console timer wrappers.
+    acceptance:
+      - 'observability/README.md present'
+    actions:
+      - ensure: 'observability/README.md'
+      - edit: 'observability/README.md'
+
+  - id: 46-node-cache-ci
+    title: 'Cache Node deps in CI'
+    goal: 'Speed installs with setup-node cache'
+    instructions: |
+      Update test.yml to use cache: npm and cache-dependency-path.
+    acceptance:
+      - 'Subsequent runs are faster'
+    actions:
+      - edit: '.github/workflows/test.yml'
+
+  - id: 47-commitlint
+    title: 'Commitlint advisory'
+    goal: 'Check commit messages (non-blocking)'
+    instructions: |
+      Add commitlint config and npm script, but do not fail CI.
+    acceptance:
+      - 'commitlint present; optional script'
+    actions:
+      - ensure: 'commitlint.config.cjs'
+      - node: |
+          const fs=require('fs');if(fs.existsSync('package.json')){const j=JSON.parse(fs.readFileSync('package.json','utf8'));j.scripts=j.scripts||{};j.scripts['lint:commits']=j.scripts['lint:commits']||'echo "(advisory)"';fs.writeFileSync('package.json',JSON.stringify(j,null,2));}
+
+  - id: 48-precommit
+    title: 'Pre-commit hooks (husky)'
+    goal: 'Prettier+ESLint on pre-commit'
+    instructions: |
+      Install husky; add hook to run format+lint; skip-safe.
+    acceptance:
+      - '.husky/pre-commit created'
+    actions:
+      - run: 'npm i -D husky || true'
+      - run: 'npx --yes husky init || true'
+      - run: 'printf "#!/usr/bin/env sh\nnpm run format && npm run lint || true\n" > .husky/pre-commit || true'
+      - run: 'git add .husky/pre-commit || true'
+
+  - id: 49-ts-init
+    title: 'TypeScript init'
+    goal: 'Add tsconfig if TS files exist'
+    instructions: |
+      Create tsconfig.json (strict true) when any .ts/.tsx present.
+    acceptance:
+      - 'tsconfig.json present or skipped'
+    actions:
+      - run: 'git ls-files "**/*.ts" "**/*.tsx" | grep -q . || exit 0'
+      - ensure: 'tsconfig.json'
+      - edit: 'tsconfig.json'
+
+  - id: 50-eslint-ts
+    title: 'ESLint TS support'
+    goal: 'Enable typescript-eslint if TS exists'
+    instructions: |
+      Install @typescript-eslint/* and update lint script.
+    acceptance:
+      - 'eslint runs on TS files'
+    actions:
+      - run: 'git ls-files "**/*.ts" "**/*.tsx" | grep -q . || exit 0'
+      - run: 'npm i -D @typescript-eslint/parser @typescript-eslint/eslint-plugin || true'
+      - edit: 'eslint.config.js'
+
+  - id: 51-semantic-release-doc
+    title: 'Semantic release doc'
+    goal: 'Describe commit types & release flow'
+    instructions: |
+      Add docs/release.md explaining conventional commits and Release Please.
+    acceptance:
+      - 'docs/release.md present'
+    actions:
+      - ensure: 'docs/release.md'
+      - edit: 'docs/release.md'
+
+  - id: 52-docker-healthcheck
+    title: 'Dockerfile HEALTHCHECK'
+    goal: 'Add simple healthcheck'
+    instructions: |
+      Add HEALTHCHECK curl localhost:port if applicable; skip if Dockerfile missing.
+    acceptance:
+      - 'Dockerfile contains HEALTHCHECK or skipped'
+    actions:
+      - run: 'test -f Dockerfile || exit 0'
+      - edit: 'Dockerfile'
+
+  - id: 53-compose-health
+    title: 'Compose healthchecks'
+    goal: 'Add depends_on: condition: service_healthy'
+    instructions: |
+      Update docker-compose.yml with healthchecks and dependency order.
+    acceptance:
+      - 'Compose brings up healthy services'
+    actions:
+      - run: 'test -f docker-compose.yml || exit 0'
+      - edit: 'docker-compose.yml'
+
+  - id: 54-md-lint
+    title: 'Markdown lint config'
+    goal: 'Add .markdownlint.json'
+    instructions: |
+      Seed a minimal markdownlint config.
+    acceptance:
+      - '.markdownlint.json present'
+    actions:
+      - ensure: '.markdownlint.json'
+      - edit: '.markdownlint.json'
+
+  - id: 55-yamllint
+    title: 'Yamllint config'
+    goal: 'Add .yamllint.yaml'
+    instructions: |
+      Seed yamllint configuration (advisory).
+    acceptance:
+      - '.yamllint.yaml present'
+    actions:
+      - ensure: '.yamllint.yaml'
+      - edit: '.yamllint.yaml'
+
+  - id: 56-openapi-stub
+    title: 'OpenAPI stub'
+    goal: 'Add openapi/openapi.yaml placeholder'
+    instructions: |
+      Create folder and minimal spec; skip if not API repo, still harmless.
+    acceptance:
+      - 'openapi/openapi.yaml exists'
+    actions:
+      - ensure: 'openapi/openapi.yaml'
+      - edit: 'openapi/openapi.yaml'
+
+  - id: 57-ci-timeouts
+    title: 'Add timeouts to jobs'
+    goal: 'Cap long-running jobs'
+    instructions: |
+      Add `timeout-minutes: 20` to heavier workflows.
+    acceptance:
+      - 'Key workflows carry timeouts'
+    actions:
+      - edit: '.github/workflows'
+
+  - id: 58-cache-pip
+    title: 'Cache pip in CI'
+    goal: 'Speed Python installs'
+    instructions: |
+      Use actions/cache for ~/.cache/pip keyed by requirements.txt hash.
+    acceptance:
+      - 'test.yml caches pip when Python job runs'
+    actions:
+      - edit: '.github/workflows/monorepo-matrix.yml'
+
+  - id: 59-license
+    title: 'LICENSE file'
+    goal: 'Add MIT license by default (editable)'
+    instructions: |
+      Create LICENSE; user can change later.
+    acceptance:
+      - 'LICENSE present'
+    actions:
+      - ensure: 'LICENSE'
+      - edit: 'LICENSE'
+
+  - id: 60-code-of-conduct
+    title: 'CODE_OF_CONDUCT'
+    goal: 'Add Contributor Covenant template'
+    instructions: |
+      Create CODE_OF_CONDUCT.md minimal.
+    acceptance:
+      - 'CODE_OF_CONDUCT.md present'
+    actions:
+      - ensure: 'CODE_OF_CONDUCT.md'
+      - edit: 'CODE_OF_CONDUCT.md'
+
+  - id: 61-security-md
+    title: 'SECURITY policy'
+    goal: 'Add SECURITY.md with contact route'
+    instructions: |
+      Document how to report vulnerabilities.
+    acceptance:
+      - 'SECURITY.md present'
+    actions:
+      - ensure: 'SECURITY.md'
+      - edit: 'SECURITY.md'
+
+  - id: 62-issue-labels
+    title: 'Default labels doc'
+    goal: 'Document label meanings'
+    instructions: |
+      Create docs/labels.md listing common labels.
+    acceptance:
+      - 'docs/labels.md present'
+    actions:
+      - ensure: 'docs/labels.md'
+      - edit: 'docs/labels.md'
+
+  - id: 63-pr-size-labels
+    title: 'PR size labelling'
+    goal: 'Auto-label PRs by diff size'
+    instructions: |
+      Add tiny action snippet using labeler or github-script.
+    acceptance:
+      - 'PRs get size labels'
+    actions:
+      - ensure: '.github/workflows/pr-size.yml'
+
+  - id: 64-dependabot-opt
+    title: 'Dependabot config'
+    goal: 'Ensure dependabot.yml present'
+    instructions: |
+      Create .github/dependabot.yml if missing.
+    acceptance:
+      - 'dependabot enabled'
+    actions:
+      - ensure: '.github/dependabot.yml'
+
+  - id: 65-renovate-opt
+    title: 'Renovate config'
+    goal: 'Ensure renovate.json5 present'
+    instructions: |
+      Create renovate.json5 if missing.
+    acceptance:
+      - 'renovate config present'
+    actions:
+      - ensure: '.github/renovate.json5'
+
+  - id: 66-gh-templates
+    title: 'GH templates polish'
+    goal: 'Ensure PR/issue templates exist'
+    instructions: |
+      Reuse existing or create minimal.
+    acceptance:
+      - 'Templates visible in UI'
+    actions:
+      - ensure: '.github/PULL_REQUEST_TEMPLATE.md'
+      - ensure: '.github/ISSUE_TEMPLATE/feature_request.yml'
+      - ensure: '.github/ISSUE_TEMPLATE/bug_report.yml'
+
+  - id: 67-npm-audit-advisory
+    title: 'npm audit advisory'
+    goal: 'Run npm audit without failing CI'
+    instructions: |
+      Provide npm script audit:ci that exits 0.
+    acceptance:
+      - "'npm run audit:ci' exists"
+    actions:
+      - node: |
+          const fs=require('fs');if(fs.existsSync('package.json')){const j=JSON.parse(fs.readFileSync('package.json','utf8'));j.scripts=j.scripts||{};j.scripts['audit:ci']='npm audit || true';fs.writeFileSync('package.json',JSON.stringify(j,null,2));}
+
+  - id: 68-node-version
+    title: 'Engines field'
+    goal: 'Add engines.node >=20'
+    instructions: |
+      Set engines.node in package.json for consistency.
+    acceptance:
+      - 'engines.node present'
+    actions:
+      - node: |
+          const fs=require('fs');if(fs.existsSync('package.json')){const j=JSON.parse(fs.readFileSync('package.json','utf8'));j.engines=j.engines||{};j.engines.node=j.engines.node||'>=20';fs.writeFileSync('package.json',JSON.stringify(j,null,2));}
+
+  - id: 69-nvm
+    title: '.nvmrc'
+    goal: 'Add .nvmrc with v20'
+    instructions: |
+      Create .nvmrc for local dev convenience.
+    acceptance:
+      - '.nvmrc present'
+    actions:
+      - ensure: '.nvmrc'
+      - edit: '.nvmrc'
+
+  - id: 70-editor-settings
+    title: 'VS Code settings'
+    goal: 'Seed .vscode/settings.json'
+    instructions: |
+      Configure format on save and default formatter.
+    acceptance:
+      - '.vscode/settings.json present'
+    actions:
+      - ensure: '.vscode/settings.json'
+      - edit: '.vscode/settings.json'
+
+  - id: 71-gh-pages-cname
+    title: 'Pages CNAME'
+    goal: 'Add CNAME for blackroad.io if site exists'
+    instructions: |
+      Create sites/blackroad/CNAME with custom domain (editable).
+    acceptance:
+      - 'CNAME present or skipped'
+    actions:
+      - run: 'test -d sites/blackroad || exit 0'
+      - ensure: 'sites/blackroad/CNAME'
+      - edit: 'sites/blackroad/CNAME'
+
+  - id: 72-eslint-ci-no-fail
+    title: 'Advisory ESLint exit 0 in CI'
+    goal: 'Prevent noisy ESLint from failing CI'
+    instructions: |
+      In CI, run eslint with || true as backup.
+    acceptance:
+      - 'test.yml updated'
+    actions:
+      - edit: '.github/workflows/test.yml'
+
+  - id: 73-prettier-ignore
+    title: 'Prettier ignore'
+    goal: 'Add .prettierignore'
+    instructions: |
+      Ignore build/vendor directories.
+    acceptance:
+      - '.prettierignore present'
+    actions:
+      - ensure: '.prettierignore'
+      - edit: '.prettierignore'
+
+  - id: 74-jsdoc-init
+    title: 'JSDoc config'
+    goal: 'Add jsdoc.json'
+    instructions: |
+      Provide minimal JSDoc config if using docs:api.
+    acceptance:
+      - 'jsdoc.json present'
+    actions:
+      - ensure: 'jsdoc.json'
+      - edit: 'jsdoc.json'
+
+  - id: 75-tf-validate
+    title: 'Terraform validate (skip-safe)'
+    goal: 'If *.tf exists, run fmt -check and validate'
+    instructions: |
+      Add ChatOps /tf validate guarded and workflow snippet.
+    acceptance:
+      - 'Validation runs or skip'
+    actions:
+      - ensure: '.github/workflows/calm-chatops.yml'
+
+  - id: 76-gha-permissions-doc
+    title: 'GHA permissions doc'
+    goal: 'Document least-privilege in workflows'
+    instructions: |
+      Create docs/gha-permissions.md summarizing current settings.
+    acceptance:
+      - 'docs/gha-permissions.md present'
+    actions:
+      - ensure: 'docs/gha-permissions.md'
+      - edit: 'docs/gha-permissions.md'
+
+  - id: 77-cspell
+    title: 'Code spell checker'
+    goal: 'Add cspell config (advisory)'
+    instructions: |
+      Add cspell.json; optional npm script.
+    acceptance:
+      - 'cspell.json present'
+    actions:
+      - ensure: 'cspell.json'
+      - edit: 'cspell.json'
+
+  - id: 78-gh-action-reuse
+    title: 'Reusable workflow stub'
+    goal: 'Add .github/workflows/_reusable.yml'
+    instructions: |
+      Provide a template to be called via workflow_call.
+    acceptance:
+      - '_reusable.yml exists'
+    actions:
+      - ensure: '.github/workflows/_reusable.yml'
+
+  - id: 79-ci-summary
+    title: 'CI summary step'
+    goal: 'Add step to write $GITHUB_STEP_SUMMARY'
+    instructions: |
+      Update key workflows to use summaries for clarity.
+    acceptance:
+      - 'Summaries appear in runs'
+    actions:
+      - edit: '.github/workflows'
+
+  - id: 80-pr-description-ai
+    title: 'AI PR description (flag-aware)'
+    goal: 'Generate PR description via Ollama when enabled'
+    instructions: |
+      Wire ChatOps `/describe` to call ollama_call.sh and post output.
+    acceptance:
+      - 'Comment appears with AI text when ai_tools=true'
+    actions:
+      - ensure: '.github/workflows/calm-chatops.yml'

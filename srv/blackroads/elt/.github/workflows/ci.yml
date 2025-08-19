@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('srv/blackroads/elt/pipelines/requirements.txt') }}
+      - name: Install dependencies
+        run: |
+          pip install -r srv/blackroads/elt/pipelines/requirements.txt
+          pip install dbt-postgres
+      - name: Lint
+        run: ruff srv/blackroads/elt/pipelines
+      - name: Compile dbt
+        working-directory: srv/blackroads/elt/dbt
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: dummy
+          POSTGRES_PASSWORD: dummy
+          POSTGRES_DB: dummy
+          POSTGRES_PORT: 5432
+        run: dbt deps && dbt compile
+      - name: CSV schema check
+        run: |
+          python - <<'PY'
+import pandas as pd
+from pathlib import Path
+cols = {'VendorID','tpep_pickup_datetime','tpep_dropoff_datetime'}
+path = Path('srv/blackroads/elt/data/raw/yellow_tripdata_sample.csv')
+df = pd.read_csv(path)
+missing = cols - set(df.columns)
+if missing:
+    raise SystemExit(f'Missing columns: {missing}')
+PY

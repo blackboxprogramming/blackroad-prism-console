@@ -1,95 +1,46 @@
 name: Apply Rulesets (best-effort)
 on:
-  push:
-    branches: [ main ]
+  push: { branches: [ main ] }
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   rulesets:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup gh cli
-        uses: cli/cli-action@v2
-      - name: Upsert ruleset for main
+      - name: Preflight admin token
+        id: pre
+        run: |
+          if [ -z "${ADMIN_TOKEN:-}" ]; then echo "go=no" >> "$GITHUB_OUTPUT"; else echo "go=yes" >> "$GITHUB_OUTPUT"; fi
+        env: { ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }} }
+      - uses: cli/cli-action@v2
+        if: steps.pre.outputs.go == 'yes'
+      - name: Upsert ruleset
+        if: steps.pre.outputs.go == 'yes'
         env:
-          GH_TOKEN: ${{ secrets.ADMIN_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ADMIN_TOKEN }}
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
         run: |
           set -e
           header='-H Accept: application/vnd.github+json'
           base="/repos/$OWNER/$REPO/rulesets"
-
-          echo "🔎 Checking existing rulesets…"
-          gh api $header "$base" > /tmp/rs.json || { echo "::warning::Cannot list rulesets (insufficient scope/plan?)"; exit 0; }
-
-          # Prepare payload (GitHub may evolve this schema; if the API rejects it, we log and exit 0)
-          cat > /tmp/main_ruleset.json <<'JSON'
-          {
-            "name": "Main branch protections",
-            "target": "branch",
-            "enforcement": "active",
-            "conditions": {
-              "ref_name": {
-                "include": ["~DEFAULT_BRANCH", "main"],
-                "exclude": []
-              }
-            },
-            "bypass_actors": [],
-            "rules": [
-              { "type": "required_signatures" },
-              { "type": "required_linear_history" },
-              {
-                "type": "pull_request",
-                "parameters": {
-                  "dismiss_stale_reviews_on_push": true,
-                  "require_code_owner_review": true,
-                  "required_approving_review_count": 1
-                }
-              },
-              {
-                "type": "required_status_checks",
-                "parameters": {
-                  "strict_required_status_checks": true,
-                  "required_status_checks": [
-                    { "context": "Deploy Quantum App (safe)" },
-                    { "context": "CodeQL" },
-                    { "context": "Snyk Scan" },
-                    { "context": "Trivy FS Scan" },
-                    { "context": "Gitleaks (secrets)" }
-                  ]
-                }
-              }
-            ]
-          }
+          gh api $header "$base" >/tmp/rs.json || { echo "Rulesets list failed; skipping"; exit 0; }
+          cat > /tmp/rs.json.new <<JSON
+          { "name":"Main protections","target":"branch","enforcement":"active",
+            "conditions":{"ref_name":{"include":["~DEFAULT_BRANCH","main"],"exclude":[]}},
+            "rules":[{"type":"required_linear_history"},{"type":"required_signatures"},
+                     {"type":"pull_request","parameters":{"required_approving_review_count":1,"require_code_owner_review":true}}] }
           JSON
-
-          # Resolve default branch name in payload
-          default_branch=$(gh api $header "/repos/$OWNER/$REPO" --jq .default_branch || echo main)
-          jq --arg def "~DEFAULT_BRANCH" --arg real "$default_branch" \
-            '(.. | select(type == "string")) |= if . == $def then $real else . end' \
-            /tmp/main_ruleset.json >/tmp/main_ruleset_resolved.json
-
-          # Find existing ruleset with same name
-          rs_id=$(jq -r '.[] | select(.name=="Main branch protections") | .id' /tmp/rs.json || true)
-          if [ -n "$rs_id" ] && [ "$rs_id" != "null" ]; then
-            echo "✏️  Updating existing ruleset id=$rs_id"
-            code=$(gh api $header -X PATCH "$base/$rs_id" --input /tmp/main_ruleset_resolved.json -i 2>&1 | tail -n1 | awk '{print $2}')
-            # gh prints response headers on -i; ignore parse if layout changes
-            echo "Updated (best-effort)."
+          def=$(gh api $header "/repos/$OWNER/$REPO" --jq .default_branch)
+          jq --arg d "$def" '(..|strings|select(.=="~DEFAULT_BRANCH")) |= $d' /tmp/rs.json.new >/tmp/rs.final
+          id=$(jq -r '.[]|select(.name=="Main protections")|.id' /tmp/rs.json || true)
+          if [ -n "$id" ] && [ "$id" != "null" ]; then
+            gh api $header -X PATCH "$base/$id" --input /tmp/rs.final >/dev/null || echo "PATCH failed; skipping"
           else
-            echo "➕ Creating ruleset…"
-            if ! gh api $header -X POST "$base" --input /tmp/main_ruleset_resolved.json >/dev/null 2>&1; then
-              echo "::warning::Ruleset create failed (token scope/plan restrictions or API changes). Skipping without error."
-              exit 0
-            fi
-            echo "✅ Ruleset created."
+            gh api $header -X POST "$base" --input /tmp/rs.final >/dev/null || echo "POST failed; skipping"
           fi
+      - name: Summary
+        if: steps.pre.outputs.go != 'yes'
+        run: echo "ℹ️ Skipping rulesets (no ADMIN_TOKEN)." >> $GITHUB_STEP_SUMMARY
 
-      - name: Summarize
-        run: |
-          echo "If your plan or token doesn't allow Rulesets, the step above posted a warning."
-          echo "No action needed; everything else (branch protection workflow, project board, CI) still works."

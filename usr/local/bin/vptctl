@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Simple CLI to talk to Lucidia VPT Service
+set -euo pipefail
+HOST="${VPT_HOST:-http://127.0.0.1:8188}"
+TOKEN_FILE="${VPT_TOKEN_FILE:-/opt/blackroad/vpt/.token}"
+AUTH="Authorization: Bearer $(cat "$TOKEN_FILE" 2>/dev/null || echo "changeme")"
+
+case "${1:-}" in
+  status)
+    curl -s "${HOST}/agent/status"
+    ;;
+  start)
+    # vptctl start <model> <weights> [env] [extra_args...]
+    MODEL="${2:-foundation-1x.model}"
+    WEIGHTS="${3:-foundation-1x.weights}"
+    ENV="${4:-MineRLTreechop-v0}"
+    shift 4 || true
+    EXTRA="$*"
+    curl -s -X POST "${HOST}/agent/start" \
+      -H "$AUTH" -H "Content-Type: application/json" \
+      -d "{\"model\":\"${MODEL}\",\"weights\":\"${WEIGHTS}\",\"minerl_env\":\"${ENV}\",\"extra_args\":\"${EXTRA}\"}"
+    ;;
+  stop)
+    # vptctl stop [pid]
+    PID="${2:-}"
+    if [ -n "$PID" ]; then
+      curl -s -X POST "${HOST}/agent/stop" -H "$AUTH" -H "Content-Type: application/json" -d "{\"pid\":$PID}"
+    else
+      curl -s -X POST "${HOST}/agent/stop" -H "$AUTH" -H "Content-Type: application/json" -d "{}"
+    fi
+    ;;
+  tail)
+    # vptctl tail [nlines]
+    NLINES="${2:-200}"
+    curl -s "${HOST}/logs/tail?lines=${NLINES}"
+    ;;
+  idm)
+    # vptctl idm <idm_model> <idm_weights> [video] [jsonl]
+    IDM_MODEL="${2:?idm model file}"
+    IDM_WEIGHTS="${3:?idm weights file}"
+    VIDEO="${4:-}"
+    JSONL="${5:-}"
+    DATA="{\"idm_model\":\"${IDM_MODEL}\",\"idm_weights\":\"${IDM_WEIGHTS}\""
+    [ -n "$VIDEO" ] && DATA+=",\"video_path\":\"${VIDEO}\""
+    [ -n "$JSONL" ] && DATA+=",\"jsonl_path\":\"${JSONL}\""
+    DATA+="}"
+    curl -s -X POST "${HOST}/idm/predict" -H "$AUTH" -H "Content-Type: application/json" -d "$DATA"
+    ;;
+  *)
+    echo "Usage:
+  vptctl status
+  vptctl start <model> <weights> [env] [extra args...]
+  vptctl stop [pid]
+  vptctl tail [nlines]
+  vptctl idm <idm_model> <idm_weights> [video] [jsonl]
+
+Env:
+  VPT_HOST (default http://127.0.0.1:8188)
+  VPT_TOKEN_FILE (default /opt/blackroad/vpt/.token)
+"
+    ;;
+esac

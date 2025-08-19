@@ -1,0 +1,16 @@
+[Unit]
+Description=Glow Agent Service
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/blackroad/glow
+Environment=GLOW_PROFILE=amd64
+ExecStart=/usr/bin/docker compose -f /opt/blackroad/glow/compose.yml --profile ${GLOW_PROFILE} up
+ExecStop=/usr/bin/docker compose -f /opt/blackroad/glow/compose.yml --profile ${GLOW_PROFILE} down
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

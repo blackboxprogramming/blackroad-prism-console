@@ -1,0 +1,16 @@
+[Unit]
+Description=BlackRoad LRfR API
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+Environment=LRFR_DIR=/var/www/blackroad/data/requests
+Environment=PSI_SEED=CHANGE_ME_TO_YOUR_SECRET
+WorkingDirectory=/var/www/blackroad/api
+ExecStart=/usr/bin/uvicorn lrfr_service:app --host 127.0.0.1 --port 8013
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

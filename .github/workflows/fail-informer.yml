@@ -2,14 +2,7 @@ name: Fail Informer
 on:
   workflow_run:
     workflows:
-      [
-        'Deploy Quantum App (safe)',
-        'Super-Linter',
-        'CodeQL',
-        'Snyk Scan',
-        'Trivy FS Scan',
-        'Gitleaks (secrets)',
-      ]
+      ['Deploy Quantum App (safe)', 'Super-Linter', 'CodeQL', 'Snyk Scan', 'OSSF Scorecard']
     types: [completed]
 permissions:
   pull-requests: write
@@ -19,18 +12,16 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Comment on PR with failure summary
-        uses: actions/github-script@v7
+      - uses: actions/github-script@v7
         with:
           script: |
             const run = context.payload.workflow_run;
             const prs = run.pull_requests || [];
-            if (!prs.length) { core.info('No PR associated.'); return; }
+            if (!prs.length) { core.info('No associated PR; nothing to comment.'); return; }
             const {owner, repo} = context.repo;
-            const url = run.html_url;
             for (const pr of prs) {
               await github.issues.createComment({
                 owner, repo, issue_number: pr.number,
-                body: `❌ **${run.name}** failed on ${run.head_branch}\n\nSee logs: ${url}`
+                body: `❌ **${run.name}** failed on \`${run.head_branch}\`.\n\nLogs: ${run.html_url}`
               });
             }

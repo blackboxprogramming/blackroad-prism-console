@@ -10,7 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: 20 }
       - run: npm ci --omit=optional || npm i --package-lock-only
-      - run: |
-          npx npm-audit-resolver --audit-level=high || echo "::warning::Advisories found (review logs)."
+      - run: npx npm-audit-resolver --audit-level=high || echo "::warning::Advisories found (non-blocking)."

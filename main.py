@@ -1,15 +1,21 @@
 import streamlit as st
-import openai
+from openai import OpenAI
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import io
 import os
-import base64
 import tempfile
 import whisper
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+api_key = os.getenv("OPENAI_API_KEY")
+if api_key:
+    client = OpenAI(api_key=api_key)
+else:
+    client = None
+    st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=api_key) if api_key else None
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")
@@ -38,14 +44,22 @@ else:
 
 if user_input:
     try:
+        if not client:
+            st.error("OpenAI API key not set.")
+            raise RuntimeError("missing api key")
+
         st.session_state.chat_history.append({"role": "user", "content": user_input})
 
         # GPT response with full history
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+        if client is None:
+            raise ValueError("OpenAI API key is not configured")
+        response = client.chat.completions.create(
             model="gpt-4",
-            messages=st.session_state.chat_history
+            messages=st.session_state.chat_history,
         )
-        assistant_reply = response["choices"][0]["message"]["content"]
+        assistant_reply = response.choices[0].message.content
         st.session_state.chat_history.append({"role": "assistant", "content": assistant_reply})
 
         st.markdown(f"**Venture Console AI:** {assistant_reply}")
@@ -76,7 +90,8 @@ if user_input:
         plt.close(fig)
 
     except Exception as e:
-        st.error(f"Error: {e}")
+        if str(e) != "missing api key":
+            st.error(f"Error: {e}")
 
 st.markdown("---")
 st.markdown("**BlackRoad Prism Console** | Live UI Simulation")

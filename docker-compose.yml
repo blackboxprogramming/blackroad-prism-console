@@ -1,0 +1,65 @@
+FILE: docker-compose.yml
+
+version: "3.9"
+
+services:
+  lucidia-blackroad:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: lucidia-blackroad
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "9000:8000"   # external:internal
+    volumes:
+      - lucidia-data:/app/data
+      - lucidia-logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "scripts/healthcheck.js"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: lucidia
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d lucidia"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  lucidia-data:
+  lucidia-logs:
