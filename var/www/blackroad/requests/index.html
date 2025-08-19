@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>BlackRoad × Lucidia — Requests for Research</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="wrap">
+      <h1>BlackRoad × Lucidia — Requests for Research</h1>
+      <p class="muted">Machine-first problems & bounties for Codex Infinity and agents.</p>
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="Search title, tags, agent…" />
+        <select id="agent">
+          <option value="">All agents</option>
+          <option>guardian</option>
+          <option>roadie</option>
+          <option>truth</option>
+          <option>contradiction</option>
+          <option>quantum</option>
+          <option>emotional</option>
+          <option>file</option>
+          <option>web_server</option>
+          <option>integration</option>
+        </select>
+        <select id="status">
+          <option value="">Any status</option>
+          <option>open</option>
+          <option>in_progress</option>
+          <option>review</option>
+          <option>done</option>
+          <option>archived</option>
+        </select>
+        <a class="btn" href="./submit.html">New request</a>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <div id="stats" class="muted"></div>
+      <div id="list" class="grid"></div>
+    </main>
+
+    <footer class="wrap muted">
+      <small
+        >Data source: <code>/data/requests/index.json</code> • API (optional):
+        <code>/api/lrfr</code></small
+      >
+    </footer>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
