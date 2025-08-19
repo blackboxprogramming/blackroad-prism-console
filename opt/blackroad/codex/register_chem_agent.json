@@ -1,0 +1,7 @@
+{
+  "name": "chem_agent",
+  "prompt_path": "/opt/blackroad/codex/agents/chem_agent.prompt.yml",
+  "policies": ["/opt/blackroad/codex/policies/no_cloud.policy.yml"],
+  "handshake": "Ψ′|CHEM|READY",
+  "mount": "/agents/chem"
+}

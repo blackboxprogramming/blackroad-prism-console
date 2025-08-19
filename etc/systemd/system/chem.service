@@ -1,0 +1,26 @@
+[Unit]
+Description=BlackRoad Chem Service (FastAPI + Uvicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/blackroad/services/chem
+ExecStart=/opt/blackroad/services/chem/run.sh
+Restart=always
+RestartSec=2
+
+# Hardened & no-egress by default
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=yes
+NoNewPrivileges=yes
+PrivateDevices=yes
+IPAddressDeny=any
+IPAddressAllow=127.0.0.1
+IPAddressAllow=::1
+
+[Install]
+WantedBy=multi-user.target
