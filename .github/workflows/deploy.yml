@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Safe activate + verify (backup & rollback + write health.json)
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
@@ -53,7 +53,7 @@ jobs:
             echo "Deployed OK; backup → $TS_DIR; health.json updated."
 
       - name: Update sidecar COMMIT_SHA and restart
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
