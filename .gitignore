@@ -44,3 +44,7 @@ rag/index/*.faiss
 rag/index/meta.json
 secrets/
 *.enc
+# Codex CI kit
+/tests/_codex_autogen/
+.tmp/
+*.out.md
