@@ -59,3 +59,7 @@ tests/_codex_autogen/
 !lucidia/modules/random_fields/datasets/
 !lucidia/modules/random_fields/datasets/*.py
 lucidia/modules/random_fields/datasets/__pycache__/
+# Codex CI artifacts
+tests/_codex_autogen/
+.tmp/
+*.out.md

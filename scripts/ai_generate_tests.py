@@ -1,6 +1,8 @@
 import argparse, pathlib, os
 import argparse
 import pathlib
+import argparse
+from pathlib import Path
 
 import tools.llm as llm
 
@@ -39,6 +41,10 @@ def main():
     reply = llm.chat(PROMPT.format(ctx=ctx), SYSTEM)
 
     outdir = pathlib.Path(args.out)
+    ctx = Path(args.context).read_text()
+    reply = llm.chat(PROMPT.format(ctx=ctx), SYSTEM)
+
+    outdir = Path(args.out)
     outdir.mkdir(parents=True, exist_ok=True)
     # Save raw AI output so it can be reviewed or parsed downstream
     (outdir / "AI_TESTS.out.md").write_text(reply)

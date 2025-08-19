@@ -1,6 +1,8 @@
 import argparse, tools.llm as llm, pathlib
 import argparse
 import pathlib
+import argparse
+from pathlib import Path
 
 import tools.llm as llm
 
@@ -25,6 +27,9 @@ def main():
     ctx = pathlib.Path(args.context).read_text()
     out = llm.chat(PROMPT_TMPL.format(ctx=ctx), SYSTEM)
     pathlib.Path(args.out).write_text(out)
+    ctx = Path(args.context).read_text()
+    out = llm.chat(PROMPT_TMPL.format(ctx=ctx), SYSTEM)
+    Path(args.out).write_text(out)
 
 
 if __name__ == "__main__":

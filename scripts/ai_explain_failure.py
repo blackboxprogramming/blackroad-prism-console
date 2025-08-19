@@ -1,6 +1,8 @@
 import argparse, json, pathlib, os
 import argparse
 import pathlib
+import argparse
+from pathlib import Path
 
 import tools.llm as llm
 
@@ -32,6 +34,9 @@ def main():
     meta = pathlib.Path(args.meta).read_text()
     result = llm.chat(PROMPT.format(meta=meta), SYSTEM)
     pathlib.Path(args.out).write_text(result)
+    meta = Path(args.meta).read_text()
+    result = llm.chat(PROMPT.format(meta=meta), SYSTEM)
+    Path(args.out).write_text(result)
 
 
 if __name__ == "__main__":
