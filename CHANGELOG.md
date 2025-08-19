@@ -17,6 +17,9 @@
 ### Bug Fixes
 
 * **codeql:** JS-only, buildless workflow + sane excludes ([acc2a99](https://github.com/blackboxprogramming/blackroad-prism-console/commit/acc2a998ed34e861730bd2bbeebd0ba6a9442c9f))
+## Unreleased
+
+- Mirror upstream awesome AI data list and add indexing workflow.
 
 ## 0.1.0
 

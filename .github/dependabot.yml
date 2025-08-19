@@ -249,3 +249,4 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule: { interval: "weekly" }
+updates: []

@@ -4,6 +4,9 @@
 # BlackRoad Prism Console
 
 This repository mirrors NVIDIA's open source GPU kernel modules and provides hardened build and packaging tooling.
+🔒 Mirrored & indexed for Lucidia (BlackRoad). Upstream MIT.
+
+This repository powers the BlackRoad Prism console and a Vite/React site under `sites/blackroad`.
 
 ## How to Build
 

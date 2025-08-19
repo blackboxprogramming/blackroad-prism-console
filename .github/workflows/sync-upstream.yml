@@ -3,6 +3,12 @@ on:
   schedule: [{ cron: '17 3 * * *' }]
   workflow_dispatch: {}
 permissions: { contents: write }
+
+on:
+  schedule:
+    - cron: '22 4 * * *'
+  workflow_dispatch:
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -19,3 +25,21 @@ jobs:
             git switch -C "$b" "upstream/$b"
             git push -u origin "$b"
           done
+        with:
+          fetch-depth: 0
+      - name: Add upstream remote
+        run: git remote add upstream https://github.com/youssefHosni/Awesome-AI-Data-GitHub-Repos.git
+      - name: Fetch upstream
+        run: git fetch upstream
+      - name: Fast-forward or merge
+        run: |
+          set -e
+          git merge --ff-only upstream/main && git push origin main || echo "merge-conflict" > merge.status
+      - name: Create PR on conflict
+        if: ${{ hashFiles('merge.status') != '' }}
+        uses: peter-evans/create-pull-request@v5
+        with:
+          branch: sync-upstream
+          title: Sync upstream
+          body: Automatic upstream sync with merge conflicts.
+          commit-message: chore: sync upstream

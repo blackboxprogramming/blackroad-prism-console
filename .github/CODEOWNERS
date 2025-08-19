@@ -10,3 +10,4 @@
 /sites/blackroad/**  @blackroad-web
 .github/**           @blackroad-ci
 /droplet-manager-macos/ @blackboxprogramming
+* @blackboxprogramming/maintainers
