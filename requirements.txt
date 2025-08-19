@@ -5,7 +5,3 @@ numpy==1.26.4
 whisper
 torch
 
-fastapi
-uvicorn
-pydantic
-requests
