@@ -8,3 +8,10 @@ repos:
   - repo: https://github.com/zricethezav/gitleaks
     rev: v8.18.4
     hooks: [{ id: gitleaks, args: ["--redact"] }]
+  - repo: local
+    hooks:
+      - id: lucidia-review
+        name: lucidia-review
+        entry: python tools/lucidia-review/lucidia_review/cli.py --fast
+        language: system
+        pass_filenames: false
