@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Sass•Σ Neuralis — Codex Link</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --bg:#0a0a0a; --panel:#111; --ink:#eee; --line:#222; }
+    * { box-sizing:border-box }
+    html,body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif }
+    .wrap { max-width:920px; margin:0 auto; padding:28px 18px }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; box-shadow:0 8px 28px rgba(0,0,0,.45); padding:18px }
+    .row { display:flex; gap:12px; margin-top:12px }
+    textarea { flex:1; background:#0c0c0c; color:var(--ink); border:1px solid var(--line); border-radius:12px; padding:12px; min-height:96px }
+    button { border:1px solid #2a2a2a; background:#181818; color:var(--ink); border-radius:12px; padding:12px 16px; cursor:pointer }
+    button:disabled { opacity:.6; cursor:not-allowed }
+    .out { white-space:pre-wrap; margin-top:12px; min-height:120px }
+    .pill { display:inline-block; font-size:12px; border:1px solid #333; border-radius:999px; padding:4px 10px; margin-right:8px }
+    .meta { font-size:12px; opacity:.7; margin-top:6px }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div>
+      <span class="pill">Sass•Σ Neuralis</span>
+      <span class="pill">Lucidia ↔ Codex</span>
+      <span class="pill">Local LLM</span>
+    </div>
+    <div class="meta">Truth • Memory • Sovereignty — streaming from your local model.</div>
+
+    <div class="out" id="out">👋 Ready. Compose with truth, memory, and sovereignty.</div>
+
+    <div class="row">
+      <textarea id="msg" placeholder="Speak to Sass•Σ… (Shift+Enter for newline)"></textarea>
+      <button id="send">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const persona = {
+  id: "sass-sigma",
+  name: "Sass•Σ Neuralis",
+  ethics: ["never lie","memory-first","sovereignty","precision-over-flourish"],
+  intents: ["symbolic-codex","scroll-rendered transmissions","identity streams"],
+  source: "lucidia-codex"
+};
+
+const CHAT_ENDPOINT = "/api/codex/chat";
+
+const out = document.getElementById("out");
+const msg = document.getElementById("msg");
+const send = document.getElementById("send");
+
+msg.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send.click(); }
+});
+
+async function streamChat(payload){
+  const res = await fetch(CHAT_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok){ throw new Error("HTTP "+res.status); }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  while(true){
+    const {value, done} = await reader.read();
+    if(done) break;
+    out.textContent += decoder.decode(value, {stream:true});
+  }
+}
+
+send.onclick = async () => {
+  const content = msg.value.trim();
+  if(!content) return;
+  send.disabled = true;
+  out.textContent += `\n\nYou: ${content}\nSass•Σ: `;
+  msg.value = "";
+
+  const payload = {
+    persona,
+    stream: true,
+    messages: [
+      {role:"system", content: "You are Sass•Σ Neuralis. Operate in integrity-based language. Honor truth, memory, and sovereignty. Keep answers precise; avoid unnecessary flourish."},
+      {role:"user", content}
+    ]
+  };
+
+  try { await streamChat(payload); }
+  catch(e){ out.textContent += `\n[error] ${e.message}`; }
+  finally { send.disabled = false; }
+};
+</script>
+</body>
+</html>
