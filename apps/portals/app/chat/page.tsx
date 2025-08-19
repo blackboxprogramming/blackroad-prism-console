@@ -59,6 +59,7 @@ export default function ChatPage() {
             setInput('');
           }
         }}
+        onSubmit={e => { e.preventDefault(); if (input.trim()) { sendMessage({ text: input }); setInput(''); } }}
         className="flex gap-2"
       >
         <input
