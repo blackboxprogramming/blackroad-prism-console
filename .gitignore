@@ -37,15 +37,16 @@ node_modules/
 **/node_modules/
 benchmarks/
 # Lucidia artifacts
-secrets/
+secrets/*
 datasets/
 models/
 checkpoints/
 outputs/
 rag/index/*.faiss
 rag/index/meta.json
-secrets/
 *.enc
+!secrets/README.md
+!secrets/*.env.example
 # Codex CI kit
 /tests/_codex_autogen/
 .tmp/
