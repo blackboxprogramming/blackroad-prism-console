@@ -11,7 +11,7 @@ from lucidia_meta_annotator import load_config, annotate_dataset
 
 cfg = load_config("overrides.yaml")
 meta = {"a": 1, "_*temp": "x"}
-result = annotate_dataset(meta, cfg)
+result, removed = annotate_dataset(meta, cfg)
 ```
 
 ## Threat model

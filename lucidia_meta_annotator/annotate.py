@@ -29,26 +29,61 @@ def _apply_attributes(metadata: Dict[str, Any], attrs: List[Dict[str, Any]], str
     return applied
 
 
-def annotate_dataset(metadata: Dict[str, Any], config: Dict[str, Any], *, strict: bool = True, strip_temp: bool = True, audit_path: str | None = None) -> Dict[str, Any]:
+def annotate_dataset(
+    metadata: Dict[str, Any],
+    config: Dict[str, Any],
+    *,
+    strict: bool = True,
+    strip_temp: bool = True,
+    audit_path: str | None = None,
+) -> tuple[Dict[str, Any], List[str]]:
+    """Apply *config* overrides to *metadata*.
+
+    Returns a tuple of ``(result, removed_temp)`` where ``result`` is the
+    sanitized metadata and ``removed_temp`` is the list of temporary attribute
+    names that were stripped during processing.
+    """
+
     meta = read_metadata(metadata)
     applied = _apply_attributes(meta, config.get("Attributes", []), strict)
     if strip_temp:
-        before = list(k for k in meta if is_temp(k))
+        removed = [k for k in meta if is_temp(k)]
         meta = strip_temp_attrs(meta)
     else:
-        before = []
+        removed = []
     if audit_path:
-        log_event(audit_path, {
-            "applied": applied,
-            "removed_temp": before,
-        })
-    return write_metadata(meta, strip_temp=False)
+        log_event(
+            audit_path,
+            {
+                "applied": applied,
+                "removed_temp": removed,
+            },
+        )
+    result = write_metadata(meta, strip_temp=False)
+    return result, removed
 
 
-def annotate_file(*, in_path: str, out_path: str, config: Dict[str, Any], format: str = "generic", strict: bool = True, strip_temp: bool = True, audit_path: str | None = None) -> Dict[str, Any]:
+def annotate_file(
+    *,
+    in_path: str,
+    out_path: str,
+    config: Dict[str, Any],
+    format: str = "generic",
+    strict: bool = True,
+    strip_temp: bool = True,
+    audit_path: str | None = None,
+) -> Dict[str, Any]:
+    """Annotate file on disk and persist result.
+
+    Returns a dict containing the ``audit_path`` and list of removed temporary
+    attributes.
+    """
+
     if format != "generic":
         raise NotImplementedError("only generic format supported in this reference implementation")
     data = json.loads(Path(in_path).read_text())
-    result = annotate_dataset(data, config, strict=strict, strip_temp=strip_temp, audit_path=audit_path)
+    result, removed = annotate_dataset(
+        data, config, strict=strict, strip_temp=strip_temp, audit_path=audit_path
+    )
     Path(out_path).write_text(json.dumps(result))
-    return {"audit_path": audit_path}
+    return {"audit_path": audit_path, "removed_temp": removed}
