@@ -18,3 +18,4 @@ If you discover a security vulnerability, please report it responsibly.
 Send an email to [security@blackroad.io](mailto:security@blackroad.io) with the details of the issue. We will respond as quickly as possible and keep you informed of the progress.
 
 Please do not disclose the vulnerability publicly until it has been addressed.
+If you discover a security issue, please email [security@blackroad.app](mailto:security@blackroad.app).
