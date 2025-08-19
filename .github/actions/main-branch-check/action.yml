@@ -1,0 +1,141 @@
+name: Local Main Branch Check
+description: Ensure this workflow has a successful run on the main branch before allowing PRs to pass.
+inputs:
+  token:
+    description: GitHub token (use the default GITHUB_TOKEN)
+    required: true
+  main_branch:
+    description: Name of your main branch
+    required: false
+    default: main
+  allow_overrides:
+    description: Allow PR description tokens to bypass the check
+    required: false
+    default: "true"
+  override_tokens:
+    description: Comma-separated tokens that bypass (exact match search in PR body)
+    required: false
+    default: "[ci override_main_branch_checks],[ci override_main_branch_checks $WORKFLOW]"
+  workflow_file:
+    description: Fallback workflow file name (e.g., ci.yml) if GITHUB_WORKFLOW_REF unavailable
+    required: false
+  recency_days:
+    description: Require that main’s last passing run is <= N days old (0 disables)
+    required: false
+    default: "0"
+  verbose:
+    description: Extra logs
+    required: false
+    default: "false"
+runs:
+  using: "composite"
+  steps:
+    - name: Ensure jq
+      shell: bash
+      run: |
+        set -e
+        if ! command -v jq >/dev/null 2>&1; then
+          sudo apt-get update -y
+          sudo apt-get install -y jq
+        fi
+
+    - name: Check main branch has passing run of this workflow
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        MAIN_BRANCH: ${{ inputs.main_branch }}
+        ALLOW_OVERRIDES: ${{ inputs.allow_overrides }}
+        OVERRIDE_TOKENS: ${{ inputs.override_tokens }}
+        WORKFLOW_FILE_FALLBACK: ${{ inputs.workflow_file }}
+        RECENCY_DAYS: ${{ inputs.recency_days }}
+        VERBOSE: ${{ inputs.verbose }}
+      run: |
+        set -euo pipefail
+
+        if [[ "${GITHUB_EVENT_NAME:-}" != "pull_request" && "${GITHUB_EVENT_NAME:-}" != "pull_request_target" ]]; then
+          echo "Not a PR event; skipping."
+          exit 0
+        fi
+
+        # Skip if running on the main branch itself
+        if [[ "${GITHUB_REF_NAME:-}" == "${MAIN_BRANCH}" ]]; then
+          echo "Running on ${MAIN_BRANCH}; skipping."
+          exit 0
+        fi
+
+        # Check overrides in PR body
+        PR_BODY="$(jq -r '.pull_request.body // ""' "$GITHUB_EVENT_PATH")"
+        if [[ "${ALLOW_OVERRIDES}" == "true" ]]; then
+          IFS=',' read -ra TOKS <<< "${OVERRIDE_TOKENS}"
+          for t in "${TOKS[@]}"; do
+            tok="$(echo "$t" | xargs)"
+            if [[ -n "$tok" && "$PR_BODY" == *"$tok"* ]]; then
+              echo "Override token found: '$tok'. Bypassing main-branch check."
+              exit 0
+            fi
+          done
+        fi
+
+        REPO="${GITHUB_REPOSITORY}"
+        API="https://api.github.com"
+        HDR=(-H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json")
+
+        # Resolve workflow file path from GITHUB_WORKFLOW_REF if available
+        WF_FILE=""
+        if [[ -n "${GITHUB_WORKFLOW_REF:-}" ]]; then
+          # form: owner/repo/.github/workflows/<file>@ref
+          WF_PATH="${GITHUB_WORKFLOW_REF#*/*/}"
+          WF_FILE="${WF_PATH#".github/workflows/"}"
+          WF_FILE="${WF_FILE%@*}"
+        else
+          WF_FILE="${WORKFLOW_FILE_FALLBACK}"
+        fi
+
+        if [[ -z "$WF_FILE" ]]; then
+          echo "::error::Cannot determine workflow file name; set inputs.workflow_file."
+          exit 2
+        fi
+
+        [[ "$VERBOSE" == "true" ]] && echo "Workflow file: $WF_FILE"
+
+        # Get workflow id
+        WF_JSON="$(curl -sS "${HDR[@]}" "$API/repos/$REPO/actions/workflows/$WF_FILE")"
+        WF_ID="$(echo "$WF_JSON" | jq -r '.id')"
+        if [[ "$WF_ID" == "null" || -z "$WF_ID" ]]; then
+          echo "::error::Could not resolve workflow id for $WF_FILE"
+          echo "$WF_JSON"
+          exit 2
+        fi
+
+        # Get latest successful run on main branch for this workflow
+        RUNS_JSON="$(curl -sS "${HDR[@]}" "$API/repos/$REPO/actions/workflows/$WF_ID/runs?branch=${MAIN_BRANCH}&status=success&event=push&per_page=1")"
+        COUNT="$(echo "$RUNS_JSON" | jq -r '.total_count // 0')"
+        if (( COUNT < 1 )); then
+          echo "::error::No successful '$WF_FILE' runs found on '${MAIN_BRANCH}'. Re-run the workflow on ${MAIN_BRANCH}."
+          exit 1
+        fi
+
+        RUN_SHA="$(echo "$RUNS_JSON" | jq -r '.workflow_runs[0].head_sha')"
+        RUN_UPDATED="$(echo "$RUNS_JSON" | jq -r '.workflow_runs[0].updated_at')"
+        BASE_SHA="$(jq -r '.pull_request.base.sha' "$GITHUB_EVENT_PATH")"
+
+        if [[ -n "${RECENCY_DAYS}" && "${RECENCY_DAYS}" != "0" ]]; then
+          NOW=$(date -u +%s)
+          RUN_TS=$(date -u -d "$RUN_UPDATED" +%s)
+          AGE_DAYS=$(( (NOW - RUN_TS) / 86400 ))
+          if (( AGE_DAYS > RECENCY_DAYS )); then
+            echo "::error::Latest main run is ${AGE_DAYS} days old (> ${RECENCY_DAYS}). Re-run on ${MAIN_BRANCH}."
+            exit 1
+          fi
+        fi
+
+        # Ensure the successful main run includes the PR base commit
+        CMP_JSON="$(curl -sS "${HDR[@]}" "$API/repos/$REPO/compare/$BASE_SHA...$RUN_SHA")"
+        STATUS="$(echo "$CMP_JSON" | jq -r '.status')"
+        if [[ "$STATUS" != "ahead" && "$STATUS" != "identical" ]]; then
+          echo "::error::Latest successful main run ($RUN_SHA) does not include PR base $BASE_SHA. Re-run '$WF_FILE' on ${MAIN_BRANCH}."
+          exit 1
+        fi
+
+        echo "Main-branch check passed: $RUN_SHA @ $RUN_UPDATED includes base $BASE_SHA."
+

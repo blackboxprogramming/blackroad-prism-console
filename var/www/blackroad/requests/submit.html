@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Create LRfR JSON</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="wrap">
+      <h1>Create a Lucidia Request for Research (LRfR)</h1>
+      <p class="muted">
+        Fill the form → get machine-ready JSON. Save to
+        <code>/var/www/blackroad/data/requests/</code> or POST to <code>/api/lrfr/submit</code>.
+      </p>
+    </header>
+    <main class="wrap">
+      <div class="card">
+        <label>Title <input id="title" /></label><br />
+        <label
+          >Agent
+          <select id="agent">
+            <option>guardian</option>
+            <option>roadie</option>
+            <option>truth</option>
+            <option>contradiction</option>
+            <option>quantum</option>
+            <option>emotional</option>
+            <option>file</option>
+            <option>web_server</option>
+            <option>integration</option>
+          </select> </label
+        ><br />
+        <label>Tags (comma-sep) <input id="tags" placeholder="ollama, streaming, psi-hash" /></label
+        ><br />
+        <label
+          >Difficulty
+          <select id="difficulty">
+            <option>starter</option>
+            <option>intermediate</option>
+            <option>advanced</option>
+            <option>frontier</option>
+          </select> </label
+        ><br />
+        <label
+          >Status
+          <select id="status">
+            <option>open</option>
+            <option>in_progress</option>
+            <option>review</option>
+            <option>done</option>
+          </select> </label
+        ><br />
+        <label
+          >Summary
+          <textarea id="summary" rows="3" placeholder="One-paragraph overview"></textarea></label
+        ><br />
+        <label>Problem <textarea id="problem" rows="5"></textarea></label><br />
+        <label
+          >Constraints
+          <textarea
+            id="constraints"
+            rows="3"
+            placeholder="No external calls, must run on Jetson Orin, etc."
+          ></textarea></label
+        ><br />
+        <label
+          >Acceptance Criteria
+          <textarea id="accept" rows="4" placeholder="Testable outcomes"></textarea></label
+        ><br />
+        <label>Bounty (RoadCoin) <input id="bounty_rc" type="number" step="1" min="0" /></label>
+        <label>~USD <input id="bounty_usd" type="number" step="1" min="0" /></label><br />
+        <label>Owner name <input id="owner_name" placeholder="Alexa Louise" /></label>
+        <label>Owner contact <input id="owner_contact" placeholder="you@blackroad.io" /></label
+        ><br />
+        <button class="btn" id="gen">Generate JSON</button>
+        <button class="btn" id="post" style="background: #a2ffea">POST to API</button>
+        <pre id="out" style="margin-top: 12px"></pre>
+      </div>
+    </main>
+    <script>
+      const byId = (id) => document.getElementById(id);
+      function slugify(s) {
+        return s
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+      }
+      function now() {
+        return new Date().toISOString();
+      }
+      function build() {
+        const title = byId('title').value.trim();
+        const id = `${new Date().toISOString().slice(0, 10)}-${slugify(title)}`;
+        const obj = {
+          $schema: '/data/requests/schema.json',
+          version: '2025-08-18',
+          id: id,
+          title: title,
+          summary: byId('summary').value.trim(),
+          problem: byId('problem').value.trim(),
+          constraints: byId('constraints').value.trim(),
+          acceptance_criteria: byId('accept').value.trim().split(/\n+/).filter(Boolean),
+          tags: byId('tags')
+            .value.split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
+          agent: byId('agent').value,
+          difficulty: byId('difficulty').value,
+          status: byId('status').value,
+          bounty: {
+            roadcoin: Number(byId('bounty_rc').value || 0),
+            usd: Number(byId('bounty_usd').value || 0),
+          },
+          owner: {
+            name: byId('owner_name').value.trim(),
+            contact: byId('owner_contact').value.trim(),
+          },
+          machine_decomposition: {
+            tasks: [],
+            skills: [],
+            datasets: [],
+            interfaces: [],
+          },
+          thread: [],
+          created_at: now(),
+          updated_at: now(),
+          signing: { algorithm: 'PS-SHA∞', signature: '' },
+        };
+        return obj;
+      }
+      function show(o) {
+        byId('out').textContent = JSON.stringify(o, null, 2);
+      }
+      document.getElementById('gen').onclick = () => show(build());
+      document.getElementById('post').onclick = async () => {
+        const payload = build();
+        const res = await fetch('/api/lrfr/submit', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const txt = await res.text();
+        byId('out').textContent = txt;
+      };
+    </script>
+  </body>
+</html>

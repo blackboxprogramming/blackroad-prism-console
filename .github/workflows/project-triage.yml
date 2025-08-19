@@ -4,11 +4,13 @@ on:
     types: [opened, labeled, reopened]
   pull_request:
     types: [opened, ready_for_review, reopened]
+
 permissions:
   contents: read
   issues: write
   pull-requests: write
   repository-projects: write
+
 jobs:
   triage:
     runs-on: ubuntu-latest
@@ -18,39 +20,54 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const isPR = !!context.payload.pull_request;
-            const number = isPR ? context.payload.pull_request.number : context.payload.issue.number;
-            // get/ensure project and columns
-            const pj = await github.request('GET /repos/{owner}/{repo}/projects', {
-              owner, repo, headers: { 'Accept': 'application/vnd.github.inertia-preview+json' }
-            });
-            const project = pj.data.find(p => p.name === 'Quantum Auto');
-            if (!project) { core.info('No project found; nothing to do.'); return; }
-            const cols = await github.request('GET /projects/{project_id}/columns', {
-              project_id: project.id, headers: { 'Accept': 'application/vnd.github.inertia-preview+json' }
-            });
-            const byName = Object.fromEntries(cols.data.map(c => [c.name, c]));
-            // choose column
-            let target = byName['Backlog'];
-            if (isPR) {
-              const pr = (await github.pulls.get({ owner, repo, pull_number: number })).data;
-              target = pr.draft ? byName['To do'] : byName['In progress'];
-            } else {
-              const labels = (context.payload.issue.labels || []).map(l => l.name);
-              if (labels.includes('priority: high')) target = byName['In progress'];
-              else if (labels.includes('priority: medium')) target = byName['To do'];
-            }
-            if (!target) { core.info('No target column; exiting'); return; }
-            // create card if not present
-            const link = isPR ? { content_id: context.payload.pull_request.id, content_type: 'PullRequest' }
-                              : { content_id: context.payload.issue.id, content_type: 'Issue' };
             try {
-              await github.request('POST /projects/columns/{column_id}/cards', {
-                column_id: target.id, ...link,
-                headers: { 'Accept': 'application/vnd.github.inertia-preview+json' }
+              const { data: projects } = await github.request('GET /repos/{owner}/{repo}/projects', {
+                owner, repo, headers: { 'Accept': 'application/vnd.github.inertia-preview+json' }
               });
-              core.info(`Added card to ${target.name}`);
+              let project = projects.find(p => p.name === 'Quantum Auto');
+              if (!project) {
+                const created = await github.request('POST /repos/{owner}/{repo}/projects', {
+                  owner, repo, name: 'Quantum Auto', body: 'Automanaged board',
+                  headers: { 'Accept': 'application/vnd.github.inertia-preview+json' }
+                });
+                project = created.data;
+              }
+              const cols = await github.request('GET /projects/{project_id}/columns', {
+                project_id: project.id, headers: { 'Accept': 'application/vnd.github.inertia-preview+json' }
+              });
+              const want = ['Backlog','To do','In progress','Done'];
+              const byName = Object.fromEntries(cols.data.map(c => [c.name, c]));
+              for (const n of want) {
+                if (!byName[n]) {
+                  const { data } = await github.request('POST /projects/{project_id}/columns', {
+                    project_id: project.id, name: n,
+                    headers: { 'Accept': 'application/vnd.github.inertia-preview+json' }
+                  });
+                  byName[n] = data;
+                }
+              }
+              const isPR = !!context.payload.pull_request;
+              const number = isPR ? context.payload.pull_request.number : context.payload.issue.number;
+              let target = byName['Backlog'];
+              if (isPR) {
+                const pr = (await github.pulls.get({ owner, repo, pull_number: number })).data;
+                target = pr.draft ? byName['To do'] : byName['In progress'];
+              }
+              const link = isPR ? { content_id: context.payload.pull_request.id, content_type: 'PullRequest' }
+                                : { content_id: context.payload.issue.id, content_type: 'Issue' };
+              try {
+                await github.request('POST /projects/columns/{column_id}/cards', {
+                  column_id: target.id, ...link,
+                  headers: { 'Accept': 'application/vnd.github.inertia-preview+json' }
+                });
+              } catch (e) {
+                if (e.status === 422) {
+                  core.info('Card already exists');
+                } else {
+                  throw e;
+                }
+              }
             } catch (e) {
-              if (e.status === 422) core.info('Card already exists');
-              else throw e;
+              core.warning(`Project triage skipped: ${e.message || e}`);
             }
+

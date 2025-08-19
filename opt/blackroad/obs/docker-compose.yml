@@ -1,0 +1,48 @@
+# /opt/blackroad/obs/docker-compose.yml
+version: "3.9"
+services:
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    volumes:
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+  grafana:
+    image: grafana/grafana:10.2.3
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+  loki:
+    image: grafana/loki:2.9.2
+    volumes:
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+  promtail:
+    image: grafana/promtail:2.9.2
+    command: -config.file=/etc/promtail/promtail.yml
+    volumes:
+      - /var/log:/var/log
+      - ./promtail.yml:/etc/promtail/promtail.yml:ro
+    depends_on:
+      - loki
+  tempo:
+    image: grafana/tempo:2.4.1
+    volumes:
+      - tempo_data:/tmp/tempo
+    ports:
+      - "3200:3200"
+  blackbox:
+    image: prom/blackbox-exporter:v0.25.0
+    ports:
+      - "9115:9115"
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    ports:
+      - "9093:9093"
+volumes:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  tempo_data:

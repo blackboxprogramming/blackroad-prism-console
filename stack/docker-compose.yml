@@ -1,0 +1,214 @@
+# <!-- FILE: /stack/docker-compose.yml -->
+version: "3.8"
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - stepca
+
+  stepca:
+    image: smallstep/step-ca:0.27.4
+    container_name: stepca
+    restart: always
+    volumes:
+      - ../infra/step-ca:/home/step
+    environment:
+      STEP_CA_INIT_NAME: "BlackRoad CA"
+      STEP_CA_INIT_DNS_NAMES: "stepca"
+      STEP_CA_INIT_PASSWORD: "changeit"
+    ports:
+      - "9000:9000"
+
+  vault:
+    image: hashicorp/vault:1.15
+    container_name: vault
+    restart: always
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_LOCAL_CONFIG: '{"backend":{"file":{"path":"/vault/file"}},"listener":{"tcp":{"address":"0.0.0.0:8200","tls_disable":1}},"default_lease_ttl":"168h","max_lease_ttl":"720h"}'
+    volumes:
+      - vault_data:/vault/file
+    ports:
+      - "8200:8200"
+
+  gitea:
+    image: gitea/gitea:1.21.0
+    container_name: gitea
+    restart: always
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__HOST=postgres-primary:5432
+      - GITEA__database__NAME=gitea
+      - GITEA__database__USER=gitea
+      - GITEA__database__PASSWD=gitea_pass
+    depends_on:
+      - postgres-primary
+    volumes:
+      - gitea_data:/data
+    ports:
+      - "3000:3000"
+      - "2222:22"
+
+  gitea-runner:
+    image: gitea/act_runner:0.2.6
+    container_name: gitea-runner
+    restart: always
+    environment:
+      - GITEA_INSTANCE_URL=http://gitea:3000
+      - GITEA_RUNNER_REGISTRATION_TOKEN=changeme
+    depends_on:
+      - gitea
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  harbor:
+    image: goharbor/harbor-core:v2.9.0
+    container_name: harbor
+    restart: always
+    environment:
+      - POSTGRESQL_HOST=postgres-primary
+      - POSTGRESQL_USERNAME=harbor
+      - POSTGRESQL_PASSWORD=harbor_pass
+      - POSTGRESQL_DATABASE=harbor
+      - REGISTRY_STORAGE_PROVIDER_NAME=s3
+      - REGISTRY_STORAGE_PROVIDER_CONFIG=/{"region":"us-east-1","bucket":"harbor-registry","accesskey":"minio","secretkey":"minio123","regionendpoint":"http://minio:9000","encrypt":false}
+    depends_on:
+      - postgres-primary
+      - minio
+    volumes:
+      - harbor_data:/harbor
+    ports:
+      - "8443:8443"
+
+  minio:
+    image: minio/minio:RELEASE.2024-01-18T22-51-28Z
+    container_name: minio
+    restart: always
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  postgres-primary:
+    image: bitnami/postgresql-repmgr:16
+    container_name: postgres-primary
+    restart: always
+    environment:
+      - POSTGRESQL_POSTGRES_PASSWORD=supersecret
+      - POSTGRESQL_USERNAME=blackroad
+      - POSTGRESQL_PASSWORD=blackroad_pass
+      - POSTGRESQL_DATABASE=blackroad
+      - REPMGR_PRIMARY_ROLE=primary
+      - REPMGR_PARTNER_NODES=postgres-primary,postgres-replica
+      - REPMGR_PASSWORD=repmgr_pass
+      - REPMGR_PRIMARY_HOST=postgres-primary
+      - REPMGR_NODE_NAME=postgres-primary
+      - REPMGR_NODE_NETWORK_NAME=postgres-primary
+    volumes:
+      - pg_primary:/bitnami/postgresql
+    ports:
+      - "5432:5432"
+
+  postgres-replica:
+    image: bitnami/postgresql-repmgr:16
+    container_name: postgres-replica
+    restart: always
+    environment:
+      - POSTGRESQL_POSTGRES_PASSWORD=supersecret
+      - POSTGRESQL_USERNAME=blackroad
+      - POSTGRESQL_PASSWORD=blackroad_pass
+      - POSTGRESQL_DATABASE=blackroad
+      - REPMGR_PRIMARY_ROLE=replica
+      - REPMGR_PARTNER_NODES=postgres-primary,postgres-replica
+      - REPMGR_PASSWORD=repmgr_pass
+      - REPMGR_PRIMARY_HOST=postgres-primary
+      - REPMGR_NODE_NAME=postgres-replica
+      - REPMGR_NODE_NETWORK_NAME=postgres-replica
+    depends_on:
+      - postgres-primary
+    volumes:
+      - pg_replica:/bitnami/postgresql
+
+  redis-cluster:
+    image: bitnami/redis-cluster:7.2
+    container_name: redis-cluster
+    restart: always
+    environment:
+      - REDIS_PASSWORD=redispass
+      - REDISCLI_AUTH=redispass
+    ports:
+      - "7000-7005:7000-7005"
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.6
+    container_name: meilisearch
+    restart: always
+    environment:
+      - MEILI_MASTER_KEY=meili_master
+    ports:
+      - "7700:7700"
+    volumes:
+      - meili_data:/meili_data
+
+  lucidia-api:
+    build: ../apps/lucidia/api
+    container_name: lucidia-api
+    restart: always
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      - postgres-primary
+      - redis-cluster
+
+  lucidia-agents:
+    build: ../apps/lucidia/agents
+    container_name: lucidia-agents
+    restart: always
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - lucidia-api
+      - redis-cluster
+
+  lucidia-web:
+    build: ../apps/lucidia/web
+    container_name: lucidia-web
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - lucidia-api
+
+volumes:
+  caddy_data:
+  caddy_config:
+  vault_data:
+  gitea_data:
+  harbor_data:
+  minio_data:
+  pg_primary:
+  pg_replica:
+  meili_data:

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
 echo "==> Python dev deps"
 if [ -f requirements-dev.txt ]; then
   python -m pip install --upgrade pip >/dev/null
@@ -16,6 +17,7 @@ npm run lint:js:fix || true
 npm run format || true
 
 echo "==> Python fixes"
+echo "==> Python fixes (ruff imports + lint; black format; isort just-in-case)"
 ruff check . --fix || true
 ruff format . || true
 black . || true
@@ -28,3 +30,8 @@ echo "==> Remove node_modules from index if present"
 git rm -r --cached --ignore-unmatch **/node_modules 2>/dev/null || true
 
 echo "==> Done."
+echo "==> Remove node_modules cruft from index if any"
+git rm -r --cached --ignore-unmatch **/node_modules 2>/dev/null || true
+
+echo "==> Done."
+

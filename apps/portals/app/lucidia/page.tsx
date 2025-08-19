@@ -1,9 +1,66 @@
-import { Card } from "../../components/ui/card";
+'use client';
+
+import { useState } from 'react';
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
 
 export default function LucidiaPage() {
+  const { messages, sendMessage, addToolResult, status, error } = useChat({
+    transport: new DefaultChatTransport({ api: '/api/lucidia' }),
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    async onToolCall({ toolCall }) {
+      if (toolCall.toolName === 'getClientEnv') {
+        addToolResult({
+          tool: 'getClientEnv',
+          toolCallId: toolCall.toolCallId,
+          output: { tz: Intl.DateTimeFormat().resolvedOptions().timeZone },
+        });
+      }
+    },
+  });
+
+  const [input, setInput] = useState('');
+
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <Card className="p-8">Lucidia coming soon.</Card>
-    </div>
+    <main className="p-6 max-w-3xl mx-auto space-y-4">
+      <div className="space-y-3">
+        {messages.map(m => (
+          <div key={m.id} className="text-sm leading-relaxed">
+            <b>{m.role}:</b>{' '}
+            {m.parts.map((part, i) => {
+              switch (part.type) {
+                case 'text':
+                  return <span key={i}>{part.text}</span>;
+                case 'step-start':
+                  return <hr key={i} className="my-2 opacity-40" />;
+                default:
+                  return null;
+              }
+            })}
+          </div>
+        ))}
+      </div>
+
+      {status === 'error' && <div className="text-red-600">{String(error)}</div>}
+
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          if (input.trim()) {
+            sendMessage({ text: input });
+            setInput('');
+          }
+        }}
+        className="flex gap-2"
+      >
+        <input
+          className="flex-1 border rounded px-3 py-2"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          placeholder="Ask Lucidia…"
+        />
+        <button className="border rounded px-3 py-2">Send</button>
+      </form>
+    </main>
   );
 }

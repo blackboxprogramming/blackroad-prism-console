@@ -1,0 +1,14 @@
+[project]
+name = "lucidia_reason"
+version = "0.1.0"
+description = "Program-of-Thought reasoning engine with trinary logic"
+requires-python = ">=3.11"
+authors = [{name="Lucidia"}]
+dependencies = []
+
+[project.scripts]
+lucidia-reason = "lucidia_reason.cli:main"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git build-essential curl && rm -rf /var/lib/apt/lists/*
+
+# Cache dir layout
+RUN mkdir -p /app /models /root/.cache/huggingface
+WORKDIR /app
+
+# Bring the repo in at build time or mount it (compose mounts it read-only)
+# Keeping this step commented since compose mounts ./vendor/transformer-debugger
+# RUN git clone https://github.com/openai/transformer-debugger.git
+
+# Torch CPU + transformers
+RUN pip install --no-cache-dir torch==2.4.0 --index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir "transformers>=4.41.0" "uvicorn>=0.30" "fastapi>=0.112" "numpy" "scipy"
+
+# Editable install from the mounted repo when container starts (fast)
+CMD ["bash", "-lc", "pip install -e ./transformer-debugger && sleep infinity"]
