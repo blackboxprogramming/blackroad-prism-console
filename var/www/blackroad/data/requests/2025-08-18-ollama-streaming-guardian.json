@@ -1,0 +1,35 @@
+{
+  "$schema": "/data/requests/schema.json",
+  "version": "2025-08-18",
+  "id": "2025-08-18-ollama-streaming-guardian",
+  "title": "Guardian: Streaming inference (Ollama) + contradiction hooks",
+  "summary": "Implement server+UI streaming from Ollama with Codex hooks to log and surface contradictions live.",
+  "problem": "Lucidia requires real-time, token-level streaming from Ollama models with hooks to the contradiction engine. The stream must include structured events for {token, logprob?, state_change?, contradiction?}.",
+  "constraints": "Zero external APIs. Must run on Jetson Orin + Raspberry Pi 5. Use SSE or WebSocket. Integrate with existing Codex Infinity UI indicators.",
+  "acceptance_criteria": [
+    "Web UI shows incremental tokens with no more than 100ms average latency on LAN",
+    "Contradiction events bubble to UI and to `contradiction_log.jsonl`",
+    "Backpressure handles 1 concurrent model × 3 clients",
+    "Unit tests simulate stream + contradiction injection"
+  ],
+  "tags": ["ollama", "streaming", "sse", "websocket", "contradiction", "guardian"],
+  "agent": "guardian",
+  "difficulty": "advanced",
+  "status": "open",
+  "bounty": { "roadcoin": 500, "usd": 400 },
+  "owner": { "name": "Alexa Louise", "contact": "you@blackroad.io" },
+  "machine_decomposition": {
+    "tasks": [
+      "Implement SSE endpoint /api/phi/stream",
+      "Add middleware to call contradiction detector on partial buffers",
+      "UI event loop: token/contradiction/state indicators"
+    ],
+    "skills": ["python", "websockets", "sse", "ollama", "asyncio"],
+    "datasets": [],
+    "interfaces": ["phi.html", "guardian panel"]
+  },
+  "thread": [],
+  "created_at": "2025-08-18T22:11:00Z",
+  "updated_at": "2025-08-18T22:11:00Z",
+  "signing": { "algorithm": "PS-SHA∞", "signature": "" }
+}
