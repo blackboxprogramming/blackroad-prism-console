@@ -14,6 +14,7 @@ import Blog from './pages/Blog.jsx'
 import Post from './pages/Post.jsx'
 import QuantumLab from './pages/QuantumLab.jsx'
 import NotFound from './pages/NotFound.jsx'
+import PromptRequest from './pages/PromptRequest.jsx'
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { path: 'roadmap', element: <Roadmap /> },
       { path: 'changelog', element: <Changelog /> },
       { path: 'blog', element: <Blog /> },
+      { path: 'prompts', element: <PromptRequest /> },
       { path: 'blog/:slug', element: <Post /> },
       { path: '*', element: <NotFound /> }
     ]
@@ -50,6 +52,7 @@ export const router = createBrowserRouter([
     { path: 'roadmap', element: <Roadmap /> },
     { path: 'changelog', element: <Changelog /> },
     { path: 'blog', element: <Blog /> },
+    { path: 'prompts', element: <PromptRequest /> },
     { path: 'blog/:slug', element: <Post /> },
     { path: '*', element: <NotFound /> }
   ] }
