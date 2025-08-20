@@ -12,6 +12,7 @@ import Roadmap from './pages/Roadmap.jsx'
 import Changelog from './pages/Changelog.jsx'
 import Blog from './pages/Blog.jsx'
 import Post from './pages/Post.jsx'
+import QuantumLab from './pages/QuantumLab.jsx'
 import NotFound from './pages/NotFound.jsx'
 
 export const router = createBrowserRouter([
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
       { path: 'snapshot', element: <SnapshotPage /> },
       { path: 'portal', element: <Portal /> },
       { path: 'playground', element: <Playground /> },
+      { path: 'quantum-lab', element: <QuantumLab /> },
       { path: 'contact', element: <Contact /> },
       { path: 'tutorials', element: <Tutorials /> },
       { path: 'roadmap', element: <Roadmap /> },
@@ -42,6 +44,7 @@ export const router = createBrowserRouter([
     { path: 'snapshot', element: <SnapshotPage /> },
     { path: 'portal', element: <Portal /> },
     { path: 'playground', element: <Playground /> },
+    { path: 'quantum-lab', element: <QuantumLab /> },
     { path: 'contact', element: <Contact /> },
     { path: 'tutorials', element: <Tutorials /> },
     { path: 'roadmap', element: <Roadmap /> },
