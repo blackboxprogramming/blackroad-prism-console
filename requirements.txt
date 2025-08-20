@@ -12,7 +12,7 @@ requests>=2.31.0
 pre-commit==3.7.1
 requests>=2.31.0
 requests==2.32.2
-PyYAML==6.0.1
+PyYAML==6.0.2
 
 fastapi
 uvicorn
