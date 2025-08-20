@@ -9,7 +9,7 @@ anthropic
 boto3
 python-dotenv
 requests>=2.31.0
-pre-commit==3.7.1
+pre-commit==4.3.0
 requests>=2.31.0
 requests==2.32.2
 PyYAML==6.0.1
