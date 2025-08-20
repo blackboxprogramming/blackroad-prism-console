@@ -1,27 +1,46 @@
-name: Feature Flags (reusable)
+name: Flags
 on:
   workflow_call:
     outputs:
       ai_tools:
-        description: "ai_tools flag"
+        description: 'ai_tools flag'
         value: ${{ jobs.flags.outputs.ai_tools }}
       security_scans:
-        description: "security_scans flag"
+        description: 'security_scans flag'
+        description: 'AI tools flag'
+        value: ${{ jobs.flags.outputs.ai_tools }}
+      security_scans:
+        description: 'Security scans flag'
         value: ${{ jobs.flags.outputs.security_scans }}
+      web_performance:
+        description: 'Web perf flag'
+        value: ${{ jobs.flags.outputs.web_performance }}
       heavy_linters:
-        description: "heavy_linters flag"
+        description: 'heavy_linters flag'
+        description: 'Heavy linters flag'
         value: ${{ jobs.flags.outputs.heavy_linters }}
 jobs:
   flags:
     runs-on: ubuntu-latest
     outputs:
-      ai_tools: ${{ steps.read.outputs.ai_tools }}
-      security_scans: ${{ steps.read.outputs.security_scans }}
-      heavy_linters: ${{ steps.read.outputs.heavy_linters }}
+      ai_tools: ${{ steps.f.outputs.ai_tools }}
+      security_scans: ${{ steps.f.outputs.security_scans }}
+      web_performance: ${{ steps.f.outputs.web_performance }}
+      heavy_linters: ${{ steps.f.outputs.heavy_linters }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - id: read
+      - id: f
         run: |
-          node .github/tools/read-flags.js >> $GITHUB_OUTPUT
+          yq() { python - <<'PY'
+            import sys,yaml;print(yaml.safe_load(sys.stdin.read())['ai_tools'] if sys.argv[1]=='ai' else '')
+            PY
+            ; }
+          file=".github/feature-flags.yml"
+          ai=$(grep -E '^ai_tools:' "$file" | awk '{print $2}')
+          sec=$(grep -E '^security_scans:' "$file" | awk '{print $2}')
+          wp=$(grep -E '^web_performance:' "$file" | awk '{print $2}')
+          hl=$(grep -E '^heavy_linters:' "$file" | awk '{print $2}')
+          echo "ai_tools=${ai:-false}" >> $GITHUB_OUTPUT
+          echo "security_scans=${sec:-false}" >> $GITHUB_OUTPUT
+          echo "web_performance=${wp:-false}" >> $GITHUB_OUTPUT
+          echo "heavy_linters=${hl:-false}" >> $GITHUB_OUTPUT

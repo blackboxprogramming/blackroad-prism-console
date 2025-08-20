@@ -1,0 +1,29 @@
+# /opt/blackroad/iam/keycloak-realm.json
+{
+  "realm": "BlackRoad",
+  "enabled": true,
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "otpPolicyType": "totp",
+  "otpPolicyDigits": 6,
+  "otpPolicyPeriod": 30,
+  "clients": [
+    {"clientId": "ui", "publicClient": true, "redirectUris": ["*"]},
+    {"clientId": "api", "publicClient": false, "secret": "api-secret"},
+    {"clientId": "gitea", "publicClient": false, "secret": "gitea-secret"},
+    {"clientId": "woodpecker", "publicClient": false, "secret": "woodpecker-secret"},
+    {"clientId": "minio", "publicClient": false, "secret": "minio-secret"},
+    {"clientId": "registry", "publicClient": false, "secret": "registry-secret"},
+    {"clientId": "verdaccio", "publicClient": false, "secret": "verdaccio-secret"},
+    {"clientId": "devpi", "publicClient": false, "secret": "devpi-secret"},
+    {"clientId": "grafana", "publicClient": false, "secret": "grafana-secret"}
+  ],
+  "roles": {
+    "realm": [
+      {"name": "admin"},
+      {"name": "engineer"},
+      {"name": "readonly"},
+      {"name": "service"}
+    ]
+  }
+}

@@ -1,7 +1,8 @@
 name: Fail Informer
 on:
   workflow_run:
-    workflows: ["Deploy Quantum App (safe)", "Super-Linter", "CodeQL", "Snyk Scan", "OSSF Scorecard"]
+    workflows:
+      ['Deploy Quantum App (safe)', 'Super-Linter', 'CodeQL', 'Snyk Scan', 'OSSF Scorecard']
     types: [completed]
 permissions:
   pull-requests: write
@@ -24,4 +25,3 @@ jobs:
                 body: `❌ **${run.name}** failed on \`${run.head_branch}\`.\n\nLogs: ${run.html_url}`
               });
             }
-

@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package lucidia.vision.v1;
+
+option go_package   = "github.com/lucidia/vision/gen/go;visionpb";
+option java_package = "com.lucidia.vision.v1";
+
+// General image container (PNG or GeoTIFF by default).
+message Image {
+  bytes data   = 1;            // Raw image bytes.
+  string format = 2;           // "png" or "tiff".
+  uint32 width  = 3;
+  uint32 height = 4;
+}
+
+// Common projection info (EPSG codes).
+message Projection {
+  int32 epsg = 1;              // e.g., 4326 for WGS84, 3857 for WebMercator.
+}
+
+// ReprojectImage -------------------------------------------------------------
+message ReprojectImageRequest {
+  Image input          = 1;
+  Projection src_proj  = 2;
+  Projection dst_proj  = 3;
+}
+message ReprojectImageResponse {
+  Image output = 1;
+}
+
+// TilePyramid ----------------------------------------------------------------
+message TilePyramidRequest {
+  Image input          = 1;
+  Projection proj      = 2;
+  uint32 tile_size     = 3;     // e.g., 256.
+  uint32 min_zoom      = 4;
+  uint32 max_zoom      = 5;
+}
+message TilePyramidResponse {
+  repeated Image tiles = 1;     // XYZ tiles concatenated in z/x/y order.
+}
+
+// Mosaic ---------------------------------------------------------------------
+message MosaicRequest {
+  repeated Image inputs = 1;
+  Projection proj       = 2;
+}
+message MosaicResponse {
+  Image output = 1;
+}
+
+// Hillshade ------------------------------------------------------------------
+message HillshadeRequest {
+  Image dem            = 1;
+  Projection proj      = 2;
+  double sun_azimuth   = 3;     // degrees.
+  double sun_elevation = 4;     // degrees.
+}
+message HillshadeResponse {
+  Image output = 1;
+}
+
+// OrthorectifyDEM ------------------------------------------------------------
+message OrthorectifyDEMRequest {
+  Image dem       = 1;
+  Image texture   = 2;
+  Projection proj = 3;
+}
+message OrthorectifyDEMResponse {
+  Image output = 1;
+}
+
+// Resample -------------------------------------------------------------------
+message ResampleRequest {
+  Image input  = 1;
+  uint32 width = 2;
+  uint32 height = 3;
+}
+message ResampleResponse {
+  Image output = 1;
+}
+
+// ColorMap -------------------------------------------------------------------
+message ColorMapRequest {
+  Image input  = 1;
+  string palette = 2;           // e.g., "viridis", "terrain".
+}
+message ColorMapResponse {
+  Image output = 1;
+}
+
+// Service --------------------------------------------------------------------
+service VisionService {
+  rpc ReprojectImage   (ReprojectImageRequest)   returns (ReprojectImageResponse);
+  rpc TilePyramid      (TilePyramidRequest)      returns (TilePyramidResponse);
+  rpc Mosaic           (MosaicRequest)           returns (MosaicResponse);
+  rpc Hillshade        (HillshadeRequest)        returns (HillshadeResponse);
+  rpc OrthorectifyDEM  (OrthorectifyDEMRequest)  returns (OrthorectifyDEMResponse);
+  rpc Resample         (ResampleRequest)         returns (ResampleResponse);
+  rpc ColorMap         (ColorMapRequest)         returns (ColorMapResponse);
+}

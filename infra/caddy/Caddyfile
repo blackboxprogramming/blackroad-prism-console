@@ -1,0 +1,22 @@
+# <!-- FILE: /infra/caddy/Caddyfile -->
+{
+  admin off
+}
+
+blackroad.io {
+  encode gzip
+  reverse_proxy lucidia-web:80
+  header {
+    Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+    X-Content-Type-Options nosniff
+    X-Frame-Options DENY
+    Referrer-Policy no-referrer
+  }
+}
+
+*.internal.blackroad.io {
+  tls {
+    ca http://stepca:9000
+  }
+  reverse_proxy {"{http.request.host}":8080}
+}

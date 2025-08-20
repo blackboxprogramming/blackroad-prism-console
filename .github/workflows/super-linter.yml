@@ -20,3 +20,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
         continue-on-error: ${{ steps.flags.outputs.heavy != 'true' }}
+          VALIDATE_ALL_CODEBASE: true
+          LOG_LEVEL: warn
+          FILTER_REGEX_EXCLUDE: 'node_modules/|dist/|build/'
+          VALIDATE_MARKDOWN: true
+          VALIDATE_YAML: true
+          VALIDATE_JSON: true
+          VALIDATE_JAVASCRIPT_ES: true
+          VALIDATE_TYPESCRIPT: false
+          VALIDATE_HTML: true

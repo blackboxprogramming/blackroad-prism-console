@@ -1,0 +1,10 @@
+---
+- hosts: controllers
+  become: true
+  roles:
+    - { role: k3s, k3s_role: controller }
+
+- hosts: workers
+  become: true
+  roles:
+    - { role: k3s, k3s_role: worker }

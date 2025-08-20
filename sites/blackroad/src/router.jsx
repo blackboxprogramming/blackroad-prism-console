@@ -35,4 +35,19 @@ export const router = createBrowserRouter([
       { path: '*', element: <NotFound /> }
     ]
   }
+  { path: '/', element: <Layout />, errorElement: <Layout><NotFound/></Layout>, children: [
+    { index: true, element: <Home /> },
+    { path: 'docs', element: <Docs /> },
+    { path: 'status', element: <StatusPage /> },
+    { path: 'snapshot', element: <SnapshotPage /> },
+    { path: 'portal', element: <Portal /> },
+    { path: 'playground', element: <Playground /> },
+    { path: 'contact', element: <Contact /> },
+    { path: 'tutorials', element: <Tutorials /> },
+    { path: 'roadmap', element: <Roadmap /> },
+    { path: 'changelog', element: <Changelog /> },
+    { path: 'blog', element: <Blog /> },
+    { path: 'blog/:slug', element: <Post /> },
+    { path: '*', element: <NotFound /> }
+  ] }
 ])

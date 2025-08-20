@@ -47,3 +47,15 @@ curl http://ORIN_IP:8000/v1/chat/completions \
   }'
 
 The LLM API & trtllm-serve can take a local HF-format model path and handle checkpoint conversion + engine build internally; it serves an OpenAI-style API at /v1.
+#!/usr/bin/env bash
+set -euo pipefail
+
+VENV=${1:-trtllm-venv}
+python3 -m venv "$VENV"
+source "$VENV/bin/activate"
+pip install --upgrade pip
+# Install TensorRT-LLM from NVIDIA PyPI
+pip install --extra-index-url https://pypi.nvidia.com tensorrt-llm
+
+echo "TensorRT-LLM installed in $VENV"
+echo "Run with: trtllm-serve <MODEL_PATH> --port 8000 --host 0.0.0.0"

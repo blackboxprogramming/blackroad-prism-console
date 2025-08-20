@@ -1,0 +1,17 @@
+{
+  "realm": "blackroad",
+  "clients": [
+    {
+      "clientId": "ui",
+      "publicClient": true,
+      "redirectUris": ["https://blackroad.io/*"]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "credentials": [{"type": "password", "value": "admin"}]
+    }
+  ]
+}

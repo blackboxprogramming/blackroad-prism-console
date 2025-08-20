@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "required": ["title", "url"],
+      "properties": {
+        "title": {"type": "string"},
+        "url": {"type": "string", "format": "uri"},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}

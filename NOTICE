@@ -1,0 +1,8 @@
+This project includes an independent implementation of concepts from:
+
+Moorhead, A. V., et al. "Modeling the meteoroid environment far from the
+ ecliptic plane / MEM 3.1-alpha." Journal of Geophysical Research: Planets
+ (2014).
+
+The equations have been rederived and implemented from the publication; no
+source code from that work or from NASA/JPL projects has been used.

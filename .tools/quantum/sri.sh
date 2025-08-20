@@ -21,6 +21,8 @@ fi
 
 perl -0777 -pe "s|<script\\s+([^>]*?src=\\\"[^\\\"]*Chart\\.js/3\\.9\\.1/chart\\.min\\.js\\\"[^>]*?)>|my $a=$1;$a=~s/\\s+integrity=\\\"[^\\\"]*\\\"//g;$a=~s/\\s+crossorigin=\\\"[^\\\"]*\\\"//g;$a=~s/\\s+referrerpolicy=\\\"[^\\\"]*\\\"//g; '<script '.\$a.' integrity=\\\"$CHART_SRI\\\" crossorigin=\\\"anonymous\\\" referrerpolicy=\\\"no-referrer\\\">'|ge" -i \"$HTML\"
 perl -0777 -pe "s|<script\\s+([^>]*?src=\\\"[^\\\"]*mathjs/11\\.11\\.0/math\\.min\\.js\\\"[^>]*?)>|my $a=$1;$a=~s/\\s+integrity=\\\"[^\\\"]*\\\"//g;$a=~s/\\s+crossorigin=\\\"[^\\\"]*\\\"//g;$a=~s/\\s+referrerpolicy=\\\"[^\\\"]*\\\"//g; '<script '.\$a.' integrity=\\\"$MATH_SRI\\\" crossorigin=\\\"anonymous\\\" referrerpolicy=\\\"no-referrer\\\">'|ge" -i \"$HTML\"
+perl -0777 -pe "s|<script\s+([^>]*?src=\\\"[^\\\"]*Chart\\.js/3\\.9\\.1/chart\\.min\\.js\\\"[^>]*)>|my \$a=\$1;\$a=~s/\\s+integrity=\\\"[^\\\"]*\\\"//g;\$a=~s/\\s+crossorigin=\\\"[^\\\"]*\\\"//g;\$a=~s/\\s+referrerpolicy=\\\"[^\\\"]*\\\"//g; '<script '.\$a.' integrity=\\\"$CHART_SRI\\\" crossorigin=\\\"anonymous\\\" referrerpolicy=\\\"no-referrer\\\">'|ge" -i "$HTML"
+perl -0777 -pe "s|<script\s+([^>]*?src=\\\"[^\\\"]*mathjs/11\\.11\\.0/math\\.min\\.js\\\"[^>]*)>|my \$a=\$1;\$a=~s/\\s+integrity=\\\"[^\\\"]*\\\"//g;\$a=~s/\\s+crossorigin=\\\"[^\\\"]*\\\"//g;\$a=~s/\\s+referrerpolicy=\\\"[^\\\"]*\\\"//g; '<script '.\$a.' integrity=\\\"$MATH_SRI\\\" crossorigin=\\\"anonymous\\\" referrerpolicy=\\\"no-referrer\\\">'|ge" -i "$HTML"
 
 git add "$HTML"
 echo "SRI updated. Commit separately with: make commit && make push"

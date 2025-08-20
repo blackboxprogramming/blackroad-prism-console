@@ -46,4 +46,22 @@ export default function StatusPage() {
       )}
     </div>
   )
+export default function StatusPage() {
+  return (
+    <div className="card">
+      <h2 className="text-xl font-semibold mb-2">Status</h2>
+      {!s ? <p>Loading…</p> : (
+        <ul className="list-disc ml-5">
+          <li>Last update: <code>{s.ts || 'n/a'}</code></li>
+          <li>Commit: <code>{(s.ref||'').slice(0,7) || 'n/a'}</code></li>
+          <li>Run: <code>{s.run || 'n/a'}</code></li>
+        </ul>
+      )}
+export default function StatusPage(){
+  return (
+    <div className="card">
+      <h2 className="text-xl font-semibold mb-2">StatusPage</h2>
+      <p>Content coming soon.</p>
+    </div>
+  )
 }
