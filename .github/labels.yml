@@ -26,6 +26,18 @@
   color: "0052cc"
   description: "CI/CD, config, tooling"
 
+- name: 'priority: high'
+  color: d73a4a
+  description: Must-do soon
+- name: 'priority: medium'
+  color: fbca04
+  description: Should-do
+- name: 'priority: low'
+  color: c2e0c6
+  description: Nice-to-have
+- name: deps
+  color: 0366d6
+  description: Dependencies
 - name: security
   color: "d93f0b"
   description: "Security, policies, secrets"

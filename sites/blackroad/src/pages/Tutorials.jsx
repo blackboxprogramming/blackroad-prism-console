@@ -39,6 +39,11 @@ export default function Tutorials(){
     <div className="card">
       <h2 className="text-xl font-semibold mb-2">{t('navTutorials')}</h2>
       <p className="opacity-80">Tutorials coming soon.</p>
+export default function Tutorials(){
+  return (
+    <div className="card">
+      <h2 className="text-xl font-semibold mb-2">Tutorials</h2>
+      <p>Content coming soon.</p>
     </div>
   )
 }

@@ -5,6 +5,23 @@ services:
     image: postgres:15
     container_name: blackroads-postgres
     restart: unless-stopped
+# <!-- FILE: /srv/blackroads/elt/docker-compose.yml -->
+version: '3.8'
+
+networks:
+  blackroads_net:
+    driver: bridge
+
+volumes:
+  pgdata_blackroads:
+
+secrets:
+  postgres_password:
+    file: ./docker/secrets/postgres_password.txt
+
+services:
+  blackroads-postgres:
+    image: postgres:15
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -38,12 +55,40 @@ services:
       retries: 5
     ports:
       - '4200:4200'
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_blackroads:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - blackroads_net
+    secrets:
+      - postgres_password
+
+  blackroads-prefect:
+    image: prefecthq/prefect:2-latest
+    environment:
+      PREFECT_API_URL: http://0.0.0.0:4200/api
+      TZ: America/Chicago
+    command: prefect server start --host 0.0.0.0 --port 4200
+    ports:
+      - "4200:4200"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4200/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - blackroads_net
 
   blackroads-prefect-agent:
     image: prefecthq/prefect:2.14.10-python3.11
     container_name: blackroads-prefect-agent
+    image: prefecthq/prefect:2-latest
     depends_on:
       - blackroads-prefect
     environment:
@@ -62,6 +107,11 @@ services:
     env_file: .env
     volumes:
       - .:/srv/blackroads/elt
+    volumes:
+      - ./:/srv/blackroads/elt
+    environment:
+      TZ: America/Chicago
+      PREFECT_API_URL: http://blackroads-prefect:4200/api
     depends_on:
       - blackroads-postgres
     networks:
@@ -78,10 +128,24 @@ services:
     command: tail -f /dev/null
     volumes:
       - .:/srv/blackroads/elt
+    image: ghcr.io/dbt-labs/dbt-postgres:1.7.6
+    volumes:
+      - ./:/srv/blackroads/elt
+    working_dir: /srv/blackroads/elt/dbt
+    entrypoint: ["/bin/sh", "-c", "export POSTGRES_PASSWORD=$(cat $${POSTGRES_PASSWORD_FILE}); dbt"]
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      TZ: America/Chicago
     depends_on:
       - blackroads-postgres
     networks:
       - blackroads_net
+    secrets:
+      - postgres_password
 
   blackroads-ge:
     build:
@@ -94,6 +158,11 @@ services:
       - .:/srv/blackroads/elt
     depends_on:
       - blackroads-postgres
+    volumes:
+      - ./:/srv/blackroads/elt
+    working_dir: /srv/blackroads/elt
+    environment:
+      TZ: America/Chicago
     networks:
       - blackroads_net
 
@@ -119,3 +188,13 @@ volumes:
 secrets:
   postgres_password:
     file: docker/secrets/postgres_password.txt
+    image: metabase/metabase:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - blackroads-postgres
+    environment:
+      MB_DB_FILE: /metabase.db
+      TZ: America/Chicago
+    networks:
+      - blackroads_net

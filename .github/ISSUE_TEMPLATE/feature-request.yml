@@ -9,3 +9,14 @@ body:
   - type: textarea
     id: accept
     attributes: { label: Acceptance criteria }
+description: Suggest an idea
+labels: [enhancement]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+  - type: textarea
+    id: value
+    attributes:
+      label: Value/Why

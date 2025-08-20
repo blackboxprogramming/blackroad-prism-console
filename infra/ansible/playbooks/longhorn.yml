@@ -1,0 +1,5 @@
+---
+- hosts: controllers
+  become: true
+  roles:
+    - longhorn

@@ -1,6 +1,7 @@
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
+import process from 'node:process';
 
 const prod = process.env.NODE_ENV === 'production';
 
@@ -12,4 +13,11 @@ export default {
     sourcemap: true,
   },
   plugins: [nodeResolve({ preferBuiltins: true }), commonjs(), prod && terser()],
+    sourcemap: true
+  },
+  plugins: [
+    nodeResolve({ preferBuiltins: true }),
+    commonjs(),
+    prod && terser()
+  ]
 };

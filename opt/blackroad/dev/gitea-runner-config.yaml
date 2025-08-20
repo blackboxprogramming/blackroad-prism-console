@@ -1,0 +1,6 @@
+# /opt/blackroad/dev/gitea-runner-config.yaml
+runner:
+  token: abcdefghij1234567890
+  url: https://gitea.blackroad.internal/
+  capacity: 2
+  workdir: /tmp/runner

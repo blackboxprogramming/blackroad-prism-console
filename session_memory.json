@@ -1,0 +1,273 @@
+{
+  "created_utc": "2025-08-20T20:05:18.331636Z",
+  "note": "Portable memory for this session. Re-upload to a future chat to restore context.",
+  "user_preferences": {
+    "never_lie": true
+  },
+  "conversation_summary": "Conversation & context summary (auto-generated)\n------------------------------------------------\n- You shared several screenshots from Math StackExchange and Reddit.\n  \u2022 Topic 1: Integral representation of the Riemann zeta function \u2014 derivation of\n    \u03b6(s) = (1/\u0393(s)) \u222b_0^\u221e x^{s-1}/(e^x\u22121) dx for Re(s) > 1 using the geometric series,\n    change of variables, and interchange of sum and integral.\n  \u2022 Topic 2: A complex-parameter integral identity involving Gamma and Zeta functions\n    (comments noting equations like \u0393(a)\u03b6(a) \u2212 \u0393(\u2212a+1)\u03b6(\u2212a+1) = 0).\n  \u2022 Topic 3: Busy Beaver & ZFC independence \u2014 discussion clarifying how statements\n    like \u201cn = BB(745)\u201d can be undecidable in ZFC and what \u201cindependent of ZFC\u201d means.\n- You asked me to \u201cStore these files and this conversation in memory.\u201d\n- I cannot persist data beyond this chat session, but the files listed below are available\n  to me during this session. I\u2019ve also generated this portable memory pack you can\n  download and re\u2011upload in future chats to restore context.\n",
+  "topics_tags": [
+    "riemann-zeta",
+    "gamma-function",
+    "integral-representations",
+    "busy-beaver",
+    "ZFC-independence",
+    "AI/ML-papers",
+    "gravitational-waves",
+    "evolutionary-AI",
+    "sine-functions"
+  ],
+  "uploaded_files_manifest": [
+    {
+      "name": "0160D6F4-74A4-44E7-B297-2A782BD5AD81.jpeg",
+      "path": "/mnt/data/0160D6F4-74A4-44E7-B297-2A782BD5AD81.jpeg",
+      "ext": ".jpeg",
+      "size_bytes": 240549,
+      "sha256_8": "a5c3bfcc"
+    },
+    {
+      "name": "1802.01528v3.pdf",
+      "path": "/mnt/data/1802.01528v3.pdf",
+      "ext": ".pdf",
+      "size_bytes": 761311,
+      "sha256_8": "5ec0f6fc"
+    },
+    {
+      "name": "1AE25807-B3A1-40C9-A095-35E50382BFF5.jpeg",
+      "path": "/mnt/data/1AE25807-B3A1-40C9-A095-35E50382BFF5.jpeg",
+      "ext": ".jpeg",
+      "size_bytes": 302731,
+      "sha256_8": "334f95ca"
+    },
+    {
+      "name": "21456C18-CAE2-4AA4-8ABA-A654D4BE65F6.jpeg",
+      "path": "/mnt/data/21456C18-CAE2-4AA4-8ABA-A654D4BE65F6.jpeg",
+      "ext": ".jpeg",
+      "size_bytes": 292603,
+      "sha256_8": "f08f3ca4"
+    },
+    {
+      "name": "2204.04157v2.pdf",
+      "path": "/mnt/data/2204.04157v2.pdf",
+      "ext": ".pdf",
+      "size_bytes": 1528457,
+      "sha256_8": "e1efccae"
+    },
+    {
+      "name": "2501.14787v1.pdf",
+      "path": "/mnt/data/2501.14787v1.pdf",
+      "ext": ".pdf",
+      "size_bytes": 1884010,
+      "sha256_8": "ee3d2855"
+    },
+    {
+      "name": "2502.00873v1.pdf",
+      "path": "/mnt/data/2502.00873v1.pdf",
+      "ext": ".pdf",
+      "size_bytes": 6212927,
+      "sha256_8": "d1ccb4a8"
+    },
+    {
+      "name": "29DF0592-5BA4-463D-9D1A-4183A0F39DC1.jpeg",
+      "path": "/mnt/data/29DF0592-5BA4-463D-9D1A-4183A0F39DC1.jpeg",
+      "ext": ".jpeg",
+      "size_bytes": 328463,
+      "sha256_8": "abef3a00"
+    },
+    {
+      "name": "40F4F81C-9E29-427F-B951-666DDB0787A2.jpeg",
+      "path": "/mnt/data/40F4F81C-9E29-427F-B951-666DDB0787A2.jpeg",
+      "ext": ".jpeg",
+      "size_bytes": 307954,
+      "sha256_8": "aeebd1c0"
+    },
+    {
+      "name": "473_taming_the_waves_sine_as_activ.pdf",
+      "path": "/mnt/data/473_taming_the_waves_sine_as_activ.pdf",
+      "ext": ".pdf",
+      "size_bytes": 997341,
+      "sha256_8": "2ed1a82d"
+    },
+    {
+      "name": "477CA225-36B6-44F8-91C5-9A4391A223E6.jpeg",
+      "path": "/mnt/data/477CA225-36B6-44F8-91C5-9A4391A223E6.jpeg",
+      "ext": ".jpeg",
+      "size_bytes": 164475,
+      "sha256_8": "e4142e93"
+    },
+    {
+      "name": "4EC5F61C-FF23-4AB0-818B-2686D7BB6F0F.jpeg",
+      "path": "/mnt/data/4EC5F61C-FF23-4AB0-818B-2686D7BB6F0F.jpeg",
+      "ext": ".jpeg",
+      "size_bytes": 212597,
+      "sha256_8": "79313004"
+    },
+    {
+      "name": "68239.pdf",
+      "path": "/mnt/data/68239.pdf",
+      "ext": ".pdf",
+      "size_bytes": 2313040,
+      "sha256_8": "adc16850"
+    },
+    {
+      "name": "843D1DEE-6A74-4D20-BDD7-549079168FED.jpeg",
+      "path": "/mnt/data/843D1DEE-6A74-4D20-BDD7-549079168FED.jpeg",
+      "ext": ".jpeg",
+      "size_bytes": 198195,
+      "sha256_8": "ee826a3b"
+    },
+    {
+      "name": "9c596c12c2d5bd1d41fa0d66150474e8ff15.pdf",
+      "path": "/mnt/data/9c596c12c2d5bd1d41fa0d66150474e8ff15.pdf",
+      "ext": ".pdf",
+      "size_bytes": 2086803,
+      "sha256_8": "cfd32486"
+    },
+    {
+      "name": "AI@INFN_Cuoco.pdf",
+      "path": "/mnt/data/AI@INFN_Cuoco.pdf",
+      "ext": ".pdf",
+      "size_bytes": 8985786,
+      "sha256_8": "bc65663b"
+    },
+    {
+      "name": "AIM-128.pdf",
+      "path": "/mnt/data/AIM-128.pdf",
+      "ext": ".pdf",
+      "size_bytes": 124707,
+      "sha256_8": "7da4b4bb"
+    },
+    {
+      "name": "AIM-349.pdf",
+      "path": "/mnt/data/AIM-349.pdf",
+      "ext": ".pdf",
+      "size_bytes": 2300855,
+      "sha256_8": "c2961e07"
+    },
+    {
+      "name": "Calculus for Machine Learning Understanding the Language of Mathematics - DOKUMEN.PUB.webarchive",
+      "path": "/mnt/data/Calculus for Machine Learning Understanding the Language of Mathematics - DOKUMEN.PUB.webarchive",
+      "ext": ".webarchive",
+      "size_bytes": 6790240,
+      "sha256_8": "58dbc6cb"
+    },
+    {
+      "name": "DA5F9FEA-0F1D-45CB-88D9-433B053FF798.jpeg",
+      "path": "/mnt/data/DA5F9FEA-0F1D-45CB-88D9-433B053FF798.jpeg",
+      "ext": ".jpeg",
+      "size_bytes": 150939,
+      "sha256_8": "c560151c"
+    },
+    {
+      "name": "FC155776-360F-477A-A735-F9CBC7A32310.jpeg",
+      "path": "/mnt/data/FC155776-360F-477A-A735-F9CBC7A32310.jpeg",
+      "ext": ".jpeg",
+      "size_bytes": 210666,
+      "sha256_8": "b4f177c1"
+    },
+    {
+      "name": "GrokkingArtificialIntelligenceAlgorithms.pdf",
+      "path": "/mnt/data/GrokkingArtificialIntelligenceAlgorithms.pdf",
+      "ext": ".pdf",
+      "size_bytes": 4876870,
+      "sha256_8": "0efed02d"
+    },
+    {
+      "name": "Luger_0136070477_1.pdf",
+      "path": "/mnt/data/Luger_0136070477_1.pdf",
+      "ext": ".pdf",
+      "size_bytes": 2611154,
+      "sha256_8": "a94fabe8"
+    },
+    {
+      "name": "Trig functions ai.pdf",
+      "path": "/mnt/data/Trig functions ai.pdf",
+      "ext": ".pdf",
+      "size_bytes": 141492,
+      "sha256_8": "b8020a3c"
+    },
+    {
+      "name": "alg4ai.pdf",
+      "path": "/mnt/data/alg4ai.pdf",
+      "ext": ".pdf",
+      "size_bytes": 538179,
+      "sha256_8": "aad133bd"
+    },
+    {
+      "name": "applsci-11-06704-v3.pdf",
+      "path": "/mnt/data/applsci-11-06704-v3.pdf",
+      "ext": ".pdf",
+      "size_bytes": 1055566,
+      "sha256_8": "9b8c55d7"
+    },
+    {
+      "name": "co_coding_portal_research2.txt",
+      "path": "/mnt/data/co_coding_portal_research2.txt",
+      "ext": ".txt",
+      "size_bytes": 61193,
+      "sha256_8": "67c9c5f4"
+    },
+    {
+      "name": "evolution_research.txt",
+      "path": "/mnt/data/evolution_research.txt",
+      "ext": ".txt",
+      "size_bytes": 34401,
+      "sha256_8": "a78d204d"
+    },
+    {
+      "name": "l.fopc2.pdf",
+      "path": "/mnt/data/l.fopc2.pdf",
+      "ext": ".pdf",
+      "size_bytes": 12529,
+      "sha256_8": "d989572f"
+    },
+    {
+      "name": "lecture32.pdf",
+      "path": "/mnt/data/lecture32.pdf",
+      "ext": ".pdf",
+      "size_bytes": 163727,
+      "sha256_8": "6c5ad4e5"
+    },
+    {
+      "name": "maalouf22a.pdf",
+      "path": "/mnt/data/maalouf22a.pdf",
+      "ext": ".pdf",
+      "size_bytes": 1111952,
+      "sha256_8": "75d3951b"
+    },
+    {
+      "name": "math4ml.pdf",
+      "path": "/mnt/data/math4ml.pdf",
+      "ext": ".pdf",
+      "size_bytes": 266370,
+      "sha256_8": "f8db6bc1"
+    },
+    {
+      "name": "physiology-of-the-pineal-gland-and-melatonin.pdf",
+      "path": "/mnt/data/physiology-of-the-pineal-gland-and-melatonin.pdf",
+      "ext": ".pdf",
+      "size_bytes": 1416545,
+      "sha256_8": "aabc4f40"
+    },
+    {
+      "name": "rn.chap1.pdf",
+      "path": "/mnt/data/rn.chap1.pdf",
+      "ext": ".pdf",
+      "size_bytes": 5019691,
+      "sha256_8": "f075fba8"
+    },
+    {
+      "name": "sms essay 2.pdf",
+      "path": "/mnt/data/sms essay 2.pdf",
+      "ext": ".pdf",
+      "size_bytes": 146007,
+      "sha256_8": "0d36f1dc"
+    },
+    {
+      "name": "steps.pdf",
+      "path": "/mnt/data/steps.pdf",
+      "ext": ".pdf",
+      "size_bytes": 6073914,
+      "sha256_8": "7982c8e0"
+    }
+  ]
+}

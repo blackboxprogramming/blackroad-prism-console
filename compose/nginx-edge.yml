@@ -1,0 +1,10 @@
+version: '3'
+services:
+  edge:
+    image: nginx:1.25
+    volumes:
+      - ../security/nginx/waf.conf:/etc/nginx/conf.d/waf.conf:ro
+      - ../security/ufw.rules:/etc/nginx/ufw.rules:ro
+    ports:
+      - "80:80"
+      - "443:443"

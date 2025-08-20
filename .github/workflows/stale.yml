@@ -6,6 +6,10 @@ permissions:
   issues: write
   pull-requests: write
 
+name: Stale Issues/PRs
+on:
+  schedule: [{ cron: '0 8 * * *' }]
+permissions: { issues: write, pull-requests: write }
 jobs:
   stale:
     runs-on: ubuntu-latest
@@ -18,3 +22,8 @@ jobs:
           stale-pr-message: "This PR is stale due to inactivity. It will auto-close in 7 days."
           exempt-issue-labels: "security,blocked"
           exempt-pr-labels: "security,blocked"
+
+          days-before-close: 14
+          stale-issue-label: 'stale'
+          stale-pr-label: 'stale'
+          exempt-issue-labels: 'security'
