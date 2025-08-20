@@ -1,0 +1,10 @@
+name: CodeQL JS config
+paths:
+  - apps/quantum
+paths-ignore:
+  - node_modules
+  - dist
+  - build
+  - public/vendor
+  - .tools
+  - .github

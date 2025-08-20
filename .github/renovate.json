@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    ":semanticCommits",
+    ":separateMultipleMajorReleases",
+    ":rebaseStalePrs",
+    "group:allNonMajor"
+  ],
+  "labels": ["dependencies"],
+  "rangeStrategy": "bump",
+  "timezone": "America/Chicago",
+  "assignees": [],
+  "packageRules": [
+    {
+      "matchManagers": ["npm"],
+      "rangeStrategy": "auto",
+      "labels": ["deps:npm"]
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "labels": ["deps:actions"]
+    }
+  ],
+  "prHourlyLimit": 4,
+  "prConcurrentLimit": 10,
+  "rebaseWhen": "behind-base-branch"
+  "extends": ["config:base"],
+  "labels": ["dependencies", "automerge"]
+}

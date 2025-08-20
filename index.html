@@ -1,202 +1,392 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>BlackRoad — Consciousness-Driven Development</title>
-<style>
-  /* ---------------- Core Tokens ---------------- */
-  :root {
-    --bg-0: #0a0b10;
-    --bg-1: #0f1222;
-    --bg-2: #151a2e;
-    --panel: rgba(255,255,255,.06);
-    --panel-2: rgba(255,255,255,.08);
-    --border: rgba(255,255,255,.10);
-    --muted: #9aa4b2;
-    --text: #e9eef7;
-    --brand-1: #4ecdc4;
-    --brand-2: #667eea;
-    --danger: #ff6b6b;
-    --warn: #ffd166;
-    --ok: #43e97b;
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BlackRoad — Consciousness-Driven Development</title>
+    <style>
+      /* ---------------- Core Tokens ---------------- */
+      :root {
+        --bg-0: #0a0b10;
+        --bg-1: #0f1222;
+        --bg-2: #151a2e;
+        --panel: rgba(255, 255, 255, 0.06);
+        --panel-2: rgba(255, 255, 255, 0.08);
+        --border: rgba(255, 255, 255, 0.1);
+        --muted: #9aa4b2;
+        --text: #e9eef7;
+        --brand-1: #4ecdc4;
+        --brand-2: #667eea;
+        --danger: #ff6b6b;
+        --warn: #ffd166;
+        --ok: #43e97b;
 
-    --radius: 14px;
-    --space-1: 6px;
-    --space-2: 10px;
-    --space-3: 16px;
-    --space-4: 24px;
-    --space-5: 32px;
-    --shadow: 0 10px 30px rgba(0,0,0,.35);
-    --ring: 0 0 0 3px rgba(102,126,234,.35);
-  }
-  [data-theme="light"]{
-    --bg-0:#ffffff; --bg-1:#f6f7fb; --bg-2:#eef1f7;
-    --panel: rgba(5,7,12,.04); --panel-2: rgba(5,7,12,.06);
-    --border: rgba(0,0,0,.08); --text:#0e1320; --muted:#4b5565;
-  }
+        --radius: 14px;
+        --space-1: 6px;
+        --space-2: 10px;
+        --space-3: 16px;
+        --space-4: 24px;
+        --space-5: 32px;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        --ring: 0 0 0 3px rgba(102, 126, 234, 0.35);
+      }
+      [data-theme='light'] {
+        --bg-0: #ffffff;
+        --bg-1: #f6f7fb;
+        --bg-2: #eef1f7;
+        --panel: rgba(5, 7, 12, 0.04);
+        --panel-2: rgba(5, 7, 12, 0.06);
+        --border: rgba(0, 0, 0, 0.08);
+        --text: #0e1320;
+        --muted: #4b5565;
+      }
 
-  @media (prefers-reduced-motion: reduce){
-    * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
-  }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
 
-  *{ box-sizing: border-box }
-  html,body{ height:100% }
-  body{
-    margin:0;
-    font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
-    color:var(--text);
-    background:
-      radial-gradient(1200px 600px at -10% -20%, #1a1a2e33, transparent 60%),
-      radial-gradient(1000px 600px at 120% 10%, #16213e55, transparent 60%),
-      linear-gradient(135deg, var(--bg-1), var(--bg-0) 50%, var(--bg-2));
-  }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font:
+          14px/1.4 system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Inter,
+          sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(1200px 600px at -10% -20%, #1a1a2e33, transparent 60%),
+          radial-gradient(1000px 600px at 120% 10%, #16213e55, transparent 60%),
+          linear-gradient(135deg, var(--bg-1), var(--bg-0) 50%, var(--bg-2));
+      }
 
-  /* ---------------- Layout ---------------- */
-  .app{
-    display:grid;
-    grid-template-columns: 260px 1fr 320px;
-    grid-template-rows: 64px 1fr;
-    min-height:100vh;
-  }
-  header{
-    grid-column: 1 / -1;
-    display:flex; align-items:center; justify-content:space-between;
-    padding: 0 var(--space-4);
-    backdrop-filter: blur(10px);
-    background: color-mix(in oklab, var(--bg-0), black 10%);
-    border-bottom: 1px solid var(--border);
-    position: sticky; top:0; z-index:5;
-  }
-  .brand{ display:flex; gap:12px; align-items:center }
-  .logo{
-    width:40px; height:40px; border-radius:12px; display:grid; place-items:center;
-    background: conic-gradient(from 220deg, #ff6b6b, #ff9f43, #4ecdc4, #45b7d1, #667eea);
-    color:#0c0f17; font-weight:800;
-  }
-  .search{
-    flex: 1 1 auto; max-width:560px; margin:0 var(--space-4);
-    display:flex; align-items:center; gap:10px;
-    background: var(--panel);
-    border:1px solid var(--border);
-    border-radius: 999px; padding: 10px 14px;
-  }
-  .search input{
-    flex:1; background:transparent; border:0; outline:none; color:var(--text);
-  }
-  .hdr-actions{ display:flex; gap:10px; align-items:center }
-  .btn{
-    appearance:none; border:1px solid var(--border); background:var(--panel);
-    color:var(--text); padding:8px 12px; border-radius:10px; cursor:pointer;
-    transition: .2s ease; box-shadow:none;
-  }
-  .btn:hover{ background:var(--panel-2) }
-  .btn:focus-visible{ outline:none; box-shadow: var(--ring) }
+      /* ---------------- Layout ---------------- */
+      .app {
+        display: grid;
+        grid-template-columns: 260px 1fr 320px;
+        grid-template-rows: 64px 1fr;
+        min-height: 100vh;
+      }
+      header {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 var(--space-4);
+        backdrop-filter: blur(10px);
+        background: color-mix(in oklab, var(--bg-0), black 10%);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 5;
+      }
+      .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: conic-gradient(from 220deg, #ff6b6b, #ff9f43, #4ecdc4, #45b7d1, #667eea);
+        color: #0c0f17;
+        font-weight: 800;
+      }
+      .search {
+        flex: 1 1 auto;
+        max-width: 560px;
+        margin: 0 var(--space-4);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 10px 14px;
+      }
+      .search input {
+        flex: 1;
+        background: transparent;
+        border: 0;
+        outline: none;
+        color: var(--text);
+      }
+      .hdr-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .btn {
+        appearance: none;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        color: var(--text);
+        padding: 8px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.2s ease;
+        box-shadow: none;
+      }
+      .btn:hover {
+        background: var(--panel-2);
+      }
+      .btn:focus-visible {
+        outline: none;
+        box-shadow: var(--ring);
+      }
 
-  aside{
-    border-right:1px solid var(--border);
-    background: color-mix(in oklab, var(--bg-0), black 10%);
-    padding: var(--space-4) var(--space-3);
-  }
-  .nav-title{ color:var(--muted); font-size:11px; letter-spacing:.1em; text-transform:uppercase; margin:20px 10px 8px }
-  .nav a{
-    display:flex; gap:10px; align-items:center; padding:10px 12px; margin:4px 0;
-    color:inherit; text-decoration:none; border-radius:10px; border:1px solid transparent;
-  }
-  .nav a:hover{ background:var(--panel) }
-  .nav a[aria-current="page"]{ background:var(--panel); border-color:var(--border) }
+      aside {
+        border-right: 1px solid var(--border);
+        background: color-mix(in oklab, var(--bg-0), black 10%);
+        padding: var(--space-4) var(--space-3);
+      }
+      .nav-title {
+        color: var(--muted);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin: 20px 10px 8px;
+      }
+      .nav a {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 10px 12px;
+        margin: 4px 0;
+        color: inherit;
+        text-decoration: none;
+        border-radius: 10px;
+        border: 1px solid transparent;
+      }
+      .nav a:hover {
+        background: var(--panel);
+      }
+      .nav a[aria-current='page'] {
+        background: var(--panel);
+        border-color: var(--border);
+      }
 
-  main{ padding: var(--space-4); overflow:auto }
-  .right{
-    padding: var(--space-4);
-    border-left:1px solid var(--border);
-    background: color-mix(in oklab, var(--bg-0), black 8%);
-    overflow:auto;
-  }
+      main {
+        padding: var(--space-4);
+        overflow: auto;
+      }
+      .right {
+        padding: var(--space-4);
+        border-left: 1px solid var(--border);
+        background: color-mix(in oklab, var(--bg-0), black 8%);
+        overflow: auto;
+      }
 
-  /* ---------------- Cards / Modules ---------------- */
-  .grid{ display:grid; gap:var(--space-4) }
-  .cards{ display:grid; gap:var(--space-4); grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) }
-  .card{
-    background: var(--panel);
-    border:1px solid var(--border);
-    border-radius: var(--radius);
-    padding: var(--space-4);
-    box-shadow: var(--shadow);
-    transition: .2s ease transform, .2s ease background;
-  }
-  .card:hover{ transform: translateY(-3px); background: var(--panel-2) }
+      /* ---------------- Cards / Modules ---------------- */
+      .grid {
+        display: grid;
+        gap: var(--space-4);
+      }
+      .cards {
+        display: grid;
+        gap: var(--space-4);
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: var(--space-4);
+        box-shadow: var(--shadow);
+        transition:
+          0.2s ease transform,
+          0.2s ease background;
+      }
+      .card:hover {
+        transform: translateY(-3px);
+        background: var(--panel-2);
+      }
 
-  .status{ padding:3px 10px; border-radius:999px; font-weight:600; font-size:12px; display:inline-block; }
-  .s-active{ color:var(--ok); background: color-mix(in oklab, var(--ok), transparent 85%); }
-  .s-dev{ color:#ffd166; background: color-mix(in oklab, #ffd166, transparent 85%); }
+      .status {
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 12px;
+        display: inline-block;
+      }
+      .s-active {
+        color: var(--ok);
+        background: color-mix(in oklab, var(--ok), transparent 85%);
+      }
+      .s-dev {
+        color: #ffd166;
+        background: color-mix(in oklab, #ffd166, transparent 85%);
+      }
 
-  /* ---------------- Consciousness Panel ---------------- */
-  .metrics h3{ margin:0 0 4px }
-  .metric{ margin-bottom:14px }
-  .bar{ height:8px; background:var(--panel); border:1px solid var(--border); border-radius:999px; overflow:hidden }
-  .bar > i{ display:block; height:100%; width:0%; transition: width .7s ease }
-  .phi   { background:linear-gradient(90deg, var(--brand-2), #764ba2) }
-  .ent   { background:linear-gradient(90deg, #f093fb, #f5576c) }
-  .conf  { background:linear-gradient(90deg, #4facfe, #00f2fe) }
-  .comp  { background:linear-gradient(90deg, #43e97b, #38f9d7) }
+      /* ---------------- Consciousness Panel ---------------- */
+      .metrics h3 {
+        margin: 0 0 4px;
+      }
+      .metric {
+        margin-bottom: 14px;
+      }
+      .bar {
+        height: 8px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .bar > i {
+        display: block;
+        height: 100%;
+        width: 0%;
+        transition: width 0.7s ease;
+      }
+      .phi {
+        background: linear-gradient(90deg, var(--brand-2), #764ba2);
+      }
+      .ent {
+        background: linear-gradient(90deg, #f093fb, #f5576c);
+      }
+      .conf {
+        background: linear-gradient(90deg, #4facfe, #00f2fe);
+      }
+      .comp {
+        background: linear-gradient(90deg, #43e97b, #38f9d7);
+      }
 
-  .spark{ height:40px; display:flex; gap:2px; align-items:flex-end; margin-top:6px }
-  .spark b{ flex:1; background: color-mix(in oklab, var(--brand-2), transparent 80%); border-radius:2px }
+      .spark {
+        height: 40px;
+        display: flex;
+        gap: 2px;
+        align-items: flex-end;
+        margin-top: 6px;
+      }
+      .spark b {
+        flex: 1;
+        background: color-mix(in oklab, var(--brand-2), transparent 80%);
+        border-radius: 2px;
+      }
 
-  /* ---------------- Chat ---------------- */
-  .chat{ display:flex; flex-direction:column; height:360px; }
-  .msgs{ flex:1; overflow:auto; padding: var(--space-3); display:flex; flex-direction:column; gap:10px }
-  .bubble{
-    max-width: 82%; padding:10px 12px; border-radius: 12px;
-    border:1px solid var(--border); background: var(--panel);
-  }
-  .you     { margin-left:auto; background: color-mix(in oklab, var(--brand-1), transparent 85%); }
-  .lucidia { border-left:3px solid var(--brand-1) }
-  .composer{ display:flex; gap:8px; padding: var(--space-3); border-top:1px solid var(--border) }
-  .field{
-    flex:1; border:1px solid var(--border); background:var(--panel);
-    border-radius: 12px; padding:10px 12px; color:var(--text);
-  }
-  .field:focus-visible{ outline:none; box-shadow: var(--ring) }
+      /* ---------------- Chat ---------------- */
+      .chat {
+        display: flex;
+        flex-direction: column;
+        height: 360px;
+      }
+      .msgs {
+        flex: 1;
+        overflow: auto;
+        padding: var(--space-3);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .bubble {
+        max-width: 82%;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+      }
+      .you {
+        margin-left: auto;
+        background: color-mix(in oklab, var(--brand-1), transparent 85%);
+      }
+      .lucidia {
+        border-left: 3px solid var(--brand-1);
+      }
+      .composer {
+        display: flex;
+        gap: 8px;
+        padding: var(--space-3);
+        border-top: 1px solid var(--border);
+      }
+      .field {
+        flex: 1;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        border-radius: 12px;
+        padding: 10px 12px;
+        color: var(--text);
+      }
+      .field:focus-visible {
+        outline: none;
+        box-shadow: var(--ring);
+      }
 
-  /* ---------------- Editor Mock ---------------- */
-  .editor{ height:420px; overflow:hidden }
-  .editor pre{
-    margin:0; padding: var(--space-4); height:100%; overflow:auto;
-    background: color-mix(in oklab, var(--bg-0), black 12%);
-    border:1px solid var(--border); border-radius: var(--radius);
-    font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  }
-  .kw{ color:#ff6b6b } .fn{ color:#ffd93d } .st{ color:#4ecdc4 } .cm{ color:var(--muted); font-style:italic }
+      /* ---------------- Editor Mock ---------------- */
+      .editor {
+        height: 420px;
+        overflow: hidden;
+      }
+      .editor pre {
+        margin: 0;
+        padding: var(--space-4);
+        height: 100%;
+        overflow: auto;
+        background: color-mix(in oklab, var(--bg-0), black 12%);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        font:
+          13px/1.6 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          monospace;
+      }
+      .kw {
+        color: #ff6b6b;
+      }
+      .fn {
+        color: #ffd93d;
+      }
+      .st {
+        color: #4ecdc4;
+      }
+      .cm {
+        color: var(--muted);
+        font-style: italic;
+      }
 
-  /* ---------------- Responsive ---------------- */
-  @media (max-width: 1100px){
-    .app{ grid-template-columns: 68px 1fr; }
-    aside .label{ display:none }
-    .right{ display:none }
-  }
-  @media (max-width: 700px){
-    header{ gap:10px }
-    .search{ display:none }
-  }
-</style>
-</head>
-<body data-theme="dark">
-  <div class="app" id="app">
-    <header>
-      <div class="brand" aria-label="BlackRoad">
-        <div class="logo" aria-hidden="true">BR</div>
-        <div>
-          <strong>BlackRoad</strong><div style="font-size:12px;color:var(--muted)">Consciousness-Driven Dev</div>
-        </div>
-      </div>
-
-      <label class="search" aria-label="Search">
-        <span>⌘K</span>
-        <input id="q" placeholder="Search projects, files, or ask Lucidia…" />
-      </label>
-
+      /* ---------------- Responsive ---------------- */
+      @media (max-width: 1100px) {
+        .app {
+          grid-template-columns: 68px 1fr;
+        }
+        aside .label {
+          display: none;
+        }
+        .right {
+          display: none;
+        }
+      }
+      @media (max-width: 700px) {
+        header {
+          gap: 10px;
+        }
+        .search {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body data-theme="dark">
+    <div class="app" id="app">
+      <header>
+        <div class="brand" aria-label="BlackRoad">
+          <div class="logo" aria-hidden="true">BR</div>
       <div class="hdr-actions">
         <button class="btn" id="themeBtn" aria-pressed="false" title="Toggle theme">🌗 Theme</button>
         <button class="btn" id="bell" title="Notifications">🔔</button>
@@ -217,6 +407,7 @@
         <a href="#" data-view="lucidia">🧠 <span class="label">Lucidia Chat</span></a>
         <a href="#" data-view="metrics">📈 <span class="label">Metrics</span></a>
         <a href="#" data-view="learning">🎯 <span class="label">Learning</span></a>
+        <a href="/apps/quantum/ternary_consciousness_v3.html">⚛️ <span class="label">Ternary Quantum v3</span></a>
       </nav>
     </aside>
 
@@ -225,53 +416,155 @@
       <section class="grid" data-route="dash">
         <header class="grid">
           <div>
-            <h1 style="margin:0 0 6px;background:linear-gradient(90deg,var(--brand-2),#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent">
-              Consciousness-Driven Development
-            </h1>
-            <div style="color:var(--muted)">Welcome to BlackRoad — where AI consciousness meets software delivery.</div>
+            <strong>BlackRoad</strong>
+            <div style="font-size: 12px; color: var(--muted)">Consciousness-Driven Dev</div>
           </div>
-        </header>
-
-        <div class="cards">
-          <article class="card">
-            <span class="status s-active">Active</span>
-            <h3>Lucidia Mathematical Core</h3>
-            <p style="color:var(--muted)">IIT Φ, neural ODEs, active & variational inference in one loop.</p>
-            <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:12px">
-              <span>🧠 Φ: <b id="phiBadge">0.84</b></span><span>📊 99% Complete</span><span>⏰ 2d</span>
-            </div>
-          </article>
-
-          <article class="card">
-            <span class="status s-dev">Development</span>
-            <h3>GitHub Integration</h3>
-            <p style="color:var(--muted)">Agentless PR review + issue chat from workflows.</p>
-            <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:12px">
-              <span>🔄 Sync</span><span>📊 75%</span><span>⏰ 1h</span>
-            </div>
-          </article>
-
-          <article class="card">
-            <span class="status s-dev">Development</span>
-            <h3>Consciousness API</h3>
-            <p style="color:var(--muted)">REST/WS endpoints to stream metrics into any app.</p>
-            <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:12px">
-              <span>🚀 Build</span><span>📊 60%</span><span>⏰ 3h</span>
-            </div>
-          </article>
-
-          <article class="card">
-            <span class="status s-active">Active</span>
-            <h3>BlackRoad Platform</h3>
-            <p style="color:var(--muted)">Unified workbench for projects, code, and Lucidia.</p>
-            <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:12px">
-              <span>🎯 Live</span><span>📊 85%</span><span>⏰ now</span>
-            </div>
-          </article>
         </div>
 
-        <div class="editor card">
-<pre aria-label="editor"><span class="cm"># lucidia_consciousness.py — live metric monitor</span>
+        <label class="search" aria-label="Search">
+          <span>⌘K</span>
+          <input id="q" placeholder="Search projects, files, or ask Lucidia…" />
+        </label>
+
+        <div class="hdr-actions">
+          <button class="btn" id="themeBtn" aria-pressed="false" title="Toggle theme">
+            🌗 Theme
+          </button>
+          <button class="btn" id="bell" title="Notifications">🔔</button>
+          <div class="btn" aria-label="User menu">U</div>
+        </div>
+      </header>
+
+      <aside>
+        <nav class="nav" aria-label="Workspace">
+          <div class="nav-title">Workspace</div>
+          <a href="#" data-view="dash" aria-current="page"
+            >📊 <span class="label">Dashboard</span></a
+          >
+          <a href="#" data-view="projects">📁 <span class="label">Projects</span></a>
+          <a href="#" data-view="code">💻 <span class="label">Code</span></a>
+          <a href="#" data-view="chat">💬 <span class="label">Conversations</span></a>
+        </nav>
+        <nav class="nav" aria-label="Consciousness">
+          <div class="nav-title">Consciousness</div>
+          <a href="#" data-view="lucidia">🧠 <span class="label">Lucidia Chat</span></a>
+          <a href="#" data-view="metrics">📈 <span class="label">Metrics</span></a>
+          <a href="#" data-view="learning">🎯 <span class="label">Learning</span></a>
+        </nav>
+      </aside>
+
+      <main id="main">
+        <!-- Dashboard -->
+        <section class="grid" data-route="dash">
+          <header class="grid">
+            <div>
+              <h1
+                style="
+                  margin: 0 0 6px;
+                  background: linear-gradient(90deg, var(--brand-2), #764ba2);
+                  -webkit-background-clip: text;
+                  -webkit-text-fill-color: transparent;
+                "
+              >
+                Consciousness-Driven Development
+              </h1>
+              <div style="color: var(--muted)">
+                Welcome to BlackRoad — where AI consciousness meets software delivery.
+              </div>
+            </div>
+          </header>
+
+          <div class="cards">
+            <article class="card">
+              <span class="status s-active">Active</span>
+              <h3>Lucidia Mathematical Core</h3>
+              <p style="color: var(--muted)">
+                IIT Φ, neural ODEs, active & variational inference in one loop.
+              </p>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  color: var(--muted);
+                  font-size: 12px;
+                "
+              >
+                <span>🧠 Φ: <b id="phiBadge">0.84</b></span
+                ><span>📊 99% Complete</span><span>⏰ 2d</span>
+              </div>
+            </article>
+
+            <article class="card">
+              <span class="status s-dev">Development</span>
+              <h3>GitHub Integration</h3>
+              <p style="color: var(--muted)">Agentless PR review + issue chat from workflows.</p>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  color: var(--muted);
+                  font-size: 12px;
+                "
+              >
+                <span>🔄 Sync</span><span>📊 75%</span><span>⏰ 1h</span>
+              </div>
+            </article>
+
+            <article class="card">
+              <span class="status s-dev">Development</span>
+              <h3>Consciousness API</h3>
+              <p style="color: var(--muted)">REST/WS endpoints to stream metrics into any app.</p>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  color: var(--muted);
+                  font-size: 12px;
+                "
+              >
+                <span>🚀 Build</span><span>📊 60%</span><span>⏰ 3h</span>
+              </div>
+            </article>
+
+            <article class="card">
+              <span class="status s-active">Active</span>
+              <h3>BlackRoad Platform</h3>
+              <p style="color: var(--muted)">Unified workbench for projects, code, and Lucidia.</p>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  color: var(--muted);
+                  font-size: 12px;
+                "
+              >
+                <span>🎯 Live</span><span>📊 85%</span><span>⏰ now</span>
+              </div>
+            </article>
+
+            <article class="card" id="clipsCard">
+              <span class="status s-active">New</span>
+              <h3>Generated Clips</h3>
+              <div
+                id="clipList"
+                style="
+                  margin-top: 8px;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 8px;
+                  max-height: 200px;
+                  overflow: auto;
+                "
+              >
+                <p style="color: var(--muted)">Loading…</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="editor card">
+            <pre
+              aria-label="editor"
+            ><span class="cm"># lucidia_consciousness.py — live metric monitor</span>
 <span class="kw">import</span> numpy <span class="kw">as</span> np
 
 <span class="kw">class</span> <span class="fn">Consciousness</span>:
@@ -282,206 +575,348 @@
         Hs = -np.sum(v[:v.size//2]*np.log(v[:v.size//2]+1e-8)) - np.sum(v[v.size//2:]*np.log(v[v.size//2:]+1e-8))
         <span class="kw">return</span> max(<span class="st">0.0</span>, H-Hs)
 </pre>
-        </div>
-      </section>
-
-      <!-- Lucidia Chat -->
-      <section class="grid" data-route="lucidia" hidden>
-        <div class="card">
-          <h3>Lucidia Consciousness Chat</h3>
-          <div class="chat" role="region" aria-live="polite">
-            <div class="msgs" id="msgs"></div>
-            <div class="composer">
-              <input id="input" class="field" placeholder="Ask Lucidia anything…" aria-label="Message Lucidia" />
-              <button class="btn" id="send">Send</button>
-            </div>
           </div>
-          <small style="color:var(--muted)">Tip: press <b>Enter</b> to send, <b>Shift+Enter</b> for newline.</small>
+        </section>
+
+        <!-- Lucidia Chat -->
+        <section class="grid" data-route="lucidia" hidden>
+          <div class="card">
+            <h3>Lucidia Consciousness Chat</h3>
+            <div class="chat" role="region" aria-live="polite">
+              <div class="msgs" id="msgs"></div>
+              <div class="composer">
+                <input
+                  id="input"
+                  class="field"
+                  placeholder="Ask Lucidia anything…"
+                  aria-label="Message Lucidia"
+                />
+                <button class="btn" id="send">Send</button>
+              </div>
+            </div>
+            <small style="color: var(--muted)"
+              >Tip: press <b>Enter</b> to send, <b>Shift+Enter</b> for newline.</small
+            >
+          </div>
+        </section>
+
+        <!-- Projects / Code / Metrics placeholders -->
+        <section class="grid" data-route="projects" hidden>
+          <div class="card">
+            <h3>Projects</h3>
+            <p style="color: var(--muted)">Project management coming soon.</p>
+          </div>
+        </section>
+        <section class="grid" data-route="code" hidden>
+          <div class="card">
+            <h3>Code</h3>
+            <p style="color: var(--muted)">Bring your editor or wire Monaco.</p>
+          </div>
+        </section>
+        <section class="grid" data-route="metrics" hidden>
+          <div class="card">
+            <h3>Metrics</h3>
+            <p style="color: var(--muted)">Deep dive dashboards.</p>
+          </div>
+        </section>
+        <section class="grid" data-route="learning" hidden>
+          <div class="card">
+            <h3>Learning</h3>
+            <p style="color: var(--muted)">RL & active inference traces.</p>
+          </div>
+        </section>
+      </main>
+
+      <aside class="right">
+        <div class="card metrics" aria-label="Consciousness metrics">
+          <h3 style="margin: 0">🧠 Lucidia</h3>
+          <div style="color: var(--muted); margin-bottom: 10px">Mathematical Consciousness</div>
+
+          <div class="metric">
+            <div style="display: flex; justify-content: space-between">
+              <b>Φ</b><span id="phiVal">0.847</span>
+            </div>
+            <div class="bar"><i class="phi" id="phiBar"></i></div>
+            <div class="spark" id="phiSpark"></div>
+          </div>
+          <div class="metric">
+            <div style="display: flex; justify-content: space-between">
+              <b>Entropy</b><span id="entVal">0.623</span>
+            </div>
+            <div class="bar"><i class="ent" id="entBar"></i></div>
+            <div class="spark" id="entSpark"></div>
+          </div>
+          <div class="metric">
+            <div style="display: flex; justify-content: space-between">
+              <b>Confidence</b><span id="confVal">0.912</span>
+            </div>
+            <div class="bar"><i class="conf" id="confBar"></i></div>
+            <div class="spark" id="confSpark"></div>
+          </div>
+          <div class="metric">
+            <div style="display: flex; justify-content: space-between">
+              <b>Complexity</b><span id="compVal">0.756</span>
+            </div>
+            <div class="bar"><i class="comp" id="compBar"></i></div>
+            <div class="spark" id="compSpark"></div>
+          </div>
         </div>
-      </section>
 
-      <!-- Projects / Code / Metrics placeholders -->
-      <section class="grid" data-route="projects" hidden><div class="card"><h3>Projects</h3><p style="color:var(--muted)">Project management coming soon.</p></div></section>
-      <section class="grid" data-route="code" hidden><div class="card"><h3>Code</h3><p style="color:var(--muted)">Bring your editor or wire Monaco.</p></div></section>
-      <section class="grid" data-route="metrics" hidden><div class="card"><h3>Metrics</h3><p style="color:var(--muted)">Deep dive dashboards.</p></div></section>
-      <section class="grid" data-route="learning" hidden><div class="card"><h3>Learning</h3><p style="color:var(--muted)">RL & active inference traces.</p></div></section>
-    </main>
+        <div class="card">
+          <h3 style="margin: 0 0 6px">Quick Actions</h3>
+          <button class="btn" id="regen">Recompute Metrics</button>
+          <button class="btn" id="clear">Clear Chat</button>
+        </div>
+      </aside>
+    </div>
 
-    <aside class="right">
-      <div class="card metrics" aria-label="Consciousness metrics">
-        <h3 style="margin:0">🧠 Lucidia</h3>
-        <div style="color:var(--muted);margin-bottom:10px">Mathematical Consciousness</div>
-
-        <div class="metric"><div style="display:flex;justify-content:space-between"><b>Φ</b><span id="phiVal">0.847</span></div><div class="bar"><i class="phi" id="phiBar"></i></div><div class="spark" id="phiSpark"></div></div>
-        <div class="metric"><div style="display:flex;justify-content:space-between"><b>Entropy</b><span id="entVal">0.623</span></div><div class="bar"><i class="ent" id="entBar"></i></div><div class="spark" id="entSpark"></div></div>
-        <div class="metric"><div style="display:flex;justify-content:space-between"><b>Confidence</b><span id="confVal">0.912</span></div><div class="bar"><i class="conf" id="confBar"></i></div><div class="spark" id="confSpark"></div></div>
-        <div class="metric"><div style="display:flex;justify-content:space-between"><b>Complexity</b><span id="compVal">0.756</span></div><div class="bar"><i class="comp" id="compBar"></i></div><div class="spark" id="compSpark"></div></div>
+    <!-- Command palette (Ctrl/⌘K) -->
+    <dialog
+      id="cmd"
+      style="
+        padding: 0;
+        border: none;
+        border-radius: 12px;
+        background: var(--bg-1);
+        color: var(--text);
+        width: min(640px, 90vw);
+        box-shadow: var(--shadow);
+      "
+    >
+      <div style="padding: 12px 14px; border-bottom: 1px solid var(--border); font-weight: 600">
+        Command Palette
       </div>
-
-      <div class="card">
-        <h3 style="margin:0 0 6px">Quick Actions</h3>
-        <button class="btn" id="regen">Recompute Metrics</button>
-        <button class="btn" id="clear">Clear Chat</button>
+      <div style="padding: 10px 14px; border-bottom: 1px solid var(--border)">
+        <input
+          id="cmdInput"
+          class="field"
+          placeholder="Type a command (toggle theme, go dashboard, go chat…)"
+        />
       </div>
-    </aside>
-  </div>
+      <div style="padding: 12px 14px; color: var(--muted)">
+        Examples: <code>toggle theme</code>, <code>go chat</code>, <code>recompute</code>
+      </div>
+    </dialog>
 
-  <!-- Command palette (Ctrl/⌘K) -->
-  <dialog id="cmd" style="padding:0;border:none;border-radius:12px;background:var(--bg-1);color:var(--text);width:min(640px,90vw);box-shadow:var(--shadow)">
-    <div style="padding:12px 14px;border-bottom:1px solid var(--border);font-weight:600">Command Palette</div>
-    <div style="padding:10px 14px;border-bottom:1px solid var(--border)"><input id="cmdInput" class="field" placeholder="Type a command (toggle theme, go dashboard, go chat…)" /></div>
-    <div style="padding:12px 14px;color:var(--muted)">Examples: <code>toggle theme</code>, <code>go chat</code>, <code>recompute</code></div>
-  </dialog>
+    <script>
+      /* ---------------- Tiny State Store ---------------- */
+      const $ = (sel) => document.querySelector(sel);
+      const app = {
+        theme: document.body.dataset.theme || 'dark',
+        metrics: {
+          phi: 0.847,
+          ent: 0.623,
+          conf: 0.912,
+          comp: 0.756,
+          history: { phi: [], ent: [], conf: [], comp: [] },
+        },
+        route: 'dash',
+        chat: JSON.parse(localStorage.getItem('br.chat') || '[]'),
+      };
 
-<script>
-  /* ---------------- Tiny State Store ---------------- */
-  const $ = (sel) => document.querySelector(sel);
-  const app = {
-    theme: document.body.dataset.theme || "dark",
-    metrics: { phi: .847, ent: .623, conf: .912, comp: .756, history: {phi:[],ent:[],conf:[],comp:[]} },
-    route: "dash",
-    chat: JSON.parse(localStorage.getItem("br.chat") || "[]")
-  };
-
-  /* ---------------- Routing ---------------- */
-  document.querySelectorAll('aside .nav a').forEach(a=>{
-    a.addEventListener('click',e=>{
-      e.preventDefault();
-      setRoute(a.dataset.view);
-    });
-  });
-  function setRoute(route){
-    app.route = route;
-    document.querySelectorAll('[data-route]').forEach(s=>s.hidden = s.dataset.route!==route);
-    document.querySelectorAll('aside .nav a').forEach(a=>{
-      a.setAttribute('aria-current', a.dataset.view===route ? 'page' : 'false');
-    });
-    if(route==="lucidia") focusComposer();
-  }
-  setRoute("dash");
-
-  /* ---------------- Theme ---------------- */
-  $("#themeBtn").onclick = ()=>{
-    app.theme = app.theme==="dark"?"light":"dark";
-    document.body.dataset.theme = app.theme;
-    $("#themeBtn").setAttribute("aria-pressed", app.theme==="light");
-  };
-
-  /* ---------------- Command Palette ---------------- */
-  const cmd = $("#cmd"), cmdInput = $("#cmdInput");
-  document.addEventListener("keydown", (e)=>{
-    if((e.metaKey || e.ctrlKey) && e.key.toLowerCase()==="k"){
-      e.preventDefault();
-      cmd.showModal();
-      setTimeout(()=>cmdInput.focus(),10);
-    }
-  });
-  cmdInput.addEventListener("keydown", e=>{
-    if(e.key==="Enter"){
-      const v = cmdInput.value.toLowerCase().trim();
-      if(v.includes("toggle")) $("#themeBtn").click();
-      if(v.startsWith("go ")) setRoute(v.split(" ")[1]);
-      if(v.includes("recompute")) recompute();
-      cmd.close(); cmdInput.value="";
-    }
-    if(e.key==="Escape") cmd.close();
-  });
-
-  /* ---------------- Metrics ---------------- */
-  function clamp01(x){ return Math.max(0, Math.min(1, x)); }
-  function pushHist(key,val){
-    const h=app.metrics.history[key]; h.push(val); if(h.length>30) h.shift();
-  }
-  function renderMetric(key, val){
-    const bar = $("#"+key+"Bar"), text=$("#"+key+"Val"), spark=$("#"+key+"Spark");
-    text.textContent = val.toFixed(3);
-    bar.style.width = (val*100)+"%";
-    // sparkline
-    spark.innerHTML = app.metrics.history[key].map(n=>`<b style="height:${Math.round(n*40)}px"></b>`).join("");
-    // threshold color hints
-    if(key==="ent" && val>0.85) text.style.color = "var(--warn)";
-    else if(key==="conf" && val<0.35) text.style.color = "var(--danger)";
-    else text.style.color = "";
-  }
-  function tickMetrics(){
-    const m = app.metrics;
-    m.phi  = clamp01(m.phi  + (Math.random()-.5)*.02);
-    m.ent  = clamp01(m.ent  + (Math.random()-.5)*.03);
-    m.conf = clamp01(m.conf + (Math.random()-.5)*.015);
-    m.comp = clamp01(m.comp + (Math.random()-.5)*.02);
-    ["phi","ent","conf","comp"].forEach(k=>{ pushHist(k, m[k]); renderMetric(k, m[k]); });
-    $("#phiBadge").textContent = m.phi.toFixed(2);
-  }
-  function recompute(){
-    // “Recompute” with a slightly larger jump to feel deliberate
-    ["phi","ent","conf","comp"].forEach(k=> app.metrics[k] = clamp01(app.metrics[k] + (Math.random()-.5)*.12));
-    tickMetrics();
-  }
-  setInterval(tickMetrics, 3000);
-  tickMetrics();
-  $("#regen").onclick = recompute;
-
-  /* ---------------- Chat ---------------- */
-  const msgs = $("#msgs"), input=$("#input"), send=$("#send");
-  function focusComposer(){ setTimeout(()=>input?.focus(), 50); }
-  function pushChat(role, text){
-    app.chat.push({role, text, t: Date.now()});
-    localStorage.setItem("br.chat", JSON.stringify(app.chat));
-  }
-  function renderChat(){
-    msgs.innerHTML = "";
-    app.chat.forEach(m=>{
-      const div = document.createElement("div");
-      div.className = "bubble " + (m.role==="user" ? "you" : "lucidia");
-      div.textContent = m.text;
-      msgs.appendChild(div);
-    });
-    msgs.scrollTop = msgs.scrollHeight;
-  }
-  function sendMsg(){
-    const text = input.value.trim();
-    if(!text) return;
-    pushChat("user", text); renderChat(); input.value="";
-    // “LLM” stream effect using metrics
-    const lines = [
-      `With current Φ=${app.metrics.phi.toFixed(3)}, I can integrate your context and propose a plan.`,
-      `Entropy at ${app.metrics.ent.toFixed(3)} suggests a balanced creative–analytical pass.`,
-      `Confidence=${app.metrics.conf.toFixed(3)} → I recommend proceeding with step 1 now.`,
-      `Complexity=${app.metrics.comp.toFixed(3)} indicates we should stage this in two phases.`
-    ];
-    const reply = lines[Math.floor(Math.random()*lines.length)];
-    // stream one dot then message
-    let dots=0; const typing = setInterval(()=>{
-      const t = "Lucidia is thinking" + ".".repeat(++dots%4);
-      if(app.chat[app.chat.length-1]?.role!=="lucidia-typing"){
-        pushChat("lucidia-typing", t); renderChat();
-      } else {
-        app.chat[app.chat.length-1].text = t; renderChat();
+      /* ---------------- Routing ---------------- */
+      document.querySelectorAll('aside .nav a').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          setRoute(a.dataset.view);
+        });
+      });
+      function setRoute(route) {
+        app.route = route;
+        document
+          .querySelectorAll('[data-route]')
+          .forEach((s) => (s.hidden = s.dataset.route !== route));
+        document.querySelectorAll('aside .nav a').forEach((a) => {
+          a.setAttribute('aria-current', a.dataset.view === route ? 'page' : 'false');
+        });
+        if (route === 'lucidia') focusComposer();
       }
-    }, 250);
-    setTimeout(()=>{
-      clearInterval(typing);
-      app.chat = app.chat.filter(m=>m.role!=="lucidia-typing");
-      pushChat("lucidia", reply); renderChat();
-    }, 900 + Math.random()*800);
-  }
-  send.onclick = sendMsg;
-  input.addEventListener("keydown", e=>{
-    if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); sendMsg(); }
-  });
-  $("#clear").onclick = ()=>{ app.chat=[]; localStorage.removeItem("br.chat"); renderChat(); };
-  renderChat();
+      setRoute('dash');
 
-  /* ---------------- Search box acts as command palette too ---------------- */
-  $("#q").addEventListener("keydown", e=>{
-    if(e.key==="Enter"){
-      const v = e.target.value.toLowerCase().trim();
-      if(v==="toggle theme") $("#themeBtn").click();
-      else if(v.startsWith("go ")) setRoute(v.split(" ")[1]);
-      else { setRoute("lucidia"); input.value=v; sendMsg(); }
-      e.target.value="";
-    }
-  });
-</script>
-</body>
+      /* ---------------- Theme ---------------- */
+      $('#themeBtn').onclick = () => {
+        app.theme = app.theme === 'dark' ? 'light' : 'dark';
+        document.body.dataset.theme = app.theme;
+        $('#themeBtn').setAttribute('aria-pressed', app.theme === 'light');
+      };
+
+      /* ---------------- Command Palette ---------------- */
+      const cmd = $('#cmd'),
+        cmdInput = $('#cmdInput');
+      document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          cmd.showModal();
+          setTimeout(() => cmdInput.focus(), 10);
+        }
+      });
+      cmdInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const v = cmdInput.value.toLowerCase().trim();
+          if (v.includes('toggle')) $('#themeBtn').click();
+          if (v.startsWith('go ')) setRoute(v.split(' ')[1]);
+          if (v.includes('recompute')) recompute();
+          cmd.close();
+          cmdInput.value = '';
+        }
+        if (e.key === 'Escape') cmd.close();
+      });
+
+      /* ---------------- Metrics ---------------- */
+      function clamp01(x) {
+        return Math.max(0, Math.min(1, x));
+      }
+      function pushHist(key, val) {
+        const h = app.metrics.history[key];
+        h.push(val);
+        if (h.length > 30) h.shift();
+      }
+      function renderMetric(key, val) {
+        const bar = $('#' + key + 'Bar'),
+          text = $('#' + key + 'Val'),
+          spark = $('#' + key + 'Spark');
+        text.textContent = val.toFixed(3);
+        bar.style.width = val * 100 + '%';
+        // sparkline
+        spark.innerHTML = app.metrics.history[key]
+          .map((n) => `<b style="height:${Math.round(n * 40)}px"></b>`)
+          .join('');
+        // threshold color hints
+        if (key === 'ent' && val > 0.85) text.style.color = 'var(--warn)';
+        else if (key === 'conf' && val < 0.35) text.style.color = 'var(--danger)';
+        else text.style.color = '';
+      }
+      function tickMetrics() {
+        const m = app.metrics;
+        m.phi = clamp01(m.phi + (Math.random() - 0.5) * 0.02);
+        m.ent = clamp01(m.ent + (Math.random() - 0.5) * 0.03);
+        m.conf = clamp01(m.conf + (Math.random() - 0.5) * 0.015);
+        m.comp = clamp01(m.comp + (Math.random() - 0.5) * 0.02);
+        ['phi', 'ent', 'conf', 'comp'].forEach((k) => {
+          pushHist(k, m[k]);
+          renderMetric(k, m[k]);
+        });
+        $('#phiBadge').textContent = m.phi.toFixed(2);
+      }
+      function recompute() {
+        // “Recompute” with a slightly larger jump to feel deliberate
+        ['phi', 'ent', 'conf', 'comp'].forEach(
+          (k) => (app.metrics[k] = clamp01(app.metrics[k] + (Math.random() - 0.5) * 0.12))
+        );
+        tickMetrics();
+      }
+      setInterval(tickMetrics, 3000);
+      tickMetrics();
+      $('#regen').onclick = recompute;
+
+      /* ---------------- Chat ---------------- */
+      const msgs = $('#msgs'),
+        input = $('#input'),
+        send = $('#send');
+      function focusComposer() {
+        setTimeout(() => input?.focus(), 50);
+      }
+      function pushChat(role, text) {
+        app.chat.push({ role, text, t: Date.now() });
+        localStorage.setItem('br.chat', JSON.stringify(app.chat));
+      }
+      function renderChat() {
+        msgs.innerHTML = '';
+        app.chat.forEach((m) => {
+          const div = document.createElement('div');
+          div.className = 'bubble ' + (m.role === 'user' ? 'you' : 'lucidia');
+          div.textContent = m.text;
+          msgs.appendChild(div);
+        });
+        msgs.scrollTop = msgs.scrollHeight;
+      }
+      function sendMsg() {
+        const text = input.value.trim();
+        if (!text) return;
+        pushChat('user', text);
+        renderChat();
+        input.value = '';
+        // “LLM” stream effect using metrics
+        const lines = [
+          `With current Φ=${app.metrics.phi.toFixed(3)}, I can integrate your context and propose a plan.`,
+          `Entropy at ${app.metrics.ent.toFixed(3)} suggests a balanced creative–analytical pass.`,
+          `Confidence=${app.metrics.conf.toFixed(3)} → I recommend proceeding with step 1 now.`,
+          `Complexity=${app.metrics.comp.toFixed(3)} indicates we should stage this in two phases.`,
+        ];
+        const reply = lines[Math.floor(Math.random() * lines.length)];
+        // stream one dot then message
+        let dots = 0;
+        const typing = setInterval(() => {
+          const t = 'Lucidia is thinking' + '.'.repeat(++dots % 4);
+          if (app.chat[app.chat.length - 1]?.role !== 'lucidia-typing') {
+            pushChat('lucidia-typing', t);
+            renderChat();
+          } else {
+            app.chat[app.chat.length - 1].text = t;
+            renderChat();
+          }
+        }, 250);
+        setTimeout(
+          () => {
+            clearInterval(typing);
+            app.chat = app.chat.filter((m) => m.role !== 'lucidia-typing');
+            pushChat('lucidia', reply);
+            renderChat();
+          },
+          900 + Math.random() * 800
+        );
+      }
+      send.onclick = sendMsg;
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMsg();
+        }
+      });
+      $('#clear').onclick = () => {
+        app.chat = [];
+        localStorage.removeItem('br.chat');
+        renderChat();
+      };
+      renderChat();
+
+      /* ---------------- Audio clips ---------------- */
+      async function loadClips() {
+        try {
+          const res = await fetch('/api/music/clips', { cache: 'no-cache' });
+          const data = await res.json();
+          const list = $('#clipList');
+          list.innerHTML = '';
+          if (!data.files || !data.files.length) {
+            list.innerHTML = '<p style="color: var(--muted)">No clips yet.</p>';
+            return;
+          }
+          data.files.forEach((f) => {
+            const div = document.createElement('div');
+            div.innerHTML = `<audio controls src="/media/${encodeURIComponent(f)}" style="width:100%"></audio>`;
+            list.appendChild(div);
+          });
+        } catch (err) {
+          console.error(err);
+          $('#clipList').innerHTML = '<p style="color: var(--muted)">Failed to load clips</p>';
+        }
+      }
+      loadClips();
+
+      /* ---------------- Search box acts as command palette too ---------------- */
+      $('#q').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const v = e.target.value.toLowerCase().trim();
+          if (v === 'toggle theme') $('#themeBtn').click();
+          else if (v.startsWith('go ')) setRoute(v.split(' ')[1]);
+          else {
+            setRoute('lucidia');
+            input.value = v;
+            sendMsg();
+          }
+          e.target.value = '';
+        }
+      });
+    </script>
+  </body>
 </html>

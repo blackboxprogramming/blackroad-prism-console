@@ -1,0 +1,15 @@
+[Unit]
+Description=Lucidia Filesystem MCP Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env uv run lucidia-fs
+Restart=on-failure
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,7 @@
+{
+  "base_dir": "codex/repos",
+  "git_ssh_key": "~/.ssh/id_ed25519",
+  "git_ssh_strict_hostkey": true,
+  "default_branch": "main",
+  "repositories": []
+}

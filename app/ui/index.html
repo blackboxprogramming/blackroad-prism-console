@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Lucidia</title>
+  <script>
+    async function send() {
+      const prompt = document.getElementById('prompt').value;
+      const res = await fetch('/api/chat', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({prompt})
+      });
+      const data = await res.json();
+      document.getElementById('out').textContent = data.response || JSON.stringify(data);
+    }
+  </script>
+</head>
+<body>
+  <h1>Lucidia</h1>
+  <textarea id="prompt" rows="5" cols="60"></textarea><br/>
+  <button onclick="send()">Send</button>
+  <pre id="out"></pre>
+</body>
+</html>

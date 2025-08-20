@@ -1,0 +1,4 @@
+---
+- name: Install k3s {{ k3s_role }} (placeholder)
+  debug:
+    msg: "k3s would be installed in {{ k3s_role }} mode"

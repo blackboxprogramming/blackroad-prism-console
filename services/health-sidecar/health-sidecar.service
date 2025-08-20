@@ -1,0 +1,17 @@
+[Unit]
+Description=Health Sidecar (Express)
+After=network.target
+
+[Service]
+Environment=PORT=8088
+Environment=API_ROOT=/var/www/blackroad/api
+Environment=COMMIT_SHA=
+WorkingDirectory=/var/www/blackroad/repo/services/health-sidecar
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=3
+User=www-data
+Group=www-data
+
+[Install]
+WantedBy=multi-user.target

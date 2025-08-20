@@ -1,0 +1,6 @@
+# /opt/blackroad/models/models.json
+[
+  {"name":"phi","sha256":"de0b52112b3735e080aca78afafddefa15c19743ac1522f07f0d0de9e837d484","path":"s3://models/phi.gguf"},
+  {"name":"mistral","sha256":"a8a42a4e70ebf6a53908f580ac1a444638fdd03135d2455c3a0082c81acc06cc","path":"s3://models/mistral.gguf"},
+  {"name":"llama","sha256":"413fd1132f04f6f58b5675bdf2cd4379f47ba7b7b705e464aec5f8cb29380919","path":"s3://models/llama.gguf"}
+]

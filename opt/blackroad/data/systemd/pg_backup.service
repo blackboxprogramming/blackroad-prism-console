@@ -1,0 +1,8 @@
+# /opt/blackroad/data/systemd/pg_backup.service
+[Unit]
+Description=Nightly PostgreSQL basebackup to MinIO
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/pg_basebackup -D /tmp/pgbase -F tar -X fetch -z -P
+ExecStartPost=/usr/bin/mc cp /tmp/pgbase/base.tar minio/backups/base-$(date +%F).tar

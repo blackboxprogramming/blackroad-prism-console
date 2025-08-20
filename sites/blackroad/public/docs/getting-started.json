@@ -1,0 +1,6 @@
+{
+  "slug": "getting-started",
+  "title": "Getting Started",
+  "section": "Basics",
+  "html": "<p>Install deps, run dev server:</p>\n<pre><code class=\"language-bash\">cd sites/blackroad\nnpm i\nnpm run dev\n</code></pre>"
+}

@@ -1,5 +1,5 @@
 # CI Issue Template
 
-- **Summary**: 
-- **Details**: 
-- **Suggested Fix**: 
+- **Summary**:
+- **Details**:
+- **Suggested Fix**:

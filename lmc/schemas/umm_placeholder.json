@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UMM Placeholder",
+  "description": "Placeholder for a UMM schema without NASA dependencies.",
+  "type": "object",
+  "properties": {}
+}

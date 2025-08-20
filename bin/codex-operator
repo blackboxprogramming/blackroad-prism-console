@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Optional: update PATH or venv activation here
+# source .venv/bin/activate
+
+python3 codex/agents/codex_operator.py "$@"

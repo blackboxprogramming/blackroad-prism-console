@@ -1,0 +1,6 @@
+rules:
+  - id: disallow-external-hosts
+    pattern-regex: "https?://(?!(?:[\w.-]*\.blackroad\.local|nexus\.blackroad\.local|registry\.blackroad\.local))"
+    message: "External network calls are not allowed"
+    languages: [python, javascript, typescript, yaml]
+    severity: ERROR

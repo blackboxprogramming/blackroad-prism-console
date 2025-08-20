@@ -1,0 +1,11 @@
+owner: blackboxprogramming
+platforms:
+  github: true
+defaults:
+  base_dir: codex/repos
+  branch: main
+behavior:
+  include_private: false # set true or export INCLUDE_PRIVATE=1
+  exclude_forks: true
+  strict_hostkey: true
+  audit_on_grab: true

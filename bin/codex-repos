@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Optional: token for HTTPS "auth=token" repos
+if [ -f ".env" ]; then
+  # shellcheck disable=SC2046
+  export $(grep -v '^#' .env | xargs -I {} echo {})
+fi
+
+# Optional: pick a non-default SSH key
+: "${CODEX_SSH_KEY:=${CODEX_SSH_KEY:-$HOME/.ssh/id_ed25519}}"
+export CODEX_SSH_KEY
+
+python3 codex/tools/codex_repo_wizard.py "$@"

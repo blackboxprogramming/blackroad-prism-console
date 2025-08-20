@@ -1,0 +1,10 @@
+{
+  "name": "blackroad-prism-console",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build:lucidia-create": "npx tsc -p packages/lucidia-create/tsconfig.json",
+    "test": "npm run build:lucidia-create && node tests/smoke.test.js && node --test tests/*.mjs"
+  }
+}

@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ternary Quantum Consciousness Framework — v3</title>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --bg1: #667eea;
+        --bg2: #764ba2;
+        --ink: #1a1a1a;
+        --ink-soft: #555;
+        --panel: #fff;
+        --panel2: #f7fafc;
+        --panel3: #edf2f7;
+        --accent: #5a67d8;
+        --hot: #ff6b6b;
+        --cool: #45b7d1;
+        --good: #4ecdc4;
+        --violet: #9c27b0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, system-ui, sans-serif;
+        background: linear-gradient(135deg, var(--bg1), var(--bg2));
+        color: var(--ink);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .header {
+        text-align: center;
+        color: #fff;
+        padding: 24px 0;
+        margin-bottom: 24px;
+      }
+      .header h1 {
+        font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25);
+      }
+      .controls,
+      .card,
+      .consciousness-nav,
+      .creative-energy-viz {
+        background: var(--panel);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+      }
+      .controls h3 {
+        color: var(--accent);
+        margin-bottom: 12px;
+      }
+      .control-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+      }
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .control-group label {
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .control-group input[type='range'],
+      .control-group input[type='number'] {
+        width: 100%;
+      }
+      .control-group input,
+      .control-group select {
+        padding: 10px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 14px;
+        transition: border-color 0.25s ease;
+      }
+      .control-group input:focus,
+      .control-group select:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+      .preset-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .preset-btn,
+      .btn {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 999px;
+        color: #fff;
+        background: linear-gradient(45deg, var(--bg1), var(--bg2));
+        cursor: pointer;
+        font-size: 14px;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .preset-btn:hover,
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+      }
+      .btn.secondary {
+        background: linear-gradient(45deg, #999, #666);
+      }
+      .btn.ghost {
+        background: #fff;
+        color: var(--accent);
+        border: 2px solid var(--accent);
+      }
+      .btn:disabled {
+        background: #d0d0d0;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+      }
+      .dashboard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+        gap: 20px;
+      }
+      .card h3 {
+        color: var(--accent);
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+      }
+      .chart-container {
+        position: relative;
+        height: 300px;
+        margin-top: 8px;
+      }
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        margin-top: 12px;
+      }
+      .metric {
+        background: linear-gradient(135deg, var(--panel2), var(--panel3));
+        padding: 14px;
+        border-radius: 12px;
+        text-align: center;
+      }
+      .metric-value {
+        font-weight: 800;
+        font-size: 1.3rem;
+        color: var(--accent);
+      }
+      .metric-label {
+        font-size: 0.9rem;
+        color: var(--ink-soft);
+        margin-top: 4px;
+      }
+      .ternary-display {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin: 12px 0;
+      }
+      .ternary-state {
+        flex: 1;
+        text-align: center;
+        padding: 12px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--panel2), var(--panel3));
+      }
+      .ternary-state .state-probability {
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .ternary-state.active {
+        background: linear-gradient(135deg, var(--bg1), var(--bg2));
+        color: #fff;
+      }
+      .ternary-state.active .state-probability {
+        color: #fff;
+      }
+      .evolution-controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin: 10px 0;
+        flex-wrap: wrap;
+      }
+      .nav-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+      @media (max-width: 840px) {
+        .dashboard {
+          grid-template-columns: 1fr;
+        }
+        .nav-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .formula {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 10px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+        border-left: 4px solid var(--accent);
+        margin-top: 10px;
+      }
+      .kbd {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+        background: #111;
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 6px;
+      }
+      .hgrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+      }
+      canvas#barycentric {
+        width: 100%;
+        height: 320px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #fff, #fafafa);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🧠 Ternary Quantum Consciousness Framework</h1>
+        <p>Interactive exploration of three-state quantum systems for consciousness navigation</p>
+      </div>
+
+      <div class="controls">
+        <h3>🎛️ Quantum State Configuration</h3>
+        <div class="control-grid">
+          <div class="control-group">
+            <label for="alpha">Amplitude α (|-1⟩)</label
+            ><input type="range" id="alpha" min="0" max="1" step="0.001" value="0.577" />
+            <div><span id="alphaValue">0.577</span></div>
+          </div>
+          <div class="control-group">
+            <label for="beta">Amplitude β (|0⟩)</label
+            ><input type="range" id="beta" min="0" max="1" step="0.001" value="0.577" />
+            <div><span id="betaValue">0.577</span></div>
+          </div>
+          <div class="control-group">
+            <label for="gamma">Amplitude γ (|+1⟩)</label
+            ><input type="range" id="gamma" min="0" max="1" step="0.001" value="0.577" />
+            <div><span id="gammaValue">0.577</span></div>
+          </div>
+          <div class="control-group">
+            <label for="time">Time t</label
+            ><input type="range" id="time" min="0" max="12.56" step="0.05" value="0" />
+            <div><span id="timeValue">0.00</span></div>
+          </div>
+          <div class="control-group">
+            <label for="evoModel">Evolution</label
+            ><select id="evoModel">
+              <option value="unitary">Unitary (Schrödinger)</option>
+              <option value="lindblad">Lindblad (open)</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label>γ<sub>φ</sub> (Dephasing)</label
+            ><input id="gammaPhi" type="number" min="0" max="2" step="0.01" value="0.10" />
+          </div>
+          <div class="control-group">
+            <label>γ<sub>rel</sub> (Relaxation)</label
+            ><input id="gammaRel" type="number" min="0" max="2" step="0.01" value="0.05" />
+          </div>
+          <div class="control-group">
+            <label for="observableSet">Observables</label
+            ><select id="observableSet">
+              <option value="pauli">Pauli-like (A,B,C)</option>
+              <option value="gell">Gell-Mann (λ1,λ2,λ3)</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label for="hPreset">Hamiltonian</label
+            ><select id="hPreset">
+              <option value="default">Coupled (default)</option>
+              <option value="diag">Diagonal split</option>
+              <option value="ring">Ring coupling</option>
+            </select>
+          </div>
+        </div>
+        <div class="hgrid">
+          <div class="control-group">
+            <label>h11</label><input id="h11" type="number" step="0.01" value="1.2" />
+          </div>
+          <div class="control-group">
+            <label>h22</label><input id="h22" type="number" step="0.01" value="0" />
+          </div>
+          <div class="control-group">
+            <label>h33</label><input id="h33" type="number" step="0.01" value="-0.9" />
+          </div>
+          <div class="control-group">
+            <label>h12</label><input id="h12" type="number" step="0.01" value="0.25" />
+          </div>
+          <div class="control-group">
+            <label>h13</label><input id="h13" type="number" step="0.01" value="0.10" />
+          </div>
+          <div class="control-group">
+            <label>h23</label><input id="h23" type="number" step="0.01" value="0.30" />
+          </div>
+          <div class="control-group">
+            <label>&nbsp;</label><button class="btn ghost" id="applyH">Apply H</button>
+          </div>
+          <div class="control-group">
+            <label>Record evolution</label><input id="recordToggle" type="checkbox" />
+          </div>
+          <div class="control-group">
+            <label>&nbsp;</label><button class="btn ghost" id="downloadCSV">Download CSV</button>
+          </div>
+        </div>
+        <div class="preset-buttons">
+          <button class="preset-btn" onclick="setPreset('balanced')">Balanced</button>
+          <button class="preset-btn" onclick="setPreset('focused')">Focused</button>
+          <button class="preset-btn" onclick="setPreset('creative')">Creative</button>
+          <button class="preset-btn" onclick="setPreset('meditative')">Meditative</button>
+          <button class="btn" id="measureBtn">Measure (collapse)</button>
+          <button class="btn secondary" id="resetBtn">🔄 Reset</button>
+          <button class="btn" id="playBtn">▶️ Play</button>
+        </div>
+        <div class="formula">
+          <strong>Shortcuts:</strong> <span class="kbd">Space</span> Play/Pause ·
+          <span class="kbd">R</span> Reset · <span class="kbd">M</span> Measure ·
+          <span class="kbd">1–4</span> Presets
+        </div>
+      </div>
+
+      <div class="dashboard">
+        <div class="card">
+          <h3>🔬 Quantum State Probabilities</h3>
+          <div class="ternary-display">
+            <div class="ternary-state" id="state-1">
+              <div class="state-label">|-1⟩</div>
+              <div class="state-probability" id="prob-1">0.333</div>
+            </div>
+            <div class="ternary-state" id="state0">
+              <div class="state-label">|0⟩</div>
+              <div class="state-probability" id="prob0">0.333</div>
+            </div>
+            <div class="ternary-state" id="state1">
+              <div class="state-label">|+1⟩</div>
+              <div class="state-probability" id="prob1">0.333</div>
+            </div>
+          </div>
+          <div class="chart-container"><canvas id="probabilityChart"></canvas></div>
+        </div>
+
+        <div class="card">
+          <h3>📊 Information Measures</h3>
+          <div class="metrics">
+            <div class="metric">
+              <div class="metric-value" id="entropy">1.099</div>
+              <div class="metric-label">von Neumann Entropy S(ρ)</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value" id="purity">1.000</div>
+              <div class="metric-label">Purity Tr(ρ²)</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value" id="uncertainty">0.125</div>
+              <div class="metric-label">Uncertainty ΔO₁ΔO₂ΔO₃</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value" id="consciousness">0.750</div>
+              <div class="metric-label">Consciousness Score Ψ</div>
+            </div>
+          </div>
+          <div class="formula">
+            S(ρ) = -Tr(ρ log ρ) &nbsp;|&nbsp; P = Tr(ρ²) &nbsp;|&nbsp; ΔO = √(⟨O²⟩-⟨O⟩²)
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>⚡ Boundary Creative Energy</h3>
+          <div class="chart-container"><canvas id="creativeEnergyChart"></canvas></div>
+          <div class="formula">K_c(δu) = [σ_c (1+γ) (1+ χ|δu|)] / [1 + λ|δu|]</div>
+          <div class="metrics">
+            <div class="metric">
+              <div class="metric-value" id="maxCreative">—</div>
+              <div class="metric-label">Peak Energy</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value" id="optimalDelta">—</div>
+              <div class="metric-label">Optimal δu</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>🔄 Quantum Evolution</h3>
+          <div class="chart-container"><canvas id="evolutionChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="consciousness-nav">
+        <h3>🧭 Consciousness Navigation</h3>
+        <div class="nav-grid">
+          <div>
+            <h4>Navigation Paths (Barycentric → 2D)</h4>
+            <div class="chart-container"><canvas id="navigationChart"></canvas></div>
+          </div>
+          <div>
+            <h4>Capability Ratios</h4>
+            <div class="chart-container"><canvas id="capabilityChart"></canvas></div>
+          </div>
+        </div>
+        <div class="formula">
+          Mapping: Focus ≈ p(+1), Calm ≈ p(0), Anxious ≈ p(-1), Creativity ↑ with S(ρ) and K_c peak
+          proximity
+        </div>
+      </div>
+
+      <div class="creative-energy-viz">
+        <h3>🔺 Barycentric Triangle (live)</h3>
+        <canvas id="barycentric"></canvas>
+      </div>
+
+      <div class="creative-energy-viz">
+        <h3>🌊 Creative Energy Landscape (γ, λ sweeps)</h3>
+        <div class="chart-container"><canvas id="energyLandscape"></canvas></div>
+      </div>
+    </div>
+
+    <script>
+      // ===== Utilities =====
+      const clamp01 = x => Math.max(0, Math.min(1, x));
+      const toFixed = (x, n=3) => (Number.isFinite(x) ? (+x).toFixed(n) : '—');
+      const real = z => (z && typeof z === 'object' && 're' in z) ? z.re : z;
+
+      // ===== Basis & Observables =====
+      const I3 = math.identity(3);
+      const Pm1 = math.diag([1,0,0]);
+      const P0  = math.diag([0,1,0]);
+      const Pp1 = math.diag([0,0,1]);
+
+      // Pauli-like qutrit observables
+      const A = math.matrix([[-1,0,0],[0,0,0],[0,0,1]]); // Z-like
+      const B = math.multiply(1/Math.sqrt(2), math.matrix([[0,1,0],[1,0,1],[0,1,0]])); // X-like
+      const C = math.multiply(1/Math.sqrt(2), math.matrix([[0,math.complex(0,-1),0],[math.complex(0,1),0,math.complex(0,-1)],[0,math.complex(0,1),0]])); // Y-like
+
+      // Gell-Mann (subset used for triple)
+      const lam1 = math.matrix([[0,1,0],[1,0,0],[0,0,0]]);
+      const lam2 = math.matrix([[0,math.complex(0,-1),0],[math.complex(0,1),0,0],[0,0,0]]);
+      const lam3 = math.matrix([[1,0,0],[0,-1,0],[0,0,0]]);
+      // (others not needed for the selected triple)
+
+      // ===== Hamiltonian (editable) =====
+      let H = math.matrix([
+        [ 1.2, 0.25, 0.10],
+        [ 0.25, 0.0,  0.30],
+        [ 0.10, 0.30, -0.9]
+      ]);
+
+      function buildHFromInputs(){
+        const h11 = parseFloat(document.getElementById('h11').value);
+        const h22 = parseFloat(document.getElementById('h22').value);
+        const h33 = parseFloat(document.getElementById('h33').value);
+        const h12 = parseFloat(document.getElementById('h12').value);
+        const h13 = parseFloat(document.getElementById('h13').value);
+        const h23 = parseFloat(document.getElementById('h23').value);
+        H = math.matrix([
+          [h11, h12, h13],
+          [h12, h22, h23],
+          [h13, h23, h33]
+        ]);
+      }
+
+      function applyHPreset(){
+        const p = document.getElementById('hPreset').value;
+        if(p==='default'){
+          document.getElementById('h11').value = 1.2; document.getElementById('h22').value = 0; document.getElementById('h33').value = -0.9;
+          document.getElementById('h12').value = 0.25; document.getElementById('h13').value = 0.10; document.getElementById('h23').value = 0.30;
+        } else if(p==='diag'){
+          document.getElementById('h11').value = 1.0; document.getElementById('h22').value = 0.0; document.getElementById('h33').value = -1.0;
+          document.getElementById('h12').value = 0.0; document.getElementById('h13').value = 0.0; document.getElementById('h23').value = 0.0;
+        } else if(p==='ring'){
+          document.getElementById('h11').value = 0.0; document.getElementById('h22').value = 0.0; document.getElementById('h33').value = 0.0;
+          document.getElementById('h12').value = 0.5; document.getElementById('h13').value = 0.5; document.getElementById('h23').value = 0.5;
+        }
+        buildHFromInputs();
+      }
+
+      // ===== State =====
+      let psi0 = math.matrix([1/Math.sqrt(3), 1/Math.sqrt(3), 1/Math.sqrt(3)]); // initial amplitudes (real)
+      let rho0 = pureDensity(psi0); // initial density
+      let rho = rho0.clone();
+
+      function pureDensity(psi){
+        const ket = math.reshape(psi, [3,1]);
+        const bra = math.ctranspose(ket);
+        return math.multiply(ket, bra);
+      }
+
+      // ===== Expectation & Variance (ρ) =====
+      function trace(M){ return math.trace(M); }
+      function expectRho(r, O){ return math.multiply(trace(math.multiply(r, O))); }
+      function varRho(r, O){
+        const EO = expectRho(r, O);
+        const O2 = math.multiply(O, O);
+        const E2 = expectRho(r, O2);
+        const val = math.subtract(E2, math.multiply(EO, EO));
+        return Math.max(0, math.abs(val));
+      }
+
+      function uncertaintyTriple(r, set){
+        let O1,O2,O3;
+        if(set==='gell') { O1=lam1; O2=lam2; O3=lam3; }
+        else { O1=A; O2=B; O3=C; }
+        const d1=Math.sqrt(varRho(r,O1)), d2=Math.sqrt(varRho(r,O2)), d3=Math.sqrt(varRho(r,O3));
+        return d1*d2*d3;
+      }
+
+      // ===== Entropy (von Neumann via invariants) =====
+      function vnEntropy(r){
+        // invariants for 3x3: tr = 1, but compute robustly
+        const tr = real(trace(r));
+        const r2 = math.multiply(r,r);
+        const tr2 = real(trace(r2));
+        const det = real(math.det(r));
+        const c1 = tr; // ~1
+        const c2 = 0.5*(c1*c1 - tr2);
+        const c3 = det;
+        const eigs = cubicEigenvalues(c1,c2,c3);
+        // clamp and renormalize
+        let lam = eigs.map(x=> Math.max(0, x));
+        const s = lam.reduce((a,b)=>a+b,0) || 1; lam = lam.map(x=>x/s);
+        return -lam.reduce((acc,p)=> acc + (p>1e-12 ? p*Math.log(p) : 0), 0);
+      }
+
+      function cubicEigenvalues(c1,c2,c3){
+        // Solve λ^3 - c1 λ^2 + c2 λ - c3 = 0
+        const A = -c1, B = c2, C = -c3; // to x^3 + A x^2 + B x + C = 0
+        const sq = x=>x*x;
+        const p = B - sq(A)/3;
+        const q = (2*sq(A)*A)/27 - (A*B)/3 + C;
+        const D = sq(q/2) + sq(p/3)*p/3; // discriminant
+        const shift = -A/3;
+        if (D <= 1e-18){
+          const r = Math.sqrt(Math.max(0,-p/3));
+          const phi = Math.acos(Math.max(-1, Math.min(1, -q/(2*r*r*r)))) || 0;
+          const x1 = 2*r*Math.cos(phi/3) + shift;
+          const x2 = 2*r*Math.cos((phi+2*Math.PI)/3) + shift;
+          const x3 = 2*r*Math.cos((phi+4*Math.PI)/3) + shift;
+          return [x1,x2,x3];
+        } else {
+          const sqrtD = Math.sqrt(D);
+          const u = Math.cbrt(-q/2 + sqrtD);
+          const v = Math.cbrt(-q/2 - sqrtD);
+          const x1 = u+v + shift;
+          // complex pair ignored (shouldn't happen for Hermitian r); return reals
+          const x2 = shift - (u+v)/2; // fallback approx
+          const x3 = x2; // duplicate
+          return [x1,x2,x3];
+        }
+      }
+
+      function purity(r){ return real(trace(math.multiply(r,r))); }
+
+      // ===== Creative energy =====
+      class BoundaryCreativeEnergy { static calculate(sigmaC, gamma, chi, lambda, deltaU){
+        const num = sigmaC*(1+gamma)*(1+chi*Math.abs(deltaU));
+        const den = 1 + lambda*Math.abs(deltaU);
+        return num/den;
+      }}
+
+      // ===== Evolution =====
+      let isPlaying=false, timer=null, tCurrent=0;
+
+      function unitaryU(t){
+        const iH = math.multiply(math.complex(0,-1), H);
+        return math.expm(math.multiply(iH, t));
+      }
+
+      function evolveUnitary(t){
+        const U = unitaryU(t);
+        const Udag = math.ctranspose(U);
+        rho = math.multiply(U, math.multiply(rho0, Udag));
+      }
+
+      function dissipator(r, L){
+        const Ld = math.ctranspose(L);
+        const LrLd = math.multiply(L, math.multiply(r, Ld));
+        const LdL = math.multiply(Ld, L);
+        const half = x => math.multiply(0.5, x);
+        return math.subtract(LrLd, half(math.add(math.multiply(LdL, r), math.multiply(r, LdL))));
+      }
+
+      function lindbladStep(r, dt){
+        const comm = math.subtract(math.multiply(H,r), math.multiply(r,H));
+        let dr = math.multiply(math.complex(0,-1), comm); // -i[H,ρ]
+        const gphi = parseFloat(document.getElementById('gammaPhi').value);
+        const grel = parseFloat(document.getElementById('gammaRel').value);
+        // dephasing via projectors
+        const Lz = [Pm1,P0,Pp1].map(P => math.multiply(Math.sqrt(Math.max(0,gphi)), P));
+        Lz.forEach(L => { dr = math.add(dr, dissipator(r,L)); });
+        // relaxation (|+1>→|0>, |0>→|-1>)
+        const L10 = math.matrix([[0,0,0],[0,0,1],[0,0,0]]); // |0><+1|
+        const L0m1 = math.matrix([[0,1,0],[0,0,0],[0,0,0]]); // |-1><0|
+        const LR = [L10, L0m1].map(L => math.multiply(Math.sqrt(Math.max(0,grel)), L));
+        LR.forEach(L => { dr = math.add(dr, dissipator(r,L)); });
+        let rnext = math.add(r, math.multiply(dt, dr));
+        // Hermitize & renormalize
+        rnext = math.multiply(0.5, math.add(rnext, math.ctranspose(rnext)));
+        const tr = real(trace(rnext)) || 1; rnext = math.divide(rnext, tr);
+        return rnext;
+      }
+
+      function startEvolution(){
+        if(isPlaying) return; isPlaying=true; document.getElementById('playBtn').textContent='⏸️ Pause';
+        const model = document.getElementById('evoModel').value;
+        const slider = document.getElementById('time');
+        const tmax = parseFloat(slider.max); const step = 0.05; const dt = 0.02;
+        charts.evo.data.labels = []; charts.evo.data.datasets.forEach(d=> d.data=[]);
+        timer = setInterval(()=>{
+          if(model==='unitary'){
+            tCurrent = (tCurrent+step>tmax) ? 0 : tCurrent+step;
+            slider.value = tCurrent; document.getElementById('timeValue').textContent = toFixed(tCurrent,2);
+            evolveUnitary(tCurrent);
+          } else {
+            // integrate forward
+            tCurrent += dt; slider.value = tCurrent%tmax; document.getElementById('timeValue').textContent = toFixed(tCurrent,2);
+            rho = lindbladStep(rho, dt);
+          }
+          updateAll();
+        }, 80);
+      }
+
+      function stopEvolution(){ isPlaying=false; document.getElementById('playBtn').textContent='▶️ Play'; if(timer){clearInterval(timer); timer=null;} }
+      function resetEvolution(){ stopEvolution(); tCurrent=0; document.getElementById('time').value=0; document.getElementById('timeValue').textContent='0.00'; rho = rho0.clone(); charts.evo.data.labels=[]; charts.evo.data.datasets.forEach(d=> d.data=[]); charts.evo.update('none'); updateAll(); }
+
+      function updateEvolution(){
+        const model = document.getElementById('evoModel').value;
+        const t = parseFloat(document.getElementById('time').value);
+        document.getElementById('timeValue').textContent = toFixed(t,2);
+        if(model==='unitary'){ evolveUnitary(t); updateAll(); }
+        else {
+          // simulate from 0 to t with small dt (paused preview)
+          let r = rho0.clone(); const dt=0.02; const N = Math.max(1, Math.floor(t/dt));
+          for(let k=0;k<N;k++) r = lindbladStep(r, dt);
+          rho = r; updateAll();
+        }
+      }
+
+      // ===== Charts =====
+      let charts = {}; let navPath=[]; let recordRows=[];
+
+      function setupCharts(){
+        const probCtx = document.getElementById('probabilityChart').getContext('2d');
+        charts.prob = new Chart(probCtx,{ type:'doughnut', data:{ labels:['|-1⟩','|0⟩','|+1⟩'], datasets:[{ data:[.333,.333,.333], backgroundColor:['#ff6b6b','#4ecdc4','#45b7d1'], borderColor:'#fff', borderWidth:2 }]}, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}} }});
+
+        const evoCtx = document.getElementById('evolutionChart').getContext('2d');
+        charts.evo = new Chart(evoCtx,{ type:'line', data:{ labels:[], datasets:[
+          { label:'|-1⟩', data:[], borderColor:'#ff6b6b', backgroundColor:'rgba(255,107,107,.1)', borderWidth:2 },
+          { label:'|0⟩',  data:[], borderColor:'#4ecdc4', backgroundColor:'rgba(78,205,196,.1)',  borderWidth:2 },
+          { label:'|+1⟩', data:[], borderColor:'#45b7d1', backgroundColor:'rgba(69,183,209,.1)', borderWidth:2 }
+        ]}, options:{ responsive:true, maintainAspectRatio:false, animation:{duration:0}, scales:{ y:{ min:0, max:1 } } });
+
+        const ceCtx = document.getElementById('creativeEnergyChart').getContext('2d');
+        const deltaRange = Array.from({length:101},(_,i)=> -5 + 0.1*i);
+        const sigmaC=1.0, gamma=0.5, chi=0.3, lambda=0.2;
+        const energyData = deltaRange.map(d=> BoundaryCreativeEnergy.calculate(sigmaC,gamma,chi,lambda,d));
+        charts.creative = new Chart(ceCtx,{ type:'line', data:{ labels:deltaRange, datasets:[{ label:'K_c(δu)', data:energyData, borderColor:'#9c27b0', backgroundColor:'rgba(156,39,176,.10)', fill:true, tension:.35 }]}, options:{ responsive:true, maintainAspectRatio:false, scales:{ x:{ title:{display:true,text:'δu'} }, y:{ title:{display:true,text:'K_c'} } } });
+        const maxE = Math.max(...energyData); const opt = deltaRange[energyData.indexOf(maxE)];
+        document.getElementById('maxCreative').textContent = toFixed(maxE); document.getElementById('optimalDelta').textContent = toFixed(opt);
+
+        const navCtx = document.getElementById('navigationChart').getContext('2d');
+        charts.nav = new Chart(navCtx,{ type:'line', data:{ labels:[], datasets:[{ label:'Path', data:[], borderColor:'#5a67d8', borderWidth:2, fill:false, tension:.25 }]}, options:{ responsive:true, maintainAspectRatio:false, parsing:false, scales:{ x:{ min:-1, max:1 }, y:{ min:-.2, max:1.2 } } });
+
+        const capCtx = document.getElementById('capabilityChart').getContext('2d');
+        charts.cap = new Chart(capCtx,{ type:'radar', data:{ labels:['Focus','Calm','Anxious','Creativity'], datasets:[{ label:'Capabilities', data:[.33,.33,.33,.5], borderColor:'#5a67d8', backgroundColor:'rgba(90,103,216,.15)' }]}, options:{ responsive:true, maintainAspectRatio:false, scales:{ r:{ suggestedMin:0, suggestedMax:1 } } }});
+
+        const landsCtx = document.getElementById('energyLandscape').getContext('2d');
+        const deltas = Array.from({length:61},(_,i)=> -3 + 0.1*i);
+        const lines = [ {label:'γ=0.2, λ=0.2', g:.2, l:.2, color:'#ff6b6b'}, {label:'γ=0.5, λ=0.3', g:.5, l:.3, color:'#4ecdc4'}, {label:'γ=0.8, λ=0.5', g:.8, l:.5, color:'#45b7d1'} ];
+        charts.land = new Chart(landsCtx,{ type:'line', data:{ labels:deltas, datasets: lines.map(line=>({ label:line.label, borderColor:line.color, backgroundColor:'transparent', borderWidth:2, data: deltas.map(d=>BoundaryCreativeEnergy.calculate(1.0,line.g,.3,line.l,d)) })) }, options:{ responsive:true, maintainAspectRatio:false, scales:{ x:{ title:{display:true,text:'δu'} }, y:{ title:{display:true,text:'K_c'} } } });
+
+        drawBarycentric();
+      }
+
+      // ===== Barycentric Triangle =====
+      let baryPts=[]; // recent trail
+      function barycentricToCartesian(pNeg1,p0,pPos1){
+        const V1=[-1,0], V2=[1,0], V3=[0,Math.sqrt(3)];
+        const x = pNeg1*V1[0] + p0*V3[0] + pPos1*V2[0];
+        const y = pNeg1*V1[1] + p0*V3[1] + pPos1*V2[1];
+        return {x,y};
+      }
+
+      function drawBarycentric(){
+        const canvas = document.getElementById('barycentric');
+        const dpr = window.devicePixelRatio||1; const W = canvas.clientWidth, Hc = canvas.clientHeight; canvas.width=W*dpr; canvas.height=Hc*dpr; const ctx = canvas.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+        ctx.clearRect(0,0,W,Hc);
+        // triangle coords in canvas
+        const margin=24; const x0=margin, x1=W-margin, y0=Hc-margin; const cx=(x0+x1)/2; const topY=margin;
+        // vertices positions
+        const V1=[x0,y0], V2=[x1,y0], V3=[cx,topY];
+        // draw triangle
+        ctx.lineWidth=2; ctx.strokeStyle='#d1d5db'; ctx.beginPath(); ctx.moveTo(...V1); ctx.lineTo(...V2); ctx.lineTo(...V3); ctx.closePath(); ctx.stroke();
+        // labels
+        ctx.fillStyle='#6b7280'; ctx.fillText('|-1⟩', V1[0]-4, V1[1]+14); ctx.fillText('|+1⟩', V2[0]-12, V2[1]+14); ctx.fillText('|0⟩', V3[0]-6, V3[1]-6);
+        // current point
+        const p = diagProbs(rho);
+        // map theoretical coords (-1..1,0..√3) to canvas triangle
+        const bc = barycentricToCartesian(p[0],p[1],p[2]);
+        const Tx = x=> ( (bc.x+1)/2 )*(x1-x0)+x0; // -1..1 → [x0,x1]
+        const Ty = y=> y0 - (bc.y/Math.sqrt(3))*(y0-topY);
+        const px = Tx(bc.x), py = Ty(bc.y);
+        baryPts.push([px,py]); if(baryPts.length>300) baryPts.shift();
+        // trail
+        ctx.strokeStyle = '#5a67d8'; ctx.lineWidth=2; ctx.beginPath(); baryPts.forEach((pt,i)=>{ if(i===0) ctx.moveTo(pt[0],pt[1]); else ctx.lineTo(pt[0],pt[1]); }); ctx.stroke();
+        // point
+        ctx.fillStyle = '#5a67d8'; ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2); ctx.fill();
+      }
+
+      // ===== Display & Metrics =====
+      function diagProbs(r){ const d = [real(r.get([0,0])), real(r.get([1,1])), real(r.get([2,2]))]; return d; }
+
+      function updateDisplay(){
+        const probs = diagProbs(rho);
+        document.getElementById('prob-1').textContent = toFixed(probs[0]);
+        document.getElementById('prob0').textContent  = toFixed(probs[1]);
+        document.getElementById('prob1').textContent  = toFixed(probs[2]);
+        ['state-1','state0','state1'].forEach((id,idx)=>{ const el=document.getElementById(id); const m=Math.max(...probs); if(probs[idx]===m) el.classList.add('active'); else el.classList.remove('active'); });
+        charts.prob.data.datasets[0].data = probs; charts.prob.update('none');
+
+        const S = vnEntropy(rho);
+        const P = purity(rho);
+        const U = uncertaintyTriple(rho, document.getElementById('observableSet').value);
+        const score = 0.4*(S/Math.log(3)) + 0.3*(1-P) + 0.3*Math.min(1,U/0.5);
+        document.getElementById('entropy').textContent = toFixed(S);
+        document.getElementById('purity').textContent = toFixed(P);
+        document.getElementById('uncertainty').textContent = toFixed(U);
+        document.getElementById('consciousness').textContent = toFixed(score);
+
+        // evolution chart append
+        charts.evo.data.labels.push(toFixed(tCurrent,2));
+        charts.evo.data.datasets[0].data.push(probs[0]);
+        charts.evo.data.datasets[1].data.push(probs[1]);
+        charts.evo.data.datasets[2].data.push(probs[2]);
+        if (charts.evo.data.labels.length>250){ charts.evo.data.labels.shift(); charts.evo.data.datasets.forEach(d=>d.data.shift()); }
+        charts.evo.update('none');
+
+        updateCapabilities();
+        pushNavPoint();
+        drawBarycentric();
+        maybeRecordRow(S,P,U,score,probs);
+      }
+
+      function updateCapabilities(){
+        const p = diagProbs(rho); const S = vnEntropy(rho);
+        const creativity = Math.min(1, (S/Math.log(3))*0.6 + 0.2);
+        charts.cap.data.datasets[0].data = [p[2], p[1], p[0], creativity];
+        charts.cap.update('none');
+      }
+
+      function pushNavPoint(){
+        const p = diagProbs(rho);
+        const bc = barycentricToCartesian(p[0],p[1],p[2]);
+        navPath.push({x:bc.x,y:bc.y}); if(navPath.length>200) navPath.shift();
+        charts.nav.data.labels = navPath.map((_,i)=>i);
+        charts.nav.data.datasets[0].data = navPath.map(o=>({x:o.x,y:o.y}));
+        charts.nav.update('none');
+      }
+
+      // ===== Recording & CSV =====
+      function maybeRecordRow(S,P,U,score,probs){
+        if(!document.getElementById('recordToggle').checked) return;
+        recordRows.push({ t:tCurrent, p_neg1:probs[0], p_0:probs[1], p_pos1:probs[2], entropy:S, purity:P, uncertainty:U, score });
+        if(recordRows.length>5000) recordRows.shift();
+      }
+
+      function downloadCSV(){
+        const header = 't,p_-1,p_0,p_+1,entropy,purity,uncertainty,score\n';
+        const rows = recordRows.map(r=> [r.t,r.p_neg1,r.p_0,r.p_pos1,r.entropy,r.purity,r.uncertainty,r.score].map(v=>String(v)).join(','));
+        const csv = header + rows.join('\n');
+        const blob = new Blob([csv],{type:'text/csv'});
+        const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='evolution_log.csv'; a.click(); URL.revokeObjectURL(url);
+      }
+
+      // ===== Presets & Measurement =====
+      function setPreset(kind){
+        const map={ balanced:[1/Math.sqrt(3),1/Math.sqrt(3),1/Math.sqrt(3)], focused:[0.82,0.09,0.09], creative:[0.25,0.32,0.88], meditative:[0.10,0.82,0.10] };
+        const v = map[kind]||map.balanced; ['alpha','beta','gamma'].forEach((id,i)=>{ const el=document.getElementById(id); el.value=v[i]; document.getElementById(id+'Value').textContent=toFixed(v[i]); });
+        updateStateFromSliders();
+      }
+
+      function measureCollapse(){
+        const p = diagProbs(rho); const r = Math.random(); let cum=0, idx=2; for(let i=0;i<3;i++){ cum+=p[i]; if(r<=cum){ idx=i; break; } }
+        const basis = [0,0,0]; basis[idx]=1; psi0 = math.matrix(basis); rho0 = pureDensity(psi0); rho = rho0.clone(); tCurrent=0; updateAll();
+      }
+
+      // ===== Wiring =====
+      function updateStateFromSliders(){
+        const a=parseFloat(document.getElementById('alpha').value); const b=parseFloat(document.getElementById('beta').value); const c=parseFloat(document.getElementById('gamma').value);
+        const norm = Math.sqrt(a*a+b*b+c*c)||1; psi0 = math.matrix([a/norm,b/norm,c/norm]); rho0 = pureDensity(psi0); rho = rho0.clone(); tCurrent=0; updateAll();
+      }
+
+      function setupControls(){
+        ['alpha','beta','gamma','time'].forEach(id=>{ const slider=document.getElementById(id); const span=document.getElementById(id+'Value'); slider.addEventListener('input',e=>{ if(span) span.textContent=toFixed(parseFloat(e.target.value)); if(id==='time') updateEvolution(); else updateStateFromSliders(); }); });
+        document.getElementById('playBtn').addEventListener('click', ()=> isPlaying?stopEvolution():startEvolution());
+        document.getElementById('resetBtn').addEventListener('click', resetEvolution);
+        document.getElementById('measureBtn').addEventListener('click', measureCollapse);
+        document.getElementById('downloadCSV').addEventListener('click', downloadCSV);
+        document.getElementById('hPreset').addEventListener('change', applyHPreset);
+        document.getElementById('applyH').addEventListener('click', ()=>{ buildHFromInputs(); });
+        document.getElementById('observableSet').addEventListener('change', ()=> updateAll());
+
+        // Keyboard
+        window.addEventListener('keydown', e=>{
+          if(e.code==='Space'){ e.preventDefault(); isPlaying?stopEvolution():startEvolution(); }
+          if(e.key==='r'||e.key==='R') resetEvolution();
+          if(e.key==='m'||e.key==='M') measureCollapse();
+          if(e.key==='1') setPreset('balanced');
+          if(e.key==='2') setPreset('focused');
+          if(e.key==='3') setPreset('creative');
+          if(e.key==='4') setPreset('meditative');
+        });
+      }
+
+      function updateAll(){ updateDisplay(); }
+
+      // ===== Init =====
+      window.addEventListener('DOMContentLoaded', ()=>{ setupCharts(); setupControls(); applyHPreset(); updateAll(); });
+    </script>
+  </body>
+</html>
