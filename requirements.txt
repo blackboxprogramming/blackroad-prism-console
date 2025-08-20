@@ -30,3 +30,4 @@ whisper
 
 qiskit-machine-learning==0.8.3
 qiskit-aer==0.17.1
+pyarrow==16.1.0
