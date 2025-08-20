@@ -6,17 +6,12 @@ on:
         description: 'ai_tools flag'
         value: ${{ jobs.flags.outputs.ai_tools }}
       security_scans:
-        description: 'security_scans flag'
-        description: 'AI tools flag'
-        value: ${{ jobs.flags.outputs.ai_tools }}
-      security_scans:
         description: 'Security scans flag'
         value: ${{ jobs.flags.outputs.security_scans }}
       web_performance:
         description: 'Web perf flag'
         value: ${{ jobs.flags.outputs.web_performance }}
       heavy_linters:
-        description: 'heavy_linters flag'
         description: 'Heavy linters flag'
         value: ${{ jobs.flags.outputs.heavy_linters }}
 jobs:
@@ -31,10 +26,6 @@ jobs:
       - uses: actions/checkout@v4
       - id: f
         run: |
-          yq() { python - <<'PY'
-            import sys,yaml;print(yaml.safe_load(sys.stdin.read())['ai_tools'] if sys.argv[1]=='ai' else '')
-            PY
-            ; }
           file=".github/feature-flags.yml"
           ai=$(grep -E '^ai_tools:' "$file" | awk '{print $2}')
           sec=$(grep -E '^security_scans:' "$file" | awk '{print $2}')

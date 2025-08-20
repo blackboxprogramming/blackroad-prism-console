@@ -64,3 +64,4 @@ lucidia/modules/random_fields/datasets/__pycache__/
 tests/_codex_autogen/
 .tmp/
 *.out.md
+services/quantum_lab/*.db
