@@ -1,22 +1,14 @@
-"""Agent for executing Condor simulations and optimisations.
-
-The implementation provided here is intentionally lightweight.  It
-supports the core intents required for experimentation and defers more
-advanced logging, sandboxing and streaming features to future work.
 """Agent for running Condor models in a controlled environment.
 
-The :class:`SimulatorAgent` provides a thin wrapper around the helpers in
-``lucidia.engines.condor_engine``.  It accepts user supplied model source code,
-performs basic validation, and executes the requested intent.  Results of the
-last few runs are cached to avoid recomputation.
+The :class:`SimulatorAgent` wraps helper utilities from
+``lucidia.engines.condor_engine`` to execute small simulations and
+optimisations.  Results of recent runs are memoised to avoid
+recomputation.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict
-
-from lucidia.engines import condor_engine
 from hashlib import sha256
 import json
 from typing import Any, Dict
@@ -32,6 +24,7 @@ CACHE_SIZE = 5
 
 
 def _hash_model(source: str, args: Dict[str, Any]) -> str:
+    """Create a hash for caching based on source and arguments."""
     return sha256((source + json.dumps(args, sort_keys=True)).encode()).hexdigest()
 
 
@@ -39,36 +32,12 @@ def _hash_model(source: str, args: Dict[str, Any]) -> str:
 class SimulatorAgent:
     """Minimal simulator agent used in tests and local demos."""
 
-    cache_size: int = 4
-    _cache: Dict[str, Any] = field(default_factory=dict)
-
-    def run(self, intent: str, *args, **kwargs) -> Any:
-        """Dispatch to Condor engine helpers based on ``intent``."""
-        key = (intent, str(args), str(kwargs))
-        if key in self._cache:
-            return self._cache[key]
-
-        if intent == "simulate":
-            result = condor_engine.simulate_ode(*args, **kwargs)
-        elif intent == "optimize":
-            result = condor_engine.optimize(*args, **kwargs)
-        elif intent == "analyze_trajectory":
-            result = condor_engine.solve_algebraic(*args, **kwargs)
-        else:
-            raise ValueError(f"Unknown intent: {intent}")
-
-        if len(self._cache) >= self.cache_size:
-            self._cache.pop(next(iter(self._cache)))
-        self._cache[key] = result
-        return result
-    """Execute Condor models according to a given intent."""
-
     cache: Dict[str, Dict[str, Any]] = field(default_factory=dict)
 
     def _memoise(self, key: str, value: Dict[str, Any]) -> None:
+        """Store ``value`` under ``key`` keeping cache within ``CACHE_SIZE``."""
         self.cache[key] = value
         if len(self.cache) > CACHE_SIZE:
-            # remove oldest entry
             self.cache.pop(next(iter(self.cache)))
 
     def run(
@@ -79,7 +48,6 @@ class SimulatorAgent:
         args: Dict[str, Any] | None = None,
     ) -> Dict[str, Any]:
         """Execute ``intent`` using the provided model source."""
-
         args = args or {}
         key = _hash_model(model_source, {"intent": intent, **args})
         if key in self.cache:
@@ -108,3 +76,7 @@ class SimulatorAgent:
         self._memoise(key, result)
         return result
 
+
+if __name__ == "__main__":
+    agent = SimulatorAgent()
+    print("SimulatorAgent ready")
