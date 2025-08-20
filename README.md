@@ -1,3 +1,4 @@
+![Build](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/monorepo-matrix.yml/badge.svg) ![E2E](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/playwright.yml/badge.svg) ![Deploy](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/deploy-blackroad.yml/badge.svg)
 # BlackRoad.io Portal — Full‑Stack Scaffold
 
 A production‑ready scaffold for the BlackRoad‑style portal you described. Includes:
