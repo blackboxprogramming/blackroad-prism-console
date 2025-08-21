@@ -1,0 +1,8 @@
+FROM node:20
+
+WORKDIR /app/neuron_viewer
+# Code is mounted read-only by compose; this container runs the dev server
+EXPOSE 1234
+
+# Keep it simple: dev server (hot reload) on port 1234
+CMD ["bash", "-lc", "npm ci && npm run start"]

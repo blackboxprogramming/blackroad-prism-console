@@ -1,0 +1,42 @@
+"""Bot for automating GitHub issue creation and management."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+import os
+from typing import Optional
+import requests
+
+
+@dataclass
+class IssueBot:
+    """Automate creation and closing of GitHub issues."""
+
+    repo: str
+    token: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        if self.token is None:
+            self.token = os.getenv("GITHUB_TOKEN")
+
+    def create_issue(self, title: str, body: str = "") -> dict:
+        """Create a new issue on GitHub."""
+        url = f"https://api.github.com/repos/{self.repo}/issues"
+        headers = {"Authorization": f"token {self.token}"} if self.token else {}
+        payload = {"title": title, "body": body}
+        response = requests.post(url, json=payload, headers=headers, timeout=10)
+        response.raise_for_status()
+        return response.json()
+
+    def close_issue(self, issue_number: int) -> dict:
+        """Close an existing GitHub issue."""
+        url = f"https://api.github.com/repos/{self.repo}/issues/{issue_number}"
+        headers = {"Authorization": f"token {self.token}"} if self.token else {}
+        payload = {"state": "closed"}
+        response = requests.patch(url, json=payload, headers=headers, timeout=10)
+        response.raise_for_status()
+        return response.json()
+
+
+if __name__ == "__main__":
+    print("IssueBot ready to manage issues.")

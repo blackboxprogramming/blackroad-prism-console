@@ -1,10 +1,16 @@
+import React from 'react';
 import { createRoot } from 'react-dom/client';
-import ErrorBoundary from './ui/ErrorBoundary.jsx';
-import Router from './Router.jsx';
-import './ui/styles.css';
+import App from './App.jsx';
+import './styles.css';
 
 createRoot(document.getElementById('root')).render(
-  <ErrorBoundary>
-    <Router />
-  </ErrorBoundary>
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.jsx";
+import "./styles.css";
+
+createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
 );

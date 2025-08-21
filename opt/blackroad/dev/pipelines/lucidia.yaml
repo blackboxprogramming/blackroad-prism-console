@@ -1,0 +1,19 @@
+# /opt/blackroad/dev/pipelines/lucidia.yaml
+pipeline:
+  build:
+    image: docker:24
+    commands:
+      - docker build -t registry:5000/lucidia:${CI_COMMIT_SHA} .
+      - cosign sign --key /secrets/cosign.key registry:5000/lucidia:${CI_COMMIT_SHA}
+      - docker push registry:5000/lucidia:${CI_COMMIT_SHA}
+  test:
+    image: python:3.11
+    commands:
+      - pytest
+  deploy:
+    image: alpine:3.19
+    commands:
+      - ssh deploy@edge 'docker compose -f /opt/blackroad/lucidia/docker-compose.yml up -d'
+      - curl -sf http://traefik:8080/api/http/services/lucidia@docker | jq '.loadBalancer.servers[0].weight=10' | curl -sfXPUT -H "Content-Type: application/json" --data @- http://traefik:8080/api/http/services/lucidia@docker
+      - sleep 30
+      - curl -sf http://lucidia-api:8000/health || (curl -sfXPUT -H "Content-Type: application/json" --data '{"loadBalancer":{"servers":[{"url":"http://lucidia-old:8000","weight":100}]}}' http://traefik:8080/api/http/services/lucidia@docker && exit 1)

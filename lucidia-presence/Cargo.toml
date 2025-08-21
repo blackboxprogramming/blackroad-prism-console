@@ -1,0 +1,13 @@
+[workspace]
+members = [
+    "presence_core",
+    "presence_net",
+    "presence_sandbox",
+    "presence_host_desktop",
+    "presence_host_web",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT OR Apache-2.0"

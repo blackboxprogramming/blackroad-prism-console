@@ -1,0 +1,13 @@
+[Unit]
+Description=Lucidia Service
+After=network.target
+
+[Service]
+User=deploy
+EnvironmentFile=/srv/lucidia/lucidia.env
+ExecStart=/usr/bin/docker compose -f /srv/compose/lucidia.yml up -d
+ExecStop=/usr/bin/docker compose -f /srv/compose/lucidia.yml down
+Restart=always
+
+[Install]
+WantedBy=lucidia.target

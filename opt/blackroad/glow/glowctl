@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+HOST="${HOST:-localhost}"
+PORT="${PORT:-8018}"
+
+case "${1:-}" in
+  health)
+    curl -s "http://$HOST:$PORT/health" | jq ;;
+  train)
+    curl -s -X POST "http://$HOST:$PORT/train" -H 'content-type: application/json' \
+      -d '{"dataset_dir": null, "img_size":64, "batch":16, "epochs":1, "n_flow":32, "n_block":3, "bits":5}' | jq ;;
+  sample)
+    curl -s -X POST "http://$HOST:$PORT/sample" -H 'content-type: application/json' \
+      -d '{"n":9,"temperature":0.7,"out_size":64}' | jq -r '.image_b64' | base64 --decode > sample.png && echo "wrote sample.png" ;;
+  *)
+    echo "usage: $0 {health|train|sample}"
+    exit 1 ;;
+esac

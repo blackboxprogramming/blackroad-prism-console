@@ -387,6 +387,34 @@
       <header>
         <div class="brand" aria-label="BlackRoad">
           <div class="logo" aria-hidden="true">BR</div>
+      <div class="hdr-actions">
+        <button class="btn" id="themeBtn" aria-pressed="false" title="Toggle theme">🌗 Theme</button>
+        <button class="btn" id="bell" title="Notifications">🔔</button>
+        <div class="btn" aria-label="User menu">U</div>
+      </div>
+    </header>
+
+    <aside>
+      <nav class="nav" aria-label="Workspace">
+        <div class="nav-title">Workspace</div>
+        <a href="#" data-view="dash" aria-current="page">📊 <span class="label">Dashboard</span></a>
+        <a href="#" data-view="projects">📁 <span class="label">Projects</span></a>
+        <a href="#" data-view="code">💻 <span class="label">Code</span></a>
+        <a href="#" data-view="chat">💬 <span class="label">Conversations</span></a>
+      </nav>
+      <nav class="nav" aria-label="Consciousness">
+        <div class="nav-title">Consciousness</div>
+        <a href="#" data-view="lucidia">🧠 <span class="label">Lucidia Chat</span></a>
+        <a href="#" data-view="metrics">📈 <span class="label">Metrics</span></a>
+        <a href="#" data-view="learning">🎯 <span class="label">Learning</span></a>
+        <a href="/apps/quantum/ternary_consciousness_v3.html">⚛️ <span class="label">Ternary Quantum v3</span></a>
+      </nav>
+    </aside>
+
+    <main id="main">
+      <!-- Dashboard -->
+      <section class="grid" data-route="dash">
+        <header class="grid">
           <div>
             <strong>BlackRoad</strong>
             <div style="font-size: 12px; color: var(--muted)">Consciousness-Driven Dev</div>
@@ -511,6 +539,24 @@
                 "
               >
                 <span>🎯 Live</span><span>📊 85%</span><span>⏰ now</span>
+              </div>
+            </article>
+
+            <article class="card" id="clipsCard">
+              <span class="status s-active">New</span>
+              <h3>Generated Clips</h3>
+              <div
+                id="clipList"
+                style="
+                  margin-top: 8px;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 8px;
+                  max-height: 200px;
+                  overflow: auto;
+                "
+              >
+                <p style="color: var(--muted)">Loading…</p>
               </div>
             </article>
           </div>
@@ -833,6 +879,29 @@
         renderChat();
       };
       renderChat();
+
+      /* ---------------- Audio clips ---------------- */
+      async function loadClips() {
+        try {
+          const res = await fetch('/api/music/clips', { cache: 'no-cache' });
+          const data = await res.json();
+          const list = $('#clipList');
+          list.innerHTML = '';
+          if (!data.files || !data.files.length) {
+            list.innerHTML = '<p style="color: var(--muted)">No clips yet.</p>';
+            return;
+          }
+          data.files.forEach((f) => {
+            const div = document.createElement('div');
+            div.innerHTML = `<audio controls src="/media/${encodeURIComponent(f)}" style="width:100%"></audio>`;
+            list.appendChild(div);
+          });
+        } catch (err) {
+          console.error(err);
+          $('#clipList').innerHTML = '<p style="color: var(--muted)">Failed to load clips</p>';
+        }
+      }
+      loadClips();
 
       /* ---------------- Search box acts as command palette too ---------------- */
       $('#q').addEventListener('keydown', (e) => {

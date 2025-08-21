@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  blackroad-site:
+    image: caddy:2.8-alpine
+    container_name: blackroad-site
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      # built site goes here after npm run build
+      - ./sites/blackroad/dist:/srv:ro
+      - ./sites/blackroad/Caddyfile:/etc/caddy/Caddyfile:ro
+
+  # (optional) mock backend so /api resolves locally
+  mock-api:
+    image: ghcr.io/underscoreio/http-echo:latest
+    container_name: blackroad-mock-api
+    command: ["-listen", ":4000", "-text", "{\"status\":\"ok\",\"message\":\"mock backend\"}"]
+    restart: unless-stopped
+    ports:
+      - "4000:4000"

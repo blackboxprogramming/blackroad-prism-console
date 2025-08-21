@@ -1,0 +1,15 @@
+[Unit]
+Description=BlackRoad Diffusion Service (local)
+After=network-online.target
+
+[Service]
+WorkingDirectory=/opt/blackroad/ai/diffusion
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=/usr/bin/python3 /opt/blackroad/ai/diffusion/blackroad_diffusion_service.py
+Restart=on-failure
+User=www-data
+Group=www-data
+RuntimeDirectory=blackroad-diffusion
+
+[Install]
+WantedBy=multi-user.target
