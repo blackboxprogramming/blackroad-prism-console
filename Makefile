@@ -170,3 +170,17 @@ sbom: ; bash scripts/review.sh --sbom
 lock: ; bash scripts/review.sh --lock
 gen: ; python scripts/ai_codegen.py --task "$(t)"
 docs: ; python scripts/ai_docs.py --from-diff
+
+
+.PHONY: api-dev api-up api-logs site-up-all
+api-dev:
+	cd services/api && npm i && npm run dev
+
+api-up:
+	docker compose -f docker-compose.prism.yml up -d api
+
+api-logs:
+	docker compose -f docker-compose.prism.yml logs -f api
+
+site-up-all:
+	docker compose -f docker-compose.prism.yml up -d
