@@ -1,0 +1,10 @@
+{
+  "title": "Contradiction demo",
+  "steps": [
+    {
+      "narrate": "Gate in -1 state triggers contradiction",
+      "focus": "gate1",
+      "animate": {"node": "gate1", "props": {"state": -1}, "duration": 1000}
+    }
+  ]
+}

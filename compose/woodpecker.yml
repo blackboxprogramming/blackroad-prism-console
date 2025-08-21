@@ -1,0 +1,14 @@
+version: '3'
+services:
+  server:
+    image: woodpeckerci/woodpecker-server:1.0.0
+    env_file: /srv/woodpecker.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8000:8000"
+  agent:
+    image: woodpeckerci/woodpecker-agent:1.0.0
+    env_file: /srv/woodpecker.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

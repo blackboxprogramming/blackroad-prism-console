@@ -1,0 +1,202 @@
+<!-- FILE: /ops/docker/docker-compose.yml -->
+version: "3.9"
+services:
+  caddy:
+    image: caddy@sha256:1111111111111111111111111111111111111111111111111111111111111111
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    networks:
+      - web
+
+  web:
+    image: blackroad/web@sha256:2222222222222222222222222222222222222222222222222222222222222222
+    depends_on:
+      - api
+    restart: always
+    networks:
+      - web
+
+  api:
+    image: blackroad/api@sha256:3333333333333333333333333333333333333333333333333333333333333333
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://lucidia:password@db:5432/lucidia
+    networks:
+      - web
+      - backend
+
+  model:
+    image: ollama/ollama@sha256:4444444444444444444444444444444444444444444444444444444444444444
+    restart: always
+    volumes:
+      - models:/models
+    networks:
+      - backend
+
+  db:
+    image: postgres@sha256:5555555555555555555555555555555555555555555555555555555555555555
+    restart: always
+    environment:
+      POSTGRES_USER: lucidia
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: lucidia
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  vector:
+    image: tensorchord/pgvecto-rs@sha256:6666666666666666666666666666666666666666666666666666666666666666
+    restart: always
+    environment:
+      POSTGRES_USER: lucidia
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: vectors
+    volumes:
+      - vector_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  minio:
+    image: minio/minio@sha256:7777777777777777777777777777777777777777777777777777777777777777
+    command: server /data --console-address :9001
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=admin123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - backend
+
+  gitea:
+    image: gitea/gitea@sha256:8888888888888888888888888888888888888888888888888888888888888888
+    restart: always
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    volumes:
+      - gitea_data:/data
+    ports:
+      - "3000:3000"
+      - "222:22"
+    networks:
+      - backend
+
+  registry:
+    image: registry@sha256:9999999999999999999999999999999999999999999999999999999999999999
+    restart: always
+    environment:
+      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/var/lib/registry
+    volumes:
+      - registry_data:/var/lib/registry
+    networks:
+      - backend
+
+  woodpecker-server:
+    image: woodpeckerci/woodpecker-server@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    restart: always
+    environment:
+      - WOODPECKER_OPEN=true
+    ports:
+      - "8000:8000"
+    volumes:
+      - woodpecker_server:/var/lib/woodpecker
+    networks:
+      - backend
+
+  woodpecker-agent:
+    image: woodpeckerci/woodpecker-agent@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    restart: always
+    environment:
+      - WOODPECKER_SERVER=woodpecker-server:9000
+    networks:
+      - backend
+
+  prometheus:
+    image: prom/prometheus@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+    restart: always
+    volumes:
+      - prometheus_data:/prometheus
+    networks:
+      - backend
+
+  node-exporter:
+    image: prom/node-exporter@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+    restart: always
+    networks:
+      - backend
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor@sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    restart: always
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+    networks:
+      - backend
+
+  loki:
+    image: grafana/loki@sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    restart: always
+    volumes:
+      - loki_data:/loki
+    networks:
+      - backend
+
+  promtail:
+    image: grafana/promtail@sha256:1111111111111111111111111111111111111111111111111111111111111112
+    restart: always
+    volumes:
+      - /var/log:/var/log
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana@sha256:1212121212121212121212121212121212121212121212121212121212121212
+    restart: always
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    networks:
+      - backend
+
+  uptime-kuma:
+    image: louislam/uptime-kuma@sha256:1313131313131313131313131313131313131313131313131313131313131313
+    restart: always
+    volumes:
+      - uptimekuma_data:/app/data
+    ports:
+      - "3002:3001"
+    networks:
+      - backend
+
+networks:
+  web:
+  backend:
+
+volumes:
+  caddy_data:
+  models:
+  db_data:
+  vector_data:
+  minio_data:
+  gitea_data:
+  registry_data:
+  woodpecker_server:
+  prometheus_data:
+  loki_data:
+  grafana_data:
+  uptimekuma_data:

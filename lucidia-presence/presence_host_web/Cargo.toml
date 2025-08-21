@@ -1,0 +1,23 @@
+[package]
+name = "presence_host_web"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
+
+[dependencies]
+wasm-bindgen = "0.2"
+console_error_panic_hook = { version = "0.1", optional = true }
+
+[dependencies.presence_core]
+path = "../presence_core"
+
+[dependencies.presence_net]
+path = "../presence_net"
+
+[features]
+default = []
+wee_alloc = []

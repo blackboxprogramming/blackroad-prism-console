@@ -35,12 +35,33 @@ node_modules/
 **/node_modules/
 benchmarks/
 # Lucidia artifacts
-secrets/
+secrets/*
 datasets/
 models/
 checkpoints/
 outputs/
 rag/index/*.faiss
 rag/index/meta.json
-secrets/
 *.enc
+!secrets/README.md
+!secrets/*.env.example
+# Codex CI kit
+/tests/_codex_autogen/
+.tmp/
+*.out.md
+# Codex artifacts
+tests/_codex_autogen/
+.tmp/
+*.out.md
+
+# Allow random field datasets
+!lucidia/modules/random_fields/datasets/
+!lucidia/modules/random_fields/datasets/*.py
+lucidia/modules/random_fields/datasets/__pycache__/
+# Codex CI artifacts
+tests/_codex_autogen/
+.tmp/
+*.out.md
+services/quantum_lab/*.db
+node_modules/
+!opt/blackroad/tdb/.env

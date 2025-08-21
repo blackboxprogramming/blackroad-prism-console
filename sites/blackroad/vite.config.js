@@ -1,12 +1,17 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
+// Vite config for the static BlackRoad site.
+// NGINX/Caddy in the repo will serve the built /dist at runtime.
 export default defineConfig({
-  esbuild: { jsxFactory: 'React.createElement', jsxFragment: 'React.Fragment' },
-  build: { outDir: 'dist' },
-export default defineConfig({
-  esbuild: {
-    jsx: 'automatic',
-    jsxImportSource: 'react',
+  plugins: [react()],
+  root: '.',
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    emptyOutDir: true,
   },
-  base: '/',
+  server: {
+    host: true,
+  },
 });

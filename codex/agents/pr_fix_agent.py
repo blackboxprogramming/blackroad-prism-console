@@ -38,7 +38,9 @@ def main() -> int:
         print("No changes after fix-everything")
         return 0
 
-    shell("git commit -am 'chore: auto fixes via pr agent'")
+    # Stage all changes (including new files) and commit them
+    shell("git add -A")
+    shell("git commit -m 'chore: auto fixes via pr agent'")
 
     token = os.getenv("GITHUB_TOKEN")
     repo = os.getenv("GITHUB_REPOSITORY")

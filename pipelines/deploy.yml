@@ -1,0 +1,13 @@
+pipeline:
+  pull:
+    image: docker:24
+    commands:
+      - echo pull signed image
+  health:
+    image: alpine:3.19
+    commands:
+      - echo health check
+  swap:
+    image: alpine:3.19
+    commands:
+      - echo blue/green swap

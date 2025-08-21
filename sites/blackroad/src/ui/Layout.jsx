@@ -23,6 +23,7 @@ const links = [
   { to: '/math', label: 'MathLab' },
   { to: '/uncertainty', label: 'Uncertainty' },
   { to: '/geodesic', label: 'Geodesic' },
+  { to: '/prompts', label: 'Prompts' },
 ];
 
 function navigate(e, to) {
@@ -102,6 +103,7 @@ export default function Layout() {
               <Tab to="/changelog">{t('navChangelog')}</Tab>
               <Tab to="/blog">{t('navBlog')}</Tab>
               <Tab to="/contact">{t('navContact')}</Tab>
+              <Tab to="/prompts">Prompts</Tab>
               <LanguageSwitcher />
             </nav>
           </header>

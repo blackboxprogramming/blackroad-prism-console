@@ -1,0 +1,5 @@
+$TTL 3600
+@ IN SOA ns1.blackroad.io. admin.blackroad.io. (
+  2024010101 7200 3600 1209600 3600 )
+@ IN NS ns1.blackroad.io.
+ns1 IN A 203.0.113.10

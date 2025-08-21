@@ -1,0 +1,16 @@
+<!-- FILE: /ops/systemd/seed/lucidia-db.service -->
+[Unit]
+Description=Lucidia Database Service
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/lucidia/docker
+ExecStart=/usr/bin/docker compose up -d db
+ExecStop=/usr/bin/docker compose stop db
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
