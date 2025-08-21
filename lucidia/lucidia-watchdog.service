@@ -1,0 +1,9 @@
+[Unit]
+Description=Lucidia Watchdog
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/curl -fs http://localhost:8080/ || systemctl restart lucidia.service
+
+[Install]
+WantedBy=multi-user.target

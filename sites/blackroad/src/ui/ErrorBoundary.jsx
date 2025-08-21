@@ -1,25 +1,18 @@
-import React from 'react';
+import { Component } from 'react';
 
-export default class ErrorBoundary extends React.Component {
+export default class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false };
   }
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
+  static getDerivedStateFromError() {
+    return { hasError: true };
   }
   componentDidCatch(error, info) {
-    console.error('ErrorBoundary', error, info);
+    console.error(error, info);
   }
   render() {
-    if (this.state.hasError) {
-      return (
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-2">Something went wrong.</h2>
-          <pre style={{ whiteSpace: 'pre-wrap' }}>{String(this.state.error)}</pre>
-        </div>
-      );
-    }
+    if (this.state.hasError) return <div>Something went wrong.</div>;
     return this.props.children;
   }
 }

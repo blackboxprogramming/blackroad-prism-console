@@ -1,0 +1,13 @@
+# <!-- FILE: /ops/ci/pipeline.yml -->
+name: build
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build image
+        run: |
+          docker build -t harbor/blackroad/lucidia-api:$(git rev-parse --short HEAD) apps/lucidia/api
+          cosign sign --key cosign.key harbor/blackroad/lucidia-api:$(git rev-parse --short HEAD)
+          docker push harbor/blackroad/lucidia-api:$(git rev-parse --short HEAD)

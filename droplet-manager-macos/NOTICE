@@ -1,0 +1,7 @@
+Droplet Manager for macOS
+Copyright (C) 2013 DODropletManager contributors
+
+This is a modified version maintained by BlackRoad.
+Upstream project: https://github.com/deivuh/DODropletManager-OSX
+Modifications include migration to DigitalOcean API v2, security hardening,
+and build tooling updates.

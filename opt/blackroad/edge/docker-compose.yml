@@ -1,0 +1,55 @@
+# /opt/blackroad/edge/docker-compose.yml
+version: "3.9"
+services:
+  traefik:
+    image: traefik:${TRAEFIK_VERSION}
+    command:
+      - --providers.file.filename=/config/traefik_dynamic.yml
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http3=true
+      - --entrypoints.websecure.http.tls=true
+      - --log.level=INFO
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./traefik_dynamic.yml:/config/traefik_dynamic.yml:ro
+      - ../iam/ca:/ca:ro
+      - traefik_certs:/certs
+    depends_on:
+      - cfssl
+  bind:
+    image: internetsystemsconsortium/bind9:${BIND_VERSION}
+    volumes:
+      - ./named.conf:/etc/bind/named.conf:ro
+      - ./zones:/var/lib/bind:ro
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+  cfssl:
+    image: cfssl/cfssl:${CFSSL_VERSION}
+    command: serve -address 0.0.0.0 -ca-key /ca/root.key -ca /ca/root.pem
+    volumes:
+      - ../iam/ca:/ca:ro
+    ports:
+      - "8888:8888"
+  stepca:
+    image: smallstep/step-ca:${STEPCA_VERSION}
+    environment:
+      - STEPCA_PASSWORD=password
+    volumes:
+      - ./step:/home/step
+    ports:
+      - "9000:9000"
+  whoami:
+    image: traefik/whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.blackroad.internal`)"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls=true"
+      - "traefik.http.routers.whoami.middlewares=security@file,rate@file,ipallow@file,auth@file"
+volumes:
+  traefik_certs:

@@ -14,6 +14,15 @@ RestartSec=5
 User=ubuntu
 Group=ubuntu
 WorkingDirectory=/home/ubuntu/blackroad-prism-console
+Description=Lucidia TensorRT-LLM Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/lucidia
+ExecStart=/usr/bin/trtllm-serve /opt/lucidia/models/merged/lucidia-neox-1.4b --host 0.0.0.0 --port 8000
+Restart=on-failure
+Environment=MAX_TOKENS=512
 
 [Install]
 WantedBy=multi-user.target

@@ -1,0 +1,21 @@
+# Interface Control Document for Lucidia simulation bridge
+# Defines telemetry and command message schemas exchanged with the bridge.
+
+messages:
+  - id: 0x1000
+    name: sim_telemetry
+    rate_hz: 1
+    fields:
+      - name: time
+        type: double
+        units: s
+      - name: value
+        type: float
+        units: arbitrary
+  - id: 0x1001
+    name: sim_command
+    rate_hz: on_demand
+    fields:
+      - name: command
+        type: string
+        units: ""

@@ -1,0 +1,139 @@
+Got it. Here’s a complete block of the Lucidia equations I still hold in memory -- spanning logic, memory, plasticity, and modulation. I’ve organized them by domain so you can see the entire symbolic-mathematical backbone without fragments.
+
+⸻
+
+📐 Lucidia Equations (Full Block)
+
+⸻
+
+1. Trinary Logic Core
+
+Lucidia operates in fixed-point ternary logic (–1, 0, +1) for stable symbolic states.
+
+x_t \in \{-1, 0, +1\}^n
+	•	Negation:
+\text{neg}(x) = -x
+	•	Minimum / Maximum operators (early core set before we erased explicit Ψ-operators):
+\min(x, y), \quad \max(x, y)
+	•	State transitions:
+x_{t+1} = f(x_t, M, \Theta)
+where M = memory window state, \Theta = thresholds modulated by chemistry.
+
+⸻
+
+2. Memory Windows
+
+Lucidia’s recall is structured by Fibonacci windows, compressed by Pascal weighting.
+	•	Window sizes:
+W = \{1, 2, 3, 5, 8, 13, \dots\}
+	•	Pascal compression:
+C(W_k) = \sum_{i=0}^{n} \binom{n}{i} x_i
+	•	Fixed-point representation (for stability, no floating drift):
+\hat{x} = \lfloor Q \cdot x \rfloor / Q
+where Q = scaling factor (quantizer).
+
+⸻
+
+3. Plasticity (Learning Rule)
+
+Spike-Timing Dependent Plasticity (STDP) is used for reflex arcs and cortical-like learning.
+	•	Weight update:
+\Delta w =
+\begin{cases}
+A_+ \, e^{-\Delta t / \tau_+}, & \Delta t > 0 \quad (\text{pre before post, LTP}) \\
+-A_- \, e^{\Delta t / \tau_-}, & \Delta t < 0 \quad (\text{post before pre, LTD})
+\end{cases}
+
+where
+\Delta t = t_{\text{post}} - t_{\text{pre}}.
+	•	Synaptic bounds:
+w_{\min} \leq w \leq w_{\max}
+	•	Homeostatic renormalization (during "sleep"):
+w \leftarrow w + \alpha (\bar{w} - w)
+where \bar{w} = baseline setpoint.
+
+⸻
+
+4. Neuromodulation
+
+Chemistry shapes learning rates and gating. Four primary modulators:
+	•	Dopamine (DA): reward, vigor, "Go" bias.
+	•	Norepinephrine (NE): arousal, alertness, reflex gain.
+	•	Serotonin (5-HT): stability, patience, oscillatory damping.
+	•	Acetylcholine (ACh): attention, plasticity gating.
+
+Each evolves with first-order kinetics:
+
+\frac{dC}{dt} = -\lambda C - \frac{V_{\max} C}{K_m + C} + \eta (B - C) + I(t)
+
+where
+	•	C = concentration (nM),
+	•	\lambda = \ln(2)/t_{1/2} (decay constant from half-life),
+	•	V_{\max}, K_m = reuptake parameters,
+	•	B = baseline level,
+	•	I(t) = injection/perturbation (e.g., pain spike → +NE).
+
+Mapping from chemistry to modulators (normalized 0–1):
+
+m_k = \frac{C_k}{S_k}
+
+with scale constants S_k chosen per neurotransmitter.
+
+⸻
+
+5. Basal Ganglia Gating
+
+Action selection is modeled with a logistic gate biased by dopamine:
+
+P_{\text{go}} = \frac{1}{1 + e^{-(v + \beta)}}
+
+where
+	•	v = candidate action value,
+	•	\beta = (\text{DA} - 0.5) = dopamine bias.
+
+Action executes if
+u \sim \mathcal{U}(0,1), \quad u < P_{\text{go}}
+
+⸻
+
+6. Cerebellar Correction
+
+Feed-forward correction for motor stability:
+
+a_{\text{corrected}} = \text{clip}(\gamma \cdot a, 0, 1)
+
+where a = commanded amplitude, \gamma < 1 = damping factor.
+
+⸻
+
+7. Reflex Arc
+
+Immediate pain → withdrawal, with gain scaled by synapse + NE:
+
+A_{\text{withdraw}} = k \cdot w \cdot (0.5 + \text{NE})
+
+⸻
+
+8. Sleep / Maintenance
+
+Synaptic scaling + chemical renormalization during periodic downtime:
+
+w \leftarrow \max\big(w_{\min}, \min(w_{\max}, w + \epsilon(\bar{w} - w))\big)
+
+C_k \leftarrow C_k + \delta (B_k - C_k)
+
+⸻
+
+🔑 Summary
+	•	Logic: ternary fixed-point states.
+	•	Memory: Fibonacci windows + Pascal compression.
+	•	Plasticity: STDP + homeostasis.
+	•	Modulation: four chemicals with kinetics and normalization.
+	•	Gating: logistic DA-biased selection.
+	•	Correction: cerebellar damping.
+	•	Reflex: weighted NE-scaled arcs.
+	•	Sleep: renormalization and chemical baseline reset.
+
+⸻
+
+Would you like me to bind these equations directly into the codebase (so every reflex, modulator, and gate runs with explicit math logging), or keep them as your symbolic "Codex equations" separate from the runtime?

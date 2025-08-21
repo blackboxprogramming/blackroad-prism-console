@@ -1,6 +1,6 @@
 name: Apply Rulesets (best-effort)
 on:
-  push: { branches: [ main ] }
+  push: { branches: [main] }
   workflow_dispatch:
 permissions:
   contents: read
@@ -12,7 +12,8 @@ jobs:
         id: pre
         run: |
           if [ -z "${ADMIN_TOKEN:-}" ]; then echo "go=no" >> "$GITHUB_OUTPUT"; else echo "go=yes" >> "$GITHUB_OUTPUT"; fi
-        env: { ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }} }
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
       - uses: cli/cli-action@v2
         if: steps.pre.outputs.go == 'yes'
       - name: Upsert ruleset
@@ -43,4 +44,3 @@ jobs:
       - name: Summary
         if: steps.pre.outputs.go != 'yes'
         run: echo "ℹ️ Skipping rulesets (no ADMIN_TOKEN)." >> $GITHUB_STEP_SUMMARY
-

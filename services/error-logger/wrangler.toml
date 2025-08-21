@@ -1,0 +1,11 @@
+name = "blackroad-error-logger"
+main = "worker.ts"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "ERROR_LOGS"
+id = "$ERROR_LOGS_KV_ID"
+
+# Optionally set via vars or secrets:
+# CORS_ORIGIN = "https://example.com"
+# API_KEY = "$ERROR_API_KEY"
