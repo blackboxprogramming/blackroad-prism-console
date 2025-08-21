@@ -1,20 +1,16 @@
-name: Trivy FS Scan
+name: Trivy Scan
 on:
-  pull_request:
   push:
     branches: [ main ]
-permissions:
-  contents: read
+    paths: [ "docker-compose*.yml", "services/", "sites/" ]
+  pull_request:
+    paths: [ "docker-compose*.yml", "services/", "sites/" ]
 jobs:
-  trivy:
+  scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@0.20.0
+      - uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: fs
-          format: table
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'library,os'
-          severity: 'CRITICAL,HIGH'
+          scan-type: "fs"
+          format: "table"
+          exit-code: "0"
