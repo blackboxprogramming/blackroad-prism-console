@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Droplet | blackroad.io</title>
+  </head>
+  <body>
+    <h1>Droplet Information</h1>
+    <pre id="info">Loading...</pre>
+    <script>
+      async function load() {
+        try {
+          const res = await fetch('/api/droplet');
+          const data = await res.json();
+          document.getElementById('info').textContent = JSON.stringify(data, null, 2);
+        } catch (err) {
+          document.getElementById('info').textContent = 'Error loading droplet info';
+        }
+      }
+      load();
+    </script>
+  </body>
+</html>

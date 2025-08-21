@@ -1,4 +1,13 @@
-require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
+const dotenv = require('dotenv');
+
+dotenv.config();
+const dropletEnv = path.join(__dirname, '..', 'secrets', 'droplet.env');
+if (fs.existsSync(dropletEnv)) {
+  dotenv.config({ path: dropletEnv, override: true });
+}
+
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
@@ -29,6 +38,18 @@ app.post('/api/auth/login', (req, res) => {
 
 app.get('/api/auth/me', authMiddleware(JWT_SECRET), (req, res) => {
   res.json({ user: store.users[0] });
+});
+
+// ---- Public Info ----
+app.get('/api/about', (req, res) => {
+  res.json({ message: 'BlackRoad.io backend is running' });
+});
+
+app.get('/api/droplet', (req, res) => {
+  res.json({
+    ip: process.env.DROPLET_IP || null,
+    fingerprint: process.env.DROPLET_HOST_FINGERPRINT_SHA256 || null,
+  });
 });
 
 // ---- Data Endpoints ----
@@ -134,6 +155,7 @@ io.on('connection', (socket)=>{
 });
 
 const PORT = process.env.PORT || 4000;
-server.listen(PORT, ()=>{
-  console.log(`Backend listening on http://localhost:${PORT}`);
+const HOST = '0.0.0.0';
+server.listen(PORT, HOST, () => {
+  console.log(`Backend listening on http://${HOST}:${PORT}`);
 });

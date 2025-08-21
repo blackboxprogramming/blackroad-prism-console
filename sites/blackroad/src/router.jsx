@@ -10,6 +10,7 @@ import Contact from './pages/Contact.jsx'
 import Tutorials from './pages/Tutorials.jsx'
 import Roadmap from './pages/Roadmap.jsx'
 import Changelog from './pages/Changelog.jsx'
+import Atlas from './pages/Atlas.jsx'
 import Blog from './pages/Blog.jsx'
 import Post from './pages/Post.jsx'
 import QuantumLab from './pages/QuantumLab.jsx'
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
       { path: 'portal', element: <Portal /> },
       { path: 'playground', element: <Playground /> },
       { path: 'quantum-lab', element: <QuantumLab /> },
+      { path: 'atlas', element: <Atlas /> },
       { path: 'contact', element: <Contact /> },
       { path: 'tutorials', element: <Tutorials /> },
       { path: 'roadmap', element: <Roadmap /> },
@@ -47,6 +49,7 @@ export const router = createBrowserRouter([
     { path: 'portal', element: <Portal /> },
     { path: 'playground', element: <Playground /> },
     { path: 'quantum-lab', element: <QuantumLab /> },
+    { path: 'atlas', element: <Atlas /> },
     { path: 'contact', element: <Contact /> },
     { path: 'tutorials', element: <Tutorials /> },
     { path: 'roadmap', element: <Roadmap /> },
