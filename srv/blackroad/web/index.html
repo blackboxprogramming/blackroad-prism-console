@@ -51,6 +51,15 @@ async function apiGet(p){const r=await fetch(p,{credentials:"include"});if(!r.ok
 async function apiPost(p,b={}){const r=await fetch(p,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify(b)});if(!r.ok)throw new Error(await r.text());return r.json()}
 async function apiPut(p,b={}){const r=await fetch(p,{method:"PUT",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify(b)});if(!r.ok)throw new Error(await r.text());return r.json()}
 async function apiDel(p){const r=await fetch(p,{method:"DELETE",credentials:"include"});if(!r.ok)throw new Error(await r.text());return r.json()}
+async function streamLLM(prompt,onToken){
+  return new Promise((resolve,reject)=>{
+    const es=new EventSource(`/api/llm/stream?prompt=${encodeURIComponent(prompt)}`);
+    let full='';
+    es.onmessage=e=>{full+=e.data;onToken&&onToken(e.data);};
+    es.addEventListener('done',e=>{es.close();resolve(full);});
+    es.onerror=e=>{es.close();reject(new Error('stream error'))};
+  });
+}
 /* ------------- Theme & layout ---------- */
 const theme={colors:{bg:get('--bg'),panel:get('--panel'),subpanel:get('--subpanel'),text:get('--text'),muted:get('--muted'),border:get('--border'),accent:get('--accent'),accent2:get('--accent-2'),accent3:get('--accent-3'),good:get('--good'),warn:get('--warn'),bad:get('--bad')},radius:'16px',shadow:'var(--shadow)'}; function get(v){return getComputedStyle(document.documentElement).getPropertyValue(v)}
 const Shell = styled.div`display:flex;flex-direction:column;height:100%`;
@@ -78,12 +87,53 @@ function ActivityItem({item,onOpen}){return(<div onClick={()=>onOpen(item)} styl
 function Modal({open,onClose,title,children}){if(!open)return null;return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.45)',display:'grid',placeItems:'center',zIndex:200}} onClick={onClose}><div onClick={e=>e.stopPropagation()} style={{width:'min(760px,94vw)',background:'var(--panel)',border:'1px solid var(--border)',borderRadius:'16px',boxShadow:'var(--shadow)'}}><div style={{display:'flex',justify-content:'space-between',alignItems:'center',padding:'14px 16px',borderBottom:'1px solid var(--border)'}}><strong style={{fontSize:'1.05rem'}}>{title}</strong><button class="btn small" onClick={onClose}>Close</button></div><div style={{padding:16}}>{children}</div></div></div>)}
 /* ------------- Pages ------------- */
 function ChatPage(){const[msgs,setMsgs]=useState([{role:'system',content:'You are Lucidia — concise and helpful.'}]);const[input,setInput]=useState('');const[speaking,setSpeaking]=useState(false);async function send(){const p=input.trim();if(!p)return;const m=[...msgs,{role:'user',content:p}];setMsgs(m);setInput('');try{const r=await apiPost('/api/llm/chat',{prompt:p});const text=r.text||JSON.stringify(r);const bot={role:'assistant',content:text};setMsgs(m2=>[...m,bot]);if(speaking&&'speechSynthesis'in window){const u=new SpeechSynthesisUtterance(text);speechSynthesis.speak(u)}}catch(e){setMsgs(m2=>[...m,{role:'assistant',content:'[LLM offline] '+e.message}])}}return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',alignItems:'center',gap:10}}><label class="chip" style={{cursor:'pointer'}}><input type="checkbox" checked={speaking} onChange={()=>setSpeaking(s=>!s)}/> Speak replies</label><button class="btn small" onClick={()=>setMsgs(msgs.slice(0,1))}>Clear</button></div><div style={{maxHeight:360,overflow:'auto',border:'1px solid var(--border)',borderRadius:12,padding:10,background:'#0b1324'}}>{msgs.map((m,i)=>(<div key={i} style={{marginBottom:10}}><div class="chip" style={{marginBottom:6}}>{m.role}</div><div style={{whiteSpace:'pre-wrap'}}>{m.content}</div></div>))}</div><textarea value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}} placeholder="Ask Lucidia…" style={{minHeight:90,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'var(--text)',padding:10}}/><div style={{display:'flex',justifyContent:'flex-end'}}><button class="btn primary" onClick={send}>Send</button></div></div>)}
+function StreamChatPage(){
+  const[msgs,setMsgs]=useState([{role:'system',content:'You are Lucidia — concise and helpful.'}]);
+  const[input,setInput]=useState('');
+  const[speaking,setSpeaking]=useState(false);
+  async function send(){
+    const p=input.trim(); if(!p) return;
+    const m=[...msgs,{role:'user',content:p}];
+    setMsgs(m); setInput('');
+    const bot={role:'assistant',content:''};
+    setMsgs([...m,bot]);
+    try{
+      await streamLLM(p,token=>{bot.content+=token; setMsgs([...m,{...bot}]);});
+      if(speaking&&'speechSynthesis'in window){const u=new SpeechSynthesisUtterance(bot.content);speechSynthesis.speak(u)}
+    }catch(e){bot.content='[LLM offline] '+e.message; setMsgs([...m,bot]);}
+  }
+  return(<div style={{display:'grid',gap:10}}>
+    <div style={{display:'flex',alignItems:'center',gap:10}}><label class="chip" style={{cursor:'pointer'}}><input type="checkbox" checked={speaking} onChange={()=>setSpeaking(s=>!s)}/> Speak replies</label><button class="btn small" onClick={()=>setMsgs(msgs.slice(0,1))}>Clear</button></div>
+    <div style={{maxHeight:360,overflow:'auto',border:'1px solid var(--border)',borderRadius:12,padding:10,background:'#0b1324'}}>{msgs.map((m,i)=>(<div key={i} style={{marginBottom:10}}><div class="chip" style={{marginBottom:6}}>{m.role}</div><div style={{whiteSpace:'pre-wrap'}}>{m.content}</div></div>))}</div>
+    <textarea value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}} placeholder="Ask Lucidia…" style={{minHeight:90,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'var(--text)',padding:10}}/>
+    <div style={{display:'flex',justifyContent:'flex-end'}}><button class="btn primary" onClick={send}>Send</button></div>
+  </div>)
+}
 function CanvasPage(){const ref=useRef(null);const[draw,setDraw]=useState(false);const[color,setColor]=useState('#FF4FD8');useEffect(()=>{const c=ref.current,ctx=c.getContext('2d');ctx.lineWidth=2;ctx.lineCap='round';let last=null;const pos=e=>{const r=c.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};const down=e=>{setDraw(true);last=pos(e)};const move=e=>{if(!draw)return;const p=pos(e);ctx.strokeStyle=color;ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();last=p};const up=()=>setDraw(false);c.addEventListener('mousedown',down);window.addEventListener('mousemove',move);window.addEventListener('mouseup',up);return()=>{c.removeEventListener('mousedown',down);window.removeEventListener('mousemove',move);window.removeEventListener('mouseup',up)}},[draw,color]);return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',gap:8}}><input type="color" value={color} onChange={e=>setColor(e.target.value)}/><button class="btn small" onClick={()=>{const ctx=ref.current.getContext('2d');ctx.clearRect(0,0,ref.current.width,ref.current.height)}}>Clear</button><div class="chip">Freehand whiteboard</div></div><canvas ref={ref} width="900" height="380" style={{width:'100%',height:380,border:'1px solid var(--border)',borderRadius:12,background:'#0b1324'}}></canvas></div>)}
 function EditorPage({onRun,onCommit,code,setCode}){return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',justify-content:'space-between'}}><strong>Editor</strong><div style={{display:'flex',gap:8}}><button class="btn small" onClick={onRun}>Run</button><button class="btn small" onClick={onCommit}>Commit</button></div></div><div onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>setCode(String(r.result));r.readAsText(f)}}><CodeEditor value={code} onChange={setCode}/></div></div>)}
 function TerminalPage({onCommand}){return <Terminal onCommand={onCommand}/>}
 function RoadViewPage({timeline,filteredTimeline,filter,setFilter,modal,setModal,itemAction,build,cpu,mem,gpu}){return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',alignItems:'center',gap:8}}><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Search timeline…" style={{flex:1,background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'var(--text)',padding:'8px 10px'}}/></div><div style={{display:'grid',gap:10}}>{filteredTimeline.map(item=><ActivityItem key={item.id} item={{...item,onAction:itemAction}} onOpen={setModal}/>)}</div><div style={{display:'grid',gap:10}}><div style={{fontWeight:700}}>Build</div><div style={{height:10,background:'#0b1324',border:'1px solid var(--border)',borderRadius:10,overflow:'hidden'}}><div style={{height:'100%',width:build+'%',background:'linear-gradient(90deg,var(--accent),var(--accent-2))',transition:'width .6s'}}></div></div><div style={{display:'grid',gap:6}}><div style={{display:'flex',justifyContent:'space-between'}}><span>CPU</span><span>{Math.round(cpu.at(-1))}%</span></div><Sparkline data={cpu} color={theme.colors.accent2}/><div style={{display:'flex',justifyContent:'space-between'}}><span>Memory</span><span>{Math.round(mem.at(-1))}%</span></div><Sparkline data={mem} color={theme.colors.accent}/><div style={{display:'flex',justifyContent:'space-between'}}><span>GPU</span><span>{Math.round(gpu.at(-1))}%</span></div><Sparkline data={gpu} color={theme.colors.accent3}/></div></div>)}
 function BackRoadPage({agents,setAgents,streamOn,setStreamOn,wallet,setWallet,notes,setNotes}){return(<div style={{display:'grid',gap:10}}><div style={{fontWeight:700}}>Agent Stack</div><div style={{display:'flex',gap:8}}>{Object.keys(agents).map(k=>(<label key={k} class="chip" style={{cursor:'pointer'}}><input type="checkbox" checked={agents[k]} onChange={()=>setAgents(a=>({...a,[k]:!a[k]}))}/> {k}</label>))}</div><label style={{display:'inline-flex',alignItems:'center',gap:8}}><input type="checkbox" checked={streamOn} onChange={()=>setStreamOn(s=>!s)}/><span>Stream</span></label><div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><div><div style={{fontWeight:700}}>Wallet</div><div class="chip">{wallet} RC</div></div><div style={{display:'flex',gap:8}}><button class="btn small" onClick={()=>setWallet(w=>(parseFloat(w)+0.1).toFixed(2))}>Stake</button><button class="btn small" onClick={()=>setWallet(w=>(Math.max(0,parseFloat(w)-0.1)).toFixed(2))}>Unstake</button></div></div><div style={{fontWeight:700}}>Session Notes</div><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Type notes…" style={{minHeight:140,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:10}}/></div>)}
 function CrudPage({kind,title,fields}){const[list,setList]=useState([]);const[loading,setLoading]=useState(true);const[modalOpen,setModalOpen]=useState(false);const[item,setItem]=useState({});const[query,setQuery]=useState('');async function load(){try{const d=await apiGet(`/api/${kind}`);setList(d)}catch{setList([])}finally{setLoading(false)}}useEffect(()=>{load()},[kind]);function edit(x){setItem(x||{});setModalOpen(true)}async function save(){const body={...item};if(item.id){await apiPut(`/api/${kind}/${item.id}`,body)}else{await apiPost(`/api/${kind}`,body)}setModalOpen(false);load()}async function del(id){if(!confirm('Delete?'))return;await apiDel(`/api/${kind}/${id}`);load()}const cols=fields.map(f=>f.name);const filtered=list.filter(r=>JSON.stringify(r).toLowerCase().includes(query.toLowerCase()));return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',justify-content:'space-between',alignItems:'center'}}><strong>{title}</strong><div style={{display:'flex',gap:8}}><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search…" style={{background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'#fff',padding:'8px 10px'}}/><button class="btn small" onClick={()=>edit({})}>New</button></div></div><div style={{overflow:'auto',border:'1px solid var(--border)',borderRadius:12}}><table style={{width:'100%',borderCollapse:'collapse'}}><thead><tr>{cols.map(c=><th key={c} style={{textAlign:'left',padding:'10px 12px',borderBottom:'1px solid var(--border)',color:'var(--muted)'}}>{c}</th>)}<th style={{padding:'10px 12px',borderBottom:'1px solid var(--border)'}}></th></tr></thead><tbody>{loading?<tr><td colSpan={cols.length+1} style={{padding:12}}>Loading…</td></tr>:filtered.map(row=>(<tr key={row.id}><>{cols.map(c=><td key={c} style={{padding:'10px 12px',borderBottom:'1px solid var(--border)'}}>{String(row[c]??'')}</td>)}</><td style={{padding:'10px 12px',borderBottom:'1px solid var(--border)'}}><button class="btn small" onClick={()=>edit(row)}>Edit</button> <button class="btn small" onClick={()=>del(row.id)}>Delete</button></td></tr>))}</tbody></table></div><Modal open={modalOpen} onClose={()=>setModalOpen(false)} title={item.id?'Edit':'New'}><div style={{display:'grid',gap:8}}>{fields.map(f=>(<div key={f.name} style={{display:'grid',gap:6}}><label style={{color:'var(--muted)'}}>{f.name}</label><input value={item[f.name]||''} onChange={e=>setItem({...item,[f.name]:e.target.value})} placeholder={f.placeholder||''} style={{background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'#fff',padding:'8px 10px'}}/></div>))}<div style={{display:'flex',gap:8,justifyContent:'flex-end',marginTop:6}}><button class="btn" onClick={()=>setModalOpen(false)}>Cancel</button><button class="btn primary" onClick={save}>Save</button></div></div></Modal></div>)}
+function S3Uploader(){
+  const [file,setFile]=useState(null);
+  const [msg,setMsg]=useState('');
+  async function upload(){
+    if(!file) return;
+    const fd=new FormData();
+    fd.append('file',file);
+    try{
+      const r=await fetch('/api/datasets/upload',{method:'POST',body:fd});
+      const j=await r.json();
+      setMsg(j.ok?'Uploaded':'Error');
+    }catch(e){setMsg('Error');}
+  }
+  return(<div style={{display:'flex',gap:8,alignItems:'center'}}><input type="file" onChange={e=>setFile(e.target.files[0])}/><button class="btn small" onClick={upload}>Upload</button>{msg && <span>{msg}</span>}</div>);
+}
+function DatasetsPage(){return(<div style={{display:'grid',gap:10}}><S3Uploader/><CrudPage kind='datasets' title='Datasets' fields={[{name:'id'},{name:'name'},{name:'source'},{name:'size'}]}/></div>);}
+function PricingPage(){return(<div><h2>Pricing</h2><p>Coming soon.</p></div>);}
+function DocsPage(){return(<div><h2>Docs</h2><p>Documentation under construction.</p></div>);}
+function StatusPage(){return(<div><h2>Status</h2><p>All systems operational.</p></div>);}
 /* ------------- Login ------------- */
 function Login({onLogin}){const[u,setU]=useState('');const[p,setP]=useState('');const[err,setErr]=useState('');async function tryLogin(){try{await apiPost('/api/login',{username:u,password:p});onLogin()}catch(e){setErr(e.message||'Login failed')}}useEffect(()=>{const h=e=>{if(e.key==='Enter')tryLogin()};window.addEventListener('keydown',h);return()=>window.removeEventListener('keydown',h)},[u,p]);return(<div style={{minHeight:'100vh',display:'grid',placeItems:'center',padding:20}}><div style={{width:'min(420px,96vw)',background:'var(--panel)',border:'1px solid var(--border)',borderRadius:20,boxShadow:theme.shadow}}><div style={{padding:22,display:'flex',alignItems:'center',gap:12}}><div class="logo" style={{width:34,height:34,borderRadius:10}}></div><div style={{fontWeight:800,fontSize:'1.1rem'}}>BlackRoad.io — Login</div></div><div style={{padding:22,paddingTop:0,display:'flex',flexDirection:'column',gap:12}}><label style={{fontSize:13,color:'var(--muted)'}}>Username</label><input value={u} onChange={e=>setU(e.target.value)} placeholder="root" style={{background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:'12px 14px'}}/><label style={{fontSize:13,color:'var(--muted)'}}>Password</label><input type="password" value={p} onChange={e=>setP(e.target.value)} placeholder="Codex2025" style={{background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:'12px 14px'}}/>{err && <div style={{color:'var(--bad)'}}>{err}</div>}<button class="btn primary" style={{marginTop:6}} onClick={tryLogin}>Enter Platform</button></div></div></div>)}
 /* ------------- App & Dashboard ------------- */
@@ -113,6 +163,7 @@ function Dashboard({route}) {
   function Main(){
     if(route==='/'||route==='/roadview') return React.createElement(RoadViewPage,{timeline,filteredTimeline,filter,setFilter,modal,setModal,itemAction:(a)=>{if(a==='Run')runCode(); if(a==='Revert')apiPost('/api/revert',{}); if(a==='Mint')apiPost('/api/wallet/mint',{})},build,cpu,mem,gpu});
     if(route==='/chat') return React.createElement(ChatPage);
+    if(route==='/chat') return React.createElement(StreamChatPage);
     if(route==='/canvas') return React.createElement(CanvasPage);
     if(route==='/editor') return React.createElement(EditorPage,{onRun:runCode,onCommit:()=>apiPost('/api/commit',{msg:'Patch from editor'}),code,setCode});
     if(route==='/terminal') return React.createElement(TerminalPage,{onCommand});
@@ -122,6 +173,12 @@ function Dashboard({route}) {
     if(route==='/datasets') return React.createElement(CrudPage,{kind:'datasets',title:'Datasets',fields:[{name:'id'},{name:'name'},{name:'source'},{name:'size'}]});
     if(route==='/models') return React.createElement(CrudPage,{kind:'models',title:'Models',fields:[{name:'id'},{name:'name'},{name:'family'},{name:'status'}]});
     if(route==='/integrations') return React.createElement(CrudPage,{kind:'integrations',title:'Integrations',fields:[{name:'id'},{name:'name'},{name:'status'},{name:'details'}]});
+    if(route==='/datasets') return React.createElement(DatasetsPage);
+    if(route==='/models') return React.createElement(CrudPage,{kind:'models',title:'Models',fields:[{name:'id'},{name:'name'},{name:'family'},{name:'status'}]});
+    if(route==='/integrations') return React.createElement(CrudPage,{kind:'integrations',title:'Integrations',fields:[{name:'id'},{name:'name'},{name:'status'},{name:'details'}]});
+    if(route==='/pricing') return React.createElement(PricingPage);
+    if(route==='/docs') return React.createElement(DocsPage);
+    if(route==='/status') return React.createElement(StatusPage);
     return React.createElement('div',null,'Unknown route ',route)
   }
   return (<Shell>
@@ -129,6 +186,7 @@ function Dashboard({route}) {
       <Brand><div className="logo"></div><div>BlackRoad.io</div></Brand>
       <NavTabs>
         {['Chat','Canvas','Editor','Terminal','RoadView','BackRoad'].map(t=>{const href='/'+t.toLowerCase();return <div key={t} onClick={()=>go(href)} className={'tab '+(route===href||(route==='/'&&href==='/roadview')?'active':'')}>{t}</div>})}
+        {['Chat','Canvas','Editor','Terminal','RoadView','BackRoad','Pricing','Docs','Status'].map(t=>{const href='/'+t.toLowerCase();return <div key={t} onClick={()=>go(href)} className={'tab '+(route===href||(route==='/'&&href==='/roadview')?'active':'')}>{t}</div>})}
       </NavTabs>
       <HeaderRight>
         <div className="chip">root</div>

@@ -3,6 +3,8 @@ import os
 import time
 from datetime import datetime
 from pathlib import Path
+import uuid
+import boto3
 
 from dotenv import load_dotenv
 from flask import (
@@ -172,6 +174,39 @@ def api_prompt():
         return err
     preset = (request.args.get("preset") or DEFAULT_PRESET).lower()
     return Response(_load_system_prompt(preset), mimetype="text/plain")
+
+
+@app.post("/api/datasets/upload")
+def api_datasets_upload():
+    err = _auth_guard()
+    if err:
+        return err
+    file = request.files.get("file")
+    if not file:
+        return ("No file", 400)
+    bucket = os.getenv("S3_BUCKET", "blackroad-datasets")
+    key = f"uploads/{uuid.uuid4()}_{file.filename}"
+    s3 = boto3.client("s3")
+    s3.upload_fileobj(file.stream, bucket, key)
+    return jsonify({"ok": True, "key": key})
+
+
+@app.get("/api/llm/stream")
+def api_llm_stream():
+    err = _auth_guard()
+    if err:
+        return err
+    prompt = request.args.get("prompt", "")
+
+    def generate():
+        for token in BACKEND.stream_chat([{ "role": "user", "content": prompt }]):
+            yield f"data: {token}\n\n"
+        yield "event: done\n\n"
+
+    resp = Response(stream_with_context(generate()), mimetype="text/event-stream")
+    resp.headers["Cache-Control"] = "no-cache"
+    resp.headers["X-Accel-Buffering"] = "no"
+    return resp
 
 
 if __name__ == "__main__":
