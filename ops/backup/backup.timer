@@ -1,0 +1,10 @@
+# <!-- FILE: /ops/backup/backup.timer -->
+[Unit]
+Description=Daily restic backup
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target

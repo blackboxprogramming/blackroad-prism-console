@@ -1,4 +1,6 @@
 name: CI
+# <!-- FILE: /srv/blackroads/elt/.github/workflows/ci.yml -->
+name: ci
 
 on:
   push:
@@ -46,4 +48,23 @@ df = pd.read_csv(path)
 missing = cols - set(df.columns)
 if missing:
     raise SystemExit(f'Missing columns: {missing}')
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r srv/blackroads/elt/pipelines/requirements.txt dbt-postgres ruff
+      - name: Lint
+        run: ruff srv/blackroads/elt
+      - name: dbt compile
+        run: dbt compile --project-dir srv/blackroads/elt/dbt --profiles-dir srv/blackroads/elt/dbt
+      - name: Validate CSV schema
+        run: |
+          python - <<'PY'
+import pandas as pd
+csv = pd.read_csv('srv/blackroads/elt/data/raw/yellow_tripdata_sample.csv')
+expected = {'VendorID', 'tpep_pickup_datetime'}
+assert expected.issubset(set(csv.columns))
+print('schema ok')
 PY

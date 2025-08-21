@@ -1,0 +1,9 @@
+# Default configuration for c-LFM demos
+seed: 0
+out_dir: opt/blackroad/lucidia/artifacts
+model:
+  latent_dim: 8
+data:
+  grid_points: 128
+training:
+  epochs: 1

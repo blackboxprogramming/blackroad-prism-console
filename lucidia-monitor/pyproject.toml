@@ -1,0 +1,21 @@
+[project]
+name = "lucidia-monitor"
+version = "0.1.0"
+description = "Self-contained monitoring and conformance suite for Lucidia and BlackRoad"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "httpx",
+    "pydantic>=2",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-xdist",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true

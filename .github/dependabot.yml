@@ -97,3 +97,156 @@ updates:
     labels:
       - 'terraform'
       - 'infrastructure'
+  - package-ecosystem: npm
+    directory: "/"
+    schedule: { interval: daily }
+    open-pull-requests-limit: 10
+    reviewers:
+      - 'your-team/maintainers'
+    assignees:
+      - 'your-username'
+    commit-message:
+      prefix: 'deps'
+      prefix-development: 'deps-dev'
+      include: 'scope'
+    labels:
+      - 'dependencies'
+      - 'auto-merge'
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+    groups:
+      production-dependencies:
+        patterns:
+          - '*'
+        exclude-patterns:
+          - '@types/*'
+          - '*eslint*'
+          - '*prettier*'
+          - '*jest*'
+          - '*test*'
+      development-dependencies:
+        patterns:
+          - '@types/*'
+          - '*eslint*'
+          - '*prettier*'
+          - '*jest*'
+          - '*test*'
+          - '*dev*'
+
+  # GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '10:00'
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'ci'
+      include: 'scope'
+    labels:
+      - 'github-actions'
+      - 'ci/cd'
+
+  # Docker
+  - package-ecosystem: 'docker'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'tuesday'
+      time: '09:00'
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'docker'
+    labels:
+      - 'docker'
+      - 'dependencies'
+
+  # Python (if applicable)
+  - package-ecosystem: 'pip'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+      time: '09:00'
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'deps'
+    labels:
+      - 'python'
+      - 'dependencies'
+
+
+  # GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '10:00'
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'ci'
+      include: 'scope'
+    labels:
+      - 'github-actions'
+      - 'ci/cd'
+
+  # Docker
+  - package-ecosystem: 'docker'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'tuesday'
+      time: '09:00'
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'docker'
+    labels:
+      - 'docker'
+      - 'dependencies'
+
+  # Python (if applicable)
+  - package-ecosystem: 'pip'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+      time: '09:00'
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'deps'
+    labels:
+      - 'python'
+      - 'dependencies'
+
+  # Terraform (if applicable)
+  - package-ecosystem: 'terraform'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'thursday'
+      time: '09:00'
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: 'terraform'
+    labels:
+      - 'terraform'
+      - 'infrastructure'
+
+  - package-ecosystem: npm
+    directory: "/sites/blackroad"
+    schedule: { interval: daily }
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: pip
+    directory: "/"
+    schedule: { interval: weekly }
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule: { interval: "weekly" }
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule: { interval: "weekly" }
+updates: []

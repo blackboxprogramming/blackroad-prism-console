@@ -9,7 +9,7 @@ tasks:
     prompt: |
       Extract the two animals mentioned in the sentence: "A cat chased a mouse around the barn."
       Return as JSON array of strings.
-    expect_keywords: [",", "[", "]"]
+    expect_keywords: [',', '[', ']']
 
   - id: steps-001
     prompt: |

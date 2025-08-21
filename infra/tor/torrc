@@ -1,0 +1,3 @@
+# <!-- FILE: /infra/tor/torrc -->
+HiddenServiceDir /var/lib/tor/lucidia/
+HiddenServicePort 80 lucidia-web:80

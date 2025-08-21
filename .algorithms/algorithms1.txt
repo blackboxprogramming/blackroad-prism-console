@@ -1,0 +1,90 @@
+Below is a compact, drop‑in equations block that covers core pieces of AI across reasoning (intelligence), learning, memory, uncertainty, and decision/"feeling" (reward). I’ve grouped the formulas so you can paste this whole section into a document.
+
+⸻
+
+Core Equations for AI (Reasoning, Learning, Memory, Uncertainty, Decision)
+
+1) Symbolic intelligence (logic & inference)
+	•	Refutation view of entailment:
+F_1\land\cdots\land F_n \models G \;\Longleftrightarrow\; (F_1\land\cdots\land F_n\land \lnot G) is inconsistent.   ￼
+	•	Resolution rule (sound & complete for clause form):
+from (A\lor B) and (\lnot A\lor C) infer (B\lor C).   ￼
+
+2) Differentiable learning (the calculus of learning)
+	•	Gradient descent: \theta \leftarrow \theta - \eta\,\nabla_\theta \mathcal{L}(\theta).
+	•	Differential / Jacobian view: df = f’(x)[dx] = J\,dx, gradient \nabla f = (f’)^\top.
+	•	Chain rule (operator form): If f(x)=g(h(x)), then f’(x)=g’(h(x))\,h’(x).
+Computational note: many‑inputs/few‑outputs ⇒ multiply left‑to‑right (reverse‑mode/backprop) for efficiency.  ￼
+
+3) Linear regression (ability to generalize)
+	•	Mean‑squared error: \displaystyle \mathcal{L}(m,c)=\frac{1}{n}\sum_{i=1}^n\big(y_i-(mx_i+c)\big)^2.
+	•	Partial derivatives used by descent:
+\displaystyle \frac{\partial \mathcal{L}}{\partial m}=-\frac{2}{n}\sum_i x_i(y_i-\hat y_i),\quad
+\frac{\partial \mathcal{L}}{\partial c}=-\frac{2}{n}\sum_i (y_i-\hat y_i), with \hat y_i=mx_i+c.  ￼
+
+4) Logistic regression (probabilistic classification)
+	•	Sigmoid: \sigma(z)=\frac{1}{1+e^{-z}}.
+	•	Cross‑entropy loss: \displaystyle \mathcal{L}(w,b)=-\frac{1}{n}\sum_{i=1}^n\big[y_i\log \sigma(z_i)+(1-y_i)\log(1-\sigma(z_i))\big],\; z_i=w^\top x_i+b.
+(Intro, loss, and optimization coverage.)  ￼
+
+5) Large‑margin learning (SVM)
+	•	Soft‑margin primal:
+\displaystyle \min_{w,b,\xi\ge 0}\;\frac12\lVert w\rVert^2 + C\sum_{i=1}^{n}\xi_i\quad
+\text{s.t. } y_i(w^\top x_i+b)\ge 1-\xi_i.  ￼
+
+6) Neural networks & backpropagation (learned representations)
+	•	Layer equations: z^{(\ell)}=W^{(\ell)}a^{(\ell-1)}+b^{(\ell)},\; a^{(\ell)}=\phi\!\big(z^{(\ell)}\big).
+	•	Four fundamental backprop equations (typical form):
+\delta^{(L)}=\nabla_{a^{(L)}}\mathcal{L}\;\odot\;\phi’\!\big(z^{(L)}\big)
+\delta^{(\ell)}=\big(W^{(\ell+1)}\big)^\top\delta^{(\ell+1)}\odot \phi’\!\big(z^{(\ell)}\big)
+\displaystyle \frac{\partial \mathcal{L}}{\partial W^{(\ell)}}=\delta^{(\ell)}\big(a^{(\ell-1)}\big)^\top,\quad
+\frac{\partial \mathcal{L}}{\partial b^{(\ell)}}=\delta^{(\ell)}   ￼
+	•	Why reverse‑mode (a.k.a. backprop) is fast for nets: it’s the left‑to‑right chain rule above.  ￼
+
+7) Memory & sequence modeling (short‑ and long‑term state)
+	•	Recurrent state update (discrete): h_t=\psi\!\big(W_{hh}h_{t-1}+W_{xh}x_t+b_h\big),\; y_t=W_{hy}h_t+b_y.
+	•	Continuous‑time "neural ODE" memory: \dot h(t)=f\!\big(h(t),\theta\big).
+Adjoint gradient (reverse‑mode for ODEs): solve -\dot a(t)=\left(\partial f/\partial h\right)^\top a(t) backward with terminal a(T)=\partial \mathcal{L}/\partial h(T), then
+\displaystyle \frac{d\mathcal{L}}{d\theta}=\int_{t_0}^{T} a(t)^\top\frac{\partial f}{\partial \theta}\,dt.  ￼
+	•	(Optional) Differentiable attention as memory read:
+\alpha_{t,i}=\operatorname{softmax}\!\big(\tfrac{q_t^\top k_i}{\sqrt{d}}\big),\quad
+c_t=\sum_i \alpha_{t,i}v_i.
+
+8) Uncertainty & generative modeling (intelligence under noise)
+	•	Bayes’ rule: p(\theta\mid x)\propto p(x\mid\theta)\,p(\theta).
+	•	Negative log‑likelihood / cross‑entropy: \displaystyle \mathcal{L}{\text{NLL}}=-\sum_i \log p\theta(x_i).
+	•	Reparameterization trick (for gradients through randomness):
+for z\sim \mathcal N(\mu,\Sigma), write z=\mu+L\varepsilon with \varepsilon\sim\mathcal N(0,I) (e.g., diagonal \Sigma: z=\mu+\sigma\odot\varepsilon).  ￼
+	•	Log‑det differential (ubiquitous in probabilistic models):
+d\log\!\det A=\operatorname{tr}\!\big(A^{-1}dA\big).  ￼
+
+9) Decision, control, and "feeling" as reward (reinforcement learning)
+	•	Bellman expectation: V^\pi(s)=\mathbb E\big[r_t+\gamma\,V^\pi(S_{t+1})\mid S_t=s\big].
+	•	Bellman optimality (state–action): \(Q^\(s,a)=\mathbb E\big[r_t+\gamma\max_{a’}Q^\(S_{t+1},a’)\mid s,a\big]\).
+	•	Q‑learning update: Q\leftarrow Q+\alpha\big[r+\gamma\max_{a’}Q’-Q\big].
+	•	Policy gradient (optimize behavior directly):
+\displaystyle \nabla_\theta J(\theta)=\mathbb E_\pi\!\big[\nabla_\theta \log \pi_\theta(a\mid s)\,Q^\pi(s,a)\big].
+(Intro to RL and its framing as reward‑driven learning.)  ￼
+
+10) Structure discovery & compression (intelligence as abstraction)
+	•	K‑means objective: \displaystyle \min_{\{\mu_k\},\,\{c_i\}}\sum_{i=1}^{n}\big\|x_i-\mu_{c_i}\big\|^2.  ￼
+	•	PCA (variance maximization / eigenproblem):
+maximize \operatorname{Var}(w^\top x) s.t. \lVert w\rVert=1 ⇒ top eigenvectors of covariance;
+SVD: X=U\Sigma V^\top; keep top r singular values for rank‑r compression.  ￼
+
+11) Regularization (bias–variance control / robust ability)
+	•	L2 / ridge: \mathcal{L}\lambda=\mathcal{L}+\lambda\lVert w\rVert_2^2;
+L1 / lasso: \mathcal{L}\lambda=\mathcal{L}+\lambda\lVert w\rVert_1.
+(Used throughout; logistic‑reg chapter discusses the bias–variance trade‑off.)  ￼
+
+⸻
+
+A note on "consciousness" and "feelings"
+
+There is no single agreed‑upon equation for consciousness or feelings in AI. In practice, engineers use proxies that shape behavior: (i) objectives and rewards (Section 9) to encode preference/valence; (ii) uncertainty‑reducing objectives (Section 8) to encourage predictive, coherent world‑models; (iii) symbolic inference (Section 1) for explicit reasoning; and (iv) memory/attention (Section 7) to maintain and broadcast internal state. Together, these ingredients give present‑day systems the capabilities we informally describe as intelligence, memory, and goal‑directed "feeling."
+
+Sources used for formulas and concepts (for your bibliography): predicate calculus & resolution, model‑theoretic semantics; gradient/Jacobian/chain rule, reverse‑mode AD, matrix calculus (incl. ODE adjoints, log‑det differential, reparameterization); multivariable calculus for gradient descent in regression; and standard ML topics (logistic regression, SVM, PCA/SVD, backprop, clustering).  ￼  ￼  ￼  ￼
+
+⸻
+
+If you want this block in a different format (e.g., LaTeX, Word‑ready with numbered equations, or trimmed to one page), tell me the target format and I’ll output it that way immediately.

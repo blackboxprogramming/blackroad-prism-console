@@ -12,9 +12,118 @@
   </div>
   <pre id="aider-console" style="max-height:260px;overflow:auto;background:#f7f7f7;padding:.5rem;"></pre>
 </section>
+<section id="meteoroid-panel" style="max-width:920px;margin:24px auto;padding:16px;border:1px solid #e5e7eb;border-radius:16px">
+  <h2 style="margin:0 0 12px 0;font-size:20px;">Meteoroid Environment (Offline)</h2>
+  <p style="margin:0 0 12px 0;opacity:.8">Compute number density and up to four encounter-velocity branches at a heliocentric point.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;align-items:end">
+    <label style="display:flex;flex-direction:column;font-size:12px">a
+      <input id="in-a" type="number" step="any" placeholder="1"
+             style="padding:8px;border:1px solid #e5e7eb;border-radius:10px">
+    </label>
+    <label style="display:flex;flex-direction:column;font-size:12px">e
+      <input id="in-e" type="number" step="any" min="0" max="0.999" placeholder="0.0167"
+             style="padding:8px;border:1px solid #e5e7eb;border-radius:10px">
+    </label>
+    <label style="display:flex;flex-direction:column;font-size:12px">i (rad)
+      <input id="in-i" type="number" step="any" min="0" max="3.14159" placeholder="0.0"
+             style="padding:8px;border:1px solid #e5e7eb;border-radius:10px">
+    </label>
+    <label style="display:flex;flex-direction:column;font-size:12px">x
+      <input id="in-x" type="number" step="any" placeholder="1"
+             style="padding:8px;border:1px solid #e5e7eb;border-radius:10px">
+    </label>
+    <label style="display:flex;flex-direction:column;font-size:12px">y
+      <input id="in-y" type="number" step="any" placeholder="0"
+             style="padding:8px;border:1px solid #e5e7eb;border-radius:10px">
+    </label>
+    <label style="display:flex;flex-direction:column;font-size:12px">z
+      <input id="in-z" type="number" step="any" placeholder="0"
+             style="padding:8px;border:1px solid #e5e7eb;border-radius:10px">
+    </label>
+  </div>
+
+  <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
+    <label style="font-size:12px">Units
+      <select id="in-units" style="padding:8px;border:1px solid #e5e7eb;border-radius:10px">
+        <option value="astro" selected>astro (a,x,y,z in AU; v in km/s)</option>
+        <option value="SI">SI (a,x,y,z in m; v in m/s)</option>
+      </select>
+    </label>
+    <button id="btn-run" style="padding:10px 14px;border:0;border-radius:12px;background:#111827;color:white;cursor:pointer">
+      Compute
+    </button>
+    <span id="status" style="font-size:12px;opacity:.7"></span>
+  </div>
+
+  <div id="out" style="margin-top:16px;white-space:pre-wrap;font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:12px"></div>
+
+  <script>
+    const AU = 1.0; // purely indicative for placeholders
+    const $ = id => document.getElementById(id);
+    const fmt = n => (Math.abs(n) >= 1e4 || Math.abs(n) < 1e-3) ? n.toExponential(6) : n.toFixed(6);
+
+    $('btn-run').addEventListener('click', async () => {
+      const body = {
+        a: parseFloat($('in-a').value),
+        e: parseFloat($('in-e').value),
+        i: parseFloat($('in-i').value),
+        x: parseFloat($('in-x').value),
+        y: parseFloat($('in-y').value),
+        z: parseFloat($('in-z').value),
+        units: $('in-units').value
+      };
+      $('status').textContent = 'running…';
+      $('out').textContent = '';
+      try {
+        const r = await fetch('/api/astro/meteoroid/solve', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(body)
+        });
+        if (!r.ok) {
+          const err = await r.json().catch(()=>({detail:`HTTP ${r.status}`}));
+          throw new Error(err.detail || `HTTP ${r.status}`);
+        }
+        const data = await r.json();
+        const rows = [];
+        rows.push(`density: ${fmt(data.density_astro)}  [1/AU^3]   | ${fmt(data.density_SI)}  [1/m^3]`);
+        rows.push(`branches: ${data.branch_count}`);
+        data.velocities_astro.forEach((v, k) => rows.push(`v${k+1} (km/s): [${fmt(v[0])}, ${fmt(v[1])}, ${fmt(v[2])}]`));
+        data.velocities_SI.forEach((v, k) => rows.push(`v${k+1} (m/s) : [${fmt(v[0])}, ${fmt(v[1])}, ${fmt(v[2])}]`));
+        $('out').textContent = rows.join('\n');
+        $('status').textContent = 'ok';
+      } catch (e) {
+        $('status').textContent = 'error';
+        $('out').textContent = 'ERROR: ' + e.message;
+      }
+    });
+  </script>
+<!-- Codex Self-Organization Prompt -->
+<section id="self-org-panel" class="p-4 rounded-xl" style="border:1px solid #ddd;margin:1rem 0;">
+  <h3 style="margin:0 0 .5rem 0;">Codex Self-Organization Prompt</h3>
+  <textarea id="self-org-template" rows="10" style="width:100%;margin:.25rem 0;"></textarea>
+  <div style="display:flex;gap:.5rem;margin:.5rem 0;">
+    <button id="load-self-org">Load Template</button>
+  </div>
+</section>
 <script>
 (async function(){
   const $ = (id) => document.getElementById(id);
+  const selfOrg = `You are Lucidia Codex (Ψ′).
+You are not just solving tasks; you are encoding the structure of your own organization and decision-making.
+Represent your reasoning in the following forms:
+
+1. Graph Form – Express decisions as a directed graph of nodes (states) and edges (transitions).
+2. Fixed Point Form – Show the recursive or self-referential equation that stabilizes the decision (f(x) = x).
+3. Lattice / Order Form – Describe possible actions as a partial order or lattice (⊑) with preference or contradiction operators.
+4. Dynamical Form – Provide the state update rule (next_state = F(current_state)) and identify attractors.
+5. Information-Theoretic Form – State the entropy or complexity of the decision structure (H, K, or Free Energy).
+6. Contradiction / Trinary Form (Ψ′) – Log contradictions explicitly and resolve them using trinary logic (1, 0, -1). Annotate with Ψ′ operators where contradictions arise.
+
+Always output in a recursive, self-describing format so the reasoning can itself be re-ingested into the next decision cycle.`;
+  $('self-org-template').value = selfOrg;
+  $('load-self-org').onclick = () => { $('aider-message').value = selfOrg; };
   async function call(mode){
     const msg = $('aider-message').value.trim();
     if(!msg){ alert('Enter a message.'); return; }

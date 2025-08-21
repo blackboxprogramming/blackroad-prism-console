@@ -1,16 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { chatOllama, type Msg } from "@/lib/providers/ollama";
 import { codexInfinityPrompt } from "@/lib/prompts/codex-infinity";
-import { searchFiles } from "@/lib/tools/files";
+import { searchFiles, readFile } from "@/lib/tools/files";
 
 type Mode = "machine" | "chit-chat";
-interface In { messages: { role: "user" | "assistant"; content: string }[]; mode?: Mode; }
+interface In {
+  messages: { role: "user" | "assistant"; content: string }[];
+  mode?: Mode;
+  prompt?: string;
+}
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, mode: modeIn }: In = await req.json();
+    const body: In = await req.json();
+    let { messages, mode: modeIn, prompt } = body;
+    if (!messages && typeof prompt === "string") {
+      messages = [{ role: "user", content: prompt }];
+    }
     let mode: Mode = (modeIn || (process.env.DEFAULT_MODE as Mode) || "machine");
     const last = messages?.at(-1)?.content ?? "";
     if (/chit\s*chat\s*cadillac/i.test(last)) mode = "chit-chat";
@@ -29,6 +37,10 @@ export async function POST(req: NextRequest) {
       if (name === "files.search") {
         const q = String(args.query || "");
         toolResult = { ok: true, hits: searchFiles(q) };
+      } else if (name === "files.read") {
+        const p = String(args.path || "");
+        const text = readFile(p);
+        toolResult = text != null ? { ok: true, path: p, text } : { ok: false, error: "file not found" };
       } else {
         toolResult = { ok: false, error: `unknown tool: ${name}` };
       }
@@ -53,4 +65,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
-function tryJson(s: string) { try { return JSON.parse(s); } catch { return null; } }
+function tryJson(s: string) {
+  try {
+    return JSON.parse(s);
+  } catch {
+    return null;
+  }
+}
+

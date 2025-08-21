@@ -39,9 +39,30 @@ def build_env(cfg):
 
 
 def tokenize_url(url: str, token: str):
-    # Convert https://host/org/repo.git -> https://TOKEN@host/org/repo.git
-    if not url.startswith("https://"):
+    """Return a token-authenticated HTTPS URL.
+
+    If ``token`` is empty or ``None`` the original ``url`` is returned
+    unchanged.  This guards against creating URLs with an empty username
+    portion such as ``https://@github.com/...`` which Git would reject.
+
+    Parameters
+    ----------
+    url: str
+        The repository URL.
+    token: str
+        Personal access token to embed in the URL.
+
+    Returns
+    -------
+    str
+        URL with the token embedded for HTTPS, or the original URL when
+        token authentication is not applicable.
+    """
+
+    # Only HTTPS URLs can be tokenized; others (e.g. SSH) are returned as-is.
+    if not url.startswith("https://") or not token:
         return url
+
     parts = url.split("https://", 1)[1]
     return f"https://{token}@{parts}"
 
