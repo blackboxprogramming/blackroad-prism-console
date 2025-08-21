@@ -13,6 +13,8 @@ const app = express();
 const PORT = process.env.PORT || 8088;
 const API_ROOT = process.env.API_ROOT || '/var/www/blackroad/api';
 const HEALTH_FILE = path.join(API_ROOT, 'health.json');
+const API_ROOT = process.env.API_ROOT || "/var/www/blackroad/api";
+const HEALTH_FILE = path.join(API_ROOT, "health.json");
 
 // simple cache-control for JSON
 app.use((_req, res, next) => {
@@ -28,6 +30,11 @@ app.get('/api/health', (_req, res) => {
     version: 'v3.0.0',
     commit: process.env.COMMIT_SHA || 'unknown',
     ts: new Date().toISOString(),
+    status: "ok",
+    app: "quantum-v3",
+    version: "v3.0.0",
+    commit: process.env.COMMIT_SHA || "unknown",
+    ts: new Date().toISOString()
   };
   try {
     if (fs.existsSync(HEALTH_FILE)) {
@@ -36,6 +43,10 @@ app.get('/api/health', (_req, res) => {
     }
   } catch (e) {
     body.status = 'degraded';
+      body = { ...file, status: "ok" };
+    }
+  } catch (e) {
+    body.status = "degraded";
     body.error = String(e?.message || e);
   }
   res.json(body);
