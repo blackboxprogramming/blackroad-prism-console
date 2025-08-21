@@ -1,0 +1,27 @@
+name: Feature Flags (reusable)
+on:
+  workflow_call:
+    outputs:
+      ai_tools:
+        description: "ai_tools flag"
+        value: ${{ jobs.flags.outputs.ai_tools }}
+      security_scans:
+        description: "security_scans flag"
+        value: ${{ jobs.flags.outputs.security_scans }}
+      heavy_linters:
+        description: "heavy_linters flag"
+        value: ${{ jobs.flags.outputs.heavy_linters }}
+jobs:
+  flags:
+    runs-on: ubuntu-latest
+    outputs:
+      ai_tools: ${{ steps.read.outputs.ai_tools }}
+      security_scans: ${{ steps.read.outputs.security_scans }}
+      heavy_linters: ${{ steps.read.outputs.heavy_linters }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - id: read
+        run: |
+          node .github/tools/read-flags.js >> $GITHUB_OUTPUT

@@ -10,6 +10,12 @@ import tempfile
 import whisper
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+api_key = os.getenv("OPENAI_API_KEY")
+if api_key:
+    client = OpenAI(api_key=api_key)
+else:
+    client = None
+    st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
 
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")
@@ -38,6 +44,10 @@ else:
 
 if user_input:
     try:
+        if not client:
+            st.error("OpenAI API key not set.")
+            raise RuntimeError("missing api key")
+
         st.session_state.chat_history.append({"role": "user", "content": user_input})
 
         # GPT response with full history
@@ -76,7 +86,8 @@ if user_input:
         plt.close(fig)
 
     except Exception as e:
-        st.error(f"Error: {e}")
+        if str(e) != "missing api key":
+            st.error(f"Error: {e}")
 
 st.markdown("---")
 st.markdown("**BlackRoad Prism Console** | Live UI Simulation")

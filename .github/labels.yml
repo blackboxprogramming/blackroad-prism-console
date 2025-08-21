@@ -1,0 +1,35 @@
+- name: frontend
+  color: "1d76db"
+  description: "UI, React, TS/JS, styles"
+
+- name: backend
+  color: "0e8a16"
+  description: "API, services, Python/Go"
+
+- name: docs
+  color: "5319e7"
+  description: "Documentation and guides"
+
+- name: tests
+  color: "b60205"
+  description: "Test code and fixtures"
+
+- name: prompts
+  color: "fbca04"
+  description: "LLM prompts & Codex"
+
+- name: templates
+  color: "c2e0c6"
+  description: "Scaffolds & templates"
+
+- name: devops
+  color: "0052cc"
+  description: "CI/CD, config, tooling"
+
+- name: security
+  color: "d93f0b"
+  description: "Security, policies, secrets"
+
+- name: site-assets
+  color: "5319e7"
+  description: "Static site assets"
