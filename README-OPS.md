@@ -28,3 +28,12 @@ bash scripts/bootstrap-site.sh
   - `site-build.yml` builds & uploads site artifact.
   - `site-e2e.yml` runs Playwright tests.
   - Optional Pages deploy is wired; swap to NGINX/Caddy deployment as desired.
+
+## Watchdog
+
+Install & enable the periodic watchdog to validate API, NGINX config, and site root. Auto-restarts the API if unhealthy.
+
+```bash
+sudo bash scripts/install-watchdog.sh
+journalctl -u blackroad-watchdog.service -n 50 --no-pager
+```
