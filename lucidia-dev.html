@@ -1,0 +1,34 @@
+<!-- FILE: /var/www/blackroad/lucidia-dev.html -->
+<!-- Aider Control Panel -->
+<section id="aider-panel" class="p-4 rounded-xl" style="border:1px solid #ddd;margin:1rem 0;">
+  <h3 style="margin:0 0 .5rem 0;">Aider: Repo-Aware Edits</h3>
+  <label>Message</label>
+  <textarea id="aider-message" rows="4" style="width:100%;margin:.25rem 0;"></textarea>
+  <label>Files (optional, space-separated)</label>
+  <input id="aider-files" placeholder="e.g., src/app.js package.json" style="width:100%;margin:.25rem 0;">
+  <div style="display:flex;gap:.5rem;margin:.5rem 0;">
+    <button id="aider-run">Edit with Aider</button>
+    <button id="aider-ask">Ask about code</button>
+  </div>
+  <pre id="aider-console" style="max-height:260px;overflow:auto;background:#f7f7f7;padding:.5rem;"></pre>
+</section>
+<script>
+(async function(){
+  const $ = (id) => document.getElementById(id);
+  async function call(mode){
+    const msg = $('aider-message').value.trim();
+    if(!msg){ alert('Enter a message.'); return; }
+    const files = $('aider-files').value.trim();
+    const body = {
+      message: msg,
+      mode,
+      files: files ? files.split(/\s+/) : []
+    };
+    const res = await fetch('/api/aider', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const data = await res.json();
+    $('aider-console').textContent = (data.console || JSON.stringify(data,null,2));
+  }
+  $('aider-run').onclick = () => call('code');
+  $('aider-ask').onclick = () => call('ask');
+})();
+</script>

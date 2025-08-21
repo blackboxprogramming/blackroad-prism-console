@@ -1,0 +1,24 @@
+{
+  "funnels": [
+    {
+      "name": "Signup",
+      "description": "Homepage CTA → Portal open → Account created",
+      "windowDays": 14,
+      "steps": [
+        { "id": "cta_click" },
+        { "id": "portal_open" },
+        { "id": "signup_success" }
+      ]
+    },
+    {
+      "name": "MathLab Explore",
+      "description": "Visited MathLab → Ran Geodesic → Saved Snapshot",
+      "windowDays": 7,
+      "steps": [
+        { "id": "math_view" },
+        { "id": "geodesic_run" },
+        { "id": "snapshot_save" }
+      ]
+    }
+  ]
+}

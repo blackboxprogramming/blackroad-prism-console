@@ -1,0 +1,22 @@
+vpt_repo_dir: /opt/blackroad/vpt/Video-Pre-Training
+python_bin: /opt/blackroad/vpt/.venv/bin/python
+
+models_dir: /opt/blackroad/vpt/models
+weights_dir: /opt/blackroad/vpt/weights
+
+# Set your preferred defaults (replace with actual filenames you place in the dirs above)
+default_model: foundation-1x.model
+default_weights: foundation-1x.weights
+
+logs_dir: /var/blackroad/logs/lucidia/vpt
+runtime_dir: /opt/blackroad/vpt/runtime
+
+# Headless run (xvfb) if your server has no display
+headless: true
+xvfb_bin: /usr/bin/xvfb-run
+
+# Token auth for the API
+token_file: /opt/blackroad/vpt/.token
+
+# Optional: tweak MineRL env from the repo’s scripts (usually set inside run_agent.py)
+minerl_env: MineRLTreechop-v0

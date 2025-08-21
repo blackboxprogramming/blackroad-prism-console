@@ -1,0 +1,30 @@
+name: Lucidia CI
+on:
+  pull_request:
+    branches: ["*"]
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+
+concurrency:
+  group: lucidia-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ❗️ Your real build/test steps go here
+      - run: echo "Run Lucidia build/tests here"
+
+      - name: Main Branch Check (local)
+        uses: ./.github/actions/main-branch-check
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          main_branch: main
+          recency_days: 7
+

@@ -1,0 +1,22 @@
+name: Super-Linter (flag-aware)
+on:
+  pull_request:
+  workflow_dispatch:
+permissions: { contents: read, statuses: write }
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read flags
+        id: flags
+        run: |
+          heavy=$(grep -E '^heavy_linters:' .github/feature-flags.yml | awk '{print $2}')
+          echo "heavy=${heavy:-false}" >> $GITHUB_OUTPUT
+      - name: Run Super-Linter (advisory if not heavy)
+        uses: super-linter/super-linter@v7
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_ALL_CODEBASE: false
+        continue-on-error: ${{ steps.flags.outputs.heavy != 'true' }}

@@ -1,0 +1,10 @@
+{
+  "news": [
+    {
+      "id": "example-draft",
+      "title": "Example draft item",
+      "body": "This is a draft news item.",
+      "published": false
+    }
+  ]
+}

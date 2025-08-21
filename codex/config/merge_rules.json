@@ -1,9 +1,9 @@
 {
-  "strategy": "rebase",           // "rebase" or "merge"
-  "fast_forward_only": false,     // true = only FF; never rebase/merge
+  "strategy": "rebase", // "rebase" or "merge"
+  "fast_forward_only": false, // true = only FF; never rebase/merge
   "push_retries": 5,
   "push_backoff_sec": 2,
   "signoff": true,
   "work_branch_prefix": "codex/merge",
-  "create_pr_on_conflict": false  // (optional GitHub API; not enabled by default)
+  "create_pr_on_conflict": false // (optional GitHub API; not enabled by default)
 }

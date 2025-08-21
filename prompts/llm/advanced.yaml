@@ -1,0 +1,16 @@
+# Tougher tasks (advisory)
+tasks:
+  - id: classify-001
+    prompt: |
+      Classify the sentence "This product is absolutely fantastic!" as POSITIVE or NEGATIVE and explain briefly.
+    expect_keywords: [positive]
+
+  - id: function-001
+    prompt: |
+      I have an object with fields: name, age, email. Produce a JSON Schema draft-07 for it.
+    expect_keywords: [properties, type, object]
+
+  - id: plan-001
+    prompt: |
+      Write a 5-item bullet plan to refactor a legacy JS file for readability.
+    expect_keywords: [bullet, refactor]

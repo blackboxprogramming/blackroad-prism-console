@@ -1,0 +1,74 @@
+{
+  "$id": "https://blackroad.io/data/requests/schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Lucidia Request for Research (LRfR)",
+  "type": "object",
+  "required": ["id", "title", "problem", "acceptance_criteria", "agent", "status", "created_at"],
+  "properties": {
+    "version": { "type": "string" },
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]+$" },
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
+    "problem": { "type": "string" },
+    "constraints": { "type": "string" },
+    "acceptance_criteria": { "type": "array", "items": { "type": "string" } },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "agent": { "type": "string" },
+    "difficulty": { "type": "string", "enum": ["starter", "intermediate", "advanced", "frontier"] },
+    "status": { "type": "string", "enum": ["open", "in_progress", "review", "done", "archived"] },
+    "bounty": {
+      "type": "object",
+      "properties": {
+        "roadcoin": { "type": "number" },
+        "usd": { "type": "number" },
+        "escrow_tx": { "type": "string" }
+      }
+    },
+    "owner": {
+      "type": "object",
+      "properties": { "name": { "type": "string" }, "contact": { "type": "string" } }
+    },
+    "machine_decomposition": {
+      "type": "object",
+      "properties": {
+        "tasks": { "type": "array", "items": { "type": "string" } },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "datasets": { "type": "array", "items": { "type": "string" } },
+        "interfaces": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "thread": {
+      "description": "Agent/human discussion log",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ts": { "type": "string" },
+          "role": {
+            "type": "string",
+            "enum": [
+              "human",
+              "guardian",
+              "roadie",
+              "truth",
+              "contradiction",
+              "quantum",
+              "emotional",
+              "system"
+            ]
+          },
+          "content": { "type": "string" }
+        }
+      }
+    },
+    "created_at": { "type": "string" },
+    "updated_at": { "type": "string" },
+    "signing": {
+      "type": "object",
+      "properties": {
+        "algorithm": { "type": "string" },
+        "signature": { "type": "string" }
+      }
+    }
+  }
+}

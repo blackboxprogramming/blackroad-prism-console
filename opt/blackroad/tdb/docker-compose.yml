@@ -1,0 +1,91 @@
+version: "3.9"
+
+name: blackroad-tdb
+
+services:
+  tdb-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: tdb-server
+    env_file:
+      - .env
+    environment:
+      # All-local, offline-first Hugging Face
+      - HF_HOME=/models
+      - HF_HUB_ENABLE_HF_TRANSFER=1
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0}
+      # Model to introspect (gpt2-small is well-supported by TDB)
+      - TDB_MODEL_NAME=${TDB_MODEL_NAME:-gpt2-small}
+      # Server port
+      - TDB_PORT=${TDB_PORT:-7000}
+    volumes:
+      - ./data/models:/models
+      - ./data/cache:/root/.cache/huggingface
+      - ./vendor/transformer-debugger:/app/transformer-debugger:ro
+    working_dir: /app/transformer-debugger
+    command: >
+      bash -lc "python neuron_explainer/activation_server/main.py
+      --model_name ${TDB_MODEL_NAME}
+      --port ${TDB_PORT}"
+    expose:
+      - "${TDB_PORT}"
+    ports:
+      - "127.0.0.1:${TDB_PORT}:${TDB_PORT}"
+    profiles: ["cpu"]
+
+  tdb-server-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.server.gpu
+    container_name: tdb-server-gpu
+    env_file:
+      - .env
+    environment:
+      - HF_HOME=/models
+      - HF_HUB_ENABLE_HF_TRANSFER=1
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-0}
+      - TDB_MODEL_NAME=${TDB_MODEL_NAME:-gpt2-small}
+      - TDB_PORT=${TDB_PORT:-7000}
+    volumes:
+      - ./data/models:/models
+      - ./data/cache:/root/.cache/huggingface
+      - ./vendor/transformer-debugger:/app/transformer-debugger:ro
+    working_dir: /app/transformer-debugger
+    command: >
+      bash -lc "python neuron_explainer/activation_server/main.py
+      --model_name ${TDB_MODEL_NAME}
+      --port ${TDB_PORT}"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]
+    gpus: all
+    expose:
+      - "${TDB_PORT}"
+    ports:
+      - "127.0.0.1:${TDB_PORT}:${TDB_PORT}"
+    profiles: ["gpu"]
+
+  tdb-viewer:
+    build:
+      context: .
+      dockerfile: Dockerfile.viewer
+    container_name: tdb-viewer
+    environment:
+      # We’ll serve the viewer at /tdb via Nginx; viewer still runs on 1234 internally
+      - PORT=1234
+    volumes:
+      - ./vendor/transformer-debugger/neuron_viewer:/app/neuron_viewer:ro
+    working_dir: /app/neuron_viewer
+    command: >
+      bash -lc "npm ci && npm run start"
+    expose:
+      - "1234"
+    ports:
+      - "127.0.0.1:1234:1234"
+
+# Notes
+# • Viewer default path and TDB route are as in the repo (/gpt2-small/tdb_alpha). You’ll access them through Nginx under /tdb/....
+# • Activation Server is launched via the repo entrypoint and takes --model_name and --port. (The README shows running “gpt2-small” with a port flag.)

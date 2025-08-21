@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  job-applier:
+    build:
+      context: /opt/blackroad/services/job_applier
+    image: blackroad/job-applier:latest
+    container_name: job-applier
+    restart: unless-stopped
+    environment:
+      - PORT=9301
+      - JOB_APPLIER_DATA_DIR=/data
+      - JOB_APPLIER_LOG_DIR=/logs
+      - AIHAWK_REPO_URL=https://github.com/feder-cr/Jobs_Applier_AI_Agent_AIHawk
+      - AIHAWK_BRANCH=main
+      - AIHAWK_DIR=/opt/aih/aih
+      # Set this to actually invoke AIHawk; example placeholders:
+      # - AIHAWK_RUN_CMD=python {AIHAWK_DIR}/main.py --collect --input {RUN_DIR}/jobs.txt --dry {DRY_RUN}
+      - AIHAWK_RUN_CMD=python {AIHAWK_DIR}/main.py --collect --input {RUN_DIR}/jobs.txt --dry {DRY_RUN}
+      - AIHAWK_DRY_RUN=true
+    volumes:
+      - job_applier_data:/data
+      - job_applier_logs:/logs
+    ports:
+      - "9301:9301"
+volumes:
+  job_applier_data:
+  job_applier_logs:
