@@ -178,5 +178,12 @@ site-blackroad-build:
 site-blackroad-caddy:
 	docker compose -f docker-compose.site.yml up -d
 
-site-blackroad-up: site-blackroad-build site-blackroad-caddy
-	@echo "Site running at http://localhost:8080"
+.PHONY: nginx-ensure nginx-health tls
+nginx-ensure:
+	bash scripts/nginx-ensure-and-health.sh
+
+nginx-health:
+	bash scripts/nginx-ensure-and-health.sh
+
+tls:
+	bash scripts/nginx-enable-tls.sh blackroad.io you@example.com
