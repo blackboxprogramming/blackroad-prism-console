@@ -1,0 +1,65 @@
+{
+  "name": "lucidia_vpt_tools",
+  "version": "1.0",
+  "description": "Local tools for controlling VPT (Video Pre-Training) via HTTP. No external AI dependencies.",
+  "base_url": "http://127.0.0.1:8188",
+  "auth": {
+    "type": "bearer",
+    "header": "Authorization",
+    "prefix": "Bearer ",
+    "token_file": "/opt/blackroad/vpt/.token"
+  },
+  "functions": [
+    {
+      "name": "agent_status",
+      "method": "GET",
+      "path": "/agent/status",
+      "args_schema": { "type": "object", "properties": {}, "required": [] },
+      "returns": { "type": "object" }
+    },
+    {
+      "name": "agent_start",
+      "method": "POST",
+      "path": "/agent/start",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "model": { "type": "string", "description": "Model filename or absolute path" },
+          "weights": { "type": "string", "description": "Weights filename or absolute path" },
+          "minerl_env": { "type": "string", "default": "MineRLTreechop-v0" },
+          "headless": { "type": "boolean", "default": true },
+          "extra_args": { "type": "string", "description": "Extra CLI args for run_agent.py" }
+        },
+        "required": []
+      },
+      "returns": { "type": "object" }
+    },
+    {
+      "name": "agent_stop",
+      "method": "POST",
+      "path": "/agent/stop",
+      "args_schema": {
+        "type": "object",
+        "properties": { "pid": { "type": "integer" } },
+        "required": []
+      },
+      "returns": { "type": "object" }
+    },
+    {
+      "name": "idm_predict",
+      "method": "POST",
+      "path": "/idm/predict",
+      "args_schema": {
+        "type": "object",
+        "properties": {
+          "idm_model": { "type": "string" },
+          "idm_weights": { "type": "string" },
+          "video_path": { "type": "string" },
+          "jsonl_path": { "type": "string" }
+        },
+        "required": ["idm_model", "idm_weights"]
+      },
+      "returns": { "type": "object" }
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+-w /etc/passwd -p wa -k identity
+-w /etc/group -p wa -k identity
+-w /var/log/auth.log -p wa -k auth

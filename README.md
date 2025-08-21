@@ -1,86 +1,43 @@
-# BlackRoad Prism Console
+![Build](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/monorepo-matrix.yml/badge.svg) ![E2E](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/playwright.yml/badge.svg) ![Deploy](https://github.com/blackboxprogramming/blackroad-prism-console/actions/workflows/deploy-blackroad.yml/badge.svg)
+# BlackRoad.io Portal — Full‑Stack Scaffold
 
-This repository powers the BlackRoad Prism console and a Vite/React site under `sites/blackroad`.
+A production‑ready scaffold for the BlackRoad‑style portal you described. Includes:
 
-## Quickstart
+- **Frontend**: React + Vite + Tailwind, dark UI, Timeline/Tasks/Commits tabs, Agent Stack with live charts, Wallet (RC), Contradictions, Session Notes, and Run/Revert/Mint actions.
+- **Backend**: Express + Socket.IO, JWT auth, endpoints for timeline/tasks/commits/agents/wallet/notes, and real‑time system metrics. Optional guarded shell execution.
 
-Install dependencies:
+## Quick Start
 
+### 1) Backend
 ```bash
-npm ci
-(cd sites/blackroad && npm i --package-lock-only)
-```
-
-## Development
-
-```bash
-cd sites/blackroad
+cd backend
+cp .env.example .env
+npm install
 npm run dev
+# server at http://localhost:4000
 ```
 
-## Build
-
+### 2) Frontend
 ```bash
-cd sites/blackroad
-npm run build
+cd ../frontend
+npm install
+npm run dev
+# app at http://localhost:5173
 ```
 
-## Tests
+### 3) Login
+Use **username** `root` and **password** `Codex2025`.
 
-```bash
-npm test
-```
+### Configure
+- `backend/.env` — set `JWT_SECRET`, `CORS_ORIGIN` (comma‑separated origins), and `ALLOW_SHELL` (defaults to `false`).
+- Change the API base by setting `VITE_API_BASE` in `frontend` (defaults to `http://localhost:4000`).
 
-Additional operational docs live in the [`docs/`](docs) folder.
+### Deploy Notes
+- Put backend behind Nginx (reverse proxy) with TLS.
+- Build frontend: `npm run build` → serve `dist/` via Nginx or the backend as static assets.
+- Replace in‑memory store with Postgres/Redis when ready.
+- Wire real agents to `/api/actions/*` and stream richer events over Socket.IO.
 
-## Experiments & Funnels
+---
 
-### Flip experiments (ChatOps)
-Comment on any PR/Issue:
-
-```
-/exp set <id> active on|off weights A=<num> B=<num>
-```
-
-This edits `sites/blackroad/public/experiments.json`, commits, and pushes.
-
-### Manage funnels (ChatOps)
-
-```
-/funnel set "Signup" window 14 steps cta_click,portal_open,signup_success
-```
-
-This edits `sites/blackroad/public/funnels.json`.
-
-### Experiments dashboard
-- Visit **/experiments** to preview experiments and generate the exact ChatOps command.
-
-### Per-variant lift
-- Conversions automatically include your A/B assignments (cookie `br_ab`) in `meta.ab`.
-- **/metrics** shows A vs B counts and naïve rates per conversion id, plus **lift**.
-
-### Funnels analytics
-- Configure `public/funnels.json`. **/metrics** computes per-step counts, step rate, and cumulative rate (last 30 days).
-- For very high volumes, move aggregation to the Worker/Durable Objects.
-
-### Quick use
-
-Flip an experiment:
-
-```
-/exp set new_nav active on weights A=0.4 B=0.6
-```
-
-Add a funnel:
-
-```
-/funnel set "Docs Journey" window 10 steps home_view,docs_view,docs_search,docs_copy_snippet
-```
-
-Record extra conversions from code:
-
-```ts
-import { recordConversion } from '@/lib/convert'
-recordConversion('portal_open')
-recordConversion('signup_success', 1, { plan: 'pro' })
-```
+This scaffold is intentionally clean and compact so you can drop in your own logic fast.

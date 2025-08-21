@@ -1,51 +1,75 @@
+import js from "@eslint/js";
+import prettier from "eslint-config-prettier";
+module.exports = [
+  {
+    ignores: ["node_modules/**"],
+  },
+  {
+    files: ["**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      ecmaVersion: 2021,
+      sourceType: "module",
+    },
+    rules: {},
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
 
 export default [
   {
     ignores: [
-      'node_modules/',
-      'dist/',
-      'build/',
-      '.github/',
-      '.tools/',
-      '**/*.ts',
-      '**/*.tsx',
-    ],
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      ".github/**",
+      ".tools/**"
+    ]
   },
+  { ignores: ['node_modules/', 'dist/', 'build/', '.github/', '.tools/', '**/*.ts'] },
+  js.configs.recommended,
+  prettier,
   {
-    files: ['**/*.{js,jsx,mjs,cjs}'],
-    ...js.configs.recommended,
-  },
-  {
-    files: ['**/*.{js,jsx,mjs,cjs}'],
-    ...prettier,
-  },
-  {
-    files: ['**/*.{js,jsx,mjs,cjs}'],
     languageOptions: {
-      parserOptions: {
-        ecmaFeatures: { jsx: true },
-      },
+      ecmaVersion: "latest",
+      sourceType: "module",
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      globals: { console: "readonly", process: "readonly" }
+    },
+      parserOptions: { ecmaVersion: "latest", sourceType: "module", ecmaFeatures: { jsx: true } }
+    },
+    ignores: ["node_modules/", "dist/", "build/", ".github/", ".tools/"],
+    rules: {
+      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "no-undef": "warn"
+    }
+  }
+    ignores: ["node_modules/**"],
+  },
+  js.configs.recommended,
+  prettier,
+module.exports = [
+  {
+    ignores: ["node_modules/**"],
+  },
+  {
+    files: ["**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      ecmaVersion: 2021,
+      sourceType: "module",
+    },
+    rules: {},
       globals: {
-        navigator: 'readonly',
-        window: 'readonly',
-        document: 'readonly',
-        fetch: 'readonly',
-        location: 'readonly',
-        console: 'readonly',
-        Event: 'readonly',
-        URL: 'readonly',
-        alert: 'readonly',
-        setTimeout: 'readonly',
+        process: "readonly",
+        console: "readonly",
+        require: "readonly",
+        danger: "readonly",
+        message: "readonly",
+        warn: "readonly",
       },
     },
+    ignores: ["node_modules/", "dist/", "build/", ".github/", ".tools/"],
     rules: {
-      'no-unused-vars': [
-        'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_|^[A-Z]' },
-      ],
-      'no-undef': 'warn',
+      "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+      "no-undef": "warn",
     },
   },
 ];

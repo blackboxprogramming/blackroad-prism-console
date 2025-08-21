@@ -1,0 +1,31 @@
+bot:
+  name: "BlackRoad Codex Liaison"
+  default_backend: "lucidia"   # options: lucidia, ollama
+  thread_close_after_messages: 80
+  max_context_messages: 24
+  temperature: 0.4
+  max_tokens: 512
+
+permissions:
+  allowed_server_ids:
+    - 123456789012345678   # replace with your guild IDs
+
+lucidia:
+  base_url_env: "LUCIDIA_BASE_URL"
+  route: "/api/codex/chat"     # adjust to your API path
+  timeout_seconds: 120
+
+ollama:
+  base_url_env: "OLLAMA_BASE_URL"
+  model: "llama3.1:8b-instruct"
+  timeout_seconds: 120
+
+moderation:
+  # Simple, local heuristics (no external calls)
+  blocklist:
+    - "(?i)how to make.*explosive"
+    - "(?i)credit card.*generator"
+    - "(?i)violent threat"
+  redact_pii_patterns:
+    - "(?i)\\b\\d{3}-\\d{2}-\\d{4}\\b"   # SSN-like
+  action: "soft"   # soft = warn + continue; hard = refuse

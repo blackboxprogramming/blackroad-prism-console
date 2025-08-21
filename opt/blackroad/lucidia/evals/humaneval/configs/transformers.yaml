@@ -1,0 +1,16 @@
+name: "lucidia-hf-offline"
+backend: "transformers"
+backend_params:
+  model_name_or_path: "/models/CodeLlama-7b-Instruct"  # local path only
+  device: "auto"
+  max_tokens: 256
+  temperature: 0.2
+  top_p: 0.95
+  stop: ["\n\n\n", "\n# End", "\nif __name__ == '__main__':"]
+sampling:
+  n_samples_per_task: 10
+  tasks: "all"
+prompt:
+  template_path: "prompts/codex_prompt.txt"
+paths:
+  output_dir: "outputs"

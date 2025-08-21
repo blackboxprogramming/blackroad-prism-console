@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>BlackRoad • SymPy Compute</title>
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; }
+    textarea { width: 100%; height: 6rem; }
+    .out { border: 1px solid #ddd; padding: 1rem; border-radius: .75rem; margin-top: 1rem; }
+    img.plot { max-width: 100%; height: auto; display: block; margin-top: .5rem; }
+  </style>
+</head>
+<body>
+  <h1>SymPy Compute (Local)</h1>
+  <p>Type an expression (e.g., <code>sin(x)^2 + cos(x)^2</code>, <code>solve x^2-2x-3</code>)</p>
+  <textarea id="expr" placeholder="compute: integral of exp(-x^2) from 0 to 1  OR  sin(x)^2 + cos(x)^2"></textarea>
+  <label><input id="plot" type="checkbox"> Plot</label>
+  <button id="run">Run</button>
+  <div class="out" id="out"></div>
+
+  <script>
+  const run = async () => {
+    const t = document.getElementById('expr').value.trim();
+    const plot = document.getElementById('plot').checked;
+    // very light intent parsing
+    const lower = t.toLowerCase();
+    const req = {
+      expr: t.replace(/^compute:\s*/i,''),
+      vars: ["x"],
+      do: ["simplify","diff","integrate","series","solve","numeric"],
+      series_order: 6,
+      plot: plot
+    };
+    if (lower.startsWith('solve ')) {
+      req.expr = t.replace(/^solve\s+/i,'');
+      req.target_eq_zero = true;
+      req.do = ["simplify","solve"];
+    }
+    const r = await fetch('/api/sympy/compute', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(req)
+    });
+    const data = await r.json();
+    const el = document.getElementById('out');
+    const img = data.plot_png_b64 ? `<img class="plot" src="data:image/png;base64,${data.plot_png_b64}" />` : '';
+    el.innerHTML = `
+      <div><b>Input</b>: $$${data.expr_latex||''}$$</div>
+      ${data.simplify_latex ? `<div><b>Simplified</b>: $$${data.simplify_latex}$$</div>`:''}
+      ${data.derivative_latex ? `<div><b>Derivative</b>: $$${data.derivative_latex}$$</div>`:''}
+      ${data.integral_latex ? `<div><b>Integral</b>: $$${data.integral_latex}$$</div>`:''}
+      ${data.series_latex ? `<div><b>Series</b>: $$${data.series_latex}$$</div>`:''}
+      ${data.roots_latex && data.roots_latex.length ? `<div><b>Solutions</b>: $$${data.roots_latex.join(", ")}$$</div>`:''}
+      ${typeof data.numeric === 'number' ? `<div><b>Numeric</b>: ${data.numeric}</div>`:''}
+      ${img}
+    `;
+    if (window.MathJax) MathJax.typesetPromise();
+  };
+  document.getElementById('run').addEventListener('click', run);
+  </script>
+</body>
+</html>

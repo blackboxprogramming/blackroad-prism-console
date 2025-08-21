@@ -1,0 +1,14 @@
+torch
+torchvision
+fastapi
+uvicorn[standard]
+pydantic>=2
+numpy
+pillow
+tqdm
+pyyaml
+einops
+# Optional for multi-GPU training in the repo's scripts:
+mpi4py
+# OPTIONAL text -> class helpers (kept neutral; no OpenAI deps)
+regex

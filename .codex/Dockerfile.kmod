@@ -1,0 +1,7 @@
+FROM ghcr.io/blackroad/kmod-build:latest
+
+# Build NVIDIA open kernel modules inside reproducible environment
+WORKDIR /workspace
+COPY . /workspace
+
+CMD ["bash"]

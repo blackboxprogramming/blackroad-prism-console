@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+pydantic>=2
+pyyaml
+requests
+tenacity
+psutil
+numpy
+opencv-python
+aiofiles
+watchfiles

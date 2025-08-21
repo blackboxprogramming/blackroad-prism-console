@@ -1,0 +1,14 @@
+# <!-- FILE: /apps/lucidia/systemd/lucidia-agents.service -->
+[Unit]
+Description=Lucidia Agents
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+WatchdogSec=30
+ExecStart=/usr/local/bin/docker compose -f /srv/blackroad/stack/docker-compose.yml up -d lucidia-agents
+ExecStop=/usr/local/bin/docker compose -f /srv/blackroad/stack/docker-compose.yml stop lucidia-agents
+
+[Install]
+WantedBy=multi-user.target

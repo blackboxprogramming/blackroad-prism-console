@@ -54,7 +54,12 @@ def recent_audits(limit=200):
 
 def parse_github_owner_repo(origin_url: str):
     # Supports ssh: git@github.com:owner/repo.git  or https: https://github.com/owner/repo.git
-    m = re.search(r"github\.com[:/](?P<owner>[^/]+)/(?P<repo>[^\.]+)", origin_url)
+    # Original regex failed to handle repository names containing periods
+    # because `[^\.]` excluded them entirely. This meant URLs such as
+    # `git@github.com:owner/re.po.git` would incorrectly parse the repo name
+    # as ``re``. Allow any characters up to the next slash and strip an
+    # optional trailing `.git` to properly support dots in names.
+    m = re.search(r"github\.com[:/](?P<owner>[^/]+)/(?P<repo>[^/]+?)(?:\.git)?$", origin_url)
     if not m:
         return None, None
     return m.group("owner"), m.group("repo")

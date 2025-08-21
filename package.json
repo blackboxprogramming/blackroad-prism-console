@@ -1,38 +1,10 @@
 {
-  "name": "blackroad-monorepo",
+  "name": "blackroad-prism-console",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "dependencies": {
-    "fast-json-stable-stringify": "^2.1.0",
-    "prom-client": "^15.0.0",
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "eslint": "^9.9.0",
-    "eslint-config-prettier": "^9.1.0",
-    "husky": "^9.1.5",
-    "lint-staged": "^15.2.8",
-    "prettier": "^3.3.3",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.5.4",
-    "@types/node": "^20.11.30"
-  },
   "scripts": {
-    "format": "prettier -w .",
-    "lint:js": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:js:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
-    "typecheck": "tsc -p . || true",
-    "prepare": "husky",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.mjs,.cjs || true",
-    "test": "node tests/smoke.test.js",
-    "dev": "npm --prefix sites/blackroad run dev",
-    "build": "npm --prefix sites/blackroad run build",
-    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
-  },
-  "lint-staged": {
-    "**/*.{js,mjs,cjs,html,css,md,yml,yaml,json}": [
-      "prettier -w"
-    ]
+    "build:lucidia-create": "npx tsc -p packages/lucidia-create/tsconfig.json",
+    "test": "npm run build:lucidia-create && node tests/smoke.test.js && node --test tests/*.mjs"
   }
 }
