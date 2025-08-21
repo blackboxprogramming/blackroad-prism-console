@@ -14,9 +14,7 @@ pnpm-debug.log*
 Thumbs.db
 
 # Artifacts
-artifacts/*
-!artifacts/review/
-!artifacts/review/**
+artifacts/
 coverage/
 
 # Project-specific

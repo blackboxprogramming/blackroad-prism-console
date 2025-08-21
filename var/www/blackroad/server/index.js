@@ -16,4 +16,8 @@ app.post('/api/term/propose', term.propose);
 app.post('/api/term/approve', term.approve);
 
 const PORT = process.env.PORT || 9000;
-app.listen(PORT, ()=> console.log(`[lucidia-dev] server listening on :${PORT}`));
+app.listen(
+  PORT,
+  '0.0.0.0',
+  () => console.log(`[lucidia-dev] server listening on 0.0.0.0:${PORT}`)
+);
