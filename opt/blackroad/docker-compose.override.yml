@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  sympy-gamma:
+    build: ./services/sympy_gamma
+    container_name: sympy-gamma
+    environment:
+      - DEBUG=True
+    ports:
+      - "18080:8080"   # map container :8080 -> host :18080
+    restart: unless-stopped
+
+  sympy-api:
+    build: ./services/sympy_api
+    container_name: sympy-api
+    ports:
+      - "18081:8000"   # map container :8000 -> host :18081
+    restart: unless-stopped
+
