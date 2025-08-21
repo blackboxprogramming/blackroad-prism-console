@@ -3,6 +3,8 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
 permissions:
   contents: write
   pull-requests: write
@@ -15,3 +17,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           config-file: .github/release-please-config.json
           manifest-file: .github/.release-please-manifest.json
+          release-type: simple
+          bump-minor-pre-major: true
+          changelog-types: '[{"type":"feat","section":"Features"},{"type":"fix","section":"Bug Fixes"},{"type":"chore","section":"Chores","hidden":false}]'

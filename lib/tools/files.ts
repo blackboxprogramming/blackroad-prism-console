@@ -41,6 +41,13 @@ export function searchFiles(query: string, limit = 4) {
   return scores.filter(s => s.score > 0).sort((a, b) => b.score - a.score).slice(0, limit);
 }
 
+export function readFile(relPath: string): string | null {
+  const full = path.resolve(ROOT, relPath);
+  if (!full.startsWith(ROOT)) return null;
+  if (!fs.existsSync(full) || !fs.statSync(full).isFile()) return null;
+  return fs.readFileSync(full, "utf8");
+}
+
 function tokenize(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9\s]+/g, " ").split(/\s+/).filter(Boolean);
 }

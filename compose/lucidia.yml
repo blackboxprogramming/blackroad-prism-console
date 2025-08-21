@@ -1,0 +1,9 @@
+version: '3'
+services:
+  lucidia:
+    build: ../lucidia
+    image: registry.internal:5000/lucidia:latest
+    ports:
+      - "8080:8080"
+    env_file:
+      - ../lucidia/lucidia.env

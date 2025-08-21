@@ -1,0 +1,11 @@
+labels:
+  - label: 'docs'
+    files:
+      - '**/*.md'
+      - 'docs/**'
+  - label: 'site'
+    files:
+      - 'sites/blackroad/**'
+  - label: 'ci'
+    files:
+      - '.github/workflows/**'

@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import pino from 'pino';
+import process from 'node:process';
 
 const log = pino();
 const app = express();
@@ -22,6 +23,7 @@ app.get('/', (_req, res) => {
     name: 'lucidia-cognitive-system',
     status: 'online',
     logic: ['binary', 'trinary', '42-state'],
+    logic: ['binary', 'trinary', '42-state']
   });
 });
 

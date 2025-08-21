@@ -1,0 +1,57 @@
+# /opt/blackroad/lucidia/docker-compose.yml
+version: "3.9"
+services:
+  lucidia_api:
+    image: registry:5000/lucidia_api:latest
+    environment:
+      DATABASE_URL: postgresql://lucidia:lucidiapass@data-postgres:5432/lucidia
+      MINIO_URL: http://data-minio:9000
+      KEYCLOAK_URL: http://iam-keycloak:8080/realms/BlackRoad
+      VAULT_ADDR: http://vault:8200
+    depends_on:
+      - data-postgres
+      - data-minio
+      - iam-keycloak
+      - vault
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    read_only: true
+  agents_gateway:
+    image: registry:5000/agents_gateway:latest
+    depends_on:
+      - lucidia_api
+    restart: unless-stopped
+    read_only: true
+  codex_api:
+    image: registry:5000/codex_api:latest
+    environment:
+      OPENAI_ENDPOINT: http://models-openai:8000/v1
+    depends_on:
+      - models-openai
+    restart: unless-stopped
+    read_only: true
+  guardian:
+    image: registry:5000/guardian:latest
+    restart: unless-stopped
+    read_only: true
+  roadchain:
+    image: registry:5000/roadchain:latest
+    restart: unless-stopped
+    read_only: true
+  roadcoin:
+    image: registry:5000/roadcoin:latest
+    restart: unless-stopped
+    read_only: true
+  web_frontend:
+    image: registry:5000/web_frontend:latest
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    read_only: true
+networks:
+  default:
+    name: blackroad

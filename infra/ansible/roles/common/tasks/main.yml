@@ -1,0 +1,4 @@
+---
+- name: Base system preparation placeholder
+  debug:
+    msg: "Common baseline tasks would run here"

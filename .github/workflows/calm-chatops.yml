@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-      BOT_USER:  ${{ secrets.BOT_USER || 'blackroad-bot' }}
+      BOT_USER: ${{ secrets.BOT_USER || 'blackroad-bot' }}
       OLLAMA_URL: ${{ secrets.OLLAMA_URL }}
       OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL || 'llama3.1:8b' }}
       AI_ENABLED: ${{ needs.flags.outputs.ai_tools }}

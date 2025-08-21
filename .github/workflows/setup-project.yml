@@ -1,6 +1,6 @@
 name: Ensure Repo Project
 on:
-  push: { branches: [ main ] }
+  push: { branches: [main] }
   workflow_dispatch:
 permissions:
   repository-projects: write
@@ -32,4 +32,3 @@ jobs:
                 throw e;
               }
             }
-

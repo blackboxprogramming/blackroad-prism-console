@@ -11,4 +11,8 @@ app.use('/api/music', musicRouter);
 app.use('/media', express.static(MUSIC_DIR));
 
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => console.log(`[server] listening on :${PORT}`));
+app.listen(
+  PORT,
+  '0.0.0.0',
+  () => console.log(`[server] listening on 0.0.0.0:${PORT}`)
+);

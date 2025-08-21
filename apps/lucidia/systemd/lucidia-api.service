@@ -1,0 +1,14 @@
+# <!-- FILE: /apps/lucidia/systemd/lucidia-api.service -->
+[Unit]
+Description=Lucidia API
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+WatchdogSec=30
+ExecStart=/usr/local/bin/docker compose -f /srv/blackroad/stack/docker-compose.yml up -d lucidia-api
+ExecStop=/usr/local/bin/docker compose -f /srv/blackroad/stack/docker-compose.yml stop lucidia-api
+
+[Install]
+WantedBy=multi-user.target
