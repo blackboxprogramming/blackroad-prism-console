@@ -822,7 +822,7 @@ export class M2MNode {
       estimatedTime: 30_000,
       successProbability: 0.85,
       parameters: { cpuThrottling: true, processOptimization: true },
-      rollbackPlan: 'revert-tuning',
+      rollbackPlan: 'manual-review',
     }));
     // HIGH_MEMORY -> MEMORY_CLEANUP
     this.registry.register('HIGH_MEMORY', (_issue) => ({
