@@ -30,3 +30,5 @@
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.35);
 }
 
+/* Accessibly-visible focus ring for keyboard users */
+:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(16,185,129,.35); }
