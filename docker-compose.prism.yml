@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  api:
+    image: node:20-alpine
+    container_name: blackroad-api
+    working_dir: /app
+    restart: unless-stopped
+    environment:
+      - PORT=4000
+      - NODE_ENV=production
+    volumes:
+      - ./services/api:/app:ro
+    command: ["node", "server.mjs"]
+    ports:
+      - "4000:4000"
+
+  site:
+    image: caddy:2.8-alpine
+    container_name: blackroad-site
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./sites/blackroad/dist:/srv:ro
+      - ./sites/blackroad/Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - api

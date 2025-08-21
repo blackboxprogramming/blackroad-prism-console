@@ -1,5 +1,51 @@
-:8080
-root * /srv
-encode zstd gzip
-file_server
-try_files {path} /index.html
+{
+    auto_https off
+}
+
+:8080 {
+    root * /srv
+    encode zstd gzip
+
+    handle /api/health {
+        file_server
+    }
+
+    handle_path /api/* {
+        reverse_proxy 127.0.0.1:4000
+    }
+
+    handle_path /ws* {
+        reverse_proxy 127.0.0.1:4000 {
+            header_up Connection {>Connection}
+            header_up Upgrade {>Upgrade}
+        }
+    }
+
+    # Single Page App fallback (keeps /portal, /status working client-side)
+    try_files {path} /index.html
+    file_server
+}
+
+# Production (enable when deployed with TLS)
+blackroad.io, www.blackroad.io {
+    root * /srv
+    encode zstd gzip
+
+    handle /api/health {
+        file_server
+    }
+
+    handle_path /api/* {
+        reverse_proxy 127.0.0.1:4000
+    }
+
+    handle_path /ws* {
+        reverse_proxy 127.0.0.1:4000 {
+            header_up Connection {>Connection}
+            header_up Upgrade {>Upgrade}
+        }
+    }
+
+    try_files {path} /index.html
+    file_server
+}
