@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>/</loc></url>
-  <url><loc>/docs</loc></url>
-  <url><loc>/status</loc></url>
-  <url><loc>/snapshot</loc></url>
-  <url><loc>/portal</loc></url>
-  <url><loc>/playground</loc></url>
-  <url><loc>/contact</loc></url>
-  <url><loc>/tutorials</loc></url>
-  <url><loc>/roadmap</loc></url>
-  <url><loc>/changelog</loc></url>
-  <url><loc>/blog</loc></url>
+  <url><loc>https://blackroad.io/</loc></url>
+  <url><loc>https://blackroad.io/status</loc></url>
+  <url><loc>https://blackroad.io/portal</loc></url>
+  <url><loc>https://blackroad.io/docs</loc></url>
+  <url><loc>https://blackroad.io/portal/roadbook</loc></url>
+  <url><loc>https://blackroad.io/portal/roadview</loc></url>
+  <url><loc>https://blackroad.io/portal/lucidia</loc></url>
+  <url><loc>https://blackroad.io/portal/roadcode</loc></url>
+  <url><loc>https://blackroad.io/portal/roadcoin</loc></url>
+  <url><loc>https://blackroad.io/portal/roadchain</loc></url>
+  <url><loc>https://blackroad.io/portal/radius</loc></url>
 </urlset>
