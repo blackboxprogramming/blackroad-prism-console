@@ -1,0 +1,35 @@
+[Unit]
+Description=Lucidia LLM (FastAPI + Uvicorn) on 127.0.0.1:8000
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/lucidia-llm
+# Optional environment overrides (safe if missing)
+EnvironmentFile=-/etc/default/lucidia-llm
+
+# Defaults (override in /etc/default/lucidia-llm)
+Environment=HOST=127.0.0.1
+Environment=PORT=8000
+# Default tiny model for reliability; override MODEL_ID in /etc/default/lucidia-llm
+Environment=MODEL_ID=sshleifer/tiny-gpt2
+Environment=HF_HOME=/srv/lucidia-llm/hf-cache
+Environment=TRANSFORMERS_CACHE=/srv/lucidia-llm/hf-cache
+Environment=HF_DATASETS_CACHE=/srv/lucidia-llm/hf-cache
+Environment=TOKENIZERS_PARALLELISM=false
+Environment=OMP_NUM_THREADS=1
+
+# Ensure cache dir exists
+ExecStartPre=/usr/bin/mkdir -p /srv/lucidia-llm/hf-cache
+
+# Launch via bash so env vars in ExecStart are honored
+ExecStart=/usr/bin/env bash -lc 'uvicorn app:app --host "${HOST:-127.0.0.1}" --port "${PORT:-8000}" --workers "${WORKERS:-1}" --timeout-keep-alive 65'
+
+Restart=always
+RestartSec=2
+UMask=0022
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
