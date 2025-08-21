@@ -170,3 +170,44 @@ sbom: ; bash scripts/review.sh --sbom
 lock: ; bash scripts/review.sh --lock
 gen: ; python scripts/ai_codegen.py --task "$(t)"
 docs: ; python scripts/ai_docs.py --from-diff
+
+.PHONY: site-blackroad-build site-blackroad-caddy site-blackroad-up
+site-blackroad-build:
+	cd sites/blackroad && npm run build
+
+site-blackroad-caddy:
+	docker compose -f docker-compose.site.yml up -d
+
+site-blackroad-up: site-blackroad-build site-blackroad-caddy
+	@echo "Site running at http://localhost:8080"
+
+.PHONY: nginx-ensure nginx-health tls
+nginx-ensure:
+	bash scripts/nginx-ensure-and-health.sh
+
+nginx-health:
+	bash scripts/nginx-ensure-and-health.sh
+
+tls:
+	bash scripts/nginx-enable-tls.sh blackroad.io you@example.com
+
+.PHONY: api-dev api-up api-logs site-up-all
+api-dev:
+	cd services/api && npm i && npm run dev
+
+api-up:
+	docker compose -f docker-compose.prism.yml up -d api
+
+api-logs:
+	docker compose -f docker-compose.prism.yml logs -f api
+
+site-up-all:
+	docker compose -f docker-compose.prism.yml up -d
+# BlackRoad site helpers
+.PHONY: site-blackroad-dev site-blackroad-build site-blackroad-preview
+site-blackroad-dev:
+	cd sites/blackroad && npm i && npm run dev
+site-blackroad-build:
+	cd sites/blackroad && npm ci && npm run build
+site-blackroad-preview:
+	cd sites/blackroad && npm run preview

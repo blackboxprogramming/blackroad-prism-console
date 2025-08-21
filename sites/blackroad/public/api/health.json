@@ -1,0 +1,4 @@
+{
+  "status": "ok",
+  "message": "dev health stub (served from /public). In production, NGINX proxies /api to the backend."
+}
