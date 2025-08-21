@@ -11,16 +11,22 @@ const portals = [
 ];
 
 function Status() {
-  const [state, setState] = useState({ ok: null, error: null });
+  const [state, setState] = useState({ ok: null, error: null, info: '' });
 
   useEffect(() => {
     let canceled = false;
     (async () => {
       try {
         const res = await fetch('/api/health.json', { cache: 'no-store' });
-        if (!canceled) setState({ ok: res.ok, error: null });
+        const text = await res.text();
+        let info = '';
+        try {
+          const json = JSON.parse(text);
+          info = `${json.service || ''} • ${json.time || ''}`;
+        } catch {}
+        if (!canceled) setState({ ok: res.ok, error: null, info });
       } catch (e) {
-        if (!canceled) setState({ ok: false, error: String(e) });
+        if (!canceled) setState({ ok: false, error: String(e), info: '' });
       }
     })();
     return () => {
@@ -42,6 +48,7 @@ function Status() {
   return (
     <p className={`mt-3 text-sm ${tone}`}>
       {label}
+      {state.info && <span className="ml-2 text-neutral-400">{state.info}</span>}
       {state.error && <span className="ml-2">{state.error}</span>}
     </p>
   );

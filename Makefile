@@ -190,3 +190,16 @@ nginx-health:
 
 tls:
 	bash scripts/nginx-enable-tls.sh blackroad.io you@example.com
+
+.PHONY: api-dev api-up api-logs site-up-all
+api-dev:
+	cd services/api && npm i && npm run dev
+
+api-up:
+	docker compose -f docker-compose.prism.yml up -d api
+
+api-logs:
+	docker compose -f docker-compose.prism.yml logs -f api
+
+site-up-all:
+	docker compose -f docker-compose.prism.yml up -d
