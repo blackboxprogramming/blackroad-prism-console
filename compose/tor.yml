@@ -1,0 +1,9 @@
+version: '3'
+services:
+  tor:
+    image: alpine:3.19
+    command: ["tor"]
+    volumes:
+      - /var/lib/tor:/var/lib/tor
+    ports:
+      - "9050:9050"

@@ -1,0 +1,13 @@
+# Lucidia Peer-Review policy configuration
+complexity:
+  python: "C"  # radon grade threshold
+  typescript: "B"
+coverage:
+  diff: 80  # percent
+licenses:
+  allowed:
+    - Apache-2.0
+    - MIT
+    - BSD-3-Clause
+secrets:
+  allowlist: []

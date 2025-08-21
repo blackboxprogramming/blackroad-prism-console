@@ -1,0 +1,11 @@
+[package]
+name = "lucidia-geodesy-ffi"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "lucidgeo_ffi"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[dependencies]
+lucidia-geodesy = { path = "../lucidia-geodesy" }

@@ -1,0 +1,15 @@
+[package]
+name = "presence_core"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+bevy = { version = "0.13", default-features = false, features = ["bevy_winit", "x11"] }
+wgpu = "0.19"
+bevy_egui = "0.24"
+rapier3d = { version = "0.26", features = ["dim3", "simd-stable"] }
+serde = { version = "1", features = ["derive"] }
+
+[lib]
+path = "src/lib.rs"

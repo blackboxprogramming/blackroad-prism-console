@@ -1,0 +1,9 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "py-lucidgeo"
+version = "0.1.0"
+description = "Python bindings for lucidia-geodesy"
+authors = [{name="Lucidia"}]

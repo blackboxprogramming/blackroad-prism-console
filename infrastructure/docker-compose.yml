@@ -1,0 +1,141 @@
+version: '3.8'
+services:
+  nginx:
+    image: nginx:1.25.3
+    restart: unless-stopped
+    volumes:
+      - ./nginx/blackroad.conf:/etc/nginx/conf.d/blackroad.conf:ro
+      - ../app/ui:/usr/share/nginx/html:ro
+    ports:
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - keycloak
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.3
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+  vault:
+    image: hashicorp/vault:1.15.2
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root
+    ports:
+      - '8200:8200'
+  verdaccio:
+    image: verdaccio/verdaccio:5.29.0
+    volumes:
+      - verdaccio-data:/verdaccio/storage
+      - verdaccio-conf:/verdaccio/conf
+    ports:
+      - '4873:4873'
+  devpi:
+    image: devpi/devpi:6.10.0
+    volumes:
+      - devpi-data:/data
+    ports:
+      - '3141:3141'
+  registry:
+    image: registry:2.8.2
+    volumes:
+      - registry-data:/var/lib/registry
+    ports:
+      - '5000:5000'
+  aptmirror:
+    image: sameersbn/apt-cacher-ng:3.7-3
+    ports:
+      - '3142:3142'
+    volumes:
+      - aptcache-data:/var/cache/apt-cacher-ng
+  grafana:
+    image: grafana/grafana:10.4.2
+    depends_on:
+      - prometheus
+      - loki
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - '3000:3000'
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    volumes:
+      - prometheus-data:/prometheus
+    ports:
+      - '9090:9090'
+  loki:
+    image: grafana/loki:3.0.0
+    ports:
+      - '3100:3100'
+    volumes:
+      - loki-data:/loki
+  promtail:
+    image: grafana/promtail:3.0.0
+    volumes:
+      - /var/log:/var/log
+    depends_on:
+      - loki
+  ollama:
+    image: ollama/ollama:0.1.32
+    volumes:
+      - ollama-data:/root/.ollama
+    ports:
+      - '11434:11434'
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: blackroad
+      POSTGRES_PASSWORD: blackroad
+      POSTGRES_DB: lucidia
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+  minio:
+    image: minio/minio:RELEASE.2024-06-13T19-20-08Z
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio-data:/data
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+  stepca:
+    image: smallstep/step-ca:0.26.3
+    environment:
+      STEPPATH: /home/step
+    volumes:
+      - step-data:/home/step
+    ports:
+      - '9002:9000'
+  wireguard:
+    image: lscr.io/linuxserver/wireguard:1.0.20210914
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    volumes:
+      - ./wireguard:/config
+    ports:
+      - '51820:51820/udp'
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+volumes:
+  keycloak-data:
+  verdaccio-data:
+  verdaccio-conf:
+  devpi-data:
+  registry-data:
+  aptcache-data:
+  grafana-data:
+  prometheus-data:
+  loki-data:
+  ollama-data:
+  pg-data:
+  minio-data:
+  step-data:

@@ -1,0 +1,16 @@
+python:
+  - fastapi==0.110.0
+  - uvicorn==0.29.0
+  - requests==2.31.0
+npm:
+  - name: next
+    version: 14.2.5
+  - name: react
+    version: 18.2.0
+docker:
+  - nginx:1.25.3
+  - postgres:16-alpine
+  - grafana/grafana:10.4.2
+models:
+  - llama3
+  - phi3

@@ -1,13 +1,24 @@
-# BlackRoad.io — Ops
+BlackRoad.io — Site
 
-**Deploy commands (ChatOps):**
-- `/deploy blackroad pages` — GitHub Pages
-- `/deploy blackroad vercel` — Vercel (needs `VERCEL_*` secrets)
-- `/deploy blackroad cloudflare` — Cloudflare Pages (needs `CF_*` + `CF_PAGES_PROJECT`)
+Static Vite + React + Tailwind site served at / on blackroad.io.
+NGINX proxies /api to the backend and /ws for WebSockets.
 
-**Useful:**
-- `/site status` — quick HTTP code check
-- `/site url` — prints configured URL
-- `/urls` — lists primary, GH Pages, and status.json URLs
+Local dev
 
-**Status page:** available at `/status` (reads `sites/blackroad/public/status.json`, updated every 30 minutes by workflow).
+cd sites/blackroad
+npm i
+npm run dev
+# open http://localhost:5173
+
+Build
+
+npm run build   # outputs to sites/blackroad/dist
+
+Preview
+
+npm run preview # http://localhost:5174
+
+Production is served by the repository’s NGINX/Caddy configs. Artifacts are also uploaded from CI.
+
+⸻
+

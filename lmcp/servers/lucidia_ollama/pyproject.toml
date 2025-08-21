@@ -1,0 +1,12 @@
+[project]
+name = "lucidia-ollama"
+version = "0.1.0"
+description = "Lucidia Ollama MCP server"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp",
+    "requests",
+]
+
+[project.scripts]
+lucidia-ollama = "lucidia_ollama.server:main"

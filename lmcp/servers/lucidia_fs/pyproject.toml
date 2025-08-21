@@ -1,0 +1,11 @@
+[project]
+name = "lucidia-fs"
+version = "0.1.0"
+description = "Lucidia filesystem MCP server"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp",
+]
+
+[project.scripts]
+lucidia-fs = "lucidia_fs.server:main"
