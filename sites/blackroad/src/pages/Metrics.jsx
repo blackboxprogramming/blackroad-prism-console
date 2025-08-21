@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, BarChart, Bar } from 'recharts'
 
 function useJson(url, fallback){ const [d,setD]=useState(fallback); useEffect(()=>{ if(!url){ setD(fallback); return } fetch(url,{cache:'no-cache'}).then(r=>r.json()).then(setD).catch(()=>setD(fallback)) },[url]); return d }
+function useJson(url, fallback){ const [d,setD]=useState(fallback); useEffect(()=>{ fetch(url,{cache:'no-cache'}).then(r=>r.json()).then(setD).catch(()=>setD(fallback)) },[url]); return d }
 function fmtTs(s){ try{ return new Date(s).toLocaleString() }catch{ return s } }
 function msToMin(ms){ return (ms/60000).toFixed(2) }
 
@@ -18,6 +19,16 @@ export default function Metrics(){
   const lh = useJson('/metrics/lh.json', { history: [] })
   const convBase = getAnalyticsBase()
   const funnels = useJson('/funnels.json', { funnels: [] })
+function useJson(url, fallback){ const [d,setD]=useState(fallback); useEffect(()=>{ fetch(url,{cache:'no-cache'}).then(r=>r.json()).then(setD).catch(()=>setD(fallback)) },[url]); return d }
+
+function fmtTs(s){ try{ return new Date(s).toLocaleString() }catch{ return s } }
+function msToMin(ms){ return (ms/60000).toFixed(2) }
+
+export default function Metrics(){
+  const ci = useJson('/metrics/ci.json', { runs: [] })
+  const lh = useJson('/metrics/lh.json', { history: [] })
+  const convUrl = getAnalyticsBase() ? `${getAnalyticsBase()}/conversions?since=${new Date(Date.now()-1000*60*60*24*30).toISOString().slice(0,10)}` : ''
+  const conv = useJson(convUrl || '/__nope__.json', { ids:[], rows:[], totals:[] })
 
   const byWF = useMemo(()=> {
     const m = {}
@@ -76,11 +87,19 @@ export default function Metrics(){
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="ts" hide/>
                   <YAxis yAxisId="left" label={{ value: 'min', angle:-90, position:'insideLeft' }}/>
+                  <YAxis yAxisId="right" orientation="right" domain={[0,1]} hide/>
                   <Tooltip />
                   <Legend />
                   <Bar yAxisId="left" dataKey="min" name="duration (min)" fill="currentColor" />
                 </BarChart>
               </ResponsiveContainer>
+              <ul className="text-xs mt-2 space-y-1">
+                {runs.slice(-5).reverse().map((r,i)=>(
+                  <li key={i}>
+                    <code>{(r.sha||'').slice(0,7)}</code> — {r.conclusion || r.status} — {msToMin(r.duration_ms)} min — <span className="opacity-70">{fmtTs(r.updated_at||r.started_at)}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
@@ -132,6 +151,30 @@ export default function Metrics(){
           </div>
         ) : <p className="text-sm opacity-70">No funnel data yet.</p>}
         <p className="text-xs opacity-60 mt-2">Add/update funnels via ChatOps: <code>/funnel set "Signup" window 14 steps cta_click,portal_open,signup_success</code></p>
+      <section className="p-3 rounded-lg bg-white/5 border border-white/10 mt-4">
+        <h3 className="font-semibold mb-2">Conversions (last 30 days)</h3>
+        {conv.ids?.length ? (
+          <>
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart data={conv.rows}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis allowDecimals={false}/>
+                <Tooltip />
+                <Legend />
+                {conv.ids.map(id=> <Line key={id} type="monotone" dataKey={id} name={id} dot={false} />)}
+              </LineChart>
+            </ResponsiveContainer>
+            <ul className="text-sm mt-3 grid" style={{gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))', gap:12}}>
+              {conv.totals.map(t=>(
+                <li key={t.id} className="p-2 rounded bg-black/20">
+                  <b>{t.id}</b><br/>
+                  total: <code>{t.total}</code>{typeof t.value==='number' ? <> • value: <code>{t.value.toFixed(2)}</code></> : null}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : <p className="text-sm opacity-70">No conversion data yet. Call <code>recordConversion(id)</code> in the client and set <code>VITE_ANALYTICS_BASE</code>.</p>}
       </section>
     </div>
   )
@@ -232,4 +275,11 @@ function computeFunnels(items, funnels){
     out.push({ name:f.name, description:f.description, steps: formatted })
   }
   return out
+export default function Metrics() {
+  return (
+    <div className="card">
+      <h2 className="text-xl font-semibold mb-3">Metrics</h2>
+      <p className="text-sm">Coming soon.</p>
+    </div>
+  );
 }

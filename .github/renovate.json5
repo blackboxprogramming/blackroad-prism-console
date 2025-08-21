@@ -1,0 +1,23 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: ['config:recommended'],
+  labels: ['dependencies'],
+  timezone: 'UTC',
+  rebaseWhen: 'behind-base-branch',
+  schedule: ['every weekend'],
+  prCreation: 'not-pending',
+  automerge: true,
+  automergeType: 'pr',
+  automergeStrategy: 'squash',
+  packageRules: [
+    {
+      matchDepTypes: ['devDependencies'],
+      matchUpdateTypes: ['minor', 'patch', 'pin', 'digest'],
+      automerge: true,
+    },
+    {
+      matchManagers: ['github-actions'],
+      automerge: true,
+    },
+  ],
+}

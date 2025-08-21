@@ -1,0 +1,46 @@
+# /opt/blackroad/edge/traefik_dynamic.yml
+tls:
+  options:
+    default:
+      clientAuth:
+        caFiles:
+          - /ca/root.pem
+        clientAuthType: RequireAndVerifyClientCert
+http:
+  middlewares:
+    auth:
+      forwardAuth:
+        address: http://iam-keycloak:8080/realms/BlackRoad/protocol/openid-connect/userinfo
+        trustForwardHeader: true
+    ipallow:
+      ipAllowList:
+        sourceRange:
+          - "203.0.113.4/32"
+    rate:
+      rateLimit:
+        average: 100
+        burst: 50
+    security:
+      headers:
+        stsSeconds: 15552000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        frameDeny: true
+        contentTypeNosniff: true
+        referrerPolicy: no-referrer
+  routers:
+    whoami:
+      service: whoami
+      rule: Host(`whoami.blackroad.internal`)
+      entryPoints:
+        - websecure
+      middlewares:
+        - security
+        - rate
+        - ipallow
+        - auth
+  services:
+    whoami:
+      loadBalancer:
+        servers:
+          - url: http://whoami:80

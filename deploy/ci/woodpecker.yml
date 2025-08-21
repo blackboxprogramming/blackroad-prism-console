@@ -1,0 +1,10 @@
+pipeline:
+  semgrep:
+    image: returntocorp/semgrep:1.44.0
+    commands:
+      - semgrep --config deploy/ci/semgrep.yml
+  offline-test:
+    image: docker:24-dind
+    privileged: true
+    commands:
+      - docker build --pull=false -t lucidia-test .

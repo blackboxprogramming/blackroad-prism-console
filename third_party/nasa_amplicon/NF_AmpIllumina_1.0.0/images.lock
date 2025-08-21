@@ -1,0 +1,6 @@
+# Image digests for the GeneLab Amplicon workflow
+# Use `bin/prepull.sh` to populate the local cache with these images.
+
+[images]
+"ghcr.io/nasa/nf-amplicon:1.0.0" = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+"ghcr.io/nasa/multiqc:1.0" = "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
