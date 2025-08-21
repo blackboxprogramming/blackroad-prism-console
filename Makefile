@@ -170,3 +170,13 @@ sbom: ; bash scripts/review.sh --sbom
 lock: ; bash scripts/review.sh --lock
 gen: ; python scripts/ai_codegen.py --task "$(t)"
 docs: ; python scripts/ai_docs.py --from-diff
+
+.PHONY: site-blackroad-build site-blackroad-caddy site-blackroad-up
+site-blackroad-build:
+	cd sites/blackroad && npm run build
+
+site-blackroad-caddy:
+	docker compose -f docker-compose.site.yml up -d
+
+site-blackroad-up: site-blackroad-build site-blackroad-caddy
+	@echo "Site running at http://localhost:8080"
