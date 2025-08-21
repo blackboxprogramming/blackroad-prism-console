@@ -1,0 +1,17 @@
+[Unit]
+Description=Lucidia VPT Service (FastAPI wrapper for Video-Pre-Training)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/blackroad/vpt/.venv/bin/uvicorn lucidia_vpt_service:app --host 127.0.0.1 --port 8188 --reload
+WorkingDirectory=/opt/blackroad/vpt
+Restart=on-failure
+RestartSec=3
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

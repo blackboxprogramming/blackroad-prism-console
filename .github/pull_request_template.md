@@ -1,9 +1,15 @@
 ### Summary
+Describe the change and why it exists.
 
--
+### Tests
+List how you tested this change (commands, screenshots, logs).
 
-### Checks
+### Rollout / Risk
+- Risks:
+- Mitigations:
+- Rollback plan:
 
-- [ ] Page loads locally without errors
-- [ ] S(ρ), Tr(ρ²) sane on presets
-- [ ] No console errors; controls responsive
+> **Bypass (emergencies only):**
+> Add one of these tokens to the PR description to skip the main-branch gate:
+> `[ci override_main_branch_checks]` or `[ci override_main_branch_checks $WORKFLOW]`
+

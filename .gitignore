@@ -22,3 +22,5 @@ repos/
 runtime/
 __pycache__/
 codex/runtime/
+
+!opt/blackroad/tdb/.env

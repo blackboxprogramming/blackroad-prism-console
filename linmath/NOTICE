@@ -1,0 +1,3 @@
+This repository is a mirror of datenwolf/linmath.h pinned to a specific commit.
+BlackRoad added build tooling, CI, packaging, docs, and policies. Original code:
+(c) upstream authors, license: WTFPL (see LICENCE).
