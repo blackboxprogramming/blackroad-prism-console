@@ -17,9 +17,21 @@
 ### Bug Fixes
 
 * **codeql:** JS-only, buildless workflow + sane excludes ([acc2a99](https://github.com/blackboxprogramming/blackroad-prism-console/commit/acc2a998ed34e861730bd2bbeebd0ba6a9442c9f))
+## Unreleased
+
+- Mirror upstream awesome AI data list and add indexing workflow.
 
 ## 0.1.0
 
 - Initial multi-page site scaffold (Home, Docs, Status, Snapshot, Portal, Playground, Contact, Tutorials, Roadmap, Changelog, Blog).
 - ErrorBoundary, 404 page, sitemap/robots workflow alignment.
 - Codex fix-anything playbook + bridge.
+## v3.0.0
+- Lindbladian dynamics (γφ, γrel), von Neumann entropy, Gell-Mann set
+- Hamiltonian editor + presets, recording/CSV, barycentric view
+## v3.0.0
+- Lindbladian dynamics (γφ dephasing, γrel relaxation)
+- True von Neumann entropy via density-matrix invariants
+- Selectable observables (Pauli-like / Gell-Mann λ1–λ3)
+- Hamiltonian editor + presets; session recording + CSV
+- Live barycentric triangle navigation

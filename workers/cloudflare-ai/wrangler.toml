@@ -1,0 +1,14 @@
+name = "lucidia-workers-ai"
+main = "src/index.ts"
+compatibility_date = "2025-08-18"
+
+[ai]
+binding = "AI"
+
+[observability]
+enabled = true
+
+# Optional: fill these or leave as placeholders and set later.
+[vars]
+CF_ACCOUNT_ID = "YOUR_CF_ACCOUNT_ID"
+CF_GATEWAY_ID = "blackroad-prod"

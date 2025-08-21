@@ -27,6 +27,8 @@
           "improvement_surcharge",
           "total_amount",
           "congestion_surcharge"
+          "tip_amount",
+          "total_amount"
         ]
       }
     },
@@ -40,4 +42,15 @@
     }
   ],
   "meta": {}
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "VendorID", "type_": "INTEGER"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {"column": "fare_amount", "type_": "FLOAT"}
+    }
+  ],
+  "meta": {
+    "great_expectations_version": "0.18.12"
+  }
 }

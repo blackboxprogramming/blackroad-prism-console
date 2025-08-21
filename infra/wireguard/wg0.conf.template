@@ -1,0 +1,22 @@
+# <!-- FILE: /infra/wireguard/wg0.conf.template -->
+[Interface]
+Address = 10.10.0.1/32
+ListenPort = 51820
+PrivateKey = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+
+# Peer example
+#[Peer]
+#PublicKey = BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=
+#AllowedIPs = 10.10.0.2/32
+#Endpoint = peer.example.com:51820
+<!-- FILE: /infra/wireguard/wg0.conf.template -->
+[Interface]
+Address = ${WG_ADDRESS}
+ListenPort = ${WG_PORT:-51820}
+PrivateKey = ${WG_PRIVATE_KEY}
+SaveConfig = true
+
+PostUp   = ufw route allow in on wg0 out on eth0; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = ufw route delete allow in on wg0 out on eth0; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+# Peers are appended by gen-peers.sh

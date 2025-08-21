@@ -10,9 +10,12 @@ import Contact from './pages/Contact.jsx'
 import Tutorials from './pages/Tutorials.jsx'
 import Roadmap from './pages/Roadmap.jsx'
 import Changelog from './pages/Changelog.jsx'
+import Atlas from './pages/Atlas.jsx'
 import Blog from './pages/Blog.jsx'
 import Post from './pages/Post.jsx'
+import QuantumLab from './pages/QuantumLab.jsx'
 import NotFound from './pages/NotFound.jsx'
+import PromptRequest from './pages/PromptRequest.jsx'
 
 export const router = createBrowserRouter([
   {
@@ -26,11 +29,14 @@ export const router = createBrowserRouter([
       { path: 'snapshot', element: <SnapshotPage /> },
       { path: 'portal', element: <Portal /> },
       { path: 'playground', element: <Playground /> },
+      { path: 'quantum-lab', element: <QuantumLab /> },
+      { path: 'atlas', element: <Atlas /> },
       { path: 'contact', element: <Contact /> },
       { path: 'tutorials', element: <Tutorials /> },
       { path: 'roadmap', element: <Roadmap /> },
       { path: 'changelog', element: <Changelog /> },
       { path: 'blog', element: <Blog /> },
+      { path: 'prompts', element: <PromptRequest /> },
       { path: 'blog/:slug', element: <Post /> },
       { path: '*', element: <NotFound /> }
     ]
@@ -42,11 +48,14 @@ export const router = createBrowserRouter([
     { path: 'snapshot', element: <SnapshotPage /> },
     { path: 'portal', element: <Portal /> },
     { path: 'playground', element: <Playground /> },
+    { path: 'quantum-lab', element: <QuantumLab /> },
+    { path: 'atlas', element: <Atlas /> },
     { path: 'contact', element: <Contact /> },
     { path: 'tutorials', element: <Tutorials /> },
     { path: 'roadmap', element: <Roadmap /> },
     { path: 'changelog', element: <Changelog /> },
     { path: 'blog', element: <Blog /> },
+    { path: 'prompts', element: <PromptRequest /> },
     { path: 'blog/:slug', element: <Post /> },
     { path: '*', element: <NotFound /> }
   ] }

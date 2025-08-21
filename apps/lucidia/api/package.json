@@ -1,0 +1,9 @@
+# <!-- FILE: /apps/lucidia/api/package.json -->
+{
+  "name": "lucidia-api",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

@@ -6,10 +6,21 @@ on:
       - 'apps/quantum/**'
       - '.github/workflows/deploy-quantum.yml'
   pull_request:
+    branches: [main]
+name: Deploy Quantum App
+on:
+  push:
     branches: [ main ]
     paths:
       - 'apps/quantum/**'
       - '.github/workflows/deploy-quantum.yml'
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
@@ -18,6 +29,34 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Upload app to server (staging dir)
+      - name: Upload build to server (staging dir)
+      - uses: actions/checkout@v5
+      - name: Copy to server
+      - name: Preflight (secrets present?)
+        id: preflight
+        run: |
+          missing=()
+          for v in SSH_HOST SSH_USER SSH_KEY SITE_DOMAIN; do
+            [ -n "${!v:-}" ] || missing+=("$v")
+          done
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "Missing secrets: ${missing[*]}"
+            echo "status=skip" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=ok" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY:  ${{ secrets.SSH_KEY }}
+          SITE_DOMAIN: ${{ secrets.SITE_DOMAIN }}
+
+      - name: Checkout
+        if: steps.preflight.outputs.status == 'ok'
+        uses: actions/checkout@v4
+
+      - name: Upload app to server (staging dir)
+        if: steps.preflight.outputs.status == 'ok'
         uses: burnett01/rsync-deployments@6.0
         with:
           switches: -avzr --delete
@@ -28,6 +67,8 @@ jobs:
           remote_key: ${{ secrets.SSH_KEY }}
 
       - name: Safe activate + verify + write /api/health.json
+      - name: Safe activate + verify (backup & rollback + write health.json)
+        if: steps.preflight.outputs.status == 'ok'
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -45,6 +86,10 @@ jobs:
             mkdir -p "$LIVE_DIR" "$API_DIR" "/var/www/blackroad/backups"
             TS_DIR="/var/www/blackroad/backups/quantum-$(date +%Y%m%d-%H%M%S)"
             rsync -a --delete "$LIVE_DIR/" "$TS_DIR/"
+            mkdir -p "$LIVE_DIR" "$API_DIR"
+            BACKUP_DIR="/var/www/blackroad/backups/quantum-$(date +%Y%m%d-%H%M%S)"
+            mkdir -p "$BACKUP_DIR"
+            rsync -a --delete "$LIVE_DIR/" "$BACKUP_DIR/"
             rsync -a --delete "$SRC_DIR/" "$LIVE_DIR/"
             nginx -t && systemctl reload nginx
             set +e
@@ -56,6 +101,7 @@ jobs:
             if [ "$STATUS" -ne 0 ] || [ "$TITLE_OK" -lt 1 ] || [ "$SIZE_OK" -ne 1 ]; then
               echo "Health check failed — rolling back"
               rsync -a --delete "$TS_DIR/" "$LIVE_DIR/"
+              rsync -a --delete "$BACKUP_DIR/" "$LIVE_DIR/"
               nginx -t && systemctl reload nginx
               exit 1
             fi
@@ -68,3 +114,25 @@ jobs:
         run: |
           curl -fsS "https://${{ secrets.SITE_DOMAIN }}/api/health/health.json" | tee /tmp/health.json
           node -e "const j=require('fs').readFileSync('/tmp/health.json','utf8'); const o=JSON.parse(j); if(o.status!=='ok'){process.exit(1)}; console.log('Health OK', o)"
+            { "status": "ok", "app": "quantum-v3", "version": "$VER", "commit": "$SHA", "ts": "$TS" }
+            JSON
+            echo "Deployed OK; backup → $BACKUP_DIR; health.json updated."
+
+      - name: Verify /api/health
+        run: |
+          curl -fsS "https://${{ secrets.SITE_DOMAIN }}/api/health.json" | tee /tmp/health.json
+          node -e "const h=require('fs').readFileSync('/tmp/health.json','utf8'); const j=JSON.parse(h); if(j.status!=='ok') {console.error('Bad status', j); process.exit(1)}; console.log('Health OK:', j)"
+        run: |
+          curl -fsS "https://${{ secrets.SITE_DOMAIN }}/api/health/health.json" | tee /tmp/health.json
+          node -e "const j=require('fs').readFileSync('/tmp/health.json','utf8'); const o=JSON.parse(j); if(o.status!=='ok'){process.exit(1)}; console.log('Health OK', o)"
+      - name: Health check
+        run: |
+          set -e
+          curl -fsS "https://${{ secrets.SITE_DOMAIN }}/apps/quantum/ternary_consciousness_v3.html" >/dev/null
+
+      - name: Health check
+      - name: Summary (skipped)
+        if: steps.preflight.outputs.status == 'skip'
+        run: |
+          echo "🚧 Deploy skipped — missing required secrets (SSH_HOST/SSH_USER/SSH_KEY/SITE_DOMAIN)." >> $GITHUB_STEP_SUMMARY
+

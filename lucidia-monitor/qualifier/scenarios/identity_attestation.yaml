@@ -1,0 +1,6 @@
+# Placeholder scenario for identity attestation
+steps:
+  - name: request-attestation
+    action: POST /attest
+    payload:
+      agent_id: sample-agent

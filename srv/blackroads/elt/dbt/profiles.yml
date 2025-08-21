@@ -1,3 +1,4 @@
+# <!-- FILE: /srv/blackroads/elt/dbt/profiles.yml -->
 blackroads:
   target: dev
   outputs:
@@ -8,5 +9,9 @@ blackroads:
       password: '{{ env_var("POSTGRES_PASSWORD") }}'
       dbname: '{{ env_var("POSTGRES_DB") }}'
       port: '{{ env_var("POSTGRES_PORT") | as_number }}'
+      port: '{{ env_var("POSTGRES_PORT") | int }}'
+      user: '{{ env_var("POSTGRES_USER") }}'
+      password: '{{ env_var("POSTGRES_PASSWORD") }}'
+      dbname: '{{ env_var("POSTGRES_DB") }}'
       schema: core
       threads: 4

@@ -5,6 +5,14 @@ on:
     paths: [ 'sites/blackroad/**' ]
   workflow_dispatch:
 permissions: { contents: read, pages: write, id-token: write }
+    branches: [main]
+    paths:
+      - 'sites/blackroad/**'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 jobs:
   build:
     runs-on: ubuntu-latest

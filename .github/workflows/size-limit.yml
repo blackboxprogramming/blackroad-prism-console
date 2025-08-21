@@ -1,35 +1,22 @@
 name: Size Limit (advisory)
 on:
   pull_request:
-  workflow_dispatch: {}
-permissions: { contents: read }
+    paths: ['sites/blackroad/**']
+  workflow_dispatch:
+permissions: { contents: read, pull-requests: write }
 jobs:
   size:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'npm' }
-      - name: Install size-limit (if Node project)
-        run: |
-          if [ -f package.json ]; then
-            npm i -D size-limit @size-limit/preset-app || true
-            node -e "const fs=require('fs'); if(!fs.existsSync('.size-limit.json')) fs.writeFileSync('.size-limit.json', JSON.stringify([{ path: 'sites/blackroad/dist/assets/*.js', limit: '250 KB' }],null,2));"
-          else
-            echo "No package.json; skipping." >> $GITHUB_STEP_SUMMARY
-          fi
-      - name: Build site (if present)
-        run: |
-          if [ -d sites/blackroad ]; then
-            cd sites/blackroad && npm ci --omit=optional || npm i --package-lock-only
-            npm run build || true
-          fi
-      - name: Run size-limit
-        run: |
-          if [ -f package.json ]; then npx --yes size-limit || true; else echo "skip" ; fi
-      - name: Upload report
-        if: ${{ hashFiles('.size-limit.json') != '' }}
-        uses: actions/upload-artifact@v4
+        with: { node-version: 20 }
+      - run: |
+          cd sites/blackroad
+          npm ci --omit=optional || npm i --package-lock-only
+          npm i -D size-limit @size-limit/file
+          npx size-limit --why || true
+      - uses: actions/github-script@v7
         with:
-          name: size-limit
-          path: .size-limit.json
+          script: |
+            await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.pull_request.number, body: "📦 Size Limit checked (advisory). Run `npx size-limit --why` locally for details."});

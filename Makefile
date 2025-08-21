@@ -114,6 +114,7 @@ patch-runtime:
      -v perf="<script>$$(sed -e 's/[\/&]/\\&/g' $(SCRIPTS)/perf_budget_snippet.js)</script>" \
      -v cons="<script>$$(sed -e 's/[\/&]/\\&/g' $(SCRIPTS)/console_only_snippet.js)</script>" \
      '{gsub(/<\/body>/, badge "\n" perf "\n" cons "\n<\/body>"); print;}' $(HTML) > $(HTML).tmp && mv $(HTML).tmp $(HTML) && echo "Patched.")
+     '{gsub(/<\/body>/, badge "\n" perf "\n" cons "\n</body>"); print;}' $(HTML) > $(HTML).tmp && mv $(HTML).tmp $(HTML) && echo "Patched.")
 @git add $(HTML)
 
 sri:
@@ -140,3 +141,32 @@ health-remote:
 health-local:
 @url="http://localhost:8080/apps/quantum/ternary_consciousness_v3.html"; \
 curl -fsS "$$url" >/dev/null && echo "Local page OK: $$url" || (echo "Local page not reachable"; exit 1)
+.PHONY: dev build site up lint format
+dev:
+	cd sites/blackroad && npm run dev
+build:
+	cd sites/blackroad && npm run build
+site:
+	xdg-open http://localhost:5173 || open http://localhost:5173 || true
+up:
+	docker compose up --build -d
+lint:
+	npm run lint
+format:
+	npm run format
+
+.PHONY: bootstrap fmt lint type test cov fix review sbom lock gen docs
+bootstrap: ; pip install -U pip pre-commit && pre-commit install
+fmt: ; black .
+lint: ; ruff check .
+type: ; mypy .
+test: ; pytest -q
+cov: ; pytest --cov --cov-report=term-missing
+fix: fmt lint
+review: ; bash scripts/review.sh
+
+sbom: ; bash scripts/review.sh --sbom
+
+lock: ; bash scripts/review.sh --lock
+gen: ; python scripts/ai_codegen.py --task "$(t)"
+docs: ; python scripts/ai_docs.py --from-diff

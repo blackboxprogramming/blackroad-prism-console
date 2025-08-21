@@ -52,6 +52,8 @@ jobs:
         with:
           node-version: 20
         with: { node-version: 20 }
+        with:
+          node-version: 20
       - name: Install & Build
         run: |
           cd sites/blackroad
@@ -67,6 +69,8 @@ jobs:
         with:
           path: sites/blackroad/dist
         with: { path: sites/blackroad/dist }
+        with:
+          path: sites/blackroad/dist
       - name: Upload dist snapshot (artifact)
         uses: actions/upload-artifact@v4
         with:
@@ -119,6 +123,8 @@ jobs:
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
         with: { ref: ${{ github.event.inputs.ref || github.ref }} }
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
       - name: Deploy to Cloudflare Pages
         id: cf
         uses: cloudflare/pages-action@v1
@@ -162,6 +168,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
         env: { GITHUB_TOKEN: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }} }
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           git add sites/blackroad/public/deploys.json || true
           git diff --staged --quiet || (git config user.name  "${{ secrets.BOT_USER || 'blackroad-bot' }}"; git config user.email "${{ secrets.BOT_USER || 'blackroad-bot' }}@users.noreply.github.com"; git commit -m "chore(deploy): record ${{ inputs.channel }} @ ${{ github.sha }}"; git push || true)

@@ -8,6 +8,11 @@
 /* global danger, warn, message */
 
 // Quick quality checks for pull requests
+/* eslint-env node */
+/* global danger, warn, message */
+/* global danger, warn, message */
+
+// PR quality checks executed by Danger.js
 
 const files = danger.git.modified_files.concat(danger.git.created_files);
 const big = files.filter((f) => f.endsWith('.html') || f.endsWith('.js'));
@@ -29,3 +34,4 @@ const hasScreenshot = /!\[.*\]\(.*\)/.test(danger.github.pr.body || '');
 if (!hasScreenshot && files.some((f) => f.endsWith('.html'))) {
   warn('UI change detected, but no screenshot in the PR body.');
 }
+

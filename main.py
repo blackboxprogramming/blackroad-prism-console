@@ -6,6 +6,7 @@ import io
 import os
 import tempfile
 import whisper
+import ast
 
 api_key = os.getenv("OPENAI_API_KEY")
 if api_key:
@@ -15,6 +16,7 @@ else:
     st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 client = OpenAI(api_key=api_key) if api_key else None
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")
@@ -86,6 +88,10 @@ if user_input:
         plt.savefig(buf, format="png")
         buf.seek(0)
         st.image(buf)
+        with io.BytesIO() as buf:
+            plt.savefig(buf, format="png")
+            buf.seek(0)
+            st.image(buf)
         plt.close(fig)
 
     except Exception as e:

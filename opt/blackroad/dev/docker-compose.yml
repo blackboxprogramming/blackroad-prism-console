@@ -1,0 +1,72 @@
+# /opt/blackroad/dev/docker-compose.yml
+version: "3.9"
+services:
+  gitea:
+    image: gitea/gitea:1.21
+    environment:
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__HOST=gitea-db:5432
+      - GITEA__database__NAME=gitea
+      - GITEA__database__USER=gitea
+      - GITEA__database__PASSWD=giteapass
+      - GITEA__server__DOMAIN=gitea.blackroad.internal
+      - GITEA__server__ROOT_URL=https://gitea.blackroad.internal/
+    volumes:
+      - gitea_data:/data
+      - ./gitea/app.ini:/data/gitea/conf/app.ini
+    depends_on:
+      - gitea-db
+    ports:
+      - "3000:3000"
+  gitea-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: gitea
+      POSTGRES_USER: gitea
+      POSTGRES_PASSWORD: giteapass
+    volumes:
+      - gitea_db:/var/lib/postgresql/data
+  gitea-runner:
+    image: gitea/act_runner:0.2.6
+    environment:
+      - CONFIG_FILE=/etc/runner/config.yaml
+    volumes:
+      - ./gitea-runner-config.yaml:/etc/runner/config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - gitea
+  woodpecker-server:
+    image: woodpeckerci/woodpecker-server:latest
+    environment:
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_GITEA=true
+      - WOODPECKER_GITEA_URL=http://gitea:3000
+      - WOODPECKER_GITEA_CLIENT=woodpecker
+      - WOODPECKER_GITEA_SECRET=woodpecker-secret
+      - WOODPECKER_AGENT_SECRET=agent-secret
+    volumes:
+      - woodpecker_data:/var/lib/woodpecker
+    ports:
+      - "9001:9000"
+    depends_on:
+      - gitea
+  woodpecker-agent:
+    image: woodpeckerci/woodpecker-agent:latest
+    environment:
+      - WOODPECKER_SERVER=http://woodpecker-server:9000
+      - WOODPECKER_AGENT_SECRET=agent-secret
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - woodpecker-server
+  registry:
+    image: registry:2
+    volumes:
+      - registry_data:/var/lib/registry
+    ports:
+      - "5000:5000"
+volumes:
+  gitea_data:
+  gitea_db:
+  woodpecker_data:
+  registry_data:

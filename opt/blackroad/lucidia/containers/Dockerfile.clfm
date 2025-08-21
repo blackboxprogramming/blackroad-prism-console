@@ -1,0 +1,13 @@
+FROM python:3.11-slim
+
+# Create non-root user
+RUN useradd -m app && mkdir /app && chown app /app
+USER app
+WORKDIR /app
+
+COPY ./opt/blackroad/lucidia/pyproject.toml ./
+RUN pip install --no-cache-dir torch numpy scipy einops h5py pydantic typer fastapi uvicorn
+
+COPY opt/blackroad/lucidia ./lucidia
+
+CMD ["python", "-m", "opt.blackroad.lucidia.clfm.cli.train"]
