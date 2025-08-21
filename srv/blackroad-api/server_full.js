@@ -27,6 +27,7 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
 const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
 const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
 const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
+const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 
 // Ensure DB dir exists
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
@@ -53,11 +54,14 @@ app.use(cookieSession({
   maxAge: 1000 * 60 * 60 * 8, // 8h
 }));
 
+// --- Homepage
+app.get('/', (_, res) => {
+  res.sendFile(path.join(WEB_ROOT, 'index.html'));
+});
+
 // --- Health
 app.head('/api/health', (_, res) => res.status(200).end());
-app.get('/api/health', (_, res) =>
-  res.json({ ok: true, service: 'blackroad-api', time: new Date().toISOString() })
-);
+app.get('/api/health', (_, res) => res.json({ ok: true }));
 
 // --- Auth (cookie-session)
 function requireAuth(req, res, next) {
