@@ -203,3 +203,11 @@ api-logs:
 
 site-up-all:
 	docker compose -f docker-compose.prism.yml up -d
+# BlackRoad site helpers
+.PHONY: site-blackroad-dev site-blackroad-build site-blackroad-preview
+site-blackroad-dev:
+	cd sites/blackroad && npm i && npm run dev
+site-blackroad-build:
+	cd sites/blackroad && npm ci && npm run build
+site-blackroad-preview:
+	cd sites/blackroad && npm run preview
