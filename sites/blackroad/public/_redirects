@@ -1,1 +1,6 @@
-/*    /index.html   200
+(for static hosts that support Netlify-style redirects)
+
+send all SPA routes to index
+
+/*   /index.html   200
+
