@@ -7,13 +7,18 @@ type Mode = "machine" | "chit-chat";
 interface In {
   messages: { role: "user" | "assistant"; content: string }[];
   mode?: Mode;
+  prompt?: string;
 }
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, mode: modeIn }: In = await req.json();
+    const body: In = await req.json();
+    let { messages, mode: modeIn, prompt } = body;
+    if (!messages && typeof prompt === "string") {
+      messages = [{ role: "user", content: prompt }];
+    }
     let mode: Mode = (modeIn || (process.env.DEFAULT_MODE as Mode) || "machine");
     const last = messages?.at(-1)?.content ?? "";
     if (/chit\s*chat\s*cadillac/i.test(last)) mode = "chit-chat";
