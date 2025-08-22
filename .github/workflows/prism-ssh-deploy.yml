@@ -1,12 +1,11 @@
 name: Prism — SSH Deploy to blackroad.io
+# Requires secrets: DEPLOY_HOST, DEPLOY_USER, DEPLOY_KEY
 on:
   push:
     branches: [ main ]
     paths:
-      - "frontend/**"
-      - "sites/blackroad/**"
       - "services/api/**"
-      - "nginx/blackroad.io.conf"
+      - "ops/nginx/**"
       - "systemd/**"
       - ".github/workflows/prism-ssh-deploy.yml"
   workflow_dispatch: {}
@@ -34,12 +33,6 @@ jobs:
           cache: npm
           cache-dependency-path: "${{ steps.site.outputs.dir }}/package-lock.json"
 
-      - name: Build site
-        working-directory: ${{ steps.site.outputs.dir }}
-        run: |
-          npm ci
-          npm run build
-
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -50,18 +43,14 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Rsync site
-        run: |
-          rsync -avz --delete --rsync-path="sudo rsync" ${{ steps.site.outputs.dir }}/dist/ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/var/www/blackroad/
-
       - name: Rsync API source
         run: |
           rsync -avz --delete --rsync-path="sudo rsync" services/api/ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/blackroad/api/
-
+      
       - name: Upload config files
         run: |
-          scp nginx/blackroad.io.conf ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/tmp/blackroad.io.conf
-          scp systemd/blackroad-api.service ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/tmp/blackroad-api.service
+          scp ops/nginx/blackroad.io.conf ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/tmp/blackroad.io.conf
+          scp systemd/*.service ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/tmp/
 
       - name: Remote activate
         run: |
@@ -71,7 +60,7 @@ jobs:
           sudo ln -sf /etc/nginx/sites-available/blackroad.io /etc/nginx/sites-enabled/blackroad.io
           sudo nginx -t
           sudo systemctl reload nginx
-          sudo mv /tmp/blackroad-api.service /etc/systemd/system/blackroad-api.service
+          sudo mv /tmp/*.service /etc/systemd/system/
           sudo systemctl daemon-reload
           sudo systemctl enable --now blackroad-api
           sudo systemctl status blackroad-api --no-pager
