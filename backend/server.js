@@ -17,6 +17,25 @@ const { store, addTimeline } = require('./data');
 const { exec } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
 
+// Sample Roadbook data
+const roadbookChapters = [
+  {
+    id: '1',
+    title: 'Introduction',
+    content: 'Welcome to the Roadbook. This chapter introduces the journey.'
+  },
+  {
+    id: '2',
+    title: 'Getting Started',
+    content: 'Setup instructions and first steps with code snippets and images.'
+  },
+  {
+    id: '3',
+    title: 'Advanced Topics',
+    content: 'Deep dive into advanced usage with rich examples.'
+  }
+];
+
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || '*'}));
@@ -201,6 +220,24 @@ app.post('/api/codex/run', authMiddleware(JWT_SECRET), (req, res)=>{
 
 app.get('/api/codex/history', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json({ runs: store.codexRuns });
+// Roadbook endpoints
+app.get('/api/roadbook/chapters', authMiddleware(JWT_SECRET), (req, res) => {
+  const chapters = roadbookChapters.map(({ id, title }) => ({ id, title }));
+  res.json({ chapters });
+});
+
+app.get('/api/roadbook/chapter/:id', authMiddleware(JWT_SECRET), (req, res) => {
+  const chapter = roadbookChapters.find(c => c.id === req.params.id);
+  if (!chapter) return res.status(404).json({ error: 'not found' });
+  res.json({ chapter });
+});
+
+app.get('/api/roadbook/search', authMiddleware(JWT_SECRET), (req, res) => {
+  const q = String(req.query.q || '').toLowerCase();
+  const results = roadbookChapters
+    .filter(c => c.title.toLowerCase().includes(q) || c.content.toLowerCase().includes(q))
+    .map(c => ({ id: c.id, title: c.title, snippet: c.content.slice(0, 80) }));
+  res.json({ results });
 });
 
 // Actions

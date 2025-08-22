@@ -105,6 +105,19 @@ export async function runCodex(prompt){
 export async function fetchCodexHistory(){
   const { data } = await axios.get(`${API_BASE}/api/codex/history`)
   return data.runs
+export async function fetchRoadbookChapters(){
+  const { data } = await axios.get(`${API_BASE}/api/roadbook/chapters`)
+  return data.chapters
+}
+
+export async function fetchRoadbookChapter(id){
+  const { data } = await axios.get(`${API_BASE}/api/roadbook/chapter/${id}`)
+  return data.chapter
+}
+
+export async function searchRoadbook(term){
+  const { data } = await axios.get(`${API_BASE}/api/roadbook/search`, { params: { q: term } })
+  return data.results
 }
 
 export { API_BASE }

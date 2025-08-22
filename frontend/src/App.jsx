@@ -1,10 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { Routes, Route, useNavigate } from 'react-router-dom'
 import io from 'socket.io-client'
 import { API_BASE, setToken, login, me, fetchTimeline, fetchTasks, fetchCommits, fetchAgents, fetchRoadcoinWallet, fetchContradictions, getNotes, setNotes, action } from './api'
 import { API_BASE, setToken, login, me, fetchTimeline, fetchTasks, fetchCommits, fetchAgents, fetchWallet, fetchContradictions, getNotes, setNotes, action } from './api'
 import Guardian from './Guardian.jsx'
 import { Activity, Brain, Cpu, Database, GitCommit, LayoutGrid, Rocket, Settings, ShieldCheck, SquareDashedMousePointer, Wallet } from 'lucide-react'
 import { Activity, Brain, Cpu, Database, GitCommit, LayoutGrid, Rocket, Settings, ShieldCheck, SquareDashedMousePointer, Wallet, User } from 'lucide-react'
+import { Activity, Brain, Cpu, Database, GitCommit, LayoutGrid, Rocket, Settings, ShieldCheck, SquareDashedMousePointer, Wallet, BookOpen } from 'lucide-react'
 import Timeline from './components/Timeline.jsx'
 import Tasks from './components/Tasks.jsx'
 import Commits from './components/Commits.jsx'
@@ -15,6 +17,7 @@ import Dashboard from './components/Dashboard.jsx'
 import You from './components/You.jsx'
 import Claude from './components/Claude.jsx'
 import Codex from './components/Codex.jsx'
+import Roadbook from './components/Roadbook.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -108,6 +111,7 @@ export default function App(){
               <NavItem icon={<Cpu size={18} />} text="Claude" href="/claude" />
               <NavItem icon={<Cpu size={18} />} text="Codex" href="/codex" />
               <NavItem icon={<Wallet size={18} />} text="RoadCoin" href="/roadcoin" />
+              <NavItem icon={<BookOpen size={18} />} text="Roadbook" to="/roadbook" />
             </nav>
 
             <button className="btn w-full text-white font-semibold">Start Co‑Coding</button>
@@ -152,6 +156,10 @@ export default function App(){
               )}
               {isRoadcoin && <RoadCoin onUpdate={(data)=>setWallet({ rc: data.balance })} />}
               {isClaude && <Claude socket={socket} />}
+              <Routes>
+                <Route path="/roadbook" element={<Roadbook />} />
+                <Route path="*" element={<Dashboard tab={tab} setTab={setTab} timeline={timeline} tasks={tasks} commits={commits} onAction={onAction} />} />
+              </Routes>
             </section>
             {route === '/guardian' ? (
               <Guardian />
@@ -192,6 +200,13 @@ function NavItem({ icon, text, href }){
   ) : (
     <div className={className}>{icon}<span>{text}</span></div>
   );
+function NavItem({ icon, text, to }){
+  const navigate = useNavigate()
+  return (
+    <div onClick={()=> to && navigate(to)} className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-900 cursor-pointer">
+      {icon}<span>{text}</span>
+    </div>
+  )
 }
 
 function Tab({ children, active, onClick }){
@@ -199,5 +214,26 @@ function Tab({ children, active, onClick }){
     <button onClick={onClick} className={`py-3 border-b-2 ${active?'border-indigo-500 text-white':'border-transparent text-slate-400 hover:text-slate-200'}`}>
       {children}
     </button>
+  )
+}
+
+function Dashboard({ tab, setTab, timeline, tasks, commits, onAction }){
+  return (
+    <>
+      <header className="flex items-center gap-8 border-b border-slate-800 mb-4">
+        <Tab onClick={()=>setTab('timeline')} active={tab==='timeline'}>Timeline</Tab>
+        <Tab onClick={()=>setTab('tasks')} active={tab==='tasks'}>Tasks</Tab>
+        <Tab onClick={()=>setTab('commits')} active={tab==='commits'}>Commits</Tab>
+        <div className="ml-auto flex items-center gap-2 py-3">
+          <button className="badge" onClick={()=>onAction('run')}>Run</button>
+          <button className="badge" onClick={()=>onAction('revert')}>Revert</button>
+          <button className="badge" onClick={()=>onAction('mint')}><Wallet size={14}/> Mint</button>
+        </div>
+      </header>
+
+      {tab==='timeline' && <Timeline items={timeline} />}
+      {tab==='tasks' && <Tasks items={tasks} />}
+      {tab==='commits' && <Commits items={commits} />}
+    </>
   )
 }
