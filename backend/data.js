@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const store = {
   users: [
-    { id: 'u-root', username: 'root', displayName: 'Root', role: 'owner' }
+    { id: 'u-root', username: 'root', displayName: 'Root', role: 'owner', plan: 'free', lastLogin: new Date().toISOString() }
   ],
   wallet: { rc: 1.2 },
   agents: [
@@ -22,6 +22,9 @@ const store = {
   commits: [
     { id: 'c1', hash: 'd1f6e52', author: 'Mistral agent', message: 'Revert last commit', time: new Date(Date.now()-3600e3).toISOString() },
     { id: 'c2', hash: 'a9c1b02', author: 'User', message: 'Add print("Hello, world!")', time: new Date(Date.now()-1800e3).toISOString() }
+  ],
+  projects: [
+    { id: uuidv4(), name: 'Demo Project', status: 'active' }
   ],
   timeline: [
     { id: uuidv4(), type: 'agent', agent: 'Phi', text: "created a branch `main`", time: new Date().toISOString() },
