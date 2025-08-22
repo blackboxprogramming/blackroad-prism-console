@@ -34,6 +34,8 @@ export default function App(){
   const isDashboard = path === '/dashboard'
   const isYou = path === '/you'
   const isClaude = path === '/claude'
+  const isDashboard = path === '/dashboard'
+  const isYou = path === '/you'
 
   // bootstrap auth from localstorage
   useEffect(()=>{
