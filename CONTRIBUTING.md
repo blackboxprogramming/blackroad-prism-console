@@ -53,7 +53,8 @@ Thank you for your interest in contributing to this project!
 
 We appreciate your time and look forward to your contributions.
 - Open an issue first for large changes.
+- Bots and agents may open issues they discover and submit pull requests resolving them.
 - Use conventional commits (feat:, fix:, chore:).
 - For docs-only PRs, add label `docs` to allow auto-merge.
-- To ask bots to remediate:  
+- To ask bots to remediate:
   `/codex apply .github/prompts/codex-fix-anything.md`
