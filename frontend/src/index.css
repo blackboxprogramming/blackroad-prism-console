@@ -4,6 +4,9 @@
 
 :root {
   --panel: 15 15 30;
+  --accent: #FF4FD8;
+  --accent-2: #0096FF;
+  --accent-3: #FDBA2D;
 }
 
 .card {

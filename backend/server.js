@@ -85,6 +85,22 @@ app.get('/api/agents', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json({ agents: store.agents });
 });
 
+// Orchestrator APIs
+app.get('/api/orchestrator/agents', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json({ agents: store.agents });
+});
+
+app.post('/api/orchestrator/control/:id', authMiddleware(JWT_SECRET), (req, res)=>{
+  const { action } = req.body || {};
+  const id = req.params.id;
+  const agent = store.agents.find(a => a.id === id);
+  if (!agent) return res.status(404).json({ error: 'not found' });
+  if (action === 'start') agent.status = 'running';
+  else if (action === 'stop') agent.status = 'stopped';
+  else if (action === 'restart') agent.status = 'running';
+  res.json({ ok: true, agent });
+});
+
 app.get('/api/wallet', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json({ wallet: store.wallet });
 });
@@ -148,10 +164,19 @@ setInterval(()=>{
   io.emit('system:update', { cpu, mem, gpu, at: nowISO() });
 }, 2000);
 
+setInterval(()=>{
+  store.agents.forEach(a => {
+    a.cpu = randomWalk(a.cpu, 5);
+    a.memory = randomWalk(a.memory, 5);
+  });
+  io.emit('orchestrator:metrics', store.agents.map(a => ({ id: a.id, cpu: a.cpu, memory: a.memory })));
+}, 3000);
+
 io.on('connection', (socket)=>{
   socket.emit('system:update', { cpu, mem, gpu, at: nowISO() });
   socket.emit('wallet:update', store.wallet);
   socket.emit('notes:update', store.sessionNotes);
+  socket.emit('orchestrator:metrics', store.agents.map(a => ({ id: a.id, cpu: a.cpu, memory: a.memory })));
 });
 
 const PORT = process.env.PORT || 4000;
