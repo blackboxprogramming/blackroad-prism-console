@@ -5,6 +5,13 @@
   "type": "module",
   "scripts": {
     "build:lucidia-create": "npx tsc -p packages/lucidia-create/tsconfig.json --noEmit false --outDir packages/lucidia-create/dist",
-    "test": "npm run build:lucidia-create && node tests/smoke.test.js && node --test tests/*.mjs"
+    "test": "npm run build:lucidia-create && node tests/smoke.test.js && node --test tests/*.mjs",
+    "test:unit": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "react": "^18.2.0",
+    "react-test-renderer": "^18.2.0",
+    "supertest": "^6.3.3"
   }
 }

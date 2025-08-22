@@ -4,6 +4,7 @@ const ai = require('./routes/ai');
 const agent = require('./routes/agent');
 const git = require('./routes/git');
 const term = require('./routes/term');
+const billing = require('./routes/billing');
 
 const app = express();
 app.use(cors());
@@ -14,6 +15,7 @@ app.post('/api/agent/task', agent.runTask);
 app.post('/api/git/apply', git.applyPatches);
 app.post('/api/term/propose', term.propose);
 app.post('/api/term/approve', term.approve);
+app.get('/api/billing', billing.getBilling);
 
 const PORT = process.env.PORT || 9000;
 app.listen(
