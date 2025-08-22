@@ -13,6 +13,12 @@ const store = {
   ],
   contradictions: { issues: 2 },
   sessionNotes: "",
+  guardian: {
+    status: { secure: true, mfa: true, encryption: true, lastScan: '2025-08-20' },
+    alerts: [
+      { id: uuidv4(), type: 'Unauthorized login', severity: 'high', time: new Date().toISOString(), status: 'active' }
+    ]
+  },
   tasks: [
     { id: uuidv4(), title: "Calculus HW 3", course: "Math 201", status: "todo", due: "2025-08-25", reward: 12, progress: 0.2 },
     { id: uuidv4(), title: "Lab: Sorting", course: "CS 101", status: "inprogress", due: "2025-08-23", reward: 20, progress: 0.55 },
