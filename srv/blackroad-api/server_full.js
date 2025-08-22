@@ -102,6 +102,33 @@ for (const t of TABLES) {
   `).run();
 }
 
+// Billing tables (minimal subset)
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS plans (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    monthly_price_cents INTEGER NOT NULL DEFAULT 0,
+    yearly_price_cents INTEGER NOT NULL DEFAULT 0,
+    features TEXT NOT NULL,
+    is_active INTEGER NOT NULL DEFAULT 1
+  )
+`).run();
+
+// Seed default plans if table empty
+const planCount = db.prepare('SELECT COUNT(*) as c FROM plans').get().c;
+if (planCount === 0) {
+  const defaultPlans = [
+    { id: 'free', name: 'Free', monthly: 0, yearly: 0, features: ['Basic access'] },
+    { id: 'builder', name: 'Builder', monthly: 1500, yearly: 15000, features: ['Builder tools', 'Email support'] },
+    { id: 'pro', name: 'Pro', monthly: 4000, yearly: 40000, features: ['All builder features', 'Priority support'] },
+    { id: 'enterprise', name: 'Enterprise', monthly: 0, yearly: 0, features: ['Custom pricing', 'Dedicated support'] },
+  ];
+  const stmt = db.prepare('INSERT INTO plans (id, name, monthly_price_cents, yearly_price_cents, features, is_active) VALUES (?, ?, ?, ?, ?, 1)');
+  for (const p of defaultPlans) {
+    stmt.run(p.id, p.name, p.monthly, p.yearly, JSON.stringify(p.features));
+  }
+}
+
 // Helpers
 function listRows(t) {
   return db.prepare(`SELECT id, name, updated_at, meta FROM ${t} ORDER BY datetime(updated_at) DESC`).all();
@@ -152,6 +179,19 @@ app.delete('/api/:kind/:id', requireAuth, (req, res) => {
   if (!validKind(kind)) return res.status(404).json({ error: 'unknown_kind' });
   try { deleteRow(kind, Number(id)); res.json({ ok: true }); }
   catch (e) { res.status(500).json({ error: 'db_delete_failed', detail: String(e) }); }
+});
+
+// --- Billing: plans
+app.get('/api/subscribe/plans', requireAuth, (_req, res) => {
+  try {
+    const rows = db.prepare('SELECT id, name, monthly_price_cents, yearly_price_cents, features, is_active FROM plans WHERE is_active = 1').all();
+    for (const r of rows) {
+      try { r.features = JSON.parse(r.features); } catch { r.features = []; }
+    }
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: 'db_plans_failed', detail: String(e) });
+  }
 });
 
 // --- LLM bridge (/api/llm/chat)
