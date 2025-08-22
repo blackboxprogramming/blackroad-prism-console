@@ -23,6 +23,31 @@ const store = {
     { id: 'c1', hash: 'd1f6e52', author: 'Mistral agent', message: 'Revert last commit', time: new Date(Date.now()-3600e3).toISOString() },
     { id: 'c2', hash: 'a9c1b02', author: 'User', message: 'Add print("Hello, world!")', time: new Date(Date.now()-1800e3).toISOString() }
   ],
+  roadchainBlocks: [
+    {
+      height: 3,
+      hash: '0xabc123',
+      time: new Date().toISOString(),
+      txs: [
+        { hash: '0xtx1', from: 'alice', to: 'bob', amount: 5.2 },
+        { hash: '0xtx2', from: 'carol', to: 'dave', amount: 1.1 }
+      ]
+    },
+    {
+      height: 2,
+      hash: '0xdef456',
+      time: new Date(Date.now() - 60000).toISOString(),
+      txs: [
+        { hash: '0xtx3', from: 'eve', to: 'frank', amount: 0.7 }
+      ]
+    },
+    {
+      height: 1,
+      hash: '0xghi789',
+      time: new Date(Date.now() - 120000).toISOString(),
+      txs: []
+    }
+  ],
   timeline: [
     { id: uuidv4(), type: 'agent', agent: 'Phi', text: "created a branch `main`", time: new Date().toISOString() },
     { id: uuidv4(), type: 'agent', agent: 'GPT', text: "ran a code generation (env: prod, branch: main)", time: new Date().toISOString() },

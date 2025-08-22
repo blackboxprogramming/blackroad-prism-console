@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import io from 'socket.io-client'
+import { Routes, Route, Link } from 'react-router-dom'
 import { API_BASE, setToken, login, me, fetchTimeline, fetchTasks, fetchCommits, fetchAgents, fetchWallet, fetchContradictions, getNotes, setNotes, action } from './api'
 import { Activity, Brain, Cpu, Database, GitCommit, LayoutGrid, Rocket, Settings, ShieldCheck, SquareDashedMousePointer, Wallet } from 'lucide-react'
 import Timeline from './components/Timeline.jsx'
@@ -7,6 +8,7 @@ import Tasks from './components/Tasks.jsx'
 import Commits from './components/Commits.jsx'
 import AgentStack from './components/AgentStack.jsx'
 import Login from './components/Login.jsx'
+import RoadChain from './components/RoadChain.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -86,6 +88,7 @@ export default function App(){
               <NavItem icon={<Database size={18} />} text="Datasets" />
               <NavItem icon={<ShieldCheck size={18} />} text="Models" />
               <NavItem icon={<Settings size={18} />} text="Integrations" />
+              <NavItem icon={<Rocket size={18} />} text="RoadChain" to="/roadchain" />
             </nav>
 
             <button className="btn w-full text-white font-semibold">Start Co‑Coding</button>
@@ -104,20 +107,30 @@ export default function App(){
           {/* Main */}
           <main className="flex-1 px-6 py-4 grid grid-cols-12 gap-6">
             <section className="col-span-8">
-              <header className="flex items-center gap-8 border-b border-slate-800 mb-4">
-                <Tab onClick={()=>setTab('timeline')} active={tab==='timeline'}>Timeline</Tab>
-                <Tab onClick={()=>setTab('tasks')} active={tab==='tasks'}>Tasks</Tab>
-                <Tab onClick={()=>setTab('commits')} active={tab==='commits'}>Commits</Tab>
-                <div className="ml-auto flex items-center gap-2 py-3">
-                  <button className="badge" onClick={()=>onAction('run')}>Run</button>
-                  <button className="badge" onClick={()=>onAction('revert')}>Revert</button>
-                  <button className="badge" onClick={()=>onAction('mint')}><Wallet size={14}/> Mint</button>
-                </div>
-              </header>
+              <Routes>
+                <Route path="/roadchain" element={<RoadChain />} />
+                <Route
+                  path="/"
+                  element={
+                    <>
+                      <header className="flex items-center gap-8 border-b border-slate-800 mb-4">
+                        <Tab onClick={()=>setTab('timeline')} active={tab==='timeline'}>Timeline</Tab>
+                        <Tab onClick={()=>setTab('tasks')} active={tab==='tasks'}>Tasks</Tab>
+                        <Tab onClick={()=>setTab('commits')} active={tab==='commits'}>Commits</Tab>
+                        <div className="ml-auto flex items-center gap-2 py-3">
+                          <button className="badge" onClick={()=>onAction('run')}>Run</button>
+                          <button className="badge" onClick={()=>onAction('revert')}>Revert</button>
+                          <button className="badge" onClick={()=>onAction('mint')}><Wallet size={14}/> Mint</button>
+                        </div>
+                      </header>
 
-              {tab==='timeline' && <Timeline items={timeline} />}
-              {tab==='tasks' && <Tasks items={tasks} />}
-              {tab==='commits' && <Commits items={commits} />}
+                      {tab==='timeline' && <Timeline items={timeline} />}
+                      {tab==='tasks' && <Tasks items={tasks} />}
+                      {tab==='commits' && <Commits items={commits} />}
+                    </>
+                  }
+                />
+              </Routes>
             </section>
 
             {/* Right bar */}
@@ -131,9 +144,17 @@ export default function App(){
   )
 }
 
-function NavItem({ icon, text }){
+function NavItem({ icon, text, to }){
+  const className = "flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-900 cursor-pointer";
+  if (to) {
+    return (
+      <Link to={to} className={className}>
+        {icon}<span>{text}</span>
+      </Link>
+    )
+  }
   return (
-    <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-900 cursor-pointer">
+    <div className={className}>
       {icon}<span>{text}</span>
     </div>
   )
