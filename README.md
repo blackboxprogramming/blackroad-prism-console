@@ -1,160 +1,55 @@
-<!-- FILE: /srv/blackroad-api/README.md -->
-# BlackRoad.io Backend (API + Socket.IO + SQLite)
+# BlackRoad.io — Dependency & Ops Bundle
+Date: 2025-08-22
 
-This is a production-ready Express backend for **blackroad.io**, featuring:
+This bundle is a **drop-in helper** to resolve “missing dependencies etc.” without requiring
+connector access. Push it into your working copy, then run one script on the server to scan
+your API, install missing npm packages, set up env defaults, and (optionally) boot a local
+LLM stub on port **8000** if none is running.
 
-- Express API with modular routers
-- Cookie-session auth + bcrypt password hashing
-- SQLite (via better-sqlite3) with auto-migrations
-- Socket.IO real-time metrics
-- RoadCoin wallet ledger (mint + transfer)
-- Agents, tasks, notes, timeline, commits, contradictions
-- LLM bridge to local `lucidia-llm` (FastAPI on port 8000)
-- Deployment webhook (optional) + healthcheck
-- NGINX & systemd examples
+**What’s included**
+- `ops/install.sh` — one-shot setup for `/srv/blackroad-api` (or detected API path)
+- `tools/dep-scan.js` — scans JS/TS for `require()`/`import` usage and installs missing packages
+- `tools/verify-runtime.sh` — quick health checks (API on 4000, LLM on 8000)
+- `srv/blackroad-api/.env.example` — sample env for your Express API
+- `srv/blackroad-api/package.json.sample` — a safe starter if your API has no package.json
+- `srv/lucidia-llm/` — minimal FastAPI echo stub (only used if you don’t already run an LLM on 8000)
+- `srv/lucia-llm/` — same stub (duplicate dir name for compatibility with earlier scripts)
+
+> Nothing here overwrites your existing code. The scripts are defensive: they detect paths,
+> **merge** deps, and only generate files if missing.
 
 ---
 
-## Quick Start
+## Quick start
+**On your workstation**
+1) Unzip this at the **root of your working copy** (where your repo root lives).
+2) Commit and push.
 
+**On the server**
 ```bash
-# On server
-sudo mkdir -p /srv/blackroad-api
-cd /srv/blackroad-api
-# Copy the extracted files here (from the provided zip)
-
-cp .env.example .env   # then edit secrets
-npm install
-
-# First run will create the SQLite DB and apply migrations.
-npm run seed           # creates the admin (uses env vars)
-
-# Start (dev)
-npm run dev
-
-# Start (prod, optional systemd below)
-npm start
+cd /path/to/your/working/copy
+sudo bash ops/install.sh
+bash tools/verify-runtime.sh
 ```
 
-### Environment
-
-Edit `.env`:
-
-```
-NODE_ENV=production
-PORT=4000
-DB_PATH=/srv/blackroad-api/blackroad.db
-SESSION_SECRET=...
-JWT_SECRET=...
-SOCKET_SECRET=...
-ALLOWED_ORIGIN=https://blackroad.io
-ADMIN_EMAIL=root@blackroad.io
-ADMIN_PASSWORD=Codex2025
-ADMIN_NAME=Root
-LUCIDIA_LLM_URL=http://127.0.0.1:8000
-DEPLOY_WEBHOOK_SECRET=...
-ALLOW_DEPLOY_RUN=false
-LOG_DIR=/var/log/blackroad-api
-```
-
-### NGINX
-
-Use the provided snippet at `./nginx/blackroad_api_snippet.conf` inside your main server block.
-
-### systemd
-
-Use `./system/blackroad-api.service` and `./system/lucidia-llm.service` (optional) then:
-
-```bash
-sudo cp system/blackroad-api.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now blackroad-api
-
-# Optional LLM stub
-sudo apt-get install -y python3-venv
-sudo mkdir -p /srv/lucidia-llm
-cp -r lucidia-llm/* /srv/lucidia-llm/
-cd /srv/lucidia-llm
-python3 -m venv .venv && . .venv/bin/activate
-pip install -r requirements.txt
-sudo cp /srv/blackroad-api/system/lucidia-llm.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now lucidia-llm
-```
-
-### Healthcheck
-
-```
-curl -s http://127.0.0.1:4000/api/health | jq
-```
-
-### Default Admin
-
-- Email: `root@blackroad.io`
-- Password: `Codex2025`
-
-> **Change these immediately in production.**
+- The installer will:
+  - Locate your API (prefers `./srv/blackroad-api`, then `/srv/blackroad-api`, else searches for `server_full.js`)
+  - Create `package.json` if missing and **auto-install** any missing npm packages it finds
+  - Create `.env` from the example if missing and generate strong secrets
+  - Ensure your SQLite file exists (defaults to `blackroad.db` inside the API dir if `DB_PATH` is not set)
+  - Check if `127.0.0.1:8000` is serving `/health`. If not, it prints a one-liner to launch the stub.
 
 ---
 
-## Project Layout
+## Notes & assumptions
+- Stack recorded in memory (Aug 2025): SPA on `/var/www/blackroad/index.html`, Express API on port **4000**
+  at `/srv/blackroad-api` with SQLite; LLM service on **127.0.0.1:8000**; NGINX proxies `/api` and `/ws`.
+- This bundle does **not** ship `node_modules/` (native builds vary by machine). Instead, it generates
+  and installs what’s actually needed by **scanning your sources**.
+- If your API already has `package.json`, nothing is overwritten; missing deps are added.
+- If you maintain your API directly under a different path, run the scanner manually, e.g.:
+  ```bash
+  node tools/dep-scan.js --dir /path/to/api --save
+  ```
 
-```
-/srv/blackroad-api
-├── server_full.js
-├── package.json
-├── .env.example
-├── src/
-│   ├── config.js
-│   ├── logger.js
-│   ├── db.js
-│   ├── auth.js
-│   ├── rateLimiter.js
-│   ├── socket.js
-│   ├── routes/
-│   │   ├── index.js
-│   │   ├── auth.js
-│   │   ├── users.js
-│   │   ├── agents.js
-│   │   ├── wallet.js
-│   │   ├── notes.js
-│   │   ├── tasks.js
-│   │   ├── timeline.js
-│   │   ├── contradictions.js
-│   │   ├── commits.js
-│   │   ├── metrics.js
-│   │   ├── health.js
-│   │   ├── llm.js
-│   │   └── deploy.js
-│   ├── services/
-│   │   ├── agentService.js
-│   │   ├── walletService.js
-│   │   ├── llmService.js
-│   │   ├── metricsService.js
-│   │   └── notifyService.js
-│   └── utils/
-│       ├── crypto.js
-│       └── validate.js
-├── db/
-│   └── migrations/
-│       └── 0001_init.sql
-├── scripts/
-│   ├── seed_admin.js
-│   └── deploy.sh
-├── system/
-│   ├── blackroad-api.service
-│   ├── lucidia-llm.service
-│   └── healthcheck.sh
-└── nginx/
-    └── blackroad_api_snippet.conf
-```
-
----
-
-## Security Notes
-
-- Put **strong secrets** in `.env`.
-- Set `NODE_ENV=production` in production.
-- Set `ALLOW_DEPLOY_RUN=false` unless you need auto-deploy.
-- SQLite file permissions should restrict non-root access.
-- NGINX adds further security headers; see snippet.
+If anything looks off, run `bash tools/verify-runtime.sh` and share the output.
