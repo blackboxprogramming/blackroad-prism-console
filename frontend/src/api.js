@@ -36,6 +36,16 @@ export async function fetchWallet(){
   const { data } = await axios.get(`${API_BASE}/api/wallet`)
   return data.wallet
 }
+
+export async function fetchRoadcoinWallet(){
+  const { data } = await axios.get(`${API_BASE}/api/roadcoin/wallet`)
+  return data
+}
+
+export async function mintRoadcoin(){
+  const { data } = await axios.post(`${API_BASE}/api/roadcoin/mint`)
+  return data
+}
 export async function fetchContradictions(){
   const { data } = await axios.get(`${API_BASE}/api/contradictions`)
   return data.contradictions
