@@ -18,6 +18,7 @@ import You from './components/You.jsx'
 import Claude from './components/Claude.jsx'
 import Codex from './components/Codex.jsx'
 import Roadbook from './components/Roadbook.jsx'
+import Subscribe from './Subscribe.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -41,6 +42,7 @@ export default function App(){
   const isDashboard = path === '/dashboard'
   const isYou = path === '/you'
   const isCodex = path === '/codex'
+  const isSubscribe = path === '/subscribe'
 
   // bootstrap auth from localstorage
   useEffect(()=>{
@@ -85,6 +87,10 @@ export default function App(){
 
   async function onAction(name){
     await action(name)
+  }
+
+  if (isSubscribe) {
+    return <Subscribe />
   }
 
   return (
