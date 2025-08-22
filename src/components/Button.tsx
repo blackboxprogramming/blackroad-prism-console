@@ -1,6 +1,6 @@
 import React from 'react';
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
-type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'positive';
+type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '40pt';
 type State = 'idle' | 'loading' | 'success' | 'error';
 
 const base =
@@ -10,12 +10,14 @@ const byVariant: Record<Variant, string> = {
   primary:   'bg-[var(--accent)] text-black hover:bg-[var(--accent-strong)]',
   secondary: 'bg-[var(--bg-elev-2)] text-[var(--text)] hover:bg-[var(--bg-elev-1)] border border-[var(--border)]',
   ghost:     'bg-transparent text-[var(--text)] hover:bg-[var(--bg-elev-2)]',
-  danger:    'bg-[var(--danger)] text-white hover:brightness-110'
+  danger:    'bg-[var(--danger)] text-white hover:brightness-110',
+  positive:  'bg-[var(--accent-3)] text-[color:var(--on-warm)] hover:brightness-105'
 };
 
 const bySize: Record<Size, string> = {
   xs: 'h-7 px-2 text-xs', sm: 'h-8 px-3 text-sm', md: 'h-10 px-4 text-sm',
-  lg: 'h-12 px-5 text-base', xl: 'h-14 px-6 text-lg'
+  lg: 'h-12 px-5 text-base', xl: 'h-14 px-6 text-lg',
+  '40pt': 'h-[40pt] px-6 text-lg'
 };
 
 export function Button({
@@ -23,8 +25,10 @@ export function Button({
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: Size; state?: State }) {
   const cls = [base, byVariant[variant], bySize[size]].join(' ');
   return (
-    <button className={cls} data-state={state} {...props}>
+    <button data-brand="blackroad" className={cls} data-state={state} {...props}>
       {children}
     </button>
   );
 }
+
+// BrandAudit: { "fills":["--accent-3"], "text":"--on-warm", "focus":"--accent-2" }
