@@ -63,4 +63,14 @@ export async function action(name){
   return data
 }
 
+export async function runCodex(prompt){
+  const { data } = await axios.post(`${API_BASE}/api/codex/run`, { prompt })
+  return data
+}
+
+export async function fetchCodexHistory(){
+  const { data } = await axios.get(`${API_BASE}/api/codex/history`)
+  return data.runs
+}
+
 export { API_BASE }

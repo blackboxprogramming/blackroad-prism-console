@@ -26,7 +26,8 @@ const store = {
   timeline: [
     { id: uuidv4(), type: 'agent', agent: 'Phi', text: "created a branch `main`", time: new Date().toISOString() },
     { id: uuidv4(), type: 'agent', agent: 'GPT', text: "ran a code generation (env: prod, branch: main)", time: new Date().toISOString() },
-  ]
+  ],
+  codexRuns: []
 };
 
 function addTimeline(evt){

@@ -8,6 +8,7 @@ import Commits from './components/Commits.jsx'
 import AgentStack from './components/AgentStack.jsx'
 import Login from './components/Login.jsx'
 import RoadCoin from './components/RoadCoin.jsx'
+import Codex from './components/Codex.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -24,6 +25,7 @@ export default function App(){
   const [stream, setStream] = useState(true)
   const path = window.location.pathname
   const isRoadcoin = path === '/roadcoin'
+  const isCodex = path === '/codex'
 
   // bootstrap auth from localstorage
   useEffect(()=>{
@@ -89,6 +91,7 @@ export default function App(){
               <NavItem icon={<Database size={18} />} text="Datasets" />
               <NavItem icon={<ShieldCheck size={18} />} text="Models" />
               <NavItem icon={<Settings size={18} />} text="Integrations" />
+              <NavItem icon={<Cpu size={18} />} text="Codex" href="/codex" />
               <NavItem icon={<Wallet size={18} />} text="RoadCoin" href="/roadcoin" />
             </nav>
 
@@ -108,7 +111,9 @@ export default function App(){
           {/* Main */}
           <main className="flex-1 px-6 py-4 grid grid-cols-12 gap-6">
             <section className="col-span-8">
-              {!isRoadcoin && (
+              {isRoadcoin && <RoadCoin onUpdate={(data)=>setWallet({ rc: data.balance })} />}
+              {isCodex && <Codex socket={socket} />}
+              {!isRoadcoin && !isCodex && (
                 <>
                   <header className="flex items-center gap-8 border-b border-slate-800 mb-4">
                     <Tab onClick={()=>setTab('timeline')} active={tab==='timeline'}>Timeline</Tab>
@@ -126,7 +131,6 @@ export default function App(){
                   {tab==='commits' && <Commits items={commits} />}
                 </>
               )}
-              {isRoadcoin && <RoadCoin onUpdate={(data)=>setWallet({ rc: data.balance })} />}
             </section>
 
             {/* Right bar */}
