@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Lucidia Co Coding Portal</title>
+  </head>
+  <body>
+    <h1>Lucidia Co Coding Portal</h1>
+    <form id="code-form">
+      <textarea id="code" rows="10" cols="80" placeholder="print('Hello')"></textarea><br />
+      <button type="submit">Run</button>
+    </form>
+    <pre id="output"></pre>
+    <script>
+      document.getElementById('code-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const code = document.getElementById('code').value;
+        const response = await fetch('/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code }),
+        });
+        const data = await response.json();
+        document.getElementById('output').textContent = data.output;
+      });
+    </script>
+  </body>
+</html>
