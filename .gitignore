@@ -1,3 +1,7 @@
+# Sensitive SSH keys
+sshprivate.sh
+publicssh.sh
+
 # Node
 node_modules/
 dist/
