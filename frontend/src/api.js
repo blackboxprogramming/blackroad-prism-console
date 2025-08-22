@@ -63,4 +63,19 @@ export async function action(name){
   return data
 }
 
+export async function fetchGuardianStatus(){
+  const { data } = await axios.get(`${API_BASE}/api/guardian/status`)
+  return data
+}
+
+export async function fetchGuardianAlerts(){
+  const { data } = await axios.get(`${API_BASE}/api/guardian/alerts`)
+  return data.alerts
+}
+
+export async function resolveGuardianAlert(id, status='resolved'){
+  const { data } = await axios.post(`${API_BASE}/api/guardian/alerts/${id}/resolve`, { status })
+  return data.alert
+}
+
 export { API_BASE }

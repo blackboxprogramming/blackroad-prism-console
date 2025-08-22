@@ -130,6 +130,20 @@ app.post('/api/lucidia/chat', (req, res) => {
       store.lucidiaHistory.push({ id, prompt, response: acc.trim() });
     }
   }, 200);
+// Guardian endpoints
+app.get('/api/guardian/status', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json(store.guardian.status);
+});
+
+app.get('/api/guardian/alerts', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json({ alerts: store.guardian.alerts });
+});
+
+app.post('/api/guardian/alerts/:id/resolve', authMiddleware(JWT_SECRET), (req, res)=>{
+  const alert = store.guardian.alerts.find(a=>a.id === req.params.id);
+  if (!alert) return res.status(404).json({ error: 'not found' });
+  alert.status = req.body?.status || 'resolved';
+  res.json({ ok: true, alert });
 });
 
 // Actions

@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import io from 'socket.io-client'
 import { API_BASE, setToken, login, me, fetchTimeline, fetchTasks, fetchCommits, fetchAgents, fetchRoadcoinWallet, fetchContradictions, getNotes, setNotes, action } from './api'
+import { API_BASE, setToken, login, me, fetchTimeline, fetchTasks, fetchCommits, fetchAgents, fetchWallet, fetchContradictions, getNotes, setNotes, action } from './api'
+import Guardian from './Guardian.jsx'
 import { Activity, Brain, Cpu, Database, GitCommit, LayoutGrid, Rocket, Settings, ShieldCheck, SquareDashedMousePointer, Wallet } from 'lucide-react'
 import Timeline from './components/Timeline.jsx'
 import Tasks from './components/Tasks.jsx'
@@ -24,6 +26,7 @@ export default function App(){
   const [stream, setStream] = useState(true)
   const path = window.location.pathname
   const isRoadcoin = path === '/roadcoin'
+  const route = window.location.pathname
 
   // bootstrap auth from localstorage
   useEffect(()=>{
@@ -128,6 +131,26 @@ export default function App(){
               )}
               {isRoadcoin && <RoadCoin onUpdate={(data)=>setWallet({ rc: data.balance })} />}
             </section>
+            {route === '/guardian' ? (
+              <Guardian />
+            ) : (
+              <section className="col-span-8">
+                <header className="flex items-center gap-8 border-b border-slate-800 mb-4">
+                  <Tab onClick={()=>setTab('timeline')} active={tab==='timeline'}>Timeline</Tab>
+                  <Tab onClick={()=>setTab('tasks')} active={tab==='tasks'}>Tasks</Tab>
+                  <Tab onClick={()=>setTab('commits')} active={tab==='commits'}>Commits</Tab>
+                  <div className="ml-auto flex items-center gap-2 py-3">
+                    <button className="badge" onClick={()=>onAction('run')}>Run</button>
+                    <button className="badge" onClick={()=>onAction('revert')}>Revert</button>
+                    <button className="badge" onClick={()=>onAction('mint')}><Wallet size={14}/> Mint</button>
+                  </div>
+                </header>
+
+                {tab==='timeline' && <Timeline items={timeline} />}
+                {tab==='tasks' && <Tasks items={tasks} />}
+                {tab==='commits' && <Commits items={commits} />}
+              </section>
+            )}
 
             {/* Right bar */}
             <section className="col-span-4 flex flex-col gap-4">
