@@ -103,6 +103,14 @@ app.post('/api/notes', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json({ ok: true });
 });
 
+// RoadView sample streams
+app.get('/api/roadview/list', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json({ streams: [
+    { id: 'cam-1', name: 'Main Street', status: 'offline' },
+    { id: 'cam-2', name: 'Downtown', status: 'offline' }
+  ]});
+});
+
 // Actions
 app.post('/api/actions/run', authMiddleware(JWT_SECRET), (req,res)=>{
   const item = addTimeline({ type: 'action', text: 'Run triggered', by: req.user.username });

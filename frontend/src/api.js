@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000'
+const API_BASE = import.meta.env.VITE_API_BASE || ''
 
 export function setToken(token){
   axios.defaults.headers.common['Authorization'] = token ? `Bearer ${token}` : ''
@@ -51,6 +51,11 @@ export async function setNotes(notes){
 export async function action(name){
   const { data } = await axios.post(`${API_BASE}/api/actions/${name}`)
   return data
+}
+
+export async function fetchRoadviewStreams(){
+  const { data } = await axios.get(`${API_BASE}/api/roadview/list`)
+  return data.streams
 }
 
 export { API_BASE }
