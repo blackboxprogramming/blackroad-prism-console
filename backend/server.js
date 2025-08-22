@@ -103,6 +103,35 @@ app.post('/api/notes', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json({ ok: true });
 });
 
+// ---- Lucidia ----
+app.get('/api/lucidia/history', (req, res) => {
+  res.json({ history: store.lucidiaHistory });
+});
+
+app.post('/api/lucidia/chat', (req, res) => {
+  const prompt = String(req.body?.prompt || '');
+  const id = Date.now().toString();
+  const full = `Lucidia response to: ${prompt}. This is a sample streamed reply.`;
+  const parts = full.split(' ');
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Transfer-Encoding', 'chunked');
+  let idx = 0;
+  let acc = '';
+  const interval = setInterval(() => {
+    if (idx < parts.length) {
+      const chunk = parts[idx] + ' ';
+      res.write(chunk);
+      acc += chunk;
+      io.emit('lucidia:chat', { id, chunk });
+      idx++;
+    } else {
+      clearInterval(interval);
+      res.end();
+      store.lucidiaHistory.push({ id, prompt, response: acc.trim() });
+    }
+  }, 200);
+});
+
 // Actions
 app.post('/api/actions/run', authMiddleware(JWT_SECRET), (req,res)=>{
   const item = addTimeline({ type: 'action', text: 'Run triggered', by: req.user.username });
