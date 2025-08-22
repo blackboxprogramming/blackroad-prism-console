@@ -103,6 +103,27 @@ app.post('/api/notes', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json({ ok: true });
 });
 
+// Dashboard
+app.get('/api/dashboard/system', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json({ cpu, gpu, memory: mem, network: net });
+});
+
+app.get('/api/dashboard/feed', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json({ events: store.timeline.slice(0, 20) });
+});
+
+// Personal profile
+app.get('/api/you/profile', authMiddleware(JWT_SECRET), (req, res)=>{
+  const user = store.users[0];
+  res.json({
+    username: user.username,
+    plan: user.plan || 'free',
+    lastLogin: user.lastLogin || nowISO(),
+    tasks: store.tasks,
+    projects: store.projects || []
+  });
+});
+
 // Actions
 app.post('/api/actions/run', authMiddleware(JWT_SECRET), (req,res)=>{
   const item = addTimeline({ type: 'action', text: 'Run triggered', by: req.user.username });
@@ -140,16 +161,17 @@ function randomWalk(prev, step=2, min=0, max=100){
   return Number(v.toFixed(1));
 }
 
-let cpu=35, mem=62, gpu=24;
+let cpu=35, mem=62, gpu=24, net=40;
 setInterval(()=>{
   cpu = randomWalk(cpu, 3);
   mem = randomWalk(mem, 2);
   gpu = randomWalk(gpu, 1);
-  io.emit('system:update', { cpu, mem, gpu, at: nowISO() });
+  net = randomWalk(net, 5);
+  io.emit('system:update', { cpu, mem, gpu, net, at: nowISO() });
 }, 2000);
 
 io.on('connection', (socket)=>{
-  socket.emit('system:update', { cpu, mem, gpu, at: nowISO() });
+  socket.emit('system:update', { cpu, mem, gpu, net, at: nowISO() });
   socket.emit('wallet:update', store.wallet);
   socket.emit('notes:update', store.sessionNotes);
 });

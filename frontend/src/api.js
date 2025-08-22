@@ -63,4 +63,19 @@ export async function action(name){
   return data
 }
 
+export async function fetchDashboardSystem(){
+  const { data } = await axios.get(`${API_BASE}/api/dashboard/system`)
+  return data
+}
+
+export async function fetchDashboardFeed(){
+  const { data } = await axios.get(`${API_BASE}/api/dashboard/feed`)
+  return data.events
+}
+
+export async function fetchProfile(){
+  const { data } = await axios.get(`${API_BASE}/api/you/profile`)
+  return data
+}
+
 export { API_BASE }
