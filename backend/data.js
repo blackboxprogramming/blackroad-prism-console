@@ -37,6 +37,7 @@ const store = {
     { id: uuidv4(), type: 'agent', agent: 'GPT', text: "ran a code generation (env: prod, branch: main)", time: new Date().toISOString() },
   ],
   lucidiaHistory: []
+  claudeHistory: []
 };
 
 function addTimeline(evt){

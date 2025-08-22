@@ -163,6 +163,27 @@ app.get('/api/you/profile', authMiddleware(JWT_SECRET), (req, res)=>{
     tasks: store.tasks,
     projects: store.projects || []
   });
+// Claude chat
+app.post('/api/claude/chat', authMiddleware(JWT_SECRET), (req, res)=>{
+  const prompt = String(req.body?.prompt || '');
+  const response = `Claude heard: ${prompt}`;
+  let sent = 0;
+  const chunks = response.match(/.{1,10}/g) || [];
+  const interval = setInterval(()=>{
+    if (sent < chunks.length){
+      io.emit('claude:chat', { chunk: chunks[sent], done: false });
+      sent++;
+    } else {
+      io.emit('claude:chat', { done: true });
+      store.claudeHistory.push({ prompt, response });
+      clearInterval(interval);
+    }
+  }, 200);
+  res.json({ ok: true });
+});
+
+app.get('/api/claude/history', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json({ history: store.claudeHistory });
 });
 
 // Actions

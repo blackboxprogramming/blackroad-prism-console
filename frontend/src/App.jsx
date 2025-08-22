@@ -13,6 +13,7 @@ import Login from './components/Login.jsx'
 import RoadCoin from './components/RoadCoin.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import You from './components/You.jsx'
+import Claude from './components/Claude.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -32,6 +33,7 @@ export default function App(){
   const route = window.location.pathname
   const isDashboard = path === '/dashboard'
   const isYou = path === '/you'
+  const isClaude = path === '/claude'
 
   // bootstrap auth from localstorage
   useEffect(()=>{
@@ -99,6 +101,7 @@ export default function App(){
               <NavItem icon={<Database size={18} />} text="Datasets" />
               <NavItem icon={<ShieldCheck size={18} />} text="Models" />
               <NavItem icon={<Settings size={18} />} text="Integrations" />
+              <NavItem icon={<Cpu size={18} />} text="Claude" href="/claude" />
               <NavItem icon={<Wallet size={18} />} text="RoadCoin" href="/roadcoin" />
             </nav>
 
@@ -121,6 +124,7 @@ export default function App(){
               {isDashboard && <Dashboard />}
               {isYou && <You />}
               {!isDashboard && !isYou && !isRoadcoin && (
+              {!isRoadcoin && !isClaude && (
                 <>
                   <header className="flex items-center gap-8 border-b border-slate-800 mb-4">
                     <Tab onClick={()=>setTab('timeline')} active={tab==='timeline'}>Timeline</Tab>
@@ -139,6 +143,7 @@ export default function App(){
                 </>
               )}
               {isRoadcoin && <RoadCoin onUpdate={(data)=>setWallet({ rc: data.balance })} />}
+              {isClaude && <Claude socket={socket} />}
             </section>
             {route === '/guardian' ? (
               <Guardian />
