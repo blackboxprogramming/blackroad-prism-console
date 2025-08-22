@@ -12,6 +12,7 @@ const routes = [
   '/roadmap',
   '/changelog',
   '/blog',
+  '/about',
 ];
 
 for (const r of routes) {
