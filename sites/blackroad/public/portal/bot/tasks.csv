@@ -1,0 +1,4 @@
+id,title,status,progress
+1,Wire GPUs to agents,In Progress,0.3
+2,Policy/secret scan checks,Queued,0.0
+3,Implement streaming SSE,Done,1.0
