@@ -53,4 +53,9 @@ export async function action(name){
   return data
 }
 
+export async function fetchManifesto(){
+  const { data } = await axios.get(`${API_BASE}/api/manifesto`)
+  return data.content
+}
+
 export { API_BASE }

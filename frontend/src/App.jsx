@@ -7,6 +7,7 @@ import Tasks from './components/Tasks.jsx'
 import Commits from './components/Commits.jsx'
 import AgentStack from './components/AgentStack.jsx'
 import Login from './components/Login.jsx'
+import Manifesto from './components/Manifesto.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -21,6 +22,7 @@ export default function App(){
   const [notes, setNotesState] = useState('')
   const [socket, setSocket] = useState(null)
   const [stream, setStream] = useState(true)
+  const path = window.location.pathname
 
   // bootstrap auth from localstorage
   useEffect(()=>{
@@ -80,12 +82,13 @@ export default function App(){
             </div>
 
             <nav className="space-y-1">
-              <NavItem icon={<LayoutGrid size={18} />} text="Workspace" />
+              <NavItem icon={<LayoutGrid size={18} />} text="Workspace" href="/" />
               <NavItem icon={<SquareDashedMousePointer size={18} />} text="Projects" />
               <NavItem icon={<Brain size={18} />} text="Agents" />
               <NavItem icon={<Database size={18} />} text="Datasets" />
               <NavItem icon={<ShieldCheck size={18} />} text="Models" />
               <NavItem icon={<Settings size={18} />} text="Integrations" />
+              <NavItem icon={<Rocket size={18} />} text="Manifesto" href="/manifesto" />
             </nav>
 
             <button className="btn w-full text-white font-semibold">Start Co‑Coding</button>
@@ -104,20 +107,26 @@ export default function App(){
           {/* Main */}
           <main className="flex-1 px-6 py-4 grid grid-cols-12 gap-6">
             <section className="col-span-8">
-              <header className="flex items-center gap-8 border-b border-slate-800 mb-4">
-                <Tab onClick={()=>setTab('timeline')} active={tab==='timeline'}>Timeline</Tab>
-                <Tab onClick={()=>setTab('tasks')} active={tab==='tasks'}>Tasks</Tab>
-                <Tab onClick={()=>setTab('commits')} active={tab==='commits'}>Commits</Tab>
-                <div className="ml-auto flex items-center gap-2 py-3">
-                  <button className="badge" onClick={()=>onAction('run')}>Run</button>
-                  <button className="badge" onClick={()=>onAction('revert')}>Revert</button>
-                  <button className="badge" onClick={()=>onAction('mint')}><Wallet size={14}/> Mint</button>
-                </div>
-              </header>
+              {path === '/manifesto' ? (
+                <Manifesto />
+              ) : (
+                <>
+                  <header className="flex items-center gap-8 border-b border-slate-800 mb-4">
+                    <Tab onClick={()=>setTab('timeline')} active={tab==='timeline'}>Timeline</Tab>
+                    <Tab onClick={()=>setTab('tasks')} active={tab==='tasks'}>Tasks</Tab>
+                    <Tab onClick={()=>setTab('commits')} active={tab==='commits'}>Commits</Tab>
+                    <div className="ml-auto flex items-center gap-2 py-3">
+                      <button className="badge" onClick={()=>onAction('run')}>Run</button>
+                      <button className="badge" onClick={()=>onAction('revert')}>Revert</button>
+                      <button className="badge" onClick={()=>onAction('mint')}><Wallet size={14}/> Mint</button>
+                    </div>
+                  </header>
 
-              {tab==='timeline' && <Timeline items={timeline} />}
-              {tab==='tasks' && <Tasks items={tasks} />}
-              {tab==='commits' && <Commits items={commits} />}
+                  {tab==='timeline' && <Timeline items={timeline} />}
+                  {tab==='tasks' && <Tasks items={tasks} />}
+                  {tab==='commits' && <Commits items={commits} />}
+                </>
+              )}
             </section>
 
             {/* Right bar */}
@@ -131,11 +140,12 @@ export default function App(){
   )
 }
 
-function NavItem({ icon, text }){
+function NavItem({ icon, text, href }){
+  const Comp = href ? 'a' : 'div'
   return (
-    <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-900 cursor-pointer">
+    <Comp href={href} className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-900 cursor-pointer">
       {icon}<span>{text}</span>
-    </div>
+    </Comp>
   )
 }
 

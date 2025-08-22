@@ -103,6 +103,16 @@ app.post('/api/notes', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json({ ok: true });
 });
 
+app.get('/api/manifesto', (req, res)=>{
+  const content = `<h1>Manifesto</h1><p>The BlackRoad manifesto outlines our vision.</p><h2>Principles</h2><ul><li>Openness</li><li>Autonomy</li><li>Resilience</li></ul><blockquote>Stay curious.</blockquote><p>Use <code>npm run build</code> to compile.</p>`;
+  res.json({ content });
+});
+
+app.get('/api/manifesto/download', (req, res)=>{
+  const file = path.join(__dirname, 'manifesto.pdf');
+  res.sendFile(file);
+});
+
 // Actions
 app.post('/api/actions/run', authMiddleware(JWT_SECRET), (req,res)=>{
   const item = addTimeline({ type: 'action', text: 'Run triggered', by: req.user.username });
