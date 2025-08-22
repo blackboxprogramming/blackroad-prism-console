@@ -1,0 +1,12 @@
+:root {
+  --ease-natural: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --speed-urgent: .16s; --speed-standard: .24s; --speed-contemplative: .8s;
+}
+
+.btn-premium { transition: all var(--speed-standard) var(--ease-natural); }
+.btn-premium::before { transition: left .5s; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition-duration: .01ms !important; }
+}
