@@ -1,21 +1,26 @@
 ---
-name: "🐞 Bug report"
-about: Report a problem
-labels: ["tests"]
+name: "🐛 Bug report"
+about: Report a problem with BlackRoad
+labels: [bug]
 ---
 
-**Describe the bug**
-A clear description…
+## Describe the bug
+A clear description of the issue.
 
-**To Reproduce**
-Steps…
+## To Reproduce
+Steps to reproduce:
+1.
+2.
 
-**Expected behavior**
-…
+## Expected behavior
+What should have happened?
 
-**Screenshots / Logs**
-…
+## Screenshots / Logs
+If applicable, add screenshots or logs.
 
-**Environment**
-- OS:
-- Node/Python:
+## Environment
+- URL: (prod/dev)
+- Browser/OS:
+
+## Additional context
+Anything else?
