@@ -63,4 +63,14 @@ export async function action(name){
   return data
 }
 
+export async function claudeChat(prompt){
+  const { data } = await axios.post(`${API_BASE}/api/claude/chat`, { prompt })
+  return data
+}
+
+export async function fetchClaudeHistory(){
+  const { data } = await axios.get(`${API_BASE}/api/claude/history`)
+  return data.history
+}
+
 export { API_BASE }
