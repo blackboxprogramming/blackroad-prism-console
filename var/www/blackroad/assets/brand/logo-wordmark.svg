@@ -1,0 +1,24 @@
+<!-- FILE: /var/www/blackroad/assets/brand/logo-wordmark.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1350" height="300" viewBox="0 0 1350 300" role="img" aria-labelledby="title desc">
+  <title id="title">BlackRoad Logo + Wordmark</title>
+  <desc id="desc">Logomark to the left, BLACKROAD gradient wordmark to the right.</desc>
+  <defs>
+    <linearGradient id="w" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0" stop-color="#FF4FD8"/>
+      <stop offset="50%" stop-color="#0096FF"/>
+      <stop offset="100%" stop-color="#FDBA2D"/>
+    </linearGradient>
+  </defs>
+  <!-- Logomark -->
+  <g transform="translate(10,22)">
+    <circle cx="128" cy="128" r="120" fill="#0A0A0E"/>
+    <path d="M80 248 L128 56 L176 248 Z" fill="#FFFFFF" opacity="0.96"/>
+    <path d="M88 248 L128 72 L168 248 Z" fill="#0A0A0E" opacity="0.12"/>
+    <path d="M128 244 L128 64" stroke="url(#w)" stroke-width="10" stroke-linecap="round" stroke-dasharray="18 18" fill="none"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="310" y="190"
+        font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
+        font-size="160" font-weight="900" letter-spacing="6"
+        fill="url(#w)">BLACKROAD</text>
+</svg>

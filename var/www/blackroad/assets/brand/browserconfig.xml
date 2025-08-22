@@ -1,0 +1,10 @@
+<!-- FILE: /var/www/blackroad/assets/brand/browserconfig.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<browserconfig>
+  <msapplication>
+    <tile>
+      <square150x150logo src="/assets/brand/icons/icon-256.png"/>
+      <TileColor>#0A0A0E</TileColor>
+    </tile>
+  </msapplication>
+</browserconfig>

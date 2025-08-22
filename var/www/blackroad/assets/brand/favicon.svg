@@ -1,0 +1,13 @@
+<!-- FILE: /var/www/blackroad/assets/brand/favicon.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0" stop-color="#FF4FD8"/>
+      <stop offset="50%" stop-color="#0096FF"/>
+      <stop offset="100%" stop-color="#FDBA2D"/>
+    </linearGradient>
+  </defs>
+  <circle cx="24" cy="24" r="22.5" fill="#0A0A0E"/>
+  <path d="M16 44 L24 8 L32 44 Z" fill="#FFFFFF"/>
+  <path d="M24 41 L24 11" stroke="url(#g)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="4 4"/>
+</svg>
