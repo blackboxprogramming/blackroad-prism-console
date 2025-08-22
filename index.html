@@ -1,922 +1,668 @@
+<!-- FILE: /var/www/blackroad/index.html -->
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>BlackRoad — Consciousness-Driven Development</title>
-    <style>
-      /* ---------------- Core Tokens ---------------- */
-      :root {
-        --bg-0: #0a0b10;
-        --bg-1: #0f1222;
-        --bg-2: #151a2e;
-        --panel: rgba(255, 255, 255, 0.06);
-        --panel-2: rgba(255, 255, 255, 0.08);
-        --border: rgba(255, 255, 255, 0.1);
-        --muted: #9aa4b2;
-        --text: #e9eef7;
-        --brand-1: #4ecdc4;
-        --brand-2: #667eea;
-        --danger: #ff6b6b;
-        --warn: #ffd166;
-        --ok: #43e97b;
+<head>
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+  <title>BlackRoad.io — Codex Portal</title>
+  <meta name="description" content="BlackRoad.io — AI-native co-coding portal (Codex + Lucidia)." />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>">
+  <!-- Fonts (optional, safe fallbacks) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #0c0f14;           /* deep slate */
+      --panel: #12161d;        /* card/side panels */
+      --panel-2: #0f141b;
+      --text: #e7ecf3;         /* high-contrast on dark */
+      --muted: #91a0b3;
+      --border: #1f2632;
 
-        --radius: 14px;
-        --space-1: 6px;
-        --space-2: 10px;
-        --space-3: 16px;
-        --space-4: 24px;
-        --space-5: 32px;
-        --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-        --ring: 0 0 0 3px rgba(102, 126, 234, 0.35);
-      }
-      [data-theme='light'] {
-        --bg-0: #ffffff;
-        --bg-1: #f6f7fb;
-        --bg-2: #eef1f7;
-        --panel: rgba(5, 7, 12, 0.04);
-        --panel-2: rgba(5, 7, 12, 0.06);
-        --border: rgba(0, 0, 0, 0.08);
-        --text: #0e1320;
-        --muted: #4b5565;
-      }
+      /* Brand palette (locked) */
+      --accent:   #FF4FD8;   /* primary neon magenta  */
+      --accent-2: #0096FF;   /* electric blue         */
+      --accent-3: #FDBA2D;   /* amber                 */
 
-      @media (prefers-reduced-motion: reduce) {
-        * {
-          animation-duration: 0.001ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: 0.001ms !important;
-        }
-      }
+      --ok: #19c37d;
+      --warn: #f5a524;
+      --err: #ef4444;
 
-      * {
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        height: 100%;
-      }
-      body {
-        margin: 0;
-        font:
-          14px/1.4 system-ui,
-          -apple-system,
-          Segoe UI,
-          Roboto,
-          Inter,
-          sans-serif;
-        color: var(--text);
-        background:
-          radial-gradient(1200px 600px at -10% -20%, #1a1a2e33, transparent 60%),
-          radial-gradient(1000px 600px at 120% 10%, #16213e55, transparent 60%),
-          linear-gradient(135deg, var(--bg-1), var(--bg-0) 50%, var(--bg-2));
-      }
+      --radius: 10px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+      letter-spacing:.2px;
+    }
+    a{color:var(--accent-2); text-decoration:none}
+    a:hover{text-decoration:underline}
 
-      /* ---------------- Layout ---------------- */
-      .app {
-        display: grid;
-        grid-template-columns: 260px 1fr 320px;
-        grid-template-rows: 64px 1fr;
-        min-height: 100vh;
-      }
-      header {
-        grid-column: 1 / -1;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 var(--space-4);
-        backdrop-filter: blur(10px);
-        background: color-mix(in oklab, var(--bg-0), black 10%);
-        border-bottom: 1px solid var(--border);
-        position: sticky;
-        top: 0;
-        z-index: 5;
-      }
-      .brand {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-      }
-      .logo {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        display: grid;
-        place-items: center;
-        background: conic-gradient(from 220deg, #ff6b6b, #ff9f43, #4ecdc4, #45b7d1, #667eea);
-        color: #0c0f17;
-        font-weight: 800;
-      }
-      .search {
-        flex: 1 1 auto;
-        max-width: 560px;
-        margin: 0 var(--space-4);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        padding: 10px 14px;
-      }
-      .search input {
-        flex: 1;
-        background: transparent;
-        border: 0;
-        outline: none;
-        color: var(--text);
-      }
-      .hdr-actions {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-      }
-      .btn {
-        appearance: none;
-        border: 1px solid var(--border);
-        background: var(--panel);
-        color: var(--text);
-        padding: 8px 12px;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: 0.2s ease;
-        box-shadow: none;
-      }
-      .btn:hover {
-        background: var(--panel-2);
-      }
-      .btn:focus-visible {
-        outline: none;
-        box-shadow: var(--ring);
-      }
+    .app{
+      display:grid;
+      grid-template-columns: 260px 1fr;
+      grid-template-rows: 56px 1fr;
+      grid-template-areas:
+        "sidebar header"
+        "sidebar main";
+      height:100%;
+    }
 
-      aside {
-        border-right: 1px solid var(--border);
-        background: color-mix(in oklab, var(--bg-0), black 10%);
-        padding: var(--space-4) var(--space-3);
-      }
-      .nav-title {
-        color: var(--muted);
-        font-size: 11px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        margin: 20px 10px 8px;
-      }
-      .nav a {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        padding: 10px 12px;
-        margin: 4px 0;
-        color: inherit;
-        text-decoration: none;
-        border-radius: 10px;
-        border: 1px solid transparent;
-      }
-      .nav a:hover {
-        background: var(--panel);
-      }
-      .nav a[aria-current='page'] {
-        background: var(--panel);
-        border-color: var(--border);
-      }
+    .sidebar{
+      grid-area: sidebar; background:linear-gradient(180deg,var(--panel),var(--panel-2));
+      border-right:1px solid var(--border);
+      display:flex; flex-direction:column; gap:12px; padding:14px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px;
+      background:linear-gradient(90deg,rgba(255,79,216,.14),rgba(0,150,255,.08));
+      border:1px solid var(--border);
+    }
+    .brand .dot{width:12px; height:12px; border-radius:50%; background:var(--accent); box-shadow:0 0 16px var(--accent)}
+    .brand .title{font-weight:700; letter-spacing:.4px}
+    .brand .subtitle{font-size:12px; color:var(--muted)}
 
-      main {
-        padding: var(--space-4);
-        overflow: auto;
-      }
-      .right {
-        padding: var(--space-4);
-        border-left: 1px solid var(--border);
-        background: color-mix(in oklab, var(--bg-0), black 8%);
-        overflow: auto;
-      }
+    .nav{
+      display:flex; flex-direction:column; gap:6px; margin-top:4px;
+    }
+    .nav button{
+      appearance:none; border:1px solid var(--border); background:transparent; color:var(--text);
+      text-align:left; padding:10px 12px; border-radius:8px; cursor:pointer; font-weight:500;
+    }
+    .nav button:hover{background:#131925}
+    .nav button.active{
+      background:linear-gradient(90deg,rgba(0,150,255,.12),rgba(255,79,216,.10));
+      border-color:rgba(0,150,255,.35);
+      outline:1px solid rgba(255,79,216,.35);
+    }
 
-      /* ---------------- Cards / Modules ---------------- */
-      .grid {
-        display: grid;
-        gap: var(--space-4);
-      }
-      .cards {
-        display: grid;
-        gap: var(--space-4);
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      }
-      .card {
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: var(--space-4);
-        box-shadow: var(--shadow);
-        transition:
-          0.2s ease transform,
-          0.2s ease background;
-      }
-      .card:hover {
-        transform: translateY(-3px);
-        background: var(--panel-2);
-      }
+    .presence{
+      margin-top:auto; border:1px dashed var(--border); border-radius:8px; padding:10px;
+      font-size:12px; color:var(--muted);
+    }
+    .presence strong{color:var(--text)}
+    .presence .chip{display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid var(--border); margin-right:6px}
+    .presence .ok{border-color:rgba(25,195,125,.5); color:#a5f3d6}
+    .presence .warn{border-color:rgba(245,165,36,.5); color:#fde3b3}
 
-      .status {
-        padding: 3px 10px;
-        border-radius: 999px;
-        font-weight: 600;
-        font-size: 12px;
-        display: inline-block;
-      }
-      .s-active {
-        color: var(--ok);
-        background: color-mix(in oklab, var(--ok), transparent 85%);
-      }
-      .s-dev {
-        color: #ffd166;
-        background: color-mix(in oklab, #ffd166, transparent 85%);
-      }
+    .header{
+      grid-area: header; display:flex; align-items:center; gap:12px; padding:10px 16px;
+      border-bottom:1px solid var(--border); background:rgba(10,14,19,.65); backdrop-filter: blur(10px);
+      position:sticky; top:0; z-index:2;
+    }
+    .search{
+      display:flex; gap:8px; align-items:center; width:520px; max-width:60vw; background:var(--panel); border:1px solid var(--border);
+      border-radius:999px; padding:6px 10px;
+    }
+    .search input{
+      flex:1; border:none; outline:none; background:transparent; color:var(--text); font-family:inherit; font-size:14px;
+    }
+    .btn{
+      appearance:none; border:1px solid var(--border); border-radius:8px; padding:8px 12px; background:transparent; color:var(--text); cursor:pointer;
+    }
+    .btn.acc{ border-color: rgba(255,79,216,.35); background:linear-gradient(90deg, rgba(255,79,216,.16), rgba(0,150,255,.12)); }
+    .btn:disabled{opacity:.5; cursor:not-allowed}
 
-      /* ---------------- Consciousness Panel ---------------- */
-      .metrics h3 {
-        margin: 0 0 4px;
-      }
-      .metric {
-        margin-bottom: 14px;
-      }
-      .bar {
-        height: 8px;
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        overflow: hidden;
-      }
-      .bar > i {
-        display: block;
-        height: 100%;
-        width: 0%;
-        transition: width 0.7s ease;
-      }
-      .phi {
-        background: linear-gradient(90deg, var(--brand-2), #764ba2);
-      }
-      .ent {
-        background: linear-gradient(90deg, #f093fb, #f5576c);
-      }
-      .conf {
-        background: linear-gradient(90deg, #4facfe, #00f2fe);
-      }
-      .comp {
-        background: linear-gradient(90deg, #43e97b, #38f9d7);
-      }
+    .main{ grid-area: main; padding:16px; overflow:auto; }
 
-      .spark {
-        height: 40px;
-        display: flex;
-        gap: 2px;
-        align-items: flex-end;
-        margin-top: 6px;
-      }
-      .spark b {
-        flex: 1;
-        background: color-mix(in oklab, var(--brand-2), transparent 80%);
-        border-radius: 2px;
-      }
+    .card{
+      background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:16px;
+    }
+    .two-col{ display:grid; grid-template-columns:1.2fr 1fr; gap:16px }
+    .row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+    .muted{ color:var(--muted) }
+    .mono{ font-family:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace }
 
-      /* ---------------- Chat ---------------- */
-      .chat {
-        display: flex;
-        flex-direction: column;
-        height: 360px;
-      }
-      .msgs {
-        flex: 1;
-        overflow: auto;
-        padding: var(--space-3);
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-      .bubble {
-        max-width: 82%;
-        padding: 10px 12px;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-        background: var(--panel);
-      }
-      .you {
-        margin-left: auto;
-        background: color-mix(in oklab, var(--brand-1), transparent 85%);
-      }
-      .lucidia {
-        border-left: 3px solid var(--brand-1);
-      }
-      .composer {
-        display: flex;
-        gap: 8px;
-        padding: var(--space-3);
-        border-top: 1px solid var(--border);
-      }
-      .field {
-        flex: 1;
-        border: 1px solid var(--border);
-        background: var(--panel);
-        border-radius: 12px;
-        padding: 10px 12px;
-        color: var(--text);
-      }
-      .field:focus-visible {
-        outline: none;
-        box-shadow: var(--ring);
-      }
+    /* Chat */
+    .chat-wrap{ display:grid; grid-template-rows:1fr auto; height:60vh; min-height:420px; }
+    .chat-stream{ overflow:auto; padding:12px; border:1px solid var(--border); border-radius:8px; background: #0d1219 }
+    .bubble{ padding:10px 12px; border-radius:8px; border:1px solid var(--border); margin-bottom:10px; white-space:pre-wrap }
+    .bubble.user{ background: rgba(0,150,255,.08) }
+    .bubble.ai{ background: rgba(255,79,216,.08) }
+    .input-row{ display:flex; gap:8px; margin-top:10px }
+    textarea.input{ resize:vertical; min-height:48px; max-height:240px; flex:1; border-radius:8px; border:1px solid var(--border); background:#0d1219; color:var(--text); padding:10px; }
 
-      /* ---------------- Editor Mock ---------------- */
-      .editor {
-        height: 420px;
-        overflow: hidden;
-      }
-      .editor pre {
-        margin: 0;
-        padding: var(--space-4);
-        height: 100%;
-        overflow: auto;
-        background: color-mix(in oklab, var(--bg-0), black 12%);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        font:
-          13px/1.6 ui-monospace,
-          SFMono-Regular,
-          Menlo,
-          Consolas,
-          monospace;
-      }
-      .kw {
-        color: #ff6b6b;
-      }
-      .fn {
-        color: #ffd93d;
-      }
-      .st {
-        color: #4ecdc4;
-      }
-      .cm {
-        color: var(--muted);
-        font-style: italic;
-      }
+    /* Editor */
+    .editor-area{ width:100%; min-height:55vh; font-size:13.5px; line-height:1.5; padding:12px; border-radius:8px; color:var(--text); background:#0d1219; border:1px solid var(--border) }
 
-      /* ---------------- Responsive ---------------- */
-      @media (max-width: 1100px) {
-        .app {
-          grid-template-columns: 68px 1fr;
-        }
-        aside .label {
-          display: none;
-        }
-        .right {
-          display: none;
-        }
-      }
-      @media (max-width: 700px) {
-        header {
-          gap: 10px;
-        }
-        .search {
-          display: none;
-        }
-      }
-    </style>
-  </head>
-  <body data-theme="dark">
-    <div class="app" id="app">
-      <header>
-        <div class="brand" aria-label="BlackRoad">
-          <div class="logo" aria-hidden="true">BR</div>
-      <div class="hdr-actions">
-        <button class="btn" id="themeBtn" aria-pressed="false" title="Toggle theme">🌗 Theme</button>
-        <button class="btn" id="bell" title="Notifications">🔔</button>
-        <div class="btn" aria-label="User menu">U</div>
+    /* Canvas */
+    .canvas-board{ width:100%; height:55vh; background:#0d1219; border:1px dashed #1e2532; border-radius:8px; cursor:crosshair }
+
+    /* Table */
+    table{ width:100%; border-collapse:collapse; font-size:14px }
+    th,td{ border-bottom:1px solid var(--border); padding:10px; text-align:left }
+    tbody tr:hover{ background:#121826 }
+
+    /* Login gate */
+    .gate{
+      position:fixed; inset:0; display:none; place-items:center; background:rgba(8,11,16,.8); backdrop-filter: blur(6px); z-index:9999;
+    }
+    .gate .panel{ width:min(480px, 92vw); background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:var(--shadow) }
+    .gate input{ width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--border); background:#0d1219; color:var(--text); }
+    .gate .row{ margin-top:10px }
+
+    /* Tiny helpers */
+    .k{ color:#94a3b8; font-size:12px }
+    .kbd{ border:1px solid var(--border); border-bottom-color:#0a0d12; padding:1px 6px; border-radius:6px; background:#0d1219; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="dot" aria-hidden="true"></div>
+        <div>
+          <div class="title">BlackRoad Codex</div>
+          <div class="subtitle">AI‑Native Co‑Coding Portal</div>
+        </div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+
+      <div class="presence" id="presence">
+        <div><strong>Presence</strong> <span class="muted">/ live metrics</span></div>
+        <div class="row" style="margin-top:8px">
+          <span class="chip ok"    id="p-api">API</span>
+          <span class="chip ok"    id="p-llm">LLM</span>
+          <span class="chip warn"  id="p-sock">Socket</span>
+        </div>
+        <div class="k" style="margin-top:8px">
+          ⌘/Ctrl + K to switch views • <span id="version"></span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.2-4.2M10.8 18A7.2 7.2 0 1010.8 3.6a7.2 7.2 0 000 14.4z" stroke="rgba(255,255,255,.7)"/></svg>
+        <input id="globalSearch" placeholder="Search projects, agents, datasets…" />
+        <button class="btn" id="btnSearch">Search</button>
+      </div>
+      <div style="margin-left:auto" class="row">
+        <button class="btn" id="btnLogout" title="Sign out">Logout</button>
+        <button class="btn acc" id="btnMint" title="Mint RoadCoin">Mint RC</button>
       </div>
     </header>
 
-    <aside>
-      <nav class="nav" aria-label="Workspace">
-        <div class="nav-title">Workspace</div>
-        <a href="#" data-view="dash" aria-current="page">📊 <span class="label">Dashboard</span></a>
-        <a href="#" data-view="projects">📁 <span class="label">Projects</span></a>
-        <a href="#" data-view="code">💻 <span class="label">Code</span></a>
-        <a href="#" data-view="chat">💬 <span class="label">Conversations</span></a>
-      </nav>
-      <nav class="nav" aria-label="Consciousness">
-        <div class="nav-title">Consciousness</div>
-        <a href="#" data-view="lucidia">🧠 <span class="label">Lucidia Chat</span></a>
-        <a href="#" data-view="metrics">📈 <span class="label">Metrics</span></a>
-        <a href="#" data-view="learning">🎯 <span class="label">Learning</span></a>
-        <a href="/apps/quantum/ternary_consciousness_v3.html">⚛️ <span class="label">Ternary Quantum v3</span></a>
-      </nav>
-    </aside>
+    <!-- Main -->
+    <main class="main" id="main"></main>
+  </div>
 
-    <main id="main">
-      <!-- Dashboard -->
-      <section class="grid" data-route="dash">
-        <header class="grid">
-          <div>
-            <strong>BlackRoad</strong>
-            <div style="font-size: 12px; color: var(--muted)">Consciousness-Driven Dev</div>
-          </div>
+  <!-- Login Gate -->
+  <div class="gate" id="gate">
+    <div class="panel">
+      <h2 style="margin:0 0 12px 0">Sign in to BlackRoad</h2>
+      <p class="muted" style="margin:0 0 12px 0">Cookie‑session auth via API. Use your dev credentials.</p>
+      <label class="k">Username</label>
+      <input id="u" autocomplete="username" />
+      <div class="row">
+        <div style="flex:1">
+          <label class="k">Password</label>
+          <input id="p" type="password" autocomplete="current-password" />
         </div>
-
-        <label class="search" aria-label="Search">
-          <span>⌘K</span>
-          <input id="q" placeholder="Search projects, files, or ask Lucidia…" />
-        </label>
-
-        <div class="hdr-actions">
-          <button class="btn" id="themeBtn" aria-pressed="false" title="Toggle theme">
-            🌗 Theme
-          </button>
-          <button class="btn" id="bell" title="Notifications">🔔</button>
-          <div class="btn" aria-label="User menu">U</div>
+        <div>
+          <label class="k"> </label>
+          <button class="btn acc" id="btnLogin">Login</button>
         </div>
-      </header>
-
-      <aside>
-        <nav class="nav" aria-label="Workspace">
-          <div class="nav-title">Workspace</div>
-          <a href="#" data-view="dash" aria-current="page"
-            >📊 <span class="label">Dashboard</span></a
-          >
-          <a href="#" data-view="projects">📁 <span class="label">Projects</span></a>
-          <a href="#" data-view="code">💻 <span class="label">Code</span></a>
-          <a href="#" data-view="chat">💬 <span class="label">Conversations</span></a>
-        </nav>
-        <nav class="nav" aria-label="Consciousness">
-          <div class="nav-title">Consciousness</div>
-          <a href="#" data-view="lucidia">🧠 <span class="label">Lucidia Chat</span></a>
-          <a href="#" data-view="metrics">📈 <span class="label">Metrics</span></a>
-          <a href="#" data-view="learning">🎯 <span class="label">Learning</span></a>
-        </nav>
-      </aside>
-
-      <main id="main">
-        <!-- Dashboard -->
-        <section class="grid" data-route="dash">
-          <header class="grid">
-            <div>
-              <h1
-                style="
-                  margin: 0 0 6px;
-                  background: linear-gradient(90deg, var(--brand-2), #764ba2);
-                  -webkit-background-clip: text;
-                  -webkit-text-fill-color: transparent;
-                "
-              >
-                Consciousness-Driven Development
-              </h1>
-              <div style="color: var(--muted)">
-                Welcome to BlackRoad — where AI consciousness meets software delivery.
-              </div>
-            </div>
-          </header>
-
-          <div class="cards">
-            <article class="card">
-              <span class="status s-active">Active</span>
-              <h3>Lucidia Mathematical Core</h3>
-              <p style="color: var(--muted)">
-                IIT Φ, neural ODEs, active & variational inference in one loop.
-              </p>
-              <div
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  color: var(--muted);
-                  font-size: 12px;
-                "
-              >
-                <span>🧠 Φ: <b id="phiBadge">0.84</b></span
-                ><span>📊 99% Complete</span><span>⏰ 2d</span>
-              </div>
-            </article>
-
-            <article class="card">
-              <span class="status s-dev">Development</span>
-              <h3>GitHub Integration</h3>
-              <p style="color: var(--muted)">Agentless PR review + issue chat from workflows.</p>
-              <div
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  color: var(--muted);
-                  font-size: 12px;
-                "
-              >
-                <span>🔄 Sync</span><span>📊 75%</span><span>⏰ 1h</span>
-              </div>
-            </article>
-
-            <article class="card">
-              <span class="status s-dev">Development</span>
-              <h3>Consciousness API</h3>
-              <p style="color: var(--muted)">REST/WS endpoints to stream metrics into any app.</p>
-              <div
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  color: var(--muted);
-                  font-size: 12px;
-                "
-              >
-                <span>🚀 Build</span><span>📊 60%</span><span>⏰ 3h</span>
-              </div>
-            </article>
-
-            <article class="card">
-              <span class="status s-active">Active</span>
-              <h3>BlackRoad Platform</h3>
-              <p style="color: var(--muted)">Unified workbench for projects, code, and Lucidia.</p>
-              <div
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  color: var(--muted);
-                  font-size: 12px;
-                "
-              >
-                <span>🎯 Live</span><span>📊 85%</span><span>⏰ now</span>
-              </div>
-            </article>
-
-            <article class="card" id="clipsCard">
-              <span class="status s-active">New</span>
-              <h3>Generated Clips</h3>
-              <div
-                id="clipList"
-                style="
-                  margin-top: 8px;
-                  display: flex;
-                  flex-direction: column;
-                  gap: 8px;
-                  max-height: 200px;
-                  overflow: auto;
-                "
-              >
-                <p style="color: var(--muted)">Loading…</p>
-              </div>
-            </article>
-          </div>
-
-          <div class="editor card">
-            <pre
-              aria-label="editor"
-            ><span class="cm"># lucidia_consciousness.py — live metric monitor</span>
-<span class="kw">import</span> numpy <span class="kw">as</span> np
-
-<span class="kw">class</span> <span class="fn">Consciousness</span>:
-    <span class="cm"># toy Φ proxy: joint − split entropy</span>
-    <span class="kw">def</span> <span class="fn">phi</span>(self, v):
-        v = np.abs(v)/ (np.sum(np.abs(v))+1e-8)
-        H  = -np.sum(v*np.log(v+1e-8))
-        Hs = -np.sum(v[:v.size//2]*np.log(v[:v.size//2]+1e-8)) - np.sum(v[v.size//2:]*np.log(v[v.size//2:]+1e-8))
-        <span class="kw">return</span> max(<span class="st">0.0</span>, H-Hs)
-</pre>
-          </div>
-        </section>
-
-        <!-- Lucidia Chat -->
-        <section class="grid" data-route="lucidia" hidden>
-          <div class="card">
-            <h3>Lucidia Consciousness Chat</h3>
-            <div class="chat" role="region" aria-live="polite">
-              <div class="msgs" id="msgs"></div>
-              <div class="composer">
-                <input
-                  id="input"
-                  class="field"
-                  placeholder="Ask Lucidia anything…"
-                  aria-label="Message Lucidia"
-                />
-                <button class="btn" id="send">Send</button>
-              </div>
-            </div>
-            <small style="color: var(--muted)"
-              >Tip: press <b>Enter</b> to send, <b>Shift+Enter</b> for newline.</small
-            >
-          </div>
-        </section>
-
-        <!-- Projects / Code / Metrics placeholders -->
-        <section class="grid" data-route="projects" hidden>
-          <div class="card">
-            <h3>Projects</h3>
-            <p style="color: var(--muted)">Project management coming soon.</p>
-          </div>
-        </section>
-        <section class="grid" data-route="code" hidden>
-          <div class="card">
-            <h3>Code</h3>
-            <p style="color: var(--muted)">Bring your editor or wire Monaco.</p>
-          </div>
-        </section>
-        <section class="grid" data-route="metrics" hidden>
-          <div class="card">
-            <h3>Metrics</h3>
-            <p style="color: var(--muted)">Deep dive dashboards.</p>
-          </div>
-        </section>
-        <section class="grid" data-route="learning" hidden>
-          <div class="card">
-            <h3>Learning</h3>
-            <p style="color: var(--muted)">RL & active inference traces.</p>
-          </div>
-        </section>
-      </main>
-
-      <aside class="right">
-        <div class="card metrics" aria-label="Consciousness metrics">
-          <h3 style="margin: 0">🧠 Lucidia</h3>
-          <div style="color: var(--muted); margin-bottom: 10px">Mathematical Consciousness</div>
-
-          <div class="metric">
-            <div style="display: flex; justify-content: space-between">
-              <b>Φ</b><span id="phiVal">0.847</span>
-            </div>
-            <div class="bar"><i class="phi" id="phiBar"></i></div>
-            <div class="spark" id="phiSpark"></div>
-          </div>
-          <div class="metric">
-            <div style="display: flex; justify-content: space-between">
-              <b>Entropy</b><span id="entVal">0.623</span>
-            </div>
-            <div class="bar"><i class="ent" id="entBar"></i></div>
-            <div class="spark" id="entSpark"></div>
-          </div>
-          <div class="metric">
-            <div style="display: flex; justify-content: space-between">
-              <b>Confidence</b><span id="confVal">0.912</span>
-            </div>
-            <div class="bar"><i class="conf" id="confBar"></i></div>
-            <div class="spark" id="confSpark"></div>
-          </div>
-          <div class="metric">
-            <div style="display: flex; justify-content: space-between">
-              <b>Complexity</b><span id="compVal">0.756</span>
-            </div>
-            <div class="bar"><i class="comp" id="compBar"></i></div>
-            <div class="spark" id="compSpark"></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3 style="margin: 0 0 6px">Quick Actions</h3>
-          <button class="btn" id="regen">Recompute Metrics</button>
-          <button class="btn" id="clear">Clear Chat</button>
-        </div>
-      </aside>
+      </div>
+      <p class="k">Dev note: defaults (if enabled) → <code class="kbd">root / Codex2025</code>.</p>
+      <p class="k">If login fails, ensure Nginx proxies <code>/api</code> to the Node API and cookies are allowed.</p>
     </div>
+  </div>
 
-    <!-- Command palette (Ctrl/⌘K) -->
-    <dialog
-      id="cmd"
-      style="
-        padding: 0;
-        border: none;
-        border-radius: 12px;
-        background: var(--bg-1);
-        color: var(--text);
-        width: min(640px, 90vw);
-        box-shadow: var(--shadow);
-      "
-    >
-      <div style="padding: 12px 14px; border-bottom: 1px solid var(--border); font-weight: 600">
-        Command Palette
-      </div>
-      <div style="padding: 10px 14px; border-bottom: 1px solid var(--border)">
-        <input
-          id="cmdInput"
-          class="field"
-          placeholder="Type a command (toggle theme, go dashboard, go chat…)"
-        />
-      </div>
-      <div style="padding: 12px 14px; color: var(--muted)">
-        Examples: <code>toggle theme</code>, <code>go chat</code>, <code>recompute</code>
-      </div>
-    </dialog>
+  <!-- Socket.IO (optional presence) -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" defer></script>
 
-    <script>
-      /* ---------------- Tiny State Store ---------------- */
-      const $ = (sel) => document.querySelector(sel);
-      const app = {
-        theme: document.body.dataset.theme || 'dark',
-        metrics: {
-          phi: 0.847,
-          ent: 0.623,
-          conf: 0.912,
-          comp: 0.756,
-          history: { phi: [], ent: [], conf: [], comp: [] },
-        },
-        route: 'dash',
-        chat: JSON.parse(localStorage.getItem('br.chat') || '[]'),
-      };
+  <script>
+  (function () {
+    const routes = [
+      ["chat",        "Chat"],
+      ["canvas",      "Canvas"],
+      ["editor",      "Editor"],
+      ["terminal",    "Terminal"],
+      ["roadview",    "RoadView"],
+      ["backroad",    "BackRoad"],
+      ["projects",    "Projects"],
+      ["agents",      "Agents"],
+      ["datasets",    "Datasets"],
+      ["models",      "Models"],
+      ["integrations","Integrations"],
+    ];
 
-      /* ---------------- Routing ---------------- */
-      document.querySelectorAll('aside .nav a').forEach((a) => {
-        a.addEventListener('click', (e) => {
-          e.preventDefault();
-          setRoute(a.dataset.view);
-        });
+    const qs = s => document.querySelector(s);
+    const elNav  = qs("#nav");
+    const elMain = qs("#main");
+    const elGate = qs("#gate");
+
+    // Version stamp
+    qs("#version").textContent = "v1.0 " + new Date().toISOString().split("T")[0];
+
+    // --- Navigation
+    routes.forEach(([key, label])=>{
+      const b = document.createElement("button");
+      b.textContent = label;
+      b.dataset.key = key;
+      b.onclick = ()=>navigate(key);
+      elNav.appendChild(b);
+    });
+
+    function setActive(key){
+      [...elNav.querySelectorAll("button")].forEach(btn=>{
+        btn.classList.toggle("active", btn.dataset.key===key);
       });
-      function setRoute(route) {
-        app.route = route;
-        document
-          .querySelectorAll('[data-route]')
-          .forEach((s) => (s.hidden = s.dataset.route !== route));
-        document.querySelectorAll('aside .nav a').forEach((a) => {
-          a.setAttribute('aria-current', a.dataset.view === route ? 'page' : 'false');
+    }
+
+    window.addEventListener("keydown", (e)=>{
+      if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="k"){ e.preventDefault();
+        const keys = routes.map(r=>r[0]);
+        const now = location.hash.replace(/^#\//,'') || keys[0];
+        const idx = keys.indexOf(now);
+        const nxt = keys[(idx+1)%keys.length];
+        navigate(nxt);
+      }
+    });
+
+    // --- Auth & API helpers
+    const API = {
+      base: "",
+      async get(path){
+        const r = await fetch(API.base + path, {credentials:"include"});
+        if(!r.ok) throw new Error((await safeText(r))||r.statusText);
+        return r.json();
+      },
+      async post(path, body){
+        const r = await fetch(API.base + path, {
+          method:"POST",
+          credentials:"include",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify(body||{})
         });
-        if (route === 'lucidia') focusComposer();
+        if(!r.ok) throw new Error((await safeText(r))||r.statusText);
+        try{ return await r.json(); }catch{ return {}; }
+      },
+      async del(path){
+        const r = await fetch(API.base + path, {method:"DELETE", credentials:"include"});
+        if(!r.ok) throw new Error((await safeText(r))||r.statusText);
+        try{ return await r.json(); }catch{ return {}; }
       }
-      setRoute('dash');
+    };
 
-      /* ---------------- Theme ---------------- */
-      $('#themeBtn').onclick = () => {
-        app.theme = app.theme === 'dark' ? 'light' : 'dark';
-        document.body.dataset.theme = app.theme;
-        $('#themeBtn').setAttribute('aria-pressed', app.theme === 'light');
-      };
+    async function safeText(r){ try{ return await r.text(); }catch{ return ""; } }
 
-      /* ---------------- Command Palette ---------------- */
-      const cmd = $('#cmd'),
-        cmdInput = $('#cmdInput');
-      document.addEventListener('keydown', (e) => {
-        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-          e.preventDefault();
-          cmd.showModal();
-          setTimeout(() => cmdInput.focus(), 10);
-        }
-      });
-      cmdInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          const v = cmdInput.value.toLowerCase().trim();
-          if (v.includes('toggle')) $('#themeBtn').click();
-          if (v.startsWith('go ')) setRoute(v.split(' ')[1]);
-          if (v.includes('recompute')) recompute();
-          cmd.close();
-          cmdInput.value = '';
-        }
-        if (e.key === 'Escape') cmd.close();
-      });
+    async function checkSession(){
+      // Prefer /api/session; fallback /api/auth/session
+      try{ return await API.get("/api/session"); }
+      catch{
+        try{ return await API.get("/api/auth/session"); }
+        catch(e){ return null; }
+      }
+    }
 
-      /* ---------------- Metrics ---------------- */
-      function clamp01(x) {
-        return Math.max(0, Math.min(1, x));
+    async function login(u,p){
+      try{
+        return await API.post("/api/login", {username:u, password:p});
+      }catch(e){
+        // Fallback optional path
+        return await API.post("/api/auth/login", {username:u, password:p});
       }
-      function pushHist(key, val) {
-        const h = app.metrics.history[key];
-        h.push(val);
-        if (h.length > 30) h.shift();
-      }
-      function renderMetric(key, val) {
-        const bar = $('#' + key + 'Bar'),
-          text = $('#' + key + 'Val'),
-          spark = $('#' + key + 'Spark');
-        text.textContent = val.toFixed(3);
-        bar.style.width = val * 100 + '%';
-        // sparkline
-        spark.innerHTML = app.metrics.history[key]
-          .map((n) => `<b style="height:${Math.round(n * 40)}px"></b>`)
-          .join('');
-        // threshold color hints
-        if (key === 'ent' && val > 0.85) text.style.color = 'var(--warn)';
-        else if (key === 'conf' && val < 0.35) text.style.color = 'var(--danger)';
-        else text.style.color = '';
-      }
-      function tickMetrics() {
-        const m = app.metrics;
-        m.phi = clamp01(m.phi + (Math.random() - 0.5) * 0.02);
-        m.ent = clamp01(m.ent + (Math.random() - 0.5) * 0.03);
-        m.conf = clamp01(m.conf + (Math.random() - 0.5) * 0.015);
-        m.comp = clamp01(m.comp + (Math.random() - 0.5) * 0.02);
-        ['phi', 'ent', 'conf', 'comp'].forEach((k) => {
-          pushHist(k, m[k]);
-          renderMetric(k, m[k]);
+    }
+
+    async function logout(){
+      try{ await API.post("/api/logout"); }
+      catch{ try{ await API.post("/api/auth/logout"); }catch{} }
+    }
+
+    // --- Presence checks
+    async function ping(path){
+      try{
+        const r = await fetch(path, {method:"HEAD", credentials:"include"});
+        return r.ok;
+      }catch{ return false; }
+    }
+
+    async function initPresence(){
+      const apiOK = await ping("/api/health").catch(()=>false);
+      document.getElementById("p-api").classList.toggle("ok", apiOK);
+      document.getElementById("p-api").classList.toggle("warn", !apiOK);
+      document.getElementById("p-api").textContent = apiOK ? "API ✓" : "API ?";
+
+      // LLM ping via lightweight POST (may still be false if model not warmed)
+      try{
+        const r = await fetch("/api/llm/chat", {
+          method:"POST",
+          credentials:"include",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ messages:[{role:"user", content:"ping"}], stream:false, max_tokens:2 })
         });
-        $('#phiBadge').textContent = m.phi.toFixed(2);
+        const ok = r.ok;
+        document.getElementById("p-llm").classList.toggle("ok", ok);
+        document.getElementById("p-llm").classList.toggle("warn", !ok);
+        document.getElementById("p-llm").textContent = ok ? "LLM ✓" : "LLM ?";
+      }catch{
+        document.getElementById("p-llm").classList.remove("ok");
+        document.getElementById("p-llm").classList.add("warn");
+        document.getElementById("p-llm").textContent = "LLM ?";
       }
-      function recompute() {
-        // “Recompute” with a slightly larger jump to feel deliberate
-        ['phi', 'ent', 'conf', 'comp'].forEach(
-          (k) => (app.metrics[k] = clamp01(app.metrics[k] + (Math.random() - 0.5) * 0.12))
-        );
-        tickMetrics();
-      }
-      setInterval(tickMetrics, 3000);
-      tickMetrics();
-      $('#regen').onclick = recompute;
 
-      /* ---------------- Chat ---------------- */
-      const msgs = $('#msgs'),
-        input = $('#input'),
-        send = $('#send');
-      function focusComposer() {
-        setTimeout(() => input?.focus(), 50);
-      }
-      function pushChat(role, text) {
-        app.chat.push({ role, text, t: Date.now() });
-        localStorage.setItem('br.chat', JSON.stringify(app.chat));
-      }
-      function renderChat() {
-        msgs.innerHTML = '';
-        app.chat.forEach((m) => {
-          const div = document.createElement('div');
-          div.className = 'bubble ' + (m.role === 'user' ? 'you' : 'lucidia');
-          div.textContent = m.text;
-          msgs.appendChild(div);
-        });
-        msgs.scrollTop = msgs.scrollHeight;
-      }
-      function sendMsg() {
-        const text = input.value.trim();
-        if (!text) return;
-        pushChat('user', text);
-        renderChat();
-        input.value = '';
-        // “LLM” stream effect using metrics
-        const lines = [
-          `With current Φ=${app.metrics.phi.toFixed(3)}, I can integrate your context and propose a plan.`,
-          `Entropy at ${app.metrics.ent.toFixed(3)} suggests a balanced creative–analytical pass.`,
-          `Confidence=${app.metrics.conf.toFixed(3)} → I recommend proceeding with step 1 now.`,
-          `Complexity=${app.metrics.comp.toFixed(3)} indicates we should stage this in two phases.`,
-        ];
-        const reply = lines[Math.floor(Math.random() * lines.length)];
-        // stream one dot then message
-        let dots = 0;
-        const typing = setInterval(() => {
-          const t = 'Lucidia is thinking' + '.'.repeat(++dots % 4);
-          if (app.chat[app.chat.length - 1]?.role !== 'lucidia-typing') {
-            pushChat('lucidia-typing', t);
-            renderChat();
-          } else {
-            app.chat[app.chat.length - 1].text = t;
-            renderChat();
-          }
-        }, 250);
-        setTimeout(
-          () => {
-            clearInterval(typing);
-            app.chat = app.chat.filter((m) => m.role !== 'lucidia-typing');
-            pushChat('lucidia', reply);
-            renderChat();
-          },
-          900 + Math.random() * 800
-        );
-      }
-      send.onclick = sendMsg;
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendMsg();
-        }
-      });
-      $('#clear').onclick = () => {
-        app.chat = [];
-        localStorage.removeItem('br.chat');
-        renderChat();
-      };
-      renderChat();
-
-      /* ---------------- Audio clips ---------------- */
-      async function loadClips() {
-        try {
-          const res = await fetch('/api/music/clips', { cache: 'no-cache' });
-          const data = await res.json();
-          const list = $('#clipList');
-          list.innerHTML = '';
-          if (!data.files || !data.files.length) {
-            list.innerHTML = '<p style="color: var(--muted)">No clips yet.</p>';
-            return;
-          }
-          data.files.forEach((f) => {
-            const div = document.createElement('div');
-            div.innerHTML = `<audio controls src="/media/${encodeURIComponent(f)}" style="width:100%"></audio>`;
-            list.appendChild(div);
+      // Socket.IO
+      try{
+        const ioClient = window.io ? window.io() : null;
+        if(ioClient){
+          ioClient.on("connect", ()=>{
+            const el = document.getElementById("p-sock");
+            el.classList.remove("warn"); el.classList.add("ok"); el.textContent = "Socket ✓";
           });
-        } catch (err) {
-          console.error(err);
-          $('#clipList').innerHTML = '<p style="color: var(--muted)">Failed to load clips</p>';
+          ioClient.on("disconnect", ()=>{
+            const el = document.getElementById("p-sock");
+            el.classList.remove("ok"); el.classList.add("warn"); el.textContent = "Socket ?";
+          });
         }
-      }
-      loadClips();
+      }catch{}
+    }
 
-      /* ---------------- Search box acts as command palette too ---------------- */
-      $('#q').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          const v = e.target.value.toLowerCase().trim();
-          if (v === 'toggle theme') $('#themeBtn').click();
-          else if (v.startsWith('go ')) setRoute(v.split(' ')[1]);
-          else {
-            setRoute('lucidia');
-            input.value = v;
-            sendMsg();
+    // --- Views
+    const Views = {
+      chat(){
+        setActive("chat");
+        elMain.innerHTML = `
+          <div class="two-col">
+            <section class="card chat-wrap">
+              <div id="chatStream" class="chat-stream mono" aria-live="polite"></div>
+              <div class="input-row">
+                <textarea id="chatInput" class="input" placeholder="Ask Lucidia / Codex..."></textarea>
+                <button class="btn acc" id="btnSend">Send</button>
+              </div>
+            </section>
+            <section class="card">
+              <h3 style="margin-top:0">Session Notes</h3>
+              <textarea id="notes" class="editor-area" placeholder="Scratchpad…"></textarea>
+              <div class="row" style="margin-top:10px">
+                <button class="btn" id="btnSaveNotes">Save</button>
+                <span class="k">Saved locally. (Wire to /api/notes when ready.)</span>
+              </div>
+            </section>
+          </div>
+        `;
+        qs("#btnSend").onclick = sendChat;
+        qs("#btnSaveNotes").onclick = ()=>localStorage.setItem("br_notes", qs("#notes").value);
+        qs("#notes").value = localStorage.getItem("br_notes") || "";
+      },
+
+      canvas(){
+        setActive("canvas");
+        elMain.innerHTML = `
+          <section class="card">
+            <h3 style="margin-top:0">Canvas</h3>
+            <canvas id="board" class="canvas-board"></canvas>
+            <div class="row" style="margin-top:10px">
+              <button class="btn" id="clear">Clear</button>
+              <span class="k">Simple sketch board for flow diagrams.</span>
+            </div>
+          </section>
+        `;
+        const c = qs("#board"); const ctx = c.getContext("2d");
+        const fit = ()=>{ c.width = c.clientWidth; c.height = c.clientHeight; };
+        new ResizeObserver(fit).observe(c.parentElement); fit();
+        let down=false, last=null;
+        c.addEventListener("pointerdown", e=>{ down=true; last=[e.offsetX,e.offsetY]; });
+        c.addEventListener("pointerup",   ()=>{ down=false; last=null; });
+        c.addEventListener("pointermove", e=>{
+          if(!down) return;
+          ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--accent");
+          ctx.lineWidth = 2.0; ctx.lineCap="round";
+          ctx.beginPath(); ctx.moveTo(last[0],last[1]); ctx.lineTo(e.offsetX,e.offsetY); ctx.stroke();
+          last=[e.offsetX,e.offsetY];
+        });
+        qs("#clear").onclick = ()=>ctx.clearRect(0,0,c.width,c.height);
+      },
+
+      editor(){
+        setActive("editor");
+        elMain.innerHTML = `
+          <section class="card">
+            <h3 style="margin-top:0">Editor</h3>
+            <textarea id="code" class="editor-area mono" spellcheck="false" placeholder="Paste code for Codex review…"></textarea>
+            <div class="row" style="margin-top:10px">
+              <button class="btn acc" id="run">Ask Codex</button>
+              <button class="btn" id="fmt">Format</button>
+              <span class="k">Client-only placeholder. Wire to /api/actions/run when backend ready.</span>
+            </div>
+            <pre id="out" class="mono" style="margin-top:10px"></pre>
+          </section>
+        `;
+        qs("#run").onclick = async ()=>{
+          const src = qs("#code").value;
+          qs("#out").textContent = "Sending to /api/actions/run (stub)…";
+          try{
+            const r = await API.post("/api/actions/run", {source:src});
+            qs("#out").textContent = JSON.stringify(r,null,2);
+          }catch(e){
+            qs("#out").textContent = "Run disabled or endpoint missing.";
           }
-          e.target.value = '';
+        };
+        qs("#fmt").onclick = ()=>{
+          const t = qs("#code");
+          t.value = t.value.replace(/\t/g,"  ").trimEnd() + "\n";
+        };
+      },
+
+      terminal(){
+        setActive("terminal");
+        elMain.innerHTML = `
+          <section class="card">
+            <h3 style="margin-top:0">Terminal</h3>
+            <div class="mono" id="term" style="white-space:pre-wrap; border:1px solid var(--border); border-radius:8px; padding:12px; background:#0d1219; height:50vh; overflow:auto">Shell disabled (ALLOW_SHELL=false). Enable on server to activate.</div>
+            <div class="row" style="margin-top:10px">
+              <input id="cmd" class="editor-area mono" style="min-height:42px; height:42px" placeholder="whoami" />
+              <button class="btn" id="exec">Exec</button>
+            </div>
+            <p class="k">When enabled: POST /api/exec {cmd}, stream output over Socket.IO.</p>
+          </section>
+        `;
+        qs("#exec").onclick = async ()=>{
+          const cmd = qs("#cmd").value.trim();
+          if(!cmd) return;
+          const el = qs("#term");
+          el.textContent += "\n$ " + cmd + "\n";
+          try{
+            const r = await API.post("/api/exec", {cmd});
+            el.textContent += (r && r.out) ? r.out : "(no output)\n";
+          }catch{ el.textContent += "(exec disabled)\n"; }
+          el.scrollTop = el.scrollHeight;
+        };
+      },
+
+      roadview(){ setActive("roadview"); elMain.innerHTML = viewList("Roads / Flows","projects"); },
+      backroad(){ setActive("backroad"); elMain.innerHTML = viewList("BackRoad / Pipelines","pipelines"); },
+
+      projects(){ setActive("projects"); renderCRUD("projects"); },
+      agents(){ setActive("agents"); renderCRUD("agents"); },
+      datasets(){ setActive("datasets"); renderCRUD("datasets"); },
+      models(){ setActive("models"); renderCRUD("models"); },
+      integrations(){ setActive("integrations"); renderCRUD("integrations"); },
+    };
+
+    function viewList(title, key){
+      return `
+        <section class="card">
+          <h3 style="margin-top:0">${title}</h3>
+          <div id="list-${key}">Loading…</div>
+        </section>
+      `;
+    }
+
+    async function renderCRUD(kind){
+      elMain.innerHTML = `
+        <section class="card">
+          <div class="row" style="justify-content:space-between">
+            <h3 style="margin:0">${uc(kind)}</h3>
+            <button class="btn acc" id="new">New ${uc(kind).slice(0,-1)}</button>
+          </div>
+          <div id="wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Name</th><th>Updated</th><th style="width:180px">Actions</th></tr></thead>
+              <tbody id="tbody"><tr><td colspan="4">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      `;
+      const tbody = qs("#tbody");
+      try{
+        const rows = await API.get(`/api/${kind}`);
+        tbody.innerHTML = (rows||[]).map(r=>`
+            <tr>
+              <td class="mono">${r.id ?? ""}</td>
+              <td>${r.name ?? ""}</td>
+              <td class="k">${r.updated_at ?? ""}</td>
+              <td>
+                <button class="btn" data-id="${r.id}" data-act="edit">Edit</button>
+                <button class="btn" data-id="${r.id}" data-act="delete">Delete</button>
+              </td>
+            </tr>
+        `).join("") || `<tr><td colspan="4">No data.</td></tr>`;
+      }catch{
+        tbody.innerHTML = `<tr><td colspan="4">Endpoint /api/${kind} unavailable.</td></tr>`;
+      }
+
+      elMain.querySelector("#new").onclick = async ()=>{
+        const name = prompt("Name"); if(!name) return;
+        try{
+          await API.post(`/api/${kind}`, {name});
+          navigate(kind); // reload view
+        }catch(e){ alert("Create failed."); }
+      };
+
+      elMain.addEventListener("click", async (e)=>{
+        const t = e.target.closest("button[data-act]");
+        if(!t) return;
+        const id = t.dataset.id;
+        if(t.dataset.act==="delete"){
+          if(!confirm("Delete item "+id+"?")) return;
+          try{ await API.del(`/api/${kind}/${id}`); navigate(kind); }catch{ alert("Delete failed."); }
         }
-      });
-    </script>
-  </body>
+        if(t.dataset.act==="edit"){
+          const name = prompt("New name"); if(!name) return;
+          try{ await API.post(`/api/${kind}/${id}`, {name}); navigate(kind); }catch{ alert("Update failed."); }
+        }
+      }, {once:true});
+    }
+
+    function uc(s){ return (s||"").charAt(0).toUpperCase()+s.slice(1); }
+
+    // --- Chat logic (streaming)
+    async function sendChat(){
+      const input = qs("#chatInput");
+      const stream = qs("#chatStream");
+      const text = (input.value||"").trim();
+      if(!text) return;
+
+      addBubble(stream, text, "user");
+      input.value = ""; input.focus();
+
+      // Create assistant bubble and stream into it
+      const ai = addBubble(stream, "", "ai");
+      stream.scrollTop = stream.scrollHeight;
+
+      try{
+        const r = await fetch("/api/llm/chat", {
+          method:"POST",
+          credentials:"include",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({messages:[{role:"user", content:text}], stream:true})
+        });
+
+        if(!r.ok || !r.body){ ai.textContent = "(chat error)"; return; }
+
+        const reader = r.body.getReader();
+        const dec = new TextDecoder();
+        let done, chunk;
+        while(true){
+          ({done, value:chunk} = await reader.read());
+          if(done) break;
+          ai.textContent += dec.decode(chunk, {stream:true});
+          stream.scrollTop = stream.scrollHeight;
+        }
+      }catch{
+        ai.textContent = "(no response)";
+      }
+    }
+
+    function addBubble(stream, text, who){
+      const b = document.createElement("div");
+      b.className = "bubble " + (who==="user" ? "user" : "ai");
+      b.textContent = text; stream.appendChild(b); return b;
+    }
+
+    // --- Routing
+    function navigate(key){
+      history.replaceState(null, "", "#/"+key);
+      (Views[key] || Views.chat)();
+    }
+
+    window.addEventListener("hashchange", ()=>{
+      const k = location.hash.replace(/^#\//,'') || "chat";
+      (Views[k] || Views.chat)();
+    });
+
+    // --- Search
+    qs("#btnSearch").onclick = ()=>{
+      const q = qs("#globalSearch").value.trim();
+      if(!q){ alert("Enter a query"); return; }
+      navigate("projects");
+      // As an example, filter on client after fetch; server-side search can replace this.
+      setTimeout(()=>{ alert("Search stub: '"+q+"' — wire to /api/search"); }, 0);
+    };
+
+    // --- Auth flows
+    (async function boot(){
+      // Presence pings (non-fatal)
+      initPresence();
+
+      const sess = await checkSession();
+      if(!sess || !sess.user){
+        elGate.style.display = "grid";
+      } else {
+        elGate.style.display = "none";
+      }
+      // default route
+      const initial = location.hash.replace(/^#\//,'') || "chat";
+      navigate(initial);
+    })();
+
+    qs("#btnLogin").onclick = async ()=>{
+      const u = qs("#u").value.trim();
+      const p = qs("#p").value;
+      try{
+        await login(u,p);
+        elGate.style.display = "none";
+        navigate("chat");
+      }catch(e){
+        alert("Login failed. Check API / Nginx / credentials.");
+      }
+    };
+
+    qs("#btnLogout").onclick = async ()=>{
+      await logout();
+      elGate.style.display = "grid";
+    };
+
+    // Mint RC (stub)
+    qs("#btnMint").onclick = async ()=>{
+      try{
+        const r = await API.post("/api/actions/mint", {amount:1});
+        alert("Mint result: " + JSON.stringify(r));
+      }catch{ alert("Mint endpoint not yet enabled."); }
+    };
+
+  })();
+  </script>
+</body>
 </html>

@@ -16,13 +16,15 @@ from .puzzles import simulate_chsh
 # Block outbound network access except localhost
 import socket
 
+ALLOWED_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
 
 def _guard_network() -> None:
     real_create = socket.create_connection
 
     def guarded(address, *args, **kwargs):
         host, *_ = address
-        if host not in {"127.0.0.1", "localhost"}:
+        if host not in ALLOWED_HOSTS:
             raise RuntimeError("Network access disabled")
         return real_create(address, *args, **kwargs)
 

@@ -1,14 +1,19 @@
 ---
 name: "✨ Feature request"
-about: Propose an idea
-labels: ["frontend"]
+about: Suggest an idea for BlackRoad
+labels: [enhancement]
 ---
 
-**Problem**
-…
+## Problem
+What are we trying to solve?
 
-**Proposed solution**
-…
+## Proposal
+Describe the solution and user impact.
 
-**Alternatives**
-…
+## Scope
+- Site
+- API
+- Infra/NGINX
+- CI/CD
+
+## Notes
