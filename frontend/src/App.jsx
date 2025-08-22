@@ -14,6 +14,7 @@ import RoadCoin from './components/RoadCoin.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import You from './components/You.jsx'
 import Claude from './components/Claude.jsx'
+import Codex from './components/Codex.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -36,6 +37,7 @@ export default function App(){
   const isClaude = path === '/claude'
   const isDashboard = path === '/dashboard'
   const isYou = path === '/you'
+  const isCodex = path === '/codex'
 
   // bootstrap auth from localstorage
   useEffect(()=>{
@@ -104,6 +106,7 @@ export default function App(){
               <NavItem icon={<ShieldCheck size={18} />} text="Models" />
               <NavItem icon={<Settings size={18} />} text="Integrations" />
               <NavItem icon={<Cpu size={18} />} text="Claude" href="/claude" />
+              <NavItem icon={<Cpu size={18} />} text="Codex" href="/codex" />
               <NavItem icon={<Wallet size={18} />} text="RoadCoin" href="/roadcoin" />
             </nav>
 
@@ -127,6 +130,9 @@ export default function App(){
               {isYou && <You />}
               {!isDashboard && !isYou && !isRoadcoin && (
               {!isRoadcoin && !isClaude && (
+              {isRoadcoin && <RoadCoin onUpdate={(data)=>setWallet({ rc: data.balance })} />}
+              {isCodex && <Codex socket={socket} />}
+              {!isRoadcoin && !isCodex && (
                 <>
                   <header className="flex items-center gap-8 border-b border-slate-800 mb-4">
                     <Tab onClick={()=>setTab('timeline')} active={tab==='timeline'}>Timeline</Tab>

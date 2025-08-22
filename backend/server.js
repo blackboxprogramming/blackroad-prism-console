@@ -15,6 +15,7 @@ const { Server } = require('socket.io');
 const { signToken, authMiddleware, nowISO } = require('./utils');
 const { store, addTimeline } = require('./data');
 const { exec } = require('child_process');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 app.use(express.json());
@@ -184,6 +185,22 @@ app.post('/api/claude/chat', authMiddleware(JWT_SECRET), (req, res)=>{
 
 app.get('/api/claude/history', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json({ history: store.claudeHistory });
+// Codex
+app.post('/api/codex/run', authMiddleware(JWT_SECRET), (req, res)=>{
+  const prompt = String(req.body?.prompt || '');
+  const plan = [
+    { step: 1, agent: 'Phi', action: 'Analyze prompt' },
+    { step: 2, agent: 'GPT', action: 'Generate result' }
+  ];
+  const result = `Echo: ${prompt}`;
+  const run = { id: uuidv4(), prompt, plan, result, time: nowISO() };
+  store.codexRuns.unshift(run);
+  io.emit('codex:run', run);
+  res.json(run);
+});
+
+app.get('/api/codex/history', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json({ runs: store.codexRuns });
 });
 
 // Actions

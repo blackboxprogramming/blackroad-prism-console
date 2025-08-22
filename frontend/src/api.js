@@ -97,6 +97,14 @@ export async function claudeChat(prompt){
 export async function fetchClaudeHistory(){
   const { data } = await axios.get(`${API_BASE}/api/claude/history`)
   return data.history
+export async function runCodex(prompt){
+  const { data } = await axios.post(`${API_BASE}/api/codex/run`, { prompt })
+  return data
+}
+
+export async function fetchCodexHistory(){
+  const { data } = await axios.get(`${API_BASE}/api/codex/history`)
+  return data.runs
 }
 
 export { API_BASE }

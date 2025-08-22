@@ -38,6 +38,7 @@ const store = {
   ],
   lucidiaHistory: []
   claudeHistory: []
+  codexRuns: []
 };
 
 function addTimeline(evt){
