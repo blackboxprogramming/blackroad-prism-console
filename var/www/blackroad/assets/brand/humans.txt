@@ -1,0 +1,7 @@
+/* FILE: /var/www/blackroad/assets/brand/humans.txt */
+Team: BlackRoad — AI-native & blockchain advisory
+Site: blackroad.io
+Design: BlackRoad Core
+Thanks: community, open-source maintainers, and co-creators
+Standards: HTML5, CSS3, ECMAScript, PWA
+Do-not-track: We respect privacy.
