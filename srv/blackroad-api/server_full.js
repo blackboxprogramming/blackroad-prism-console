@@ -28,6 +28,58 @@ const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
 const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
 const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
+const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
+
+const PLANS = [
+  {
+    id: 'builder',
+    name: 'Builder',
+    slug: 'builder',
+    monthly: Number(process.env.PRICE_BUILDER_MONTH_CENTS || 0),
+    annual: Number(process.env.PRICE_BUILDER_YEAR_CENTS || 0),
+    features: [
+      'Portal access',
+      'Agent Stack (basic)',
+      '100 chat turns/day',
+      'RC mint monthly',
+    ],
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    slug: 'pro',
+    monthly: Number(process.env.PRICE_PRO_MONTH_CENTS || 0),
+    annual: Number(process.env.PRICE_PRO_YEAR_CENTS || 0),
+    features: [
+      'Portal access',
+      'Agent Stack (basic)',
+      '100 chat turns/day',
+      'RC mint monthly',
+      'Priority queue',
+      'Advanced agents',
+      '5,000 chat turns/day',
+    ],
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    slug: 'enterprise',
+    monthly: Number(process.env.PRICE_ENTERPRISE_MONTH_CENTS || 0),
+    annual: Number(process.env.PRICE_ENTERPRISE_YEAR_CENTS || 0),
+    features: [
+      'Portal access',
+      'Agent Stack (basic)',
+      '100 chat turns/day',
+      'RC mint monthly',
+      'Priority queue',
+      'Advanced agents',
+      '5,000 chat turns/day',
+      'Org SSO (stub)',
+      'Dedicated support',
+      'Custom connectors',
+    ],
+  },
+];
 
 // Ensure DB dir exists
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
@@ -83,6 +135,35 @@ app.post('/api/login', (req, res) => {
 app.post('/api/logout', (req, res) => {
   req.session = null;
   res.json({ ok: true });
+});
+
+// --- Billing (stubs)
+app.get('/api/billing/plans', (req, res) => {
+  res.json(
+    PLANS.map(({ id, name, slug, monthly, annual, features }) => ({
+      id,
+      name,
+      slug,
+      monthly,
+      annual,
+      features,
+    }))
+  );
+});
+
+app.post('/api/billing/checkout', requireAuth, (req, res) => {
+  if (BILLING_DISABLE) return res.status(503).json({ disabled: true });
+  res.json({ checkoutUrl: '/subscribe?demo=1' });
+});
+
+app.post('/api/billing/portal', requireAuth, (req, res) => {
+  if (BILLING_DISABLE) return res.status(503).json({ disabled: true });
+  res.json({ portalUrl: '/subscribe?portal=1' });
+});
+
+app.post('/api/billing/webhook', (req, res) => {
+  // TODO: verify Stripe signature and handle events
+  res.json({ received: true });
 });
 
 // --- SQLite bootstrap
