@@ -76,6 +76,19 @@ export async function fetchGuardianAlerts(){
 export async function resolveGuardianAlert(id, status='resolved'){
   const { data } = await axios.post(`${API_BASE}/api/guardian/alerts/${id}/resolve`, { status })
   return data.alert
+export async function fetchDashboardSystem(){
+  const { data } = await axios.get(`${API_BASE}/api/dashboard/system`)
+  return data
+}
+
+export async function fetchDashboardFeed(){
+  const { data } = await axios.get(`${API_BASE}/api/dashboard/feed`)
+  return data.events
+}
+
+export async function fetchProfile(){
+  const { data } = await axios.get(`${API_BASE}/api/you/profile`)
+  return data
 }
 
 export { API_BASE }
