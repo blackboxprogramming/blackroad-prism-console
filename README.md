@@ -38,6 +38,21 @@ Use **username** `root` and **password** `Codex2025`.
 - Replace in‑memory store with Postgres/Redis when ready.
 - Wire real agents to `/api/actions/*` and stream richer events over Socket.IO.
 
+### BlackRoad Sync CLI
+`codex/tools/blackroad_sync.py` scaffolds a chat-friendly pipeline that mirrors
+commands like "Push latest to BlackRoad.io" or "Refresh working copy and
+redeploy".  Each sub-command currently logs the intended action:
+
+```bash
+python codex/tools/blackroad_sync.py push
+python codex/tools/blackroad_sync.py refresh
+python codex/tools/blackroad_sync.py rebase
+python codex/tools/blackroad_sync.py sync
+```
+
+Extend the script with real webhooks, Slack posts, or droplet deployments as
+needed.
+
 ---
 
 This scaffold is intentionally clean and compact so you can drop in your own logic fast.
