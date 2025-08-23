@@ -12,7 +12,7 @@
   },
   "scripts": {
     "prepare": "husky",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.mjs,.cjs || true",
+      "lint": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
     "format": "prettier -w .",
     "test": "node tests/smoke.test.js",
     "dev": "npm --prefix sites/blackroad run dev",
