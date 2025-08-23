@@ -16,10 +16,15 @@ Reads:
 Emits:
   repo.issues.opened
 """
-import os, re, json, base64, time
-from pathlib import Path
+import json
+import os
+import re
+import time
 from datetime import datetime
-import urllib.request, urllib.error
+from pathlib import Path
+import urllib.error
+import urllib.parse
+import urllib.request
 
 BASE = Path("codex")
 EVENTS = BASE/"runtime"/"events"
