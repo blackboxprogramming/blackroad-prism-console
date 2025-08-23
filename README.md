@@ -41,3 +41,17 @@ Use **username** `root` and **password** `Codex2025`.
 ---
 
 This scaffold is intentionally clean and compact so you can drop in your own logic fast.
+
+## Codex Deployment
+
+A helper script `scripts/blackroad_codex.sh` provides a chat-like interface for common deployment actions:
+
+```bash
+scripts/blackroad_codex.sh push
+scripts/blackroad_codex.sh deploy
+scripts/blackroad_codex.sh refresh
+scripts/blackroad_codex.sh rebase
+scripts/blackroad_codex.sh sync
+```
+
+Set `REMOTE`, `BRANCH`, and `DROPLET_HOST` to customize targets. Provide `SLACK_WEBHOOK` to post updates.
