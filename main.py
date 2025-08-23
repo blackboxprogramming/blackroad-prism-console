@@ -32,13 +32,20 @@ st.markdown("""
 """)
 
 # Audio input
+@st.cache_resource
+def load_whisper_model():
+    """Load Whisper model once and cache for subsequent requests."""
+    return whisper.load_model("base")
+
+
 audio_file = st.file_uploader("Upload your voice (mp3 or wav)", type=["mp3", "wav"])
 if audio_file is not None:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio:
         temp_audio.write(audio_file.read())
         temp_audio_path = temp_audio.name
-    model = whisper.load_model("base")
+    model = load_whisper_model()
     result = model.transcribe(temp_audio_path)
+    os.remove(temp_audio_path)
     user_input = result["text"]
     st.markdown(f"**You said:** {user_input}")
 else:
