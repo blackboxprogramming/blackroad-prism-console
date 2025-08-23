@@ -2,12 +2,16 @@ import streamlit as st
 import openai
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import io
 import os
-import base64
 import tempfile
 import whisper
+
+
+@st.cache_resource
+def get_whisper_model():
+    """Load and cache the Whisper model to avoid reloading on each request."""
+    return whisper.load_model("base")
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -29,8 +33,10 @@ if audio_file is not None:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio:
         temp_audio.write(audio_file.read())
         temp_audio_path = temp_audio.name
-    model = whisper.load_model("base")
+
+    model = get_whisper_model()
     result = model.transcribe(temp_audio_path)
+    os.unlink(temp_audio_path)
     user_input = result["text"]
     st.markdown(f"**You said:** {user_input}")
 else:
