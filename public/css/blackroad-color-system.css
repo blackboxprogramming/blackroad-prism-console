@@ -1,0 +1,62 @@
+@layer tokens, base, components, utilities;
+
+@layer tokens {
+  :root {
+    /* Locked brand */
+    --accent:   #FF4FD8;
+    --accent-2: #0096FF;
+    --accent-3: #FDBA2D;
+
+    /* Surfaces & text */
+    --bg-app:    #0B0C0F;
+    --bg-elev-1: #121319;
+    --bg-elev-2: #1A1C23;
+    --text:      #E6E7EB;
+    --text-muted:#B5B8C1;
+    --border:    #2A2E37;
+
+    /* State colors */
+    --success: #10B981; --warning: #F59E0B; --danger: #EF4444; --info: var(--accent-2);
+
+    /* Dynamic derived scales using OKLCH mixing (falls back automatically) */
+    --accent-weak:  color-mix(in oklch, var(--accent) 60%, white);
+    --accent-strong:color-mix(in oklch, var(--accent) 85%, black);
+
+    --link: var(--accent-2);
+    --focus: var(--accent);
+  }
+
+  /* Time‑based accents, honoring your earlier API */
+  :root[data-time="morning"] { --accent-warm: #FFB347; }
+  :root[data-time="evening"] { --accent-warm: #FF6B35; }
+  :root[data-time="night"]   { --accent-warm: #4A90E2; }
+
+  /* High contrast & motion */
+  @media (prefers-contrast: more) {
+    :root { --border: #3A3F4B; --text-muted: #C8CBD2; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :root { --motion-intensity: 0.1; }
+  }
+}
+
+/* Light mode variant (optional site-wide) */
+@layer base {
+  :root[data-theme="light"] {
+    --bg-app: #FBFCFE;
+    --bg-elev-1: #FFFFFF;
+    --bg-elev-2: #F4F6FA;
+    --text: #111318;
+    --text-muted: #4A4F5A;
+    --border: #D6DBE5;
+  }
+}
+
+/* Focus ring consistent across components */
+@layer utilities {
+  .focus-ring {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}

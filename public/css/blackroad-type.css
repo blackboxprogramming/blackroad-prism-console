@@ -1,0 +1,28 @@
+:root {
+  --font-body: 'Inter Variable', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --ratio: 1.333;
+  --fs-xs: 0.75rem;  --fs-sm: 1rem;   --fs-md: 1.333rem;
+  --fs-lg: 1.777rem; --fs-xl: 2.369rem; --fs-2xl: 3.157rem; --fs-3xl: 4.209rem;
+
+  --lh-tight: 1.25; --lh: 1.5; --lh-loose: 1.7;
+}
+
+/* Reading-optimized */
+.text-optimized {
+  font-family: var(--font-body);
+  line-height: calc(1em + 0.725ex);
+  word-spacing: 0.16em;
+  letter-spacing: 0.012em;
+  text-rendering: optimizeLegibility;
+  hanging-punctuation: first last;
+}
+
+/* Adaptive density */
+@container (min-width: 768px) {
+  .adaptive-text {
+    font-size: clamp(1rem, 1rem + 1vw, 1.5rem);
+    line-height: calc(1em + 0.5rem);
+  }
+}

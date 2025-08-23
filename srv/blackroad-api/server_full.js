@@ -20,6 +20,7 @@ const cookieSession = require('cookie-session');
 const Database = require('better-sqlite3');
 const { Server: SocketIOServer } = require('socket.io');
 const { exec } = require('child_process');
+const { randomUUID } = require('crypto');
 
 // --- Config
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -28,6 +29,58 @@ const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
 const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
 const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
+const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
+
+const PLANS = [
+  {
+    id: 'builder',
+    name: 'Builder',
+    slug: 'builder',
+    monthly: Number(process.env.PRICE_BUILDER_MONTH_CENTS || 0),
+    annual: Number(process.env.PRICE_BUILDER_YEAR_CENTS || 0),
+    features: [
+      'Portal access',
+      'Agent Stack (basic)',
+      '100 chat turns/day',
+      'RC mint monthly',
+    ],
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    slug: 'pro',
+    monthly: Number(process.env.PRICE_PRO_MONTH_CENTS || 0),
+    annual: Number(process.env.PRICE_PRO_YEAR_CENTS || 0),
+    features: [
+      'Portal access',
+      'Agent Stack (basic)',
+      '100 chat turns/day',
+      'RC mint monthly',
+      'Priority queue',
+      'Advanced agents',
+      '5,000 chat turns/day',
+    ],
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    slug: 'enterprise',
+    monthly: Number(process.env.PRICE_ENTERPRISE_MONTH_CENTS || 0),
+    annual: Number(process.env.PRICE_ENTERPRISE_YEAR_CENTS || 0),
+    features: [
+      'Portal access',
+      'Agent Stack (basic)',
+      '100 chat turns/day',
+      'RC mint monthly',
+      'Priority queue',
+      'Advanced agents',
+      '5,000 chat turns/day',
+      'Org SSO (stub)',
+      'Dedicated support',
+      'Custom connectors',
+    ],
+  },
+];
 
 // Ensure DB dir exists
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
@@ -85,6 +138,35 @@ app.post('/api/logout', (req, res) => {
   res.json({ ok: true });
 });
 
+// --- Billing (stubs)
+app.get('/api/billing/plans', (req, res) => {
+  res.json(
+    PLANS.map(({ id, name, slug, monthly, annual, features }) => ({
+      id,
+      name,
+      slug,
+      monthly,
+      annual,
+      features,
+    }))
+  );
+});
+
+app.post('/api/billing/checkout', requireAuth, (req, res) => {
+  if (BILLING_DISABLE) return res.status(503).json({ disabled: true });
+  res.json({ checkoutUrl: '/subscribe?demo=1' });
+});
+
+app.post('/api/billing/portal', requireAuth, (req, res) => {
+  if (BILLING_DISABLE) return res.status(503).json({ disabled: true });
+  res.json({ portalUrl: '/subscribe?portal=1' });
+});
+
+app.post('/api/billing/webhook', (req, res) => {
+  // TODO: verify Stripe signature and handle events
+  res.json({ received: true });
+});
+
 // --- SQLite bootstrap
 const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
@@ -100,6 +182,81 @@ for (const t of TABLES) {
       meta JSON
     )
   `).run();
+}
+
+// Subscription tables
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS subscribers (
+    id TEXT PRIMARY KEY,
+    email TEXT UNIQUE,
+    name TEXT,
+    company TEXT,
+    created_at TEXT,
+    source TEXT
+  )
+`).run();
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS subscriptions (
+    id TEXT PRIMARY KEY,
+    subscriber_id TEXT,
+    plan TEXT,
+    cycle TEXT,
+    status TEXT,
+    stripe_customer_id TEXT,
+    stripe_subscription_id TEXT,
+    created_at TEXT,
+    updated_at TEXT
+  )
+`).run();
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS payments (
+    id TEXT PRIMARY KEY,
+    subscription_id TEXT,
+    provider TEXT,
+    amount_cents INTEGER,
+    currency TEXT,
+    status TEXT,
+    raw JSON,
+    created_at TEXT
+  )
+`).run();
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS logs_connectors (
+    id TEXT PRIMARY KEY,
+    subscriber_id TEXT,
+    action TEXT,
+    connector TEXT,
+    ok INTEGER,
+    detail TEXT,
+    created_at TEXT
+  )
+`).run();
+
+// Billing tables (minimal subset)
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS plans (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    monthly_price_cents INTEGER NOT NULL DEFAULT 0,
+    yearly_price_cents INTEGER NOT NULL DEFAULT 0,
+    features TEXT NOT NULL,
+    is_active INTEGER NOT NULL DEFAULT 1
+  )
+`).run();
+
+// Seed default plans if table empty
+const planCount = db.prepare('SELECT COUNT(*) as c FROM plans').get().c;
+if (planCount === 0) {
+  const defaultPlans = [
+    { id: 'free', name: 'Free', monthly: 0, yearly: 0, features: ['Basic access'] },
+    { id: 'builder', name: 'Builder', monthly: 1500, yearly: 15000, features: ['Builder tools', 'Email support'] },
+    { id: 'pro', name: 'Pro', monthly: 4000, yearly: 40000, features: ['All builder features', 'Priority support'] },
+    { id: 'enterprise', name: 'Enterprise', monthly: 0, yearly: 0, features: ['Custom pricing', 'Dedicated support'] },
+  ];
+  const stmt = db.prepare('INSERT INTO plans (id, name, monthly_price_cents, yearly_price_cents, features, is_active) VALUES (?, ?, ?, ?, ?, 1)');
+  for (const p of defaultPlans) {
+    stmt.run(p.id, p.name, p.monthly, p.yearly, JSON.stringify(p.features));
+  }
 }
 
 // Helpers
@@ -152,6 +309,67 @@ app.delete('/api/:kind/:id', requireAuth, (req, res) => {
   if (!validKind(kind)) return res.status(404).json({ error: 'unknown_kind' });
   try { deleteRow(kind, Number(id)); res.json({ ok: true }); }
   catch (e) { res.status(500).json({ error: 'db_delete_failed', detail: String(e) }); }
+});
+
+// --- Subscribe & connectors
+const VALID_PLANS = ['free', 'builder', 'guardian'];
+const VALID_CYCLES = ['monthly', 'annual'];
+
+app.get('/api/connectors/status', (req, res) => {
+  const stripe = !!(process.env.STRIPE_PUBLIC_KEY && process.env.STRIPE_SECRET && process.env.STRIPE_WEBHOOK_SECRET);
+  const mail = !!process.env.MAIL_PROVIDER;
+  const sheets = !!(process.env.GSHEETS_SA_JSON || process.env.SHEETS_CONNECTOR_TOKEN);
+  const calendar = !!(process.env.GOOGLE_CALENDAR_CREDENTIALS || process.env.ICS_URL);
+  const discord = !!process.env.DISCORD_INVITE;
+  const webhooks = stripe; // placeholder
+  res.json({ stripe, mail, sheets, calendar, discord, webhooks });
+});
+
+app.post('/api/subscribe/checkout', (req, res) => {
+  const { plan, cycle } = req.body || {};
+  if (!VALID_PLANS.includes(plan) || !VALID_CYCLES.includes(cycle)) {
+    return res.status(400).json({ error: 'invalid_input' });
+  }
+  if (!process.env.STRIPE_SECRET) {
+    return res.status(409).json({ mode: 'invoice' });
+  }
+  // Stripe integration would go here
+  res.json({ url: 'https://stripe.example/checkout' });
+});
+
+app.post('/api/subscribe/invoice-intent', (req, res) => {
+  const { plan, cycle, email, name, company, address, notes } = req.body || {};
+  if (!email || !VALID_PLANS.includes(plan) || !VALID_CYCLES.includes(cycle)) {
+    return res.status(400).json({ error: 'invalid_input' });
+  }
+  let sub = db.prepare('SELECT id FROM subscribers WHERE email = ?').get(email);
+  let subscriberId = sub ? sub.id : randomUUID();
+  if (!sub) {
+    db.prepare('INSERT INTO subscribers (id, email, name, company, created_at, source) VALUES (?, ?, ?, ?, datetime("now"), ?)')
+      .run(subscriberId, email, name || null, company || null, 'invoice');
+  }
+  const subscriptionId = randomUUID();
+  db.prepare('INSERT INTO subscriptions (id, subscriber_id, plan, cycle, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, datetime("now"), datetime("now"))')
+    .run(subscriptionId, subscriberId, plan, cycle, 'pending_invoice');
+  res.json({ ok: true, next: '/subscribe/thanks' });
+});
+
+app.get('/api/subscribe/status', (req, res) => {
+  const { email } = req.query || {};
+  if (!email) return res.status(400).json({ error: 'email_required' });
+  const row = db.prepare('SELECT s.plan, s.cycle, s.status FROM subscribers sub JOIN subscriptions s ON sub.id = s.subscriber_id WHERE sub.email = ? ORDER BY datetime(s.created_at) DESC LIMIT 1').get(email);
+  res.json(row || { status: 'none' });
+// --- Billing: plans
+app.get('/api/subscribe/plans', requireAuth, (_req, res) => {
+  try {
+    const rows = db.prepare('SELECT id, name, monthly_price_cents, yearly_price_cents, features, is_active FROM plans WHERE is_active = 1').all();
+    for (const r of rows) {
+      try { r.features = JSON.parse(r.features); } catch { r.features = []; }
+    }
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: 'db_plans_failed', detail: String(e) });
+  }
 });
 
 // --- LLM bridge (/api/llm/chat)

@@ -1,0 +1,89 @@
+// FILE: /srv/blackroad-api/server_full.js
+'use strict';
+
+require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
+const http = require('http');
+const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const morgan = require('morgan');
+const cookieSession = require('cookie-session');
+const rateLimit = require('express-rate-limit');
+
+const { PORT, NODE_ENV, ALLOWED_ORIGIN, LOG_DIR, SESSION_SECRET } = require('./src/config');
+
+// Ensure log dir exists
+if (LOG_DIR) {
+  try {
+    fs.mkdirSync(LOG_DIR, { recursive: true });
+  } catch {}
+}
+
+const app = express();
+app.set('trust proxy', 1); // behind NGINX
+
+// HTTP security headers
+app.use(helmet());
+
+// CORS (adjust as needed)
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // allow curl / same-origin
+    if (!ALLOWED_ORIGIN || origin === ALLOWED_ORIGIN) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'), false);
+  },
+  credentials: true
+};
+app.use(cors(corsOptions));
+
+// Logging
+app.use(morgan('combined'));
+
+// Body parsing
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: false }));
+
+// Sessions
+if (!SESSION_SECRET || SESSION_SECRET === 'change-this-session-secret') {
+  console.warn('[WARN] Weak or default SESSION_SECRET detected. Update your .env!');
+}
+app.use(cookieSession({
+  name: 'brsid',
+  secret: SESSION_SECRET || 'dev-session-secret',
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: NODE_ENV === 'production',
+  maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+}));
+
+// Rate limiting (global)
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use(limiter);
+
+// Initialize DB (auto-migrations on import)
+const db = require('./src/db');
+
+// Routes
+const apiRouter = require('./src/routes');
+app.use('/api', apiRouter);
+
+// Root
+app.get('/', (req, res) => {
+  res.status(200).json({ ok: true, service: 'blackroad-api', env: NODE_ENV || 'dev' });
+});
+
+// HTTP server + Socket.IO
+const server = http.createServer(app);
+const { setupSockets } = require('./src/socket');
+setupSockets(server);
+
+server.listen(PORT, () => {
+  console.log(`[blackroad-api] listening on port ${PORT} (env: ${NODE_ENV})`);
+});

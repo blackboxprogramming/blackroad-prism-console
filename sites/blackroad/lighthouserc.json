@@ -1,7 +1,19 @@
 {
   "ci": {
     "collect": {
-      "url": ["https://blackroad.io/", "https://blackroad.io/portal", "https://blackroad.io/status"],
+      "url": [
+        "https://blackroad.io/",
+        "https://blackroad.io/portal",
+        "https://blackroad.io/status",
+        "https://blackroad.io/portal/roadbook",
+        "https://blackroad.io/portal/roadview",
+        "https://blackroad.io/portal/lucidia",
+        "https://blackroad.io/portal/roadcode",
+        "https://blackroad.io/portal/roadcoin",
+        "https://blackroad.io/portal/roadchain",
+        "https://blackroad.io/portal/radius",
+        "https://blackroad.io/portal/bot"
+      ],
       "numberOfRuns": 1
     },
     "assert": {

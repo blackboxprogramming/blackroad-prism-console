@@ -1,0 +1,8 @@
+.focus-enhanced { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+.touch-target { min-height: 44px; min-width: 44px; padding: 12px; }
+.reading-aid { line-height: 1.6; word-spacing: .16em; letter-spacing: .04em; font-variant-numeric: oldstyle-nums; }
+
+@media (forced-colors: active) {
+  :root { --focus: Highlight; }
+  .focus-enhanced { outline-color: Highlight; }
+}
