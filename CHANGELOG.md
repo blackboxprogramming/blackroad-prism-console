@@ -1,3 +1,7 @@
+## Unreleased
+
+- Add `scripts/blackroad_sync.py` CI/CD helper script.
+
 ## v3.0.0
 
 - Lindbladian dynamics (γφ dephasing, γrel relaxation)
