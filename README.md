@@ -31,6 +31,19 @@ npm run build
 npm test
 ```
 
+## Codex Sync/Deploy
+
+An experimental control surface lives at `codex/tools/blackroad_pipeline.py`.
+It accepts chat-style commands and orchestrates a stubbed pipeline spanning
+GitHub commits, connector sync, Working Copy refresh, and droplet deployment.
+
+```bash
+python codex/tools/blackroad_pipeline.py "Push latest to BlackRoad.io" -m "chore: sync"
+```
+
+The script only logs each step today; extend the placeholders with real
+connectors, OAuth, and deployment hooks to enable end-to-end automation.
+
 Additional operational docs live in the [`docs/`](docs) folder.
 
 ## Experiments & Funnels
