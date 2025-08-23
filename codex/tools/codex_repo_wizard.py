@@ -126,9 +126,14 @@ def build_git_env(ssh_key_path: str, strict: bool):
     env = os.environ.copy()
     key = os.path.expanduser(ssh_key_path)
     if strict:
-        env["GIT_SSH_COMMAND"] = f"ssh -i {shlex.quote(key)} -o UserKnownHostsFile={shlex.quote(str(KNOWN_HOSTS_PATH))} -o StrictHostKeyChecking=yes"
+        env["GIT_SSH_COMMAND"] = (
+            f"ssh -i {shlex.quote(key)} -o UserKnownHostsFile={shlex.quote(str(KNOWN_HOSTS_PATH))} "
+            "-o StrictHostKeyChecking=yes"
+        )
     else:
-        env["GIT_SSH_COMMAND"] = f"ssh -i {shlex.quote(key)} -o StrictHostKeyChecking=accept-new"
+        env["GIT_SSH_COMMAND"] = (
+            f"ssh -i {shlex.quote(key)} -o StrictHostKeyChecking=accept-new"
+        )
     return env
 
 def tokenize_url(url, token):
