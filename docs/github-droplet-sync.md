@@ -52,3 +52,19 @@ This guide outlines how to keep a GitHub repository, your local working copy, an
 - Verify the droplet's SSH fingerprint `SHA256:b3uikwBkwnxpMTZjWBFaNgscsWXHRRG3Snj9QYke+ok=` on first connection.
 - Use SSH keys instead of passwords whenever possible.
 
+## Unified sync & deploy
+
+For one-step push or refresh use `scripts/blackroad_sync.sh`:
+
+```bash
+# Commit and push local changes, then redeploy on the droplet
+scripts/blackroad_sync.sh push "commit message"
+
+# Pull latest from GitHub and redeploy without committing
+scripts/blackroad_sync.sh refresh
+```
+
+The script expects SSH access to the droplet (`$DROPLET_HOST`) and
+optionally posts status events via `WEBHOOK_URL` to connected systems
+like Slack or Airtable.
+
