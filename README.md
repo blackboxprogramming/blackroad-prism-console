@@ -31,4 +31,17 @@ npm run build
 npm test
 ```
 
+## Deployment
+
+Run the scaffolded end-to-end sync script to push local changes and deploy them
+to the live environment:
+
+```bash
+python scripts/blackroad_sync.py
+```
+
+The script pushes to GitHub, fans out to connector webhooks, refreshes an iOS
+Working Copy checkout and issues a remote deploy on the droplet when configured
+via environment variables.
+
 Additional operational docs live in the [`docs/`](docs) folder.
