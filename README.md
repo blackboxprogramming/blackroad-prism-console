@@ -31,6 +31,23 @@ npm run build
 npm test
 ```
 
+## Sync & Deploy
+
+Use the `bin/blackroad-sync` script to push code and refresh the live site end to end.
+
+```bash
+# Push commits, trigger connector jobs, refresh the Working Copy, and redeploy the droplet
+bin/blackroad-sync push
+
+# Refresh deployment without new commits
+bin/blackroad-sync refresh
+
+# Rebase with main, push, and redeploy
+bin/blackroad-sync rebase
+```
+
+The script relies on environment variables like `DROPLET_HOST` and `WORKING_COPY_HOST` to reach remote hosts.
+
 Additional operational docs live in the [`docs/`](docs) folder.
 
 ## Experiments & Funnels
