@@ -1,17 +1,19 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 
-// Vite config for the static BlackRoad site.
-// NGINX/Caddy in the repo will serve the built /dist at runtime.
 export default defineConfig({
   plugins: [react()],
-  root: '.',
   build: {
     outDir: 'dist',
     sourcemap: false,
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        index:  resolve(__dirname, 'index.html'),
+        portal: resolve(__dirname, 'portal.html'),
+      },
+    },
   },
-  server: {
-    host: true,
-  },
-});
+  server: { host: true },
+})

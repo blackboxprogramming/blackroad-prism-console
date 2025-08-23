@@ -3,22 +3,29 @@ BlackRoad.io — Site
 Static Vite + React + Tailwind site served at / on blackroad.io.
 NGINX proxies /api to the backend and /ws for WebSockets.
 
-Local dev
+## Local dev
 
 cd sites/blackroad
 npm i
 npm run dev
 # open http://localhost:5173
 
-Build
+## Build
 
 npm run build   # outputs to sites/blackroad/dist
 
-Preview
+## Preview
 
 npm run preview # http://localhost:5174
 
-Production is served by the repository’s NGINX/Caddy configs. Artifacts are also uploaded from CI.
+## Deployment
+
+GitHub Pages builds and deploys `dist` on every push to `main` via `.github/workflows/site-build.yml`.
+Pages URL: https://blackroad.io
+
+To switch to Vercel or Cloudflare Pages, add the respective project tokens as repository
+secrets and enable the `pr-preview-vercel.yml` or `pr-preview-cloudflare.yml` workflows.
+Production is served by the repository’s NGINX/Caddy configs; GitHub Pages hosts the static assets.
 
 ⸻
 

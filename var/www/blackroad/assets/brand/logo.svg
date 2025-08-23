@@ -1,0 +1,19 @@
+<!-- FILE: /var/www/blackroad/assets/brand/logo.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">BlackRoad Logomark</title>
+  <desc id="desc">A near-black circle with a perspective road and a dashed gradient center line.</desc>
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0" stop-color="#FF4FD8"/>
+      <stop offset="0.5" stop-color="#0096FF"/>
+      <stop offset="1" stop-color="#FDBA2D"/>
+    </linearGradient>
+  </defs>
+  <circle cx="128" cy="128" r="120" fill="#0A0A0E"/>
+  <!-- Road body -->
+  <path d="M80 240 L128 48 L176 240 Z" fill="#FFFFFF" opacity="0.96"/>
+  <!-- Subtle inner shadow on road edges -->
+  <path d="M88 240 L128 64 L168 240 Z" fill="#0A0A0E" opacity="0.12"/>
+  <!-- Center dashed line -->
+  <path d="M128 236 L128 56" stroke="url(#g)" stroke-width="10" stroke-linecap="round" stroke-dasharray="18 18" fill="none"/>
+</svg>
