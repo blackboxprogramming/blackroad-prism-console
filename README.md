@@ -32,3 +32,23 @@ npm test
 ```
 
 Additional operational docs live in the [`docs/`](docs) folder.
+
+## Codex Sync & Deploy
+
+An initial scaffold for the end-to-end BlackRoad deployment flow lives in
+`scripts/blackroad_sync.py`. The helper currently exposes three
+subcommands:
+
+```bash
+# Push local commits to GitHub and trigger connector jobs
+python3 scripts/blackroad_sync.py push
+
+# Update an iOS Working Copy clone
+python3 scripts/blackroad_sync.py refresh-working-copy --path /path/to/clone
+
+# Pull latest code and restart services on the droplet
+python3 scripts/blackroad_sync.py deploy --host user@droplet
+```
+
+The script only prints the operations it would perform, acting as a
+placeholder for future automation.
