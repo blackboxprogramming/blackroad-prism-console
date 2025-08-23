@@ -1,3 +1,7 @@
+## Unreleased
+
+- Add BlackRoad sync pipeline script for end-to-end Codex deployment.
+
 ## v3.0.0
 
 - Lindbladian dynamics (γφ dephasing, γrel relaxation)
