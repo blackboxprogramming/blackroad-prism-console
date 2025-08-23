@@ -14,10 +14,21 @@ class CleanupBot:
     branches: List[str]
 
     def cleanup(self) -> None:
-        """Remove the configured branches locally and remotely."""
+        """Remove the configured branches locally and remotely.
+
+        Branches missing either locally or remotely are skipped with a message.
+        """
         for branch in self.branches:
-            subprocess.run(["git", "branch", "-D", branch], check=True)
-            subprocess.run(["git", "push", "origin", "--delete", branch], check=True)
+            try:
+                subprocess.run(["git", "branch", "-D", branch], check=True)
+            except subprocess.CalledProcessError:
+                print(f"Local branch '{branch}' does not exist.")
+            try:
+                subprocess.run(
+                    ["git", "push", "origin", "--delete", branch], check=True
+                )
+            except subprocess.CalledProcessError:
+                print(f"Remote branch '{branch}' does not exist.")
 
 
 if __name__ == "__main__":
