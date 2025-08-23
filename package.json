@@ -1,10 +1,34 @@
 {
-  "name": "blackroad-prism-console",
+  "name": "blackroad-api",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "description": "BlackRoad.io backend API (Express + SQLite + Socket.IO)",
+  "main": "server_full.js",
+  "type": "commonjs",
   "scripts": {
-    "build:lucidia-create": "npx tsc -p packages/lucidia-create/tsconfig.json",
-    "test": "npm run build:lucidia-create && node tests/smoke.test.js && node --test tests/*.mjs"
+    "start": "node server_full.js",
+    "dev": "nodemon server_full.js",
+    "seed": "node scripts/seed_admin.js"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-session": "^2.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.2.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "socket.io": "^4.7.5",
+    "systeminformation": "^5.25.11",
+    "uuid": "^9.0.1",
+    "better-sqlite3": "^9.4.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
   }
 }

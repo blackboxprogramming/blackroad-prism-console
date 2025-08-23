@@ -13,14 +13,15 @@ class StudentBot:
 
 
 def create_student_bots() -> List[StudentBot]:
-    """Create 15 student bots guided by phi, gpt, mistral, codex, and lucidia.
+    """Create 25 student bots guided by phi, gpt, mistral, codex, and lucidia.
 
     The leaders act as mentors rather than managers. Bots cycle through the
-    leaders, demonstrating collaborative learning.
+    leaders, demonstrating collaborative learning while traversing repositories
+    to keep them in harmony.
     """
     leaders = ["phi", "gpt", "mistral", "codex", "lucidia"]
     bot_cycle = cycle(leaders)
-    return [StudentBot(name=f"student_bot_{i+1}", leader=next(bot_cycle)) for i in range(15)]
+    return [StudentBot(name=f"student_bot_{i+1}", leader=next(bot_cycle)) for i in range(25)]
 
 
 if __name__ == "__main__":

@@ -15,6 +15,26 @@ const { Server } = require('socket.io');
 const { signToken, authMiddleware, nowISO } = require('./utils');
 const { store, addTimeline } = require('./data');
 const { exec } = require('child_process');
+const { v4: uuidv4 } = require('uuid');
+
+// Sample Roadbook data
+const roadbookChapters = [
+  {
+    id: '1',
+    title: 'Introduction',
+    content: 'Welcome to the Roadbook. This chapter introduces the journey.'
+  },
+  {
+    id: '2',
+    title: 'Getting Started',
+    content: 'Setup instructions and first steps with code snippets and images.'
+  },
+  {
+    id: '3',
+    title: 'Advanced Topics',
+    content: 'Deep dive into advanced usage with rich examples.'
+  }
+];
 
 const app = express();
 app.use(express.json());
@@ -103,6 +123,123 @@ app.post('/api/notes', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json({ ok: true });
 });
 
+// ---- Lucidia ----
+app.get('/api/lucidia/history', (req, res) => {
+  res.json({ history: store.lucidiaHistory });
+});
+
+app.post('/api/lucidia/chat', (req, res) => {
+  const prompt = String(req.body?.prompt || '');
+  const id = Date.now().toString();
+  const full = `Lucidia response to: ${prompt}. This is a sample streamed reply.`;
+  const parts = full.split(' ');
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Transfer-Encoding', 'chunked');
+  let idx = 0;
+  let acc = '';
+  const interval = setInterval(() => {
+    if (idx < parts.length) {
+      const chunk = parts[idx] + ' ';
+      res.write(chunk);
+      acc += chunk;
+      io.emit('lucidia:chat', { id, chunk });
+      idx++;
+    } else {
+      clearInterval(interval);
+      res.end();
+      store.lucidiaHistory.push({ id, prompt, response: acc.trim() });
+    }
+  }, 200);
+// Guardian endpoints
+app.get('/api/guardian/status', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json(store.guardian.status);
+});
+
+app.get('/api/guardian/alerts', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json({ alerts: store.guardian.alerts });
+});
+
+app.post('/api/guardian/alerts/:id/resolve', authMiddleware(JWT_SECRET), (req, res)=>{
+  const alert = store.guardian.alerts.find(a=>a.id === req.params.id);
+  if (!alert) return res.status(404).json({ error: 'not found' });
+  alert.status = req.body?.status || 'resolved';
+  res.json({ ok: true, alert });
+// Dashboard
+app.get('/api/dashboard/system', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json({ cpu, gpu, memory: mem, network: net });
+});
+
+app.get('/api/dashboard/feed', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json({ events: store.timeline.slice(0, 20) });
+});
+
+// Personal profile
+app.get('/api/you/profile', authMiddleware(JWT_SECRET), (req, res)=>{
+  const user = store.users[0];
+  res.json({
+    username: user.username,
+    plan: user.plan || 'free',
+    lastLogin: user.lastLogin || nowISO(),
+    tasks: store.tasks,
+    projects: store.projects || []
+  });
+// Claude chat
+app.post('/api/claude/chat', authMiddleware(JWT_SECRET), (req, res)=>{
+  const prompt = String(req.body?.prompt || '');
+  const response = `Claude heard: ${prompt}`;
+  let sent = 0;
+  const chunks = response.match(/.{1,10}/g) || [];
+  const interval = setInterval(()=>{
+    if (sent < chunks.length){
+      io.emit('claude:chat', { chunk: chunks[sent], done: false });
+      sent++;
+    } else {
+      io.emit('claude:chat', { done: true });
+      store.claudeHistory.push({ prompt, response });
+      clearInterval(interval);
+    }
+  }, 200);
+  res.json({ ok: true });
+});
+
+app.get('/api/claude/history', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json({ history: store.claudeHistory });
+// Codex
+app.post('/api/codex/run', authMiddleware(JWT_SECRET), (req, res)=>{
+  const prompt = String(req.body?.prompt || '');
+  const plan = [
+    { step: 1, agent: 'Phi', action: 'Analyze prompt' },
+    { step: 2, agent: 'GPT', action: 'Generate result' }
+  ];
+  const result = `Echo: ${prompt}`;
+  const run = { id: uuidv4(), prompt, plan, result, time: nowISO() };
+  store.codexRuns.unshift(run);
+  io.emit('codex:run', run);
+  res.json(run);
+});
+
+app.get('/api/codex/history', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json({ runs: store.codexRuns });
+// Roadbook endpoints
+app.get('/api/roadbook/chapters', authMiddleware(JWT_SECRET), (req, res) => {
+  const chapters = roadbookChapters.map(({ id, title }) => ({ id, title }));
+  res.json({ chapters });
+});
+
+app.get('/api/roadbook/chapter/:id', authMiddleware(JWT_SECRET), (req, res) => {
+  const chapter = roadbookChapters.find(c => c.id === req.params.id);
+  if (!chapter) return res.status(404).json({ error: 'not found' });
+  res.json({ chapter });
+});
+
+app.get('/api/roadbook/search', authMiddleware(JWT_SECRET), (req, res) => {
+  const q = String(req.query.q || '').toLowerCase();
+  const results = roadbookChapters
+    .filter(c => c.title.toLowerCase().includes(q) || c.content.toLowerCase().includes(q))
+    .map(c => ({ id: c.id, title: c.title, snippet: c.content.slice(0, 80) }));
+  res.json({ results });
+});
+
 // Actions
 app.post('/api/actions/run', authMiddleware(JWT_SECRET), (req,res)=>{
   const item = addTimeline({ type: 'action', text: 'Run triggered', by: req.user.username });
@@ -140,16 +277,17 @@ function randomWalk(prev, step=2, min=0, max=100){
   return Number(v.toFixed(1));
 }
 
-let cpu=35, mem=62, gpu=24;
+let cpu=35, mem=62, gpu=24, net=40;
 setInterval(()=>{
   cpu = randomWalk(cpu, 3);
   mem = randomWalk(mem, 2);
   gpu = randomWalk(gpu, 1);
-  io.emit('system:update', { cpu, mem, gpu, at: nowISO() });
+  net = randomWalk(net, 5);
+  io.emit('system:update', { cpu, mem, gpu, net, at: nowISO() });
 }, 2000);
 
 io.on('connection', (socket)=>{
-  socket.emit('system:update', { cpu, mem, gpu, at: nowISO() });
+  socket.emit('system:update', { cpu, mem, gpu, net, at: nowISO() });
   socket.emit('wallet:update', store.wallet);
   socket.emit('notes:update', store.sessionNotes);
 });

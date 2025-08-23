@@ -42,4 +42,5 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+      - run: echo "Deployed to ${{ steps.deployment.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"
 

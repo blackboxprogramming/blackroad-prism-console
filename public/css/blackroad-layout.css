@@ -1,0 +1,9 @@
+.grid-modular {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(260px, 30vw, 420px), 1fr));
+  gap: 16px;
+}
+
+[data-density="compact"] .grid-modular { gap: 12px; }
+[data-density="comfortable"] .grid-modular { gap: 16px; }
+[data-density="cozy"] .grid-modular { gap: 24px; }
