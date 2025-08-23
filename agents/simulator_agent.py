@@ -11,6 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from hashlib import sha256
 import json
+from collections import OrderedDict
 from typing import Any, Dict
 
 from lucidia.engines.condor_engine import (
@@ -30,15 +31,16 @@ def _hash_model(source: str, args: Dict[str, Any]) -> str:
 
 @dataclass
 class SimulatorAgent:
-    """Minimal simulator agent used in tests and local demos."""
+    """Minimal simulator agent used in tests and local demos with an LRU cache."""
 
-    cache: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    cache: OrderedDict[str, Dict[str, Any]] = field(default_factory=OrderedDict)
 
     def _memoise(self, key: str, value: Dict[str, Any]) -> None:
         """Store ``value`` under ``key`` keeping cache within ``CACHE_SIZE``."""
         self.cache[key] = value
+        self.cache.move_to_end(key)
         if len(self.cache) > CACHE_SIZE:
-            self.cache.pop(next(iter(self.cache)))
+            self.cache.popitem(last=False)
 
     def run(
         self,
@@ -51,6 +53,7 @@ class SimulatorAgent:
         args = args or {}
         key = _hash_model(model_source, {"intent": intent, **args})
         if key in self.cache:
+            self.cache.move_to_end(key)
             return self.cache[key]
 
         model_cls = load_model_from_source(model_source, class_name)
