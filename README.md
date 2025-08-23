@@ -41,3 +41,14 @@ Use **username** `root` and **password** `Codex2025`.
 ---
 
 This scaffold is intentionally clean and compact so you can drop in your own logic fast.
+
+## BlackRoad Sync & Deploy
+
+Run `scripts/blackroad_sync.sh` to push the latest changes to GitHub and roll them out to the droplet. The script accepts natural language commands, for example:
+
+```bash
+scripts/blackroad_sync.sh "Push latest to BlackRoad.io"
+scripts/blackroad_sync.sh "Refresh working copy and redeploy"
+```
+
+Set `WORKING_COPY_SSH`, `DROPLET_SSH`, and optionally `SLACK_WEBHOOK` environment variables before running. Logs are written to `blackroad_sync.log`.
