@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { me } from './api';
-import { fetchConfig, fetchStatus, startCheckout, openPortal } from './subscribeApi';
+import { fetchConfig, fetchStatus, startCheckout, openPortal, startConnector, revokeConnector, fetchOnboardingSlots, bookOnboarding } from './subscribeApi';
 
 const PLANS = [
   { id: 'starter', name: 'Starter', price: { month: 0, year: 0 }, features: ['Community access', 'Limited features'] },
@@ -62,6 +62,14 @@ export default function Subscribe(){
 
       {status && status.invoices && status.invoices.length > 0 && (
         <InvoiceTable invoices={status.invoices} />
+      )}
+
+      {status && status.status === 'active' && (
+        <>
+          <Connectors connectors={status.connectors} />
+          <Onboarding calendarConnected={status.connectors && status.connectors.calendar} />
+          <Finish rcBalance={status.rcBalance} />
+        </>
       )}
     </div>
   );
@@ -128,6 +136,91 @@ function InvoiceTable({ invoices }){
         ))}
       </tbody>
     </table>
+  );
+}
+
+function Connectors({ connectors }){
+  const services = [
+    { id: 'gmail', label: 'Gmail' },
+    { id: 'calendar', label: 'Calendar' },
+    { id: 'contacts', label: 'Contacts' }
+  ];
+
+  function start(service){
+    startConnector(service).then(d=>{ if(d.url) window.location = d.url; });
+  }
+
+  function revoke(service){
+    revokeConnector(service);
+  }
+
+  return (
+    <div className="mt-10">
+      <h2 className="text-xl mb-4" style={{color:'#FF4FD8'}}>Connectors</h2>
+      <div className="space-y-2">
+        {services.map(s => (
+          <div key={s.id} className="flex items-center gap-2">
+            <button disabled={connectors && connectors[s.id]} className="px-3 py-2 rounded" style={{background:'#0096FF',color:'#000',opacity:connectors && connectors[s.id]?0.5:1}} onClick={()=>start(s.id)}>
+              {connectors && connectors[s.id] ? `${s.label} Connected` : `Connect ${s.label}`}
+            </button>
+            {connectors && connectors[s.id] && <button className="text-sm underline" onClick={()=>revoke(s.id)}>Revoke</button>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Onboarding({ calendarConnected }){
+  const [slots, setSlots] = useState([]);
+  const [booked, setBooked] = useState(false);
+
+  useEffect(()=>{
+    if(calendarConnected) fetchOnboardingSlots().then(d=>setSlots(d.slots));
+  }, [calendarConnected]);
+
+  function book(slot){
+    bookOnboarding(slot).then(()=>setBooked(true));
+  }
+
+  if(!calendarConnected){
+    return (
+      <div className="mt-10">
+        <h2 className="text-xl mb-4" style={{color:'#FF4FD8'}}>Onboarding</h2>
+        <a href="/api/subscribe/onboarding/ics" className="underline" style={{color:'#0096FF'}}>Download ICS to book manually</a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-10">
+      <h2 className="text-xl mb-4" style={{color:'#FF4FD8'}}>Onboarding</h2>
+      {booked ? (
+        <div className="text-green-400">Slot booked!</div>
+      ) : (
+        <ul className="space-y-2">
+          {slots.map(s => (
+            <li key={s}>
+              <button className="underline" onClick={()=>book(s)}>{new Date(s).toLocaleString()}</button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function Finish({ rcBalance }){
+  return (
+    <div className="mt-10">
+      <h2 className="text-xl mb-4" style={{color:'#FF4FD8'}}>Finish</h2>
+      <div className="mb-4">You earned {rcBalance || 0} RC for completing onboarding.</div>
+      <div className="space-x-4">
+        <a href="/dashboard" className="underline" style={{color:'#0096FF'}}>Go to Dashboard</a>
+        <a href="/codex" className="underline" style={{color:'#0096FF'}}>Open Codex</a>
+        <a href="/manifesto" className="underline" style={{color:'#0096FF'}}>See Manifesto</a>
+      </div>
+    </div>
   );
 }
 
