@@ -6,7 +6,10 @@ import { exec } from 'child_process';
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 
-const CONNECTOR_KEY = process.env.CONNECTOR_KEY || 'changeme';
+const CONNECTOR_KEY = process.env.CONNECTOR_KEY;
+if (!CONNECTOR_KEY) {
+  throw new Error('CONNECTOR_KEY is required');
+}
 const LOG_FILE = '/var/log/blackroad-connectors.log';
 
 function log(line) {
