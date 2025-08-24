@@ -1,0 +1,6 @@
+{
+  "name": "quantum_coder",
+  "version": "1.0.0",
+  "description": "quantum_coder elite coding agent",
+  "capabilities": ["ping", "analyze", "codegen"]
+}

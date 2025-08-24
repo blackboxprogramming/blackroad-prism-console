@@ -1,0 +1,6 @@
+{
+  "name": "compiler",
+  "version": "1.0.0",
+  "description": "compiler elite coding agent",
+  "capabilities": ["ping", "analyze", "codegen"]
+}

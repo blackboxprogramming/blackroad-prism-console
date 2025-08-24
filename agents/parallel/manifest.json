@@ -1,0 +1,6 @@
+{
+  "name": "parallel",
+  "version": "1.0.0",
+  "description": "parallel elite coding agent",
+  "capabilities": ["ping", "analyze", "codegen"]
+}
