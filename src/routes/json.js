@@ -2,6 +2,7 @@
 'use strict';
 
 const express = require('express');
+const crypto = require('crypto');
 const router = express.Router();
 const sqlite = require('../json/sqlite');
 
@@ -30,7 +31,10 @@ function parseQuery(q) {
 }
 
 router.get('/health', (req, res) => {
-  res.json(envelope(true, { status: 'ok' }));
+  const payload = envelope(true, { status: 'ok' });
+  const etag = crypto.createHash('sha1').update(JSON.stringify(payload)).digest('hex');
+  res.set('ETag', `"${etag}"`);
+  res.json(payload);
 });
 
 router.get('/:source/:resource', (req, res) => {
