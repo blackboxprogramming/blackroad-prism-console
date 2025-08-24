@@ -43,3 +43,22 @@ Use Admin UI or API `POST /api/rollback/:releaseId` with the internal token.
 - Ensure `/srv/blackroad-api` has required dependencies.
 - Check `/var/log/blackroad-api/app.log` for server logs.
 - Verify systemd unit `blackroad-api` is active.
+
+## Monitoring and Observability
+
+The Kubernetes manifest at `deploy/k8s/monitoring.yaml` provisions a full
+monitoring stack in the `prism-monitoring` namespace.
+
+- **Prometheus** scrapes `blackroad-api`, `lucidia-llm`, `lucidia-math`, and the
+  NGINX ingress metrics endpoint with retention set to 15 days.
+- **Grafana** persists dashboards and preloads panels for API latency, LLM
+  response times, math contradictions, and system resource usage. Grafana is
+  exposed at `/monitoring` via NGINX ingress and secured with basic auth.
+- **Loki** and **Promtail** collect pod logs so dashboards can query centralized
+  logs.
+- **Alertmanager** notifies configured Slack or Discord webhooks when services
+  go down, 5xx errors spike, database writes fail, or more than 10 contradictions
+  occur within 10 minutes.
+
+Apply the manifest with `kubectl apply -f deploy/k8s/monitoring.yaml` to enable
+observability for the Prism stack.
