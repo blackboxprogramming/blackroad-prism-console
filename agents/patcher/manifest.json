@@ -1,0 +1,6 @@
+{
+  "name": "patcher",
+  "version": "1.0.0",
+  "description": "patcher elite coding agent",
+  "capabilities": ["ping", "analyze", "codegen"]
+}

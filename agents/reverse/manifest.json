@@ -1,0 +1,6 @@
+{
+  "name": "reverse",
+  "version": "1.0.0",
+  "description": "reverse elite coding agent",
+  "capabilities": ["ping", "analyze", "codegen"]
+}
