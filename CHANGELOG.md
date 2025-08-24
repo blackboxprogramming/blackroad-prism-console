@@ -13,6 +13,11 @@
 * **blackroad:** add deploy history dashboard and workflows ([c13aa86](https://github.com/blackboxprogramming/blackroad-prism-console/commit/c13aa86940d4b855b60b16945438e682faa5cd99))
 * warn when OpenAI key missing ([433ec7e](https://github.com/blackboxprogramming/blackroad-prism-console/commit/433ec7eee7b2b5ce6a38fb87570cafc0e876622c))
 
+## Unreleased
+
+- Add `scripts/blackroad_sync.py` CI/CD helper script.
+
+## v3.0.0
 
 ### Bug Fixes
 

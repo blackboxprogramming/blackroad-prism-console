@@ -35,10 +35,8 @@ node_modules/
 services/health-sidecar/node_modules/
 services/health-sidecar/.env
 <<<<<<< Updated upstream
-=======
 <<<<<<< bbb
 =======
->>>>>>> Stashed changes
 node_modules/
 /benchmarks/
 **/node_modules/
@@ -71,12 +69,13 @@ lucidia/modules/random_fields/datasets/__pycache__/
 tests/_codex_autogen/
 .tmp/
 *.out.md
-<<<<<<< Updated upstream
 services/quantum_lab/*.db
 node_modules/
 !opt/blackroad/tdb/.env
-=======
 node_modules/
 !opt/blackroad/tdb/.env
->>>>>>> Headdd
 >>>>>>> Stashed changes
+=======
+node_modules/
+services/*/node_modules/
+>>>>>>> origin/codex/add-calm-chatops-with-ollama-helpers
