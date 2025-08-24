@@ -78,6 +78,10 @@ const db = require('./src/db');
 const apiRouter = require('./src/routes');
 app.use('/api', apiRouter);
 
+// MCI routes
+const mciRouter = require('./srv/blackroad-api/mci/routes/mci.routes');
+app.use('/api/mci', mciRouter);
+
 // Root
 app.get('/', (req, res) => {
   res.status(200).json({ ok: true, service: 'blackroad-api', env: NODE_ENV || 'dev' });
