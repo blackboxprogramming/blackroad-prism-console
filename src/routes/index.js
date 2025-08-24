@@ -18,6 +18,7 @@ router.use('/metrics', require('./metrics'));
 router.use('/llm', require('./llm'));
 router.use('/roadbook', require('./roadbook'));
 router.use('/deploy', require('./deploy'));
+router.use('/json', require('./json'));
 const subscribe = require('./subscribe');
 router.use('/', subscribe.router);
 
