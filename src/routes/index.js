@@ -16,6 +16,7 @@ router.use('/contradictions', require('./contradictions'));
 router.use('/commits', require('./commits'));
 router.use('/metrics', require('./metrics'));
 router.use('/llm', require('./llm'));
+router.use('/roadbook', require('./roadbook'));
 router.use('/deploy', require('./deploy'));
 
 module.exports = router;
