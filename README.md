@@ -53,3 +53,30 @@ bash tools/verify-runtime.sh
   ```
 
 If anything looks off, run `bash tools/verify-runtime.sh` and share the output.
+
+## Subscribe API
+
+Environment variables for Stripe integration:
+
+- `STRIPE_PUBLIC_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_PRICE_STARTER_MONTHLY`
+- `STRIPE_PRICE_PRO_MONTHLY`
+- `STRIPE_PRICE_INFINITY_MONTHLY`
+- `STRIPE_PRICE_STARTER_YEARLY`
+- `STRIPE_PRICE_PRO_YEARLY`
+- `STRIPE_PRICE_INFINITY_YEARLY`
+- `STRIPE_PORTAL_RETURN_URL` (optional)
+
+Example calls:
+
+```bash
+curl http://localhost:4000/api/subscribe/config
+curl -H "Cookie: brsid=..." http://localhost:4000/api/subscribe/status
+curl -X POST http://localhost:4000/api/subscribe/checkout \
+  -H "Content-Type: application/json" \
+  -d '{"planId":"pro","interval":"month"}'
+curl -H "Cookie: brsid=..." http://localhost:4000/api/subscribe/portal
+# Webhooks are received at /api/stripe/webhook and must include the Stripe signature header.
+```

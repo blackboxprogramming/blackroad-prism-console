@@ -18,5 +18,7 @@ router.use('/metrics', require('./metrics'));
 router.use('/llm', require('./llm'));
 router.use('/roadbook', require('./roadbook'));
 router.use('/deploy', require('./deploy'));
+const subscribe = require('./subscribe');
+router.use('/', subscribe.router);
 
 module.exports = router;
