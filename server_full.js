@@ -11,6 +11,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const cookieSession = require('cookie-session');
 const rateLimit = require('express-rate-limit');
+const connectors = require('./connectors');
 
 // Allow requiring .ts files as plain JS for lucidia brain modules
 require.extensions['.ts'] = require.extensions['.js'];
@@ -78,6 +79,7 @@ const limiter = rateLimit({
   legacyHeaders: false
 });
 app.use(limiter);
+app.use('/connectors', connectors);
 
 // Initialize DB (auto-migrations on import)
 const db = require('./src/db');
