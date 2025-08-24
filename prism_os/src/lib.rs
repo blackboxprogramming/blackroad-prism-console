@@ -7,6 +7,17 @@ use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::{prelude::*, JsCast};
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen_futures::JsFuture;
+#[cfg(target_arch = "wasm32")]
+use web_sys::{IdbDatabase, IdbOpenDbRequest, IdbTransactionMode};
+#[cfg(target_arch = "wasm32")]
+use js_sys::{Object, Reflect};
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::closure::Closure;
+
 /// In-memory representation of an agent managed by PrismOS.
 pub struct Agent {
     pub name: &'static str,
@@ -82,6 +93,55 @@ pub fn persist_snapshot(snapshot: &AgentSnapshot) -> Result<PathBuf, PrismError>
     }
     fs::write(&path, &snapshot.state_data)?;
     Ok(path)
+}
+
+#[cfg(target_arch = "wasm32")]
+async fn store_snapshot_metadata(snapshot: &AgentSnapshot) {
+    if let Some(window) = web_sys::window() {
+        if let Ok(Some(factory)) = window.indexed_db() {
+            if let Ok(open_req) = factory.open("prism") {
+                let upgrade = Closure::wrap(Box::new(move |event: web_sys::Event| {
+                    let req: IdbOpenDbRequest = event.target().unwrap().unchecked_into();
+                    let db: IdbDatabase = req.result().unwrap().unchecked_into();
+                    let _ = db.create_object_store("snapshots");
+                }) as Box<dyn FnMut(_)>);
+                open_req.set_onupgradeneeded(Some(upgrade.as_ref().unchecked_ref()));
+                upgrade.forget();
+                if let Ok(db_val) = JsFuture::from(open_req).await {
+                    let db: IdbDatabase = db_val.unchecked_into();
+                    if let Ok(tx) = db.transaction_with_str_and_mode("snapshots", IdbTransactionMode::Readwrite) {
+                        if let Ok(store) = tx.object_store("snapshots") {
+                            let meta = Object::new();
+                            let _ = Reflect::set(&meta, &JsValue::from_str("agent"), &JsValue::from_str(snapshot.agent_name));
+                            let _ = Reflect::set(&meta, &JsValue::from_str("timestamp"), &JsValue::from_f64(snapshot.timestamp as f64));
+                            let _ = Reflect::set(&meta, &JsValue::from_str("size"), &JsValue::from_f64(snapshot.state_data.len() as f64));
+                            let key = JsValue::from_str(&format!("{}-{}", snapshot.agent_name, snapshot.timestamp));
+                            let _ = store.put_with_key(&meta, &key);
+                        }
+                        let _ = JsFuture::from(tx.done()).await;
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub async fn snapshotAgent(name: String, state: js_sys::Uint8Array) -> Result<JsValue, JsValue> {
+    let agent = Agent { name: Box::leak(name.clone().into_boxed_str()), state: state.to_vec() };
+    let snap = snapshot_agent(&agent).map_err(|e| JsValue::from_str(&format!("{:?}", e)))?;
+    let _ = persist_snapshot(&snap);
+    store_snapshot_metadata(&snap).await;
+    Ok(JsValue::from_f64(snap.timestamp as f64))
+}
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub async fn rollbackAgent(name: String, id: u64) -> Result<js_sys::Uint8Array, JsValue> {
+    let mut agent = Agent { name: Box::leak(name.into_boxed_str()), state: Vec::new() };
+    cmd_rollback(&mut agent, id).map_err(|e| JsValue::from_str(&format!("{:?}", e)))?;
+    Ok(js_sys::Uint8Array::from(agent.state.as_slice()))
 }
 
 /// Read metadata from a snapshot file.
