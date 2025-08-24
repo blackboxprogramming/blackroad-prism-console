@@ -1,24 +1,34 @@
 #!/usr/bin/env python3
-"""Codex pipeline scaffold for BlackRoad.io.
+"""Codex pipeline with rollback and error handling.
 
-This CLI provides placeholder commands that outline an end-to-end
-synchronisation flow:
+This script runs a minimal deployment pipeline consisting of four stages:
 
-* Commit and push local code to GitHub.
-* Refresh iOS Working Copy state.
-* Redeploy the BlackRoad droplet.
-* Trigger external connector jobs (Salesforce, Airtable, etc.).
+* push_to_github
+* deploy_to_droplet
+* call_connectors
+* validate_services
 
-Each step contains TODO markers where project-specific logic should be
-implemented. The script is intended as a starting point for a full CI/CD
-solution rather than a complete deployment utility.
+Each stage is wrapped with error handling that logs failures to
+``pipeline_errors.log``. When a stage fails the pipeline stops unless the
+``--force`` flag is used. Some failures trigger automatic rollback from the
+latest backup located in ``/var/backups/blackroad``.
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
-import sys
+import traceback
+from datetime import datetime
+from pathlib import Path
+from typing import Callable
+import urllib.request
+
+ERROR_LOG = Path("pipeline_errors.log")
+BACKUP_ROOT = Path("/var/backups/blackroad")
+LATEST_BACKUP = BACKUP_ROOT / "latest"
+DROPLET_BACKUP = BACKUP_ROOT / "droplet"
 
 
 def run(cmd: str) -> None:
@@ -27,61 +37,85 @@ def run(cmd: str) -> None:
     subprocess.run(cmd, shell=True, check=True)
 
 
-def push_latest() -> None:
-    """Push local commits to GitHub."""
-    # TODO: handle authentication, branching, conflict resolution, and
-    # downstream webhook notifications.
+def notify_webhook(webhook: str, payload: dict[str, object]) -> None:
+    data = json.dumps(payload).encode()
+    req = urllib.request.Request(webhook, data=data, headers={"Content-Type": "application/json"})
+    urllib.request.urlopen(req, timeout=5)
+
+
+def log_error(stage: str, exc: Exception, rollback: bool, webhook: str | None) -> None:
+    timestamp = datetime.utcnow().isoformat()
+    tb = traceback.format_exc()
+    with ERROR_LOG.open("a", encoding="utf-8") as fh:
+        fh.write(f"{timestamp} [{stage}] {exc}\n{tb}\n")
+        if rollback:
+            fh.write("ROLLBACK INITIATED\n")
+    if webhook:
+        payload = {"stage": stage, "error": str(exc), "rollback": rollback}
+        try:
+            notify_webhook(webhook, payload)
+        except Exception:
+            pass
+
+
+def rollback_from_backup() -> None:
+    run(f"rsync -a {LATEST_BACKUP}/ ./")
+
+
+def push_to_github() -> None:
     run("git push origin HEAD")
 
 
-def refresh_working_copy() -> None:
-    """Placeholder for refreshing iOS Working Copy app."""
-    # TODO: use Working Copy automation or URL schemes to pull latest changes.
-    print("TODO: implement Working Copy refresh")
+def deploy_to_droplet() -> None:
+    run("deploy-to-droplet")
 
 
-def redeploy_droplet() -> None:
-    """Placeholder for redeploying the BlackRoad droplet."""
-    # TODO: SSH into droplet, pull latest code, run migrations, restart services.
-    print("TODO: implement droplet redeploy")
+def call_connectors() -> None:
+    run("connector-sync")
 
 
-def sync_connectors() -> None:
-    """Placeholder for syncing external connectors."""
-    # TODO: add OAuth flows, webhook listeners, and Slack notifications.
-    print("TODO: implement connector sync")
+def validate_services() -> None:
+    run("validate-services")
+
+
+STAGES: list[Callable[[], None]] = [
+    push_to_github,
+    deploy_to_droplet,
+    call_connectors,
+    validate_services,
+]
+
+
+def run_pipeline(*, force: bool = False, webhook: str | None = None) -> None:
+    for stage in STAGES:
+        try:
+            stage()
+        except subprocess.CalledProcessError as exc:
+            rollback = False
+            if stage is push_to_github:
+                run("git reset --hard")
+            elif stage is deploy_to_droplet:
+                rollback = True
+                run(f"rsync -a {DROPLET_BACKUP}/ /srv/blackroad/")
+            elif stage is validate_services:
+                rollback = True
+                rollback_from_backup()
+            log_error(stage.__name__, exc, rollback, webhook)
+            if not force:
+                raise
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="BlackRoad Codex pipeline scaffold",
-    )
-    sub = parser.add_subparsers(dest="command")
-    sub.add_parser("push", help="Push latest to BlackRoad.io")
-    sub.add_parser("refresh", help="Refresh working copy and redeploy")
-    sub.add_parser("rebase", help="Rebase branch and update site")
-    sub.add_parser("sync", help="Sync Salesforce → Airtable → Droplet")
-
+    parser = argparse.ArgumentParser(description="BlackRoad Codex pipeline")
+    parser.add_argument("--force", action="store_true", help="continue even if a step fails")
+    parser.add_argument("--webhook", help="Webhook URL for error notifications")
     args = parser.parse_args(argv)
-
-    if args.command == "push":
-        push_latest()
-        redeploy_droplet()
-    elif args.command == "refresh":
-        push_latest()
-        refresh_working_copy()
-        redeploy_droplet()
-    elif args.command == "rebase":
-        run("git pull --rebase")
-        push_latest()
-        redeploy_droplet()
-    elif args.command == "sync":
-        sync_connectors()
-    else:
-        parser.print_help()
+    try:
+        run_pipeline(force=args.force, webhook=args.webhook)
+    except subprocess.CalledProcessError:
+        return 1
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
