@@ -292,3 +292,13 @@ scripts/blackroad_codex.sh sync
 ```
 
 Set `REMOTE`, `BRANCH`, and `DROPLET_HOST` to customize targets. Provide `SLACK_WEBHOOK` to post updates.
+## BlackRoad Sync & Deploy
+
+Run `scripts/blackroad_sync.sh` to push the latest changes to GitHub and roll them out to the droplet. The script accepts natural language commands, for example:
+
+```bash
+scripts/blackroad_sync.sh "Push latest to BlackRoad.io"
+scripts/blackroad_sync.sh "Refresh working copy and redeploy"
+```
+
+Set `WORKING_COPY_SSH`, `DROPLET_SSH`, and optionally `SLACK_WEBHOOK` environment variables before running. Logs are written to `blackroad_sync.log`.
