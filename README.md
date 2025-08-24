@@ -277,3 +277,18 @@ python3 codex/tools/blackroad_pipeline.py "Refresh working copy and redeploy"
 
 It relies on environment variables for remote hosts and tokens
 (`GIT_REMOTE`, `DROPLET_HOST`, `SLACK_WEBHOOK`).
+This scaffold is intentionally clean and compact so you can drop in your own logic fast.
+
+## Codex Deployment
+
+A helper script `scripts/blackroad_codex.sh` provides a chat-like interface for common deployment actions:
+
+```bash
+scripts/blackroad_codex.sh push
+scripts/blackroad_codex.sh deploy
+scripts/blackroad_codex.sh refresh
+scripts/blackroad_codex.sh rebase
+scripts/blackroad_codex.sh sync
+```
+
+Set `REMOTE`, `BRANCH`, and `DROPLET_HOST` to customize targets. Provide `SLACK_WEBHOOK` to post updates.
