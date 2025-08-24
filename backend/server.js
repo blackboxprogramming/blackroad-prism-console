@@ -238,6 +238,12 @@ app.get('/api/roadbook/search', authMiddleware(JWT_SECRET), (req, res) => {
     .filter(c => c.title.toLowerCase().includes(q) || c.content.toLowerCase().includes(q))
     .map(c => ({ id: c.id, title: c.title, snippet: c.content.slice(0, 80) }));
   res.json({ results });
+// RoadView sample streams
+app.get('/api/roadview/list', authMiddleware(JWT_SECRET), (req, res)=>{
+  res.json({ streams: [
+    { id: 'cam-1', name: 'Main Street', status: 'offline' },
+    { id: 'cam-2', name: 'Downtown', status: 'offline' }
+  ]});
 });
 
 // Actions

@@ -19,6 +19,13 @@ import Claude from './components/Claude.jsx'
 import Codex from './components/Codex.jsx'
 import Roadbook from './components/Roadbook.jsx'
 import Subscribe from './Subscribe.jsx'
+import io from 'socket.io-client'
+import { Routes, Route, NavLink } from 'react-router-dom'
+import { API_BASE, setToken, login, me, fetchTimeline, fetchTasks, fetchCommits, fetchAgents, fetchWallet, fetchContradictions, getNotes, setNotes, action } from './api'
+import { Activity, Brain, Database, LayoutGrid, Settings, ShieldCheck, SquareDashedMousePointer } from 'lucide-react'
+import Login from './components/Login.jsx'
+import Dashboard from './pages/Dashboard.jsx'
+import RoadView from './pages/RoadView.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -31,7 +38,6 @@ export default function App(){
   const [contradictions, setContradictions] = useState({ issues: 0 })
   const [system, setSystem] = useState({ cpu: 0, mem: 0, gpu: 0, net: 0 })
   const [notes, setNotesState] = useState('')
-  const [socket, setSocket] = useState(null)
   const [stream, setStream] = useState(true)
   const path = window.location.pathname
   const isRoadcoin = path === '/roadcoin'
@@ -73,7 +79,6 @@ export default function App(){
     s.on('timeline:new', d => setTimeline(prev => [d.item, ...prev]))
     s.on('wallet:update', w => setWallet(w))
     s.on('notes:update', n => setNotesState(n || ''))
-    setSocket(s)
   }
 
   async function handleLogin(usr, pass){
@@ -119,19 +124,14 @@ export default function App(){
               <NavItem icon={<Wallet size={18} />} text="RoadCoin" href="/roadcoin" />
               <NavItem icon={<Rocket size={18} />} text="Subscribe" href="/subscribe" />
               <NavItem icon={<BookOpen size={18} />} text="Roadbook" to="/roadbook" />
+              <NavItem to="/" icon={<Activity size={18} />} text="Chat" />
+              <NavItem to="/projects" icon={<SquareDashedMousePointer size={18} />} text="Projects" />
+              <NavItem to="/agents" icon={<Brain size={18} />} text="Agents" />
+              <NavItem to="/datasets" icon={<Database size={18} />} text="Datasets" />
+              <NavItem to="/models" icon={<ShieldCheck size={18} />} text="Models" />
+              <NavItem to="/integrations" icon={<Settings size={18} />} text="Integrations" />
+              <NavItem to="/roadview" icon={<LayoutGrid size={18} />} text="RoadView" />
             </nav>
-
-            <button className="btn w-full text-white font-semibold">Start Co‑Coding</button>
-
-            <div className="pt-8">
-              <div className="uppercase text-[11px] text-slate-400 tracking-widest mb-2">Workspace</div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between"><span>Projects</span><span className="badge">12</span></div>
-                <div>Agents</div>
-                <div>Sessions</div>
-                <div>Datasets</div>
-              </div>
-            </div>
           </aside>
 
           {/* Main */}
@@ -193,6 +193,10 @@ export default function App(){
             <section className="col-span-4 flex flex-col gap-4">
               <AgentStack stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />
             </section>
+            <Routes>
+              <Route path="/" element={<Dashboard tab={tab} setTab={setTab} timeline={timeline} tasks={tasks} commits={commits} onAction={onAction} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
+              <Route path="/roadview" element={<RoadView agents={agents} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
+            </Routes>
           </main>
         </>
       )}
@@ -211,16 +215,11 @@ function NavItem({ icon, text, to }){
   const navigate = useNavigate()
   return (
     <div onClick={()=> to && navigate(to)} className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-900 cursor-pointer">
-      {icon}<span>{text}</span>
-    </div>
-  )
-}
-
-function Tab({ children, active, onClick }){
+function NavItem({ icon, text, to }){
   return (
-    <button onClick={onClick} className={`py-3 border-b-2 ${active?'border-indigo-500 text-white':'border-transparent text-slate-400 hover:text-slate-200'}`}>
-      {children}
-    </button>
+    <NavLink to={to} className={({isActive})=>`flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-900 ${isActive?'text-white':'text-slate-300'}`}>
+      {icon}<span>{text}</span>
+    </NavLink>
   )
 }
 
