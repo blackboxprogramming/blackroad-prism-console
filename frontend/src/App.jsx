@@ -26,11 +26,12 @@ import Subscribe from './Subscribe.jsx'
 import io from 'socket.io-client'
 import { Routes, Route, NavLink } from 'react-router-dom'
 import { API_BASE, setToken, login, me, fetchTimeline, fetchTasks, fetchCommits, fetchAgents, fetchWallet, fetchContradictions, getNotes, setNotes, action } from './api'
-import { Activity, Brain, Database, LayoutGrid, Settings, ShieldCheck, SquareDashedMousePointer } from 'lucide-react'
+import { Activity, Brain, Database, LayoutGrid, Settings, ShieldCheck, SquareDashedMousePointer, HeartPulse } from 'lucide-react'
 import Login from './components/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import RoadView from './pages/RoadView.jsx'
 import Orchestrator from './Orchestrator.jsx'
+import AutoHeal from './pages/AutoHeal.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -135,6 +136,7 @@ export default function App(){
               <NavItem to="/models" icon={<ShieldCheck size={18} />} text="Models" />
               <NavItem to="/integrations" icon={<Settings size={18} />} text="Integrations" />
               <NavItem to="/roadview" icon={<LayoutGrid size={18} />} text="RoadView" />
+              <NavItem to="/autoheal" icon={<HeartPulse size={18} />} text="Auto-Heal" />
               <NavItem icon={<Rocket size={18} />} text="Orchestrator" to="/orchestrator" />
             </nav>
           </aside>
@@ -205,6 +207,7 @@ export default function App(){
             <Routes>
               <Route path="/" element={<Dashboard tab={tab} setTab={setTab} timeline={timeline} tasks={tasks} commits={commits} onAction={onAction} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
               <Route path="/roadview" element={<RoadView agents={agents} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
+              <Route path="/autoheal" element={<AutoHeal />} />
             </Routes>
           </main>
         </>
