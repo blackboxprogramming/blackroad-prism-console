@@ -21,5 +21,8 @@ router.use('/roadbook', require('./roadbook'));
 router.use('/deploy', require('./deploy'));
 router.use('/json', require('./json'));
 // subscription routes handled directly in server_full.js
+router.use('/connect', require('./connect'));
+const subscribe = require('./subscribe');
+router.use('/', subscribe.router);
 
 module.exports = router;
