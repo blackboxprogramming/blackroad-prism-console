@@ -13,13 +13,13 @@ router.get('/', requireAuth, (req, res) => {
 });
 
 router.post('/', requireAdmin, (req, res) => {
-  const { slug, name, status, memory_path, notes } = req.body || {};
+const { slug, name, status, memory_path, notes, location } = req.body || {};
   if (!slug || !name) return res.status(400).json({ ok: false, error: 'missing_fields' });
   const id = cryptoRandomId();
   db.prepare(`
-    INSERT INTO agents (id, slug, name, status, memory_path, notes)
-    VALUES (?, ?, ?, COALESCE(?, 'idle'), ?, ?)
-  `).run(id, slug, name, status || null, memory_path || null, notes || null);
+    INSERT INTO agents (id, slug, name, status, memory_path, notes, location)
+    VALUES (?, ?, ?, COALESCE(?, 'idle'), ?, ?, COALESCE(?, 'cloud'))
+  `).run(id, slug, name, status || null, memory_path || null, notes || null, location || null);
   res.json({ ok: true, agent: db.prepare('SELECT * FROM agents WHERE id = ?').get(id) });
 });
 
@@ -27,6 +27,18 @@ router.get('/:id', requireAuth, (req, res) => {
   const a = db.prepare('SELECT * FROM agents WHERE id = ?').get(req.params.id);
   if (!a) return res.status(404).json({ ok: false, error: 'not_found' });
   res.json({ ok: true, agent: a });
+});
+
+router.get('/:id/manifest', requireAuth, (req, res) => {
+  const a = db.prepare('SELECT * FROM agents WHERE id = ?').get(req.params.id);
+  if (!a) return res.status(404).json({ ok: false, error: 'not_found' });
+  const manifest = {
+    id: a.id,
+    slug: a.slug,
+    name: a.name,
+    location: a.location || 'cloud'
+  };
+  res.json({ ok: true, manifest });
 });
 
 router.post('/:id/ping', requireAuth, (req, res) => {
