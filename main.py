@@ -14,6 +14,12 @@ import streamlit as st
 import whisper
 import ast
 
+
+@st.cache_resource
+def load_whisper_model():
+    """Load the Whisper model once and reuse across reruns."""
+    return whisper.load_model("base")
+
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 api_key = os.getenv("OPENAI_API_KEY")
 if api_key:
@@ -71,6 +77,7 @@ if audio_file is not None:
     model = load_whisper_model()
     result = model.transcribe(temp_audio_path)
     os.remove(temp_audio_path)
+    os.unlink(temp_audio_path)
     user_input = result["text"]
     st.markdown(f"**You said:** {user_input}")
 else:
