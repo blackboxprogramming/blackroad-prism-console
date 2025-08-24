@@ -16,6 +16,9 @@
 ## Unreleased
 
 - Add `scripts/blackroad_sync.py` CI/CD helper script.
+## Unreleased
+
+- Add BlackRoad sync pipeline script for end-to-end Codex deployment.
 
 ## v3.0.0
 
