@@ -7,6 +7,7 @@
 </head>
 <body>
   <h1>BlackRoad</h1>
+  <div id="plans"></div>
   <div id="lucidia-brain-badge" style="position:fixed;bottom:5px;right:5px;padding:4px 8px;background:#FF4FD8;color:#fff;font-size:12px">Lucidia Brain: Offline</div>
   <script>
   async function updateBadge(){
@@ -23,6 +24,12 @@
   }
   updateBadge();
   setInterval(updateBadge,15000);
+  fetch('/api/subscribe/plans').then(r=>r.json()).then(j=>{
+    const el=document.getElementById('plans');
+    if(j.plans){
+      el.innerHTML=j.plans.map(p=>`<div><strong>${p.name}</strong>: $${(p.price_cents/100).toFixed(2)}/${p.interval}</div>`).join('');
+    }
+  }).catch(()=>{});
   </script>
 </body>
 </html>

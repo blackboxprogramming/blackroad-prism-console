@@ -20,7 +20,6 @@ router.use('/lucidia', require('./lucidia'));
 router.use('/roadbook', require('./roadbook'));
 router.use('/deploy', require('./deploy'));
 router.use('/json', require('./json'));
-const subscribe = require('./subscribe');
-router.use('/', subscribe.router);
+// subscription routes handled directly in server_full.js
 
 module.exports = router;
