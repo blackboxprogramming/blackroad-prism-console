@@ -7,3 +7,17 @@ edition = "2021"
 x86_64 = { version = "0.15", default-features = false }
 linked_list_allocator = "0.10"
 once_cell = "1.19"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = [
+    "IdbDatabase",
+    "IdbOpenDbRequest",
+    "IdbTransaction",
+    "IdbTransactionMode",
+    "IdbObjectStore",
+    "Window",
+    "Event"
+] }
+js-sys = "0.3"
