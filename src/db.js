@@ -53,6 +53,48 @@ for (const file of files) {
   }
 }
 
+// ROADCOIN seed and backfill
+(function seedRc() {
+  const hasPrices = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='rc_prices'")
+    .get();
+  if (hasPrices) {
+    const defaults = {
+      tts_per_10s: 1,
+      image_gen: 2,
+      render_draft_base: 10,
+      render_draft_per_scene: 1,
+      render_final_base: 30,
+      render_final_per_scene: 3,
+      llm_token_1k: 1,
+      storage_per_mb: 0
+    };
+    const stmt = db.prepare(
+      'INSERT OR IGNORE INTO rc_prices (key, amount, active) VALUES (?, ?, 1)'
+    );
+    for (const [k, v] of Object.entries(defaults)) {
+      const envKey = `RC_PRICE_${k.toUpperCase()}`;
+      const val = Number.parseInt(process.env[envKey], 10);
+      stmt.run(k, Number.isFinite(val) ? val : v);
+    }
+  }
+
+  const hasCharges = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='rc_charges'")
+    .get();
+  if (hasCharges) {
+    const rows = db.prepare('SELECT user_id, amount, job_id, reason FROM rc_charges').all();
+    const insert = db.prepare(
+      `INSERT OR IGNORE INTO rc_ledger (id, user_id, delta, source, module, ref_type, ref_id, memo, created_at, created_by)
+       VALUES (?, ?, ?, 'job', 'roadview', 'job', ?, ?, ?, ?)`
+    );
+    const now = Math.floor(Date.now() / 1000);
+    for (const r of rows) {
+      insert.run(cryptoRandomId(), r.user_id, -r.amount, r.job_id, r.reason, now, 'system');
+    }
+  }
+})();
+
 // Ensure admin user
 (function ensureAdmin() {
   const getUser = db.prepare('SELECT id FROM users WHERE email = ?');

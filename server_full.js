@@ -204,6 +204,68 @@ function handleWebhook(req, res) {
 
 app.post('/api/subscribe/webhook', handleWebhook);
 app.use('/api/subscribe', subRouter);
+
+// ROADCOIN
+const rcRouter = express.Router();
+
+rcRouter.post('/hold', requireAuth, (req, res) => {
+  const { amount, module, ref_type, ref_id } = req.body || {};
+  if (!Number.isInteger(amount) || amount <= 0) {
+    return res.status(400).json({ error: 'invalid_amount', code: 'invalid_amount' });
+  }
+  const id = uuidv4();
+  const now = Math.floor(Date.now() / 1000);
+  db.prepare(
+    `INSERT INTO rc_holds (id, user_id, amount, module, ref_type, ref_id, status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'held', ?, ?)`
+  ).run(id, req.session.userId, amount, module || null, ref_type || null, ref_id || null, now, now);
+  res.json({ hold_id: id });
+});
+
+rcRouter.post('/release', requireAuth, (req, res) => {
+  const { hold_id } = req.body || {};
+  const hold = db
+    .prepare('SELECT * FROM rc_holds WHERE id = ? AND user_id = ? AND status = "held"')
+    .get(hold_id, req.session.userId);
+  if (!hold) return res.status(400).json({ error: 'invalid_hold', code: 'invalid_hold' });
+  const now = Math.floor(Date.now() / 1000);
+  db.prepare('UPDATE rc_holds SET status = ?, updated_at = ? WHERE id = ?').run('released', now, hold_id);
+  res.json({ ok: true });
+});
+
+rcRouter.post('/capture', requireAuth, (req, res) => {
+  const { hold_id } = req.body || {};
+  const hold = db
+    .prepare('SELECT * FROM rc_holds WHERE id = ? AND user_id = ? AND status = "held"')
+    .get(hold_id, req.session.userId);
+  if (!hold) return res.status(400).json({ error: 'invalid_hold', code: 'invalid_hold' });
+  const now = Math.floor(Date.now() / 1000);
+  db.prepare('UPDATE rc_holds SET status = ?, updated_at = ? WHERE id = ?').run('captured', now, hold_id);
+  db.prepare(
+    `INSERT INTO rc_ledger (id, user_id, delta, source, module, ref_type, ref_id, memo, created_at, created_by)
+     VALUES (?, ?, ?, 'job', ?, ?, ?, ?, ?, ?)`
+  ).run(
+    uuidv4(),
+    req.session.userId,
+    -hold.amount,
+    hold.module || null,
+    hold.ref_type || null,
+    hold.ref_id || null,
+    null,
+    now,
+    req.session.userId
+  );
+  res.json({ ok: true });
+});
+
+rcRouter.get('/prices', requireAuth, (_req, res) => {
+  const rows = db.prepare('SELECT key, amount FROM rc_prices WHERE active = 1').all();
+  const prices = {};
+  for (const r of rows) prices[r.key] = r.amount;
+  res.json({ prices });
+});
+
+app.use('/api/rc', rcRouter);
 // Routes
 const apiRouter = require('./src/routes');
 app.use('/api', apiRouter);
