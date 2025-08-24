@@ -325,6 +325,16 @@ app.get('/api/connectors/status', (req, res) => {
   res.json({ stripe, mail, sheets, calendar, discord, webhooks });
 });
 
+// Basic health endpoint exposing provider mode
+app.get('/api/subscribe/health', (_req, res) => {
+  const mode = process.env.SUBSCRIBE_MODE || (process.env.STRIPE_SECRET ? 'stripe' : process.env.GUMROAD_TOKEN ? 'gumroad' : 'local');
+  let providerReady = false;
+  if (mode === 'stripe') providerReady = !!process.env.STRIPE_SECRET;
+  else if (mode === 'gumroad') providerReady = !!process.env.GUMROAD_TOKEN;
+  else providerReady = true;
+  res.json({ ok: true, mode, providerReady });
+});
+
 app.post('/api/subscribe/checkout', (req, res) => {
   const { plan, cycle } = req.body || {};
   if (!VALID_PLANS.includes(plan) || !VALID_CYCLES.includes(cycle)) {
