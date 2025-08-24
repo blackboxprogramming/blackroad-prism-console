@@ -12,10 +12,12 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
-const { signToken, authMiddleware, nowISO } = require('./utils');
+const rateLimit = require('express-rate-limit');
+const { signToken, authMiddleware, adminMiddleware, nowISO } = require('./utils');
 const { store, addTimeline } = require('./data');
 const { exec } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
+const { logAudit, getAuditLogs } = require('./audit');
 
 // Sample Roadbook data
 const roadbookChapters = [
@@ -37,22 +39,38 @@ const roadbookChapters = [
 ];
 
 const app = express();
-app.use(express.json());
-app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || '*'}));
+app.use(express.json({ limit: '1mb' }));
+app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || '*' }));
+
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && 'body' in err) {
+    return res.status(400).json({ error: 'invalid json' });
+  }
+  next(err);
+});
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: process.env.CORS_ORIGIN?.split(',') || '*' } });
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is required');
+}
 const ALLOW_SHELL = (process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
+
+app.use('/api/', rateLimit({ windowMs: 60_000, max: 100 }));
+app.use('/llm/', rateLimit({ windowMs: 60_000, max: 50 }));
+app.use('/math/', rateLimit({ windowMs: 60_000, max: 50 }));
 
 // ---- Auth ----
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body || {};
   if (username === 'root' && password === 'Codex2025') {
     const token = signToken({ uid: 'u-root', username: 'root', role: 'owner' }, JWT_SECRET, '12h');
+    logAudit('u-root', 'login', true);
     return res.json({ token, user: { id: 'u-root', username: 'root', displayName: 'Root', role: 'owner' }});
   }
+  logAudit(username || 'unknown', 'login', false);
   res.status(401).json({ error: 'invalid credentials' });
 });
 
@@ -86,11 +104,15 @@ app.get('/api/tasks', authMiddleware(JWT_SECRET), (req, res)=>{
 });
 
 app.post('/api/tasks', authMiddleware(JWT_SECRET), (req, res)=>{
-  const t = req.body;
+  const t = req.body || {};
+  if (typeof t.title !== 'string' || !t.title.trim()) {
+    return res.status(400).json({ error: 'invalid task' });
+  }
   t.id = t.id || require('uuid').v4();
   store.tasks.push(t);
   addTimeline({ type: 'task', text: `New task created: ${t.title}`, by: req.user.username });
   io.emit('timeline:new', { at: nowISO(), item: store.timeline[0] });
+  logAudit(req.user.uid, 'create_task', true);
   res.status(201).json({ ok: true, task: t });
 });
 
@@ -137,6 +159,10 @@ app.post('/api/notes', authMiddleware(JWT_SECRET), (req, res)=>{
   store.sessionNotes = String(req.body?.notes || '');
   io.emit('notes:update', store.sessionNotes);
   res.json({ ok: true });
+});
+
+app.get('/api/audit-logs', authMiddleware(JWT_SECRET), adminMiddleware, (req, res) => {
+  res.json({ logs: getAuditLogs() });
 });
 
 // ---- Lucidia ----
@@ -364,6 +390,11 @@ io.on('connection', (socket)=>{
 
 const PORT = process.env.PORT || 4000;
 const HOST = '0.0.0.0';
-server.listen(PORT, HOST, () => {
-  console.log(`Backend listening on http://${HOST}:${PORT}`);
-});
+
+if (require.main === module) {
+  server.listen(PORT, HOST, () => {
+    console.log(`Backend listening on http://${HOST}:${PORT}`);
+  });
+}
+
+module.exports = { app, server };

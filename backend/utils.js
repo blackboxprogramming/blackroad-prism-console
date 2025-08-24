@@ -24,6 +24,14 @@ function authMiddleware(secret) {
   };
 }
 
+function adminMiddleware(req, res, next) {
+  const role = req.user?.role;
+  if (role !== 'owner' && role !== 'admin') {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  next();
+}
+
 function nowISO(){ return new Date().toISOString(); }
 
-module.exports = { signToken, verifyToken, authMiddleware, nowISO };
+module.exports = { signToken, verifyToken, authMiddleware, adminMiddleware, nowISO };
