@@ -166,6 +166,8 @@ app.post('/api/lucidia/chat', (req, res) => {
       store.lucidiaHistory.push({ id, prompt, response: acc.trim() });
     }
   }, 200);
+});
+
 // Guardian endpoints
 app.get('/api/guardian/status', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json(store.guardian.status);
@@ -180,6 +182,8 @@ app.post('/api/guardian/alerts/:id/resolve', authMiddleware(JWT_SECRET), (req, r
   if (!alert) return res.status(404).json({ error: 'not found' });
   alert.status = req.body?.status || 'resolved';
   res.json({ ok: true, alert });
+});
+
 // Dashboard
 app.get('/api/dashboard/system', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json({ cpu, gpu, memory: mem, network: net });
@@ -199,6 +203,8 @@ app.get('/api/you/profile', authMiddleware(JWT_SECRET), (req, res)=>{
     tasks: store.tasks,
     projects: store.projects || []
   });
+});
+
 // Claude chat
 app.post('/api/claude/chat', authMiddleware(JWT_SECRET), (req, res)=>{
   const prompt = String(req.body?.prompt || '');
@@ -220,6 +226,8 @@ app.post('/api/claude/chat', authMiddleware(JWT_SECRET), (req, res)=>{
 
 app.get('/api/claude/history', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json({ history: store.claudeHistory });
+});
+
 // Codex
 app.post('/api/codex/run', authMiddleware(JWT_SECRET), (req, res)=>{
   const prompt = String(req.body?.prompt || '');
@@ -236,6 +244,8 @@ app.post('/api/codex/run', authMiddleware(JWT_SECRET), (req, res)=>{
 
 app.get('/api/codex/history', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json({ runs: store.codexRuns });
+});
+
 // Roadbook endpoints
 app.get('/api/roadbook/chapters', authMiddleware(JWT_SECRET), (req, res) => {
   const chapters = roadbookChapters.map(({ id, title }) => ({ id, title }));
@@ -254,14 +264,17 @@ app.get('/api/roadbook/search', authMiddleware(JWT_SECRET), (req, res) => {
     .filter(c => c.title.toLowerCase().includes(q) || c.content.toLowerCase().includes(q))
     .map(c => ({ id: c.id, title: c.title, snippet: c.content.slice(0, 80) }));
   res.json({ results });
+});
+
 // RoadView sample streams
 app.get('/api/roadview/list', authMiddleware(JWT_SECRET), (req, res)=>{
   res.json({ streams: [
     { id: 'cam-1', name: 'Main Street', status: 'offline' },
     { id: 'cam-2', name: 'Downtown', status: 'offline' }
   ]});
+});
+
 // ---- BackRoad feed ----
-const { v4: uuidv4 } = require('uuid');
 
 app.get('/api/backroad/feed', (req, res)=>{
   res.json({ posts: store.posts });
