@@ -1,5 +1,5 @@
 import { fetchAgents } from './api';
-import { getLocalAgents } from './localAgents';
+import { getLocalAgents } from './localAgents.mjs';
 
 export async function fetchAllAgents() {
   const [cloud, local] = await Promise.all([
