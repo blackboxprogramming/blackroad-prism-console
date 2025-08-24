@@ -79,6 +79,67 @@ const { v4: uuidv4 } = require('uuid');
 const SUB_PROVIDER = process.env.SUB_PROVIDER || 'mock';
 const SUB_WEBHOOK_SECRET = process.env.SUB_WEBHOOK_SECRET || 'change-me';
 
+// Fallback set of subscription plans used when the database has not been
+// seeded. This keeps the API functional in development/mock modes and mirrors
+// the basic plan structure described in the product docs.
+const DEFAULT_PLANS = [
+  {
+    plan_id: 'free',
+    name: 'Free',
+    currency: 'usd',
+    monthly_price_cents: 0,
+    annual_price_cents: 0,
+    features: ['1 project', '1 agent', '100 prompts/month', 'community support']
+  },
+  {
+    plan_id: 'creator',
+    name: 'Creator',
+    currency: 'usd',
+    monthly_price_cents: 900,
+    annual_price_cents: 9000,
+    features: [
+      '10 projects',
+      '5 agents',
+      '5,000 prompts/mo',
+      'priority queue',
+      'RoadCoin minting (basic)',
+      'RC wallet link',
+      'limited Orchestrator'
+    ]
+  },
+  {
+    plan_id: 'pro',
+    name: 'Pro',
+    currency: 'usd',
+    monthly_price_cents: 2900,
+    annual_price_cents: 29000,
+    features: [
+      'unlimited projects',
+      '20 agents',
+      '25,000 prompts/mo',
+      'fast queue',
+      'RoadCoin minting (standard)',
+      'Orchestrator (full)',
+      'Dashboard analytics',
+      'API access'
+    ]
+  },
+  {
+    plan_id: 'enterprise',
+    name: 'Enterprise',
+    currency: 'usd',
+    monthly_price_cents: null,
+    annual_price_cents: null,
+    features: [
+      'SSO/SAML',
+      'custom limits',
+      'private models',
+      'SLA',
+      'dedicated support'
+    ]
+  }
+];
+
 function createCheckoutSession({ user, plan }) {
   const paymentId = uuidv4();
   return {
@@ -94,6 +155,11 @@ subRouter.get('/plans', (_req, res) => {
       'SELECT plan_id, name, price_cents, currency, interval, features_json, rc_monthly_allowance, limits_json FROM plans WHERE active = 1'
     )
     .all();
+  if (rows.length === 0) {
+    // When no plans are defined in the database (common in local development),
+    // fall back to the default static plans defined above.
+    return res.json({ plans: DEFAULT_PLANS });
+  }
   const plans = rows.map((r) => ({
     plan_id: r.plan_id,
     name: r.name,
