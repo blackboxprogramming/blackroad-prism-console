@@ -7,6 +7,7 @@ import RoadView from "./pages/RoadView.jsx";
 import BackRoad from "./pages/BackRoad.jsx";
 import Subscribe from "./pages/Subscribe.jsx";
 import Lucidia from "./pages/Lucidia.jsx";
+import Monitoring from "./pages/Monitoring.jsx";
 import { useEffect, useState } from "react";
 
 function useApiHealth(){
@@ -50,6 +51,7 @@ export default function App(){
           <NavLink className="nav-link" to="/backroad">BackRoad</NavLink>
           <NavLink className="nav-link" to="/subscribe">Subscribe</NavLink>
           <NavLink className="nav-link" to="/lucidia">Lucidia</NavLink>
+          <NavLink className="nav-link" to="/monitoring">Monitoring</NavLink>
         </nav>
         <div className="mt-6 text-xs text-neutral-400"><StatusPill/></div>
       </aside>
@@ -71,6 +73,7 @@ export default function App(){
             <Route path="/backroad" element={<BackRoad/>} />
             <Route path="/subscribe" element={<Subscribe/>} />
             <Route path="/lucidia" element={<Lucidia/>} />
+            <Route path="/monitoring" element={<Monitoring/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
