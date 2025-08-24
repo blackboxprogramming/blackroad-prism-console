@@ -17,8 +17,15 @@ solution rather than a complete deployment utility.
 from __future__ import annotations
 
 import argparse
+import json
+import logging
+import os
 import subprocess
-import sys
+import time
+from typing import Any, Dict
+
+import requests
+from dotenv import load_dotenv
 
 
 def run(cmd: str) -> None:
@@ -46,10 +53,43 @@ def redeploy_droplet() -> None:
     print("TODO: implement droplet redeploy")
 
 
-def sync_connectors() -> None:
-    """Placeholder for syncing external connectors."""
-    # TODO: add OAuth flows, webhook listeners, and Slack notifications.
-    print("TODO: implement connector sync")
+def call_connectors(action: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Call BlackRoad's connectors API with retry and logging."""
+    load_dotenv()
+    token = os.getenv("CONNECTOR_KEY")
+    if not token:
+        raise RuntimeError("CONNECTOR_KEY missing from environment")
+
+    logger = logging.getLogger("pipeline_connectors")
+    if not logger.handlers:
+        handler = logging.FileHandler("pipeline_connectors.log")
+        formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+
+    url = f"https://blackroad.io/connectors/{action}"
+    headers = {"Authorization": f"Bearer {token}"}
+
+    for attempt in range(3):
+        try:
+            logger.info("POST %s payload=%s", url, payload)
+            resp = requests.post(url, headers=headers, json=payload, timeout=30)
+            resp.raise_for_status()
+            data = resp.json()
+            logger.info("response=%s", data)
+            if data.get("ok") is True:
+                return data
+            logger.error("connector returned non-ok response: %s", data)
+        except requests.RequestException as exc:
+            logger.error("connector call failed: %s", exc)
+        time.sleep(2**attempt)
+    raise RuntimeError("connector call failed after retries")
+
+
+def sync_connectors(action: str, payload: Dict[str, Any]) -> None:
+    """Sync external connectors via Prism API."""
+    call_connectors(action, payload)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -60,7 +100,9 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("push", help="Push latest to BlackRoad.io")
     sub.add_parser("refresh", help="Refresh working copy and redeploy")
     sub.add_parser("rebase", help="Rebase branch and update site")
-    sub.add_parser("sync", help="Sync Salesforce → Airtable → Droplet")
+    sync = sub.add_parser("sync", help="Sync Salesforce → Airtable → Droplet")
+    sync.add_argument("action", choices=["paste", "append", "replace", "restart", "build"])
+    sync.add_argument("payload", help="JSON payload for the action")
 
     args = parser.parse_args(argv)
 
@@ -76,7 +118,8 @@ def main(argv: list[str] | None = None) -> int:
         push_latest()
         redeploy_droplet()
     elif args.command == "sync":
-        sync_connectors()
+        payload = json.loads(args.payload)
+        sync_connectors(args.action, payload)
     else:
         parser.print_help()
     return 0
@@ -84,4 +127,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
