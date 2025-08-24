@@ -1,4 +1,5 @@
 import { NavLink, Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Chat from "./pages/Chat.jsx";
 import Canvas from "./pages/Canvas.jsx";
 import Editor from "./pages/Editor.jsx";
@@ -8,7 +9,7 @@ import BackRoad from "./pages/BackRoad.jsx";
 import Subscribe from "./pages/Subscribe.jsx";
 import Lucidia from "./pages/Lucidia.jsx";
 import InfinityMath from "./pages/InfinityMath.jsx";
-import { useEffect, useState } from "react";
+import Desktop from "./pages/Desktop.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -38,6 +39,15 @@ function StatusPill(){
 }
 
 export default function App(){
+  return (
+    <Routes>
+      <Route path="/" element={<Desktop/>} />
+      <Route path="/*" element={<LegacyApp/>} />
+    </Routes>
+  );
+}
+
+function LegacyApp(){
   return (
     <div className="min-h-screen grid md:grid-cols-[240px_1fr] gap-4 p-4">
       <aside className="sidebar p-3">
@@ -75,16 +85,15 @@ export default function App(){
 
         <section className="card">
           <Routes>
-            <Route path="/" element={<Chat/>} />
-            <Route path="/chat" element={<Chat/>} />
-            <Route path="/canvas" element={<Canvas/>} />
-            <Route path="/editor" element={<Editor/>} />
-            <Route path="/terminal" element={<Terminal/>} />
-            <Route path="/roadview" element={<RoadView/>} />
-            <Route path="/backroad" element={<BackRoad/>} />
-            <Route path="/subscribe" element={<Subscribe/>} />
-            <Route path="/lucidia" element={<Lucidia/>} />
-            <Route path="/math" element={<InfinityMath/>} />
+            <Route path="chat" element={<Chat/>} />
+            <Route path="canvas" element={<Canvas/>} />
+            <Route path="editor" element={<Editor/>} />
+            <Route path="terminal" element={<Terminal/>} />
+            <Route path="roadview" element={<RoadView/>} />
+            <Route path="backroad" element={<BackRoad/>} />
+            <Route path="subscribe" element={<Subscribe/>} />
+            <Route path="lucidia" element={<Lucidia/>} />
+            <Route path="math" element={<InfinityMath/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
