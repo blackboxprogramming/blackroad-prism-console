@@ -216,15 +216,160 @@ if (process.env.ENABLE_LUCIDIA_BRAIN !== '0') {
   app.use('/api/lucidia/brain', require('./routes/lucidia-brain'));
 }
 
-// Root
-app.get('/', (req, res) => {
-  res.status(200).json({ ok: true, service: 'blackroad-api', env: NODE_ENV || 'dev' });
-});
-
 // HTTP server + Socket.IO
 const server = http.createServer(app);
 const { setupSockets } = require('./src/socket');
-setupSockets(server);
+const io = setupSockets(server);
+
+// LANDING
+// Minimal landing page + stats + admin CMS endpoints
+(function setupLanding() {
+  const PUBLIC_DIR = path.join(__dirname, 'public');
+
+  // Serve static assets (landing page)
+  app.use(express.static(PUBLIC_DIR));
+
+  // --- DB tables
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS landing_sections (
+      id TEXT PRIMARY KEY,
+      key TEXT UNIQUE,
+      content_json TEXT,
+      updated_by TEXT,
+      updated_at INTEGER
+    );
+    CREATE TABLE IF NOT EXISTS public_stats_cache (
+      id TEXT PRIMARY KEY,
+      agents_active INTEGER DEFAULT 0,
+      rc_minted_24h INTEGER DEFAULT 0,
+      contradictions_24h INTEGER DEFAULT 0,
+      uptime_24h_percent REAL DEFAULT 100.0,
+      latency_p50_ms INTEGER DEFAULT 0,
+      refreshed_at INTEGER
+    );
+  `);
+
+  // Seed landing sections if empty
+  const defaults = {
+    hero: { headline: 'Co-create with Lucidia.', sub: 'Symbolic agents, live RC, contradiction-aware AI.', primaryCta: 'Get Started', secondaryCta: 'See Pricing' },
+    features: [
+      { title: 'Agents', desc: 'Multi-agent orchestration with memory.' },
+      { title: 'RoadCoin', desc: 'Mint and meter usage cleanly.' },
+      { title: 'Codex', desc: 'Symbolic truth engine with contradictions.' }
+    ],
+    testimonials: [],
+    faq: [{ q: 'What is BlackRoad?', a: 'An AI-native co-creation stack with symbolic logic and RC metering.' }],
+    footer: { links: [
+      { label: 'Manifesto', to: '/manifesto' },
+      { label: 'Roadbook', to: '/roadbook' },
+      { label: 'Subscribe', to: '/subscribe' }
+    ] }
+  };
+  const getSection = db.prepare('SELECT id FROM landing_sections WHERE key = ?');
+  const insertSection = db.prepare('INSERT INTO landing_sections (id,key,content_json,updated_at) VALUES (?,?,?,?)');
+  for (const [key, value] of Object.entries(defaults)) {
+    if (!getSection.get(key)) {
+      insertSection.run(require('crypto').randomUUID(), key, JSON.stringify(value), Math.floor(Date.now()/1000));
+    }
+  }
+
+  // Ensure stats cache row
+  const ensureStats = db.prepare('INSERT OR IGNORE INTO public_stats_cache (id, refreshed_at) VALUES ("global", 0)');
+  ensureStats.run();
+
+  // --- Helpers
+  function computeStats() {
+    const now = Math.floor(Date.now()/1000);
+    let agents = 0, rc = 0, contradictions = 0, latency = 0, uptime = 99.9;
+    try {
+      agents = db.prepare('SELECT COUNT(*) AS c FROM agents WHERE heartbeat_at >= datetime("now", "-1 minute")').get().c;
+    } catch {}
+    try {
+      rc = db.prepare('SELECT IFNULL(SUM(amount),0) AS s FROM transactions WHERE created_at >= datetime("now", "-1 day")').get().s;
+    } catch {}
+    try {
+      contradictions = db.prepare('SELECT COUNT(*) AS c FROM contradictions WHERE created_at >= datetime("now", "-1 day")').get().c;
+    } catch {}
+    try {
+      latency = db.prepare('SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY latency_ms) AS p50 FROM api_metrics WHERE path = "/api/llm/chat" AND ts >= strftime("%s", "now") - 86400').get().p50 || 0;
+    } catch {}
+    return { agents_active: agents, rc_minted_24h: rc, contradictions_24h: contradictions, uptime_24h_percent: uptime, latency_p50_ms: latency, refreshed_at: now };
+  }
+
+  function refreshStats() {
+    const stats = computeStats();
+    db.prepare(`UPDATE public_stats_cache SET agents_active=?, rc_minted_24h=?, contradictions_24h=?, uptime_24h_percent=?, latency_p50_ms=?, refreshed_at=? WHERE id='global'`).run(
+      stats.agents_active, stats.rc_minted_24h, stats.contradictions_24h, stats.uptime_24h_percent, stats.latency_p50_ms, stats.refreshed_at
+    );
+    console.log('public.stats.refresh', stats);
+    io.emit('public:stats', stats);
+    return stats;
+  }
+
+  function getCachedStats() {
+    const row = db.prepare('SELECT * FROM public_stats_cache WHERE id="global"').get();
+    const now = Math.floor(Date.now()/1000);
+    if (!row.refreshed_at || now - row.refreshed_at > 15) {
+      return refreshStats();
+    }
+    return row;
+  }
+
+  // Periodic refresh every 30s
+  setInterval(refreshStats, 30000).unref();
+
+  // --- Routes
+  app.get('/api/public/landing', (req, res) => {
+    const rows = db.prepare('SELECT key, content_json FROM landing_sections').all();
+    const sections = {};
+    for (const r of rows) {
+      try { sections[r.key] = JSON.parse(r.content_json); } catch { sections[r.key] = null; }
+    }
+    if (Math.random() < 0.1) console.log('landing.view');
+    res.json({ sections });
+  });
+
+  app.get('/api/public/stats', (req, res) => {
+    const stats = getCachedStats();
+    res.json(stats);
+  });
+
+  // Admin routes
+  const { requireAdmin } = require('./src/auth');
+  const adminLimiter = rateLimit({ windowMs: 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false });
+
+  app.put('/api/admin/landing/section', requireAdmin, adminLimiter, (req, res) => {
+    const { key, content } = req.body || {};
+    const valid = ['hero', 'features', 'testimonials', 'faq', 'footer'];
+    if (!valid.includes(key)) return res.status(400).json({ error: 'invalid_key', code: 400 });
+    const json = JSON.stringify(content || null);
+    const now = Math.floor(Date.now()/1000);
+    db.prepare(`INSERT INTO landing_sections (id,key,content_json,updated_by,updated_at) VALUES (coalesce((SELECT id FROM landing_sections WHERE key=?), randomblob(16)),?,?,?,?) ON CONFLICT(key) DO UPDATE SET content_json=excluded.content_json, updated_by=excluded.updated_by, updated_at=excluded.updated_at`).run(key, key, json, req.session.userId || '', now);
+    console.log('landing.cms.updated', { key, admin_id: req.session.userId });
+    res.json({ ok: true });
+  });
+
+  app.post('/api/admin/landing/testimonial', requireAdmin, adminLimiter, (req, res) => {
+    const { author, role, quote } = req.body || {};
+    if (!author || !quote) return res.status(400).json({ error: 'missing_fields', code: 400 });
+    const row = db.prepare('SELECT content_json FROM landing_sections WHERE key="testimonials"').get();
+    let arr = [];
+    try { arr = JSON.parse(row.content_json); } catch {}
+    arr.push({ author: String(author).slice(0,200), role: String(role||'').slice(0,200), quote: String(quote).slice(0,500) });
+    if (arr.length > 20) arr = arr.slice(-20);
+    const json = JSON.stringify(arr);
+    const now = Math.floor(Date.now()/1000);
+    db.prepare('UPDATE landing_sections SET content_json=?, updated_by=?, updated_at=? WHERE key="testimonials"').run(json, req.session.userId || '', now);
+    console.log('landing.cms.updated', { key: 'testimonials', admin_id: req.session.userId });
+    res.json({ ok: true });
+  });
+
+  // Root route
+  app.get('/', (req, res) => {
+    if (Math.random() < 0.1) console.log('landing.view');
+    res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
+  });
+})();
 
 server.listen(PORT, () => {
   console.log(`[blackroad-api] listening on port ${PORT} (env: ${NODE_ENV})`);
