@@ -21,6 +21,12 @@ const Database = require('better-sqlite3');
 const { Server: SocketIOServer } = require('socket.io');
 const { exec } = require('child_process');
 const { randomUUID } = require('crypto');
+const EventEmitter = require('events');
+const verify = require('./lib/verify');
+const git = require('./lib/git');
+const deploy = require('./lib/deploy');
+const notify = require('./lib/notify');
+const logger = require('./lib/log');
 
 // --- Config
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -30,6 +36,10 @@ const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
 const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
+const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
+const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
+const BRANCH_MAIN = process.env.BRANCH_MAIN || 'main';
+const BRANCH_STAGING = process.env.BRANCH_STAGING || 'staging';
 
 const PLANS = [
   {
@@ -94,6 +104,35 @@ const io = new SocketIOServer(server, {
   cors: { origin: false }, // same-origin via Nginx
 });
 
+const emitter = new EventEmitter();
+const jobs = new Map();
+let jobSeq = 0;
+
+function addJob(type, payload, runner) {
+  const id = String(++jobSeq);
+  const job = { id, type, payload, status: 'queued', created: Date.now(), logs: [] };
+  jobs.set(id, job);
+  process.nextTick(async () => {
+    job.status = 'running';
+    try {
+      await runner(id, payload);
+      job.status = 'success';
+    } catch (e) {
+      job.status = 'failed';
+      job.error = String(e);
+    } finally {
+      emitter.emit(id, null);
+    }
+  });
+  return job;
+}
+
+function logLine(id, line) {
+  const job = jobs.get(id);
+  if (job) job.logs.push(line);
+  emitter.emit(id, line);
+}
+
 // --- Middleware
 app.disable('x-powered-by');
 app.use(compression());
@@ -114,7 +153,19 @@ app.get('/', (_, res) => {
 
 // --- Health
 app.head('/api/health', (_, res) => res.status(200).end());
-app.get('/api/health', (_, res) => res.json({ ok: true }));
+app.get('/api/health', async (_req, res) => {
+  let llm = false;
+  try {
+    const r = await fetch('http://127.0.0.1:8000/health');
+    llm = r.ok;
+  } catch {}
+  res.json({
+    ok: true,
+    version: '1.0.0',
+    uptime: process.uptime(),
+    services: { api: true, llm }
+  });
+});
 
 // --- Auth (cookie-session)
 function requireAuth(req, res, next) {
@@ -359,6 +410,8 @@ app.get('/api/subscribe/status', (req, res) => {
   if (!email) return res.status(400).json({ error: 'email_required' });
   const row = db.prepare('SELECT s.plan, s.cycle, s.status FROM subscribers sub JOIN subscriptions s ON sub.id = s.subscriber_id WHERE sub.email = ? ORDER BY datetime(s.created_at) DESC LIMIT 1').get(email);
   res.json(row || { status: 'none' });
+});
+
 // --- Billing: plans
 app.get('/api/subscribe/plans', requireAuth, (_req, res) => {
   try {
@@ -418,6 +471,105 @@ app.post('/api/exec', requireAuth, (req, res) => {
     if (err) return res.status(500).json({ error: 'exec_failed', detail: String(err), stderr });
     res.json({ out: stdout, stderr });
   });
+});
+
+// --- Deployment and CI endpoints
+app.post('/api/webhooks/github', async (req, res) => {
+  const sig = req.get('X-Hub-Signature-256');
+  const raw = JSON.stringify(req.body || {});
+  if (!verify.verifySignature(GITHUB_WEBHOOK_SECRET, raw, sig)) {
+    return res.status(401).end('invalid_signature');
+  }
+  const event = req.get('X-GitHub-Event');
+  if (event === 'ping') return res.json({ ok: true });
+  if (event === 'push') {
+    const branch = req.body.ref?.replace('refs/heads/', '');
+    if (!verify.branchAllowed(branch, [BRANCH_MAIN, BRANCH_STAGING])) return res.status(202).end();
+    const sha = req.body.after;
+    const job = addJob('deploy', { branch, sha }, async (id, payload) => {
+      logLine(id, 'git fetch');
+      await git.fetch();
+      await git.checkout(payload.branch);
+      await git.resetHard(payload.sha);
+      await git.clean();
+      logLine(id, 'deploy');
+      await deploy.stageAndSwitch(payload);
+      await notify.slack(`Deploy ${payload.branch} ${payload.sha} succeeded`);
+    });
+    return res.json({ ok: true, jobId: job.id });
+  }
+  if (event === 'pull_request') {
+    const job = addJob('ci', {}, async (id) => logLine(id, 'ci not implemented'));
+    return res.json({ ok: true, jobId: job.id });
+  }
+  res.json({ ok: true });
+});
+
+app.post('/api/deploy/plan', (req, res) => {
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  res.json({ ok: true, steps: ['build', 'switch'] });
+});
+
+app.post('/api/deploy/execute', (req, res) => {
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  const { branch = BRANCH_MAIN, sha } = req.body || {};
+  const job = addJob('deploy_manual', { branch, sha }, async (id, payload) => {
+    await git.fetch();
+    await git.checkout(payload.branch);
+    if (payload.sha) await git.resetHard(payload.sha);
+    await git.clean();
+    await deploy.stageAndSwitch(payload);
+  });
+  res.json({ ok: true, jobId: job.id });
+});
+
+app.post('/api/git/sync', (req, res) => {
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  const { branch = BRANCH_MAIN } = req.body || {};
+  addJob('git_sync', { branch }, async (id, payload) => {
+    await git.fetch();
+    await git.checkout(payload.branch);
+    await git.resetHard(`origin/${payload.branch}`);
+    await git.clean();
+  });
+  res.json({ ok: true });
+});
+
+app.get('/api/jobs', (req, res) => {
+  res.json(Array.from(jobs.values()).reverse());
+});
+
+app.get('/api/jobs/:id/log', (req, res) => {
+  const { id } = req.params;
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  const send = (line) => {
+    if (line === null) return res.write('event: end\n\n');
+    res.write(`data: ${line}\n\n`);
+  };
+  const listener = (l) => send(l);
+  emitter.on(id, listener);
+  const job = jobs.get(id);
+  if (job) job.logs.forEach(send);
+  req.on('close', () => emitter.removeListener(id, listener));
+});
+
+app.post('/api/rollback/:releaseId', (req, res) => {
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  const releaseId = req.params.releaseId;
+  const job = addJob('rollback', { releaseId }, async (id, payload) => {
+    await deploy.stageAndSwitch({ branch: 'rollback', sha: payload.releaseId });
+  });
+  res.json({ ok: true, jobId: job.id });
+});
+
+app.get('/api/connectors/status', async (_req, res) => {
+  const status = { slack: false, airtable: false, linear: false, salesforce: false };
+  try { if (process.env.SLACK_WEBHOOK_URL) { await notify.slack('status check'); status.slack = true; } } catch {}
+  try { if (process.env.AIRTABLE_API_KEY) status.airtable = true; } catch {}
+  try { if (process.env.LINEAR_API_KEY) status.linear = true; } catch {}
+  try { if (process.env.SF_USERNAME) status.salesforce = true; } catch {}
+  res.json(status);
 });
 
 // --- Actions (stubs)
