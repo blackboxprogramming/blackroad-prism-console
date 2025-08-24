@@ -2,14 +2,14 @@
 
 const assert = require('assert');
 const fs = require('fs');
-const DB_FILE = '/srv/blackroad-api/blackroad.db';
+const migrate = require('../backend/migrate');
+const { DB_FILE } = migrate;
 
 // Start fresh
 try {
   fs.rmSync(DB_FILE, { force: true });
 } catch {}
 
-const migrate = require('../backend/migrate');
 migrate();
 
 let data = require('../backend/data');

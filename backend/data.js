@@ -6,7 +6,10 @@ const { v4: uuidv4 } = require('uuid');
 const Database = require('better-sqlite3');
 const migrate = require('./migrate');
 
-const DB_FILE = '/srv/blackroad-api/blackroad.db';
+const DB_FILE =
+  process.env.NODE_ENV === 'test'
+    ? '/tmp/blackroad_test.db'
+    : '/srv/blackroad-api/blackroad.db';
 
 // Ensure database and schema are ready
 migrate();

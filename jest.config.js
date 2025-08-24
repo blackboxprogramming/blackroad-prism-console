@@ -1,5 +1,6 @@
 module.exports = {
-  testEnvironment: 'node',
-  testMatch: ['<rootDir>/src/tests/**/*.test.js'],
-  collectCoverageFrom: ['server_full.js', 'src/**/*.js']
+  testEnvironment: "node",
+  verbose: true,
+  roots: ["<rootDir>/tests"],
+  testMatch: ["<rootDir>/tests/test_integration.js"],
 };
