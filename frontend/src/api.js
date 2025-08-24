@@ -32,6 +32,16 @@ export async function fetchAgents(){
   const { data } = await axios.get(`${API_BASE}/api/agents`)
   return data.agents
 }
+
+export async function fetchOrchestratorAgents(){
+  const { data } = await axios.get(`${API_BASE}/api/orchestrator/agents`)
+  return data.agents
+}
+
+export async function controlAgent(id, action){
+  const { data } = await axios.post(`${API_BASE}/api/orchestrator/control/${id}`, { action })
+  return data
+}
 export async function fetchWallet(){
   const { data } = await axios.get(`${API_BASE}/api/wallet`)
   return data.wallet

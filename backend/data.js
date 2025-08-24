@@ -7,9 +7,9 @@ const store = {
   ],
   wallet: { rc: 1.2 },
   agents: [
-    { id: 'phi', name: 'Phi', status: 'idle' },
-    { id: 'gpt', name: 'GPT', status: 'idle' },
-    { id: 'mistral', name: 'Mistral', status: 'idle' }
+    { id: 'phi', name: 'Phi', status: 'idle', cpu: 0, memory: 0 },
+    { id: 'gpt', name: 'GPT', status: 'idle', cpu: 0, memory: 0 },
+    { id: 'mistral', name: 'Mistral', status: 'idle', cpu: 0, memory: 0 }
   ],
   contradictions: { issues: 2 },
   sessionNotes: "",
