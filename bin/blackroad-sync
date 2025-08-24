@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Unified BlackRoad.io sync & deploy script
+# Supports pushing code, syncing connectors, refreshing working copies,
+# and redeploying the droplet so the live site reflects latest changes.
+# Most actions are placeholders; fill in project-specific details as needed.
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+run() { ( set -x; "$@" ); }
+log() { echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] $*"; }
+
+push_latest() {
+  log "Pushing local commits to GitHub..."
+  run git push origin "$(git rev-parse --abbrev-ref HEAD)"
+}
+
+sync_connectors() {
+  log "Triggering connector syncs (Salesforce, Airtable, Slack, Linear, etc.)..."
+  # Placeholder: invoke connector jobs or webhooks
+}
+
+refresh_working_copy() {
+  log "Refreshing working copy..."
+  if [[ -n "${WORKING_COPY_HOST:-}" ]]; then
+    run ssh "$WORKING_COPY_HOST" "cd ${WORKING_COPY_PATH:-/var/mobile/blackroad} && git pull --rebase"
+  else
+    log "WORKING_COPY_HOST not set; skipping working copy refresh"
+  fi
+}
+
+deploy_droplet() {
+  log "Deploying to droplet..."
+  if [[ -n "${DROPLET_HOST:-}" ]]; then
+    run ssh "$DROPLET_HOST" "cd /srv/blackroad && git pull --rebase && npm ci && npm run migrate && sudo systemctl restart blackroad-api nginx"
+  else
+    log "DROPLET_HOST not set; skipping droplet deploy"
+  fi
+}
+
+check_status() {
+  log "Checking deployment status..."
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "${STATUS_URL:-https://blackroad.io/deploy/status}" || true
+    curl -fsSL "${HEALTH_URL:-https://blackroad.io/health}" || true
+  else
+    log "curl not available; status checks skipped"
+  fi
+}
+
+case "${1:-}" in
+  push)
+    push_latest
+    sync_connectors
+    refresh_working_copy
+    deploy_droplet
+    check_status
+    ;;
+  refresh)
+    refresh_working_copy
+    deploy_droplet
+    check_status
+    ;;
+  rebase)
+    log "Rebasing with origin/main..."
+    run git pull --rebase origin main
+    push_latest
+    ;;
+  sync-salesforce)
+    sync_connectors
+    ;;
+  *)
+    echo "Usage: $0 {push|refresh|rebase|sync-salesforce}" >&2
+    exit 1
+    ;;
+ esac
+
