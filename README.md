@@ -80,3 +80,19 @@ curl -X POST http://localhost:4000/api/subscribe/checkout \
 curl -H "Cookie: brsid=..." http://localhost:4000/api/subscribe/portal
 # Webhooks are received at /api/stripe/webhook and must include the Stripe signature header.
 ```
+## Unified Sync Pipeline
+
+Use `scripts/blackroad_sync.sh` to drive a chat-style deployment flow.
+Example:
+
+```bash
+./scripts/blackroad_sync.sh "Push latest to BlackRoad.io"
+```
+
+The script also understands:
+- "Refresh working copy and redeploy"
+- "Rebase branch and update site"
+- "Sync Salesforce -> Airtable -> Droplet"
+
+It pulls from GitHub, triggers connector webhooks, updates a Working Copy checkout, and
+executes a remote refresh command on the droplet.
