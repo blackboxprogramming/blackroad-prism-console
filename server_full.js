@@ -13,6 +13,7 @@ const cookieSession = require('cookie-session');
 const rateLimit = require('express-rate-limit');
 
 const { PORT, NODE_ENV, ALLOWED_ORIGIN, LOG_DIR, SESSION_SECRET } = require('./src/config');
+const subscribe = require('./src/routes/subscribe');
 
 // Ensure log dir exists
 if (LOG_DIR) {
@@ -40,6 +41,9 @@ app.use(cors(corsOptions));
 
 // Logging
 app.use(morgan('combined'));
+
+// Stripe webhook needs raw body
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), subscribe.webhookHandler);
 
 // Body parsing
 app.use(express.json({ limit: '2mb' }));
