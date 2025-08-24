@@ -19,6 +19,16 @@ const store = {
       { id: uuidv4(), type: 'Unauthorized login', severity: 'high', time: new Date().toISOString(), status: 'active' }
     ]
   },
+  posts: [
+    {
+      id: uuidv4(),
+      author: 'Root',
+      time: new Date().toISOString(),
+      content: 'Welcome to BackRoad!'
+        + '\n\nShare updates with your fellow travelers.',
+      likes: 0,
+    },
+  ],
   tasks: [
     { id: uuidv4(), title: "Calculus HW 3", course: "Math 201", status: "todo", due: "2025-08-25", reward: 12, progress: 0.2 },
     { id: uuidv4(), title: "Lab: Sorting", course: "CS 101", status: "inprogress", due: "2025-08-23", reward: 20, progress: 0.55 },

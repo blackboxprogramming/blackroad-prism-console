@@ -244,6 +244,32 @@ app.get('/api/roadview/list', authMiddleware(JWT_SECRET), (req, res)=>{
     { id: 'cam-1', name: 'Main Street', status: 'offline' },
     { id: 'cam-2', name: 'Downtown', status: 'offline' }
   ]});
+// ---- BackRoad feed ----
+const { v4: uuidv4 } = require('uuid');
+
+app.get('/api/backroad/feed', (req, res)=>{
+  res.json({ posts: store.posts });
+});
+
+app.post('/api/backroad/post', (req, res)=>{
+  const { title = '', body = '', author = 'Anon' } = req.body || {};
+  const post = {
+    id: uuidv4(),
+    author,
+    time: new Date().toISOString(),
+    content: [title, body].filter(Boolean).join('\n\n'),
+    likes: 0,
+  };
+  store.posts.unshift(post);
+  res.status(201).json({ ok: true, post });
+});
+
+app.post('/api/backroad/like/:id', (req, res)=>{
+  const post = store.posts.find(p=>p.id === req.params.id);
+  if(!post) return res.status(404).json({ error: 'not found' });
+  const delta = typeof req.body?.delta === 'number' ? req.body.delta : 1;
+  post.likes = Math.max(0, post.likes + delta);
+  res.json({ ok: true, likes: post.likes });
 });
 
 // Actions
