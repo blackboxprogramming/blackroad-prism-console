@@ -52,6 +52,8 @@ export default function Dashboard(){
             <div key={a.id} className="card p-4">
               <div className="font-medium">{a.name}</div>
               <div className="text-xs text-slate-400">{a.status} · {a.location}</div>
+              <div className="text-xs text-slate-400">{a.status}</div>
+              <div className="text-xs text-slate-500">Location: {a.location}</div>
             </div>
           ))}
         </div>

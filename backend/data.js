@@ -78,9 +78,9 @@ const store = {
   sessions: [],
   wallet: { rc: 1.2 },
   agents: [
-    { id: 'phi', name: 'Phi', status: 'idle', cpu: 0, memory: 0 },
-    { id: 'gpt', name: 'GPT', status: 'idle', cpu: 0, memory: 0 },
-    { id: 'mistral', name: 'Mistral', status: 'idle', cpu: 0, memory: 0 }
+    { id: 'phi', name: 'Phi', status: 'idle', cpu: 0, memory: 0, location: 'local' },
+    { id: 'gpt', name: 'GPT', status: 'idle', cpu: 0, memory: 0, location: 'cloud' },
+    { id: 'mistral', name: 'Mistral', status: 'idle', cpu: 0, memory: 0, location: 'cloud' }
   ],
   contradictions: { issues: 2 },
   sessionNotes: "",
