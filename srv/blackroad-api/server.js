@@ -1,4 +1,6 @@
 require('dotenv').config();
+require('./scripts/db-init');
+require('./scripts/migrate');
 const express = require('express');
 const logger = require('./middleware/logger');
 const errorHandler = require('./middleware/errorHandler');
@@ -22,3 +24,4 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
