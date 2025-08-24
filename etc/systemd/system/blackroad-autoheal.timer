@@ -1,0 +1,9 @@
+[Unit]
+Description=Run BlackRoad Auto-Heal every 1 min
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=60
+
+[Install]
+WantedBy=timers.target
