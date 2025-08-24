@@ -41,6 +41,7 @@ export default function Orchestrator({ socket }){
         <thead className="text-left">
           <tr className="border-b border-slate-700">
             <th className="py-2">Name</th>
+            <th>Location</th>
             <th>Status</th>
             <th>CPU</th>
             <th>Memory</th>
@@ -51,6 +52,7 @@ export default function Orchestrator({ socket }){
           {agents.map(a => (
             <tr key={a.id} className="border-b border-slate-800 last:border-none">
               <td className="py-2">{a.name}</td>
+              <td>{a.location}</td>
               <td>{a.status}</td>
               <td>{a.cpu}%</td>
               <td>{a.memory}%</td>

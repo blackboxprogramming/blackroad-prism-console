@@ -13,13 +13,13 @@ router.get('/', requireAuth, (req, res) => {
 });
 
 router.post('/', requireAdmin, (req, res) => {
-  const { slug, name, status, memory_path, notes } = req.body || {};
+  const { slug, name, status, memory_path, notes, location } = req.body || {};
   if (!slug || !name) return res.status(400).json({ ok: false, error: 'missing_fields' });
   const id = cryptoRandomId();
   db.prepare(`
-    INSERT INTO agents (id, slug, name, status, memory_path, notes)
-    VALUES (?, ?, ?, COALESCE(?, 'idle'), ?, ?)
-  `).run(id, slug, name, status || null, memory_path || null, notes || null);
+    INSERT INTO agents (id, slug, name, status, memory_path, notes, location)
+    VALUES (?, ?, ?, COALESCE(?, 'idle'), ?, ?, COALESCE(?, 'local'))
+  `).run(id, slug, name, status || null, memory_path || null, notes || null, location || null);
   res.json({ ok: true, agent: db.prepare('SELECT * FROM agents WHERE id = ?').get(id) });
 });
 

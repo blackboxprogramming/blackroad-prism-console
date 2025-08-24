@@ -122,6 +122,7 @@ describe('Logs and Contradictions', () => {
       .send({ slug: 'agent', name: 'Agent' });
     expect(createAgent.status).toBe(200);
     agentId = createAgent.body.agent.id;
+    expect(createAgent.body.agent.location).toBe('local');
 
     const logRes = await request(app)
       .post(`/api/agents/${agentId}/logs`)
