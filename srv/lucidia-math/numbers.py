@@ -59,3 +59,15 @@ def demo() -> tuple[FractalNumber, DimensionalNumber, WaveNumber]:
     d = DimensionalNumber(3, "m") * DimensionalNumber(2, "s")
     w = WaveNumber(1, 0) * WaveNumber(0.5, 1.0)
     return f, d, w
+"""Number theory helpers."""
+from math import factorial
+
+
+def triangular(n: int) -> int:
+    """Return the n-th triangular number."""
+    return n * (n + 1) // 2
+
+
+def factorial_demo(n: int) -> int:
+    """Expose factorial for demos."""
+    return factorial(n)
