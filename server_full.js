@@ -76,6 +76,16 @@ app.use(limiter);
 // Initialize DB (auto-migrations on import)
 const db = require('./src/db');
 
+// ROADVIEW
+const ROADVIEW_STORAGE = path.join(__dirname, 'srv', 'blackroad-api', 'storage', 'roadview');
+try {
+  fs.mkdirSync(path.join(ROADVIEW_STORAGE, 'projects'), { recursive: true });
+} catch {}
+app.use(
+  '/files/roadview',
+  express.static(ROADVIEW_STORAGE, { index: false, fallthrough: false })
+);
+
 // Routes
 const apiRouter = require('./src/routes');
 app.use('/api', apiRouter);
