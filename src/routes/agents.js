@@ -4,12 +4,19 @@
 const express = require('express');
 const db = require('../db');
 const { requireAuth, requireAdmin } = require('../auth');
+const { getAgentsSummary } = require('../services/agentSummary');
 
 const router = express.Router();
 
 router.get('/', requireAuth, (req, res) => {
   const rows = db.prepare('SELECT * FROM agents ORDER BY name').all();
   res.json({ ok: true, agents: rows });
+});
+
+// Aggregate health information for core services
+router.get('/summary', requireAuth, async (_req, res) => {
+  const summary = await getAgentsSummary();
+  res.json(summary);
 });
 
 router.post('/', requireAdmin, (req, res) => {
@@ -64,7 +71,10 @@ router.post('/:id/logs', requireAuth, (req, res) => {
 });
 
 router.get('/:id/logs', requireAuth, (req, res) => {
-  const rows = db.prepare('SELECT * FROM agent_logs WHERE agent_id = ? ORDER BY created_at DESC LIMIT 200').all(req.params.id);
+  const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
+  const rows = db
+    .prepare('SELECT * FROM agent_logs WHERE agent_id = ? ORDER BY created_at DESC LIMIT ?')
+    .all(req.params.id, limit);
   res.json({ ok: true, logs: rows });
 });
 
