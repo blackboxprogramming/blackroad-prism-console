@@ -12,7 +12,7 @@
     "prepare": "husky",
     "lint": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
     "format": "prettier -w .",
-    "test": "node tests/smoke.test.mjs",
+    "test": "node tests/test_auth.js && node tests/smoke.test.mjs",
     "dev:site": "npm --prefix sites/blackroad run dev",
     "build": "npm --prefix sites/blackroad run build",
     "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
