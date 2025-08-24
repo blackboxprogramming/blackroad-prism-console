@@ -321,3 +321,29 @@ python3 scripts/blackroad_sync.py deploy --host user@droplet
 
 The script only prints the operations it would perform, acting as a
 placeholder for future automation.
+---
+
+## Codex Deploy Flow
+
+`codex/jobs/blackroad-sync-deploy.sh` provides a chat-focused pipeline tying
+together git pushes, connector syncs, working-copy refreshes and server deploys.
+Typical usage:
+
+```bash
+# commit local changes, push and deploy to the droplet
+bash codex/jobs/blackroad-sync-deploy.sh push-latest "chore: update"
+
+# refresh the iOS Working Copy checkout and redeploy
+bash codex/jobs/blackroad-sync-deploy.sh refresh
+
+# rebase current branch onto origin/main then deploy
+bash codex/jobs/blackroad-sync-deploy.sh rebase-update
+
+# run Salesforce → Airtable → Droplet syncs
+bash codex/jobs/blackroad-sync-deploy.sh sync-connectors
+```
+
+It honours environment variables like `DROPLET_HOST`,
+`WORKING_COPY_PATH`, and `SLACK_WEBHOOK` for remote access and
+status notifications.
+
