@@ -16,7 +16,9 @@ from __future__ import annotations
 import argparse
 import shlex
 import subprocess
+from datetime import datetime
 from pathlib import Path
+from typing import Iterable
 
 LOG_FILE = Path("build.log")
 ERROR_LOG_FILE = Path("build_errors.log")
@@ -55,6 +57,23 @@ def run(cmd: str, cwd: Path | None = None) -> tuple[int, str]:
             log_error(output)
     return result.returncode, output
 
+def run(cmd: str, cwd: Path | None = None, dry_run: bool = False) -> None:
+    """Run a shell command and stream output.
+
+    Parameters
+    ----------
+    cmd:
+        Command to execute.
+    cwd:
+        Working directory for the command.
+    dry_run:
+        If ``True`` the command is printed but not executed.
+    """
+
+    print(f"$ {cmd}")
+    if dry_run:
+        return
+    subprocess.run(shlex.split(cmd), check=True, cwd=cwd)
 
 
 # ---------------------------------------------------------------------------
@@ -109,8 +128,18 @@ def pull_from_github(branch: str = "main") -> None:
         log_error(str(err))
         raise
 
+def push_latest(dry_run: bool = False) -> None:
+    """Push local commits and trigger deployment."""
+    run("git push", dry_run=dry_run)
+    deploy_to_droplet(dry_run=dry_run)
 
-def rebase_branch(branch: str = "main") -> None:
+
+def refresh_working_copy(dry_run: bool = False) -> None:
+    """Pull the latest changes into the working copy."""
+    run("git pull --ff-only", dry_run=dry_run)
+
+
+def rebase_branch(branch: str = "main", dry_run: bool = False) -> None:
     """Rebase the current branch onto the specified branch."""
     code, _ = run(f"git fetch origin {branch}")
     if code != 0:
@@ -118,13 +147,16 @@ def rebase_branch(branch: str = "main") -> None:
     code, _ = run(f"git rebase origin/{branch}")
     if code != 0:
         raise RuntimeError("git rebase failed")
+    run(f"git fetch origin {branch}", dry_run=dry_run)
+    run(f"git rebase origin/{branch}", dry_run=dry_run)
 
 
 # ---------------------------------------------------------------------------
 # Connector and deployment placeholders
 # ---------------------------------------------------------------------------
 
-def sync_connectors() -> None:
+
+def sync_connectors(dry_run: bool = False) -> None:
     """Synchronise external connectors (Salesforce, Airtable, etc.).
 
     This is a placeholder for OAuth setup and webhook processing.  Extend
@@ -134,27 +166,60 @@ def sync_connectors() -> None:
     print("[connectors] TODO: implement OAuth and webhook logic")
 
 
-def deploy_to_droplet() -> None:
-    """Deploy the latest code to the droplet.
+def _log(message: str, logfile: Path) -> None:
+    timestamp = datetime.utcnow().isoformat()
+    logfile.parent.mkdir(parents=True, exist_ok=True)
+    with logfile.open("a", encoding="utf-8") as fh:
+        fh.write(f"{timestamp} {message}\n")
 
-    Actual deployment commands (git pull, migrations, service restarts)
-    should be added here.  The function currently acts as a stub so the
-    broader orchestration flow can be wired up without side effects.
-    """
 
-    print("[droplet] TODO: implement remote deployment commands")
+def deploy_to_droplet(dry_run: bool = False) -> None:
+    """Deploy the latest code to the droplet."""
+
+    deploy_log = Path("deploy.log")
+    error_log = Path("deploy_errors.log")
+
+    paths: Iterable[tuple[str, str]] = [
+        ("var/www/blackroad/", "/var/www/blackroad/"),
+        ("srv/blackroad-api/", "/srv/blackroad-api/"),
+        ("srv/lucidia-llm/", "/srv/lucidia-llm/"),
+        ("srv/lucidia-math/", "/srv/lucidia-math/"),
+    ]
+
+    try:
+        _log("Starting deployment", deploy_log)
+        for local, remote in paths:
+            cmd = f"rsync -az {local} blackroad.io:{remote}"
+            _log(f"Sync {local} -> {remote}", deploy_log)
+            run(cmd, dry_run=dry_run)
+
+        _log("Restarting services", deploy_log)
+        run(
+            "ssh blackroad.io sudo systemctl restart blackroad-api lucidia-llm lucidia-math",
+            dry_run=dry_run,
+        )
+        run("ssh blackroad.io sudo systemctl reload nginx", dry_run=dry_run)
+        _log("Deployment complete", deploy_log)
+    except (subprocess.CalledProcessError, OSError) as exc:
+        _log(f"Deployment failed: {exc}", error_log)
+        raise
 
 
 # ---------------------------------------------------------------------------
 # Chat-first control surface
 # ---------------------------------------------------------------------------
 
-def handle_command(cmd: str) -> None:
+
+def handle_command(cmd: str, dry_run: bool = False) -> None:
     actions = {
         "push": push_to_github,
         "pull": pull_from_github,
         "rebase": rebase_branch,
         "sync": sync_connectors,
+        "push": lambda: push_latest(dry_run=dry_run),
+        "refresh": lambda: refresh_working_copy(dry_run=dry_run),
+        "rebase": lambda: rebase_branch(dry_run=dry_run),
+        "sync": lambda: sync_connectors(dry_run=dry_run),
     }
     action = actions.get(cmd)
     if action:
@@ -166,18 +231,24 @@ def handle_command(cmd: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Codex build pipeline")
     parser.add_argument("command", help="push|pull|rebase|sync")
+    parser.add_argument("command", help="push|refresh|rebase|sync")
     parser.add_argument(
         "branch",
         nargs="?",
         default="main",
         help="branch name for rebase (default: main)",
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print commands without executing",
+    )
     args = parser.parse_args()
 
     if args.command == "rebase":
-        rebase_branch(args.branch)
+        rebase_branch(args.branch, dry_run=args.dry_run)
     else:
-        handle_command(args.command)
+        handle_command(args.command, dry_run=args.dry_run)
 
 
 if __name__ == "__main__":
