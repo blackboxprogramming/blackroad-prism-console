@@ -40,6 +40,11 @@ _FILE_HANDLER = logging.FileHandler("pipeline.log")
 _FILE_HANDLER.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
 LOGGER.addHandler(_FILE_HANDLER)
 LOGGER.setLevel(logging.INFO)
+from datetime import datetime
+from pathlib import Path
+from urllib import request
+
+LOG_FILE = Path(__file__).resolve().parent.parent / "pipeline_validation.log"
 
 
 def run(cmd: str, *, dry_run: bool = False) -> None:
@@ -197,6 +202,36 @@ def trigger_working_copy_pull(
         return False
 
 
+def _check_service(name: str, url: str) -> str:
+    """Return ``OK`` if the service responds with ``{"status": "ok"}``."""
+    try:
+        with request.urlopen(url, timeout=5) as resp:  # nosec B310
+            if resp.getcode() != 200:
+                raise ValueError(f"unexpected status {resp.getcode()}")
+            payload = json.loads(resp.read().decode())
+            status = "OK" if payload.get("status") == "ok" else "FAIL"
+    except Exception:  # noqa: BLE001
+        status = "FAIL"
+
+    timestamp = datetime.utcnow().isoformat()
+    with LOG_FILE.open("a", encoding="utf-8") as fh:
+        fh.write(f"{timestamp} {name} {status}\n")
+    return status
+
+
+def validate_services() -> dict[str, str]:
+    """Check core services and return a status summary."""
+    summary = {
+        "frontend": _check_service("frontend", "https://blackroad.io/health"),
+        "api": _check_service("api", "http://127.0.0.1:4000/api/health"),
+        "llm": _check_service("llm", "http://127.0.0.1:8000/health"),
+        "math": _check_service("math", "http://127.0.0.1:8500/health"),
+    }
+    summary["timestamp"] = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+    print(json.dumps(summary))
+    return summary
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="BlackRoad Codex pipeline scaffold",
@@ -205,6 +240,9 @@ def main(argv: list[str] | None = None) -> int:
         "--dry-run",
         action="store_true",
         help="Simulate actions without executing external commands",
+        "--skip-validate",
+        action="store_true",
+        help="Skip service health validation",
     )
     sub = parser.add_subparsers(dest="command")
     sub.add_parser("push", help="Push latest to BlackRoad.io")
@@ -222,6 +260,8 @@ def main(argv: list[str] | None = None) -> int:
         run_pipeline(force=args.force, webhook=args.webhook)
     except subprocess.CalledProcessError:
         return 1
+    exit_code = 0
+
     if args.command == "push":
         push_latest(dry_run=args.dry_run)
         redeploy_droplet(dry_run=args.dry_run)
@@ -237,7 +277,14 @@ def main(argv: list[str] | None = None) -> int:
         sync_connectors(dry_run=args.dry_run)
     else:
         parser.print_help()
-    return 0
+        return exit_code
+
+    if not args.skip_validate:
+        summary = validate_services()
+        if any(v != "OK" for k, v in summary.items() if k != "timestamp"):
+            exit_code = 1
+
+    return exit_code
 
 
 if __name__ == "__main__":
