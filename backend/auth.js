@@ -1,87 +1,66 @@
 'use strict';
 
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
-const { store } = require('./data');
+const { getDb, addUser } = require('./data');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 
-function sanitizeUser(u) {
-  const { id, username, role, created_at, projectId } = u;
-  return { id, username, role, created_at, projectId };
-}
-
-function signToken(user, expires = '1h') {
-  return jwt.sign({ id: user.id, role: user.role, projectId: user.projectId }, JWT_SECRET, { expiresIn: expires });
-}
-
 function signup(req, res) {
-  const { username, password, role } = req.body || {};
-  if (!username || !password) return res.status(400).json({ error: 'missing_fields' });
-  if (store.users.find(u => u.username === username)) {
-    return res.status(409).json({ error: 'user_exists' });
-  }
-  const user = {
-    id: uuidv4(),
-    username,
-    passwordHash: bcrypt.hashSync(password, 10),
-    role: role === 'admin' ? 'admin' : 'user',
-    created_at: new Date().toISOString(),
-    projectId: store.projects[0]?.id || null
-  };
-  store.users.push(user);
-  const token = signToken(user);
-  res.json({ token, user: sanitizeUser(user) });
+  const { email, password, role } = req.body || {};
+  if (!email || !password) return res.status(400).json({ error: 'missing_fields' });
+  const db = getDb();
+  const exists = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+  if (exists) return res.status(409).json({ error: 'user_exists' });
+  const passwordHash = bcrypt.hashSync(password, 10);
+  const id = addUser(email, passwordHash);
+  const token = jwt.sign({ id, role: 'user' }, JWT_SECRET, { expiresIn: '1h' });
+  res.json({ token, user: { id, email, role: 'user' } });
 }
 
 function login(req, res) {
-  const { username, password } = req.body || {};
-  const user = store.users.find(u => u.username === username);
-  if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
+  const { email, password } = req.body || {};
+  const db = getDb();
+  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  if (!user || !bcrypt.compareSync(password, user.password_hash)) {
     return res.status(401).json({ error: 'invalid_credentials' });
   }
-  const token = signToken(user);
-  const refreshToken = uuidv4();
-  store.sessions.push({ token: refreshToken, userId: user.id });
-  res.json({ token, refreshToken, user: sanitizeUser(user) });
+  const role = user.role || 'user';
+  const token = jwt.sign({ id: user.id, role }, JWT_SECRET, { expiresIn: '1h' });
+  res.json({ token, user: { id: user.id, email: user.email, role } });
 }
 
-function logout(req, res) {
-  const { refreshToken } = req.body || {};
-  const idx = store.sessions.findIndex(s => s.token === refreshToken);
-  if (idx >= 0) store.sessions.splice(idx, 1);
-  res.json({ ok: true });
-}
-
-function authMiddleware(req, res, next) {
-  const hdr = req.headers.authorization || '';
-  const token = hdr.startsWith('Bearer ') ? hdr.slice(7) : null;
-  if (!token) return res.status(401).json({ error: 'missing_token' });
+function requireAuth(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'No token' });
   try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    req.user = payload;
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
     next();
   } catch {
-    res.status(401).json({ error: 'invalid_token' });
+    return res.status(403).json({ error: 'Invalid token' });
   }
 }
 
 function requireRole(role) {
   return (req, res, next) => {
-    if (!req.user || req.user.role !== role) {
-      return res.status(403).json({ error: 'forbidden' });
-    }
+    if (!req.user) return res.status(401).json({ error: 'No user' });
+    if (req.user.role !== role) return res.status(403).json({ error: 'Forbidden' });
     next();
   };
+}
+
+function logout(_req, res) {
+  res.json({ ok: true });
 }
 
 module.exports = {
   signup,
   login,
   logout,
-  authMiddleware,
+  requireAuth,
+  authMiddleware: requireAuth,
   requireRole,
   JWT_SECRET,
-  signToken
 };
+

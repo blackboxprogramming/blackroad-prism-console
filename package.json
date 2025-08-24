@@ -12,21 +12,23 @@
     "prepare": "husky",
     "lint": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
     "format": "prettier -w .",
-    "test": "node tests/smoke.test.mjs && node --test tests/backend-validation.test.js",
-    "test": "node tests/test_auth.js && node tests/smoke.test.mjs",
-    "test": "jest --coverage",
+    "test": "cross-env NODE_ENV=test jest --runInBand",
+    "test-db": "node tests/test_db.js",
+    "test-auth": "node tests/test_auth.js",
+    "test-projects-tasks": "node tests/test_projects_tasks.js",
+    "test-logs-contradictions": "node tests/test_logs_contradictions.js",
     "dev:site": "npm --prefix sites/blackroad run dev",
     "build": "npm --prefix sites/blackroad run build",
-    "test": "node tests/smoke.test.mjs",
     "frontend:dev": "npm --prefix sites/blackroad run dev",
     "frontend:build": "npm --prefix sites/blackroad run build",
-    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
+    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true",
+    "test-auth": "node tests/test_auth.js"
   },
   "engines": {
     "node": ">=18.17"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "bcrypt": "^5.1.1",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -44,6 +46,7 @@
   "devDependencies": {
     "nodemon": "^3.0.2",
     "jest": "^29.7.0",
-    "supertest": "^6.3.4"
+    "supertest": "^6.3.4",
+    "cross-env": "^7.0.3"
   }
 }

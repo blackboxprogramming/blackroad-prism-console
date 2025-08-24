@@ -1,0 +1,6 @@
+{
+  "name": "echo",
+  "version": "0.1",
+  "capabilities": ["ipc"],
+  "wasm": "data:application/wasm;base64,AGFzbQEAAAABDwNgAn9/AGACf38Bf2AAAAInAgVwcmlzbQpwcmlzbV9zZW5kAAAFcHJpc20KcHJpc21fcmVjdgABAwIBAgUDAQABBxMCBm1lbW9yeQIABmhhbmRsZQACCh0BGwEBf0EAQYAIEAEhACAAQQBKBEBBACAAEAALCw=="
+}

@@ -4,7 +4,10 @@ const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
 
-const DB_FILE = '/srv/blackroad-api/blackroad.db';
+const DB_FILE =
+  process.env.NODE_ENV === 'test'
+    ? '/tmp/blackroad_test.db'
+    : '/srv/blackroad-api/blackroad.db';
 
 function migrate() {
   fs.mkdirSync(path.dirname(DB_FILE), { recursive: true });
@@ -46,3 +49,4 @@ if (require.main === module) {
 }
 
 module.exports = migrate;
+module.exports.DB_FILE = DB_FILE;

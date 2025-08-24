@@ -1,0 +1,6 @@
+{
+  "name": "systems",
+  "version": "1.0.0",
+  "description": "systems elite coding agent",
+  "capabilities": ["ping", "analyze", "codegen"]
+}
