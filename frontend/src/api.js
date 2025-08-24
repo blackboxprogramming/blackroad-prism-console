@@ -133,4 +133,29 @@ export async function fetchRoadviewStreams(){
   return data.streams
 }
 
+export async function restartService(name){
+  const { data } = await axios.post(`${API_BASE}/api/autoheal/restart/${name}`)
+  return data
+}
+
+export async function rollbackLatest(){
+  const { data } = await axios.post(`${API_BASE}/api/rollback/latest`)
+  return data
+}
+
+export async function rollbackTo(id){
+  const { data } = await axios.post(`${API_BASE}/api/rollback/${id}`)
+  return data
+}
+
+export async function purgeContradictions(){
+  const { data } = await axios.delete(`${API_BASE}/api/contradictions/all`)
+  return data
+}
+
+export async function injectContradictionTest(){
+  const { data } = await axios.post(`${API_BASE}/api/contradictions/test`)
+  return data
+}
+
 export { API_BASE }

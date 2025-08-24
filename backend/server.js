@@ -12,8 +12,9 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
-const { signToken, authMiddleware, nowISO } = require('./utils');
+const { signToken, authMiddleware, nowISO, requireAdmin } = require('./utils');
 const { store, addTimeline } = require('./data');
+const autoheal = require('./autoheal');
 const { exec } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
 
@@ -321,6 +322,13 @@ app.post('/api/actions/mint', authMiddleware(JWT_SECRET), (req,res)=>{
   io.emit('wallet:update', store.wallet);
   res.json({ ok: true });
 });
+
+// Manual control panel
+app.post('/api/autoheal/restart/:service', authMiddleware(JWT_SECRET), requireAdmin, autoheal.restart);
+app.post('/api/rollback/latest', authMiddleware(JWT_SECRET), requireAdmin, autoheal.rollbackLatest);
+app.post('/api/rollback/:id', authMiddleware(JWT_SECRET), requireAdmin, autoheal.rollbackTo);
+app.delete('/api/contradictions/all', authMiddleware(JWT_SECRET), requireAdmin, autoheal.purgeContradictions);
+app.post('/api/contradictions/test', authMiddleware(JWT_SECRET), requireAdmin, autoheal.injectContradictionTest);
 
 // Optional shell exec (guarded)
 app.post('/api/exec', authMiddleware(JWT_SECRET), (req, res)=>{

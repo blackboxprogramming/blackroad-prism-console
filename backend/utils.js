@@ -1,12 +1,10 @@
-const jwt = require('jsonwebtoken');
-
-function signToken(payload, secret, expires='2h') {
-  return jwt.sign(payload, secret, { expiresIn: expires });
+function signToken(payload) {
+  return Buffer.from(JSON.stringify(payload)).toString('base64');
 }
 
-function verifyToken(token, secret) {
+function verifyToken(token) {
   try {
-    return jwt.verify(token, secret);
+    return JSON.parse(Buffer.from(token, 'base64').toString());
   } catch (e) {
     return null;
   }
@@ -26,4 +24,12 @@ function authMiddleware(secret) {
 
 function nowISO(){ return new Date().toISOString(); }
 
-module.exports = { signToken, verifyToken, authMiddleware, nowISO };
+function requireAdmin(req, res, next) {
+  const role = req.user?.role;
+  if (!['admin', 'owner'].includes(role)) {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  next();
+}
+
+module.exports = { signToken, verifyToken, authMiddleware, nowISO, requireAdmin };

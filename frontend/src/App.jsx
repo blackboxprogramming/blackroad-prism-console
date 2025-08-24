@@ -31,6 +31,7 @@ import Login from './components/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import RoadView from './pages/RoadView.jsx'
 import Orchestrator from './Orchestrator.jsx'
+import ControlPanel from './pages/ControlPanel.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -134,10 +135,11 @@ export default function App(){
               <NavItem to="/datasets" icon={<Database size={18} />} text="Datasets" />
               <NavItem to="/models" icon={<ShieldCheck size={18} />} text="Models" />
               <NavItem to="/integrations" icon={<Settings size={18} />} text="Integrations" />
-              <NavItem to="/roadview" icon={<LayoutGrid size={18} />} text="RoadView" />
-              <NavItem icon={<Rocket size={18} />} text="Orchestrator" to="/orchestrator" />
-            </nav>
-          </aside>
+                <NavItem to="/roadview" icon={<LayoutGrid size={18} />} text="RoadView" />
+                <NavItem to="/control" icon={<Settings size={18} />} text="Control Panel" />
+                <NavItem icon={<Rocket size={18} />} text="Orchestrator" to="/orchestrator" />
+              </nav>
+            </aside>
 
           {/* Main */}
           <main className="flex-1 px-6 py-4 grid grid-cols-12 gap-6">
@@ -205,6 +207,7 @@ export default function App(){
             <Routes>
               <Route path="/" element={<Dashboard tab={tab} setTab={setTab} timeline={timeline} tasks={tasks} commits={commits} onAction={onAction} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
               <Route path="/roadview" element={<RoadView agents={agents} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
+              <Route path="/control" element={<ControlPanel />} />
             </Routes>
           </main>
         </>
