@@ -784,6 +784,10 @@ const io = setupSockets(server);
   });
 })();
 
-server.listen(PORT, () => {
-  console.log(`[blackroad-api] listening on port ${PORT} (env: ${NODE_ENV})`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`[blackroad-api] listening on port ${PORT} (env: ${NODE_ENV})`);
+  });
+}
+
+module.exports = app;
