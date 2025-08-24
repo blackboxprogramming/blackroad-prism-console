@@ -349,6 +349,266 @@ const server = http.createServer(app);
 const { setupSockets } = require('./src/socket');
 const io = setupSockets(server);
 
+// LUCIDIA
+(function setupLucidia() {
+  // --- LLM Provider
+  const SUB_LLM_PROVIDER = process.env.SUB_LLM_PROVIDER || 'mock';
+  const llmProvider = {
+    async chat({ messages }) {
+      // Simple mock provider that echoes the last user message.
+      const lastUser = [...messages].reverse().find((m) => m.role === 'user');
+      const echo = lastUser ? String(lastUser.content || '') : '';
+      const content = `Mock reply: ${echo}`;
+      const token_count = Math.ceil(content.length / 4);
+      return { content, role: 'agent', token_count };
+    },
+    async moderate() {
+      return { flagged: false };
+    }
+  };
+
+  // --- DB tables
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS lucidia_projects (
+      id TEXT PRIMARY KEY,
+      user_id TEXT,
+      title TEXT,
+      description TEXT,
+      visibility TEXT CHECK(visibility IN ('private','unlisted','public')) DEFAULT 'private',
+      agent_count INTEGER DEFAULT 1,
+      created_at INTEGER,
+      updated_at INTEGER,
+      archived INTEGER DEFAULT 0
+    );
+    CREATE INDEX IF NOT EXISTS idx_lucidia_projects_user_id ON lucidia_projects(user_id);
+    CREATE INDEX IF NOT EXISTS idx_lucidia_projects_visibility ON lucidia_projects(visibility);
+    CREATE INDEX IF NOT EXISTS idx_lucidia_projects_archived ON lucidia_projects(archived);
+
+    CREATE TABLE IF NOT EXISTS lucidia_agents (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL,
+      name TEXT,
+      persona TEXT,
+      instructions TEXT,
+      color TEXT,
+      order_index INTEGER,
+      created_at INTEGER,
+      updated_at INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS idx_lucidia_agents_project_id ON lucidia_agents(project_id);
+    CREATE INDEX IF NOT EXISTS idx_lucidia_agents_order_index ON lucidia_agents(order_index);
+
+    CREATE TABLE IF NOT EXISTS lucidia_conversations (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL,
+      title TEXT,
+      status TEXT CHECK(status IN ('active','archived')) DEFAULT 'active',
+      created_at INTEGER,
+      updated_at INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS idx_lucidia_conversations_project_id ON lucidia_conversations(project_id);
+    CREATE INDEX IF NOT EXISTS idx_lucidia_conversations_status ON lucidia_conversations(status);
+
+    CREATE TABLE IF NOT EXISTS lucidia_messages (
+      id TEXT PRIMARY KEY,
+      conversation_id TEXT NOT NULL,
+      agent_id TEXT,
+      user_id TEXT,
+      role TEXT CHECK(role IN ('user','agent','system','function')) NOT NULL,
+      content TEXT,
+      function_name TEXT,
+      function_args_json TEXT,
+      token_count INTEGER DEFAULT 0,
+      created_at INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS idx_lucidia_messages_conversation_id ON lucidia_messages(conversation_id);
+    CREATE INDEX IF NOT EXISTS idx_lucidia_messages_role ON lucidia_messages(role);
+    CREATE INDEX IF NOT EXISTS idx_lucidia_messages_created_at ON lucidia_messages(created_at);
+
+    CREATE TABLE IF NOT EXISTS lucidia_notes (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL,
+      user_id TEXT,
+      title TEXT,
+      content TEXT,
+      created_at INTEGER,
+      updated_at INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS idx_lucidia_notes_project_id ON lucidia_notes(project_id);
+    CREATE INDEX IF NOT EXISTS idx_lucidia_notes_created_at ON lucidia_notes(created_at);
+
+    CREATE TABLE IF NOT EXISTS lucidia_contradictions (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL,
+      source_id TEXT,
+      source_type TEXT CHECK(source_type IN ('message','note')),
+      conflict_id TEXT,
+      conflict_type TEXT CHECK(conflict_type IN ('message','note')),
+      description TEXT,
+      resolved INTEGER DEFAULT 0,
+      created_at INTEGER,
+      updated_at INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS idx_lucidia_contradictions_project_id ON lucidia_contradictions(project_id);
+    CREATE INDEX IF NOT EXISTS idx_lucidia_contradictions_resolved ON lucidia_contradictions(resolved);
+
+    CREATE TABLE IF NOT EXISTS lucidia_knowledge (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL,
+      source TEXT CHECK(source IN ('note','agent','user','contradiction')),
+      content TEXT,
+      hash TEXT UNIQUE,
+      created_at INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS idx_lucidia_knowledge_project_id ON lucidia_knowledge(project_id);
+    CREATE INDEX IF NOT EXISTS idx_lucidia_knowledge_hash ON lucidia_knowledge(hash);
+
+    CREATE VIEW IF NOT EXISTS lucidia_project_summary_v AS
+    SELECT p.id, p.user_id, p.title, p.visibility,
+      (SELECT COUNT(*) FROM lucidia_agents a WHERE a.project_id = p.id) AS agent_count,
+      (SELECT COUNT(*) FROM lucidia_conversations c WHERE c.project_id = p.id) AS convo_count,
+      (SELECT COUNT(*) FROM lucidia_notes n WHERE n.project_id = p.id) AS note_count,
+      (SELECT COUNT(*) FROM lucidia_contradictions x WHERE x.project_id = p.id AND x.resolved = 0) AS contradictions_unresolved
+    FROM lucidia_projects p
+    WHERE p.archived = 0;
+  `);
+
+  const lucidiaRouter = express.Router();
+  lucidiaRouter.use(requireAuth);
+
+  // List projects
+  lucidiaRouter.get('/projects', (req, res) => {
+    const rows = db
+      .prepare(
+        'SELECT id, title, visibility, agent_count, convo_count, note_count, contradictions_unresolved FROM lucidia_project_summary_v WHERE user_id = ?'
+      )
+      .all(req.session.userId);
+    res.json({ projects: rows });
+  });
+
+  // Create project with default agents
+  lucidiaRouter.post('/projects', (req, res) => {
+    const { title, description } = req.body || {};
+    if (!title) return res.status(400).json({ error: 'missing_title', code: 'missing_title' });
+    const id = uuidv4();
+    const now = Math.floor(Date.now() / 1000);
+    db.prepare('INSERT INTO lucidia_projects (id,user_id,title,description,created_at,updated_at,agent_count) VALUES (?,?,?,?,?,?,?)')
+      .run(id, req.session.userId, String(title).slice(0, 200), String(description || '').slice(0, 1000), now, now, 3);
+
+    const defaults = [
+      {
+        name: 'Analyst',
+        persona: 'Analyst',
+        instructions: 'You are an analyst: summarize, extract key facts, and identify missing information.',
+        color: '#FF4FD8'
+      },
+      {
+        name: 'Planner',
+        persona: 'Planner',
+        instructions: 'You are a planner: break down objectives into steps and propose plans.',
+        color: '#0096FF'
+      },
+      {
+        name: 'Critic',
+        persona: 'Critic',
+        instructions: 'You are a critic: find flaws, contradictions, or risks in statements.',
+        color: '#FDBA2D'
+      }
+    ];
+    const insertAgent = db.prepare(
+      'INSERT INTO lucidia_agents (id, project_id, name, persona, instructions, color, order_index, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?)'
+    );
+    defaults.forEach((a, idx) => {
+      insertAgent.run(uuidv4(), id, a.name, a.persona, a.instructions, a.color, idx, now, now);
+    });
+
+    res.json({ id, title: String(title), description: String(description || '') });
+  });
+
+  // List conversations
+  lucidiaRouter.get('/conversations', (req, res) => {
+    const { project_id } = req.query || {};
+    if (!project_id) return res.status(400).json({ error: 'missing_project', code: 'missing_project' });
+    const rows = db
+      .prepare('SELECT id, title, status FROM lucidia_conversations WHERE project_id = ? ORDER BY created_at')
+      .all(project_id);
+    res.json({ conversations: rows });
+  });
+
+  // Create conversation
+  lucidiaRouter.post('/conversations', (req, res) => {
+    const { project_id, title } = req.body || {};
+    if (!project_id || !title) return res.status(400).json({ error: 'missing_fields', code: 'missing_fields' });
+    const now = Math.floor(Date.now() / 1000);
+    const id = uuidv4();
+    db.prepare('INSERT INTO lucidia_conversations (id, project_id, title, created_at, updated_at) VALUES (?,?,?,?,?)').run(
+      id,
+      project_id,
+      String(title).slice(0, 200),
+      now,
+      now
+    );
+    res.json({ id });
+  });
+
+  // Get messages
+  lucidiaRouter.get('/conversations/:id/messages', (req, res) => {
+    const convoId = req.params.id;
+    const after = parseInt(req.query.after || '0', 10);
+    const rows = db
+      .prepare(
+        'SELECT id, agent_id, user_id, role, content, token_count, created_at FROM lucidia_messages WHERE conversation_id = ? AND created_at > ? ORDER BY created_at'
+      )
+      .all(convoId, after);
+    res.json({ messages: rows });
+  });
+
+  // Post message and get agent reply
+  lucidiaRouter.post('/conversations/:id/message', async (req, res) => {
+    const convoId = req.params.id;
+    const { content, agent_id } = req.body || {};
+    if (!content) return res.status(400).json({ error: 'missing_content', code: 'missing_content' });
+    const convo = db.prepare('SELECT project_id FROM lucidia_conversations WHERE id = ?').get(convoId);
+    if (!convo) return res.status(404).json({ error: 'not_found', code: 'not_found' });
+    const now = Math.floor(Date.now() / 1000);
+    const messageId = uuidv4();
+    const tokenUser = Math.ceil(String(content).length / 4);
+    db.prepare(
+      'INSERT INTO lucidia_messages (id, conversation_id, user_id, role, content, token_count, created_at) VALUES (?,?,?,?,?,?,?)'
+    ).run(messageId, convoId, req.session.userId, 'user', String(content).slice(0, 10000), tokenUser, now);
+    io.to(`lucidia:${convo.project_id}`).emit('lucidia:message:new', {
+      conversation_id: convoId,
+      message: { id: messageId, role: 'user', content: String(content) }
+    });
+
+    const history = db
+      .prepare('SELECT role, content FROM lucidia_messages WHERE conversation_id = ? ORDER BY created_at DESC LIMIT 50')
+      .all(convoId)
+      .reverse();
+    history.push({ role: 'user', content: String(content) });
+    const reply = await llmProvider.chat({ messages: history, agent: agent_id ? { id: agent_id } : null, tools: [] });
+    const agentMessageId = uuidv4();
+    db.prepare(
+      'INSERT INTO lucidia_messages (id, conversation_id, agent_id, role, content, token_count, created_at) VALUES (?,?,?,?,?,?,?)'
+    ).run(
+      agentMessageId,
+      convoId,
+      agent_id || null,
+      'agent',
+      reply.content,
+      reply.token_count || 0,
+      Math.floor(Date.now() / 1000)
+    );
+    io.to(`lucidia:${convo.project_id}`).emit('lucidia:message:new', {
+      conversation_id: convoId,
+      message: { id: agentMessageId, role: 'agent', content: reply.content }
+    });
+    res.json({ message_id: messageId, agent_message_id: agentMessageId });
+  });
+
+  app.use('/api/lucidia', lucidiaRouter);
+})();
+
 // LANDING
 // Minimal landing page + stats + admin CMS endpoints
 (function setupLanding() {
