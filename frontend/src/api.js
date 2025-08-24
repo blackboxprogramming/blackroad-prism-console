@@ -131,6 +131,9 @@ export async function searchRoadbook(term){
 export async function fetchRoadviewStreams(){
   const { data } = await axios.get(`${API_BASE}/api/roadview/list`)
   return data.streams
+export async function fetchManifesto(){
+  const { data } = await axios.get(`${API_BASE}/api/manifesto`)
+  return data.content
 }
 
 export { API_BASE }

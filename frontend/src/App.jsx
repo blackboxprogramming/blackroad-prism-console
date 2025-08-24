@@ -31,6 +31,7 @@ import Login from './components/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import RoadView from './pages/RoadView.jsx'
 import Orchestrator from './Orchestrator.jsx'
+import Manifesto from './components/Manifesto.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -136,6 +137,7 @@ export default function App(){
               <NavItem to="/integrations" icon={<Settings size={18} />} text="Integrations" />
               <NavItem to="/roadview" icon={<LayoutGrid size={18} />} text="RoadView" />
               <NavItem icon={<Rocket size={18} />} text="Orchestrator" to="/orchestrator" />
+              <NavItem icon={<Rocket size={18} />} text="Manifesto" href="/manifesto" />
             </nav>
           </aside>
 
@@ -149,6 +151,9 @@ export default function App(){
               {isRoadcoin && <RoadCoin onUpdate={(data)=>setWallet({ rc: data.balance })} />}
               {isCodex && <Codex socket={socket} />}
               {!isRoadcoin && !isCodex && (
+              {path === '/manifesto' ? (
+                <Manifesto />
+              ) : (
                 <>
                   <header className="flex items-center gap-8 border-b border-slate-800 mb-4">
                     <Tab onClick={()=>setTab('timeline')} active={tab==='timeline'}>Timeline</Tab>
@@ -260,6 +265,11 @@ function Dashboard({ tab, setTab, timeline, tasks, commits, onAction }){
       {tab==='tasks' && <Tasks items={tasks} />}
       {tab==='commits' && <Commits items={commits} />}
     </>
+  const Comp = href ? 'a' : 'div'
+  return (
+    <Comp href={href} className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-900 cursor-pointer">
+      {icon}<span>{text}</span>
+    </Comp>
   )
 }
 

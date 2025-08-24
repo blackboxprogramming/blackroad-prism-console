@@ -24,3 +24,27 @@
 .link {
   @apply text-slate-300 hover:text-white underline underline-offset-4;
 }
+
+.manifesto h1 {
+  @apply text-4xl font-bold mb-6;
+}
+.manifesto h2 {
+  @apply text-2xl font-semibold mt-8 mb-4;
+}
+.manifesto p {
+  @apply mb-4 leading-relaxed;
+}
+.manifesto ul {
+  @apply list-disc pl-6 mb-4;
+}
+.manifesto blockquote {
+  @apply mb-4 italic text-slate-300;
+  border-left: 4px solid var(--accent);
+  padding-left: 1rem;
+}
+.manifesto code {
+  background-color: #1e293b;
+  border-radius: 4px;
+  padding: 0 4px;
+  color: var(--accent-2);
+}
