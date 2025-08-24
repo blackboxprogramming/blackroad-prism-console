@@ -76,13 +76,20 @@ def load_whisper_model():
 
 audio_file = st.file_uploader("Upload your voice (mp3 or wav)", type=["mp3", "wav"])
 if audio_file is not None:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio:
+    suffix = os.path.splitext(audio_file.name)[1] or ".wav"
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_audio:
         temp_audio.write(audio_file.read())
         temp_audio_path = temp_audio.name
     model = load_whisper_model()
     result = model.transcribe(temp_audio_path)
     os.remove(temp_audio_path)
     os.unlink(temp_audio_path)
+
+    if "whisper_model" not in st.session_state:
+        st.session_state.whisper_model = whisper.load_model("base")
+    model = st.session_state.whisper_model
+    result = model.transcribe(temp_audio_path)
+    os.remove(temp_audio_path)
     user_input = result["text"]
     st.markdown(f"**You said:** {user_input}")
     try:
