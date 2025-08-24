@@ -79,3 +79,6 @@ node_modules/
 node_modules/
 services/*/node_modules/
 >>>>>>> origin/codex/add-calm-chatops-with-ollama-helpers
+# Rust build artifacts
+target/
+**/target/
