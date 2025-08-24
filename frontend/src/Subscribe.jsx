@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { me } from './api';
-import { fetchConfig, fetchStatus, startCheckout, openPortal } from './subscribeApi';
-
-const PLANS = [
-  { id: 'starter', name: 'Starter', price: { month: 0, year: 0 }, features: ['Community access', 'Limited features'] },
-  { id: 'pro', name: 'Pro', price: { month: 29, year: 290 }, features: ['Feature set for active builders'], popular: true },
-  { id: 'infinity', name: 'Infinity', price: { month: 99, year: 990 }, features: ['Full stack', 'Priority access', 'Advanced labs'] }
-];
+import {
+  fetchConfig,
+  fetchStatus,
+  startCheckout,
+  openPortal,
+  fetchPlans,
+} from './subscribeApi';
 
 export default function Subscribe(){
   const [user, setUser] = useState(null);
@@ -14,15 +14,17 @@ export default function Subscribe(){
   const [status, setStatus] = useState(null);
   const [interval, setInterval] = useState('month');
   const [coupon, setCoupon] = useState('');
+  const [plans, setPlans] = useState([]);
 
-  useEffect(()=>{ fetchConfig().then(setConfig); me().then(setUser).catch(()=>{}); },[]);
+  useEffect(()=>{ fetchConfig().then(setConfig); fetchPlans().then(setPlans); me().then(setUser).catch(()=>{}); },[]);
   useEffect(()=>{ if(user) fetchStatus().then(setStatus); },[user]);
 
   const inTest = config && config.testMode;
 
   function handleCheckout(planId){
     if(inTest) return;
-    startCheckout(planId, interval, coupon || undefined).then(d=>{ if(d.url) window.location = d.url; });
+    startCheckout(planId, interval === 'month' ? 'monthly' : 'yearly', coupon || undefined)
+      .then(d=>{ if(d.checkout_url) window.location = d.checkout_url; });
   }
 
   function manageBilling(){
@@ -53,7 +55,7 @@ export default function Subscribe(){
       <IntervalToggle interval={interval} setInterval={setInterval} />
 
       <div className="grid md:grid-cols-3 gap-6">
-        {PLANS.map(p => (
+        {plans.map(p => (
           <PlanCard key={p.id} plan={p} interval={interval} onSelect={()=>handleCheckout(p.id)} disabled={!user || inTest} />
         ))}
       </div>
@@ -80,16 +82,30 @@ function IntervalToggle({ interval, setInterval }){
 }
 
 function PlanCard({ plan, interval, onSelect, disabled }){
-  const price = plan.price[interval];
+  const priceCents =
+    interval === 'month' ? plan.monthly_price_cents : plan.yearly_price_cents;
+  const price = (priceCents / 100).toFixed(2);
+  const features = plan.features || [];
   return (
-    <div className="border p-6 rounded-lg bg-slate-900 flex flex-col" style={{borderColor:'#0096FF'}}>
-      {plan.popular && <span className="text-xs mb-2" style={{color:'#FF4FD8'}}>Most Popular</span>}
+    <div
+      className="border p-6 rounded-lg bg-slate-900 flex flex-col"
+      style={{ borderColor: '#0096FF' }}
+    >
       <h2 className="text-xl mb-2">{plan.name}</h2>
-      <div className="text-2xl mb-4">${price}/{interval==='month'?'mo':'yr'}</div>
+      <div className="text-2xl mb-4">${price}/{interval === 'month' ? 'mo' : 'yr'}</div>
       <ul className="text-sm mb-4 space-y-1 flex-1">
-        {plan.features.map(f=> <li key={f}>• {f}</li>)}
+        {features.map((f) => (
+          <li key={f}>• {f}</li>
+        ))}
       </ul>
-      <button disabled={disabled} className="px-4 py-2 rounded mt-auto" style={{background:'#FF4FD8',color:'#000',opacity:disabled?0.5:1}} onClick={onSelect}>Subscribe</button>
+      <button
+        disabled={disabled}
+        className="px-4 py-2 rounded mt-auto"
+        style={{ background: '#FF4FD8', color: '#000', opacity: disabled ? 0.5 : 1 }}
+        onClick={onSelect}
+      >
+        Subscribe
+      </button>
     </div>
   );
 }
@@ -103,12 +119,18 @@ function PromoInput({ coupon, setCoupon }){
 }
 
 function StatusPanel({ status, manageBilling }){
-  const end = status.currentPeriodEnd ? new Date(status.currentPeriodEnd * 1000).toLocaleDateString() : '';
+  const end = status.period_end ? new Date(status.period_end * 1000).toLocaleDateString() : '';
   return (
     <div className="mb-6 p-4 border rounded" style={{borderColor:'#FDBA2D'}}>
-      <div className="mb-2">Current Plan: {status.planId} ({status.status})</div>
+      <div className="mb-2">Current Plan: {status.plan_id} ({status.status})</div>
       {end && <div className="mb-2">Renews on {end}</div>}
-      <button className="px-3 py-2 rounded" style={{background:'#0096FF',color:'#000'}} onClick={manageBilling}>Manage billing</button>
+      <button
+        className="px-3 py-2 rounded"
+        style={{ background: '#0096FF', color: '#000' }}
+        onClick={manageBilling}
+      >
+        Manage billing
+      </button>
     </div>
   );
 }
