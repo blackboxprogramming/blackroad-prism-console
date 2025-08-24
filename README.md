@@ -347,3 +347,18 @@ It honours environment variables like `DROPLET_HOST`,
 `WORKING_COPY_PATH`, and `SLACK_WEBHOOK` for remote access and
 status notifications.
 
+- **/geodesic**: Compute Fubini–Study distance `d_FS = arccos(|⟨ψ|φ⟩|)` and sample the **CP² geodesic** points between |ψ₀⟩ and |ψ₁⟩.
+
+## Codex Sync Helper
+
+Use `scripts/blackroad_sync.py` for chat-driven CI/CD tasks. It can commit and
+push changes, refresh a working copy, rebase branches, or stub out connector
+sync jobs.
+
+Examples:
+
+```bash
+scripts/blackroad_sync.py push -m "feat: update site"
+scripts/blackroad_sync.py refresh
+scripts/blackroad_sync.py sync-connectors
+```
