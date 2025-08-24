@@ -1,7 +1,7 @@
 // FILE: /srv/blackroad-api/src/auth.js
 'use strict';
 
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('./db');
 const { JWT_SECRET } = require('./config');
@@ -53,6 +53,8 @@ function requireAdmin(req, res, next) {
     }
     next();
   });
+}
+
 function requireRole(...roles) {
   return function (req, res, next) {
     if (!req.session || !req.session.userId) {
