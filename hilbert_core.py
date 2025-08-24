@@ -44,20 +44,46 @@ def pure_state(psi: np.ndarray) -> np.ndarray:
 def mixed_state(states, probs=None) -> np.ndarray:
     """Create a mixed state from state vectors.
 
-    The input vectors are orthonormalized as a group. If probability weights
-    are not provided or their length does not match the number of
-    orthonormalized states, a uniform distribution is used.
+    Parameters
+    ----------
+    states : Iterable[np.ndarray]
+        State vectors that will be orthonormalized as a group.
+    probs : Iterable[float] | None
+        Probability weights for the states. If omitted, a uniform
+        distribution is assumed.
+
+    Returns
+    -------
+    np.ndarray
+        Density matrix representing the mixed state.
+
+    Raises
+    ------
+    ValueError
+        If no states are provided, if the probabilities do not match the
+        number of states, or if a negative/zero-sum probability is supplied.
     """
+    states = list(states)
+    if not states:
+        raise ValueError("At least one state vector is required")
+
     states_arr = np.column_stack(states)
     ortho = orthonormalize(states_arr)
     states = [ortho[:, i] for i in range(ortho.shape[1])]
+
     if probs is None:
         probs = np.ones(len(states), dtype=float)
     else:
         probs = np.asarray(probs, dtype=float)
         if probs.size != len(states):
-            probs = np.ones(len(states), dtype=float)
-    probs = probs / probs.sum()
+            raise ValueError("Length of probs must match number of states")
+        if np.any(probs < 0):
+            raise ValueError("Probabilities must be non-negative")
+        total = probs.sum()
+        if total <= 0:
+            raise ValueError("Sum of probabilities must be positive")
+        probs = probs / total
+
     rho = sum(p * np.outer(s, s.conj()) for s, p in zip(states, probs))
     return (rho + rho.conj().T) / 2
 
