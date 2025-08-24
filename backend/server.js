@@ -15,7 +15,7 @@ const { Server } = require('socket.io');
 const rateLimit = require('express-rate-limit');
 const { signToken, authMiddleware, adminMiddleware, nowISO } = require('./utils');
 const { authMiddleware, requireRole, signup, login, logout, JWT_SECRET } = require('./auth');
-const { store, addTimeline } = require('./data');
+const { store, addTimeline, addLog } = require('./data');
 const { nowISO } = require('./utils');
 const { exec } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
@@ -150,8 +150,17 @@ app.delete('/api/projects/:id', authMiddleware, requireRole('admin'), (req, res)
   res.json({ ok: true });
 });
 
-app.get('/api/agents', authMiddleware, (req, res)=>{
-  res.json({ agents: store.agents });
+app.get('/api/agents', authMiddleware, (req, res) => {
+  const agents = store.agents
+    .filter(a => a.location === 'cloud')
+    .map(({ id, location, capabilities, endpoint, ws }) => ({
+      name: id,
+      location,
+      capabilities,
+      endpoint,
+      ws
+    }));
+  res.json({ agents });
 });
 
 // Orchestrator APIs
@@ -415,6 +424,20 @@ setInterval(()=>{
   });
   io.emit('orchestrator:metrics', store.agents.map(a => ({ id: a.id, cpu: a.cpu, memory: a.memory })));
 }, 3000);
+
+io.of(/^\/ws\/agents\/\w+$/).on('connection', socket => {
+  const agentId = socket.nsp.name.split('/').pop();
+  socket.on('message', msg => {
+    io.emit(`agent:${agentId}:message`, msg);
+  });
+  socket.on('disconnect', () => {
+    const agent = store.agents.find(a => a.id === agentId);
+    if (agent) {
+      agent.status = 'degraded';
+      addLog('agents', `${agentId} disconnected @ ${nowISO()}`);
+    }
+  });
+});
 
 io.on('connection', (socket)=>{
   socket.emit('system:update', { cpu, mem, gpu, net, at: nowISO() });

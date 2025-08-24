@@ -81,6 +81,39 @@ const store = {
     { id: 'phi', name: 'Phi', status: 'idle', cpu: 0, memory: 0, location: 'local' },
     { id: 'gpt', name: 'GPT', status: 'idle', cpu: 0, memory: 0, location: 'cloud' },
     { id: 'mistral', name: 'Mistral', status: 'idle', cpu: 0, memory: 0, location: 'cloud' }
+    {
+      id: 'phi',
+      name: 'Phi',
+      status: 'idle',
+      cpu: 0,
+      memory: 0,
+      location: 'cloud',
+      capabilities: ['chat'],
+      endpoint: '/api/agents/phi',
+      ws: '/ws/agents/phi'
+    },
+    {
+      id: 'gpt',
+      name: 'GPT',
+      status: 'idle',
+      cpu: 0,
+      memory: 0,
+      location: 'cloud',
+      capabilities: ['chat', 'nlp'],
+      endpoint: '/api/agents/gpt',
+      ws: '/ws/agents/gpt'
+    },
+    {
+      id: 'mistral',
+      name: 'Mistral',
+      status: 'idle',
+      cpu: 0,
+      memory: 0,
+      location: 'cloud',
+      capabilities: ['chat'],
+      endpoint: '/api/agents/mistral',
+      ws: '/ws/agents/mistral'
+    }
   ],
   contradictions: { issues: 2 },
   sessionNotes: "",
