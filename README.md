@@ -164,6 +164,20 @@ python scripts/blackroad_pipeline.py "Push latest to BlackRoad.io"
 The phrases recognised by the controller can be listed by invoking the
 script with an unknown command.
 ## Sync & Deploy
+## Codex Sync/Deploy
+
+An experimental control surface lives at `codex/tools/blackroad_pipeline.py`.
+It accepts chat-style commands and orchestrates a stubbed pipeline spanning
+GitHub commits, connector sync, Working Copy refresh, and droplet deployment.
+
+```bash
+python codex/tools/blackroad_pipeline.py "Push latest to BlackRoad.io" -m "chore: sync"
+```
+
+The script only logs each step today; extend the placeholders with real
+connectors, OAuth, and deployment hooks to enable end-to-end automation.
+
+Additional operational docs live in the [`docs/`](docs) folder.
 
 Use the `bin/blackroad-sync` script to push code and refresh the live site end to end.
 
