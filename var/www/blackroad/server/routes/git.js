@@ -1,6 +1,6 @@
-import { spawn } from 'node:child_process';
-import fs from 'node:fs/promises';
-import path from 'node:path';
+const { spawn } = require('node:child_process');
+const fs = require('node:fs/promises');
+const path = require('node:path');
 
 const repoRoot = process.cwd();
 
@@ -40,7 +40,7 @@ async function applyPatch(patch) {
   return 'ok';
 }
 
-export async function applyPatches(req, res) {
+async function applyPatches(req, res) {
   const { patches } = req.body || {};
   if (!Array.isArray(patches)) {
     return res.status(400).json({ error: 'patches[] required' });
@@ -55,4 +55,8 @@ export async function applyPatches(req, res) {
   }
   res.json({ applied });
 }
+
+module.exports = {
+  applyPatches,
+};
 
