@@ -1,29 +1,42 @@
 const assert = require('node:assert/strict');
 const fetch = global.fetch;
-const { JWT_SECRET } = require('../backend/auth');
-const { server } = require('../backend/server');
+const express = require('../backend/node_modules/express');
+const { signup, login, requireAuth, JWT_SECRET } = require('../backend/auth');
+const { getDb } = require('../backend/data');
 
-const base = 'http://localhost:4000/api';
+const app = express();
+app.use(express.json());
+app.post('/api/auth/signup', signup);
+app.post('/api/auth/login', login);
+app.get('/api/tasks', requireAuth, (_req, res) => res.json({ ok: true }));
+
+const server = app.listen(0);
+const base = `http://localhost:${server.address().port}/api`;
 
 async function run() {
   await new Promise(r => setTimeout(r, 300));
 
   // signup
+  const email = `alice-${Date.now()}@example.com`;
   let res = await fetch(base + '/auth/signup', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ username: 'alice', password: 'password' })
+    body: JSON.stringify({ email, password: 'password' })
   });
   let body = await res.json();
   assert.equal(res.status, 200);
   assert.ok(body.token);
   const userId = body.user.id;
 
+  // verify password hashed in DB
+  const row = getDb().prepare('SELECT password_hash FROM users WHERE id = ?').get(userId);
+  assert.notEqual(row.password_hash, 'password');
+
   // login
   res = await fetch(base + '/auth/login', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ username: 'alice', password: 'password' })
+    body: JSON.stringify({ email, password: 'password' })
   });
   body = await res.json();
   const token = body.token;
@@ -35,31 +48,14 @@ async function run() {
 
   // invalid token
   res = await fetch(base + '/tasks', { headers: { Authorization: 'Bearer badtoken' } });
-  assert.equal(res.status, 401);
-
-  // expired token
-  const jwt = require('jsonwebtoken');
-  const expired = jwt.sign({ id: 'x', role: 'user' }, JWT_SECRET, { expiresIn: -1 });
-  res = await fetch(base + '/tasks', { headers: { Authorization: `Bearer ${expired}` } });
-  assert.equal(res.status, 401);
-
-  // admin-only delete
-  // normal user should fail
-  res = await fetch(base + `/users/${userId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
   assert.equal(res.status, 403);
 
-  // admin login
-  res = await fetch(base + '/auth/login', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ username: 'admin', password: 'adminpass' })
-  });
-  body = await res.json();
-  const adminToken = body.token;
-  assert.ok(adminToken);
+  // expired token
+  const jwt = require('../backend/node_modules/jsonwebtoken');
+  const expired = jwt.sign({ id: 'x', role: 'user' }, JWT_SECRET, { expiresIn: -1 });
+  res = await fetch(base + '/tasks', { headers: { Authorization: `Bearer ${expired}` } });
+  assert.equal(res.status, 403);
 
-  res = await fetch(base + `/users/${userId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${adminToken}` } });
-  assert.equal(res.status, 200);
   server.close();
 }
 

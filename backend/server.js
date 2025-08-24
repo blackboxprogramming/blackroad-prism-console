@@ -13,10 +13,9 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 const rateLimit = require('express-rate-limit');
-const { signToken, authMiddleware, adminMiddleware, nowISO } = require('./utils');
+const { signToken, adminMiddleware, nowISO } = require('./utils');
 const { authMiddleware, requireRole, signup, login, logout, JWT_SECRET } = require('./auth');
 const { store, addTimeline, addLog } = require('./data');
-const { nowISO } = require('./utils');
 const { exec } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
 const { logAudit, getAuditLogs } = require('./audit');
@@ -54,10 +53,7 @@ app.use((err, req, res, next) => {
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: process.env.CORS_ORIGIN?.split(',') || '*' } });
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET is required');
-}
+// Using JWT_SECRET from auth module
 const ALLOW_SHELL = (process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
 
 app.use('/api/', rateLimit({ windowMs: 60_000, max: 100 }));

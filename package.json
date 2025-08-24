@@ -20,13 +20,14 @@
     "test": "node tests/smoke.test.mjs",
     "frontend:dev": "npm --prefix sites/blackroad run dev",
     "frontend:build": "npm --prefix sites/blackroad run build",
-    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
+    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true",
+    "test-auth": "node tests/test_auth.js"
   },
   "engines": {
     "node": ">=18.17"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "bcrypt": "^5.1.1",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
