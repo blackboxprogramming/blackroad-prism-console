@@ -31,6 +31,11 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 client = OpenAI(api_key=api_key) if api_key else None
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# Cache the Whisper model so it's loaded only once
+@st.cache_resource
+def load_whisper_model():
+    return whisper.load_model("base")
+
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")
 
@@ -80,6 +85,16 @@ if audio_file is not None:
     os.unlink(temp_audio_path)
     user_input = result["text"]
     st.markdown(f"**You said:** {user_input}")
+    try:
+        model = load_whisper_model()
+        result = model.transcribe(temp_audio_path)
+        user_input = result["text"]
+        st.markdown(f"**You said:** {user_input}")
+    finally:
+        try:
+            os.remove(temp_audio_path)
+        except OSError:
+            pass
 else:
     user_input = st.text_input("Or type here")
 
