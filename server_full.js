@@ -703,7 +703,9 @@ const io = setupSockets(server);
       rc = db.prepare('SELECT IFNULL(SUM(amount),0) AS s FROM transactions WHERE created_at >= datetime("now", "-1 day")').get().s;
     } catch {}
     try {
-      contradictions = db.prepare('SELECT COUNT(*) AS c FROM contradictions WHERE created_at >= datetime("now", "-1 day")').get().c;
+      contradictions = db
+        .prepare('SELECT COUNT(*) AS c FROM contradictions WHERE timestamp >= datetime("now", "-1 day")')
+        .get().c;
     } catch {}
     try {
       latency = db.prepare('SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY latency_ms) AS p50 FROM api_metrics WHERE path = "/api/llm/chat" AND ts >= strftime("%s", "now") - 86400').get().p50 || 0;

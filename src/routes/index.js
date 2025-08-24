@@ -14,6 +14,7 @@ router.use('/projects', require('./projects'));
 router.use('/', require('./tasks'));
 router.use('/timeline', require('./timeline'));
 router.use('/contradictions', require('./contradictions'));
+router.use('/logs', require('./logs'));
 router.use('/commits', require('./commits'));
 router.use('/metrics', require('./metrics'));
 router.use('/llm', require('./llm'));

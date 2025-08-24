@@ -53,6 +53,19 @@ function requireAdmin(req, res, next) {
     }
     next();
   });
+function requireRole(...roles) {
+  return function (req, res, next) {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ ok: false, error: 'auth_required' });
+    }
+    const user = db
+      .prepare('SELECT id, role FROM users WHERE id = ?')
+      .get(req.session.userId);
+    if (!user || !roles.includes(user.role)) {
+      return res.status(403).json({ ok: false, error: 'forbidden' });
+    }
+    next();
+  };
 }
 
 function getUserById(id) {
@@ -64,5 +77,6 @@ module.exports = {
   verifyPassword,
   requireAuth,
   requireAdmin,
+  requireRole,
   getUserById
 };
