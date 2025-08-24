@@ -4,6 +4,7 @@
 const express = require('express');
 const { hashPassword, verifyPassword, requireAuth } = require('../auth');
 const db = require('../db');
+const { NODE_ENV } = require('../config');
 
 const router = express.Router();
 
@@ -44,6 +45,11 @@ router.post('/login', (req, res) => {
 
 router.post('/logout', requireAuth, (req, res) => {
   req.session = null;
+  res.clearCookie('brsid', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: NODE_ENV === 'production'
+  });
   res.json({ ok: true });
 });
 
