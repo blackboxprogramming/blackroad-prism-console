@@ -202,3 +202,32 @@ into real connectors and infrastructure.
 - **Labeler/Stale/Lock**: repo hygiene.
 - **Auto-merge**: merges labeled PRs when checks pass.
 - **CodeQL/Snyk/Scorecard**: security analysis.
+## Deployment
+
+Run the scaffolded end-to-end sync script to push local changes and deploy them
+to the live environment:
+
+```bash
+python scripts/blackroad_sync.py
+```
+
+The script pushes to GitHub, fans out to connector webhooks, refreshes an iOS
+Working Copy checkout and issues a remote deploy on the droplet when configured
+via environment variables.
+
+Additional operational docs live in the [`docs/`](docs) folder.
+
+## Codex Pipeline
+
+This repo ships with a chat-first deployment helper at
+`codex/tools/blackroad_pipeline.py`. The script accepts plain‑English
+commands and orchestrates git pushes, connector stubs and droplet
+deploys in one flow:
+
+```bash
+python3 codex/tools/blackroad_pipeline.py "Push latest to BlackRoad.io"
+python3 codex/tools/blackroad_pipeline.py "Refresh working copy and redeploy"
+```
+
+It relies on environment variables for remote hosts and tokens
+(`GIT_REMOTE`, `DROPLET_HOST`, `SLACK_WEBHOOK`).
