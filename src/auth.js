@@ -2,7 +2,9 @@
 'use strict';
 
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const db = require('./db');
+const { JWT_SECRET } = require('./config');
 
 function hashPassword(password) {
   const salt = bcrypt.genSaltSync(10);
@@ -14,21 +16,43 @@ function verifyPassword(password, hash) {
 }
 
 function requireAuth(req, res, next) {
-  if (!req.session || !req.session.userId) {
+  let userId = req.session && req.session.userId;
+
+  if (!userId) {
+    const auth = req.headers.authorization;
+    if (auth && auth.startsWith('Bearer ')) {
+      const token = auth.slice(7);
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        userId = decoded.id;
+      } catch {}
+    }
+  }
+
+  if (!userId) {
     return res.status(401).json({ ok: false, error: 'auth_required' });
   }
+
+  const user = db
+    .prepare('SELECT id, role FROM users WHERE id = ?')
+    .get(userId);
+  if (!user) {
+    return res.status(401).json({ ok: false, error: 'auth_required' });
+  }
+
+  req.session = req.session || {};
+  req.session.userId = user.id;
+  req.user = user;
   next();
 }
 
 function requireAdmin(req, res, next) {
-  if (!req.session || !req.session.userId) {
-    return res.status(401).json({ ok: false, error: 'auth_required' });
-  }
-  const user = db.prepare('SELECT id, role FROM users WHERE id = ?').get(req.session.userId);
-  if (!user || user.role !== 'admin') {
-    return res.status(403).json({ ok: false, error: 'admin_required' });
-  }
-  next();
+  requireAuth(req, res, () => {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ ok: false, error: 'admin_required' });
+    }
+    next();
+  });
 }
 
 function getUserById(id) {
