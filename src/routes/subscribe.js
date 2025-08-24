@@ -40,6 +40,22 @@ router.get('/subscribe/status', requireAuth, (req, res) => {
     .prepare('SELECT * FROM subscriptions WHERE user_id = ? ORDER BY created_at DESC LIMIT 1')
     .get(req.session.userId);
   if (!sub) return res.json({ status: 'none' });
+
+  const invoices = db
+    .prepare(
+      'SELECT id, amount_cents, currency, status, created_at, provider_ref FROM payments WHERE user_id = ? ORDER BY created_at DESC LIMIT 10'
+    )
+    .all(req.session.userId)
+    .map((p) => ({
+      id: p.id,
+      total: p.amount_cents,
+      currency: p.currency,
+      status: p.status,
+      hosted_invoice_url: null,
+      created: p.created_at,
+      provider_ref: p.provider_ref,
+    }));
+
   res.json({
     status: sub.status,
     plan_id: sub.plan_id,
@@ -48,6 +64,7 @@ router.get('/subscribe/status', requireAuth, (req, res) => {
     renews: sub.renews,
     payment_method: sub.external_provider,
     next_invoice_estimate_cents: sub.price_cents,
+    invoices,
   });
 });
 
