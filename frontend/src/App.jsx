@@ -26,7 +26,7 @@ import Subscribe from './Subscribe.jsx'
 import io from 'socket.io-client'
 import { Routes, Route, NavLink } from 'react-router-dom'
 import { API_BASE, setToken, login, me, fetchTimeline, fetchTasks, fetchCommits, fetchAgents, fetchWallet, fetchContradictions, getNotes, setNotes, action } from './api'
-import { Activity, Brain, Database, LayoutGrid, Settings, ShieldCheck, SquareDashedMousePointer, HeartPulse } from 'lucide-react'
+import { Activity, Brain, Database, LayoutGrid, Settings, ShieldCheck, SquareDashedMousePointer, HeartPulse, Sparkles } from 'lucide-react'
 import Login from './components/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import RoadView from './pages/RoadView.jsx'
@@ -138,6 +138,7 @@ export default function App(){
               <NavItem to="/integrations" icon={<Settings size={18} />} text="Integrations" />
               <NavItem to="/roadview" icon={<LayoutGrid size={18} />} text="RoadView" />
               <NavItem to="/autoheal" icon={<HeartPulse size={18} />} text="Auto-Heal" />
+              <NavItem to="/novelty" icon={<Sparkles size={18} />} text="Novelty Dashboard" />
               <NavItem icon={<Rocket size={18} />} text="Orchestrator" to="/orchestrator" />
               <NavItem icon={<Rocket size={18} />} text="Manifesto" href="/manifesto" />
             </nav>
