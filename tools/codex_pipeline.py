@@ -24,6 +24,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable
 import urllib.request
+import logging
+import os
+import subprocess
+import time
+from typing import Any, Dict
+
+import requests
+from dotenv import load_dotenv
 
 ERROR_LOG = Path("pipeline_errors.log")
 BACKUP_ROOT = Path("/var/backups/blackroad")
@@ -230,6 +238,43 @@ def validate_services() -> dict[str, str]:
     summary["timestamp"] = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
     print(json.dumps(summary))
     return summary
+def call_connectors(action: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Call BlackRoad's connectors API with retry and logging."""
+    load_dotenv()
+    token = os.getenv("CONNECTOR_KEY")
+    if not token:
+        raise RuntimeError("CONNECTOR_KEY missing from environment")
+
+    logger = logging.getLogger("pipeline_connectors")
+    if not logger.handlers:
+        handler = logging.FileHandler("pipeline_connectors.log")
+        formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+
+    url = f"https://blackroad.io/connectors/{action}"
+    headers = {"Authorization": f"Bearer {token}"}
+
+    for attempt in range(3):
+        try:
+            logger.info("POST %s payload=%s", url, payload)
+            resp = requests.post(url, headers=headers, json=payload, timeout=30)
+            resp.raise_for_status()
+            data = resp.json()
+            logger.info("response=%s", data)
+            if data.get("ok") is True:
+                return data
+            logger.error("connector returned non-ok response: %s", data)
+        except requests.RequestException as exc:
+            logger.error("connector call failed: %s", exc)
+        time.sleep(2**attempt)
+    raise RuntimeError("connector call failed after retries")
+
+
+def sync_connectors(action: str, payload: Dict[str, Any]) -> None:
+    """Sync external connectors via Prism API."""
+    call_connectors(action, payload)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -248,7 +293,9 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("push", help="Push latest to BlackRoad.io")
     sub.add_parser("refresh", help="Refresh working copy and redeploy")
     sub.add_parser("rebase", help="Rebase branch and update site")
-    sub.add_parser("sync", help="Sync Salesforce → Airtable → Droplet")
+    sync = sub.add_parser("sync", help="Sync Salesforce → Airtable → Droplet")
+    sync.add_argument("action", choices=["paste", "append", "replace", "restart", "build"])
+    sync.add_argument("payload", help="JSON payload for the action")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -275,6 +322,8 @@ def main(argv: list[str] | None = None) -> int:
         redeploy_droplet(dry_run=args.dry_run)
     elif args.command == "sync":
         sync_connectors(dry_run=args.dry_run)
+        payload = json.loads(args.payload)
+        sync_connectors(args.action, payload)
     else:
         parser.print_help()
         return exit_code
