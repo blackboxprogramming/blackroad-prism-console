@@ -31,6 +31,7 @@ import Login from './components/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import RoadView from './pages/RoadView.jsx'
 import Orchestrator from './Orchestrator.jsx'
+import Resilience from './pages/Resilience.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -136,6 +137,7 @@ export default function App(){
               <NavItem to="/integrations" icon={<Settings size={18} />} text="Integrations" />
               <NavItem to="/roadview" icon={<LayoutGrid size={18} />} text="RoadView" />
               <NavItem icon={<Rocket size={18} />} text="Orchestrator" to="/orchestrator" />
+              <NavItem to="/resilience" icon={<ShieldCheck size={18} />} text="Resilience" />
             </nav>
           </aside>
 
@@ -205,6 +207,7 @@ export default function App(){
             <Routes>
               <Route path="/" element={<Dashboard tab={tab} setTab={setTab} timeline={timeline} tasks={tasks} commits={commits} onAction={onAction} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
               <Route path="/roadview" element={<RoadView agents={agents} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
+              <Route path="/resilience" element={<Resilience />} />
             </Routes>
           </main>
         </>

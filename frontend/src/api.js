@@ -83,54 +83,89 @@ export async function fetchGuardianAlerts(){
   return data.alerts
 }
 
-export async function resolveGuardianAlert(id, status='resolved'){
+export async function resolveGuardianAlert(id, status = 'resolved') {
   const { data } = await axios.post(`${API_BASE}/api/guardian/alerts/${id}/resolve`, { status })
   return data.alert
-export async function fetchDashboardSystem(){
+}
+
+export async function fetchDashboardSystem() {
   const { data } = await axios.get(`${API_BASE}/api/dashboard/system`)
   return data
 }
 
-export async function fetchDashboardFeed(){
+export async function fetchDashboardFeed() {
   const { data } = await axios.get(`${API_BASE}/api/dashboard/feed`)
   return data.events
 }
 
-export async function fetchProfile(){
+export async function fetchProfile() {
   const { data } = await axios.get(`${API_BASE}/api/you/profile`)
   return data
-export async function claudeChat(prompt){
+}
+
+export async function claudeChat(prompt) {
   const { data } = await axios.post(`${API_BASE}/api/claude/chat`, { prompt })
   return data
 }
 
-export async function fetchClaudeHistory(){
+export async function fetchClaudeHistory() {
   const { data } = await axios.get(`${API_BASE}/api/claude/history`)
   return data.history
-export async function runCodex(prompt){
+}
+
+export async function runCodex(prompt) {
   const { data } = await axios.post(`${API_BASE}/api/codex/run`, { prompt })
   return data
 }
 
-export async function fetchCodexHistory(){
+export async function fetchCodexHistory() {
   const { data } = await axios.get(`${API_BASE}/api/codex/history`)
   return data.runs
-export async function fetchRoadbookChapters(){
+}
+
+export async function fetchRoadbookChapters() {
   const { data } = await axios.get(`${API_BASE}/api/roadbook/chapters`)
   return data.chapters
 }
 
-export async function fetchRoadbookChapter(id){
+export async function fetchRoadbookChapter(id) {
   const { data } = await axios.get(`${API_BASE}/api/roadbook/chapter/${id}`)
   return data.chapter
 }
 
-export async function searchRoadbook(term){
+export async function searchRoadbook(term) {
   const { data } = await axios.get(`${API_BASE}/api/roadbook/search`, { params: { q: term } })
   return data.results
-export async function fetchRoadviewStreams(){
+}
+
+export async function fetchRoadviewStreams() {
   const { data } = await axios.get(`${API_BASE}/api/roadview/list`)
   return data.streams
+}
+
+export async function fetchSnapshots() {
+  const { data } = await axios.get(`${API_BASE}/api/snapshots`)
+  return data.snapshots
+}
+
+export async function createSnapshot() {
+  const { data } = await axios.post(`${API_BASE}/api/snapshots`)
+  return data.snapshot
+}
+
+export async function rollbackSnapshot(id) {
+  const { data } = await axios.post(`${API_BASE}/api/rollback/${id}`)
+  return data
+}
+
+export async function fetchSnapshotLogs() {
+  const { data } = await axios.get(`${API_BASE}/api/snapshots/logs`)
+  return data.logs
+}
+
+export async function fetchRollbackLogs() {
+  const { data } = await axios.get(`${API_BASE}/api/rollback/logs`)
+  return data.logs
 }
 
 export { API_BASE }
