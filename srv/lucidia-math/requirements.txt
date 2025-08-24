@@ -1,0 +1,7 @@
+numpy
+sympy
+matplotlib
+networkx
+flask
+flask-socketio
+gunicorn

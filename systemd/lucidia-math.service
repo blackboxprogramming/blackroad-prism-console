@@ -1,0 +1,12 @@
+[Unit]
+Description=Lucidia Infinity Math Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/lucidia-math
+ExecStart=/srv/lucidia-math/venv/bin/gunicorn -w 4 -b 127.0.0.1:8500 ui:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
