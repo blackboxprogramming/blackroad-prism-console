@@ -7,8 +7,8 @@ Wants=network-online.target
 Type=simple
 Environment=NODE_ENV=production
 Environment=PORT=4000
-WorkingDirectory=/opt/blackroad/api
-ExecStart=/usr/bin/node server.mjs
+WorkingDirectory=/srv/blackroad-api
+ExecStart=/usr/bin/node server.js
 Restart=always
 RestartSec=3
 
