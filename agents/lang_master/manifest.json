@@ -1,0 +1,6 @@
+{
+  "name": "lang_master",
+  "version": "1.0.0",
+  "description": "lang_master elite coding agent",
+  "capabilities": ["ping", "analyze", "codegen"]
+}

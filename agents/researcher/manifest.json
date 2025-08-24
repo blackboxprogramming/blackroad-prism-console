@@ -1,0 +1,6 @@
+{
+  "name": "researcher",
+  "version": "1.0.0",
+  "description": "researcher elite coding agent",
+  "capabilities": ["ping", "analyze", "codegen"]
+}
