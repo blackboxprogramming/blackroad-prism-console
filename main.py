@@ -49,6 +49,13 @@ if not _api_key:
 else:
     client = OpenAI(api_key=_api_key)
 
+@st.cache_resource
+def get_whisper_model():
+    """Load and cache the Whisper model to avoid reloading on each request."""
+    return whisper.load_model("base")
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")
 
@@ -117,6 +124,10 @@ def _transcribe_audio(uploaded_file: st.runtime.uploaded_file_manager.UploadedFi
     model = st.session_state.whisper_model
     result = model.transcribe(temp_audio_path)
     os.remove(temp_audio_path)
+
+    model = get_whisper_model()
+    result = model.transcribe(temp_audio_path)
+    os.unlink(temp_audio_path)
     user_input = result["text"]
     return result["text"]
 
@@ -217,3 +228,4 @@ st.image(
     "72BF9767-A2EE-4CB6-93F4-4D738108BC4B.png",
     caption="Live Console Interface",
 )
+st.image("72BF9767-A2EE-4CB6-93F4-4D738108BC4B.png", caption="Live Console Interface")
