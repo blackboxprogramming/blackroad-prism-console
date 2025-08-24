@@ -117,6 +117,7 @@ export default function App(){
               <NavItem icon={<Cpu size={18} />} text="Claude" href="/claude" />
               <NavItem icon={<Cpu size={18} />} text="Codex" href="/codex" />
               <NavItem icon={<Wallet size={18} />} text="RoadCoin" href="/roadcoin" />
+              <NavItem icon={<Rocket size={18} />} text="Subscribe" href="/subscribe" />
               <NavItem icon={<BookOpen size={18} />} text="Roadbook" to="/roadbook" />
             </nav>
 
