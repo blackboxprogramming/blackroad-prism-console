@@ -12,6 +12,8 @@ const morgan = require('morgan');
 const cookieSession = require('cookie-session');
 const rateLimit = require('express-rate-limit');
 
+// Allow requiring .ts files as plain JS for lucidia brain modules
+require.extensions['.ts'] = require.extensions['.js'];
 const { PORT, NODE_ENV, ALLOWED_ORIGIN, LOG_DIR, SESSION_SECRET } = require('./src/config');
 const subscribe = require('./src/routes/subscribe');
 
@@ -77,6 +79,11 @@ const db = require('./src/db');
 // Routes
 const apiRouter = require('./src/routes');
 app.use('/api', apiRouter);
+
+// Lucidia Brain routes
+if (process.env.ENABLE_LUCIDIA_BRAIN !== '0') {
+  app.use('/api/lucidia/brain', require('./routes/lucidia-brain'));
+}
 
 // Root
 app.get('/', (req, res) => {
