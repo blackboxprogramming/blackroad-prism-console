@@ -96,6 +96,21 @@ The script also understands:
 
 It pulls from GitHub, triggers connector webhooks, updates a Working Copy checkout, and
 executes a remote refresh command on the droplet.
+### BlackRoad Sync CLI
+`codex/tools/blackroad_sync.py` scaffolds a chat-friendly pipeline that mirrors
+commands like "Push latest to BlackRoad.io" or "Refresh working copy and
+redeploy".  Each sub-command currently logs the intended action:
+
+```bash
+python codex/tools/blackroad_sync.py push
+python codex/tools/blackroad_sync.py refresh
+python codex/tools/blackroad_sync.py rebase
+python codex/tools/blackroad_sync.py sync
+```
+
+Extend the script with real webhooks, Slack posts, or droplet deployments as
+needed.
+
 ---
 
 ## Codex Deploy Flow
