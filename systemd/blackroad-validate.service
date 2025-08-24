@@ -1,0 +1,11 @@
+[Unit]
+Description=BlackRoad Validation Agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/blackroad-validate.sh
+
+[Install]
+WantedBy=multi-user.target
