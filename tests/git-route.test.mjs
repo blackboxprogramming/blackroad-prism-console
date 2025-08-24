@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { applyPatches } from '../var/www/blackroad/server/routes/git.js';
+import git from '../var/www/blackroad/server/routes/git.js';
+const { applyPatches } = git;
 
 const tempFile = 'tmp-applyPatches.txt';
 const abs = path.join(process.cwd(), tempFile);
