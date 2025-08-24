@@ -131,13 +131,18 @@ def merge_into_repos_json(new_entries, base_dir: Path, default_branch="main"):
 
 def build_git_env(cfg):
     env = os.environ.copy()
-    key = os.path.expanduser(cfg.get("git_ssh_key","~/.ssh/id_ed25519"))
+    key = os.path.expanduser(cfg.get("git_ssh_key", "~/.ssh/id_ed25519"))
     # Reuse your wizard’s strict host key policy if known_hosts is already prepared.
     known_hosts = Path("codex/secrets/known_hosts")
     if known_hosts.exists():
-        env["GIT_SSH_COMMAND"] = f"ssh -i {shlex.quote(key)} -o UserKnownHostsFile={shlex.quote(str(known_hosts))} -o StrictHostKeyChecking=yes"
+        env["GIT_SSH_COMMAND"] = (
+            f"ssh -i {shlex.quote(key)} -o UserKnownHostsFile={shlex.quote(str(known_hosts))} "
+            "-o StrictHostKeyChecking=yes"
+        )
     else:
-        env["GIT_SSH_COMMAND"] = f"ssh -i {shlex.quote(key)} -o StrictHostKeyChecking=accept-new"
+        env["GIT_SSH_COMMAND"] = (
+            f"ssh -i {shlex.quote(key)} -o StrictHostKeyChecking=accept-new"
+        )
     return env
 
 def repo_state(repo_dir: Path):
