@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: prism
+spec:
+  selector:
+    app: api
+  ports:
+    - port: 4000
+      targetPort: 4000
