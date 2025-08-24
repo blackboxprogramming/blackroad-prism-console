@@ -14,7 +14,17 @@ const rateLimit = require('express-rate-limit');
 
 // Allow requiring .ts files as plain JS for lucidia brain modules
 require.extensions['.ts'] = require.extensions['.js'];
-const { PORT, NODE_ENV, ALLOWED_ORIGIN, LOG_DIR, SESSION_SECRET } = require('./src/config');
+const {
+  PORT,
+  NODE_ENV,
+  ALLOWED_ORIGIN,
+  LOG_DIR,
+  SESSION_SECRET,
+  ROADCHAIN_MODE,
+  ROADCHAIN_NETWORK,
+  EVM_CHAIN_ID,
+  ROADCHAIN_MAINNET_OK
+} = require('./src/config');
 
 // Ensure log dir exists
 if (LOG_DIR) {
@@ -332,6 +342,21 @@ rcRouter.get('/prices', requireAuth, (_req, res) => {
 });
 
 app.use('/api/rc', rcRouter);
+
+// ROADCHAIN
+const roadchainRouter = express.Router();
+
+roadchainRouter.get('/net', (_req, res) => {
+  const info = {
+    mode: ROADCHAIN_MODE,
+    network: ROADCHAIN_NETWORK,
+    mainnetAllowed: ROADCHAIN_MAINNET_OK
+  };
+  if (ROADCHAIN_MODE === 'evm') info.chainId = EVM_CHAIN_ID;
+  res.json(info);
+});
+
+app.use('/api/roadchain', roadchainRouter);
 // Routes
 const apiRouter = require('./src/routes');
 app.use('/api', apiRouter);
