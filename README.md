@@ -53,3 +53,20 @@ bash tools/verify-runtime.sh
   ```
 
 If anything looks off, run `bash tools/verify-runtime.sh` and share the output.
+
+## Unified Sync Pipeline
+
+Use `scripts/blackroad_sync.sh` to drive a chat-style deployment flow.
+Example:
+
+```bash
+./scripts/blackroad_sync.sh "Push latest to BlackRoad.io"
+```
+
+The script also understands:
+- "Refresh working copy and redeploy"
+- "Rebase branch and update site"
+- "Sync Salesforce -> Airtable -> Droplet"
+
+It pulls from GitHub, triggers connector webhooks, updates a Working Copy checkout, and
+executes a remote refresh command on the droplet.
