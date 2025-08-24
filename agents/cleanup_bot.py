@@ -21,6 +21,9 @@ class CleanupBot:
         When ``True`` no commands are executed and planned actions are
         printed instead. This is helpful for verifying branch names before
         actual deletion.
+    Args:
+        branches: Branch names to delete.
+        dry_run: If True, print commands instead of executing them.
     """
 
     branches: List[str]
@@ -35,6 +38,12 @@ class CleanupBot:
 
         Args:
             branch: The branch name to remove.
+    def _run(self, *cmd: str) -> None:
+        """Run a command unless in dry-run mode."""
+        if self.dry_run:
+            print("DRY-RUN:", " ".join(cmd))
+            return
+        subprocess.run(cmd, check=True)
 
         Returns:
             ``True`` if the branch was deleted both locally and remotely, ``False``
@@ -87,6 +96,17 @@ class CleanupBot:
                 )
             except subprocess.CalledProcessError:
                 print(f"Remote branch '{branch}' does not exist.")
+        Skips branches that are missing locally or remotely.
+        """
+        for branch in self.branches:
+            try:
+                self._run("git", "branch", "-D", branch)
+            except CalledProcessError:
+                print(f"Local branch {branch} not found; skipping")
+            try:
+                self._run("git", "push", "origin", "--delete", branch)
+            except CalledProcessError:
+                print(f"Remote branch {branch} not found; skipping")
 
 
 if __name__ == "__main__":
