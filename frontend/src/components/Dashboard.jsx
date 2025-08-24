@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { fetchDashboardSystem, fetchDashboardFeed, fetchAgents } from '../api'
+import { fetchDashboardSystem, fetchDashboardFeed } from '../api'
+import { fetchAllAgents } from '../agents'
 
 function MetricCard({ label, value }){
   return (
@@ -21,7 +22,7 @@ export default function Dashboard(){
       setMetrics(m)
       const f = await fetchDashboardFeed()
       setFeed(f)
-      const ag = await fetchAgents()
+      const ag = await fetchAllAgents()
       setAgents(ag)
     })()
   }, [])
@@ -50,7 +51,7 @@ export default function Dashboard(){
           {agents.map(a => (
             <div key={a.id} className="card p-4">
               <div className="font-medium">{a.name}</div>
-              <div className="text-xs text-slate-400">{a.status}</div>
+              <div className="text-xs text-slate-400">{a.status} · {a.location}</div>
             </div>
           ))}
         </div>
