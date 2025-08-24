@@ -136,4 +136,14 @@ export async function fetchManifesto(){
   return data.content
 }
 
+export async function fetchAutohealEvents(){
+  const { data } = await axios.get(`${API_BASE}/api/autoheal/events`)
+  return data.events
+}
+
+export async function postAutohealEscalation(note){
+  const { data } = await axios.post(`${API_BASE}/api/autoheal/escalations`, { note })
+  return data.event
+}
+
 export { API_BASE }

@@ -26,6 +26,7 @@ const {
   EVM_CHAIN_ID,
   ROADCHAIN_MAINNET_OK
 } = require('./src/config');
+const autohealService = require('./src/services/autohealService');
 
 // Ensure log dir exists
 if (LOG_DIR) {
@@ -359,6 +360,19 @@ roadchainRouter.get('/net', (_req, res) => {
 });
 
 app.use('/api/roadchain', roadchainRouter);
+
+// Auto-Heal routes
+const autohealRouter = express.Router();
+autohealRouter.get('/events', (_req, res) => {
+  res.json({ events: autohealService.getEvents() });
+});
+autohealRouter.post('/escalations', (req, res) => {
+  const { note } = req.body || {};
+  if (!note) return res.status(400).json({ error: 'note required' });
+  const event = autohealService.appendEscalation(note);
+  res.json({ event });
+});
+app.use('/api/autoheal', autohealRouter);
 // Routes
 const apiRouter = require('./src/routes');
 app.use('/api', apiRouter);
@@ -375,6 +389,7 @@ if (process.env.ENABLE_LUCIDIA_BRAIN !== '0') {
 const server = http.createServer(app);
 const { setupSockets } = require('./src/socket');
 const io = setupSockets(server);
+autohealService.streamEvents(io);
 
 // LUCIDIA
 (function setupLucidia() {
