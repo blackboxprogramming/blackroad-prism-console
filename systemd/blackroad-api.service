@@ -1,24 +1,20 @@
 [Unit]
-Description=BlackRoad API Bridge (Express + WS)
+Description=BlackRoad.io API (Express)
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-Environment=NODE_ENV=production
-Environment=PORT=4000
 WorkingDirectory=/srv/blackroad-api
-ExecStart=/usr/bin/node server.js
+EnvironmentFile=/srv/blackroad-api/.env
+ExecStart=/usr/bin/node server_full.js
 Restart=always
-RestartSec=3
-
-# security hardening
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=full
-ProtectHome=true
-ProtectKernelTunables=true
-ProtectControlGroups=true
+RestartSec=2
+User=www-data
+Group=www-data
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=10
 
 [Install]
 WantedBy=multi-user.target
