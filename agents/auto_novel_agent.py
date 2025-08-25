@@ -35,8 +35,26 @@ class AutoNovelAgent:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
+    def generate_story(self, title: str, protagonist: str) -> str:
+        """Generate a simple short story.
+
+        Args:
+            title: Title of the story.
+            protagonist: Name of the hero of the story.
+
+        Returns:
+            A three line story using the provided information.
+        """
+        return (
+            f"{title}\n"
+            f"{protagonist} embarks on a grand adventure.\n"
+            "The story concludes with lessons learned."
+        )
+
 
 if __name__ == "__main__":
     agent = AutoNovelAgent()
     agent.deploy()
     agent.create_game("unity")
+    story = agent.generate_story("The Quest", "Aria")
+    print(story)
