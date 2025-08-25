@@ -34,3 +34,8 @@ export async function fetchFeatureGates() {
   const { data } = await axios.get(`${API_BASE}/api/subscribe/feature-gates`);
   return data;
 }
+
+export async function fetchHealth() {
+  const { data } = await axios.get(`${API_BASE}/api/subscribe/health`);
+  return data;
+}

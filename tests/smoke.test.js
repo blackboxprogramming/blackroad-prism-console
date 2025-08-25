@@ -1,3 +1,3 @@
-import assert from 'node:assert';
-import './git-route.test.js';
+const assert = require('node:assert');
+require('./subscribe.health.test.js');
 assert.ok(true);

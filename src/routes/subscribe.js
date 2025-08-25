@@ -23,6 +23,11 @@ function randId() {
   return require('crypto').randomBytes(16).toString('hex');
 }
 
+// GET /api/subscribe/health
+router.get('/subscribe/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // GET /api/subscribe/plans
 router.get('/subscribe/plans', (req, res) => {
   const rows = db
