@@ -31,6 +31,19 @@ class AutoNovelAgent:
             raise ValueError("Weapons are not allowed in generated games.")
         print(f"Creating a {engine_lower.capitalize()} game without weapons...")
 
+    def generate_story(self, prompt: str, *, protagonist: str = "Hero") -> str:
+        """Generate a short, deterministic story from a prompt.
+
+        Args:
+            prompt: Seed idea for the story.
+            protagonist: Name of the main character in the story.
+
+        Returns:
+            A tiny story incorporating the protagonist and the prompt.
+        """
+        cleaned_prompt = prompt.strip().capitalize()
+        return f"{cleaned_prompt} stars {protagonist} in a short tale."
+
     def list_supported_engines(self) -> List[str]:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
@@ -40,3 +53,4 @@ if __name__ == "__main__":
     agent = AutoNovelAgent()
     agent.deploy()
     agent.create_game("unity")
+    print(agent.generate_story("a mysterious forest"))
