@@ -19,7 +19,9 @@ push_latest() {
   git add -A
   git commit -m "${COMMIT_MSG:-chore: codex sync}" || true
   git push origin "${BRANCH}"
-  # TODO: trigger CI/CD pipeline and connector webhooks
+  # Trigger CI/CD pipeline and connector webhooks
+  deploy
+  sync_connectors
 }
 
 # Pull from GitHub and deploy to droplet.
