@@ -125,11 +125,8 @@ def sync_to_working_copy(repo_path: str, *, dry_run: bool = False) -> None:
     if "working-copy" not in result.stdout:
         LOGGER.info("No Working Copy remote configured; skipping sync")
         return
-
     run(f"git -C {repo_path} push working-copy HEAD", dry_run=dry_run)
 
-def deploy_to_droplet() -> None:
-    run("deploy-to-droplet")
     repo_name = os.path.basename(os.path.abspath(repo_path))
     url = f"working-copy://x-callback-url/pull?repo={repo_name}"
     if dry_run:
@@ -143,51 +140,10 @@ def deploy_to_droplet() -> None:
 
     trigger_working_copy_pull(repo_name, dry_run=dry_run)
 
-def call_connectors() -> None:
-    run("connector-sync")
-
-
-def validate_services() -> None:
-    run("validate-services")
-
-
-STAGES: list[Callable[[], None]] = [
-    push_to_github,
-    deploy_to_droplet,
-    call_connectors,
-    validate_services,
-]
-
-
-def run_pipeline(*, force: bool = False, webhook: str | None = None) -> None:
-    for stage in STAGES:
-        try:
-            stage()
-        except subprocess.CalledProcessError as exc:
-            rollback = False
-            if stage is push_to_github:
-                run("git reset --hard")
-            elif stage is deploy_to_droplet:
-                rollback = True
-                run(f"rsync -a {DROPLET_BACKUP}/ /srv/blackroad/")
-            elif stage is validate_services:
-                rollback = True
-                rollback_from_backup()
-            log_error(stage.__name__, exc, rollback, webhook)
-            if not force:
-                raise
 
 def redeploy_droplet(*, dry_run: bool = False) -> None:
     """Placeholder for redeploying the BlackRoad droplet."""
-    # TODO: SSH into droplet, pull latest code, run migrations, restart services.
     LOGGER.info("TODO: implement droplet redeploy")
-
-
-def sync_connectors(*, dry_run: bool = False) -> None:
-    """Placeholder for syncing external connectors."""
-    # TODO: add OAuth flows, webhook listeners, and Slack notifications.
-    LOGGER.info("TODO: implement connector sync")
-
 
 def trigger_working_copy_pull(
     repo_name: str, *, server_url: str = "http://localhost:8081", dry_run: bool = False
@@ -278,17 +234,12 @@ def sync_connectors(action: str, payload: Dict[str, Any]) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="BlackRoad Codex pipeline scaffold",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Simulate actions without executing external commands",
-        "--skip-validate",
-        action="store_true",
-        help="Skip service health validation",
-    )
+    """Command-line entry point for the Codex pipeline."""
+    parser = argparse.ArgumentParser(description="BlackRoad Codex pipeline")
+    parser.add_argument("--force", action="store_true", help="continue even if a step fails")
+    parser.add_argument("--webhook", help="Webhook URL for error notifications")
+    parser.add_argument("--dry-run", action="store_true", help="Simulate actions without executing external commands")
+    parser.add_argument("--skip-validate", action="store_true", help="Skip service health validation")
     sub = parser.add_subparsers(dest="command")
     sub.add_parser("push", help="Push latest to BlackRoad.io")
     sub.add_parser("refresh", help="Refresh working copy and redeploy")
@@ -296,17 +247,8 @@ def main(argv: list[str] | None = None) -> int:
     sync = sub.add_parser("sync", help="Sync Salesforce → Airtable → Droplet")
     sync.add_argument("action", choices=["paste", "append", "replace", "restart", "build"])
     sync.add_argument("payload", help="JSON payload for the action")
-
-
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="BlackRoad Codex pipeline")
-    parser.add_argument("--force", action="store_true", help="continue even if a step fails")
-    parser.add_argument("--webhook", help="Webhook URL for error notifications")
     args = parser.parse_args(argv)
-    try:
-        run_pipeline(force=args.force, webhook=args.webhook)
-    except subprocess.CalledProcessError:
-        return 1
+
     exit_code = 0
 
     if args.command == "push":
@@ -321,7 +263,6 @@ def main(argv: list[str] | None = None) -> int:
         push_latest(dry_run=args.dry_run)
         redeploy_droplet(dry_run=args.dry_run)
     elif args.command == "sync":
-        sync_connectors(dry_run=args.dry_run)
         payload = json.loads(args.payload)
         sync_connectors(args.action, payload)
     else:
