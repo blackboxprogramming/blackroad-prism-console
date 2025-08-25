@@ -20,6 +20,13 @@ def test_add_supported_engine_and_create_game(capsys):
     assert "Godot" in captured.out
 
 
+def test_remove_supported_engine():
+    agent = AutoNovelAgent()
+    agent.add_supported_engine("godot")
+    agent.remove_supported_engine("godot")
+    assert not agent.supports_engine("godot")
+
+
 def test_create_game_disallows_weapons():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError, match="Weapons are not allowed"):
