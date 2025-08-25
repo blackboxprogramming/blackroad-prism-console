@@ -30,3 +30,16 @@ def test_create_game_rejects_unsupported_engine():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
         agent.create_game("cryengine")
+
+
+def test_remove_supported_engine():
+    agent = AutoNovelAgent()
+    agent.add_supported_engine("godot")
+    agent.remove_supported_engine("godot")
+    assert not agent.supports_engine("godot")
+
+
+def test_remove_unsupported_engine_raises():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError):
+        agent.remove_supported_engine("godot")
