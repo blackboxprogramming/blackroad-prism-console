@@ -29,11 +29,11 @@ async function getService(id, base) {
 }
 
 async function getAgentsSummary() {
-  const result = {};
-  for (const [id, base] of Object.entries(SERVICES)) {
-    result[id] = await getService(id, base);
-  }
-  return result;
+  const entries = Object.entries(SERVICES);
+  const results = await Promise.all(
+    entries.map(([id, base]) => getService(id, base).then(data => [id, data]))
+  );
+  return Object.fromEntries(results);
 }
 
 module.exports = { getAgentsSummary };
