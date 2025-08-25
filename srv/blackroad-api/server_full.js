@@ -22,6 +22,7 @@ const { Server: SocketIOServer } = require('socket.io');
 const { exec } = require('child_process');
 const { randomUUID } = require('crypto');
 const EventEmitter = require('events');
+const Stripe = require('stripe');
 const verify = require('./lib/verify');
 const git = require('./lib/git');
 const deploy = require('./lib/deploy');
@@ -40,6 +41,9 @@ const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
 const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
 const BRANCH_MAIN = process.env.BRANCH_MAIN || 'main';
 const BRANCH_STAGING = process.env.BRANCH_STAGING || 'staging';
+const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
 
 const PLANS = [
   {
@@ -214,7 +218,22 @@ app.post('/api/billing/portal', requireAuth, (req, res) => {
 });
 
 app.post('/api/billing/webhook', (req, res) => {
-  // TODO: verify Stripe signature and handle events
+  if (!stripeClient || !STRIPE_WEBHOOK_SECRET) {
+    return res.status(501).json({ error: 'stripe_unconfigured' });
+  }
+  const sig = req.headers['stripe-signature'];
+  let event;
+  try {
+    event = stripeClient.webhooks.constructEvent(
+      JSON.stringify(req.body),
+      sig,
+      STRIPE_WEBHOOK_SECRET
+    );
+  } catch (e) {
+    logger.error('stripe_webhook_verify_failed', e);
+    return res.status(400).json({ error: 'invalid_signature' });
+  }
+  emitter.emit('stripe:event', event);
   res.json({ received: true });
 });
 
