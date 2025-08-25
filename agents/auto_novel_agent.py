@@ -25,16 +25,6 @@ class AutoNovelAgent:
         """
         return engine.lower() in self.SUPPORTED_ENGINES
 
-    def add_supported_engine(self, engine: str) -> None:
-        """Add a new engine to the supported list.
-
-        Engines are stored in lowercase to keep lookups case-insensitive.
-
-        Args:
-            engine: Name of the engine to add.
-        """
-        self.SUPPORTED_ENGINES.add(engine.lower())
-
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
         """Create a basic game using a supported engine without weapons.
 
@@ -59,6 +49,14 @@ class AutoNovelAgent:
                 lowercase for case-insensitive matching.
         """
         self.SUPPORTED_ENGINES.add(engine.lower())
+
+    def remove_supported_engine(self, engine: str) -> None:
+        """Remove an engine from the supported list if present.
+
+        Args:
+            engine: Name of the engine to remove. The lookup is case-insensitive.
+        """
+        self.SUPPORTED_ENGINES.discard(engine.lower())
 
     def list_supported_engines(self) -> List[str]:
         """Return a list of supported game engines."""
