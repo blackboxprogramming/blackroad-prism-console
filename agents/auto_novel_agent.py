@@ -15,6 +15,26 @@ class AutoNovelAgent:
         """Deploy the agent by printing a greeting."""
         print(f"{self.name} deployed and ready to generate novels!")
 
+    def supports_engine(self, engine: str) -> bool:
+        """Return ``True`` if the engine is supported.
+
+        The check is case-insensitive.
+
+        Args:
+            engine: Name of the engine to verify.
+        """
+        return engine.lower() in self.SUPPORTED_ENGINES
+
+    def add_supported_engine(self, engine: str) -> None:
+        """Add a new engine to the supported list.
+
+        Engines are stored in lowercase to keep lookups case-insensitive.
+
+        Args:
+            engine: Name of the engine to add.
+        """
+        self.SUPPORTED_ENGINES.add(engine.lower())
+
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
         """Create a basic game using a supported engine without weapons.
 
@@ -24,7 +44,7 @@ class AutoNovelAgent:
                 allowed.
         """
         engine_lower = engine.lower()
-        if engine_lower not in self.SUPPORTED_ENGINES:
+        if not self.supports_engine(engine_lower):
             supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
         if include_weapons:
