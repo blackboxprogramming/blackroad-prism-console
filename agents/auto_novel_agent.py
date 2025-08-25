@@ -35,8 +35,25 @@ class AutoNovelAgent:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
+    def write_short_story(self, theme: str) -> str:
+        """Generate a short, two-sentence story for the given theme.
+
+        Args:
+            theme: The central theme of the story.
+
+        Returns:
+            A short story featuring the theme.
+        """
+        clean_theme = theme.strip()
+        if not clean_theme:
+            raise ValueError("Theme must be provided.")
+        return (
+            f"A tale of {clean_theme} begins with hope. In the end, {clean_theme} prevails."
+        )
+
 
 if __name__ == "__main__":
     agent = AutoNovelAgent()
     agent.deploy()
     agent.create_game("unity")
+    print(agent.write_short_story("friendship"))
