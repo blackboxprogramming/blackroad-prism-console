@@ -35,7 +35,7 @@ def test_validate_services_failure(monkeypatch, tmp_path):
     monkeypatch.setattr(pipeline, "LOG_FILE", tmp_path / "log")
     responses = [
         DummyResponse(200, '{"status": "ok"}'),
-        DummyResponse(500, '{}'),
+        DummyResponse(500, "{}"),
         DummyResponse(200, '{"status": "ok"}'),
         DummyResponse(200, '{"status": "ok"}'),
     ]
