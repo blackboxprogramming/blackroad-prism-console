@@ -10,7 +10,6 @@ import Subscribe from "./pages/Subscribe.jsx";
 import Lucidia from "./pages/Lucidia.jsx";
 import InfinityMath from "./pages/InfinityMath.jsx";
 import Agents from "./pages/Agents.jsx";
-import { useEffect, useState } from "react";
 import Desktop from "./pages/Desktop.jsx";
 
 function useApiHealth(){

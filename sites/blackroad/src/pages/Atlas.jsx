@@ -1,9 +1,13 @@
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function Atlas() {
+  const nav = useNavigate()
+
   useEffect(() => {
-    // TODO: enforce RBAC so only admins can access this route
-  }, [])
+    const role = localStorage.getItem('role')
+    if (role !== 'admin') nav('/')
+  }, [nav])
 
   return (
     <div className="card">
