@@ -35,8 +35,28 @@ class AutoNovelAgent:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
+    def write_novel(self, title: str, chapters: int = 3) -> List[str]:
+        """Create a simple outline for a novel.
+
+        Args:
+            title: Title of the novel to draft.
+            chapters: Number of chapter headings to generate.
+
+        Returns:
+            A list of generated chapter headings.
+        """
+        if chapters < 1:
+            raise ValueError("Novel must have at least one chapter.")
+
+        outline = [f"Chapter {i}: TBD" for i in range(1, chapters + 1)]
+        print(f"Drafting novel '{title}' with {chapters} chapters...")
+        for heading in outline:
+            print(heading)
+        return outline
+
 
 if __name__ == "__main__":
     agent = AutoNovelAgent()
     agent.deploy()
     agent.create_game("unity")
+    agent.write_novel("The Adventure")
