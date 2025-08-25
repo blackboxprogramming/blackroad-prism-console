@@ -35,6 +35,14 @@ class AutoNovelAgent:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
+    def add_engine(self, engine: str) -> None:
+        """Add a new supported game engine.
+
+        Args:
+            engine: Name of the engine to add.
+        """
+        self.SUPPORTED_ENGINES.add(engine.lower())
+
 
 if __name__ == "__main__":
     agent = AutoNovelAgent()
