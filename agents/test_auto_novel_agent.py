@@ -30,3 +30,11 @@ def test_create_game_rejects_unsupported_engine():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
         agent.create_game("cryengine")
+
+
+def test_remove_supported_engine(monkeypatch):
+    """Removing an engine should make it unsupported."""
+    monkeypatch.setattr(AutoNovelAgent, "SUPPORTED_ENGINES", {"unity", "unreal"})
+    agent = AutoNovelAgent()
+    agent.remove_supported_engine("unity")
+    assert not agent.supports_engine("unity")
