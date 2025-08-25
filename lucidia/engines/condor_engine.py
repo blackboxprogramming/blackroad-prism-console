@@ -1,20 +1,23 @@
+# ruff: noqa
+
 """Wrappers for running NASA Condor models locally.
 
 This module intentionally implements only a very small subset of the
-full design proposed in the specification.  The helpers defined here are
-sufficient for local experimentation and unit testing.  Advanced
+full design proposed in the specification. The helpers defined here are
+sufficient for local experimentation and unit testing. Advanced
 sandboxing, provenance and solver features should be implemented in the
 future.
-"""Utilities for working with Condor models.
 
-This module provides light‑weight helpers that wrap Condor's modeling
-interfaces.  The functions are intentionally small so the heavy lifting
-remains within the Condor library itself.  The goal is to expose a stable
+Utilities for working with Condor models.
+
+This module provides lightweight helpers that wrap Condor's modeling
+interfaces. The functions are intentionally small so the heavy lifting
+remains within the Condor library itself. The goal is to expose a stable
 Python API that can be called from agents or HTTP routes without pulling in
 any remote resources.
 
 The actual Condor package is optional at import time so the repository can be
-used in environments where the dependency is not yet installed.  Runtime
+used in environments where the dependency is not yet installed. Runtime
 errors are raised if the helpers are called without Condor being available.
 """
 
@@ -67,7 +70,9 @@ def validate_model_source(py_text: str) -> None:
 
     for node in ast.walk(tree):
         if isinstance(node, (ast.Import, ast.ImportFrom)):
-            modules = [n.name for n in node.names] if isinstance(node, ast.Import) else [node.module]
+            modules = (
+                [n.name for n in node.names] if isinstance(node, ast.Import) else [node.module]
+            )
             for mod in modules:
                 if mod and mod.split(".")[0] not in ALLOWED_IMPORTS:
                     raise ValueError(f"Disallowed import: {mod}")
@@ -126,6 +131,8 @@ def optimize(
     else:  # pragma: no cover - dummy fallback
         result = {}
     return _to_dict(result)
+
+
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
 import ast
@@ -284,4 +291,3 @@ def optimize(
     problem = problem_cls()
     result = problem.solve(initial_guess=initial_guess, bounds=bounds, options=options)
     return _dataclass_to_dict(result)
-

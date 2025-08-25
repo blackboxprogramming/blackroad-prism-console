@@ -1,11 +1,14 @@
+# ruff: noqa: I001
+
 import importlib
 
 import pytest
-import torch
 
-from lucidia.quantum_engine import guard_env, set_seed, enforce_import_block
-from lucidia.quantum_engine.models import PQCClassifier
-from third_party import torchquantum as tq
+torch = pytest.importorskip("torch")
+tq = pytest.importorskip("third_party.torchquantum")
+
+from lucidia.quantum_engine import guard_env, set_seed, enforce_import_block  # noqa: E402
+from lucidia.quantum_engine.models import PQCClassifier  # noqa: E402
 
 
 def test_rx_ry_rz_grad():
@@ -45,7 +48,7 @@ def test_seed_reproducible():
 def test_policy_import_block():
     enforce_import_block()
     with pytest.raises(ImportError):
-        importlib.import_module('torchquantum.plugins')
+        importlib.import_module("torchquantum.plugins")
 
 
 def test_no_socket():

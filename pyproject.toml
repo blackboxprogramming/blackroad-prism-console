@@ -11,5 +11,4 @@ extend-select = ["I"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-extend-select = ["I"]  # import sort
-
+testpaths = ["tests"]
