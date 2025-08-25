@@ -6,7 +6,7 @@ from typing import ClassVar, List
 
 @dataclass
 class AutoNovelAgent:
-    """A toy agent that can deploy itself and create simple games."""
+    """A toy agent that can deploy itself and create simple games or stories."""
 
     name: str = "AutoNovelAgent"
     SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal"}
@@ -35,8 +35,21 @@ class AutoNovelAgent:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
+    def write_novel(self, title: str, protagonist: str) -> str:
+        """Generate a minimal novel blurb.
+
+        Args:
+            title: Title of the story to generate.
+            protagonist: Main character of the story.
+
+        Returns:
+            A short string describing the novel.
+        """
+        return f"{title} is a thrilling tale about {protagonist}."
+
 
 if __name__ == "__main__":
     agent = AutoNovelAgent()
     agent.deploy()
     agent.create_game("unity")
+    print(agent.write_novel("Journey", "Alice"))
