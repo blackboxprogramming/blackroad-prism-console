@@ -9,7 +9,7 @@ class AutoNovelAgent:
     """A toy agent that can deploy itself and create simple games."""
 
     name: str = "AutoNovelAgent"
-    SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal"}
+    SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal", "godot"}
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
@@ -34,6 +34,14 @@ class AutoNovelAgent:
     def list_supported_engines(self) -> List[str]:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
+
+    def add_engine(self, engine: str) -> None:
+        """Add a new engine to the supported set.
+
+        Args:
+            engine: Name of the engine to add.
+        """
+        self.SUPPORTED_ENGINES.add(engine.lower())
 
 
 if __name__ == "__main__":
