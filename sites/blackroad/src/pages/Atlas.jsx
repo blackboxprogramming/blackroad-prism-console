@@ -1,9 +1,23 @@
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function Atlas() {
+  const navigate = useNavigate()
+
   useEffect(() => {
-    // TODO: enforce RBAC so only admins can access this route
-  }, [])
+    ;(async () => {
+      try {
+        const res = await fetch('/api/session', { cache: 'no-store' })
+        const data = await res.json()
+        const role = data?.user?.role
+        if (!role || !['admin', 'dev'].includes(role)) {
+          navigate('/', { replace: true })
+        }
+      } catch {
+        navigate('/', { replace: true })
+      }
+    })()
+  }, [navigate])
 
   return (
     <div className="card">
