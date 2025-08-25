@@ -8,6 +8,10 @@ use uart_16550::SerialPort;
 
 static SERIAL1: Mutex<SerialPort> = Mutex::new(unsafe { SerialPort::new(0x3F8) });
 
+mod memory;
+mod fs;
+mod shell;
+
 pub fn serial_init() {
     SERIAL1.lock().init();
 }
