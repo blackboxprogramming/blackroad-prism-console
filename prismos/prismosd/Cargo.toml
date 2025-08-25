@@ -1,0 +1,10 @@
+[package]
+name = "prismosd"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+prism-core = { path = "../prism-core" }
+serde_json = "1.0"
+tokio = { version = "1", features = ["net", "macros", "rt-multi-thread", "signal"] }
+clap = { version = "4.5", features = ["derive"] }
