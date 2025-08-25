@@ -117,6 +117,8 @@ import uvicorn
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 log = logging.getLogger(__name__)
 SLACK_WEBHOOK = os.getenv("SLACK_WEBHOOK_URL")
+MONITORING_URL = os.getenv("MONITORING_URL", "http://localhost:8000/logs")
+SCRIPT_DIR = os.path.dirname(__file__)
 
 
 def notify_slack(message: str) -> None:
@@ -129,10 +131,24 @@ def notify_slack(message: str) -> None:
         log.warning("slack notify failed: %s", exc)
 
 
+def notify_monitor(status: str) -> None:
+    """Send a status event to the monitoring API."""
+    try:
+        requests.post(MONITORING_URL, json={"status": status}, timeout=5)
+    except Exception as exc:  # noqa: BLE001
+        log.warning("monitor notify failed: %s", exc)
+
+
 def run(cmd: list[str], **kwargs) -> None:
     """Run a subprocess command and stream output."""
     log.info("$ %s", " ".join(cmd))
     subprocess.run(cmd, check=True, **kwargs)
+
+
+def create_snapshot() -> None:
+    """Invoke the snapshot script."""
+    snapshot = os.path.join(SCRIPT_DIR, "snapshot.sh")
+    run(["bash", snapshot])
 
 
 def push_latest() -> None:
@@ -185,11 +201,19 @@ def refresh_working_copy() -> None:
 
 
 def deploy_to_droplet() -> None:
-    script = os.path.join(os.path.dirname(__file__), "prism_sync_build.sh")
-    if os.path.exists(script):
-        run(["bash", script])
-    else:
+    script = os.path.join(SCRIPT_DIR, "prism_sync_build.sh")
+    if not os.path.exists(script):
         log.warning("deploy script missing: %s", script)
+        return
+    try:
+        run(["bash", script])
+        notify_monitor("deploy-success")
+    except subprocess.CalledProcessError as exc:
+        log.error("deploy failed: %s", exc)
+        rollback = os.path.join(SCRIPT_DIR, "rollback.sh")
+        subprocess.run(["bash", rollback, "latest"], check=False)
+        notify_monitor("deploy-rollback")
+        raise
 
 
 def launch_connector_server() -> None:
@@ -245,7 +269,10 @@ def parse_command(raw: str) -> Callable[[], None]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Codex CI/CD control surface")
     parser.add_argument("command", help="Free-form command like 'Push latest to BlackRoad.io'")
+    parser.add_argument("--snapshot", action="store_true", help="Create snapshot before running command")
     args = parser.parse_args()
+    if args.snapshot:
+        create_snapshot()
     func = parse_command(args.command)
     func()
 
