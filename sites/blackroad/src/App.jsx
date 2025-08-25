@@ -12,6 +12,7 @@ import InfinityMath from "./pages/InfinityMath.jsx";
 import Agents from "./pages/Agents.jsx";
 import { useEffect, useState } from "react";
 import Desktop from "./pages/Desktop.jsx";
+import Atlas from "./pages/Atlas.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -64,6 +65,7 @@ function LegacyApp(){
           <NavLink className="nav-link" to="/agents">Agents</NavLink>
           <NavLink className="nav-link" to="/subscribe">Subscribe</NavLink>
           <NavLink className="nav-link" to="/lucidia">Lucidia</NavLink>
+          <NavLink className="nav-link" to="/atlas">Atlas</NavLink>
           <NavLink className="nav-link" to="/math">
             <span
               style={{
@@ -98,6 +100,7 @@ function LegacyApp(){
             <Route path="/agents" element={<Agents/>} />
             <Route path="/subscribe" element={<Subscribe/>} />
             <Route path="/lucidia" element={<Lucidia/>} />
+            <Route path="/atlas" element={<Atlas/>} />
             <Route path="/math" element={<InfinityMath/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
@@ -107,6 +110,7 @@ function LegacyApp(){
             <Route path="backroad" element={<BackRoad/>} />
             <Route path="subscribe" element={<Subscribe/>} />
             <Route path="lucidia" element={<Lucidia/>} />
+            <Route path="atlas" element={<Atlas/>} />
             <Route path="math" element={<InfinityMath/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
