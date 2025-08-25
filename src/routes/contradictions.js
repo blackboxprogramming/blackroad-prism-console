@@ -3,7 +3,7 @@
 
 const express = require('express');
 const db = require('../db');
-const { requireAuth } = require('../auth');
+const { requireAuth, requireAdmin } = require('../auth');
 
 const router = express.Router();
 
@@ -26,6 +26,15 @@ router.post('/', requireAuth, (req, res) => {
     description
   );
   res.json({ ok: true, id });
+});
+
+router.delete('/:id', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const info = db.prepare('DELETE FROM contradictions WHERE id = ?').run(id);
+  if (info.changes === 0) {
+    return res.status(404).json({ ok: false, error: 'not_found' });
+  }
+  res.json({ ok: true });
 });
 
 function cryptoRandomId() {
