@@ -1,7 +1,7 @@
 """Simple auto novel agent example with game creation abilities."""
 
 from dataclasses import dataclass
-from typing import ClassVar, List
+from typing import ClassVar
 
 
 @dataclass
@@ -31,7 +31,23 @@ class AutoNovelAgent:
             raise ValueError("Weapons are not allowed in generated games.")
         print(f"Creating a {engine_lower.capitalize()} game without weapons...")
 
-    def list_supported_engines(self) -> List[str]:
+    def add_engine(self, engine: str) -> None:
+        """Register a new supported game engine.
+
+        Args:
+            engine: Engine name to register.
+
+        Raises:
+            ValueError: If the engine name is invalid or already supported.
+        """
+        normalized = engine.strip().lower()
+        if not normalized.isalpha():
+            raise ValueError("Engine name must contain only letters.")
+        if normalized in self.SUPPORTED_ENGINES:
+            raise ValueError("Engine already supported.")
+        self.SUPPORTED_ENGINES.add(normalized)
+
+    def list_supported_engines(self) -> list[str]:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
