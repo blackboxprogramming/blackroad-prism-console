@@ -65,6 +65,20 @@ rotate_keep(){
   ls -1t "$dir" | tail -n +$((keep+1)) | xargs -r -I{} rm "$dir/{}"
 }
 
+trigger_rollback(){
+  local latest
+  latest=$(ls -1t "$BACKUP_ROOT/blackroad"/* 2>/dev/null | head -n1 || true)
+  if [ -z "$latest" ]; then
+    log "No snapshots found; rollback skipped"
+    return 1
+  fi
+  if [ -x "$REPO/scripts/rollback.sh" ]; then
+    SNAPSHOT_FILE="$latest" DB_PATH="$API_DIR/blackroad.db" "$REPO/scripts/rollback.sh" || log "Rollback script failed"
+  else
+    log "Rollback script not found"
+  fi
+}
+
 update_repo(){
   if git -C "$REPO" pull --rebase; then
     (cd "$API_DIR" && npm install)
@@ -89,6 +103,8 @@ update_failure_state(){
   echo "$count $now" >"$STATE_FILE"
   if (( count >= 3 )); then
     log "Escalation: $count failures in 10 minutes"
+    log "See rollback test workflow: https://github.com/blackroad-io/prism-console/actions/workflows/rollback-tests.yml"
+    trigger_rollback
   fi
 }
 
