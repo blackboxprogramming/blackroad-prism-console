@@ -82,3 +82,8 @@ services/*/node_modules/
 # Rust build artifacts
 target/
 **/target/
+
+# Prism project artifacts
+prism-web/node_modules/
+prism-web/dist/
+prismos-kernel/target/
