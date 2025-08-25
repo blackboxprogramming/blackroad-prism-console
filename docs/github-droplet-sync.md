@@ -2,6 +2,32 @@
 
 This guide outlines how to keep a GitHub repository, your local working copy, and a remote droplet in sync.
 
+## Pull Request to Deployment Workflow
+
+1. **Start from a clean `main`**
+   - Pull the latest changes and ensure no uncommitted work.
+2. **Create a feature branch**
+   - `git checkout -b feature/your-feature-name`
+3. **Run tests and linters locally**
+   - Fix issues before committing.
+4. **Commit and push your branch**
+   - `git commit -m "Add feature"`
+   - `git push origin feature/your-feature-name`
+5. **Open a Pull Request**
+   - Confirm CI checks pass and address review feedback.
+6. **Merge the PR**
+   - Use your preferred merge strategy once approvals and checks are complete.
+7. **Update your local `main`**
+   - `git checkout main`
+   - `git pull origin main`
+8. **Resolve any conflicts and re-run tests**
+   - Commit the merge if conflicts were resolved.
+9. **Push `main` to the droplet**
+   - `git push origin main`
+   - `git push droplet main`
+10. **Repeat for each new feature**
+    - Branch, test, review, merge, and deploy.
+
 ## 1. Connect GitHub to your local working copy
 1. **Clone the repository** (or add GitHub as a remote):
    ```bash
