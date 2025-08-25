@@ -1,0 +1,26 @@
+<!-- FILE: /var/www/blackroad/assets/brand/og-image.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0" stop-color="#FF4FD8"/><stop offset="50%" stop-color="#0096FF"/><stop offset="100%" stop-color="#FDBA2D"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#0A0A0E"/>
+  <g opacity=".08">
+    <path d="M0 520 Q 300 420 600 520 T 1200 520" stroke="url(#g)" stroke-width="60" fill="none"/>
+    <path d="M0 560 Q 300 460 600 560 T 1200 560" stroke="url(#g)" stroke-width="24" fill="none"/>
+  </g>
+  <!-- Center lockup -->
+  <g transform="translate(0,0)">
+    <g transform="translate(128,187) scale(1.2)">
+      <circle cx="128" cy="128" r="120" fill="#0F1016"/>
+      <path d="M80 248 L128 56 L176 248 Z" fill="#FFFFFF" opacity=".96"/>
+      <path d="M88 248 L128 72 L168 248 Z" fill="#0A0A0E" opacity=".12"/>
+      <path d="M128 244 L128 64" stroke="url(#g)" stroke-width="10" stroke-linecap="round" stroke-dasharray="18 18" fill="none"/>
+    </g>
+    <text x="480" y="350" font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
+          font-size="120" font-weight="900" letter-spacing="8" fill="url(#g)">BLACKROAD</text>
+    <text x="480" y="405" font-family="Inter, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif"
+          font-size="28" fill="#E8EAF1" opacity=".85">AI‑native • Blockchain advisory • Co‑creation platform</text>
+  </g>
+</svg>

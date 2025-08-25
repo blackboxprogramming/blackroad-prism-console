@@ -1,0 +1,11 @@
+/var/log/blackroad-api/*.log {
+  daily
+  rotate 14
+  compress
+  missingok
+  notifempty
+  sharedscripts
+  postrotate
+    systemctl kill -s HUP blackroad-api || true
+  endscript
+}

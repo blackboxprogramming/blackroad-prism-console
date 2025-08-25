@@ -1,3 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --accent: #FF4FD8;
+  --accent-2: #0096FF;
+  --accent-3: #FDBA2D;
+}
+
+.card {
+  @apply bg-slate-900/60 rounded-2xl border border-slate-800/60;
+}
+.badge {
+  @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-800 text-slate-200 text-xs;
+}
+.btn {
+  @apply px-3 py-1.5 rounded-xl bg-[var(--accent)] hover:brightness-110 active:scale-[.99] transition;
+}
+.input {
+  @apply bg-slate-900/70 border border-slate-800/60 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-[var(--accent)]/40;
+}

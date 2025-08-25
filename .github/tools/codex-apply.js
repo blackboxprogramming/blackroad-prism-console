@@ -1,93 +1,23 @@
-#!/usr/bin/env node
-/**
- * Minimal "codex bridge": applies a markdown playbook (file paths not required).
- * - Runs a deterministic remediation sequence oriented around Node/Vite React site.
- * - Idempotent: safe to run multiple times.
- */
-import fs from 'node:fs';
 import { execSync as sh } from 'node:child_process';
-import path from 'node:path';
-
-function has(p) {
-  return fs.existsSync(p);
-}
-function ensure(p, content = '') {
-  const dir = p.endsWith('/') ? p : path.dirname(p);
-  if (dir && dir !== '.') fs.mkdirSync(dir, { recursive: true });
-  if (!has(p)) fs.writeFileSync(p, content, 'utf8');
-}
-function pkgEnsureScripts(pkgPath, map) {
-  if (!has(pkgPath)) return;
-  const j = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-  j.scripts = j.scripts || {};
-  for (const [k, v] of Object.entries(map)) {
-    if (!j.scripts[k]) j.scripts[k] = v;
-  }
-  fs.writeFileSync(pkgPath, JSON.stringify(j, null, 2));
-}
-function writeIfMissing(p, body) {
-  if (!has(p)) fs.writeFileSync(p, body, 'utf8');
-}
-
-function tryRun(cmd) {
-  try {
-    sh(cmd, { stdio: 'inherit', shell: '/bin/bash' });
-  } catch {
-    /* skip-safe */
-  }
-}
-
-function main() {
-  // Root and site package bootstraps
-  pkgEnsureScripts('package.json', {
-    format: 'prettier -w .',
-    lint: 'eslint . --ext .js,.jsx,.ts,.tsx || true',
-    build: 'echo "no root build"; exit 0',
-    test: 'node -e "console.log(`ok`)"',
-  });
-  if (has('sites/blackroad/package.json')) {
-    pkgEnsureScripts('sites/blackroad/package.json', {
-      dev: 'vite',
-      build: 'vite build',
-      preview: 'vite preview',
-      format: 'prettier -w .',
-      lint: 'eslint . --ext .js,.jsx,.ts,.tsx || true',
-    });
-  }
-
-  // Basic config files
-  writeIfMissing(
-    '.prettierrc.json',
-    JSON.stringify({ semi: false, singleQuote: true, trailingComma: 'all' }, null, 2)
-  );
-  writeIfMissing('.prettierignore', ['dist', 'node_modules', 'artifacts', '.github'].join('\n'));
-  writeIfMissing('eslint.config.js', `export default [{ rules: { 'no-unused-vars':'warn' } }];`);
-
-  // Site skeleton (only if missing)
-  if (!has('sites/blackroad/index.html')) {
-    ensure(
-      'sites/blackroad/index.html',
-      '<!doctype html><div id="root"></div><script type="module" src="/src/main.jsx"></script>'
-    );
-  }
-  if (!has('sites/blackroad/vite.config.js')) {
-    ensure(
-      'sites/blackroad/vite.config.js',
-      `import { defineConfig } from 'vite'; import react from '@vitejs/plugin-react'; export default defineConfig({ plugins:[react()], build:{outDir:'dist'} });`
-    );
-  }
-
-  // Placeholders for missing assets referenced by public
-  ensure('sites/blackroad/public/robots.txt', 'User-agent: *\nAllow: /\n');
-
-  // Run local fixes
-  tryRun(
-    'npm i -D prettier eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin || true'
-  );
-  tryRun('(cd sites/blackroad && npm i || true)');
-  tryRun('npx prettier -w . || true');
-  tryRun('npx eslint . --ext .js,.jsx,.ts,.tsx --fix || true');
-
-  console.log('codex-apply: baseline ensured.');
-}
-main();
+import fs from 'node:fs'; import path from 'node:path';
+const MAX=200*1024, body=(process.env.CODEx_BODY||'').replace(/\r/g,'');
+const perm=process.env.CODEx_PERMISSION||''; if(!/(write|admin|maintain|triage)/.test(perm)){console.log('not collaborator'); process.exit(0);}
+const repo=((body.match(/\/codex\s+repo\s+([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)(?:\s+([A-Za-z0-9._\/-]+))?/)||[])[1])||'';
+const branch=((body.match(/\/codex\s+repo\s+[^\s]+\s+([A-Za-z0-9._\/-]+)/)||[])[1])||'';
+const apply=/\/codex\s+apply\b/.test(body), patch=/\/codex\s+patch\b/.test(body);
+function run(cmd){return sh(cmd,{stdio:'pipe',encoding:'utf8'});}
+function checkoutTarget(){ if(!repo) return; const t=process.env.BOT_TOKEN||''; if(!t) throw new Error('BOT_TOKEN required'); const url=`https://${t}@github.com/${repo}.git`; run('rm -rf .codex-target && mkdir -p .codex-target'); run(`git clone --quiet ${url} .codex-target`); process.chdir('.codex-target'); try{run(`git checkout ${branch||'main'}`)}catch{run(`git checkout -b ${branch||'main'}`)} }
+function addfile(p,d){ if(Buffer.byteLength(d,'utf8')>MAX) throw new Error('block too large'); fs.mkdirSync(path.dirname(p),{recursive:true}); fs.writeFileSync(p,d,'utf8'); run(`git add ${JSON.stringify(p)}`); }
+function applydiff(d){ fs.writeFileSync('.codex.patch',d); try{run('git apply --whitespace=fix .codex.patch')}catch{run('git apply --3way .codex.patch')}; fs.rmSync('.codex.patch',{force:true}); }
+function polish(){ try{run('npm -v')}catch{return;} try{run('npm i -D prettier eslint eslint-config-prettier >/dev/null 2>&1 || true',{shell:'/bin/bash'})}catch{}; try{run('npx --yes prettier -w . >/dev/null 2>&1 || true',{shell:'/bin/bash'})}catch{}; try{run('npx --yes eslint . --ext .js,.mjs,.cjs --fix >/dev/null 2>&1 || true',{shell:'/bin/bash'})}catch{}; try{ if(fs.existsSync('package.json')){ const j=JSON.parse(fs.readFileSync('package.json','utf8')); j.scripts=j.scripts||{}; j.scripts.test=j.scripts.test||'echo "No tests specified" && exit 0'; fs.writeFileSync('package.json',JSON.stringify(j,null,2)); run('git add package.json'); run('npm test >/dev/null 2>&1 || true',{shell:'/bin/bash'});} }catch{} }
+(function(){
+  const rePath=/```(?:\w+)?\s*path=([^\n]+)\n([\s\S]*?)```/g, reDiff=/```diff\n([\s\S]*?)```/g;
+  if(!apply && !patch){console.log('no codex command'); return;}
+  if(repo) checkoutTarget();
+  run(`git config user.name "${process.env.BOT_USER||'blackroad-bot'}"`); run(`git config user.email "${(process.env.BOT_USER||'blackroad-bot')}@users.noreply.github.com"`);
+  let w=0,p=0,m; while((m=rePath.exec(body))&&apply){addfile(m[1].trim(),m[2]); w++;} while((m=reDiff.exec(body))&&patch){applydiff(m[1]); p++;}
+  polish(); try{run(`git add -A`)}catch{}; try{run(`git commit -m "chore(codex): ${w?`apply ${w} file(s)`:''}${p?`${w?' & ':''}patch ${p}`:''}"`)}catch{}
+  const tok=process.env.BOT_TOKEN||''; if(!tok){console.log('no BOT_TOKEN; no push'); return;}
+  const r=process.env.GITHUB_REPOSITORY; const br=run('git rev-parse --abbrev-ref HEAD').trim();
+  try{run(`git push https://${tok}@github.com/${r}.git HEAD:${br}`); console.log('pushed')}catch{console.log('push failed')}
+})();

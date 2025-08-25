@@ -1,0 +1,13 @@
+[package]
+name = "prismos-kernel"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bootloader = "0.10"
+x86_64 = "0.14"
+spin = "0.9"
+uart_16550 = "0.2"
+
+[package.metadata.bootloader]
+target = "x86_64-prismos.json"

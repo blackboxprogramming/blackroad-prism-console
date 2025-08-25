@@ -4,6 +4,7 @@
 
 /* ===== BlackRoad brand tokens ===== */
 :root{
+  --accent:#FF4FD8; /* pink */
   --accent-1:#FF4FD8; /* pink */
   --accent-2:#0096FF; /* blue */
   --accent-3:#FDBA2D; /* gold */

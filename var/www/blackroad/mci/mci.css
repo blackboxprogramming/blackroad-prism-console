@@ -1,0 +1,13 @@
+.mci-workbench {
+  padding: 1rem;
+}
+.mci-workbench textarea {
+  width: 100%;
+  height: 6rem;
+}
+.mci-workbench button {
+  background: var(--accent);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+}

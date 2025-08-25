@@ -1,0 +1,10 @@
+{
+  "name": "br-fix",
+  "version": "0.1.0",
+  "bin": {
+    "br-fix": "bin/br-fix.js"
+  },
+  "scripts": {
+    "postinstall": "mkdir -p node_modules/.bin && ln -sf ../bin/br-fix.js node_modules/.bin/br-fix"
+  }
+}

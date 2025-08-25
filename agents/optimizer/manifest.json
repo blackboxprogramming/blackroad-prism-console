@@ -1,0 +1,6 @@
+{
+  "name": "optimizer",
+  "version": "1.0.0",
+  "description": "optimizer elite coding agent",
+  "capabilities": ["ping", "analyze", "codegen"]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "BlackRoad Deploy",
+  "url": "https://blackroad.io",
+  "hook_attributes": { "url": "https://blackroad.io/api/webhooks/github" },
+  "redirect_url": "https://blackroad.io",
+  "callback_url": "https://blackroad.io/api/webhooks/github",
+  "public": false,
+  "default_permissions": {
+    "contents": "read",
+    "metadata": "read",
+    "pull_requests": "read",
+    "statuses": "write",
+    "checks": "write"
+  },
+  "default_events": ["push", "pull_request", "check_run", "check_suite"],
+  "setup_url": "https://github.com/apps/blackroad-deploy/installations/new"
+}

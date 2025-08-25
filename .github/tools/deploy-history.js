@@ -21,6 +21,8 @@ try {
   j = JSON.parse(fs.readFileSync(file, 'utf8'));
 } catch {
   // Ignore malformed or missing deploy history file
+} catch (err) {
+  // ignore read/parse errors and start with a fresh history
 }
 if (!Array.isArray(j.history)) j.history = [];
 j.history.unshift({ ts: new Date().toISOString(), channel, sha, ref });

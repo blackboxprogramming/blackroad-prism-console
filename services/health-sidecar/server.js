@@ -1,14 +1,6 @@
 /* eslint-env node */
-/* global process */
->>>>>>>+main
-s from '>>>>>>>-origin/codex/ad
-t app = express();
 /* global process, console */
 
-<<<<<<< bbb
-=======
-/* global process, console */
->>>>>>> Headdd
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
@@ -17,16 +9,14 @@ const app = express();
 const PORT = process.env.PORT || 8088;
 const API_ROOT = process.env.API_ROOT || '/var/www/blackroad/api';
 const HEALTH_FILE = path.join(API_ROOT, 'health.json');
-const API_ROOT = process.env.API_ROOT || "/var/www/blackroad/api";
-const HEALTH_FILE = path.join(API_ROOT, "health.json");
 
-// simple cache-control for JSON
+// simple cache-control for JSON responses
 app.use((_req, res, next) => {
   res.set('Cache-Control', 'no-store');
   next();
 });
 
-// GET /api/health  (primary)
+// GET /api/health (primary)
 app.get('/api/health', (_req, res) => {
   let body = {
     status: 'ok',
@@ -34,11 +24,6 @@ app.get('/api/health', (_req, res) => {
     version: 'v3.0.0',
     commit: process.env.COMMIT_SHA || 'unknown',
     ts: new Date().toISOString(),
-    status: "ok",
-    app: "quantum-v3",
-    version: "v3.0.0",
-    commit: process.env.COMMIT_SHA || "unknown",
-    ts: new Date().toISOString()
   };
   try {
     if (fs.existsSync(HEALTH_FILE)) {
@@ -47,16 +32,12 @@ app.get('/api/health', (_req, res) => {
     }
   } catch (e) {
     body.status = 'degraded';
-      body = { ...file, status: "ok" };
-    }
-  } catch (e) {
-    body.status = "degraded";
     body.error = String(e?.message || e);
   }
   res.json(body);
 });
 
-// Liveness/Readiness (K8s or uptime monitors)
+// Liveness/Readiness endpoints (K8s or uptime monitors)
 app.get('/livez', (_req, res) => res.send('OK'));
 app.get('/readyz', (_req, res) => {
   try {
@@ -70,4 +51,3 @@ app.get('/readyz', (_req, res) => {
 app.listen(PORT, () => {
   console.log(`[health-sidecar] listening on :${PORT}`);
 });
-

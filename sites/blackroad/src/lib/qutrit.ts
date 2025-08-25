@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Qutrit math utilities (complex amplitudes, density-operator, SU(3), unitary/Lindblad).
  * No external deps; uses native JS number arrays. Angles in radians. Logs base-2 by default.

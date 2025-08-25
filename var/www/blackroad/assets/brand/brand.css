@@ -1,0 +1,104 @@
+/* FILE: /var/www/blackroad/assets/brand/brand.css */
+:root {
+  /* Brand identity */
+  --brand-name: "BlackRoad";
+  --brand-dark: #0A0A0E;
+  --brand-darker: #050507;
+  --brand-light: #F6F7FB;
+  --brand-fg: #E8EAF1;
+  --brand-fg-muted: #B7BCCB;
+
+  /* Locked palette */
+  --accent-1: #FF4FD8; /* magenta */
+  --accent-2: #0096FF; /* azure  */
+  --accent-3: #FDBA2D; /* amber  */
+
+  /* Utilities */
+  --accent-1-10: rgba(255,79,216,0.10);
+  --accent-2-10: rgba(0,150,255,0.10);
+  --accent-3-10: rgba(253,186,45,0.10);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --shadow-1: 0 4px 16px rgba(0,0,0,.30);
+  --shadow-2: 0 10px 40px rgba(0,0,0,.55);
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --focus-ring: 0 0 0 3px rgba(0,150,255,.35);
+
+  /* Gradients */
+  --brand-gradient: linear-gradient(135deg, var(--accent-1) 0%, var(--accent-2) 50%, var(--accent-3) 100%);
+  --brand-gradient-vert: linear-gradient(180deg, var(--accent-1) 0%, var(--accent-2) 50%, var(--accent-3) 100%);
+
+  /* Theming */
+  color-scheme: dark;
+  --bg: var(--brand-dark);
+  --fg: var(--brand-fg);
+  --card: #0E0F14;
+  --border: #171923;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: var(--brand-light);
+  --fg: #0A0B0E;
+  --card: #FFFFFF;
+  --border: #E8EAF1;
+}
+
+/* ----- Base helpers ----- */
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+a { color: var(--accent-2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ----- Brand utilities ----- */
+.bg-brand     { background: var(--bg); }
+.text-brand   { color: var(--fg); }
+.text-muted   { color: var(--brand-fg-muted); }
+.border-brand { border: 1px solid var(--border); border-radius: var(--radius-md); }
+.card-brand   { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-1); }
+
+.gradient-text {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+
+.btn-brand {
+  display:inline-flex; align-items:center; gap:.6rem;
+  padding:.8rem 1rem; border-radius: var(--radius-md);
+  background: var(--brand-gradient); color:#0A0B0E; font-weight:700;
+  border: none; box-shadow: var(--shadow-1); cursor:pointer;
+}
+.btn-brand:focus-visible { outline: none; box-shadow: var(--focus-ring), var(--shadow-1); }
+.btn-brand.ghost {
+  background: transparent; color: var(--fg); border:1px solid var(--border);
+}
+.badge {
+  display:inline-block; padding:.22rem .5rem; font-size:.75rem; border-radius:999px;
+  border:1px solid var(--border); background: #0B0D12;
+}
+
+/* Logo sizing helpers */
+.brand-logo { display:inline-block; vertical-align:middle; }
+.brand-logo.sm { width:28px; height:28px; }
+.brand-logo.md { width:40px; height:40px; }
+.brand-logo.lg { width:64px; height:64px; }
+
+/* Example header */
+.header {
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:1rem 1.25rem; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+  border-bottom:1px solid var(--border);
+}
+

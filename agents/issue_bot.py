@@ -10,7 +10,7 @@ import requests
 
 @dataclass
 class IssueBot:
-    """Automate creation and closing of GitHub issues."""
+    """Automate creation, listing, and closing of GitHub issues."""
 
     repo: str
     token: Optional[str] = None
@@ -25,6 +25,19 @@ class IssueBot:
         headers = {"Authorization": f"token {self.token}"} if self.token else {}
         payload = {"title": title, "body": body}
         response = requests.post(url, json=payload, headers=headers, timeout=10)
+        response.raise_for_status()
+        return response.json()
+
+    def list_issues(self, state: str = "open") -> list[dict]:
+        """Retrieve issues from the repository.
+
+        Args:
+            state: Filter by issue state ("open", "closed", or "all").
+        """
+        url = f"https://api.github.com/repos/{self.repo}/issues"
+        headers = {"Authorization": f"token {self.token}"} if self.token else {}
+        params = {"state": state}
+        response = requests.get(url, headers=headers, params=params, timeout=10)
         response.raise_for_status()
         return response.json()
 

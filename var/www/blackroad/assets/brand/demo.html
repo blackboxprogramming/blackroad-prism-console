@@ -1,0 +1,54 @@
+<!-- FILE: /var/www/blackroad/assets/brand/demo.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>BlackRoad Brand Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="/assets/brand/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/brand/icons/icon-180.png">
+  <link rel="mask-icon" href="/assets/brand/safari-pinned-tab.svg" color="#0A0A0E">
+  <link rel="manifest" href="/assets/brand/site.webmanifest">
+  <meta name="theme-color" content="#0A0A0E">
+  <link rel="stylesheet" href="/assets/brand/brand.css">
+  <style>
+    .wrap { max-width: 980px; margin: 4rem auto; padding: 2rem; }
+    .row { display:flex; align-items:center; gap: 2rem; flex-wrap: wrap; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:1rem; }
+    .chip { padding:.5rem .75rem; border:1px solid var(--border); border-radius: 999px; }
+    .swatch { height:72px; border-radius: 12px; border:1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="row">
+      <img class="brand-logo md" src="/assets/brand/logo.svg" alt="BlackRoad logomark">
+      <img style="height:44px" src="/assets/brand/wordmark.svg" alt="BlackRoad wordmark">
+    </div>
+    <a class="btn-brand ghost" href="/">Back to site</a>
+  </header>
+  <main class="wrap">
+    <section class="card-brand" style="padding:2rem;">
+      <h1 class="gradient-text" style="font-size:2.5rem;margin:0 0 .5rem;">BLACKROAD</h1>
+      <p class="text-muted">AI‑native • Blockchain advisory • Co‑creation platform</p>
+      <div class="row" style="margin-top:1.5rem;">
+        <a class="btn-brand" href="/assets/brand/logo.svg" download>Download Logomark (SVG)</a>
+        <a class="btn-brand" href="/assets/brand/logo-wordmark.svg" download>Download Lockup (SVG)</a>
+        <a class="btn-brand" href="/assets/brand/brand.css" download>Get brand.css</a>
+      </div>
+    </section>
+
+    <section style="margin-top:2rem;">
+      <h2>Palette</h2>
+      <div class="grid">
+        <div class="swatch" style="background:#FF4FD8"></div><div class="chip">#FF4FD8</div>
+        <div class="swatch" style="background:#0096FF"></div><div class="chip">#0096FF</div>
+        <div class="swatch" style="background:#FDBA2D"></div><div class="chip">#FDBA2D</div>
+        <div class="swatch" style="background:#0A0A0E"></div><div class="chip">#0A0A0E</div>
+        <div class="swatch" style="background:#F6F7FB"></div><div class="chip">#F6F7FB</div>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>
