@@ -54,7 +54,8 @@ class LoggerAgent:
                     continue
                 self.log(line)
         except EOFError:
-            pass
+            # Gracefully handle EOF to signal shutdown of the agent
+            self.log("EOF received; exiting")
 
 
 if __name__ == "__main__":
