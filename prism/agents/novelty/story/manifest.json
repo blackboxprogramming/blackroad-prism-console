@@ -1,0 +1,8 @@
+{
+  "name": "story",
+  "type": "novelty",
+  "description": "story agent",
+  "capabilities": [
+    "ping"
+  ]
+}

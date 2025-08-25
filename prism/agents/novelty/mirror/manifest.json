@@ -1,0 +1,8 @@
+{
+  "name": "mirror",
+  "type": "novelty",
+  "description": "mirror agent",
+  "capabilities": [
+    "ping"
+  ]
+}

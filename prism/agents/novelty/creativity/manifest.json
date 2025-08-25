@@ -1,0 +1,8 @@
+{
+  "name": "creativity",
+  "type": "novelty",
+  "description": "creativity agent",
+  "capabilities": [
+    "ping"
+  ]
+}

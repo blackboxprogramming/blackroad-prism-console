@@ -1,0 +1,8 @@
+{
+  "name": "dream",
+  "type": "novelty",
+  "description": "dream agent",
+  "capabilities": [
+    "ping"
+  ]
+}

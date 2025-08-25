@@ -1,0 +1,8 @@
+{
+  "name": "game",
+  "type": "novelty",
+  "description": "game agent",
+  "capabilities": [
+    "ping"
+  ]
+}

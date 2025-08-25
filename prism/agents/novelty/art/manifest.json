@@ -1,0 +1,8 @@
+{
+  "name": "art",
+  "type": "novelty",
+  "description": "art agent",
+  "capabilities": [
+    "ping"
+  ]
+}

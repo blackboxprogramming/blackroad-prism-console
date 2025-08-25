@@ -1,0 +1,8 @@
+{
+  "name": "love",
+  "type": "novelty",
+  "description": "love agent",
+  "capabilities": [
+    "ping"
+  ]
+}
