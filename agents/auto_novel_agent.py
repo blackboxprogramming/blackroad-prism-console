@@ -35,8 +35,23 @@ class AutoNovelAgent:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
+    def add_supported_engine(self, engine: str) -> None:
+        """Add a new supported engine.
+
+        Args:
+            engine: Name of the engine to add.
+
+        Raises:
+            ValueError: If the engine is already supported.
+        """
+        engine_lower = engine.lower()
+        if engine_lower in self.SUPPORTED_ENGINES:
+            raise ValueError("Engine already supported.")
+        self.SUPPORTED_ENGINES.add(engine_lower)
+
 
 if __name__ == "__main__":
     agent = AutoNovelAgent()
     agent.deploy()
-    agent.create_game("unity")
+    agent.add_supported_engine("godot")
+    agent.create_game("godot")
