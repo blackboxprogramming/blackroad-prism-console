@@ -1,2 +1,5 @@
 """Lucidia engines and utilities."""
-"""Lucidia namespace package."""
+
+from .rpg import Character, Game
+
+__all__ = ["Character", "Game"]

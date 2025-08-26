@@ -1,5 +1,6 @@
 pre-commit
 pytest
+libcst
 black==24.4.2
 ruff==0.6.9
 isort==5.13.2
