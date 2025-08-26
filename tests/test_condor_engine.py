@@ -22,6 +22,8 @@ def test_solve_algebraic_with_dummy():
 
     result = condor_engine.solve_algebraic(Dummy, a=1)
     assert result == {"x": 1}
+
+
 def test_validate_model_source_allows_basic_imports():
     src = """
 import math
@@ -51,4 +53,4 @@ class Example:
     cls = condor_engine.load_model_from_source(src, "Example")
     condor_engine.condor = object()  # type: ignore
     result = condor_engine.solve_algebraic(cls)
-    assert result == {'x': 1}
+    assert result == {"x": 1}
