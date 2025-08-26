@@ -21,7 +21,7 @@
     "recharts": "^2.11.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.0",
+    "@eslint/js": "^9.34.0",
     "@playwright/test": "^1.47.0",
     "@size-limit/file": "^11.1.5",
     "@types/react": "^18.3.4",
