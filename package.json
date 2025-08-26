@@ -12,7 +12,7 @@
     "prepare": "husky",
     "lint": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
     "format": "prettier -w .",
-    "test": "cross-env NODE_ENV=test jest --runInBand",
+    "test:jest": "cross-env NODE_ENV=test jest --runInBand",
     "test-db": "node tests/test_db.js",
     "test-auth": "node tests/test_auth.js",
     "test-projects-tasks": "node tests/test_projects_tasks.js",
@@ -23,8 +23,7 @@
     "test-agents-pack": "node tests/test_agents_mega.js",
     "frontend:dev": "npm --prefix sites/blackroad run dev",
     "frontend:build": "npm --prefix sites/blackroad run build",
-    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true",
-    "test-auth": "node tests/test_auth.js"
+    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
   },
   "engines": {
     "node": ">=18.17"
