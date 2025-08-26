@@ -67,13 +67,23 @@ class AutoNovelAgent:
         """Generate a short themed story.
 
         Args:
-            theme: Central theme of the story.
+            theme: Central theme of the story. Must be a non-empty string.
             protagonist: Name or description of the main character.
 
         Returns:
             A short story string.
+
+        Raises:
+            ValueError: If ``theme`` is empty or whitespace.
         """
-        return f"{protagonist} set out on a {theme} journey, " "discovering wonders along the way."
+        if not theme or not theme.strip():
+            raise ValueError("Theme must be a non-empty string.")
+        theme_clean = theme.strip()
+        protagonist_clean = protagonist.strip()
+        return (
+            f"{protagonist_clean} set out on a {theme_clean} journey, "
+            "discovering wonders along the way."
+        )
 
 
 if __name__ == "__main__":
