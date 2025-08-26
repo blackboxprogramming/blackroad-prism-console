@@ -36,7 +36,7 @@ class AutoNovelAgent:
         engine_lower = engine.lower()
         if not self.supports_engine(engine_lower):
             supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
-            raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
+            raise ValueError(f"Unsupported engine '{engine_lower}'. Choose one of: {supported}.")
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
         print(f"Creating a {engine_lower.capitalize()} game without weapons...")
