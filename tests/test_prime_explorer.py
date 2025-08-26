@@ -1,3 +1,11 @@
+"""Tests for prime explorer utilities."""
+
+import os
+import sys
+
+# Ensure repository root is on PYTHONPATH when running the test directly.
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from lucidia_math_lab.prime_explorer import (
     fourier_prime_gaps,
     residue_grid,
