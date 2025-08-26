@@ -1,14 +1,6 @@
 node_modules
-dist
-.git
-.gitignore
-Dockerfile*
-npm-debug.log*
-yarn-error.log*
-pnpm-lock.yaml
-.DS_Store
+logs
+*.log
+.cache
 .env
 .env.*
-coverage
-.tmp
-.cache
