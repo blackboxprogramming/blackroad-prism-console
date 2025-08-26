@@ -1,4 +1,12 @@
-from lucidia.app import app
+import pytest
+
+from lucidia.app import GLOBAL_VARS, app
+
+
+@pytest.fixture(autouse=True)
+def clear_state():
+    """Ensure each test has an isolated execution environment."""
+    GLOBAL_VARS.clear()
 
 
 def test_index():
@@ -13,3 +21,11 @@ def test_run_code():
     resp = client.post("/run", json={"code": "print('hi')"})
     assert resp.status_code == 200
     assert "hi" in resp.get_json()["output"]
+
+
+def test_state_and_builtins():
+    client = app.test_client()
+    client.post("/run", json={"code": "nums = list(range(3))"})
+    resp = client.post("/run", json={"code": "print(len(nums))"})
+    assert resp.status_code == 200
+    assert resp.get_json()["output"].strip() == "3"
