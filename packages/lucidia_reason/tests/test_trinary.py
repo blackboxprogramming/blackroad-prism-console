@@ -1,3 +1,12 @@
+import sys
+from pathlib import Path
+from pathlib import Path
+import sys
+import pytest
+
+pkg_root = Path(__file__).resolve().parents[1]
+sys.path.append(str(pkg_root))
+pytest.importorskip("lucidia_reason", reason="Install lucidia_reason or ask codex for help")
 from lucidia_reason.trinary import TruthValue, neg, and3, or3, imp3, conflict
 
 

@@ -1,21 +1,19 @@
-"""Wrappers for running NASA Condor models locally.
+"""Utilities for running NASA Condor models locally.
 
-This module intentionally implements only a very small subset of the
-full design proposed in the specification.  The helpers defined here are
-sufficient for local experimentation and unit testing.  Advanced
-sandboxing, provenance and solver features should be implemented in the
-future.
-"""Utilities for working with Condor models.
+This module intentionally implements only a very small subset of the full
+design proposed in the specification. The helpers defined here are sufficient
+for local experimentation and unit testing. Advanced sandboxing, provenance
+and solver features should be implemented in the future.
 
-This module provides light‑weight helpers that wrap Condor's modeling
-interfaces.  The functions are intentionally small so the heavy lifting
-remains within the Condor library itself.  The goal is to expose a stable
-Python API that can be called from agents or HTTP routes without pulling in
-any remote resources.
+The helpers in this file provide lightweight wrappers around Condor's modelling
+interfaces. The functions are intentionally small so the heavy lifting remains
+within the Condor library itself. The goal is to expose a stable Python API
+that can be called from agents or HTTP routes without pulling in any remote
+resources.
 
 The actual Condor package is optional at import time so the repository can be
-used in environments where the dependency is not yet installed.  Runtime
-errors are raised if the helpers are called without Condor being available.
+used in environments where the dependency is not yet installed. Runtime errors
+are raised if the helpers are called without Condor being available.
 """
 
 from __future__ import annotations
@@ -243,8 +241,6 @@ def solve_algebraic(model_cls: Type[Any], **params: Any) -> Dict[str, Any]:
     ``solve`` method.  Results are converted into a JSON friendly dictionary.
     """
 
-    if condor is None:  # pragma: no cover - runtime guard
-        raise RuntimeError("Condor is not installed")
     model = model_cls(**params)
     solution = model.solve()
     return _dataclass_to_dict(solution)
