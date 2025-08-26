@@ -36,3 +36,15 @@ def test_generate_story_requires_theme():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
         agent.generate_story("")
+
+
+def test_generate_poem_includes_theme():
+    agent = AutoNovelAgent()
+    poem = agent.generate_poem("serenity")
+    assert "serenity" in poem.lower()
+
+
+def test_generate_poem_rejects_unsupported_form():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError):
+        agent.generate_poem("serenity", form="limerick")
