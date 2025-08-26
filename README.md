@@ -39,6 +39,12 @@ bash tools/verify-runtime.sh
   - Ensure your SQLite file exists (defaults to `blackroad.db` inside the API dir if `DB_PATH` is not set)
   - Check if `127.0.0.1:8000` is serving `/health`. If not, it prints a one-liner to launch the stub.
 
+## Developing with VS Code and Docker on macOS
+1. Start [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac/).
+2. Install [Visual Studio Code](https://code.visualstudio.com/) and the **Dev Containers** extension.
+3. Open this repository in VS Code and select **Reopen in Container** to use `.devcontainer/devcontainer.json`.
+4. Once the container is running, use the integrated terminal to run commands like `npm install`, `npm run lint`, or `npm test`.
+
 ---
 
 ## Notes & assumptions
