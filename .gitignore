@@ -4,9 +4,13 @@ publicssh.sh
 
 # Node
 node_modules/
+**/node_modules/
 dist/
 .cache/
 .env
+services/*/node_modules/
+services/health-sidecar/node_modules/
+services/health-sidecar/.env
 
 # Logs
 npm-debug.log*
@@ -20,27 +24,19 @@ Thumbs.db
 # Artifacts
 artifacts/
 coverage/
+tests/_codex_autogen/
+.tmp/
+*.out.md
+services/quantum_lab/*.db
 
 # Project-specific
 repos/
 runtime/
 __pycache__/
 codex/runtime/
-
-!opt/blackroad/tdb/.env
-node_modules/
-node_modules/
-**/node_modules/
-node_modules/
-services/health-sidecar/node_modules/
-services/health-sidecar/.env
-<<<<<<< Updated upstream
-<<<<<<< bbb
-=======
-node_modules/
 /benchmarks/
-**/node_modules/
 benchmarks/
+
 # Lucidia artifacts
 secrets/*
 datasets/
@@ -52,33 +48,13 @@ rag/index/meta.json
 *.enc
 !secrets/README.md
 !secrets/*.env.example
-# Codex CI kit
-/tests/_codex_autogen/
-.tmp/
-*.out.md
-# Codex artifacts
-tests/_codex_autogen/
-.tmp/
-*.out.md
-
-# Allow random field datasets
 !lucidia/modules/random_fields/datasets/
 !lucidia/modules/random_fields/datasets/*.py
 lucidia/modules/random_fields/datasets/__pycache__/
-# Codex CI artifacts
-tests/_codex_autogen/
-.tmp/
-*.out.md
-services/quantum_lab/*.db
-node_modules/
+
+# Environment
 !opt/blackroad/tdb/.env
-node_modules/
-!opt/blackroad/tdb/.env
->>>>>>> Stashed changes
-=======
-node_modules/
-services/*/node_modules/
->>>>>>> origin/codex/add-calm-chatops-with-ollama-helpers
+
 # Rust build artifacts
 target/
 **/target/
