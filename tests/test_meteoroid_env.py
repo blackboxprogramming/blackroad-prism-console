@@ -1,4 +1,6 @@
-import numpy as np
+import pytest
+
+np = pytest.importorskip("numpy", reason="Install numpy or ask codex for help")
 from numpy.testing import assert_allclose
 
 from lucidia.astro.meteoroid_env import (

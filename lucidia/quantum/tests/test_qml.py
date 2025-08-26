@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import importlib
 
-import numpy as np
 import pytest
 
-pytest.importorskip("torch")
-pytest.importorskip("qiskit")
-pytest.importorskip("qiskit_machine_learning")
+np = pytest.importorskip("numpy", reason="Install numpy or ask codex for help")
+pytest.importorskip("torch", reason="Install torch or ask codex for help")
+pytest.importorskip("qiskit", reason="Install qiskit or ask codex for help")
+pytest.importorskip("qiskit_machine_learning", reason="Install qiskit_machine_learning or ask codex for help")
 
 import torch
 from qiskit.circuit.library import RealAmplitudes, ZZFeatureMap

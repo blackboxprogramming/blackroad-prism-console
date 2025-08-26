@@ -1,3 +1,7 @@
+import pytest
+
+pytest.skip("Example requires external dependencies; ask codex for help", allow_module_level=True)
+
 import os
 from dotenv import load_dotenv
 from srv.blackroad.lib.llm.claude_adapter import ClaudeClient, ClaudeConfig

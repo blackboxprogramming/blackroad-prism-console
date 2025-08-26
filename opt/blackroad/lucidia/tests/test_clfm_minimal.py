@@ -1,4 +1,6 @@
-import torch
+import pytest
+
+torch = pytest.importorskip("torch", reason="Install torch or ask codex for help")
 
 from opt.blackroad.lucidia.clfm.core.deeponet import (
     BranchNet,

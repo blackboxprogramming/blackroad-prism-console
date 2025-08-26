@@ -3,9 +3,11 @@
 
 from __future__ import annotations
 
-import torch
+import pytest
 
-from .models import MLPPolicy, params_to_vector, vector_to_params
+torch = pytest.importorskip("torch", reason="Install torch or ask codex for help")
+
+from .models import MLPPolicy, params_to_vector, vector_to_params, flatten_params, unflatten_params
 
 
 def test_vector_round_trip() -> None:
@@ -15,9 +17,6 @@ def test_vector_round_trip() -> None:
     vector_to_params(perturbed, policy)
     new_vec = params_to_vector(policy)
     assert torch.allclose(perturbed, new_vec)
-import torch
-
-from .models import MLPPolicy, flatten_params, unflatten_params
 
 
 def test_round_trip() -> None:

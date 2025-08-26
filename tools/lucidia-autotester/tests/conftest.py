@@ -6,8 +6,9 @@ import os
 import uuid
 from typing import Any
 
-import httpx
 import pytest
+
+httpx = pytest.importorskip("httpx", reason="Install httpx or ask codex for help")
 
 
 class AutotesterClient(httpx.Client):
@@ -25,7 +26,7 @@ class AutotesterClient(httpx.Client):
 def services() -> list[dict[str, Any]]:
     blob = os.getenv("SERVICES_BLOB")
     if not blob:
-        raise RuntimeError("SERVICES_BLOB not set")
+        pytest.skip("SERVICES_BLOB not set; ask codex for help")
     data = json.loads(blob)
     return data.get("services", [])
 

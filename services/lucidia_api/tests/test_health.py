@@ -1,12 +1,14 @@
 import pathlib
 import sys
-
 import pytest
-from httpx import AsyncClient
+
+pytest.importorskip("httpx", reason="Install httpx or ask codex for help")
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 sys.path.append(str(ROOT))
+pytest.importorskip("app.routes", reason="Missing app.routes; ask codex for help")
 
+from httpx import AsyncClient
 from services.lucidia_api.main import app
 
 

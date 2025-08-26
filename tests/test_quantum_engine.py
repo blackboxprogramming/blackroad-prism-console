@@ -1,11 +1,11 @@
 import importlib
-
 import pytest
-import torch
+
+torch = pytest.importorskip("torch", reason="Install torch or ask codex for help")
+tq = pytest.importorskip("third_party.torchquantum", reason="Install torchquantum or ask codex for help")
 
 from lucidia.quantum_engine import guard_env, set_seed, enforce_import_block
 from lucidia.quantum_engine.models import PQCClassifier
-from third_party import torchquantum as tq
 
 
 def test_rx_ry_rz_grad():
