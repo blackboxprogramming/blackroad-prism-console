@@ -85,6 +85,31 @@ class AutoNovelAgent:
             "discovering wonders along the way."
         )
 
+    def generate_story_series(
+        self, themes: List[str], protagonist: str = "An adventurer"
+    ) -> List[str]:
+        """Generate a series of short stories for multiple themes.
+
+        Args:
+            themes: A list of themes. Each must be a non-empty string.
+            protagonist: Name or description of the main character used for all
+                stories.
+
+        Returns:
+            A list containing a short story for each provided theme.
+
+        Raises:
+            ValueError: If ``themes`` is empty or any theme is blank.
+        """
+        if not themes:
+            raise ValueError("Themes list must not be empty.")
+        stories: List[str] = []
+        for theme in themes:
+            if not theme or not theme.strip():
+                raise ValueError("Each theme must be a non-empty string.")
+            stories.append(self.generate_story(theme, protagonist))
+        return stories
+
 
 if __name__ == "__main__":
     agent = AutoNovelAgent()

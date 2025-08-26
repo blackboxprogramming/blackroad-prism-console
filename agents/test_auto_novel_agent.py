@@ -36,3 +36,12 @@ def test_generate_story_requires_theme():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
         agent.generate_story("")
+
+
+def test_generate_story_series_produces_multiple_stories():
+    agent = AutoNovelAgent()
+    stories = agent.generate_story_series(["mystery", "space"], protagonist="Explorer")
+    assert len(stories) == 2
+    assert "Explorer" in stories[0]
+    assert "mystery" in stories[0]
+    assert "space" in stories[1]
