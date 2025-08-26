@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with: { node-version: 22, cache: 'npm' }
       - name: Ensure default test script
         run: |
           if [ ! -f package.json ]; then npm init -y; fi
