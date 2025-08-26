@@ -3,16 +3,18 @@
 This server exposes simple tools to interact with a locally running
 `ollama` instance. Only models present in the allow-list are accepted.
 """
+
 from __future__ import annotations
 
 import os
 from typing import Any, Dict, List
 
-
 try:
     import requests
 except Exception:  # pragma: no cover - requests may be optional
     requests = None  # type: ignore
+
+session = requests.Session() if requests else None
 
 try:
     from mcp.server import Server as MCPServer
@@ -34,10 +36,10 @@ def _check_model(model: str) -> None:
 
 
 def _post(endpoint: str, payload: Dict[str, Any]) -> Dict[str, Any]:
-    if requests is None:
+    if session is None:
         raise RuntimeError("requests not installed")
     url = f"{OLLAMA_URL}/{endpoint}"
-    response = requests.post(url, json=payload, timeout=TIMEOUT)
+    response = session.post(url, json=payload, timeout=TIMEOUT)
     response.raise_for_status()
     return response.json()
 
