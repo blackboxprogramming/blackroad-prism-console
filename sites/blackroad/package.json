@@ -34,7 +34,7 @@
     "eslint-config-prettier": "^9.1.0",
     "gray-matter": "^4.0.3",
     "husky": "^9.1.5",
-    "marked": "^12.0.2",
+    "marked": "^16.2.0",
     "monaco-editor": "^0.49.0",
     "postcss": "8.5.6",
     "prettier": "^3.3.3",
