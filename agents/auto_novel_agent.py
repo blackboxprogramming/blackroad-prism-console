@@ -72,7 +72,12 @@ class AutoNovelAgent:
 
         Returns:
             A short story string.
+
+        Raises:
+            ValueError: If ``theme`` is empty or only whitespace.
         """
+        if not theme.strip():
+            raise ValueError("Theme must be a non-empty string.")
         return f"{protagonist} set out on a {theme} journey, " "discovering wonders along the way."
 
 

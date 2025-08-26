@@ -30,3 +30,9 @@ def test_create_game_rejects_unsupported_engine():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
         agent.create_game("cryengine")
+
+
+def test_generate_story_requires_theme():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError, match="Theme must be a non-empty string"):
+        agent.generate_story(" ")
