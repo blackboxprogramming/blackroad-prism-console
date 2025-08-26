@@ -6,8 +6,10 @@ const LOG_DIR = path.join(PRISM_ROOT, 'logs');
 const CONTR_DIR = path.join(PRISM_ROOT, 'contradictions');
 const AGENTS_DIR = path.join(PRISM_ROOT, 'agents');
 const IPC_DIR = path.join(PRISM_ROOT, 'ipc');
+const SNAP_DIR = path.join(PRISM_ROOT, 'snapshots');
+const SYM_DIR = path.join(PRISM_ROOT, 'symphonies');
 
-[LOG_DIR, CONTR_DIR, AGENTS_DIR, IPC_DIR].forEach(d => fs.mkdirSync(d, { recursive: true }));
+[LOG_DIR, CONTR_DIR, AGENTS_DIR, IPC_DIR, SNAP_DIR, SYM_DIR].forEach(d => fs.mkdirSync(d, { recursive: true }));
 
 const AGENT_TABLE = new Map();
 const AGENTS = ['compiler','optimizer','security','reverse','systems','parallel','quantum_coder','crypto','debugger','ai_builder','refactor','lang_master','exploit','patcher','researcher'];
