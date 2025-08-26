@@ -24,3 +24,8 @@ def test_tokenize_url_empty_token_returns_original():
 def test_tokenize_url_non_https_unchanged():
     ssh_url = "git@github.com:org/repo.git"
     assert tokenize_url(ssh_url, "TOKEN") == ssh_url
+
+
+def test_tokenize_url_existing_credentials_unchanged():
+    url = "https://user@github.com/org/repo.git"
+    assert tokenize_url(url, "TOKEN") == url
