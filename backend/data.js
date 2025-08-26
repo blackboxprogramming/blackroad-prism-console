@@ -170,6 +170,23 @@ function getLogs() {
   return getDb().prepare('SELECT * FROM logs ORDER BY timestamp DESC').all();
 }
 
+// ---- Contradictions ----
+function addContradiction(module, description) {
+  getDb()
+    .prepare('INSERT INTO contradictions (module, description) VALUES (?, ?)')
+    .run(module, description);
+}
+
+function getContradictions() {
+  return getDb()
+    .prepare('SELECT * FROM contradictions ORDER BY timestamp DESC')
+    .all();
+}
+
+function deleteContradiction(id) {
+  return getDb().prepare('DELETE FROM contradictions WHERE id = ?').run(id);
+}
+
 module.exports = {
   getDb,
   closeDb,
@@ -186,5 +203,8 @@ module.exports = {
   deleteTask,
   addLog,
   getLogs,
+  addContradiction,
+  getContradictions,
+  deleteContradiction,
 };
 
