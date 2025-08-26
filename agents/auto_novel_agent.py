@@ -48,8 +48,14 @@ class AutoNovelAgent:
 
         Args:
             engine: Name of the engine to allow.
+
+        Raises:
+            ValueError: If ``engine`` is empty or only whitespace.
         """
-        self.SUPPORTED_ENGINES.add(engine.lower())
+        engine_clean = engine.strip()
+        if not engine_clean:
+            raise ValueError("Engine name must be a non-empty string.")
+        self.SUPPORTED_ENGINES.add(engine_clean.lower())
 
     def remove_supported_engine(self, engine: str) -> None:
         """Remove a game engine if it is currently supported.
