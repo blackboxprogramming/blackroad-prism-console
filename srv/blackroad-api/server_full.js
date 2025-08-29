@@ -1,3 +1,4 @@
+<!-- FILE: srv/blackroad-api/server_full.js -->
 /* BlackRoad API — Express + SQLite + Socket.IO + LLM bridge
    Runs behind Nginx on port 4000 with cookie-session auth.
    Env (optional):
@@ -16,7 +17,11 @@ const fs = require('fs');
 const express = require('express');
 const compression = require('compression');
 const morgan = require('morgan');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const cors = require('cors');
 const cookieSession = require('cookie-session');
+const { body, validationResult } = require('express-validator');
 const Database = require('better-sqlite3');
 const { Server: SocketIOServer } = require('socket.io');
 const { exec } = require('child_process');
@@ -44,6 +49,14 @@ const BRANCH_STAGING = process.env.BRANCH_STAGING || 'staging';
 const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
 const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
+const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim()) : [];
+
+['SESSION_SECRET', 'INTERNAL_TOKEN'].forEach((name) => {
+  if (!process.env[name]) {
+    console.error(`Missing required env ${name}`);
+    process.exit(1);
+  }
+});
 
 const PLANS = [
   {
@@ -139,16 +152,39 @@ function logLine(id, line) {
 
 // --- Middleware
 app.disable('x-powered-by');
+app.use(helmet());
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin || ALLOW_ORIGINS.includes(origin)) return cb(null, true);
+      return cb(new Error('Not allowed'), false);
+    },
+    credentials: true,
+  }),
+);
+app.use(rateLimit({ windowMs: 60_000, max: 100 }));
+app.use((req, res, next) => {
+  const id = randomUUID();
+  req.id = id;
+  const start = Date.now();
+  res.on('finish', () => {
+    logger.info({ id, method: req.method, path: req.originalUrl, status: res.statusCode, duration: Date.now() - start });
+  });
+  next();
+});
 app.use(compression());
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '1mb' }));
 app.use(morgan('tiny'));
-app.use(cookieSession({
-  name: 'brsess',
-  keys: [SESSION_SECRET],
-  httpOnly: true,
-  sameSite: 'lax',
-  maxAge: 1000 * 60 * 60 * 8, // 8h
-}));
+app.use(
+  cookieSession({
+    name: 'brsess',
+    keys: [SESSION_SECRET],
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 1000 * 60 * 60 * 8, // 8h
+  }),
+);
 
 // --- Homepage
 app.get('/', (_, res) => {
@@ -179,15 +215,23 @@ function requireAuth(req, res, next) {
 app.get('/api/session', (req, res) => {
   res.json({ user: req.session?.user || null });
 });
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body || {};
-  // dev defaults: root / Codex2025 (can be replaced with real auth)
-  if ((username === 'root' && password === 'Codex2025') || process.env.BYPASS_LOGIN === 'true') {
-    req.session.user = { username, role: 'dev' };
-    return res.json({ ok: true, user: req.session.user });
-  }
-  return res.status(401).json({ error: 'invalid_credentials' });
-});
+app.post(
+  '/api/login',
+  [body('username').isString(), body('password').isString()],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: 'invalid_request' });
+    }
+    const { username, password } = req.body || {};
+    // dev defaults: root / Codex2025 (can be replaced with real auth)
+    if ((username === 'root' && password === 'Codex2025') || process.env.BYPASS_LOGIN === 'true') {
+      req.session.user = { username, role: 'dev' };
+      return res.json({ ok: true, user: req.session.user });
+    }
+    return res.status(401).json({ error: 'invalid_credentials' });
+  },
+);
 app.post('/api/logout', (req, res) => {
   req.session = null;
   res.json({ ok: true });
@@ -631,3 +675,5 @@ server.listen(PORT, () => {
 // --- Safety
 process.on('unhandledRejection', (e) => console.error('UNHANDLED', e));
 process.on('uncaughtException', (e) => console.error('UNCAUGHT', e));
+
+module.exports = { app, server };

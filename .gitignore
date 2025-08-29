@@ -1,3 +1,4 @@
+# <!-- FILE: .gitignore -->
 # Sensitive SSH keys
 sshprivate.sh
 publicssh.sh
@@ -9,6 +10,10 @@ services/*/node_modules/
 dist/
 .cache/
 .env
+
+# Local data
+srv/blackroad-api/blackroad.db
+_trash/
 
 # Logs
 npm-debug.log*

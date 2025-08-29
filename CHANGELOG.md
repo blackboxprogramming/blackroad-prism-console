@@ -1,3 +1,4 @@
+<!-- FILE: CHANGELOG.md -->
 # Changelog
 
 ## 1.0.0 (2025-08-16)
@@ -16,6 +17,7 @@
 ## Unreleased
 
 - Add `scripts/blackroad_sync.py` CI/CD helper script.
+ - Harden API security middleware and add health tests.
 ## Unreleased
 
 - Add BlackRoad sync pipeline script for end-to-end Codex deployment.
