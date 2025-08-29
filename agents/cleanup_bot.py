@@ -20,6 +20,34 @@ class CleanupBot:
     branches: List[str]
     dry_run: bool = False
 
+    @staticmethod
+    def merged_branches(base: str = "main") -> List[str]:
+        """Return names of branches merged into ``base``.
+
+        Args:
+            base: Branch to compare against.
+
+        Returns:
+            List of merged branch names excluding ``base`` and ``HEAD``.
+        """
+        result = subprocess.run(
+            ["git", "branch", "--merged", base],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        branches: List[str] = []
+        for line in result.stdout.splitlines():
+            name = line.strip().lstrip("*").strip()
+            if name and name not in {base, "HEAD"}:
+                branches.append(name)
+        return branches
+
+    @classmethod
+    def from_merged(cls, base: str = "main", dry_run: bool = False) -> "CleanupBot":
+        """Create a bot targeting branches merged into ``base``."""
+        return cls(branches=cls.merged_branches(base), dry_run=dry_run)
+
     def _run(self, *cmd: str) -> None:
         """Run a command unless in dry-run mode."""
         if self.dry_run:
@@ -56,5 +84,9 @@ class CleanupBot:
 
 
 if __name__ == "__main__":
-    print("CleanupBot ready to delete branches.")
+    bot = CleanupBot.from_merged()
+    results = bot.cleanup()
+    for branch, deleted in results.items():
+        status = "deleted" if deleted else "skipped"
+        print(f"{branch}: {status}")
 
