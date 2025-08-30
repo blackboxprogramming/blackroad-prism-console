@@ -12,24 +12,44 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: 3.11
+          node-version: 20
 
-      - name: Install dependencies
+      - name: Build frontend
+        working-directory: sites/blackroad
         run: |
-          pip install requests
+          npm ci
+          npm run build
+          tar -czf blackroad-site.tar.gz dist
 
-      - name: Run BlackRoad deployment
-        env:
-          BLACKROAD_REMOTE: ${{ secrets.BLACKROAD_REMOTE }}
-          BLACKROAD_REMOTE_PATH: ${{ secrets.BLACKROAD_REMOTE_PATH }}
-          BLACKROAD_BRANCH: ${{ secrets.BLACKROAD_BRANCH || 'main' }}
-          WORKING_COPY_CMD: ${{ secrets.WORKING_COPY_CMD }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SALESFORCE_TOKEN: ${{ secrets.SALESFORCE_TOKEN }}
-          AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
-          LINEAR_TOKEN: ${{ secrets.LINEAR_TOKEN }}
+      - name: Package API
         run: |
-          python3 improved_blackroad_deploy.py push "Automated deploy via GitHub Actions"
+          tar -czf blackroad-api.tar.gz -C srv/blackroad-api .
+
+      - name: Upload artifacts to server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          source: |
+            sites/blackroad/blackroad-site.tar.gz
+            blackroad-api.tar.gz
+          target: /tmp
+
+      - name: Deploy and restart services
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            sudo tar -xzf /tmp/blackroad-site.tar.gz -C /var/www/blackroad --strip-components=1
+            sudo tar -xzf /tmp/blackroad-api.tar.gz -C /srv/blackroad-api --strip-components=1
+            sudo systemctl restart blackroad-api
+            sudo systemctl restart lucidia-llm
+            sudo systemctl status blackroad-api
+            sudo systemctl status lucidia-llm
+            curl -f https://blackroad.io/health
