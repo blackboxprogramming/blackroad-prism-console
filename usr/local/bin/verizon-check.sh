@@ -18,16 +18,28 @@ fi
 
 check_device() {
   if command -v nmcli >/dev/null 2>&1; then
+    set +e
     nmcli device status | awk -v dev="$DEVICE" '$1==dev {print $3}' | grep -q "connected"
+    status=$?
+    set -e
+    return $status
   elif command -v mmcli >/dev/null 2>&1; then
+    set +e
     mmcli -m 0 | grep -q "state:.*connected"
+    status=$?
+    set -e
+    return $status
   else
     return 0
   fi
 }
 
 ping_test() {
+  set +e
   ping -I "$DEVICE" "$PING_HOST" -c3 -W3 >/dev/null 2>&1
+  status=$?
+  set -e
+  return $status
 }
 
 prev_state=$(cat "$STATE_FILE" 2>/dev/null || echo "unknown")
