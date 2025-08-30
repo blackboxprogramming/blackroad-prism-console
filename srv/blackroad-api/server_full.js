@@ -117,11 +117,25 @@ const PLAN_ENTITLEMENTS = {
       limits: { api: { qps: 5 } },
     },
   },
+  builder: {
+    planName: 'Builder',
+    entitlements: {
+      can: { math: { pro: true } },
+      limits: { api: { qps: 10 } },
+    },
+  },
   pro: {
     planName: 'Pro',
     entitlements: {
       can: { math: { pro: true } },
       limits: { api: { qps: 10 } },
+    },
+  },
+  guardian: {
+    planName: 'Guardian',
+    entitlements: {
+      can: { math: { pro: true } },
+      limits: { api: { qps: 20 } },
     },
   },
   enterprise: {
