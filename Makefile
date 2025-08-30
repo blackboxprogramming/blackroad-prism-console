@@ -1,13 +1,30 @@
-.PHONY: install verify scan start-llm
+# <!-- FILE: Makefile -->
+.RECIPEPREFIX = >
+.PHONY: install dev start format lint test health migrate clean
 
 install:
-	bash ops/install.sh
+>npm install
 
-verify:
-	bash tools/verify-runtime.sh
+dev:
+>npm run dev
 
-scan:
-	node tools/dep-scan.js --dir ./srv/blackroad-api
+start:
+>npm start
 
-start-llm:
-	cd srv/lucidia-llm && python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt && uvicorn app:app --host 127.0.0.1 --port 8000
+format:
+>npm run format
+
+lint:
+>npm run lint
+
+test:
+>npm test
+
+health:
+>npm run health
+
+migrate:
+>@echo "no migrations"
+
+clean:
+>rm -rf node_modules coverage

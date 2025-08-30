@@ -1,0 +1,4 @@
+# <!-- FILE: srv/blackroad-api/.eslintignore -->
+node_modules
+blackroad.db
+/_trash

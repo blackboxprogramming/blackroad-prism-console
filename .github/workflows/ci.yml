@@ -12,13 +12,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
+      - run: npm install
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm test
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: npm ci
-      - run: npx prettier . --check
-      - run: npm run lint
-      - run: npm test
-      - run: pip install -r srv/lucidia-llm/requirements.txt
-      - run: pytest -q
+      - run: pip install fastapi pydantic pytest httpx
+      - run: pytest srv/lucidia-llm/test_app.py

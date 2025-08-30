@@ -1,0 +1,6 @@
+{
+  "_comment": "<!-- FILE: var/www/blackroad/.prettierrc.json -->",
+  "printWidth": 80,
+  "singleQuote": true,
+  "semi": true
+}
