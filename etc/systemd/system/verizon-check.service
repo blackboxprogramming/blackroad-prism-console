@@ -1,0 +1,11 @@
+[Unit]
+Description=Verizon LTE connectivity check
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/verizon-check.sh
+EnvironmentFile=/etc/default/verizon-check
+
+[Install]
+WantedBy=multi-user.target
