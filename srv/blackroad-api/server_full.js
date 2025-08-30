@@ -109,6 +109,30 @@ const PLANS = [
   },
 ];
 
+const PLAN_ENTITLEMENTS = {
+  free: {
+    planName: 'Free',
+    entitlements: {
+      can: { math: { pro: false } },
+      limits: { api: { qps: 5 } },
+    },
+  },
+  pro: {
+    planName: 'Pro',
+    entitlements: {
+      can: { math: { pro: true } },
+      limits: { api: { qps: 10 } },
+    },
+  },
+  enterprise: {
+    planName: 'Enterprise',
+    entitlements: {
+      can: { math: { pro: true } },
+      limits: { api: { qps: 20 } },
+    },
+  },
+};
+
 // Ensure DB dir exists
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
@@ -231,7 +255,7 @@ app.post(
     const { username, password } = req.body || {};
     // dev defaults: root / Codex2025 (can be replaced with real auth)
     if ((username === 'root' && password === 'Codex2025') || process.env.BYPASS_LOGIN === 'true') {
-      req.session.user = { username, role: 'dev' };
+      req.session.user = { username, role: 'dev', plan: 'free' };
       return res.json({ ok: true, user: req.session.user });
     }
     return res.status(401).json({ error: 'invalid_credentials' });
@@ -254,6 +278,12 @@ app.get('/api/billing/plans', (req, res) => {
       features,
     }))
   );
+});
+
+app.get('/api/billing/entitlements/me', requireAuth, (req, res) => {
+  const plan = req.session.user.plan || 'free';
+  const conf = PLAN_ENTITLEMENTS[plan] || PLAN_ENTITLEMENTS.free;
+  res.json({ planName: conf.planName, entitlements: conf.entitlements });
 });
 
 app.post('/api/billing/checkout', requireAuth, (req, res) => {
