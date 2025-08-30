@@ -46,6 +46,8 @@ rag/index/meta.json
 *.enc
 !secrets/README.md
 !secrets/*.env.example
+!secrets/hosts.json
+!secrets/known_hosts
 
 # Codex CI kit
 tests/_codex_autogen/
