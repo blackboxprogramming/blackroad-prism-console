@@ -1,8 +1,9 @@
 """Core cognitive primitives for Lucidia.
 
-This module defines a tiny `LucidiaBrain` class that can register
-processing steps and execute them sequentially.  It acts as a very small
-placeholder for more sophisticated reasoning engines.
+This module defines a tiny :class:`LucidiaBrain` class that can register
+processing steps and execute them sequentially. Steps may be given unique
+names so they can later be inspected, removed, or replaced. The class acts
+as a very small placeholder for more sophisticated reasoning engines.
 """
 from __future__ import annotations
 
@@ -14,8 +15,9 @@ class LucidiaBrain:
     """Simple pipeline-based brain for Lucidia.
 
     Functions registered via :meth:`register` are called in the order they
-    were added when :meth:`think` is invoked.  Each function receives the
-    current value and returns the next value.
+    were added when :meth:`think` is invoked. Each step has a unique name,
+    allowing introspection via :pyattr:`steps` as well as selective removal
+    with :meth:`unregister` or clearing with :meth:`reset`.
     """
 
     def __init__(self) -> None:

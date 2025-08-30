@@ -1,6 +1,7 @@
+"""Tests for LucidiaBrain step management and execution."""
+
 from lucidia.brain import LucidiaBrain
 import pytest
-
 
 def test_pipeline_executes_in_order():
     brain = LucidiaBrain()
