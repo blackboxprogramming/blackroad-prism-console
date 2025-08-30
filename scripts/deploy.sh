@@ -1,24 +1,43 @@
-# FILE: /srv/blackroad-api/scripts/deploy.sh
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
-LOG_DIR="/var/log/blackroad-api"
-mkdir -p "$LOG_DIR"
-LOG_FILE="$LOG_DIR/deploy.log"
+: "${SERVER_HOST:?SERVER_HOST required}"
+: "${SERVER_USER:?SERVER_USER required}"
+: "${SSH_KEY:?SSH_KEY required}"
+WEB_PATH="${WEB_PATH:-/var/www/blackroad}"
+API_PATH="${API_PATH:-/srv/blackroad-api}"
 
-exec >>"$LOG_FILE" 2>&1
-echo "---- Deploy started at $(date -Is) ----"
+key_file=$(mktemp)
+trap 'rm -f "$key_file"' EXIT
+printf '%s\n' "$SSH_KEY" >"$key_file"
+chmod 600 "$key_file"
 
-# Example: pull latest, install, restart
-if [ -d /srv/blackroad-api/.git ]; then
-  cd /srv/blackroad-api
-  git pull --rebase || true
-  npm ci || npm install
-fi
+SSH="ssh -i $key_file -o StrictHostKeyChecking=no"
+RSYNC="rsync -az --delete -e \"$SSH\""
+release="$(date +%Y%m%d%H%M%S)"
 
-# Restart service if present
-if systemctl is-enabled --quiet blackroad-api; then
-  systemctl restart blackroad-api
-fi
+$SSH "$SERVER_USER@$SERVER_HOST" "mkdir -p '$WEB_PATH/releases' '$API_PATH/releases'"
 
-echo "---- Deploy finished at $(date -Is) ----"
+$RSYNC dist/web/ "$SERVER_USER@$SERVER_HOST:$WEB_PATH/releases/$release/"
+$RSYNC dist/api/ "$SERVER_USER@$SERVER_HOST:$API_PATH/releases/$release/"
+
+$SSH "$SERVER_USER@$SERVER_HOST" "WEB_PATH='$WEB_PATH' API_PATH='$API_PATH' RELEASE='$release' /bin/sh -s" <<'EOS'
+set -eu
+
+old_web=$(readlink -f "$WEB_PATH/current" 2>/dev/null || true)
+old_api=$(readlink -f "$API_PATH/current" 2>/dev/null || true)
+
+rollback() {
+  [ -n "$old_web" ] && ln -sfn "$old_web" "$WEB_PATH/current"
+  [ -n "$old_api" ] && ln -sfn "$old_api" "$API_PATH/current"
+  rm -rf "$WEB_PATH/releases/$RELEASE" "$API_PATH/releases/$RELEASE"
+  systemctl restart blackroad-api || true
+}
+trap rollback INT TERM HUP ERR
+
+ln -sfn "$WEB_PATH/releases/$RELEASE" "$WEB_PATH/current"
+ln -sfn "$API_PATH/releases/$RELEASE" "$API_PATH/current"
+
+systemctl restart blackroad-api
+curl -fsS http://localhost/health >/dev/null
+EOS
