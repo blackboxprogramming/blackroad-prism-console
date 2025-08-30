@@ -1,8 +1,9 @@
 """Core cognitive primitives for Lucidia.
 
-This module defines a tiny `LucidiaBrain` class that can register
-processing steps and execute them sequentially.  It acts as a very small
-placeholder for more sophisticated reasoning engines.
+This module defines a tiny `LucidiaBrain` class that can register named
+processing steps and execute them sequentially. Steps may later be
+introspected, unregistered, or the entire pipeline reset. It acts as a
+very small placeholder for more sophisticated reasoning engines.
 """
 from __future__ import annotations
 
@@ -14,8 +15,9 @@ class LucidiaBrain:
     """Simple pipeline-based brain for Lucidia.
 
     Functions registered via :meth:`register` are called in the order they
-    were added when :meth:`think` is invoked.  Each function receives the
-    current value and returns the next value.
+    were added when :meth:`think` is invoked. Each function receives the
+    current value and returns the next value. Steps can be named to allow
+    subsequent removal or inspection.
     """
 
     def __init__(self) -> None:
@@ -57,7 +59,7 @@ class LucidiaBrain:
 
     @property
     def steps(self) -> List[str]:
-        """Return the list of registered step names."""
+        """Return the names of registered steps in execution order."""
 
         return [name for name, _ in self._steps]
 
