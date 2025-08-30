@@ -1,4 +1,12 @@
+<!-- FILE: CHANGELOG.md -->
+
 # Changelog
+
+## 2025-08-22
+
+- Hardened API security, added env checks, request ID logging, and body limits.
+- Removed committed logs and added ignore rules.
+- Expanded Jest tests and updated RUNME script.
 
 ## 2025-08-16
 

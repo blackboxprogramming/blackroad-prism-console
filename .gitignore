@@ -16,6 +16,9 @@ srv/blackroad-api/blackroad.db
 _trash/
 
 # Logs
+logs/
+srv/blackroad-api/logs/
+var/www/blackroad/logs/
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*

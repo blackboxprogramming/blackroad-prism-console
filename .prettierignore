@@ -8,3 +8,4 @@ public/vendor/
 .github/workflows/auto-heal.yml
 .github/workflows/flags.yml
 _trash
+tests/api_health.test.js

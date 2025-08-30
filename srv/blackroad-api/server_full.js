@@ -9,6 +9,7 @@
      ALLOW_SHELL=false
 */
 
+require('dotenv').config();
 const http = require('http');
 const os = require('os');
 const path = require('path');
@@ -49,9 +50,11 @@ const BRANCH_STAGING = process.env.BRANCH_STAGING || 'staging';
 const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
 const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
-const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim()) : [];
+const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
+  ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
+  : [];
 
-['SESSION_SECRET', 'INTERNAL_TOKEN'].forEach((name) => {
+['SESSION_SECRET', 'INTERNAL_TOKEN', 'ALLOW_ORIGINS'].forEach((name) => {
   if (!process.env[name]) {
     console.error(`Missing required env ${name}`);
     process.exit(1);
@@ -166,6 +169,7 @@ app.use(rateLimit({ windowMs: 60_000, max: 100 }));
 app.use((req, res, next) => {
   const id = randomUUID();
   req.id = id;
+  res.setHeader('X-Request-Id', id);
   const start = Date.now();
   res.on('finish', () => {
     logger.info({ id, method: req.method, path: req.originalUrl, status: res.statusCode, duration: Date.now() - start });
@@ -174,6 +178,7 @@ app.use((req, res, next) => {
 });
 app.use(compression());
 app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(morgan('tiny'));
 app.use(
   cookieSession({
