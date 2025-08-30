@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
@@ -9,15 +10,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
-      - run: npm run format:check
+      - run: npm ci
       - run: npm run lint
       - run: npm test
+      - run: npm run build
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - run: pip install fastapi pydantic pytest httpx
       - run: pytest srv/lucidia-llm/test_app.py
+
+      - name: Deploy
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          WEB_PATH: /var/www/blackroad
+          API_PATH: /srv/blackroad-api
+        run: scripts/deploy.sh
