@@ -62,3 +62,5 @@ services/quantum_lab/*.db
 # Rust build artifacts
 target/
 **/target/
+*.db
+*.sqlite

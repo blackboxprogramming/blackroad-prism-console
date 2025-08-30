@@ -1,11 +1,15 @@
 <!-- FILE: CLEANUP_RESULTS.md -->
+
 ### Summary
-- Hardened API server with helmet, CORS allowlist, rate limiting, request logging, and input validation.
-- Added `.env.sample`, lint/test config, and health script.
-- Created smoke tests for health endpoint and Python LLM stub.
-- Moved legacy files to `_trash`.
+
+- Hardened API with helmet, rate limiting, strict CORS, body-size limits, and JSON request logging.
+- Added `.env.sample` with required vars and fail-fast checks.
+- Introduced Jest smoke tests for health and security headers.
 
 ### Verification Commands
-- `curl -I http://localhost:4000/api/health`
+
+- `npm run format:check`
+- `npm run lint`
 - `npm test`
-- `pytest tests/lucidia_llm_stub_test.py`
+- `curl -I http://localhost:4000/health`
+- `curl -I http://localhost:4000/api/health`
