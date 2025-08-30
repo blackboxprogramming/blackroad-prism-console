@@ -39,6 +39,23 @@ bash tools/verify-runtime.sh
   - Ensure your SQLite file exists (defaults to `blackroad.db` inside the API dir if `DB_PATH` is not set)
   - Check if `127.0.0.1:8000` is serving `/health`. If not, it prints a one-liner to launch the stub.
 
+## Git workflow
+When you're ready to share changes:
+
+1. Stage your updates:
+   ```bash
+   git add -A
+   ```
+2. Commit with a clear message:
+   ```bash
+   git commit -m "feat: describe your change"
+   ```
+3. Push the branch:
+   ```bash
+   git push origin <branch-name>
+   ```
+4. Open a Pull Request and review the CI results.
+
 ## Developing with VS Code and Docker on macOS
 1. Start [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac/).
 2. Install [Visual Studio Code](https://code.visualstudio.com/) and the **Dev Containers** extension.
