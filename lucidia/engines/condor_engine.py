@@ -109,9 +109,14 @@ def solve_algebraic(model_cls: Type[Any], **params: Any) -> Any:
     """Instantiate ``model_cls`` and call its ``solve`` method.
 
     The returned object is converted to basic Python types so that it is
-    easy to serialise to JSON.  The function does not require the real
-    Condor dependency which keeps unit tests lightweight.
+    easy to serialise to JSON.  When the real Condor library is absent,
+    models that originate from the ``condor`` package cannot be
+    instantiated and a :class:`RuntimeError` is raised.  User supplied
+    models remain supported even without Condor installed.
     """
+
+    if condor is None and model_cls.__module__.split(".")[0] == "condor":
+        raise RuntimeError("Condor is not installed")
 
     model = model_cls(**params)
     result = model.solve() if hasattr(model, "solve") else model
