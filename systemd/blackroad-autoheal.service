@@ -1,0 +1,11 @@
+[Unit]
+Description=BlackRoad Auto-Heal watchdog
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/blackroad-autoheal.sh
+
+[Install]
+WantedBy=multi-user.target

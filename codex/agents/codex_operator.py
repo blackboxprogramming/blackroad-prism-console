@@ -69,16 +69,22 @@ def list_event_files():
     return [Path(f) for f in files]
 
 def read_new_lines(fp: Path, last_offset: int):
+    """Return a list of (line, offset_after_line) tuples for new data."""
     size = fp.stat().st_size
     if last_offset > size:
         # file rotated or truncated; start over
         last_offset = 0
+    entries = []
     with fp.open("r", encoding="utf-8", errors="ignore") as f:
         f.seek(last_offset)
-        data = f.read()
-    new_offset = last_offset + len(data.encode("utf-8"))
-    lines = [ln for ln in data.splitlines() if ln.strip()]
-    return lines, new_offset
+        while True:
+            line = f.readline()
+            if not line:
+                break
+            pos = f.tell()
+            if line.strip():
+                entries.append((line.strip(), pos))
+    return entries
 
 def load_offsets():
     return load_json(OFFSETS_PATH, {}) or {}
@@ -218,20 +224,19 @@ def process_cycle(cfg, offsets, print_alerts=True):
     for fp in files:
         key = str(fp)
         last = offsets.get(key, 0)
-        lines, new_off = read_new_lines(fp, last)
-        if not lines:
-            offsets[key] = new_off
+        entries = read_new_lines(fp, last)
+        if not entries:
+            offsets[key] = last
             continue
-        for line in lines[: cfg["max_events_per_cycle"]]:
+        for line, pos in entries[: cfg["max_events_per_cycle"]]:
             evt = parse_event(line)
-            if not evt:
-                continue
-            processed += 1
-            kind = evt.get("kind")
-            if print_alerts and (not cfg["quiet_kinds"] or kind not in set(cfg["quiet_kinds"])) and (not cfg["alert_on"] or kind in set(cfg["alert_on"])):
-                print(line_for_alert(evt))
-            handle_event(evt, cfg)
-        offsets[key] = new_off
+            if evt:
+                processed += 1
+                kind = evt.get("kind")
+                if print_alerts and (not cfg["quiet_kinds"] or kind not in set(cfg["quiet_kinds"])) and (not cfg["alert_on"] or kind in set(cfg["alert_on"])):
+                    print(line_for_alert(evt))
+                handle_event(evt, cfg)
+            offsets[key] = pos
     return processed
 
 def main():

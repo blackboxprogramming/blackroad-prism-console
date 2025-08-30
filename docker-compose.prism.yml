@@ -1,27 +1,60 @@
 version: "3.9"
 services:
   api:
-    image: node:20-alpine
-    container_name: blackroad-api
-    working_dir: /app
-    restart: unless-stopped
-    environment:
-      - PORT=4000
-      - NODE_ENV=production
-    volumes:
-      - ./services/api:/app:ro
-    command: ["node", "server.mjs"]
+    build: ./services/api
+    container_name: api
     ports:
       - "4000:4000"
-
-  site:
-    image: caddy:2.8-alpine
-    container_name: blackroad-site
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
     volumes:
-      - ./sites/blackroad/dist:/srv:ro
-      - ./sites/blackroad/Caddyfile:/etc/caddy/Caddyfile:ro
+      - blackroad-db:/app/blackroad.db
+    command: ["node", "server.mjs"]
+
+  llm:
+    build: ./srv/lucidia-llm
+    container_name: llm
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  math:
+    build: ./srv/lucidia-math
+    container_name: math
+    ports:
+      - "8500:8500"
+    volumes:
+      - math-output:/app/output
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8500/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/prism.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - api
+      - llm
+      - math
+
+volumes:
+  blackroad-db:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./srv/blackroad-api/blackroad.db
+  math-output:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./srv/lucidia-math/output

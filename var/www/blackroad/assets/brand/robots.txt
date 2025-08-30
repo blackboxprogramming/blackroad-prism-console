@@ -1,0 +1,4 @@
+# FILE: /var/www/blackroad/assets/brand/robots.txt
+User-agent: *
+Allow: /
+Sitemap: https://blackroad.io/sitemap.xml

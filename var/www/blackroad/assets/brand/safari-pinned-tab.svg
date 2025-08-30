@@ -1,0 +1,7 @@
+<!-- FILE: /var/www/blackroad/assets/brand/safari-pinned-tab.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <path fill="#000000" d="M128,8c66.3,0,120,53.7,120,120s-53.7,120-120,120S8,194.3,8,128S61.7,8,128,8z"/>
+  <path fill="#FFFFFF" d="M80 240 L128 48 L176 240 Z"/>
+  <path fill="#000000" opacity=".14" d="M88 240 L128 64 L168 240 Z"/>
+  <rect x="122.5" y="56" width="11" height="180" fill="#FFFFFF"/>
+</svg>

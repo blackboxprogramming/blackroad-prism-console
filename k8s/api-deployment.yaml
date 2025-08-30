@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: prism
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/blackroad-prism/blackroad-api:latest
+          ports:
+            - containerPort: 4000
+          envFrom:
+            - configMapRef:
+                name: prism-config
+            - secretRef:
+                name: prism-secrets
+          volumeMounts:
+            - name: blackroad-db
+              mountPath: /data
+      volumes:
+        - name: blackroad-db
+          persistentVolumeClaim:
+            claimName: blackroad-db-pvc

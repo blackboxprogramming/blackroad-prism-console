@@ -1,0 +1,35 @@
+name: BlackRoad Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          pip install requests
+
+      - name: Run BlackRoad deployment
+        env:
+          BLACKROAD_REMOTE: ${{ secrets.BLACKROAD_REMOTE }}
+          BLACKROAD_REMOTE_PATH: ${{ secrets.BLACKROAD_REMOTE_PATH }}
+          BLACKROAD_BRANCH: ${{ secrets.BLACKROAD_BRANCH || 'main' }}
+          WORKING_COPY_CMD: ${{ secrets.WORKING_COPY_CMD }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SALESFORCE_TOKEN: ${{ secrets.SALESFORCE_TOKEN }}
+          AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
+          LINEAR_TOKEN: ${{ secrets.LINEAR_TOKEN }}
+        run: |
+          python3 improved_blackroad_deploy.py push "Automated deploy via GitHub Actions"

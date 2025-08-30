@@ -1,0 +1,6 @@
+{
+  "name": "refactor",
+  "version": "1.0.0",
+  "description": "refactor elite coding agent",
+  "capabilities": ["ping", "analyze", "codegen"]
+}

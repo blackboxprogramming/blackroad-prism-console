@@ -1,0 +1,12 @@
+(module
+  (import "prism" "prism_send" (func $send (param i32 i32)))
+  (import "prism" "prism_recv" (func $recv (param i32 i32) (result i32)))
+  (memory (export "memory") 1)
+  (func (export "handle")
+    (local $len i32)
+    (local.set $len (call $recv (i32.const 0) (i32.const 1024)))
+    (if (i32.gt_s (local.get $len) (i32.const 0))
+      (then (call $send (i32.const 0) (local.get $len)))
+    )
+  )
+)

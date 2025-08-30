@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>BlackRoad Deploys</title>
+<style>
+:root { --accent:#FF4FD8; --accent-2:#0096FF; --accent-3:#FDBA2D; font-family:sans-serif; }
+body { margin:0; padding:1rem; background:#f5f5f5; }
+header { font-size:1.5rem; margin-bottom:1rem; }
+button { background:var(--accent); color:#fff; border:none; padding:0.5rem 1rem; margin:0.25rem; cursor:pointer; }
+#log { background:#000; color:#0f0; padding:1rem; height:200px; overflow:auto; white-space:pre-wrap; }
+</style>
+</head>
+<body>
+<header>BlackRoad Deploys</header>
+<div id="login">
+  <input type="password" id="token" placeholder="Token" />
+  <button onclick="login()">Login</button>
+</div>
+<div id="app" style="display:none;">
+  <div id="health"></div>
+  <div>
+    <button onclick="dryRun()">Dry-Run Plan</button>
+    <button onclick="deploy()">Deploy Now</button>
+    <input id="rollbackId" placeholder="Release ID" />
+    <button onclick="rollback()">Rollback</button>
+  </div>
+  <table id="jobs"></table>
+  <pre id="log"></pre>
+</div>
+<script>
+let token='';
+async function login(){ token=document.getElementById('token').value; document.getElementById('login').style.display='none'; document.getElementById('app').style.display='block'; load(); }
+async function load(){ const h=await fetch('/api/health').then(r=>r.json()); document.getElementById('health').innerText='API OK: '+h.ok; refreshJobs(); }
+async function refreshJobs(){ const j=await fetch('/api/jobs').then(r=>r.json()); const tbl=document.getElementById('jobs'); tbl.innerHTML='<tr><th>ID</th><th>Type</th><th>Status</th></tr>'; j.forEach(job=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${job.id}</td><td>${job.type}</td><td>${job.status}</td>`; tr.onclick=()=>watch(job.id); tbl.appendChild(tr); }); }
+function watch(id){ const log=document.getElementById('log'); log.textContent=''; const es=new EventSource(`/api/jobs/${id}/log`); es.onmessage=e=>{log.textContent+=e.data+'\n'; log.scrollTop=log.scrollHeight;}; es.addEventListener('end',()=>es.close()); }
+async function dryRun(){ await fetch('/api/deploy/plan',{method:'POST',headers:{'X-Internal-Token':token}}).then(r=>r.json()).then(alert); }
+async function deploy(){ await fetch('/api/deploy/execute',{method:'POST',headers:{'Content-Type':'application/json','X-Internal-Token':token},body:JSON.stringify({})}).then(r=>r.json()).then(()=>refreshJobs()); }
+async function rollback(){ const id=document.getElementById('rollbackId').value; await fetch('/api/rollback/'+id,{method:'POST',headers:{'X-Internal-Token':token}}).then(r=>r.json()).then(()=>refreshJobs()); }
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Watcher Bot</title>
+  <style>
+    body{font-family:sans-serif;margin:0;padding:0;background:#f7f7f7;color:#333}
+    header{background:#0096FF;color:#fff;padding:10px;text-align:center}
+    .status{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:20px}
+    .card{border-radius:4px;padding:10px 15px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.1);min-width:120px;text-align:center}
+    .green{border-top:4px solid #00a862}
+    .yellow{border-top:4px solid #FDBA2D}
+    .red{border-top:4px solid #FF4FD8}
+    table{width:90%;margin:20px auto;border-collapse:collapse}
+    th,td{border:1px solid #ccc;padding:8px}
+    th{background:#eee}
+    button{background:#FF4FD8;color:#fff;border:none;padding:6px 12px;border-radius:3px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <header><h1>Watcher Bot Dashboard</h1></header>
+  <div class="status" id="status"></div>
+  <h2 style="text-align:center">Incidents</h2>
+  <table id="incidents"><thead><tr><th>ID</th><th>Component</th><th>Severity</th><th>Status</th><th>Ack</th></tr></thead><tbody></tbody></table>
+  <script>
+    const STATUS=document.getElementById('status');
+    const INC=document.getElementById('incidents').querySelector('tbody');
+    async function refresh(){
+      const health=await fetch('/api/watcher/health').then(r=>r.json());
+      STATUS.innerHTML='';
+      health.checks.forEach(c=>{
+        const div=document.createElement('div');
+        div.className='card '+(c.ok?'green':'red');
+        div.innerHTML=`<strong>${c.component}</strong><br>${c.message}`;
+        STATUS.appendChild(div);
+      });
+      const incidents=await fetch('/api/watcher/incidents').then(r=>r.json());
+      INC.innerHTML='';
+      incidents.forEach(i=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${i.id}</td><td>${i.component}</td><td>${i.severity}</td><td>${i.status}</td>`+
+          `<td>${i.status==='open'?'<button data-id="'+i.id+'">Ack</button>':''}</td>`;
+        INC.appendChild(tr);
+      });
+    }
+    setInterval(refresh,30000);refresh();
+    document.addEventListener('click',async e=>{
+      if(e.target.tagName==='BUTTON'){const id=e.target.dataset.id;await fetch('/api/watcher/incidents/'+id+'/ack',{method:'POST',headers:{'X-Internal-Token':'change-me'}});refresh();}}
+    );
+  </script>
+</body>
+</html>

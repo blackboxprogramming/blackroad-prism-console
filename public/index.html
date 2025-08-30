@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BlackRoad — Co-create with Lucidia</title>
+  <meta name="description" content="Symbolic agents, RoadCoin metering, and contradiction-aware AI." />
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body{margin:0;font-family:system-ui, sans-serif;background:#0c0f14;color:#e7ecf3}
+    a{color:#0096FF;text-decoration:none}
+    a:focus-visible{outline:2px solid #fff;outline-offset:2px}
+    .container{max-width:960px;margin:0 auto;padding:1rem}
+    .stats{display:flex;gap:1rem;flex-wrap:wrap}
+    .stat{flex:1 1 150px;background:#12161d;padding:1rem;border-radius:8px;text-align:center}
+    .features{display:flex;gap:1rem;flex-wrap:wrap;margin-top:2rem}
+    .card{flex:1 1 260px;background:#12161d;padding:1rem;border-radius:8px}
+    footer{margin-top:3rem;font-size:.875rem;text-align:center;color:#94A3B8}
+  </style>
+</head>
+<body>
+  <main class="container" id="app">
+    <section id="hero"></section>
+    <section id="live" class="stats" aria-live="polite"></section>
+    <section id="features" class="features"></section>
+    <section id="faq"></section>
+    <footer id="footer"></footer>
+  </main>
+  <script>
+    function el(tag, attrs={}, children=[]) {
+      const e=document.createElement(tag);Object.entries(attrs).forEach(([k,v])=>e[k]=v);children.forEach(c=>e.append(c));return e;
+    }
+    function updateStats(s){
+      const live=document.getElementById('live');
+      live.innerHTML='';
+      const items=[
+        ['Agents active', s.agents_active],
+        ['RC minted (24h)', s.rc_minted_24h],
+        ['Contradictions (24h)', s.contradictions_24h],
+        ['Uptime (24h)', s.uptime_24h_percent+'%'],
+        ['p50 latency', s.latency_p50_ms+'ms']
+      ];
+      for(const [label,val] of items){
+        live.append(el('div',{className:'stat'},[el('div',{},label),el('strong',{},val.toString())]));
+      }
+    }
+    async function boot(){
+      const landing=await fetch('/api/public/landing').then(r=>r.json());
+      const h=landing.sections.hero;
+      const hero=document.getElementById('hero');
+      hero.append(el('h1',{},h.headline), el('p',{},h.sub));
+      hero.append(el('p',{},''));
+      const btn=el('a',{href:'/login',className:'btn'},h.primaryCta);hero.append(btn);
+      document.title='BlackRoad — Co-create with Lucidia';
+      const features=landing.sections.features||[];const featWrap=document.getElementById('features');
+      features.forEach(f=>{featWrap.append(el('div',{className:'card'},[el('h3',{},f.title),el('p',{},f.desc)]));});
+      const faq=landing.sections.faq||[];const faqWrap=document.getElementById('faq');
+      faq.forEach(q=>{const d=el('details');d.append(el('summary',{},q.q),el('p',{},q.a));faqWrap.append(d);});
+      const footer=document.getElementById('footer');
+      const links=(landing.sections.footer||{links:[]}).links.map(l=>`<a href="${l.to}">${l.label}</a>`).join(' | ');
+      footer.innerHTML=links+`<div style="margin-top:0.5rem">&copy; ${new Date().getFullYear()} BlackRoad.io</div>`;
+      updateStats(await fetch('/api/public/stats').then(r=>r.json()));
+      const sock=io();
+      sock.on('public:stats', updateStats);
+    }
+    boot();
+  </script>
+</body>
+</html>

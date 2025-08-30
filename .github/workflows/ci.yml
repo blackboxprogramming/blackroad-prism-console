@@ -1,17 +1,23 @@
 name: CI
+
 on:
-  push: { branches: [main] }
+  push:
   pull_request:
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm test
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -r services/bridge/requirements.txt || true
-      - run: pip install -r packages/agents/requirements.txt || true
-      - run: pytest -q services/bridge || true
-      - run: pytest -q packages/agents || true
+      - run: pip install fastapi pydantic pytest httpx
+      - run: pytest srv/lucidia-llm/test_app.py

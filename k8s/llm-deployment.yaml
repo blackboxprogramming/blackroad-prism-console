@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm
+  namespace: prism
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llm
+  template:
+    metadata:
+      labels:
+        app: llm
+    spec:
+      containers:
+        - name: llm
+          image: ghcr.io/blackroad-prism/lucidia-llm:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: prism-config
+            - secretRef:
+                name: prism-secrets

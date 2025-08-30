@@ -2,4 +2,5 @@
 *.sh text eol=lf
 *.md diff=markdown
 *.{js,jsx,ts,tsx} linguist-language=JavaScript
-
+*.py text eol=lf
+*.db binary

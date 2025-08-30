@@ -1,0 +1,23 @@
+# FILE: /etc/systemd/system/blackroad-api.service
+[Unit]
+Description=BlackRoad.io API (Express)
+After=network.target
+
+[Service]
+Type=simple
+Environment=NODE_ENV=production
+EnvironmentFile=/srv/blackroad-api/.env
+WorkingDirectory=/srv/blackroad-api
+ExecStart=/usr/bin/node /srv/blackroad-api/server_full.js
+Restart=always
+RestartSec=3
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/srv/blackroad-api /var/log/blackroad-api
+
+[Install]
+WantedBy=multi-user.target

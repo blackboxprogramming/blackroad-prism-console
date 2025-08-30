@@ -1,14 +1,19 @@
 import re
-from typing import Tuple, List
+from typing import List, Tuple
+
 
 class Safety:
+    """Minimal moderation helper for blocklist checks and PII redaction."""
+
     def __init__(self, blocklist: List[str], pii_patterns: List[str], action: str):
-        self.blocklist = [re.compile(p) for p in blocklist]
-        self.pii = [re.compile(p) for p in pii_patterns]
+        # Compile patterns case-insensitively to catch mixed-case input
+        self.blocklist = [re.compile(p, re.IGNORECASE) for p in blocklist]
+        self.pii = [re.compile(p, re.IGNORECASE) for p in pii_patterns]
         self.action = action
 
     def scan(self, text: str) -> Tuple[bool, str, List[str]]:
-        """Returns (blocked, cleaned_text, hits)"""
+        """Scan ``text`` and return ``(blocked, cleaned_text, hits)``."""
+
         hits = []
         for rx in self.blocklist:
             if rx.search(text):

@@ -1,33 +1,27 @@
 {
-  "name": "BlackRoad Dev",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
-  "features": {
-    "ghcr.io/devcontainers/features/python:1": {},
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
-  },
-  "postCreateCommand": "bash scripts/install-all.sh || true",
-  "customizations": {
-    "vscode": {
-      "settings": { "editor.formatOnSave": true, "files.eol": "\n" },
-      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode", "ms-playwright.playwright"]
-    }
-  },
-  "remoteUser": "node"
   "name": "blackroad",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
   "features": {
+    "ghcr.io/devcontainers/features/python:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "postCreateCommand": "bash scripts/bootstrap.sh",
+  "postCreateCommand": "bash scripts/bootstrap.sh || true",
   "customizations": {
     "vscode": {
-      "extensions": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
+      "settings": { "editor.formatOnSave": true, "files.eol": "\\n" },
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-playwright.playwright"
+      ]
     }
   },
   "remoteEnv": {
     "VITE_SITE_URL": "http://localhost:5173",
     "VITE_TELEMETRY": "off"
   },
-  "forwardPorts": [5173]
+  "forwardPorts": [5173],
+  "remoteUser": "node"
 }

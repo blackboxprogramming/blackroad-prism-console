@@ -1,0 +1,1 @@
+0 * * * * root node /srv/watcher-bot/rollup.js >> /var/log/watcher-bot/rollup.log 2>&1

@@ -2,6 +2,32 @@
 
 This guide outlines how to keep a GitHub repository, your local working copy, and a remote droplet in sync.
 
+## Pull Request to Deployment Workflow
+
+1. **Start from a clean `main`**
+   - Pull the latest changes and ensure no uncommitted work.
+2. **Create a feature branch**
+   - `git checkout -b feature/your-feature-name`
+3. **Run tests and linters locally**
+   - Fix issues before committing.
+4. **Commit and push your branch**
+   - `git commit -m "Add feature"`
+   - `git push origin feature/your-feature-name`
+5. **Open a Pull Request**
+   - Confirm CI checks pass and address review feedback.
+6. **Merge the PR**
+   - Use your preferred merge strategy once approvals and checks are complete.
+7. **Update your local `main`**
+   - `git checkout main`
+   - `git pull origin main`
+8. **Resolve any conflicts and re-run tests**
+   - Commit the merge if conflicts were resolved.
+9. **Push `main` to the droplet**
+   - `git push origin main`
+   - `git push droplet main`
+10. **Repeat for each new feature**
+    - Branch, test, review, merge, and deploy.
+
 ## 1. Connect GitHub to your local working copy
 1. **Clone the repository** (or add GitHub as a remote):
    ```bash
@@ -51,4 +77,20 @@ This guide outlines how to keep a GitHub repository, your local working copy, an
 ## Notes on security
 - Verify the droplet's SSH fingerprint `SHA256:b3uikwBkwnxpMTZjWBFaNgscsWXHRRG3Snj9QYke+ok=` on first connection.
 - Use SSH keys instead of passwords whenever possible.
+
+## Unified sync & deploy
+
+For one-step push or refresh use `scripts/blackroad_sync.sh`:
+
+```bash
+# Commit and push local changes, then redeploy on the droplet
+scripts/blackroad_sync.sh push "commit message"
+
+# Pull latest from GitHub and redeploy without committing
+scripts/blackroad_sync.sh refresh
+```
+
+The script expects SSH access to the droplet (`$DROPLET_HOST`) and
+optionally posts status events via `WEBHOOK_URL` to connected systems
+like Slack or Airtable.
 

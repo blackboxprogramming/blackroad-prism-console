@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quaternary Math Demo</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 2rem;
+      }
+      table {
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+      td, th {
+        border: 1px solid #999;
+        padding: 0.5rem;
+        text-align: center;
+      }
+    </style>
+    <script>
+      function toQuaternary(n) {
+        return n.toString(4);
+      }
+      function fromQuaternary(q) {
+        return parseInt(q, 4);
+      }
+      function updateFromDecimal() {
+        const decimal = parseInt(document.getElementById('decimal').value, 10) || 0;
+        document.getElementById('quaternary').value = toQuaternary(decimal);
+      }
+      function updateFromQuaternary() {
+        const qu = document.getElementById('quaternary').value;
+        document.getElementById('decimal').value = fromQuaternary(qu);
+      }
+      function buildAddTable() {
+        const tbody = document.getElementById('addTable');
+        for (let a = 0; a < 4; a++) {
+          const tr = document.createElement('tr');
+          for (let b = 0; b < 4; b++) {
+            const td = document.createElement('td');
+            td.textContent = toQuaternary(a + b);
+            tr.appendChild(td);
+          }
+          tbody.appendChild(tr);
+        }
+      }
+      window.addEventListener('DOMContentLoaded', buildAddTable);
+    </script>
+  </head>
+  <body>
+    <h1>Quaternary Math Converter</h1>
+    <p>Convert between decimal and quaternary representations.</p>
+    <label>
+      Decimal:
+      <input id="decimal" type="number" value="0" oninput="updateFromDecimal()" />
+    </label>
+    <label>
+      Quaternary:
+      <input id="quaternary" type="text" value="0" oninput="updateFromQuaternary()" />
+    </label>
+    <h2>Addition Table (base-4)</h2>
+    <table>
+      <tbody id="addTable"></tbody>
+    </table>
+  </body>
+</html>
