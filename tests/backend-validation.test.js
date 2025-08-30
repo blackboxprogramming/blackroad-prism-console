@@ -45,3 +45,16 @@ test('rejects malformed json and missing fields', async () => {
 
   server.close();
 });
+
+test('returns json for not found routes', async () => {
+  const server = app.listen(0);
+  const port = getPort(server);
+
+  const res = await fetch(`http://127.0.0.1:${port}/nope`);
+  assert.equal(res.status, 404);
+  assert.equal(res.headers.get('content-type'), 'application/json');
+  const body = await res.json();
+  assert.equal(body.error, 'not found');
+
+  server.close();
+});
