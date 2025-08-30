@@ -1,6 +1,7 @@
 process.env.SESSION_SECRET = 'test-secret';
 process.env.INTERNAL_TOKEN = 'x';
 process.env.ALLOW_ORIGINS = 'https://example.com';
+process.env.MATH_ENGINE_URL = '';
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
 
@@ -29,5 +30,17 @@ describe('API security and health', () => {
   it('validates login payload', async () => {
     const res = await request(app).post('/api/login').send({});
     expect(res.status).toBe(400);
+  });
+
+  it('provides math health info', async () => {
+    const res = await request(app).get('/api/math/health');
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+  });
+
+  it('evaluates a simple expression', async () => {
+    const res = await request(app).post('/api/math/eval').send({ expr: '2+2' });
+    expect(res.status).toBe(200);
+    expect(res.body.result).toBe(4);
   });
 });

@@ -6,6 +6,7 @@
      SESSION_SECRET=change_me
      DB_PATH=/srv/blackroad-api/blackroad.db
      LLM_URL=http://127.0.0.1:8000/chat
+     MATH_ENGINE_URL=http://127.0.0.1:8100
      ALLOW_SHELL=false
 */
 
@@ -39,6 +40,7 @@ const PORT = parseInt(process.env.PORT || '4000', 10);
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
 const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
 const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
+const MATH_ENGINE_URL = process.env.MATH_ENGINE_URL || '';
 const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
@@ -648,6 +650,46 @@ app.get('/api/connectors/status', async (_req, res) => {
   try { if (process.env.LINEAR_API_KEY) status.linear = true; } catch {}
   try { if (process.env.SF_USERNAME) status.salesforce = true; } catch {}
   res.json(status);
+});
+
+// --- Math (stub/forwarder)
+app.get('/api/math/health', async (_req, res) => {
+  if (MATH_ENGINE_URL) {
+    try {
+      const r = await fetch(`${MATH_ENGINE_URL}/health`);
+      const data = await r.json();
+      return res.json(data);
+    } catch {
+      return res.status(503).json({ ok: false, error: 'engine_unreachable' });
+    }
+  }
+  res.json({ ok: true, engine: 'stub', precision: 50 });
+});
+
+app.post('/api/math/eval', async (req, res) => {
+  const { expr } = req.body || {};
+  if (typeof expr !== 'string') return res.status(400).json({ error: 'expr_required' });
+  if (MATH_ENGINE_URL) {
+    try {
+      const r = await fetch(`${MATH_ENGINE_URL}/eval`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expr }),
+      });
+      const data = await r.json();
+      return res.json(data);
+    } catch {
+      return res.status(503).json({ error: 'engine_unreachable' });
+    }
+  }
+  let result;
+  try {
+    // naive evaluation for demo purposes only
+    result = Function('"use strict"; return (' + expr + ')')();
+  } catch {
+    return res.status(400).json({ error: 'invalid_expression' });
+  }
+  res.json({ steps: [], result });
 });
 
 // --- Actions (stubs)
