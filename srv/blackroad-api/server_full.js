@@ -1,9 +1,11 @@
 <!-- FILE: srv/blackroad-api/server_full.js -->
 /* BlackRoad API — Express + SQLite + Socket.IO + LLM bridge
    Runs behind Nginx on port 4000 with cookie-session auth.
-   Env (optional):
+   Env:
      PORT=4000
-     SESSION_SECRET=change_me
+     SESSION_SECRET=
+     INTERNAL_TOKEN=
+     ALLOW_ORIGINS=
      DB_PATH=/srv/blackroad-api/blackroad.db
      LLM_URL=http://127.0.0.1:8000/chat
      ALLOW_SHELL=false
@@ -36,27 +38,28 @@ const logger = require('./lib/log');
 
 // --- Config
 const PORT = parseInt(process.env.PORT || '4000', 10);
-const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
 const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
 const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
 const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
-const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
 const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
 const BRANCH_MAIN = process.env.BRANCH_MAIN || 'main';
 const BRANCH_STAGING = process.env.BRANCH_STAGING || 'staging';
 const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
-const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
-const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim()) : [];
 
-['SESSION_SECRET', 'INTERNAL_TOKEN'].forEach((name) => {
+['SESSION_SECRET', 'INTERNAL_TOKEN', 'ALLOW_ORIGINS'].forEach((name) => {
   if (!process.env[name]) {
     console.error(`Missing required env ${name}`);
     process.exit(1);
   }
 });
+
+const SESSION_SECRET = process.env.SESSION_SECRET;
+const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN;
+const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim());
+const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
 
 const PLANS = [
   {
@@ -174,6 +177,7 @@ app.use((req, res, next) => {
 });
 app.use(compression());
 app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(morgan('tiny'));
 app.use(
   cookieSession({
