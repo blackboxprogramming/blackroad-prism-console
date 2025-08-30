@@ -12,6 +12,11 @@
       "username": "admin",
       "enabled": true,
       "credentials": [{"type": "password", "value": "admin"}]
+    },
+    {
+      "username": "assistant",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "assistant" }]
     }
   ]
 }
