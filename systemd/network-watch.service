@@ -1,0 +1,12 @@
+[Unit]
+Description=Network connectivity watchdog
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/default/network-watch
+ExecStart=/bin/bash -c '/usr/local/bin/network-watch.sh 2>&1 | tee -a /var/log/netwatch.log'
+
+[Install]
+WantedBy=multi-user.target
