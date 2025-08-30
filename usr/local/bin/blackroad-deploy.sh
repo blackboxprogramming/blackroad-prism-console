@@ -17,6 +17,9 @@ set -Eeuo pipefail
 ### Tunables (override via env)
 ### ──────────────────────────────
 WORKING_COPY_PATH="${WORKING_COPY_PATH:-~/blackroad-api}"     # path to repo on the working-copy host (or local path if WORKING_COPY_SSH=local)
+if [[ "$WORKING_COPY_SSH" == "local" ]]; then
+  WORKING_COPY_PATH="${WORKING_COPY_PATH/#\~/$HOME}"
+fi
 SERVICE_NAME="${SERVICE_NAME:-blackroad-api}"                 # systemd or PM2 process name on droplet
 HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:4000/api/health}"  # droplet-local health endpoint
 KEEP_RELEASES="${KEEP_RELEASES:-7}"                           # how many releases to keep
