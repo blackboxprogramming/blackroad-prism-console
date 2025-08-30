@@ -6,9 +6,16 @@ from typing import ClassVar, List
 
 @dataclass
 class AutoNovelAgent:
-    """A toy agent that can deploy itself and create simple games."""
+    """A toy agent that can deploy itself and create simple games.
+
+    Attributes:
+        name: Human-readable name of the agent.
+        gamma: Creativity scaling factor. Higher values yield more excited
+            stories.
+    """
 
     name: str = "AutoNovelAgent"
+    gamma: float = 1.0
     SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal"}
 
     def deploy(self) -> None:
@@ -80,9 +87,10 @@ class AutoNovelAgent:
             raise ValueError("Theme must be a non-empty string.")
         theme_clean = theme.strip()
         protagonist_clean = protagonist.strip()
+        excitement = "!" * max(1, int(self.gamma))
         return (
             f"{protagonist_clean} set out on a {theme_clean} journey, "
-            "discovering wonders along the way."
+            f"discovering wonders along the way{excitement}"
         )
 
     def generate_story_series(
@@ -110,9 +118,22 @@ class AutoNovelAgent:
             stories.append(self.generate_story(theme, protagonist))
         return stories
 
+    def set_gamma(self, gamma: float) -> None:
+        """Set the creativity scaling factor.
+
+        Args:
+            gamma: Positive scaling factor. Higher values increase excitement.
+
+        Raises:
+            ValueError: If ``gamma`` is not positive.
+        """
+        if gamma <= 0:
+            raise ValueError("gamma must be positive.")
+        self.gamma = gamma
+
 
 if __name__ == "__main__":
-    agent = AutoNovelAgent()
+    agent = AutoNovelAgent(gamma=2.0)
     agent.deploy()
     agent.create_game("unity")
     print(agent.generate_story("mystical", "A coder"))
