@@ -1,56 +1,52 @@
-<!-- FILE: CLEANUP_PLAN.md -->
 # Cleanup Plan
 
 ## Directory Overview
+
 ```
 / (repo root)
-├── package.json                – Node project manifest (targets API)
-├── server_full.js              – copy of API server (duplicate of srv/blackroad-api/server_full.js)
+├── package.json                – Node project manifest for API
 ├── srv/
-│   ├── blackroad-api/
-│   │   ├── server_full.js      – primary Express + Socket.IO API (port 4000)
+│   ├── blackroad-api/          – Express + Socket.IO backend
+│   │   ├── server_full.js      – primary API server (port 4000)
 │   │   ├── server.js           – legacy minimal server
-│   │   ├── controllers/, routes/, middleware/, scripts/
+│   │   ├── routes/, controllers/, middleware/
 │   └── lucidia-llm/
 │       └── app.py              – FastAPI LLM stub
-├── var/
-│   └── www/blackroad/
-│       ├── index.html          – SPA entry point
-│       ├── assets/brand/…      – brand assets (logos, demo.html, etc.)
-│       ├── templates/, scripts/, server/
-├── .github/
-│   └── workflows/              – large collection of backup workflows
-└── tests/                      – assorted Node smoke tests
+└── var/
+    └── www/blackroad/          – frontend SPA (index.html and assets)
 ```
 
 ## Findings
 
 ### (a) Obvious Dead Files / Assets
-- `server_full.js` in repo root duplicates `srv/blackroad-api/server_full.js`.
-- `srv/blackroad-api/server.js` appears unused; superseded by `server_full.js`.
-- `var/www/blackroad/assets/brand/demo.html` (demo artifact not referenced).
-- Numerous PDF documents and one-off HTML files at repo root (research papers, screenshots) unrelated to build.
+
+- `srv/blackroad-api/server.js` superseded by `server_full.js`.
+- Legacy configs in `srv/blackroad-api` (`.eslintrc.json`, `package.json`, `.env.example`).
+- Committed environment files at repo root (`.env*`).
+- Unreferenced scaffold `var/www/blackroad/blackroad-io-scaffold.html`.
 
 ### (b) Duplicate or Outdated Configs
-- `.eslintrc.cjs` **and** `eslint.config.cjs` both present.
-- Multiple environment samples: `.env`, `.env.example`, `.env.local.example`, `.env.docker.example`, `.env.aider`.
-- Backup GitHub Actions: dozens of `_backup_132_*.yml` workflows cluttering `.github/workflows/`.
+
+- `eslint.config.cjs` duplicates `.eslintrc.cjs`.
+- Multiple environment samples in repo root (`.env.example`, `.env.local.example`, `.env.docker.example`).
+- Duplicate `package.json` inside `srv/blackroad-api/`.
 
 ### (c) Unsafe Patterns
-- `srv/blackroad-api/server_full.js` lacks helmet, rate limiting, structured CORS, and input validation.
-- Default session secret (`dev-secret-change-me`) and default login credentials (`root / Codex2025`).
-- `ALLOW_SHELL` option executes arbitrary shell commands via `exec`.
-- Cookie session missing `secure` flag unless manually configured.
+
+- `server_full.js` lacks top-level `/health` route (only `/api/health`).
+- Default session secret and `root/Codex2025` credentials left in code.
+- `ALLOW_SHELL` flag permits shell execution when enabled.
 
 ### (d) Missing Scripts/Tests
-- No unified `npm test`/Jest suite for API; smoke tests are ad‑hoc.
-- No tests validating `/health` or `/api/health`, CORS, or security headers.
-- Python LLM stub lacks any pytest.
-- No `health` script to ping health endpoints.
-- No CI workflow running lint/format/tests.
+
+- No Jest coverage for root `/health` or security headers.
+- Python LLM stub has no pytest.
+- `Makefile` lacks common `dev`, `start`, `format`, `lint`, and `test` targets.
+- No CI workflow to run format, lint, and tests.
 
 ## Risk Notes
-- Replacing API middleware may accidentally alter `/health` or `/api/health` responses.
-- Tightening CORS or session settings could block legitimate requests if env vars misconfigured.
-- Removing duplicate server files requires confirming no external scripts rely on them.
-- Moving assets from `var/www/blackroad` could break links if still referenced in HTML/JS.
+
+- Tightening CORS or session settings could block valid clients if env vars mis‑set.
+- Removing env files or configs may disrupt developer workflows.
+- Moving frontend assets might break unseen references.
+- Adding middleware must not alter `/health` or `/api/health` semantics.
