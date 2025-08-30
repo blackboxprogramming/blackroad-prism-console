@@ -190,6 +190,11 @@ app.use(
 app.get('/', (_, res) => {
   res.sendFile(path.join(WEB_ROOT, 'index.html'));
 });
+app.head('/health', (_req, res) => res.status(200).end());
+app.get('/health', (_req, res) => {
+  res.json({ ok: true, version: '1.0.0', uptime: process.uptime() });
+});
+
 
 // --- Health
 app.head('/api/health', (_, res) => res.status(200).end());

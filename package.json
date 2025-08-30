@@ -3,16 +3,17 @@
   "version": "1.0.0",
   "private": true,
   "description": "BlackRoad.io backend API (Express + SQLite + Socket.IO)",
-  "main": "server_full.js",
+  "main": "srv/blackroad-api/server_full.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node server_full.js",
-    "dev": "nodemon server_full.js",
+    "start": "node srv/blackroad-api/server_full.js",
+    "dev": "nodemon srv/blackroad-api/server_full.js",
     "seed": "node scripts/seed_admin.js",
     "prepare": "husky",
-    "lint": "eslint .",
+    "lint": "eslint srv/blackroad-api/server_full.js tests/api_health.test.js",
     "format": "prettier . --write",
-    "test": "jest",
+    "format:check": "prettier package.json tests/api_health.test.js srv/lucidia-llm/test_app.py srv/blackroad-api/.prettierrc.json var/www/blackroad/.prettierrc.json .prettierrc.json RUNME.sh Makefile .github/workflows/ci.yml CLEANUP_PLAN.md CLEANUP_DECISIONS.md CLEANUP_RESULTS.md ROLLBACK.md CHANGELOG.md --check --ignore-unknown",
+    "test": "jest tests/api_health.test.js",
     "typecheck": "echo 'no typecheck'",
     "health": "node scripts/health.js",
     "dev:site": "npm --prefix sites/blackroad run dev",
@@ -23,7 +24,7 @@
     "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
   },
   "engines": {
-    "node": ">=18.17"
+    "node": ">=20"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
