@@ -3,10 +3,17 @@ process.env.INTERNAL_TOKEN = 'x';
 process.env.ALLOW_ORIGINS = 'https://example.com';
 process.env.DB_PATH = ':memory:';
 const request = require('supertest');
-const { app, server } = require('../srv/blackroad-api/server_full.js');
+const {
+  app,
+  server,
+  io,
+  metricsInterval,
+} = require('../srv/blackroad-api/server_full.js');
 
 describe('API smoke tests', () => {
   afterAll((done) => {
+    clearInterval(metricsInterval);
+    io.close();
     server.close(done);
   });
 

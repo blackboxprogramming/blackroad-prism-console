@@ -664,7 +664,7 @@ app.post('/api/actions/mint', requireAuth, (req, res) => {
 io.on('connection', (socket) => {
   socket.emit('hello', { ok: true, t: Date.now() });
 });
-setInterval(() => {
+const metricsInterval = setInterval(() => {
   const total = os.totalmem(), free = os.freemem();
   const payload = {
     t: Date.now(),
@@ -685,4 +685,4 @@ server.listen(PORT, () => {
 process.on('unhandledRejection', (e) => console.error('UNHANDLED', e));
 process.on('uncaughtException', (e) => console.error('UNCAUGHT', e));
 
-module.exports = { app, server };
+module.exports = { app, server, io, metricsInterval };
