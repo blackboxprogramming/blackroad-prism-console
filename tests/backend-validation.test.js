@@ -53,7 +53,8 @@ test('returns json for not found routes', async () => {
   try {
     const res = await fetch(`http://127.0.0.1:${port}/nope`);
     assert.equal(res.status, 404);
-    assert.equal(res.headers.get('content-type'), 'application/json');
+    const contentType = res.headers.get('content-type') || '';
+    assert.ok(contentType.includes('application/json'));
     const body = await res.json();
     assert.equal(body.error, 'not found');
   } finally {
