@@ -1,7 +1,7 @@
 """Simple auto novel agent example with game creation abilities."""
 
 from dataclasses import dataclass
-from typing import ClassVar, List
+from typing import ClassVar, List, Set
 
 
 @dataclass
@@ -16,7 +16,8 @@ class AutoNovelAgent:
 
     name: str = "AutoNovelAgent"
     gamma: float = 1.0
-    SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal"}
+    # Use a typing Set for broader Python version compatibility
+    SUPPORTED_ENGINES: ClassVar[Set[str]] = {"unity", "unreal"}
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
