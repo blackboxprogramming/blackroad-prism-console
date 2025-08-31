@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx || true",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier -w .",
     "test": "echo \"(add Playwright later)\"",
     "e2e": "playwright test || true"

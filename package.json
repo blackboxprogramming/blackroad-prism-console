@@ -10,7 +10,7 @@
     "dev": "nodemon server_full.js",
     "seed": "node scripts/seed_admin.js",
     "prepare": "husky",
-    "lint": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
+    "lint": "eslint . --ext .js,.jsx,.mjs,.cjs",
     "format": "prettier -w .",
     "test": "cross-env NODE_ENV=test jest --runInBand",
     "test-db": "node tests/test_db.js",
