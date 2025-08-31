@@ -49,10 +49,27 @@ def plot_ulam(grid: np.ndarray, mask: np.ndarray) -> plt.Figure:
 
 
 def residue_grid(mod: int, size: int = 100) -> np.ndarray:
-    """Compute a modular residue grid."""
+    """Compute a modular residue grid.
+
+    Parameters
+    ----------
+    mod:
+        The modulus used for the residue computation.
+    size:
+        Total number of integers to include. ``size`` must be a perfect
+        square so that the numbers can be reshaped into a square grid.
+
+    Raises
+    ------
+    ValueError
+        If ``size`` is not a perfect square.
+    """
 
     numbers = np.arange(1, size + 1)
-    return numbers.reshape(int(np.sqrt(size)), -1) % mod
+    side = int(np.sqrt(size))
+    if side * side != size:
+        raise ValueError("size must be a perfect square")
+    return numbers.reshape(side, side) % mod
 
 
 def plot_residue(grid: np.ndarray) -> plt.Figure:
