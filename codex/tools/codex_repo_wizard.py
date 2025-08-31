@@ -99,7 +99,8 @@ def fp_of_line(line):
     p = subprocess.run(["ssh-keygen","-lf","-"], input=line+"\n", capture_output=True, text=True)
     if p.returncode != 0: return None
     parts = p.stdout.strip().split()
-    return parts[1] if len(parts) >= 2 else None  # "bits SHA256:... type comment"
+    # ssh-keygen -lf output: "<bits> SHA256:<fingerprint> <comment> [type]"
+    return parts[1] if len(parts) >= 2 else None
 
 def pin_known_hosts(host_map):
     ensure_dir(KNOWN_HOSTS_PATH.parent)
