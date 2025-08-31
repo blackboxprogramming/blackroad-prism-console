@@ -45,6 +45,7 @@ notify() {
   fi
 }
 
+# shellcheck disable=SC2086,SC2029
 rsh() { ssh $SSH_OPTS "$DROPLET_SSH" "$@"; }
 
 remote_bash() {
@@ -153,7 +154,7 @@ health_check() {
   local retries=20
   local delay=2
   local ok=1
-  for i in $(seq 1 $retries); do
+  for _ in $(seq 1 "$retries"); do
     if rsh "curl -fsS --max-time 2 '$HEALTH_URL' >/dev/null"; then
       ok=0; break
     fi
@@ -175,6 +176,7 @@ current_target() {
   rsh "readlink -f '$CURRENT_LINK' 2>/dev/null || echo ''"
 }
 
+# shellcheck disable=SC2120
 previous_release_dir() {
   remote_bash "
     cd '$RELEASES_DIR' || exit 0
@@ -184,8 +186,9 @@ previous_release_dir() {
 
 rollback() {
   say "Attempting rollback to previous release ..."
-  local prev relpath
-  prev="$(previous_release_dir || true)"
+    local prev relpath
+    # shellcheck disable=SC2119
+    prev="$(previous_release_dir)"
   if [[ -z "$prev" ]]; then
     err "No previous release found to rollback."
     return 1
@@ -220,11 +223,8 @@ cmd_deploy() {
     exit 0
   fi
 
-  # Remember previous current for potential rollback
-  PRE_SWITCH_CURRENT="$(current_target || true)"
-
-  switch_release
-  restart_service
+    switch_release
+    restart_service
 
   if health_check; then
     say "Health check passed. Deploy complete."
