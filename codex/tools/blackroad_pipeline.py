@@ -33,10 +33,10 @@ from typing import List
 # --- GitHub operations -----------------------------------------------------
 
 def push_latest() -> None:
-    """Commit and push local changes to GitHub.
+    """Push local commits to GitHub.
 
-    This function assumes that the working directory is already staged.
-    It performs a commit and push, surfacing any errors to the caller.
+    Assumes the branch already has committed changes and simply pushes
+    them to the remote, surfacing any errors to the caller.
     """
     cmd: List[str] = ["git", "push"]
     print("-> pushing to GitHub:", " ".join(cmd))
@@ -68,7 +68,7 @@ def deploy_droplet() -> None:
 # --- High level orchestration ---------------------------------------------
 
 def run_pipeline(action: str) -> None:
-    """Run one of the supported high‑level actions."""
+    """Run one of the supported high-level actions."""
     a = action.lower()
     if "push" in a and "blackroad.io" in a:
         push_latest()
