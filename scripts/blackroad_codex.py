@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Unified Codex orchestration for BlackRoad.io.
 
-This script provides a chat-style control surface that coordinates
+This script offers a chat-style control surface to coordinate
 Git operations, connector jobs, working-copy sync, and droplet deploys.
 
 Example usage:
@@ -49,7 +49,7 @@ def rebase_update() -> None:
 
 
 def sync_connectors() -> None:
-    """Sync Salesforce → Airtable → Droplet (stub)."""
+    """Sync Salesforce -> Airtable -> Droplet (stub)."""
     # Placeholder for OAuth flows and data jobs.
     logging.info("Connector sync not implemented yet")
 
