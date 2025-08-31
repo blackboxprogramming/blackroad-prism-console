@@ -21,7 +21,7 @@ def fp_of_line(line):
     p = subprocess.run(["ssh-keygen","-lf","-"], input=line+"\n",
                        capture_output=True, text=True)
     if p.returncode != 0: return None
-    # Example: "2048 SHA256:abcdef... type comment"
+    # Example output: "2048 SHA256:abcdef... (ED25519) host"
     parts = p.stdout.strip().split()
     return parts[1] if len(parts) >= 2 else None
 
