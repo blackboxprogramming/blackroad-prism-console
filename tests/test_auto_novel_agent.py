@@ -35,3 +35,11 @@ def test_add_engine():
         agent.add_engine("godot")
     with pytest.raises(ValueError):
         agent.add_engine("")
+
+
+def test_add_engine_is_instance_scoped():
+    agent_one = AutoNovelAgent()
+    agent_two = AutoNovelAgent()
+    agent_one.add_engine("godot")
+    assert "godot" in agent_one.list_supported_engines()
+    assert "godot" not in agent_two.list_supported_engines()
