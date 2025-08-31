@@ -3,13 +3,12 @@ sshprivate.sh
 publicssh.sh
 
 # Node
-node_modules/
+# Exclude Node.js dependencies everywhere
 **/node_modules/
 dist/
 .cache/
 .env
-services/*/node_modules/
-services/health-sidecar/node_modules/
+# Ignore environment files for the health sidecar service
 services/health-sidecar/.env
 
 # Logs
@@ -34,7 +33,6 @@ repos/
 runtime/
 __pycache__/
 codex/runtime/
-/benchmarks/
 benchmarks/
 
 # Lucidia artifacts
