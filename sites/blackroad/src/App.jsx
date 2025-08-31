@@ -1,5 +1,4 @@
 import { NavLink, Routes, Route } from "react-router-dom";
-import { useEffect, useState } from "react";
 import Chat from "./pages/Chat.jsx";
 import Canvas from "./pages/Canvas.jsx";
 import Editor from "./pages/Editor.jsx";
