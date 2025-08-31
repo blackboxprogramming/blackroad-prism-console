@@ -36,3 +36,10 @@ def test_generate_story_requires_theme():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError, match="Theme must be a non-empty string"):
         agent.generate_story(" ")
+
+
+def test_generate_story_returns_text():
+    agent = AutoNovelAgent()
+    story = agent.generate_story("mystical", "A coder")
+    assert "mystical" in story
+    assert story.startswith("A coder set out on a mystical journey")

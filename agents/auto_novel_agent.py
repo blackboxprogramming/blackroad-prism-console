@@ -1,7 +1,7 @@
 """Simple auto novel agent example with game creation abilities."""
 
 from dataclasses import dataclass
-from typing import ClassVar, List
+from typing import ClassVar
 
 
 @dataclass
@@ -59,7 +59,7 @@ class AutoNovelAgent:
         """
         self.SUPPORTED_ENGINES.discard(engine.lower())
 
-    def list_supported_engines(self) -> List[str]:
+    def list_supported_engines(self) -> list[str]:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
@@ -78,7 +78,10 @@ class AutoNovelAgent:
         """
         if not theme.strip():
             raise ValueError("Theme must be a non-empty string.")
-        return f"{protagonist} set out on a {theme} journey, " "discovering wonders along the way."
+        return (
+            f"{protagonist} set out on a {theme} journey, discovering "
+            f"wonders along the way."
+        )
 
 
 if __name__ == "__main__":
