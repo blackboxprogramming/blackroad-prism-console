@@ -27,3 +27,6 @@ migrate:
 
 clean:
 >rm -rf node_modules coverage
+
+analysis:
+>python analysis/run_all.py
