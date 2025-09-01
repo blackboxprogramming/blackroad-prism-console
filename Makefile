@@ -1,29 +1,15 @@
-.RECIPEPREFIX = >
-.PHONY: install dev start format lint test health migrate clean
+.PHONY: install figures ops
 
 install:
->npm install
+	python -m pip install -r requirements.txt
 
-dev:
->npm run dev
+figures: install
+	python analysis/tap_null_isi.py
+	python analysis/selectors_autocorr.py
+	python analysis/variance_surfaces.py
+	python analysis/nphase_weierstrass.py
 
-start:
->npm start
-
-format:
->npm run format
-
-lint:
->npm run lint
-
-test:
->npm test
-
-health:
->npm run health
-
-migrate:
->@echo "no migrations"
-
-clean:
->rm -rf node_modules coverage
+ops:
+	curl -fsS http://localhost/health && echo OK || (echo FAIL && exit 1)
+	curl -fsS http://localhost/api/health && echo OK || true
+	curl -fsS http://localhost/api/ops || true

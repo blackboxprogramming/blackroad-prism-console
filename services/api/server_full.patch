@@ -1,0 +1,3 @@
+// in server_full.js (Node) add:
++const attachOps = require('./ops_middleware');
++attachOps(app);
