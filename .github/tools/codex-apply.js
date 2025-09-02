@@ -6,7 +6,10 @@ const MAX = 200 * 1024;
 let body = (process.env.CODEx_BODY || '').replace(/\r/g, '');
 if (body.startsWith('@codex')) {
   if (/^@codex\s+fix comments/i.test(body)) {
-    body = '/codex apply .github/prompts/codex-fix-comments.md';
+    body = body.replace(
+      /^@codex\s+fix comments/i,
+      '/codex apply .github/prompts/codex-fix-comments.md'
+    );
   } else {
     body = body.replace(/^@codex/, '/codex');
   }
