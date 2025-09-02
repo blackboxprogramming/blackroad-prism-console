@@ -68,7 +68,12 @@ export default function App(){
           await bootData()
           connectSocket()
         }
-      } catch(e) {}
+      } catch(e) {
+        if (e?.response?.status === 401) {
+          localStorage.removeItem('token')
+          setToken('')
+        }
+      }
     })()
   }, [])
 
