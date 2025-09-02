@@ -21,6 +21,13 @@ export default function RoadChain(){
     })()
   }, [])
 
+  useEffect(() => {
+    if (!query) {
+      setResult(null)
+      setError('')
+    }
+  }, [query])
+
   function toggle(hash){
     setExpanded(prev => ({ ...prev, [hash]: !prev[hash] }))
   }

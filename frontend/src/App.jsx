@@ -39,6 +39,7 @@ export default function App(){
     setSystem({ cpu: 0, mem: 0, gpu: 0 })
     setNotesState('')
     setStream(true)
+    streamRef.current = true
     setSocket(prev => {
       if(prev) prev.disconnect()
       return null
