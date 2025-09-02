@@ -652,7 +652,7 @@ app.get('/api/connectors/status', async (_req, res) => {
   res.json(status);
 });
 
-// --- Math (stub/forwarder)
+// --- Math (forwarder)
 app.get('/api/math/health', async (_req, res) => {
   if (MATH_ENGINE_URL) {
     try {
@@ -663,7 +663,7 @@ app.get('/api/math/health', async (_req, res) => {
       return res.status(503).json({ ok: false, error: 'engine_unreachable' });
     }
   }
-  res.json({ ok: true, engine: 'stub', precision: 50 });
+  return res.status(503).json({ ok: false, error: 'engine_unavailable' });
 });
 
 app.post('/api/math/eval', async (req, res) => {
@@ -682,14 +682,7 @@ app.post('/api/math/eval', async (req, res) => {
       return res.status(503).json({ error: 'engine_unreachable' });
     }
   }
-  let result;
-  try {
-    // naive evaluation for demo purposes only
-    result = Function('"use strict"; return (' + expr + ')')();
-  } catch {
-    return res.status(400).json({ error: 'invalid_expression' });
-  }
-  res.json({ steps: [], result });
+  return res.status(503).json({ error: 'engine_unavailable' });
 });
 
 // --- Actions (stubs)
