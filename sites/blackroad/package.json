@@ -6,6 +6,7 @@
   "scripts": {
     "prebuild": "node ./scripts/build-docs.cjs && node ./scripts/build-blog.cjs",
     "dev": "vite",
+    "watch-content": "node ./scripts/watch-content.cjs",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx || true",
@@ -30,6 +31,7 @@
     "@typescript-eslint/parser": "^8.4.0",
     "@vitejs/plugin-react": "5.0.2",
     "autoprefixer": "10.4.21",
+    "chokidar": "^3.6.0",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^9.1.0",
     "gray-matter": "^4.0.3",
