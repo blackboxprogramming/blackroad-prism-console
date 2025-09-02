@@ -13,7 +13,7 @@ def test_create_game_supported_engines(capsys):
     captured = capsys.readouterr().out.splitlines()
     assert captured == [
         "Creating a Unity game without weapons...",
-        "Creating a Unreal game without weapons...",
+        "Creating an Unreal game without weapons...",
     ]
 
 
