@@ -5,15 +5,6 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
-  - repo: https://github.com/psf/black
-    rev: 24.4.2
-    hooks: [{ id: black }]
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
       - id: check-json
       - id: check-merge-conflict
       - id: forbid-new-submodules
@@ -41,9 +32,3 @@ repos:
       - id: eslint
         args: ["--fix"]
         files: "\\.(js|jsx|ts|tsx)$"
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
