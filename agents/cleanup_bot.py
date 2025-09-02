@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import subprocess
-from subprocess import CalledProcessError
-from typing import List
 from typing import Dict, List
 
 
@@ -37,15 +35,20 @@ class CleanupBot:
             branch: The branch name to remove.
 
         Returns:
-            ``True`` if the branch was deleted both locally and remotely, ``False``
-            otherwise.
+            ``True`` when both the local and remote deletions succeed.
         """
+        success = True
         try:
             self._run_git("branch", "-D", branch)
-            self._run_git("push", "origin", "--delete", branch)
-            return True
         except subprocess.CalledProcessError:
-            return False
+            print(f"Failed to delete local branch '{branch}'")
+            success = False
+        try:
+            self._run_git("push", "origin", "--delete", branch)
+        except subprocess.CalledProcessError:
+            print(f"Failed to delete remote branch '{branch}'")
+            success = False
+        return success
 
     def cleanup(self) -> Dict[str, bool]:
         """Remove the configured branches locally and remotely.
@@ -57,18 +60,8 @@ class CleanupBot:
         for branch in self.branches:
             if self.dry_run:
                 print(f"Would delete branch '{branch}' locally and remotely")
+                results[branch] = True
                 continue
-            try:
-                subprocess.run(["git", "branch", "-D", branch], check=True)
-            except CalledProcessError:
-                print(f"Failed to delete local branch '{branch}'")
-            try:
-                subprocess.run(
-                    ["git", "push", "origin", "--delete", branch],
-                    check=True,
-                )
-            except CalledProcessError:
-                print(f"Failed to delete remote branch '{branch}'")
             results[branch] = self.delete_branch(branch)
         return results
 
