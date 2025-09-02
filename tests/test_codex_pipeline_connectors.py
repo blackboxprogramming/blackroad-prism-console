@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -6,10 +6,10 @@ from tools.codex_pipeline import call_connectors
 
 
 class DummyResponse:
-    def __init__(self, data: Dict[str, Any]):
+    def __init__(self, data: dict[str, Any]):
         self._data = data
 
-    def json(self) -> Dict[str, Any]:
+    def json(self) -> dict[str, Any]:
         return self._data
 
     def raise_for_status(self) -> None:  # pragma: no cover - simple stub
@@ -18,10 +18,10 @@ class DummyResponse:
 
 @pytest.mark.parametrize("action", ["paste", "append", "replace", "restart", "build"])
 def test_call_connectors(monkeypatch: pytest.MonkeyPatch, action: str) -> None:
-    called: Dict[str, Any] = {}
+    called: dict[str, Any] = {}
 
     def fake_post(
-        url: str, *, headers: Dict[str, str], json: Dict[str, Any], timeout: int
+        url: str, *, headers: dict[str, str], json: dict[str, Any], timeout: int
     ) -> DummyResponse:
         called["url"] = url
         called["headers"] = headers

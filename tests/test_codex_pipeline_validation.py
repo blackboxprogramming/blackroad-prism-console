@@ -54,8 +54,8 @@ def test_skip_validate(monkeypatch):
         return {}
 
     monkeypatch.setattr(pipeline, "validate_services", fake_validate)
-    monkeypatch.setattr(pipeline, "push_latest", lambda: None)
-    monkeypatch.setattr(pipeline, "redeploy_droplet", lambda: None)
+    monkeypatch.setattr(pipeline, "push_latest", lambda dry_run=False: None)
+    monkeypatch.setattr(pipeline, "redeploy_droplet", lambda dry_run=False: None)
 
     pipeline.main(["--skip-validate", "push"])
     assert called is False

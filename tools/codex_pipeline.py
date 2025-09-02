@@ -8,7 +8,7 @@ import subprocess
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 from urllib import request
 
 import requests
@@ -140,7 +140,7 @@ def run_pipeline(*, force: bool = False, webhook: str | None = None) -> None:
                 raise
 
 
-def call_connectors(action: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+def call_connectors(action: str, payload: dict[str, Any]) -> dict[str, Any]:
     """Call BlackRoad's connectors API with retry and logging."""
     load_dotenv()
     token = os.getenv("CONNECTOR_KEY")
@@ -206,16 +206,17 @@ def main(argv: list[str] | None = None) -> int:
     exit_code = 0
 
     if args.command == "push":
-        push_latest(dry_run=True) if args.dry_run else push_latest()
-        redeploy_droplet(dry_run=True) if args.dry_run else redeploy_droplet()
+        push_latest(dry_run=args.dry_run)
+        redeploy_droplet(dry_run=args.dry_run)
     elif args.command == "refresh":
-        push_latest(dry_run=True) if args.dry_run else push_latest()
-        refresh_working_copy(dry_run=True) if args.dry_run else refresh_working_copy()
-        redeploy_droplet(dry_run=True) if args.dry_run else redeploy_droplet()
+        push_latest(dry_run=args.dry_run)
+        refresh_working_copy(dry_run=args.dry_run)
+        redeploy_droplet(dry_run=args.dry_run)
     elif args.command == "rebase":
-        run("git pull --rebase") if not args.dry_run else None
-        push_latest(dry_run=True) if args.dry_run else push_latest()
-        redeploy_droplet(dry_run=True) if args.dry_run else redeploy_droplet()
+        if not args.dry_run:
+            run("git pull --rebase")
+        push_latest(dry_run=args.dry_run)
+        redeploy_droplet(dry_run=args.dry_run)
     elif args.command == "sync":
         payload = json.loads(args.payload)
         call_connectors(args.action, payload)
