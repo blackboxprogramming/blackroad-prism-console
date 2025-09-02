@@ -24,7 +24,7 @@ class AutoNovelAgent:
             include_weapons: If True, raise a ``ValueError`` because weapons are not
                 allowed.
         """
-        engine_lower = engine.lower()
+        engine_lower = engine.strip().lower()
         if engine_lower not in self.supported_engines:
             supported = ", ".join(sorted(self.supported_engines))
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")

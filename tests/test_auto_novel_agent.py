@@ -43,3 +43,16 @@ def test_add_engine_is_instance_scoped():
     agent_one.add_engine("godot")
     assert "godot" in agent_one.list_supported_engines()
     assert "godot" not in agent_two.list_supported_engines()
+
+
+def test_create_game_normalizes_engine_name(capsys):
+    agent = AutoNovelAgent()
+    agent.create_game(" Unity ")
+    captured = capsys.readouterr()
+    assert "Creating a Unity game without weapons..." in captured.out
+
+
+def test_add_engine_normalizes_name():
+    agent = AutoNovelAgent()
+    agent.add_engine(" Godot ")
+    assert "godot" in agent.list_supported_engines()
