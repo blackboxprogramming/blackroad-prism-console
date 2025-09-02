@@ -26,8 +26,10 @@ Module._load = function (request, parent, isMain) {
   return originalLoad(request, parent, isMain);
 };
 
+process.env.SUBSCRIPTIONS_ENABLED = 'false';
 require('../src/routes/subscribe.js');
 Module._load = originalLoad;
+delete process.env.SUBSCRIPTIONS_ENABLED;
 
 const res = {
   body: null,

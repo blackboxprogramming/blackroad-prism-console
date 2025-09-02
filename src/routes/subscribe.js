@@ -8,6 +8,11 @@ const { strictLimiter } = require('../rateLimiter');
 
 const SUBSCRIPTIONS_ENABLED = process.env.SUBSCRIPTIONS_ENABLED !== 'false';
 
+// GET /api/subscribe/health
+router.get('/subscribe/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
 function ensureEnabled(req, res, next) {
   if (!SUBSCRIPTIONS_ENABLED) {
     return res.status(503).json({ message: 'subscriptions_disabled' });
@@ -22,11 +27,6 @@ const pendingSessions = new Map();
 function randId() {
   return require('crypto').randomBytes(16).toString('hex');
 }
-
-// GET /api/subscribe/health
-router.get('/subscribe/health', (_req, res) => {
-  res.json({ status: 'ok' });
-});
 
 // GET /api/subscribe/plans
 router.get('/subscribe/plans', (req, res) => {
