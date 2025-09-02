@@ -16,6 +16,12 @@ def test_create_game_unsupported_engine():
         agent.create_game("godot")
 
 
+def test_create_game_empty_engine():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError):
+        agent.create_game("   ")
+
+
 def test_create_game_disallows_weapons():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):

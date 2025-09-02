@@ -16,6 +16,20 @@ class AutoNovelAgent:
         """Deploy the agent by printing a greeting."""
         print(f"{self.name} deployed and ready to generate novels!")
 
+    def _normalize_engine(self, engine: str) -> str:
+        """Normalize an engine name to a lowercase, trimmed string.
+
+        Args:
+            engine: Engine name to normalize.
+
+        Raises:
+            ValueError: If the engine name is empty after normalization.
+        """
+        engine_lower = engine.strip().lower()
+        if not engine_lower:
+            raise ValueError("Engine name cannot be empty.")
+        return engine_lower
+
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
         """Create a basic game using a supported engine without weapons.
 
@@ -24,7 +38,7 @@ class AutoNovelAgent:
             include_weapons: If True, raise a ``ValueError`` because weapons are not
                 allowed.
         """
-        engine_lower = engine.strip().lower()
+        engine_lower = self._normalize_engine(engine)
         if engine_lower not in self.supported_engines:
             supported = ", ".join(sorted(self.supported_engines))
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
@@ -45,9 +59,7 @@ class AutoNovelAgent:
         Raises:
             ValueError: If the engine name is empty or already supported.
         """
-        engine_lower = engine.strip().lower()
-        if not engine_lower:
-            raise ValueError("Engine name cannot be empty.")
+        engine_lower = self._normalize_engine(engine)
         if engine_lower in self.supported_engines:
             raise ValueError("Engine already supported.")
         self.supported_engines.add(engine_lower)
