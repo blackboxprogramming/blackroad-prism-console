@@ -15,8 +15,10 @@ async function fetchJson(url) {
 
 async function getService(id, base) {
   try {
-    const health = await fetchJson(`${base}/health`);
-    const logs = await fetchJson(`${base}/logs?level=error&limit=1`).catch(() => ({ count: 0, logs: [] }));
+    const [health, logs] = await Promise.all([
+      fetchJson(`${base}/health`),
+      fetchJson(`${base}/logs?level=error&limit=1`).catch(() => ({ count: 0, logs: [] }))
+    ]);
     return {
       status: health.status || health.ok || 'FAIL',
       uptime: health.uptime || '-',
