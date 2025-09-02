@@ -35,6 +35,7 @@ export default function RoadChain(){
     }catch(err){
       setResult(null)
       setError('Block not found')
+      console.warn('Failed to fetch block', err)
     }
   }
 

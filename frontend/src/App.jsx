@@ -37,7 +37,9 @@ export default function App(){
           connectSocket()
         }
       } catch(e){
-        // User not authenticated; log for debugging but otherwise ignore
+        // Clear invalid token and log for debugging
+        localStorage.removeItem('token')
+        setToken('')
         console.warn('User not authenticated', e)
       }
     })()
