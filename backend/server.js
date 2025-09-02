@@ -65,6 +65,13 @@ const app = http.createServer(async (req, res) => {
     }
   }
 
+  if (req.method === 'GET' && req.url === '/api/tasks') {
+    if (req.headers.authorization !== `Bearer ${VALID_USER.token}`) {
+      return send(res, 401, { error: 'unauthorized' });
+    }
+    return send(res, 200, { tasks });
+  }
+
   // invalid JSON catch-all
   if (req.method === 'POST') {
     try {
