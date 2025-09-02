@@ -73,46 +73,6 @@ def rollback_from_backup() -> None:
 def push_to_github() -> None:
     run("git push origin HEAD")
 
-
-def push_latest(*, dry_run: bool = False) -> None:
-    """Push local commits to GitHub."""
-    # TODO: handle authentication, branching, conflict resolution, and
-    # downstream webhook notifications.
-    run("git push origin HEAD", dry_run=dry_run)
-
-
-def refresh_working_copy(*, repo_path: str = ".", dry_run: bool = False) -> None:
-    """Refresh the Working Copy mirror for this repository."""
-    sync_to_working_copy(repo_path, dry_run=dry_run)
-
-
-def sync_to_working_copy(repo_path: str, *, dry_run: bool = False) -> None:
-    """Ensure the repo is up to date in the Working Copy app.
-
-    The function checks for a ``working-copy`` remote, pushes to it and
-    triggers a pull inside the iOS application.  On Linux this URL scheme is
-    not executed but left as documentation for iOS automation.
-    """
-
-    LOGGER.info("sync_to_working_copy repo_path=%s", repo_path)
-    try:
-        result = subprocess.run(
-            ["git", "-C", repo_path, "remote"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-    except subprocess.CalledProcessError as exc:  # pragma: no cover - defensive
-        LOGGER.error("git remote failed: %s", exc)
-        return
-
-    if "working-copy" not in result.stdout:
-        LOGGER.info("No Working Copy remote configured; skipping sync")
-        return
-
-    run(f"git -C {repo_path} push working-copy HEAD", dry_run=dry_run)
-
-
 def deploy_to_droplet() -> None:
     """Deploy the application to the droplet."""
     run("deploy-to-droplet")
@@ -151,39 +111,6 @@ def run_pipeline(*, force: bool = False, webhook: str | None = None) -> None:
             log_error(stage.__name__, exc, rollback, webhook)
             if not force:
                 raise
-
-
-def redeploy_droplet(*, dry_run: bool = False) -> None:
-    """Placeholder for redeploying the BlackRoad droplet."""
-    # TODO: SSH into droplet, pull latest code, run migrations, restart services.
-    LOGGER.info("TODO: implement droplet redeploy")
-
-
-def sync_connectors(*, dry_run: bool = False) -> None:
-    """Placeholder for syncing external connectors."""
-    # TODO: add OAuth flows, webhook listeners, and Slack notifications.
-    LOGGER.info("TODO: implement connector sync")
-
-
-def trigger_working_copy_pull(
-    repo_name: str, *, server_url: str = "http://localhost:8081", dry_run: bool = False
-) -> bool:
-    """Trigger a pull via Working Copy's local automation server.
-
-    Returns ``True`` if the request succeeded, ``False`` otherwise.
-    """
-
-    url = f"{server_url}/pull?repo={repo_name}"
-    LOGGER.info("Requesting Working Copy pull: %s", url)
-    if dry_run:
-        return True
-    try:
-        with request.urlopen(url) as resp:  # noqa: S310 - local request
-            LOGGER.info("Working Copy pull response: %s", resp.read())
-        return True
-    except error.URLError as exc:
-        LOGGER.warning("Working Copy pull failed: %s", exc)
-        return False
 
 
 def main(argv: list[str] | None = None) -> int:
