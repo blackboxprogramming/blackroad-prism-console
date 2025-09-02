@@ -24,6 +24,21 @@ export default function App(){
   const [socket, setSocket] = useState(null)
   const [stream, setStream] = useState(true)
 
+  function resetState(){
+    setUser(null)
+    setTimeline([])
+    setTasks([])
+    setCommits([])
+    setAgents([])
+    setWallet({ rc: 0 })
+    setContradictions({ issues: 0 })
+    setNotesState('')
+    if(socket){
+      socket.disconnect()
+      setSocket(null)
+    }
+  }
+
   // Bootstrap authentication token from local storage
   useEffect(()=>{
     const token = localStorage.getItem('token')
@@ -37,11 +52,11 @@ export default function App(){
           connectSocket()
         }
       } catch(e){
-        // Clear invalid token and log for debugging
+        // Clear invalid token, reset state, and log the failure
         localStorage.removeItem('token')
         setToken('')
-        setUser(null)
-        console.error('User not authenticated', e)
+        resetState()
+        console.error('User not authenticated:', e)
       }
     })()
   }, [])
