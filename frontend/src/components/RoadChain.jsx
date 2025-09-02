@@ -13,7 +13,10 @@ export default function RoadChain(){
       try{
         const b = await fetchBlocks()
         setBlocks(b)
-      }catch(e){ /* Ignore errors when fetching initial blocks */ }
+      }catch(e){
+        // Ignore errors when fetching initial blocks but log for diagnostics
+        console.warn('Failed to fetch initial blocks', e)
+      }
     })()
   }, [])
 
