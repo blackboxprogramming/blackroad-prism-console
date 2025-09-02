@@ -1,5 +1,7 @@
 """Simple auto novel agent example with game creation abilities."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import ClassVar, List
 
