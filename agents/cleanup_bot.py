@@ -1,9 +1,15 @@
 """Bot for cleaning up merged Git branches."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 import subprocess
 from subprocess import CalledProcessError
 from typing import Dict, List
+import argparse
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -21,7 +27,7 @@ class CleanupBot:
     def _run(self, *cmd: str) -> None:
         """Run ``cmd`` unless in dry-run mode."""
         if self.dry_run:
-            print("DRY-RUN:", " ".join(cmd))
+            logger.info("DRY-RUN: %s", " ".join(cmd))
             return
         subprocess.run(cmd, check=True)
 
@@ -36,6 +42,7 @@ class CleanupBot:
             self._run("git", "push", "origin", "--delete", branch)
             return True
         except CalledProcessError:
+            logger.exception("Failed to delete branch %s", branch)
             return False
 
     def cleanup(self) -> Dict[str, bool]:
@@ -50,5 +57,21 @@ class CleanupBot:
         return results
 
 
+def main() -> None:
+    """Command-line interface for CleanupBot."""
+    parser = argparse.ArgumentParser(description="Delete local and remote Git branches.")
+    parser.add_argument("branches", nargs="+", help="Branches to delete")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Show commands without executing"
+    )
+    args = parser.parse_args()
+
+    bot = CleanupBot(branches=args.branches, dry_run=args.dry_run)
+    for branch, success in bot.cleanup().items():
+        status = "deleted" if success else "failed"
+        logger.info("%s: %s", branch, status)
+
+
 if __name__ == "__main__":
-    print("CleanupBot ready to delete branches.")
+    logging.basicConfig(level=logging.INFO)
+    main()
