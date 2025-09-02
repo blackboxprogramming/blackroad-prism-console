@@ -1,13 +1,4 @@
-import importlib.util
-from pathlib import Path
-
-spec = importlib.util.spec_from_file_location(
-    "auto_novel_agent",
-    Path(__file__).resolve().parents[1] / "agents" / "auto_novel_agent.py",
-)
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
-AutoNovelAgent = module.AutoNovelAgent
+from agents.auto_novel_agent import AutoNovelAgent
 
 
 def test_add_engine():
