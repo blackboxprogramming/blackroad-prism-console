@@ -82,7 +82,9 @@ const ROADVIEW_STORAGE = process.env.ROADVIEW_STORAGE
   : path.join(__dirname, 'srv', 'blackroad-api', 'storage', 'roadview');
 try {
   fs.mkdirSync(path.join(ROADVIEW_STORAGE, 'projects'), { recursive: true });
-} catch {}
+} catch (err) {
+  console.error('Failed to ensure RoadView storage directory', err);
+}
 app.use(
   '/files/roadview',
   express.static(ROADVIEW_STORAGE, { index: false, fallthrough: false })
