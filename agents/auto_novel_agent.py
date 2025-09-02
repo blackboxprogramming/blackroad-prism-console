@@ -1,7 +1,7 @@
 """Simple auto novel agent example with game creation abilities."""
 
 from dataclasses import dataclass
-from typing import ClassVar, List
+from typing import ClassVar
 
 
 @dataclass
@@ -32,7 +32,7 @@ class AutoNovelAgent:
         article = "an" if engine_lower == "unreal" else "a"
         print(f"Creating {article} {engine_lower.capitalize()} game without weapons...")
 
-    def list_supported_engines(self) -> List[str]:
+    def list_supported_engines(self) -> list[str]:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
