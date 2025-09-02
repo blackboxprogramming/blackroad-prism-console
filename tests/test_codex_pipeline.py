@@ -1,4 +1,10 @@
-"""Unit tests for the minimal Codex deployment pipeline."""
+"""Unit tests for the minimal Codex deployment pipeline.
+
+The suite simulates failures in each pipeline stage and asserts that
+rollback or skip behavior occurs as expected.  This keeps coverage focused
+on error handling in ``tools.codex_pipeline`` without relying on external
+services.
+"""
 
 import subprocess
 
