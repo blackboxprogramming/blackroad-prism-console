@@ -1,0 +1,13 @@
+[Unit]
+Description=Watcher Bot
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/watcher-bot
+EnvironmentFile=/srv/watcher-bot/.env
+ExecStart=/usr/bin/node /srv/watcher-bot/server.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

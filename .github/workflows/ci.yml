@@ -1,17 +1,125 @@
-name: CI
+name: BlackRoad CI/CD
+
 on:
-  push: { branches: [main] }
-  pull_request:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+# Prevent overlapping prod deploys
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
-  test:
+  build_test:
+    name: Build & Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.11'
-      - run: pip install -r services/bridge/requirements.txt || true
-      - run: pip install -r packages/agents/requirements.txt || true
-      - run: pytest -q services/bridge || true
-      - run: pytest -q packages/agents || true
+          node-version: 20
+          cache: npm
+
+      - name: Install, Lint, Test (root if present)
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+            npm run lint --if-present
+            npm test --if-present
+            npm run build --if-present
+          fi
+
+      - name: Install & Build Web (if web/)
+        run: |
+          if [ -d web ] && [ -f web/package.json ]; then
+            cd web
+            npm ci
+            npm run lint --if-present
+            npm test --if-present
+            npm run build --if-present
+          fi
+
+      - name: Install API deps (if api/)
+        run: |
+          if [ -d api ] && [ -f api/package.json ]; then
+            cd api
+            npm ci
+            npm run lint --if-present
+            npm test --if-present
+          fi
+
+      - name: Assemble release bundle
+        run: |
+          set -eu
+          mkdir -p release/web release/api
+
+          # --- Web assets ---
+          if [ -d web ] && [ -f web/package.json ]; then
+            if [ -d web/dist ]; then cp -r web/dist/* release/web/; fi
+            if [ -d web/build ]; then cp -r web/build/* release/web/; fi
+            # Fallback: copy public if no build output
+            if [ ! -d release/web ] || [ -z "$(ls -A release/web 2>/dev/null || true)" ]; then
+              if [ -d web/public ]; then cp -r web/public/* release/web/; fi
+            fi
+          else
+            # Root web build fallback
+            if [ -d dist ]; then cp -r dist/* release/web/; fi
+            if [ -d build ]; then cp -r build/* release/web/; fi
+          fi
+
+          # --- API sources ---
+          if [ -d api ] && [ -f api/package.json ]; then
+            rsync -a --delete --exclude=node_modules --exclude='.git' --exclude='**/*.test.*' api/ release/api/
+          fi
+
+          tar -czf release.tar.gz -C release .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ github.sha }}
+          path: release.tar.gz
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy to Production
+    needs: build_test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-${{ github.sha }}
+          path: .
+
+      - name: Deploy (SSH + atomic symlinks + rollback)
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          # Deploy + targets (match your known paths)
+          DEPLOY_ROOT: /opt/blackroad/releases
+          WEB_PATH: /var/www/blackroad
+          API_PATH: /srv/blackroad-api
+          # Health checks (external)
+          HEALTH_URL: https://blackroad.io/health
+          API_HEALTH_URL: https://blackroad.io/api/health
+          RELEASE: ${{ github.sha }}
+          KEEP_RELEASES: "3"
+          DO_API_DEPLOY: "1"
+        run: |
+          chmod +x scripts/deploy.sh
+          ./scripts/deploy.sh release.tar.gz

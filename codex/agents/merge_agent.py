@@ -85,7 +85,12 @@ def current_branch(repo_dir):
     return shell(["git","rev-parse","--abbrev-ref","HEAD"], cwd=repo_dir).strip()
 
 def ensure_branch(repo_dir, branch):
-    shell(["git","checkout",branch], cwd=repo_dir)
+    try:
+        shell(["git","checkout",branch], cwd=repo_dir)
+    except Exception:
+        # If the branch doesn't exist locally, create it tracking origin
+        fetch(repo_dir, branch)
+        shell(["git","checkout","-b",branch,f"origin/{branch}"], cwd=repo_dir)
 
 def fetch(repo_dir, branch):
     shell(["git","fetch","origin",branch], cwd=repo_dir)

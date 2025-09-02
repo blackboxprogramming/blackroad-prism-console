@@ -1,0 +1,55 @@
+name: BlackRoad Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build frontend
+        working-directory: sites/blackroad
+        run: |
+          npm ci
+          npm run build
+          tar -czf blackroad-site.tar.gz dist
+
+      - name: Package API
+        run: |
+          tar -czf blackroad-api.tar.gz -C srv/blackroad-api .
+
+      - name: Upload artifacts to server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          source: |
+            sites/blackroad/blackroad-site.tar.gz
+            blackroad-api.tar.gz
+          target: /tmp
+
+      - name: Deploy and restart services
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            sudo tar -xzf /tmp/blackroad-site.tar.gz -C /var/www/blackroad --strip-components=1
+            sudo tar -xzf /tmp/blackroad-api.tar.gz -C /srv/blackroad-api --strip-components=1
+            sudo systemctl restart blackroad-api
+            sudo systemctl restart lucidia-llm
+            sudo systemctl status blackroad-api
+            sudo systemctl status lucidia-llm
+            curl -f https://blackroad.io/health

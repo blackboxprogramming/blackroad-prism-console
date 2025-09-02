@@ -1,0 +1,5 @@
+{
+  "adapters": {
+    "sqlite": { "db": "./db/blackroad.db" }
+  }
+}
