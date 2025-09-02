@@ -26,6 +26,8 @@ export default function App(){
   const streamRef = useRef(true)
 
   const resetState = useCallback(() => {
+    localStorage.removeItem('token')
+    setToken('')
     setUser(null)
     setTab('timeline')
     setTimeline([])
@@ -58,9 +60,7 @@ export default function App(){
           connectSocket()
         }
       } catch(e){
-        // Clear invalid token, reset state, and log the failure
-        localStorage.removeItem('token')
-        setToken('')
+        // Reset state and log the failure
         resetState()
         console.error('User not authenticated:', e)
       }
@@ -92,8 +92,8 @@ export default function App(){
       await bootData()
       connectSocket()
     }catch(e){
-      console.error('Login failed:', e)
       resetState()
+      console.error('Login failed:', e)
       throw e
     }
   }
