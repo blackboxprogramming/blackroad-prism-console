@@ -1,4 +1,8 @@
-"""Bot for cleaning up merged Git branches."""
+"""Utility for deleting specified Git branches.
+
+Provides a simple command-line interface and structured logging to
+remove branches both locally and on the remote.
+"""
 
 from __future__ import annotations
 
@@ -25,10 +29,16 @@ class CleanupBot:
     dry_run: bool = False
 
     def _run(self, *cmd: str) -> None:
-        """Run ``cmd`` unless in dry-run mode."""
+        """Run ``cmd`` unless in dry-run mode.
+
+        Args:
+            *cmd: Pieces of the command to execute.
+        """
+        command_str = " ".join(cmd)
         if self.dry_run:
-            logger.info("DRY-RUN: %s", " ".join(cmd))
+            logger.info("DRY-RUN: %s", command_str)
             return
+        logger.debug("RUN: %s", command_str)
         subprocess.run(cmd, check=True)
 
     def delete_branch(self, branch: str) -> bool:
