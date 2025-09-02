@@ -1,7 +1,9 @@
 """Simple auto novel agent example with game creation abilities."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import ClassVar, List
+from typing import ClassVar
 
 
 @dataclass
@@ -10,7 +12,7 @@ class AutoNovelAgent:
 
     name: str = "AutoNovelAgent"
     SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal"}
-    games: List[str] = field(default_factory=list)
+    games: list[str] = field(default_factory=list)
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
@@ -38,11 +40,11 @@ class AutoNovelAgent:
         self.games.append(engine_lower)
         return message
 
-    def list_supported_engines(self) -> List[str]:
+    def list_supported_engines(self) -> list[str]:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
-    def list_created_games(self) -> List[str]:
+    def list_created_games(self) -> list[str]:
         """Return a list of engines used for created games.
 
         Returns:
