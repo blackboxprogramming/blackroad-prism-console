@@ -40,7 +40,8 @@ export default function App(){
         // Clear invalid token and log for debugging
         localStorage.removeItem('token')
         setToken('')
-        console.warn('User not authenticated', e)
+        setUser(null)
+        console.error('User not authenticated', e)
       }
     })()
   }, [])

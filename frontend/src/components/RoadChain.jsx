@@ -15,7 +15,7 @@ export default function RoadChain(){
         setBlocks(b)
       }catch(e){
         // Ignore errors when fetching initial blocks but log for diagnostics
-        console.warn('Failed to fetch initial blocks', e)
+        console.error('Failed to fetch initial blocks', e)
       }
     })()
   }, [])
@@ -35,7 +35,7 @@ export default function RoadChain(){
     }catch(err){
       setResult(null)
       setError('Block not found')
-      console.warn('Failed to fetch block', err)
+      console.error('Failed to fetch block', err)
     }
   }
 
