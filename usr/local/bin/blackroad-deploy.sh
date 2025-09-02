@@ -46,9 +46,10 @@ rsh() { ssh $SSH_OPTS "$DROPLET_SSH" "$@"; }
 
 remote_bash() {
   # Run a bash -lc command on droplet (ensures login semantics for PATH)
-  local cmd="$1"
-  # Avoid wrapping in single quotes to prevent quoting conflicts with caller-provided strings
-  rsh bash -lc "$cmd"
+  local cmd
+  # Escape single quotes so payload can be safely wrapped for the remote shell
+  cmd=$(printf '%s' "$1" | sed "s/'/'\\''/g")
+  rsh "bash -lc '$cmd'"
 }
 
 require_cmd() {
