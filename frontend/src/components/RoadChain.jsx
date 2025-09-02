@@ -13,7 +13,7 @@ export default function RoadChain(){
       try{
         const b = await fetchBlocks()
         setBlocks(b)
-      }catch(e){ /* ignore */ }
+      }catch(e){ /* Ignore errors when fetching initial blocks */ }
     })()
   }, [])
 

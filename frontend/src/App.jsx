@@ -24,7 +24,7 @@ export default function App(){
   const [socket, setSocket] = useState(null)
   const [stream, setStream] = useState(true)
 
-  // bootstrap auth from localstorage
+  // Bootstrap authentication token from local storage
   useEffect(()=>{
     const token = localStorage.getItem('token')
     if (token) setToken(token)
@@ -36,7 +36,7 @@ export default function App(){
           await bootData()
           connectSocket()
         }
-      } catch(e){ /* not authed */ }
+      } catch(e){ /* User not authenticated; ignore error */ }
     })()
   }, [])
 
