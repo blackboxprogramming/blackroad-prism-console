@@ -16,15 +16,16 @@ class AutoNovelAgent:
         print(f"{self.name} deployed and ready to generate novels!")
 
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
-        """Create a basic game using a supported engine without weapons.
+        """Create a basic game using a supported engine.
 
         Args:
-            engine: Game engine to use.
-            include_weapons: If True, raise a ``ValueError`` because weapons are not
-                allowed.
+            engine: Game engine to use (case-insensitive).
+            include_weapons: Whether to include weapons. Setting this to ``True``
+                raises a ``ValueError`` because weapons are not allowed.
 
         Raises:
-            ValueError: If the engine is unsupported or weapons are included.
+            ValueError: If the engine is unsupported.
+            ValueError: If weapons are included.
         """
         engine_lower = engine.lower()
         if engine_lower not in self.SUPPORTED_ENGINES:
