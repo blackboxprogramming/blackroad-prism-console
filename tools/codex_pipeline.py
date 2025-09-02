@@ -8,7 +8,7 @@ This script runs a minimal deployment pipeline consisting of four stages:
 * call_connectors
 * validate_services
 
-Each stage is wrapped with error handling that logs failures to
+Each stage logs console output to ``pipeline.log`` and records failures in
 ``pipeline_errors.log``. When a stage fails the pipeline stops unless the
 ``--force`` flag is used. Some failures trigger automatic rollback from the
 latest backup located in ``/var/backups/blackroad``.

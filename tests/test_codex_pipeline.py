@@ -1,3 +1,5 @@
+"""Unit tests for the minimal Codex deployment pipeline."""
+
 import subprocess
 
 import pytest
