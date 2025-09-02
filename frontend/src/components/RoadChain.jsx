@@ -14,8 +14,9 @@ export default function RoadChain(){
         const b = await fetchBlocks()
         setBlocks(b)
       }catch(e){
-        // Ignore errors when fetching initial blocks but log for diagnostics
+        // Surface initial fetch issues so they aren't missed during debugging
         console.error('Failed to fetch initial blocks', e)
+        setError('Failed to fetch initial blocks')
       }
     })()
   }, [])
