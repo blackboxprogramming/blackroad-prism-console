@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   LineChart,
   Line,
@@ -24,6 +24,21 @@ export default function Monitoring() {
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
   const seen = useRef(new Set());
+
+  const updateContradictions = useCallback((list) => {
+    const fresh = [];
+    const mapped = list.map((c) => {
+      const key = c.id || c.timestamp;
+      const isNew = !seen.current.has(key);
+      if (isNew) fresh.push(c);
+      seen.current.add(key);
+      return { ...c, key, isNew };
+    });
+    if (fresh.length) {
+      setToast(`⚠️ ${fresh.length} new contradiction${fresh.length > 1 ? "s" : ""}`);
+    }
+    setContradictions(mapped);
+  }, []);
 
   useEffect(() => {
     let ws;
@@ -78,29 +93,13 @@ export default function Monitoring() {
       if (ws) ws.close();
       if (timer) clearInterval(timer);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [updateContradictions]);
 
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 4000);
     return () => clearTimeout(t);
   }, [toast]);
-
-  const updateContradictions = (list) => {
-    const fresh = [];
-    const mapped = list.map((c) => {
-      const key = c.id || c.timestamp;
-      const isNew = !seen.current.has(key);
-      if (isNew) fresh.push(c);
-      seen.current.add(key);
-      return { ...c, key, isNew };
-    });
-    if (fresh.length) {
-      setToast(`⚠️ ${fresh.length} new contradiction${fresh.length > 1 ? "s" : ""}`);
-    }
-    setContradictions(mapped);
-  };
 
   const statusColor = {
     ok: "bg-green-500",
