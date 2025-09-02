@@ -36,7 +36,10 @@ export default function App(){
           await bootData()
           connectSocket()
         }
-      } catch(e){ /* User not authenticated; ignore error */ }
+      } catch(e){
+        // User not authenticated; log for debugging but otherwise ignore
+        console.warn('User not authenticated', e)
+      }
     })()
   }, [])
 
