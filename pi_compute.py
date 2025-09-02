@@ -15,14 +15,17 @@ import random
 import sys
 import time
 from decimal import Decimal, getcontext
-from itertools import repeat
 
 # --- Known prefix of pi for quick verification (50 digits)
 PI_PREFIX = "3.14159265358979323846264338327950288419716939937510"
 
-def _chudnovsky_term(k: int, prec: int) -> Decimal:
-    """Compute k-th term of Chudnovsky series."""
+
+def _init_worker(prec: int) -> None:
     getcontext().prec = prec
+
+
+def _chudnovsky_term(k: int) -> Decimal:
+    """Compute k-th term of Chudnovsky series."""
     numerator = Decimal(math.factorial(6 * k)) * (13591409 + 545140134 * k)
     denominator = (
         Decimal(math.factorial(3 * k))
@@ -59,8 +62,10 @@ def chudnovsky_pi(digits: int, workers: int = 1, progress: bool = False) -> str:
 
     if workers > 1:
         S = Decimal(0)
-        with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as ex:
-            tasks = ex.map(_chudnovsky_term, range(n_terms), repeat(prec))
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=workers, initializer=_init_worker, initargs=(prec,)
+        ) as ex:
+            tasks = ex.map(_chudnovsky_term, range(n_terms))
             for i, term in enumerate(tasks, 1):
                 S += term
                 if progress:
