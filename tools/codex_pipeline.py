@@ -24,7 +24,7 @@ import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Callable
-from urllib import error, request
+from urllib import request
 
 ERROR_LOG = Path("pipeline_errors.log")
 BACKUP_ROOT = Path("/var/backups/blackroad")
