@@ -47,7 +47,8 @@ rsh() { ssh $SSH_OPTS "$DROPLET_SSH" "$@"; }
 remote_bash() {
   # Run a bash -lc command on droplet (ensures login semantics for PATH)
   local cmd="$1"
-  rsh "bash -lc '$cmd'"
+  # Avoid wrapping in single quotes to prevent quoting conflicts with caller-provided strings
+  rsh bash -lc "$cmd"
 }
 
 require_cmd() {
