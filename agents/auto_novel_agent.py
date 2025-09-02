@@ -22,6 +22,9 @@ class AutoNovelAgent:
             engine: Game engine to use.
             include_weapons: If True, raise a ``ValueError`` because weapons are not
                 allowed.
+
+        Raises:
+            ValueError: If the engine is unsupported or weapons are included.
         """
         engine_lower = engine.lower()
         if engine_lower not in self.SUPPORTED_ENGINES:
