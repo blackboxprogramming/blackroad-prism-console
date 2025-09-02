@@ -29,7 +29,8 @@ class AutoNovelAgent:
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
-        print(f"Creating a {engine_lower.capitalize()} game without weapons...")
+        article = "an" if engine_lower == "unreal" else "a"
+        print(f"Creating {article} {engine_lower.capitalize()} game without weapons...")
 
     def list_supported_engines(self) -> List[str]:
         """Return a list of supported game engines."""
