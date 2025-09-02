@@ -66,18 +66,6 @@ CREATE INDEX IF NOT EXISTS roadview_jobs_type_idx ON roadview_jobs(type);
 CREATE INDEX IF NOT EXISTS roadview_jobs_status_idx ON roadview_jobs(status);
 CREATE INDEX IF NOT EXISTS roadview_jobs_created_idx ON roadview_jobs(created_at);
 
-CREATE TABLE IF NOT EXISTS rc_charges (
-  id TEXT PRIMARY KEY,
-  user_id TEXT,
-  project_id TEXT,
-  job_id TEXT,
-  amount INTEGER,
-  reason TEXT,
-  created_at INTEGER
-);
-CREATE INDEX IF NOT EXISTS rc_charges_user_idx ON rc_charges(user_id);
-CREATE INDEX IF NOT EXISTS rc_charges_project_idx ON rc_charges(project_id);
-
 CREATE VIEW IF NOT EXISTS roadview_project_summary_v AS
 SELECT
   p.id,
