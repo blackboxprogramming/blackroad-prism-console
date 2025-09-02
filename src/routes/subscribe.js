@@ -9,6 +9,7 @@ const { strictLimiter } = require('../rateLimiter');
 const SUBSCRIPTIONS_ENABLED = process.env.SUBSCRIPTIONS_ENABLED !== 'false';
 
 // GET /api/subscribe/health
+// This endpoint remains available even when subscriptions are disabled.
 router.get('/subscribe/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
