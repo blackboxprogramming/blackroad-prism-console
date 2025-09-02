@@ -3,11 +3,11 @@ on: { issue_comment: { types: [created] } }
 permissions: { contents: write, pull-requests: write, issues: write }
 jobs:
   apply:
-    if: startsWith(github.event.comment.body, '/codex ')
+    if: startsWith(github.event.comment.body, '/codex ') || startsWith(github.event.comment.body, '@codex ')
     runs-on: ubuntu-latest
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-      BOT_USER:  ${{ secrets.BOT_USER || 'blackroad-bot' }}
+      BOT_USER: ${{ secrets.BOT_USER || 'blackroad-bot' }}
       CODEx_BODY: ${{ github.event.comment.body }}
       CODEx_PERMISSION: ${{ github.event.comment.author_association }}
     steps:
