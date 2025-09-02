@@ -22,7 +22,10 @@ class StatusBot:
     def latest_status(self, workflow: str) -> str:
         """Return the status of the most recent workflow run."""
         url = f"https://api.github.com/repos/{self.repo}/actions/workflows/{workflow}/runs"
-        headers = {"Authorization": f"token {self.token}"} if self.token else {}
+        headers = {
+            "Authorization": f"token {self.token}",
+            "Accept": "application/vnd.github+json",
+        } if self.token else {"Accept": "application/vnd.github+json"}
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
         data = response.json()

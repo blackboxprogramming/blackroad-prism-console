@@ -24,7 +24,14 @@ class ReviewBot:
         url = (
             f"https://api.github.com/repos/{self.repo}/pulls/{pr_number}/requested_reviewers"
         )
-        headers = {"Authorization": f"token {self.token}"} if self.token else {}
+        headers = {
+            "Authorization": f"token {self.token}",
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        } if self.token else {
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        }
         payload = {"reviewers": reviewers}
         response = requests.post(url, json=payload, headers=headers, timeout=10)
         response.raise_for_status()

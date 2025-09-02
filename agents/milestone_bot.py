@@ -22,7 +22,14 @@ class MilestoneBot:
     def create_milestone(self, title: str, description: str = "") -> dict:
         """Create a new milestone."""
         url = f"https://api.github.com/repos/{self.repo}/milestones"
-        headers = {"Authorization": f"token {self.token}"} if self.token else {}
+        headers = {
+            "Authorization": f"token {self.token}",
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        } if self.token else {
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        }
         payload = {"title": title, "description": description}
         response = requests.post(url, json=payload, headers=headers, timeout=10)
         response.raise_for_status()
@@ -31,7 +38,14 @@ class MilestoneBot:
     def close_milestone(self, milestone_number: int) -> dict:
         """Close an existing milestone."""
         url = f"https://api.github.com/repos/{self.repo}/milestones/{milestone_number}"
-        headers = {"Authorization": f"token {self.token}"} if self.token else {}
+        headers = {
+            "Authorization": f"token {self.token}",
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        } if self.token else {
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        }
         payload = {"state": "closed"}
         response = requests.patch(url, json=payload, headers=headers, timeout=10)
         response.raise_for_status()

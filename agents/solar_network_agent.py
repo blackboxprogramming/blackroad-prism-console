@@ -45,7 +45,10 @@ class SolarNetworkClient:
             requests.HTTPError: If the HTTP request fails.
         """
         query = {"api_key": self.api_key} | params
-        response = requests.get(self.base_url, params=query, timeout=10)
+        headers = {"Accept": "application/json"}
+        response = requests.get(
+            self.base_url, params=query, headers=headers, timeout=10
+        )
         response.raise_for_status()
         return response.json()
 
