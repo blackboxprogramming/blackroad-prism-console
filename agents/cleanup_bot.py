@@ -26,11 +26,22 @@ class CleanupBot:
     dry_run: bool = False
 
     def _run_git(self, *args: str) -> subprocess.CompletedProcess:
-        """Execute a git command with ``check=True`` and captured output."""
+        """Execute a git command and return its result.
+
+        Parameters
+        ----------
+        *args:
+            Additional arguments passed directly to ``git``.
+
+        Returns
+        -------
+        subprocess.CompletedProcess
+            The completed process instance with captured output.
+        """
         return subprocess.run(["git", *args], check=True, capture_output=True, text=True)
 
     def delete_branch(self, branch: str) -> bool:
-        """Delete a branch locally and remotely.
+        """Attempt to delete a branch locally and remotely.
 
         Args:
             branch: The branch name to remove.
@@ -53,7 +64,7 @@ class CleanupBot:
         return success
 
     def cleanup(self) -> Dict[str, bool]:
-        """Remove the configured branches locally and remotely.
+        """Attempt to remove the configured branches locally and remotely.
 
         Returns:
             Mapping of branch names to deletion success.
