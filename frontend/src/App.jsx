@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import io from 'socket.io-client'
 import { Routes, Route, Link } from 'react-router-dom'
 import { API_BASE, setToken, login, me, fetchTimeline, fetchTasks, fetchCommits, fetchAgents, fetchWallet, fetchContradictions, getNotes, setNotes, action } from './api'
@@ -23,21 +23,27 @@ export default function App(){
   const [notes, setNotesState] = useState('')
   const [socket, setSocket] = useState(null)
   const [stream, setStream] = useState(true)
+  const streamRef = useRef(true)
 
-  function resetState(){
+  const resetState = useCallback(() => {
     setUser(null)
+    setTab('timeline')
     setTimeline([])
     setTasks([])
     setCommits([])
     setAgents([])
     setWallet({ rc: 0 })
     setContradictions({ issues: 0 })
+    setSystem({ cpu: 0, mem: 0, gpu: 0 })
     setNotesState('')
-    if(socket){
-      socket.disconnect()
-      setSocket(null)
-    }
-  }
+    setStream(true)
+    setSocket(prev => {
+      if(prev) prev.disconnect()
+      return null
+    })
+  }, [])
+
+  useEffect(() => { streamRef.current = stream }, [stream])
 
   // Bootstrap authentication token from local storage
   useEffect(()=>{
@@ -59,31 +65,37 @@ export default function App(){
         console.error('User not authenticated:', e)
       }
     })()
-  }, [])
+  }, [bootData, connectSocket, resetState])
 
-  async function bootData(){
+  const bootData = useCallback(async ()=>{
     const [tl, ts, cs, ag, w, c, n] = await Promise.all([
       fetchTimeline(), fetchTasks(), fetchCommits(), fetchAgents(), fetchWallet(), fetchContradictions(), getNotes()
     ])
     setTimeline(tl); setTasks(ts); setCommits(cs); setAgents(ag); setWallet(w); setContradictions(c); setNotesState(n || '')
-  }
+  }, [])
 
-  function connectSocket(){
+  const connectSocket = useCallback(()=>{
     const s = io(API_BASE, { transports: ['websocket'] })
-    s.on('system:update', d => stream && setSystem(d))
+    s.on('system:update', d => { if(streamRef.current) setSystem(d) })
     s.on('timeline:new', d => setTimeline(prev => [d.item, ...prev]))
     s.on('wallet:update', w => setWallet(w))
     s.on('notes:update', n => setNotesState(n || ''))
     setSocket(s)
-  }
+  }, [])
 
   async function handleLogin(usr, pass){
-    const { token, user } = await login(usr, pass)
-    localStorage.setItem('token', token)
-    setToken(token)
-    setUser(user)
-    await bootData()
-    connectSocket()
+    try{
+      const { token, user } = await login(usr, pass)
+      localStorage.setItem('token', token)
+      setToken(token)
+      setUser(user)
+      await bootData()
+      connectSocket()
+    }catch(e){
+      console.error('Login failed:', e)
+      resetState()
+      throw e
+    }
   }
 
   async function onAction(name){
