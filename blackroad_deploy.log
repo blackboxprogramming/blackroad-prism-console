@@ -1,0 +1,6 @@
+Tue Sep  2 18:14:21 UTC 2025: Deployment attempted.
+- /var/www/blackroad missing; git pull skipped.
+- pnpm version: 10.11.0
+- systemd services created but not started (systemd unavailable).
+- nginx configured and started.
+- curl to localhost:3000 and 3001 failed.
