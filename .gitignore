@@ -54,5 +54,4 @@ lucidia/modules/random_fields/datasets/__pycache__/
 !opt/blackroad/tdb/.env
 
 # Rust build artifacts
-target/
 **/target/
