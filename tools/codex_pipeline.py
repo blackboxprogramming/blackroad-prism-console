@@ -37,9 +37,6 @@ _FILE_HANDLER.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(messag
 LOGGER.addHandler(_FILE_HANDLER)
 LOGGER.setLevel(logging.INFO)
 
-LOG_FILE = Path(__file__).resolve().parent.parent / "pipeline_validation.log"
-
-
 def run(cmd: str, *, dry_run: bool = False) -> None:
     """Run a shell command and stream output."""
     LOGGER.info("[cmd] %s", cmd)
