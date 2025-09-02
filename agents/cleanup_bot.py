@@ -26,23 +26,29 @@ class CleanupBot:
             return
         subprocess.run(cmd, check=True)
 
-    def delete_branch(self, branch: str) -> bool:
+    def delete_branch(self, branch: str) -> Dict[str, bool]:
         """Delete a branch locally and remotely.
 
         Returns:
-            ``True`` if deletion succeeded for both local and remote branches,
-            ``False`` otherwise.
+            A mapping indicating success for ``"local"`` and ``"remote"``
+            deletions.
         """
+        results = {"local": False, "remote": False}
         try:
             self._run("git", "branch", "-D", branch)
-            self._run("git", "push", "origin", "--delete", branch)
-            return True
+            results["local"] = True
         except subprocess.CalledProcessError:
-            return False
+            pass
+        try:
+            self._run("git", "push", "origin", "--delete", branch)
+            results["remote"] = True
+        except subprocess.CalledProcessError:
+            pass
+        return results
 
-    def cleanup(self) -> Dict[str, bool]:
+    def cleanup(self) -> Dict[str, Dict[str, bool]]:
         """Remove the configured branches locally and remotely."""
-        results: Dict[str, bool] = {}
+        results: Dict[str, Dict[str, bool]] = {}
         for branch in self.branches:
             results[branch] = self.delete_branch(branch)
         return results
