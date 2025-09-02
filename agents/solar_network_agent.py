@@ -21,19 +21,22 @@ class SolarNetworkClient:
 
     base_url = "https://developer.nrel.gov/api/pvwatts/v8.json"
 
-    def __init__(self, api_key: str = "DEMO_KEY") -> None:
-        """Initialize the client with an API key.
+    def __init__(self, api_key: str = "DEMO_KEY", timeout: float = 10) -> None:
+        """Initialize the client with an API key and request timeout.
 
         Args:
             api_key: NREL API key. The default "DEMO_KEY" is suitable for
                 low-volume requests.
+            timeout: Timeout in seconds for HTTP requests.
         """
         self.api_key = api_key
+        self.timeout = timeout
 
-    def fetch_estimate(self, **params: Any) -> dict[str, Any]:
+    def fetch_estimate(self, *, timeout: float | None = None, **params: Any) -> dict[str, Any]:
         """Fetch a solar production estimate from the API.
 
         Args:
+            timeout: Optional override for the request timeout in seconds.
             **params: Additional query parameters such as ``system_capacity`` or
                 ``tilt``. Refer to the PVWatts API documentation for all
                 supported fields.
@@ -47,7 +50,10 @@ class SolarNetworkClient:
         query = {"api_key": self.api_key} | params
         headers = {"Accept": "application/json"}
         response = requests.get(
-            self.base_url, params=query, headers=headers, timeout=10
+            self.base_url,
+            params=query,
+            headers=headers,
+            timeout=timeout or self.timeout,
         )
         response.raise_for_status()
         return response.json()
