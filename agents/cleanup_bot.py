@@ -5,14 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 import subprocess
 from subprocess import CalledProcessError
-from typing import Dict, List
 
 
 @dataclass
 class CleanupBot:
     """Delete local and remote branches after merges."""
 
-    branches: List[str]
+    branches: list[str]
     dry_run: bool = False
 
     def _run(self, *cmd: str) -> None:
@@ -31,13 +30,13 @@ class CleanupBot:
         except CalledProcessError:
             return False
 
-    def cleanup(self) -> Dict[str, bool]:
+    def cleanup(self) -> dict[str, bool]:
         """Remove the configured branches locally and remotely.
 
         Returns:
             Mapping of branch names to deletion success.
         """
-        results: Dict[str, bool] = {}
+        results: dict[str, bool] = {}
         for branch in self.branches:
             if self.dry_run:
                 print(f"Would delete branch '{branch}' locally and remotely")
