@@ -81,11 +81,12 @@ const ROADVIEW_STORAGE = path.resolve(
   process.env.ROADVIEW_STORAGE ||
     path.join(__dirname, 'srv', 'blackroad-api', 'storage', 'roadview')
 );
+const ROADVIEW_PROJECTS_DIR = path.join(ROADVIEW_STORAGE, 'projects');
 try {
-  fs.mkdirSync(path.join(ROADVIEW_STORAGE, 'projects'), { recursive: true });
+  fs.mkdirSync(ROADVIEW_PROJECTS_DIR, { recursive: true });
 } catch (err) {
   console.error(
-    `Failed to ensure RoadView storage directory at ${ROADVIEW_STORAGE}`,
+    `Failed to ensure RoadView projects directory at ${ROADVIEW_PROJECTS_DIR}`,
     err
   );
 }
