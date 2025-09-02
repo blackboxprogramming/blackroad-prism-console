@@ -41,7 +41,11 @@ class CommentBot:
         url = (
             f"https://api.github.com/repos/{self.repo}/issues/{issue_number}/comments"
         )
-        headers = {"Authorization": f"token {self.token}"}
+        headers = {
+            "Authorization": f"token {self.token}",
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        }
         payload = {"body": body}
         response = requests.post(url, json=payload, headers=headers, timeout=10)
         response.raise_for_status()

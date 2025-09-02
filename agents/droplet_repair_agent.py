@@ -39,7 +39,10 @@ class DropletRepairAgent:
     )
 
     def _headers(self) -> Dict[str, str]:
-        return {"Authorization": f"Bearer {self.do_api_token}"}
+        return {
+            "Authorization": f"Bearer {self.do_api_token}",
+            "Accept": "application/json",
+        }
 
     def discover_droplet(self) -> Dict[str, Any]:
         """Locate droplet information by matching the final IP octet."""

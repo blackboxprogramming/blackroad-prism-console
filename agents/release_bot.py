@@ -22,7 +22,14 @@ class ReleaseBot:
     def create_release(self, tag: str, name: str, body: str = "") -> dict:
         """Create a release for the given tag."""
         url = f"https://api.github.com/repos/{self.repo}/releases"
-        headers = {"Authorization": f"token {self.token}"} if self.token else {}
+        headers = {
+            "Authorization": f"token {self.token}",
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        } if self.token else {
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        }
         payload = {"tag_name": tag, "name": name, "body": body}
         response = requests.post(url, json=payload, headers=headers, timeout=10)
         response.raise_for_status()

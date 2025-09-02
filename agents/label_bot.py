@@ -22,7 +22,14 @@ class LabelBot:
     def add_labels(self, issue_number: int, labels: list[str]) -> dict:
         """Add labels to a GitHub issue or pull request."""
         url = f"https://api.github.com/repos/{self.repo}/issues/{issue_number}/labels"
-        headers = {"Authorization": f"token {self.token}"} if self.token else {}
+        headers = {
+            "Authorization": f"token {self.token}",
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        } if self.token else {
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        }
         payload = {"labels": labels}
         response = requests.post(url, json=payload, headers=headers, timeout=10)
         response.raise_for_status()
@@ -33,7 +40,10 @@ class LabelBot:
         url = (
             f"https://api.github.com/repos/{self.repo}/issues/{issue_number}/labels/{label}"
         )
-        headers = {"Authorization": f"token {self.token}"} if self.token else {}
+        headers = {
+            "Authorization": f"token {self.token}",
+            "Accept": "application/vnd.github+json",
+        } if self.token else {"Accept": "application/vnd.github+json"}
         response = requests.delete(url, headers=headers, timeout=10)
         response.raise_for_status()
 
