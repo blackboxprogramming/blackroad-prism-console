@@ -5,16 +5,19 @@ import pytest
 from agents.auto_novel_agent import AutoNovelAgent
 
 
-def test_create_game_supported_engines(capsys):
+@pytest.mark.parametrize(
+    ("engine", "expected"),
+    [
+        ("unity", "Creating a Unity game without weapons..."),
+        ("unreal", "Creating an Unreal game without weapons..."),
+    ],
+)
+def test_create_game_supported_engines(engine: str, expected: str, capsys):
     """AutoNovelAgent creates games for supported engines without errors."""
     agent = AutoNovelAgent()
-    agent.create_game("unity")
-    agent.create_game("unreal")
-    captured = capsys.readouterr().out.splitlines()
-    assert captured == [
-        "Creating a Unity game without weapons...",
-        "Creating an Unreal game without weapons...",
-    ]
+    agent.create_game(engine)
+    captured = capsys.readouterr().out.strip()
+    assert captured == expected
 
 
 def test_create_game_unsupported_engine():
