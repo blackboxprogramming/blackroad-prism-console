@@ -26,7 +26,7 @@ DRY_RUN="${DRY_RUN:-false}"                                    # set true to pre
 SSH_OPTS="${SSH_OPTS:- -o BatchMode=yes -o StrictHostKeyChecking=accept-new }"
 
 if [[ "$WORKING_COPY_SSH" == "local" ]]; then
-  WORKING_COPY_PATH="${WORKING_COPY_PATH/#\~/$HOME}"
+  WORKING_COPY_PATH="${WORKING_COPY_PATH/#~/$HOME}"
 fi
 ### ──────────────────────────────
 ### Helpers
