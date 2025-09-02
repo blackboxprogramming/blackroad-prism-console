@@ -77,13 +77,17 @@ app.use(limiter);
 const db = require('./src/db');
 
 // ROADVIEW
-const ROADVIEW_STORAGE = process.env.ROADVIEW_STORAGE
-  ? path.resolve(process.env.ROADVIEW_STORAGE)
-  : path.join(__dirname, 'srv', 'blackroad-api', 'storage', 'roadview');
+const ROADVIEW_STORAGE = path.resolve(
+  process.env.ROADVIEW_STORAGE ||
+    path.join(__dirname, 'srv', 'blackroad-api', 'storage', 'roadview')
+);
 try {
   fs.mkdirSync(path.join(ROADVIEW_STORAGE, 'projects'), { recursive: true });
 } catch (err) {
-  console.error('Failed to ensure RoadView storage directory', err);
+  console.error(
+    `Failed to ensure RoadView storage directory at ${ROADVIEW_STORAGE}`,
+    err
+  );
 }
 app.use(
   '/files/roadview',
