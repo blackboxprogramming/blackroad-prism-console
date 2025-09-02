@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import argparse
+import logging
+import sys
 import subprocess
 from dataclasses import dataclass
 from subprocess import CalledProcessError
@@ -51,7 +54,7 @@ class CleanupBot:
     def _run(self, *cmd: str) -> None:
         """Run a command unless in dry-run mode."""
         if self.dry_run:
-            print("DRY-RUN:", " ".join(cmd))
+            logging.info("DRY-RUN: %s", " ".join(cmd))
             return
         subprocess.run(cmd, check=True)
 
@@ -83,10 +86,33 @@ class CleanupBot:
         return results
 
 
-if __name__ == "__main__":
-    bot = CleanupBot.from_merged()
+def main(argv: List[str] | None = None) -> int:
+    """Entry point for the CleanupBot CLI."""
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--base",
+        default="main",
+        help="Base branch to compare against",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show commands without executing them",
+    )
+    args = parser.parse_args(argv)
+
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
+
+    bot = CleanupBot.from_merged(base=args.base, dry_run=args.dry_run)
     results = bot.cleanup()
     for branch, deleted in results.items():
-        status = "deleted" if deleted else "skipped"
-        print(f"{branch}: {status}")
+        status = "deleted" if deleted else "failed"
+        logging.info("%s: %s", branch, status)
+
+    return 0 if all(results.values()) else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
 
