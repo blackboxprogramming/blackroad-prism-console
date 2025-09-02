@@ -8,4 +8,9 @@ description = "Allow non-secret test fixtures"
 paths = [
   "docs/.*",
   "analysis/fixtures/.*",
+  "TheRohoncCodex.html",
+  "scripts/nginx-ensure-and-health.sh",
+  "sshprivate.sh",
+  "opt/blackroad/dev/.*",
+  '^\.env\.example$',
 ]
