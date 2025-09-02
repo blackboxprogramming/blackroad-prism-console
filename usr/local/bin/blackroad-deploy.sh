@@ -16,7 +16,8 @@ set -Eeuo pipefail
 ### ──────────────────────────────
 ### Tunables (override via env)
 ### ──────────────────────────────
-WORKING_COPY_PATH="${WORKING_COPY_PATH:-~/blackroad-api}"     # path to repo on the working-copy host (or local path if WORKING_COPY_SSH=local)
+# Path to repo on the working-copy host (or local path if WORKING_COPY_SSH=local)
+WORKING_COPY_PATH="${WORKING_COPY_PATH:-~/blackroad-api}"
 if [[ "$WORKING_COPY_SSH" == "local" ]]; then
   WORKING_COPY_PATH="${WORKING_COPY_PATH/#\~/$HOME}"
 fi
