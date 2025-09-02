@@ -20,9 +20,9 @@ async function getService(id, base) {
       fetchJson(`${base}/logs?level=error&limit=1`).catch(() => ({ count: 0, logs: [] }))
     ]);
     return {
-      status: health.status || health.ok || 'FAIL',
+      status: health.status ?? (health.ok ? 'OK' : 'FAIL'),
       uptime: health.uptime || '-',
-      errors: logs.count || (Array.isArray(logs.logs) ? logs.logs.length : 0),
+      errors: logs.count ?? (Array.isArray(logs.logs) ? logs.logs.length : 0),
       contradictions: health.contradictions || 0
     };
   } catch {
