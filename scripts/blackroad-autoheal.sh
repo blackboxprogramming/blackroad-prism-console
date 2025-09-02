@@ -52,7 +52,8 @@ install_math_deps(){ (cd "$MATH_DIR" && pip install -r requirements.txt) }
 
 perform_backup(){
   mkdir -p "$BACKUP_ROOT/blackroad" "$BACKUP_ROOT/lucidia-math"
-  local ts=$(date +%Y%m%d)
+  local ts
+  ts=$(date +%Y%m%d)
   tar -czf "$BACKUP_ROOT/blackroad/blackroad.db-$ts.tar.gz" -C "$API_DIR" blackroad.db
   tar -czf "$BACKUP_ROOT/lucidia-math/output-$ts.tar.gz" -C "$MATH_DIR" output
   log "Backup completed for $ts"
@@ -62,11 +63,13 @@ perform_backup(){
 
 rotate_keep(){
   local dir=$1 keep=$2
+# shellcheck disable=SC2012
   ls -1t "$dir" | tail -n +$((keep+1)) | xargs -r -I{} rm "$dir/{}"
 }
 
 trigger_rollback(){
   local latest
+  # shellcheck disable=SC2012
   latest=$(ls -1t "$BACKUP_ROOT/blackroad"/* 2>/dev/null | head -n1 || true)
   if [ -z "$latest" ]; then
     log "No snapshots found; rollback skipped"
@@ -93,10 +96,11 @@ update_repo(){
 }
 
 update_failure_state(){
-  local now=$(date +%s)
+  local now
+  now=$(date +%s)
   local count=0 last=0
   if [ -f "$STATE_FILE" ]; then
-    read count last <"$STATE_FILE"
+    read -r count last <"$STATE_FILE"
   fi
   if (( now - last > 600 )); then count=0; fi
   count=$((count+1))
@@ -122,7 +126,8 @@ validate(){
   curl_check http://127.0.0.1:4000/api/health
   curl_check http://127.0.0.1:8000/health
   curl_check http://127.0.0.1:8500/health
-  local t=$(curl -o /dev/null -s -w "%{time_total}" https://blackroad.io/)
+  local t
+  t=$(curl -o /dev/null -s -w "%{time_total}" https://blackroad.io/)
   log "Frontend load time ${t}s"
   curl -s http://127.0.0.1:8000/health > /var/log/blackroad-llm-proof.log || true
 }
