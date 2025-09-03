@@ -20,7 +20,15 @@ class CommentBot:
             self.token = os.getenv("GITHUB_TOKEN")
 
     def comment(self, issue_number: int, body: str) -> dict:
-        """Post a comment on the specified issue or pull request."""
+        """Post a comment on a GitHub issue or pull request.
+
+        Args:
+            issue_number: The target issue or pull request number.
+            body: Markdown content of the comment.
+
+        Returns:
+            The JSON response from the GitHub API.
+        """
         url = f"https://api.github.com/repos/{self.repo}/issues/{issue_number}/comments"
         headers = {"Authorization": f"token {self.token}"} if self.token else {}
         payload = {"body": body}
