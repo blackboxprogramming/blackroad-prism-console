@@ -67,3 +67,11 @@ target/
 **/target/
 *.db
 *.sqlite
+
+# Never commit SSH private keys
+id_ed25519
+id_ed25519.pem
+id_rsa
+*.pem
+*.key
+ssh-*
