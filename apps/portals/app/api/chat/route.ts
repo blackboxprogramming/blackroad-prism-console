@@ -2,7 +2,6 @@
 import { streamText, convertToModelMessages, stepCountIs } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import { ollama, createOllama } from 'ollama-ai-provider-v2';
 import { z } from 'zod';
 
 export const maxDuration = 30;
@@ -10,12 +9,6 @@ export const maxDuration = 30;
 function pickModel() {
   const provider = process.env.LLM_PROVIDER ?? 'openai';
   const modelId = process.env.LLM_MODEL ?? 'gpt-4o';
-
-  if (provider === 'ollama') {
-    const baseURL = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434/api';
-    const local = createOllama({ baseURL });
-    return local(modelId);
-  }
 
   if (provider === 'openai-compatible') {
     const compat = createOpenAICompatible({
