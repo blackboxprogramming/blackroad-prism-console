@@ -33,7 +33,7 @@ export default function RoadWork() {
   useEffect(() => {
     if (generating) {
       const t = setTimeout(() => {
-        navigate('/portal');
+        navigate('/roadview');
       }, 1200);
       return () => clearTimeout(t);
     }
