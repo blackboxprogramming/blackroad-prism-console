@@ -4,6 +4,7 @@
 - Added `.env.sample`, Jest/Pytest smoke tests, Makefile, and CI workflow.
 - Moved legacy configs and environment files to `/_trash`.
 - Removed deprecated `.eslintrc.cjs` and stray `.env.aider` from repo root.
+- Consolidated lint/format configs; migrated service-level duplicates to `/_trash` and introduced repo-wide `.eslintrc.cjs`.
 
 ### Verification Commands
 
