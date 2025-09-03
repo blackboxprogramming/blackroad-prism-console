@@ -1,18 +1,17 @@
 """Definitions for student bots guided by leader agents."""
 from dataclasses import dataclass
 from itertools import cycle
-from typing import List
 
 
 @dataclass
 class StudentBot:
-    """Represents a bot learning to code, execute, and think novelly."""
+    """Represents a bot learning to code, execute, and think creatively."""
 
     name: str
     leader: str
 
 
-def create_student_bots() -> List[StudentBot]:
+def create_student_bots() -> list[StudentBot]:
     """Create 25 student bots guided by phi, gpt, mistral, codex, and lucidia.
 
     The leaders act as mentors rather than managers. Bots cycle through the
