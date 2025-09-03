@@ -1,5 +1,6 @@
 """Simple coding portal for executing Python snippets."""
 
+import ast
 import io
 import math
 import os
@@ -14,6 +15,46 @@ from flask import Flask, jsonify, render_template, request
 app = Flask(__name__)
 
 
+# --- safety helpers -------------------------------------------------------
+
+# Limit the builtins available to executed user code.  Only a few
+# side-effect-free functions are exposed; anything else would raise a
+# ``NameError``.  Using a constant dictionary both documents the policy and
+# allows the validation step below to reference the allowed names.
+SAFE_BUILTINS = {"print": print, "abs": abs, "round": round, "pow": pow}
+
+
+class CodeValidationError(ValueError):
+    """Raised when submitted code contains unsafe operations."""
+
+
+def _validate(code: str) -> None:
+    """Lightweight static analysis to reject obviously unsafe code.
+
+    The checker disallows import statements and attribute access outside of
+    the ``math`` module.  It also restricts function calls to the allowed
+    builtin names or ``math`` functions.  The intent is not to provide a
+    perfect sandbox but to reduce risk from common attack vectors such as
+    importing the ``os`` module or accessing ``__subclasses__``.
+    """
+
+    tree = ast.parse(code, mode="exec")
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            raise CodeValidationError("import statements are not allowed")
+        if isinstance(node, ast.Attribute):
+            if not (isinstance(node.value, ast.Name) and node.value.id == "math"):
+                raise CodeValidationError("attribute access restricted to math module")
+        if isinstance(node, ast.Call):
+            func = node.func
+            if isinstance(func, ast.Name):
+                if func.id not in SAFE_BUILTINS:
+                    raise CodeValidationError(f"call to '{func.id}' is not permitted")
+            elif isinstance(func, ast.Attribute):
+                if not (isinstance(func.value, ast.Name) and func.value.id == "math"):
+                    raise CodeValidationError("only calls to math functions are permitted")
+
+
 @app.route("/")
 def index():
     """Serve the main page."""
@@ -25,12 +66,21 @@ def run_code():
     """Execute user-supplied Python code and return the output."""
     data = request.get_json(silent=True) or {}
     code = data.get("code", "")
+
+    try:
+        _validate(code)
+    except CodeValidationError as exc:
+        # Reject code that fails the static checks with a clear error message.
+        return jsonify({"error": str(exc)}), 400
+
     local_vars: dict[str, object] = {"math": math}
-    safe_builtins = {"print": print, "abs": abs, "round": round, "pow": pow}
     stdout = io.StringIO()
     try:
         with redirect_stdout(stdout):
-            exec(code, {"__builtins__": safe_builtins}, local_vars)
+            # ``SAFE_BUILTINS`` is provided via the globals mapping, while
+            # ``local_vars`` exposes the math module.  No other globals are
+            # accessible to the executed code.
+            exec(code, {"__builtins__": SAFE_BUILTINS}, local_vars)
         output = stdout.getvalue()
     except Exception as exc:  # noqa: BLE001 - broad for user feedback
         output = f"Error: {exc}"
