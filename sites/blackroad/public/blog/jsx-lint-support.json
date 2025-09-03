@@ -1,0 +1,7 @@
+{
+  "slug": "jsx-lint-support",
+  "title": "JSX Lint Support",
+  "date": "2025-08-25",
+  "description": "JSX-aware linting now keeps our code consistent.",
+  "html": "<p>The project now uses an ESLint configuration that understands JSX. This helps catch issues in React components and ensures consistent style across the codebase.</p>\n<p>Developers can run <code>npm run lint</code> to check their work before committing.</p>\n"
+}

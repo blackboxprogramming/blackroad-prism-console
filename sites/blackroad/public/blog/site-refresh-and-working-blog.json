@@ -1,0 +1,7 @@
+{
+  "slug": "site-refresh-and-working-blog",
+  "title": "Site Refresh and Working Blog",
+  "date": "2025-09-03",
+  "description": "BlackRoad.io now features a cleaned-up blog and improved translations.",
+  "html": "<p>The website codebase received a long overdue tidy. The blog loader works again,\ntranslations are consistent, and navigation links render reliably.</p>\n<p>Expect smoother updates as the platform continues to evolve.</p>\n"
+}
