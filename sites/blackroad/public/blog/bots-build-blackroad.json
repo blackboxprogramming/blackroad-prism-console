@@ -1,0 +1,7 @@
+{
+  "slug": "bots-build-blackroad",
+  "title": "Bots Build BlackRoad",
+  "date": "2025-02-14",
+  "description": "Introducing agents that automatically build the BlackRoad.io website.",
+  "html": "<p>Our new build agent can run <code>npm run build</code> for the BlackRoad.io site, enabling\nbots to keep the website up to date with minimal human oversight.</p>\n"
+}

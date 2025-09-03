@@ -1,0 +1,7 @@
+{
+  "slug": "about-page-coverage",
+  "title": "About Page Coverage",
+  "date": "2025-08-22",
+  "description": "Adding an end-to-end test to verify the About page renders correctly.",
+  "html": "<p>We expanded the route coverage in our Playwright suite to include the <code>/about</code> page, ensuring visitors can always learn about BlackRoad.</p>\n"
+}
