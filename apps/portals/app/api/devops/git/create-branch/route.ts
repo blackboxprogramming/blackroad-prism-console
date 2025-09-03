@@ -4,6 +4,6 @@ export async function POST(req: NextRequest) {
   if (!branch || /[^a-zA-Z0-9/_\-]/.test(branch)) {
     return NextResponse.json({ error: "invalid branch" }, { status: 400 });
   }
-  // TODO: call GitHub/GitLab to create the branch; record audit trail
+  console.log(`create-branch stub: ${branch}`);
   return NextResponse.json({ ok: true, branch });
 }
