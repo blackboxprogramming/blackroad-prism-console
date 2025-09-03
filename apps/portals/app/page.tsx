@@ -3,9 +3,13 @@ import { Card } from "../components/ui/card";
 import { Logo } from "../components/ui/logo";
 
 const portals = [
+  { name: "Portal", href: "/portal" },
+  { name: "RoadWork", href: "/roadwork" },
+  { name: "RoadView", href: "/roadview" },
+  { name: "RoadGlitch", href: "/roadglitch" },
+  { name: "BackRoad", href: "/backroad" },
   { name: "Login", href: "/login" },
   { name: "Co-Code", href: "/cocode" },
-  { name: "RoadView", href: "/roadview" },
   { name: "RoadCoin", href: "/roadcoin" },
   { name: "RoadChain", href: "/roadchain" },
   { name: "Roadie", href: "/roadie" },
