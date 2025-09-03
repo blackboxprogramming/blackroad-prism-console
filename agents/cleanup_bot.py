@@ -1,4 +1,9 @@
-"""Bot for cleaning up merged Git branches."""
+"""Utility for removing merged Git branches.
+
+This module provides a :class:`CleanupBot` dataclass that deletes branches
+both locally and remotely. A ``dry_run`` flag prints the actions that would be
+taken without executing any commands, making it safe to preview operations.
+"""
 
 from __future__ import annotations
 
@@ -25,14 +30,22 @@ class CleanupBot:
     dry_run: bool = False
 
     def _run(self, *cmd: str) -> None:
-        """Run a command unless in dry-run mode."""
+        """Run a command unless in dry-run mode.
+
+        When ``dry_run`` is enabled the command is printed rather than
+        executed. This keeps side effects from occurring during previews.
+        """
         if self.dry_run:
             print("DRY-RUN:", " ".join(cmd))
             return
         subprocess.run(cmd, check=True)
 
     def _run_git(self, *args: str) -> subprocess.CompletedProcess:
-        """Execute a git command with ``check=True`` and captured output."""
+        """Execute a git command and return the completed process.
+
+        The command is run with ``check=True`` and captures output for logging
+        or further inspection by the caller.
+        """
         return subprocess.run(
             ["git", *args], check=True, capture_output=True, text=True
         )
