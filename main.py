@@ -1,3 +1,5 @@
+"""Streamlit app for BlackRoad Prism Generator with GPT and voice input."""
+
 import ast
 import os
 import tempfile
@@ -5,8 +7,6 @@ import tempfile
 import streamlit as st
 import whisper
 from openai import OpenAI
-
-"""Streamlit app for BlackRoad Prism Generator with GPT and voice input."""
 
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")
