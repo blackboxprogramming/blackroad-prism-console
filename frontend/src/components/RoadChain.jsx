@@ -22,7 +22,7 @@ export default function RoadChain(){
   }, [])
 
   useEffect(() => {
-    if (!query) {
+    if (!query.trim()) {
       setResult(null)
       setError('')
     }
@@ -34,9 +34,10 @@ export default function RoadChain(){
 
   async function onSearch(e){
     e.preventDefault()
-    if(!query) return
+    const q = query.trim()
+    if(!q) return
     try{
-      const blk = await fetchBlock(query.trim())
+      const blk = await fetchBlock(q)
       setResult(blk)
       setExpanded(prev => ({ ...prev, [blk.hash]: true }))
       setError('')
