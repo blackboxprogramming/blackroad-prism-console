@@ -11,6 +11,7 @@ import Lucidia from "./pages/Lucidia.jsx";
 import InfinityMath from "./pages/InfinityMath.jsx";
 import Agents from "./pages/Agents.jsx";
 import Desktop from "./pages/Desktop.jsx";
+import RoadWork from "./pages/RoadWork.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -60,6 +61,7 @@ function LegacyApp(){
           <NavLink className="nav-link" to="/terminal">Terminal</NavLink>
           <NavLink className="nav-link" to="/roadview">RoadView</NavLink>
           <NavLink className="nav-link" to="/backroad">BackRoad</NavLink>
+          <NavLink className="nav-link" to="/roadwork">RoadWork</NavLink>
           <NavLink className="nav-link" to="/agents">Agents</NavLink>
           <NavLink className="nav-link" to="/subscribe">Subscribe</NavLink>
           <NavLink className="nav-link" to="/lucidia">Lucidia</NavLink>
@@ -94,6 +96,7 @@ function LegacyApp(){
             <Route path="/terminal" element={<Terminal/>} />
             <Route path="/roadview" element={<RoadView/>} />
             <Route path="/backroad" element={<BackRoad/>} />
+            <Route path="/roadwork" element={<RoadWork/>} />
             <Route path="/agents" element={<Agents/>} />
             <Route path="/subscribe" element={<Subscribe/>} />
             <Route path="/lucidia" element={<Lucidia/>} />
@@ -104,6 +107,7 @@ function LegacyApp(){
             <Route path="terminal" element={<Terminal/>} />
             <Route path="roadview" element={<RoadView/>} />
             <Route path="backroad" element={<BackRoad/>} />
+            <Route path="roadwork" element={<RoadWork/>} />
             <Route path="subscribe" element={<Subscribe/>} />
             <Route path="lucidia" element={<Lucidia/>} />
             <Route path="math" element={<InfinityMath/>} />
