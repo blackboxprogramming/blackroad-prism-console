@@ -1,92 +1,86 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Topbar } from '../../components/ui/topbar';
 import { Card } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
-
-interface Message {
-  sender: string;
-  text: string;
-}
-
-const AGENTS = ['Lucidia', 'Silas', 'Cecilia', 'Alexa'] as const;
-
-type Agent = typeof AGENTS[number];
-
-const AGENT_COLORS: Record<Agent, string> = {
-  Lucidia: 'border-purple-500',
-  Silas: 'border-blue-500',
-  Cecilia: 'border-green-500',
-  Alexa: 'border-pink-500',
-};
-
-const RESPONSES = {
-  default: {
-    Lucidia: 'I\'m processing your request.',
-    Silas: 'Awaiting the next command.',
-    Cecilia: 'Happy to help when needed.',
-    Alexa: 'Standing by.',
-  },
-  create: {
-    Lucidia: 'New file created successfully.',
-    Silas: 'File saved to workspace.',
-    Cecilia: 'Documentation updated with new file.',
-    Alexa: 'File is ready for use.',
-  },
-  run: {
-    Lucidia: 'Executing code now.',
-    Silas: 'Code run completed.',
-    Cecilia: 'No errors detected.',
-    Alexa: 'Output captured.',
-  },
-  image: {
-    Lucidia: 'Generating image...',
-    Silas: 'Pixels arranged.',
-    Cecilia: 'Preview ready.',
-    Alexa: 'Image available for download.',
-  },
-} satisfies Record<string, Record<Agent, string>>;
+import { parseAgentOutput } from '../../lib/interpreter';
+import { runAbility } from '../../lib/runAbility';
+import { useSessionManager } from '../hooks/useSessionManager';
 
 export default function PortalPage() {
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { createSession, addMessage, addFile, getActiveSession } = useSessionManager();
+
+  useEffect(() => {
+    createSession();
+  }, []);
+
+  const handleAgentReply = async (raw: string) => {
+    const { ability, content } = parseAgentOutput(raw);
+    const active = getActiveSession();
+    if (!active) return;
+
+    const result = await runAbility({ ability, content });
+
+    if (result.file) {
+      addFile(active.id, result.file);
+      addMessage(active.id, {
+        role: 'agent',
+        content: `Generated file: ${result.file.name}`,
+        timestamp: Date.now(),
+      });
+    }
+
+    if (result.output) {
+      addMessage(active.id, {
+        role: 'agent',
+        content: result.output,
+        timestamp: Date.now(),
+      });
+    }
+  };
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
+    const active = getActiveSession() ?? createSession();
 
-    const userMessage: Message = { sender: 'You', text: input };
+    addMessage(active.id, {
+      role: 'user',
+      content: input,
+      timestamp: Date.now(),
+    });
+
     const lower = input.toLowerCase();
-    let key: keyof typeof RESPONSES = 'default';
-    if (lower.includes('create') && lower.includes('file')) key = 'create';
-    else if (lower.includes('run') && lower.includes('code')) key = 'run';
-    else if (lower.includes('generate') && lower.includes('image')) key = 'image';
+    let abilityTag: string;
+    if (lower.includes('code')) {
+      abilityTag = `<ability:codestream.generateFile>${input}</ability>`;
+    } else if (lower.includes('image')) {
+      abilityTag = `<ability:visioncraft.generateImage>${input}</ability>`;
+    } else {
+      abilityTag = `<ability:thoughtmirror.reflect>${input}</ability>`;
+    }
 
-    const replies: Message[] = AGENTS.map(agent => ({
-      sender: agent,
-      text: RESPONSES[key][agent],
-    }));
-
-    setMessages(prev => [...prev, userMessage, ...replies]);
+    handleAgentReply(abilityTag);
     setInput('');
   };
+
+  const active = getActiveSession();
 
   return (
     <div className="flex min-h-screen flex-col">
       <Topbar title="Lucidia" />
       <main className="flex-1 space-y-4 overflow-y-auto p-4">
-        {messages.map((msg, i) => (
+        {active?.messages.map((msg, i) => (
           <Card
             key={i}
-            className={`p-3 text-sm ${
-              AGENTS.includes(msg.sender as Agent)
-                ? 'border-l-4 ' + AGENT_COLORS[msg.sender as Agent]
-                : 'border-l-4 border-gray-600'
+            className={`p-3 text-sm border-l-4 ${
+              msg.role === 'agent' ? 'border-purple-500' : 'border-gray-600'
             }`}
           >
-            <span className="font-semibold">{msg.sender}:</span> {msg.text}
+            <span className="font-semibold">{msg.role === 'user' ? 'You' : 'Lucidia'}:</span> {msg.content}
           </Card>
         ))}
       </main>
