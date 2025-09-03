@@ -48,14 +48,19 @@
       <h1>Roadview</h1>
       <p>Live journey streams on an interactive globe. Back to <a href="/">home</a>.</p>
       <div id="globe"></div>
+      <h2 style="margin:40px 0 12px">Asset Creator</h2>
+      <p>Type a command to simulate assets.</p>
+      <div id="assetCreator"></div>
     </div>
     <script src="https://unpkg.com/three@0.155.0/build/three.min.js"></script>
     <script src="https://unpkg.com/globe.gl@3.9.0/dist/globe.gl.min.js"></script>
+    <script src="../asset-creator.js"></script>
     <script>
       const world = Globe()(document.getElementById('globe'))
         .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
         .backgroundColor('#0b0b10');
       world.pointOfView({ lat: 0, lng: 0, altitude: 2.5 });
+      initAssetCreator(document.getElementById('assetCreator'));
     </script>
   </body>
 </html>
