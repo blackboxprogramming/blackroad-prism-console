@@ -54,8 +54,16 @@ function Window({ id, title, layout, setLayout, children }) {
             {title}
           </span>
           <div className="space-x-1">
-            <button onClick={() => update({ open: false })}>_</button>
             <button
+              type="button"
+              aria-label="minimize"
+              onClick={() => update({ open: false })}
+            >
+              _
+            </button>
+            <button
+              type="button"
+              aria-label="maximize"
               onClick={() =>
                 update({
                   x: 0,
@@ -67,7 +75,13 @@ function Window({ id, title, layout, setLayout, children }) {
             >
               □
             </button>
-            <button onClick={() => update({ open: false })}>×</button>
+            <button
+              type="button"
+              aria-label="close"
+              onClick={() => update({ open: false })}
+            >
+              ×
+            </button>
           </div>
         </div>
         <div className="flex-1 overflow-auto">{children}</div>
