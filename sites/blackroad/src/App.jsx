@@ -9,6 +9,7 @@ import Subscribe from "./pages/Subscribe.jsx";
 import Lucidia from "./pages/Lucidia.jsx";
 import InfinityMath from "./pages/InfinityMath.jsx";
 import Agents from "./pages/Agents.jsx";
+import Desktop from "./pages/Desktop.jsx";
 import { useEffect, useState } from "react";
 
 function useApiHealth(){
@@ -50,6 +51,7 @@ export default function App(){
           <NavLink className="nav-link" to="/terminal">Terminal</NavLink>
           <NavLink className="nav-link" to="/roadview">RoadView</NavLink>
           <NavLink className="nav-link" to="/backroad">BackRoad</NavLink>
+          <NavLink className="nav-link" to="/desktop">Desktop</NavLink>
           <NavLink className="nav-link" to="/agents">Agents</NavLink>
           <NavLink className="nav-link" to="/subscribe">Subscribe</NavLink>
           <NavLink className="nav-link" to="/lucidia">Lucidia</NavLink>
@@ -84,6 +86,7 @@ export default function App(){
             <Route path="/terminal" element={<Terminal/>} />
             <Route path="/roadview" element={<RoadView/>} />
             <Route path="/backroad" element={<BackRoad/>} />
+            <Route path="/desktop" element={<Desktop/>} />
             <Route path="/agents" element={<Agents/>} />
             <Route path="/subscribe" element={<Subscribe/>} />
             <Route path="/lucidia" element={<Lucidia/>} />
