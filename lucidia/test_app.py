@@ -24,6 +24,13 @@ def test_run_code_math():
     assert "4.0" in resp.get_json()["output"]
 
 
+def test_run_code_rejects_import():
+    """The code runner should block obvious security issues like imports."""
+    client = app.test_client()
+    resp = client.post("/run", json={"code": "import os"})
+    assert resp.status_code == 400
+
+
 def test_install_package():
     client = app.test_client()
     resp = client.post("/install", json={"package": "itsdangerous==2.2.0"})
@@ -67,3 +74,4 @@ def test_math_endpoint():
     assert resp.status_code == 200
     assert data["result"] == "x**2"
     assert data["derivative"] == "2*x"
+
