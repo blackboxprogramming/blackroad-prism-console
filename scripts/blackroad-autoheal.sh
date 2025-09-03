@@ -34,7 +34,8 @@ find_free_port(){
 }
 
 update_nginx_port(){
-  local label=$1 port=$2
+  local label=$1
+  local port=$2
   sed -i "s/127\.0\.0\.1:[0-9]\+/127.0.0.1:${port}/" /etc/nginx/sites-enabled/blackroad.conf
   nginx -t && systemctl reload nginx && log "Rebound $label to port $port"
 }
@@ -62,8 +63,9 @@ perform_backup(){
 }
 
 rotate_keep(){
-  local dir=$1 keep=$2
-# shellcheck disable=SC2012
+  local dir=$1
+  local keep=$2
+  # shellcheck disable=SC2012
   ls -1t "$dir" | tail -n +$((keep+1)) | xargs -r -I{} rm "$dir/{}"
 }
 
@@ -98,7 +100,8 @@ update_repo(){
 update_failure_state(){
   local now
   now=$(date +%s)
-  local count=0 last=0
+  local count=0
+  local last=0
   if [ -f "$STATE_FILE" ]; then
     read -r count last <"$STATE_FILE"
   fi
@@ -126,9 +129,9 @@ validate(){
   curl_check http://127.0.0.1:4000/api/health
   curl_check http://127.0.0.1:8000/health
   curl_check http://127.0.0.1:8500/health
-  local t
-  t=$(curl -o /dev/null -s -w "%{time_total}" https://blackroad.io/)
-  log "Frontend load time ${t}s"
+  local frontend_load_time
+  frontend_load_time=$(curl -o /dev/null -s -w "%{time_total}" https://blackroad.io/)
+  log "Frontend load time ${frontend_load_time}s"
   curl -s http://127.0.0.1:8000/health > /var/log/blackroad-llm-proof.log || true
 }
 
