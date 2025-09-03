@@ -12,10 +12,22 @@ const SYM_DIR = path.join(PRISM_ROOT, 'symphonies');
 [LOG_DIR, CONTR_DIR, AGENTS_DIR, IPC_DIR, SNAP_DIR, SYM_DIR].forEach(d => fs.mkdirSync(d, { recursive: true }));
 
 const AGENT_TABLE = new Map();
-const AGENTS = ['compiler','optimizer','security','reverse','systems','parallel','quantum_coder','crypto','debugger','ai_builder','refactor','lang_master','exploit','patcher','researcher'];
+const AGENTS_ROOT = path.join(__dirname, '..', 'agents');
+
+function discoverAgents() {
+  return fs
+    .readdirSync(AGENTS_ROOT)
+    .filter((name) => {
+      const agentDir = path.join(AGENTS_ROOT, name);
+      return (
+        fs.existsSync(path.join(agentDir, 'manifest.json')) &&
+        fs.existsSync(path.join(agentDir, 'index.js'))
+      );
+    });
+}
 
 function loadAgent(name) {
-  const agentDir = path.join(__dirname, '..', 'agents', name);
+  const agentDir = path.join(AGENTS_ROOT, name);
   const manifest = JSON.parse(fs.readFileSync(path.join(agentDir, 'manifest.json'), 'utf8'));
   const mod = require(path.join(agentDir, 'index.js'));
   fs.writeFileSync(path.join(AGENTS_DIR, `${name}.json`), JSON.stringify(manifest));
@@ -25,7 +37,7 @@ function loadAgent(name) {
 }
 
 function spawnElite() {
-  AGENTS.forEach(loadAgent);
+  discoverAgents().forEach(loadAgent);
   return Array.from(AGENT_TABLE.keys());
 }
 
