@@ -8,7 +8,7 @@ const { exec } = require('child_process');
 const router = express.Router();
 const LOG_FILE = '/var/log/blackroad-connectors.log';
 const ROOTS = ['/srv', '/var/www/blackroad'];
-const CONNECTOR_KEY = process.env.CONNECTOR_KEY || '';
+const CONNECTOR_KEY = process.env.CONNECTOR_KEY;
 
 function log(action, details) {
   const line = `${new Date().toISOString()} ${action} ${JSON.stringify(details)}\n`;
@@ -37,7 +37,7 @@ function verifyPublicFile(resolved) {
 router.use((req, res, next) => {
   const auth = req.get('Authorization') || '';
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
-  if (token !== CONNECTOR_KEY) {
+  if (!CONNECTOR_KEY || !token || token !== CONNECTOR_KEY) {
     log('unauthorized', { path: req.path, ip: req.ip });
     return res.status(403).json({ error: 'Unauthorized' });
   }
