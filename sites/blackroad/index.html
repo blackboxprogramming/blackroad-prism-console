@@ -6,7 +6,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>BlackRoad.io — Technical Co-Creation</title>
+    <title>BlackRoad.io — Welcome</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -299,22 +299,56 @@
         }
       }
 
+      /* Animated background */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyIiBoZWlnaHQ9IjIiPjxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==');
+        background-repeat: repeat;
+        background-size: 2px 2px;
+        animation: star-move 60s linear infinite;
+        opacity: 0.6;
+        z-index: -1;
+      }
+      @keyframes star-move {
+        from {
+          transform: translateY(0);
+        }
+        to {
+          transform: translateY(-2000px);
+        }
+      }
+
       /* Hero */
       .hero {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        text-align: center;
         padding: var(--s-7) 0;
       }
+      .hero .container {
+        width: 100%;
+      }
       .hero h1 {
-        font-size: clamp(28px, 5vw, 48px);
+        font-size: clamp(32px, 6vw, 56px);
         margin-bottom: var(--s-4);
       }
       .hero p {
-        font-size: clamp(16px, 2vw, 18px);
-        max-width: 70ch;
+        font-size: clamp(16px, 2vw, 20px);
+        max-width: 60ch;
+        margin-left: auto;
+        margin-right: auto;
       }
       .cta-row {
         display: flex;
         flex-wrap: wrap;
         gap: var(--s-4);
+        justify-content: center;
         margin-top: var(--s-6);
       }
 
@@ -414,65 +448,12 @@
       <!-- Hero -->
       <section class="hero">
         <div class="container">
-          <div class="stack-6">
-            <p>Hello, BlackRoad!</p>
-            <div>
-              <span
-                class="muted"
-                style="
-                  display: inline-block;
-                  padding: var(--s-2) var(--s-4);
-                  border: 1px solid rgba(255, 255, 255, 0.1);
-                  border-radius: 999px;
-                "
-                >Technical co-creation platform</span
-              >
-            </div>
-            <h1>
-              Build, ship, and evolve — on a
-              <span
-                style="
-                  background: var(--grad);
-                  -webkit-background-clip: text;
-                  background-clip: text;
-                  color: transparent;
-                "
-                >dark, precise</span
-              >
-              stack.
-            </h1>
-            <p>
-              BlackRoad.io is a developer-focused environment for real-time coding, agents, and
-              automation. Minimal, fast, and designed for clarity with a high-contrast dark UI.
-            </p>
-            <div class="cta-row">
-              <a class="btn btn-primary" href="#portal">Launch Portal</a>
-              <a class="btn btn-secondary" href="#docs">Read the Docs</a>
-            </div>
-
-            <!-- Progress demo -->
-            <div class="card">
-              <div
-                style="
-                  display: flex;
-                  align-items: center;
-                  justify-content: space-between;
-                  margin-bottom: var(--s-4);
-                "
-              >
-                <strong>Environment Setup</strong>
-                <span class="muted">60%</span>
-              </div>
-              <div
-                class="progress"
-                role="progressbar"
-                aria-valuenow="60"
-                aria-valuemin="0"
-                aria-valuemax="100"
-              >
-                <div class="progress-bar"></div>
-              </div>
-            </div>
+          <h1>Welcome to Blackroad</h1>
+          <p>A lucid creative portal guided by AI</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="/portal.html">Enter Portal</a>
+            <a class="btn btn-secondary" href="/portal/roadview">Explore Roadview</a>
+            <a class="btn btn-secondary" href="/portal/roadwork">Start New Work</a>
           </div>
         </div>
       </section>
@@ -712,19 +693,17 @@ chat("Hello, BlackRoad").then(console.log).catch(console.error);
       <div class="container">
         <div class="stack-5">
           <div class="footer-links">
-            <a href="#features">Features</a>
-            <a href="#docs">Docs</a>
+            <a href="/portal/roadview">RoadView</a>
+            <a href="/portal/roadwork">RoadWork</a>
             <a href="/portal.html">Portal</a>
-            <a href="/droplet.html">Droplet</a>
-            <a href="/status.html">Status</a>
-            <a href="/about.html">About</a>
-            <a href="#pricing">Pricing</a>
+            <a href="/backroad">Backroad</a>
           </div>
           <div class="muted">© <span id="year"></span> BlackRoad.io. All rights reserved.</div>
         </div>
       </div>
     </footer>
 
+    <div id="root"></div>
     <script>
       // Mobile nav toggle
       (function () {
