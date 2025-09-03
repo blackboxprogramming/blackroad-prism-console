@@ -71,12 +71,21 @@ class AutomatedPullRequestManager:
 
     def handle_trigger(self, phrase: str) -> None:
         """React to codex trigger phrases."""
-        if "fix comments" in phrase:
-            self.log("Applying review comment fixes (placeholder)")
-        elif "summarize" in phrase:
+        phrase_lower = phrase.lower()
+        if "fix comments" in phrase_lower:
+            self.apply_comment_fixes()
+        elif "summarize" in phrase_lower:
             self.log("Summarizing PR (placeholder)")
-        elif "merge" in phrase:
+        elif "merge" in phrase_lower:
             self.log("Merging PR (placeholder)")
+
+    def apply_comment_fixes(self) -> None:
+        """Run the Codex comment fixer script."""
+        subprocess.run(
+            ["node", ".github/tools/codex-apply.js", ".github/prompts/codex-fix-comments.md"],
+            check=False,
+        )
+        self.log("Applied comment fixes")
 
     def log(self, message: str) -> None:
         """Log an arbitrary message to the log file."""
