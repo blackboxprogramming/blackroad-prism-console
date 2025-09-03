@@ -1,42 +1,39 @@
-import { Card } from "../../components/ui/card";
+'use client';
 
-interface Video {
-  title: string;
-  description: string;
-  url: string;
-}
-
-const videos: Video[] = [
-  {
-    title: "Welcome to RoadView",
-    description: "Introductory clip about the RoadView portal.",
-    url: "https://www.w3schools.com/html/mov_bbb.mp4",
-  },
-  {
-    title: "Road Infrastructure Update",
-    description: "A short look at the latest RoadChain upgrade.",
-    url: "https://www.w3schools.com/html/movie.mp4",
-  },
-];
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { listSessions, setCurrentSession, SessionData } from '../../lib/sessionEngine';
 
 export default function RoadViewPage() {
+  const [sessions, setSessions] = useState<SessionData[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    setSessions(listSessions());
+  }, []);
+
+  function load(name: string) {
+    setCurrentSession(name);
+    router.push('/chat');
+  }
+
   return (
     <main className="mx-auto max-w-5xl space-y-4 p-4">
-      <h1 className="text-2xl font-bold">RoadView</h1>
-      <div className="grid gap-4 md:grid-cols-2">
-        {videos.map((video) => (
-          <Card key={video.title} className="p-4">
-            <div
-              className="mb-2 w-full overflow-hidden rounded bg-black"
-              style={{ aspectRatio: "16 / 9" }}
-            >
-              <video className="h-full w-full" controls src={video.url} />
+      <h1 className="text-2xl font-bold">Saved Sessions</h1>
+      {sessions.length === 0 && (
+        <p className="text-sm text-gray-400">No sessions saved yet.</p>
+      )}
+      <ul className="space-y-2">
+        {sessions.map(s => (
+          <li key={s.name} className="flex items-center justify-between border p-3 rounded">
+            <div>
+              <div className="font-semibold">{s.name}</div>
+              <div className="text-xs text-gray-400">{new Date(s.timestamp).toLocaleString()}</div>
             </div>
-            <h2 className="text-lg font-semibold">{video.title}</h2>
-            <p className="text-sm text-gray-400">{video.description}</p>
-          </Card>
+            <button onClick={() => load(s.name)} className="border rounded px-3 py-1">Load</button>
+          </li>
         ))}
-      </div>
+      </ul>
     </main>
   );
 }
