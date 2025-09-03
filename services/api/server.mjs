@@ -30,6 +30,13 @@ app.post("/api/echo", (req, res) => {
   res.json({ ok: true, received: req.body ?? null });
 });
 
+// Minimal inference endpoint
+app.post("/api/mini/infer", (req, res) => {
+  const { x, y } = req.body || {};
+  const output = Number(x) * Number(y);
+  res.json({ output });
+});
+
 const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`BlackRoad API bridge listening on :${PORT}`);
 });
