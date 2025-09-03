@@ -9,7 +9,7 @@ const portals = [
   { name: "RoadCoin", href: "/roadcoin" },
   { name: "RoadChain", href: "/roadchain" },
   { name: "Roadie", href: "/roadie" },
-  { name: "Lucidia", href: "/lucidia" },
+  { name: "Lucidia", href: "/portal" },
   { name: "Codex", href: "/codex" },
 ];
 
