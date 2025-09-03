@@ -16,9 +16,6 @@ module.exports = [
       "services/**",
       "srv/**",
       "src/routes/subscribe.js",
-      "tests/autoheal.test.mjs",
-      "tests/git-route.test.mjs",
-      ".eslintrc.cjs",
       "eslint.config.cjs"
     ]
   },
