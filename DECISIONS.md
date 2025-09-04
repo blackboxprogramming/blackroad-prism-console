@@ -1,4 +1,3 @@
-<!-- FILE: /srv/blackroad-api/DECISIONS.md -->
 # Decisions
 
 - Implemented a minimal `br-fix` CLI under `srv/blackroad-tools/br-fix` handling scan, apply, and test commands.

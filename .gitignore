@@ -1,4 +1,3 @@
-# <!-- FILE: .gitignore -->
 # Sensitive SSH keys
 sshprivate.sh
 publicssh.sh
