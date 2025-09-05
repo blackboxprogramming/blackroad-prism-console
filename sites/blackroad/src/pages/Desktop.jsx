@@ -54,11 +54,7 @@ function Window({ id, title, layout, setLayout, children }) {
             {title}
           </span>
           <div className="space-x-1">
-            <button
-              type="button"
-              aria-label="minimize"
-              onClick={() => update({ open: false })}
-            >
+            <button type="button" aria-label="minimize" onClick={() => update({ open: false })}>
               _
             </button>
             <button
@@ -75,11 +71,7 @@ function Window({ id, title, layout, setLayout, children }) {
             >
               □
             </button>
-            <button
-              type="button"
-              aria-label="close"
-              onClick={() => update({ open: false })}
-            >
+            <button type="button" aria-label="close" onClick={() => update({ open: false })}>
               ×
             </button>
           </div>
@@ -138,15 +130,21 @@ export default function Desktop() {
         </Window>
       ))}
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-white/70 rounded px-2 py-1 flex gap-2">
-        {agents.map((a) => (
-          <button
-            key={a.id}
-            className="px-2 py-1 text-sm hover:bg-white/50 rounded"
-            onClick={() => toggle(a.id)}
-          >
-            {a.title.split(' ')[0]}
-          </button>
-        ))}
+        {agents.map((a) => {
+          const isOpen = layout[a.id]?.open;
+          return (
+            <button
+              key={a.id}
+              type="button"
+              aria-label={isOpen ? `Hide ${a.title}` : `Show ${a.title}`}
+              aria-pressed={isOpen}
+              className="px-2 py-1 text-sm hover:bg-white/50 rounded"
+              onClick={() => toggle(a.id)}
+            >
+              {a.title.split(' ')[0]}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
