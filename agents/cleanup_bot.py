@@ -14,9 +14,9 @@ class CleanupBot:
 
     Attributes
     ----------
-    branches:
-        A list of branch names to remove.
-    dry_run:
+    branches : list[str]
+        Branch names to remove.
+    dry_run : bool, default=False
         When True, commands are printed instead of executed.
     """
 

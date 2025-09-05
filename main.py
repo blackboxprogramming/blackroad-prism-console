@@ -1,6 +1,5 @@
 """Streamlit app for BlackRoad Prism Generator with GPT and voice input."""
 
-import ast
 import os
 import tempfile
 
@@ -21,18 +20,6 @@ if not _api_key:
 def load_whisper_model():
     """Load the Whisper model once and reuse across reruns."""
     return whisper.load_model("base")
-
-
-def parse_numeric_prefix(text: str) -> float:
-    """Return the leading numeric value in text or 1.0 if not found."""
-    try:
-        value = ast.literal_eval(text.split(",", maxsplit=1)[0].strip())
-        if isinstance(value, (int, float)):
-            return float(value)
-    except Exception:
-        pass
-    return 1.0
-
 
 def _transcribe_audio(uploaded_file) -> str:
     """Transcribe an uploaded audio file using Whisper and clean up temp file."""
