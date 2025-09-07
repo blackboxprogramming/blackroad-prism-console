@@ -11,6 +11,7 @@ import Lucidia from "./pages/Lucidia.jsx";
 import InfinityMath from "./pages/InfinityMath.jsx";
 import Agents from "./pages/Agents.jsx";
 import Desktop from "./pages/Desktop.jsx";
+import QuantumConsciousness from "./pages/QuantumConsciousness.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -43,6 +44,7 @@ export default function App(){
   return (
     <Routes>
       <Route path="/" element={<Desktop/>} />
+      <Route path="/quantum-consciousness" element={<QuantumConsciousness/>} />
       <Route path="/*" element={<LegacyApp/>} />
     </Routes>
   );
