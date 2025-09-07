@@ -422,6 +422,37 @@ if (planCount === 0) {
   }
 }
 
+// Quantum AI table seed
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS quantum_ai (
+    topic TEXT PRIMARY KEY,
+    summary TEXT NOT NULL
+  )
+`).run();
+const qSeed = [
+  {
+    topic: 'reasoning',
+    summary:
+      'Quantum parallelism lets models explore many reasoning paths simultaneously for accelerated insight.',
+  },
+  {
+    topic: 'memory',
+    summary:
+      'Quantum RAM with entangled states hints at dense, instantly linked memory architectures.',
+  },
+  {
+    topic: 'symbolic',
+    summary:
+      'Interference in quantum-symbolic AI could amplify useful symbol chains while damping noise.',
+  },
+];
+for (const row of qSeed) {
+  db.prepare('INSERT OR IGNORE INTO quantum_ai (topic, summary) VALUES (?, ?)').run(
+    row.topic,
+    row.summary,
+  );
+}
+
 // Helpers
 function listRows(t) {
   return db.prepare(`SELECT id, name, updated_at, meta FROM ${t} ORDER BY datetime(updated_at) DESC`).all();
@@ -692,6 +723,14 @@ app.get('/api/connectors/status', async (_req, res) => {
   try { if (process.env.LINEAR_API_KEY) status.linear = true; } catch {}
   try { if (process.env.SF_USERNAME) status.salesforce = true; } catch {}
   res.json(status);
+});
+
+// --- Quantum AI summaries
+app.get('/api/quantum/:topic', (req, res) => {
+  const { topic } = req.params;
+  const row = db.prepare('SELECT summary FROM quantum_ai WHERE topic = ?').get(topic);
+  if (!row) return res.status(404).json({ error: 'not_found' });
+  res.json({ topic, summary: row.summary });
 });
 
 // --- Actions (stubs)
