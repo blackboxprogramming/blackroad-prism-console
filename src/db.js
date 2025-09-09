@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const Database = require('better-sqlite3');
+const { log } = require('./logger');
 const { DB_PATH, ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_NAME } = require('./config');
 
 // Ensure directory exists
@@ -13,6 +14,29 @@ try {
 } catch {}
 
 const db = new Database(DB_PATH);
+
+// Optional SQL trace logger for debugging
+if (process.env.SQL_DEBUG) {
+  const origExec = db.exec.bind(db);
+  db.exec = function (sql) {
+    log('[sql][exec]', sql);
+    return origExec(sql);
+  };
+
+  const origPrepare = db.prepare.bind(db);
+  db.prepare = function (sql) {
+    const stmt = origPrepare(sql);
+    const methods = ['run', 'get', 'all', 'iterate'];
+    methods.forEach(method => {
+      const orig = stmt[method].bind(stmt);
+      stmt[method] = function (...params) {
+        log(`[sql][${method}]`, sql, params);
+        return orig(...params);
+      };
+    });
+    return stmt;
+  };
+}
 
 // Pragmas for safety/performance
 db.pragma('journal_mode = WAL');
