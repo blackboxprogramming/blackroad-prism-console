@@ -152,6 +152,8 @@ fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 // --- App & server
 const app = express();
+require('./modules/jsonEnvelope')(app);
+require('./modules/requestGuard')(app);
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   path: '/socket.io',
@@ -206,16 +208,19 @@ app.use(
 );
 app.use(rateLimit({ windowMs: 60_000, max: 100 }));
 app.use((req, res, next) => {
-  const id = randomUUID();
-  req.id = id;
   const start = Date.now();
   res.on('finish', () => {
-    logger.info({ id, method: req.method, path: req.originalUrl, status: res.statusCode, duration: Date.now() - start });
+    logger.info({
+      id: res.getHeader('X-Request-ID'),
+      method: req.method,
+      path: req.originalUrl,
+      status: res.statusCode,
+      duration: Date.now() - start,
+    });
   });
   next();
 });
 app.use(compression());
-app.use(express.json({ limit: '1mb' }));
 app.use(morgan('tiny'));
 app.use(
   cookieSession({
