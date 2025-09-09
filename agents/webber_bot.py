@@ -12,7 +12,7 @@ import json
 import os
 import subprocess
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Optional
 
 from agents.notification_bot import NotificationBot
 
@@ -24,17 +24,29 @@ class WebberBot:
     root_dir: str = field(default_factory=lambda: os.getcwd())
     notification_bot: Optional[NotificationBot] = None
 
+    def _run_prettier(self, file_path: str) -> None:
+        """Run Prettier on ``file_path`` and raise descriptive errors on failure."""
+        try:
+            subprocess.run(
+                ["prettier", "--write", file_path],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except subprocess.CalledProcessError as exc:  # pragma: no cover - runtime error path
+            raise RuntimeError(f"Prettier failed for {file_path}: {exc.stderr.strip()}") from exc
+
     def format_html(self, file_path: str) -> None:
         """Format an HTML file using Prettier."""
-        subprocess.run(["prettier", "--write", file_path], check=True)
+        self._run_prettier(file_path)
 
     def format_css(self, file_path: str) -> None:
         """Format a CSS file using Prettier."""
-        subprocess.run(["prettier", "--write", file_path], check=True)
+        self._run_prettier(file_path)
 
     def format_js(self, file_path: str) -> None:
         """Format a JavaScript file using Prettier."""
-        subprocess.run(["prettier", "--write", file_path], check=True)
+        self._run_prettier(file_path)
 
     def validate_json(self, file_path: str) -> bool:
         """Validate a JSON file and notify on failure."""
@@ -78,7 +90,7 @@ class WebberBot:
             self.notification_bot.send(message)
         print(message)
 
-    def run_on_pr(self, files: List[str]) -> None:
+    def run_on_pr(self, files: list[str]) -> None:
         """Process ``files`` based on their extension."""
         for file_path in files:
             try:
