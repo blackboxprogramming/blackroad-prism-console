@@ -71,6 +71,31 @@ class AutoNovelAgent:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
+    def generate_game_idea(self, theme: str, engine: str) -> str:
+        """Return a short description for a themed game.
+
+        Args:
+            theme: Central theme for the game.
+            engine: Game engine to use. Must be supported.
+
+        Returns:
+            A short game pitch describing the theme and engine.
+
+        Raises:
+            ValueError: If ``theme`` is blank or ``engine`` unsupported.
+        """
+        if not theme or not theme.strip():
+            raise ValueError("Theme must be a non-empty string.")
+        engine_lower = engine.lower()
+        if not self.supports_engine(engine_lower):
+            supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
+            raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
+        theme_clean = theme.strip()
+        return (
+            f"Imagine a {theme_clean} adventure crafted with "
+            f"{engine_lower.capitalize()} where creativity reigns."
+        )
+
     def generate_story(self, theme: str, protagonist: str = "An adventurer") -> str:
         """Generate a short themed story.
 
@@ -138,3 +163,4 @@ if __name__ == "__main__":
     agent.deploy()
     agent.create_game("unity")
     print(agent.generate_story("mystical", "A coder"))
+    print(agent.generate_game_idea("mystical", "unity"))
