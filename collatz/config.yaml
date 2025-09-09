@@ -1,0 +1,6 @@
+db_path: './campaign.sqlite'
+artifact_dir: './artifacts'
+chunk_size: 100000
+verify_pass: true
+max_trace_steps: 1000000
+report_every_seconds: 10

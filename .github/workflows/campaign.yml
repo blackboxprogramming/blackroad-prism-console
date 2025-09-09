@@ -1,0 +1,23 @@
+name: collatz-ci
+
+on:
+  pull_request:
+    paths:
+      - 'collatz/**'
+      - 'scripts/**'
+      - 'requirements.txt'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+      - name: seed tiny range
+        run: |
+          python -m collatz.orchestrator --start 1 --end 50000 --chunk 10000
+          python -m collatz.worker --workers 2
+          python -m collatz.verifier
