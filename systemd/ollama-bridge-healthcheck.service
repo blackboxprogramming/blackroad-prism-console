@@ -1,0 +1,9 @@
+[Unit]
+Description=Ollama bridge health check
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c '/usr/local/bin/bridge_ready.sh || systemctl restart ollama-bridge.service'
+
+[Install]
+WantedBy=multi-user.target
