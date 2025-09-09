@@ -1,0 +1,1 @@
+{ "name":"blackroad-chain","private":true,"devDependencies":{"@nomicfoundation/hardhat-toolbox":"^4.0.0","hardhat":"^2.22.0","@openzeppelin/contracts":"^5.0.0"} }
