@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>BlackRoad LLM</title>
+  <style>
+    body{font-family: sans-serif; margin:20px;}
+    #controls{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
+    textarea{width:100%;height:120px;}
+    pre{white-space:pre-wrap;border:1px solid #ccc;padding:10px;}
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <select id="model"></select>
+    <button id="setKey" title="key not set (local only)">⚙️</button>
+  </div>
+  <textarea id="prompt" placeholder="Ask something..."></textarea>
+  <button id="send">Send</button>
+  <pre id="out"></pre>
+  <script>
+    const KEY_STORAGE = 'br_origin_key';
+    const MODEL_STORAGE = 'br_llm_model';
+    function getKey(){ return localStorage.getItem(KEY_STORAGE) || ''; }
+    function headers(){
+      const h={'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'};
+      const k=getKey();
+      if(k) h['X-BlackRoad-Key']=k;
+      return h;
+    }
+    async function loadModels(){
+      try{
+        const r=await fetch('/api/llm/models');
+        const models=await r.json();
+        const sel=document.getElementById('model');
+        models.forEach(m=>{
+          const o=document.createElement('option');
+          o.value=o.textContent=m.name;
+          sel.appendChild(o);
+        });
+        const saved=localStorage.getItem(MODEL_STORAGE);
+        if(saved) sel.value=saved;
+      }catch{}
+    }
+    loadModels();
+    document.getElementById('model').addEventListener('change',async e=>{
+      const model=e.target.value;
+      localStorage.setItem(MODEL_STORAGE,model);
+      try{await fetch('/api/llm/default',{method:'POST',headers:headers(),body:JSON.stringify({model})});}catch{}
+    });
+    document.getElementById('setKey').addEventListener('click',()=>{
+      const k=prompt('Enter origin key',getKey());
+      if(k!==null){ if(k) localStorage.setItem(KEY_STORAGE,k); else localStorage.removeItem(KEY_STORAGE); }
+      document.getElementById('setKey').title=getKey()? 'key set':'key not set (local only)';
+    });
+    document.getElementById('send').addEventListener('click',async()=>{
+      const text=document.getElementById('prompt').value;
+      const model=document.getElementById('model').value;
+      const r=await fetch('/api/llm/chat',{method:'POST',headers:headers(),body:JSON.stringify({messages:[{role:'user',content:text}],model})});
+      document.getElementById('out').textContent=await r.text();
+    });
+  </script>
+</body>
+</html>
