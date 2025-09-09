@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 
 const app = express();
+app.set('trust proxy', true);
 app.use(express.json({ limit: '1mb' }));
 
 const PORT = process.env.PORT || 4010;
@@ -76,7 +77,9 @@ function csrfMiddleware(req, res, next) {
   const origin = req.get('Origin') || req.get('Referer') || '';
   try {
     const u = new URL(origin);
-    if (u.host !== 'blackroad.io') return res.status(403).json({ error: 'forbidden' });
+    if (u.host !== 'blackroad.io' && u.host !== 'www.blackroad.io') {
+      return res.status(403).json({ error: 'forbidden' });
+    }
   } catch {
     return res.status(403).json({ error: 'forbidden' });
   }
