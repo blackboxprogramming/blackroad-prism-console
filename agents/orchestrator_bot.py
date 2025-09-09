@@ -1,8 +1,8 @@
-"""Athena orchestrates agent workflows and updates a shared workboard.
+"""Athena orchestrates basic agent workflows and tracks their status.
 
-It runs build, deploy, and cleanup bots while recording task progress in
-``AGENT_WORKBOARD.md``. The coordination logic is deliberately minimal so
-contributors can extend or delegate responsibilities as the ecosystem
+It delegates build, deploy, and cleanup bots and records their progress in
+``AGENT_WORKBOARD.md``. Coordination is intentionally lightweight so future
+contributors can extend or hand off responsibilities as the ecosystem
 evolves.
 """
 
@@ -13,11 +13,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Sequence
 
+# Repository-wide workboard that tracks agent task status
 WORKBOARD = Path(__file__).resolve().parent.parent / "AGENT_WORKBOARD.md"
 
 
 def update_workboard(section: str, task: str, status: str = "") -> None:
-    """Move a task between workboard sections and append status."""
+    """Move a task between sections and append an optional status note."""
     lines = WORKBOARD.read_text().splitlines(keepends=True)
     sections = {"To Do": [], "In Progress": [], "Blocked": [], "Done": []}
     current = None
