@@ -161,6 +161,7 @@ const io = new SocketIOServer(server, {
 
 // Partner relay for mTLS-authenticated teammates
 require('./modules/partner_relay_mtls')({ app });
+require('./modules/projects')({ app });
 
 const emitter = new EventEmitter();
 const jobs = new Map();
