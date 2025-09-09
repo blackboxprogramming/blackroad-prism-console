@@ -1,4 +1,3 @@
-<!-- FILE: srv/blackroad-api/server_full.js -->
 /* BlackRoad API — Express + SQLite + Socket.IO + LLM bridge
    Runs behind Nginx on port 4000 with cookie-session auth.
    Env (optional):
@@ -15,7 +14,8 @@ const path = require('path');
 const fs = require('fs');
 
 const express = require('express');
-const compression = require('compression');
+let compression;
+try { compression = require('compression'); } catch { compression = () => (req,res,next)=>next(); }
 const morgan = require('morgan');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -167,6 +167,7 @@ require('./modules/projects')({ app });
 require('./modules/pr_proxy')({ app });
 require('./modules/patentnet')({ app });
 require('./modules/love_math')({ app });
+require('./modules/trust_math')({ app });
 
 const emitter = new EventEmitter();
 const jobs = new Map();
