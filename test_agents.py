@@ -32,17 +32,16 @@ def import_module(module_path):
 def test_agents():
     print("=== Agent Test Runner ===")
     results = []
-    for file in AGENTS_DIR.iterdir():
-        if not file.is_file() or not file.name.endswith(".py"):
+    for file in AGENTS_DIR.rglob("*.py"):
+        if file.name in SKIP_FILES or "__pycache__" in file.parts:
             continue
-        if file.name in SKIP_FILES:
-            continue
-        print(f"\nTesting agent: {file.name}")
+        rel_name = file.relative_to(AGENTS_DIR)
+        print(f"\nTesting agent: {rel_name}")
         # First, try importing
         ok, err = import_module(file)
         if not ok:
-            print(f"FAILED to import: {file.name} -- {err}")
-            results.append((file.name, "import_failed"))
+            print(f"FAILED to import: {rel_name} -- {err}")
+            results.append((str(rel_name), "import_failed"))
             continue
         # Then, run as script if main block exists
         with open(file, "r", encoding="utf-8") as f:
@@ -50,16 +49,16 @@ def test_agents():
         if "if __name__ == \"__main__\"" in src:
             rc, out, err = run_module_main(str(file))
             if rc == 0:
-                print(f"PASSED main execution: {file.name}")
-                results.append((file.name, "pass"))
+                print(f"PASSED main execution: {rel_name}")
+                results.append((str(rel_name), "pass"))
             else:
-                print(f"FAILED main execution: {file.name}")
+                print(f"FAILED main execution: {rel_name}")
                 print("stdout:", out)
                 print("stderr:", err)
-                results.append((file.name, "main_failed"))
+                results.append((str(rel_name), "main_failed"))
         else:
-            print(f"PASSED import only (no main): {file.name}")
-            results.append((file.name, "pass"))
+            print(f"PASSED import only (no main): {rel_name}")
+            results.append((str(rel_name), "pass"))
     print("\n=== Summary ===")
     for name, status in results:
         print(f"{name}: {status}")
