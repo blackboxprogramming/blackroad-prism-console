@@ -1,0 +1,46 @@
+name: pr-led-commands
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  route:
+    # Only run on PRs (issue_comment also fires on Issues)
+    if: >
+      github.event.issue.pull_request &&
+      (
+        contains(github.event.comment.body, 'athena ') ||
+        startsWith(github.event.comment.body, '/led') ||
+        contains(github.event.comment.body, '/lightshow')
+      )
+    # Require trusted commenters (repo members/collaborators/owners)
+    runs-on: [self-hosted, linux, blackroad]
+    steps:
+      - name: Authorize commenter
+        run: |
+          echo "Assoc: ${{ github.event.comment.author_association }}"
+          case "${{ github.event.comment.author_association }}" in
+            OWNER|MEMBER|COLLABORATOR) exit 0 ;;
+            *) echo "Not authorized."; exit 78 ;;  # neutral
+          esac
+
+      - uses: actions/checkout@v4
+
+      - name: Ensure jq is present
+        run: |
+          command -v jq || (sudo apt-get update && sudo apt-get install -y jq)
+
+      - name: Route comment to LEDs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_COMMENT_BODY: ${{ github.event.comment.body }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          PR: ${{ github.event.issue.number }}
+          # For remote API instead of loopback, uncomment:
+          # LED_BASE: https://blackroad.io
+          # LED_KEY:  ${{ secrets.LED_ORIGIN_KEY }}
+        run: |
+          bash scripts/led/led_router.sh
