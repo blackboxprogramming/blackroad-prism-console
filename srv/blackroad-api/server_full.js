@@ -159,6 +159,9 @@ const io = new SocketIOServer(server, {
   cors: { origin: false }, // same-origin via Nginx
 });
 
+// Partner relay for mTLS-authenticated teammates
+require('./modules/partner_relay_mtls')({ app });
+
 const emitter = new EventEmitter();
 const jobs = new Map();
 let jobSeq = 0;
