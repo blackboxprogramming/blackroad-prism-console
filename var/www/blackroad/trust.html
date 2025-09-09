@@ -1,0 +1,184 @@
+<!doctype html><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlackRoad • Trust Viz</title>
+<link rel="preconnect" href="/socket.io/">
+<style>
+  body{margin:0;background:#0b0b10;color:#e9e9f1;font:14px system-ui}
+  header{display:flex;gap:8px;align-items:center;padding:10px;background:#0f0f1a;border-bottom:1px solid #1e1e2f}
+  .pill{border:1px solid #24244a;border-radius:999px;padding:4px 10px;background:#141428}
+  main{display:grid;grid-template-columns:320px 1fr;gap:12px;padding:12px}
+  .card{background:#131320;border:1px solid #24244a;border-radius:12px;padding:10px}
+  input,button,select,textarea{border-radius:10px;border:1px solid #24244a;background:#10102a;color:#e9e9f1;padding:8px}
+  button{cursor:pointer}
+  #graph{height:72vh;border:1px solid #24244a;border-radius:12px}
+  small{color:#9aa0aa}
+  .legend span{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px}
+</style>
+<header>
+  <div class="pill">Trust Graph</div>
+  <a class="pill" href="/lenses.html" style="text-decoration:none;color:#0096FF">Lenses</a>
+  <a class="pill" href="/truth.html" style="text-decoration:none;color:#0096FF">Truth Garden</a>
+</header>
+<main>
+  <div class="card">
+    <h3>Controls</h3>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <select id="lens"></select>
+      <button id="reload">Reload</button>
+    </div>
+    <h3 style="margin-top:10px">Add/Edit Edge</h3>
+    <input id="src" placeholder="src did:key:..."><br><br>
+    <input id="dst" placeholder="dst did:key:..."><br><br>
+    <input id="w" type="number" min="-1" max="1" step="0.1" value="0.9"><br><br>
+    <button id="saveEdge">Save Edge</button>
+    <div class="legend" style="margin-top:10px">
+      <div><span style="background:#1db954"></span>positive trust</div>
+      <div><span style="background:#e64545"></span>negative trust</div>
+      <div><small>node size = trust score • node glow = live attests</small></div>
+    </div>
+  </div>
+  <div class="card">
+    <div id="graph"></div>
+  </div>
+</main>
+<script src="/lib/d3.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const S = {
+  nodes:new Map(), edges:[], sim:null, svg:null, g:null, lens:null
+};
+
+async function listLenses(){
+  const r=await fetch('/api/lenses'); const arr=await r.json();
+  const sel=document.getElementById('lens');
+  sel.innerHTML = '<option value="">(no lens)</option>' + arr.map(x=>`<option value="${x.lens_id}">${x.lens_id} (λ=${x.lambda})</option>`).join('');
+}
+
+function colorForTrust(t){
+  // 0..1 => red->amber->green
+  const lerp=(a,b,x)=>Math.round(a+(b-a)*x);
+  if (t<0.5){ const x=t/0.5; return `rgb(${lerp(230,230,x)},${lerp(70,170,x)},${lerp(70,40,x)})`; }
+  const x=(t-0.5)/0.5; return `rgb(${lerp(230,20,x)},${lerp(170,170,x)},${lerp(40,80,x)})`;
+}
+function edgeColor(w){ return w>=0? '#1db954' : '#e64545'; }
+
+async function loadGraph(){
+  const lid=document.getElementById('lens').value;
+  const r=await fetch('/api/trust/graph'+(lid?`?lid=${encodeURIComponent(lid)}`:''));
+  const {nodes, edges} = await r.json();
+
+  // Build maps
+  S.nodes = new Map(nodes.map(n=>[n.id, {...n, glow:0}]));
+  S.edges = edges;
+
+  draw();
+}
+
+function draw(){
+  const container = document.getElementById('graph');
+  container.innerHTML='';
+  const w = container.clientWidth, h = container.clientHeight;
+
+  const svg = d3.select('#graph').append('svg').attr('width', w).attr('height', h);
+  const g = svg.append('g');
+
+  // zoom/pan
+  svg.call(d3.zoom().scaleExtent([0.2,3]).on('zoom', (ev)=> g.attr('transform', ev.transform)));
+
+  const links = S.edges.map(e=>Object.assign({}, e));
+  const nodes = Array.from(S.nodes.values());
+
+  const link = g.append('g').attr('stroke-opacity',0.8).selectAll('line')
+    .data(links).join('line')
+    .attr('stroke', d=>edgeColor(d.weight))
+    .attr('stroke-width', d=> Math.max(1, Math.abs(d.weight)*3));
+
+  const node = g.append('g').attr('stroke','#222').attr('stroke-width',1.2).selectAll('circle')
+    .data(nodes).join('circle')
+    .attr('r', d=> 6 + d.trust*10)
+    .attr('fill', d=> colorForTrust(d.trust))
+    .on('mouseover', (ev,d)=> tip(`${d.label}\n${d.id}\ntrust=${(d.trust*100|0)}%`, ev.pageX, ev.pageY))
+    .on('mouseout', ()=> tip())
+    .call(drag(sim()));
+
+  const label = g.append('g').selectAll('text')
+    .data(nodes).join('text')
+    .text(d=> (d.label||d.id).slice(0,24))
+    .attr('font-size', 10)
+    .attr('fill', '#9aa0aa');
+
+  function sim(){
+    const s = d3.forceSimulation(nodes)
+      .force('link', d3.forceLink(links).id(d=>d.id).distance(d=> 50 + (1-Math.abs(d.weight))*100).strength(0.2))
+      .force('charge', d3.forceManyBody().strength(-180))
+      .force('center', d3.forceCenter(w/2,h/2))
+      .on('tick', ticked);
+    S.sim = s; return s;
+  }
+  function ticked(){
+    link.attr('x1', d=>d.source.x).attr('y1', d=>d.source.y)
+        .attr('x2', d=>d.target.x).attr('y2', d=>d.target.y);
+    node.attr('cx', d=>d.x).attr('cy', d=>d.y)
+        .attr('filter', d=> d.glow>0 ? 'url(#glow)' : null);
+    label.attr('x', d=>d.x+8).attr('y', d=>d.y+4);
+  }
+
+  // Glow filter
+  const defs = svg.append('defs');
+  const glow = defs.append('filter').attr('id','glow');
+  glow.append('feGaussianBlur').attr('stdDeviation','3').attr('result','coloredBlur');
+  const feMerge = glow.append('feMerge');
+  feMerge.append('feMergeNode').attr('in','coloredBlur');
+  feMerge.append('feMergeNode').attr('in','SourceGraphic');
+
+  function drag(sim){
+    function dragstarted(event) { if (!event.active) sim.alphaTarget(0.3).restart(); event.subject.fx = event.subject.x; event.subject.fy = event.subject.y; }
+    function dragged(event)     { event.subject.fx = event.x; event.subject.fy = event.y; }
+    function dragended(event)   { if (!event.active) sim.alphaTarget(0); event.subject.fx = null; event.subject.fy = null; }
+    return d3.drag().on('start',dragstarted).on('drag',dragged).on('end',dragended);
+  }
+
+  // Live glow decay
+  d3.interval(()=>{
+    let any=false;
+    for (const n of nodes){ if(n.glow>0){ n.glow = Math.max(0, n.glow-0.05); any=true; } }
+    if (any && S.sim) S.sim.alpha(0.02).restart();
+  }, 120);
+
+  S.svg=svg; S.g=g; S.nodeSel=node; S.linkSel=link; S.labelSel=label;
+}
+
+function tip(text, x, y){
+  let el = document.getElementById('tip');
+  if (!text){ if(el) el.remove(); return; }
+  if (!el){ el = document.createElement('div'); el.id='tip';
+    el.style.position='fixed'; el.style.background='#0f0f1a'; el.style.border='1px solid #24244a';
+    el.style.padding='6px 8px'; el.style.borderRadius='8px'; el.style.fontSize='12px'; document.body.appendChild(el);
+  }
+  el.textContent = text; el.style.left = (x+10)+'px'; el.style.top=(y+10)+'px';
+}
+
+document.getElementById('reload').onclick = loadGraph;
+document.getElementById('saveEdge').onclick = async ()=>{
+  const body = {
+    src: document.getElementById('src').value.trim(),
+    dst: document.getElementById('dst').value.trim(),
+    weight: +document.getElementById('w').value
+  };
+  const r = await fetch('/api/trust/edge',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+  if (r.ok) loadGraph();
+};
+
+(async function boot(){
+  await listLenses();
+  await loadGraph();
+
+  // live attest glow
+  const sock = io('/trust', {path:'/socket.io'});
+  sock.on('attest', (ev)=>{
+    const n = S.nodes.get(ev.did); if(!n) return;
+    n.glow = 1.0;
+    if (S.sim) S.sim.alpha(0.1).restart();
+  });
+})();
+</script>
