@@ -1,0 +1,56 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trust Lenses</title>
+<style>
+  body{margin:0;background:#0b0b10;color:#e9e9f1;font:14px system-ui}
+  header{display:flex;gap:8px;align-items:center;padding:10px;background:#0f0f1a;border-bottom:1px solid #1e1e2f}
+  .pill{border:1px solid #24244a;border-radius:999px;padding:4px 10px;background:#141428}
+  main{max-width:1100px;margin:12px auto;padding:0 12px;display:grid;grid-template-columns:320px 1fr;gap:12px}
+  .card{background:#131320;border:1px solid #24244a;border-radius:12px;padding:10px}
+  input,textarea,button{border-radius:10px;border:1px solid #24244a;background:#10102a;color:#e9e9f1;padding:8px}
+  button{cursor:pointer}
+  ul{list-style:none;margin:0;padding:0} li{padding:8px;border-bottom:1px dashed #24244a}
+  a{color:#0096FF;text-decoration:none}
+</style>
+<header>
+  <div class="pill">Trust Lenses</div>
+  <a class="pill" href="/truth.html">Truth Garden</a>
+</header>
+<main>
+  <div class="card">
+    <h3>Create Lens</h3>
+    <input id="lid" placeholder="lens id" value="ours"><br><br>
+    <label>λ (Love weight 0..1): <input id="lam" type="number" step="0.05" value="0.6"></label><br><br>
+    <textarea id="seeds" rows="5" placeholder='{"did:key:...":1, "did:key:...":0.5}'></textarea><br><br>
+    <button onclick="save()">Save</button>
+    <pre id="out" style="white-space:pre-wrap;margin-top:6px"></pre>
+  </div>
+  <div class="card">
+    <h3>Lenses</h3>
+    <ul id="list"></ul>
+    <h3>Feed (ranked)</h3>
+    <select id="sel"></select>
+    <button onclick="load()">Load</button>
+    <ul id="feed"></ul>
+  </div>
+</main>
+<script>
+async function save(){
+  const o={ lens_id: document.getElementById('lid').value,
+            lambda: +document.getElementById('lam').value,
+            seeds: JSON.parse(document.getElementById('seeds').value||'{}') };
+  const r = await fetch('/api/lenses', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(o)});
+  document.getElementById('out').textContent = await r.text();
+  list();
+}
+async function list(){
+  const r=await fetch('/api/lenses'); const arr=await r.json();
+  document.getElementById('list').innerHTML = arr.map(x=>`<li><b>${x.lens_id}</b> λ=${x.lambda} seeds=${Object.keys(x.seeds).length}</li>`).join('');
+  document.getElementById('sel').innerHTML = arr.map(x=>`<option>${x.lens_id}</option>`).join('');
+}
+async function load(){
+  const lid=document.getElementById('sel').value;
+  const r=await fetch('/api/truth/feed:lens?lid='+encodeURIComponent(lid)); const arr=await r.json();
+  document.getElementById('feed').innerHTML = arr.map(x=>`<li><b>${x.title}</b><br><small>${x.cid}</small><br>score=${x.score.toFixed(3)} love=${(x.love*100|0)}% trust=${(x.trust*100|0)}%</li>`).join('');
+}
+list();
+</script>

@@ -41,7 +41,9 @@
     "uuid": "^9.0.1",
     "better-sqlite3": "^9.4.3",
     "stripe": "^12.18.0",
-    "ethers": "^6.10.0"
+    "ethers": "^6.10.0",
+    "sqlite3": "^5.1.7",
+    "yaml": "^2.5.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
