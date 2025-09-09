@@ -164,7 +164,7 @@ require('./modules/projects')({ app });
 require('./modules/pr_proxy')({ app });
 require('./modules/patentnet')({ app });
 require('./modules/love_math')({ app });
-require('./modules/jobs')({ app });
+require('./modules/jobs_locked')({ app });
 // --- Middleware
 app.disable('x-powered-by');
 app.use(helmet());

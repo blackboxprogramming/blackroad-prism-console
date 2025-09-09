@@ -1,0 +1,35 @@
+# Global defaults (overridable per step in pipeline.yaml)
+runner: docker                # docker | host (fallbacks to host automatically if docker unavailable)
+default_image: node:20-slim
+
+security:
+  read_only_root: true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m
+    - /run:rw,nosuid,size=8m
+    - /var/tmp:rw,nosuid,size=16m
+  cap_drop: [ "ALL" ]
+  no_new_privileges: true
+  network: none               # none | bridge
+  pids_limit: 256
+  ulimit_nofile: 16384
+  memory: "2g"                # docker --memory
+  cpus: "1.0"                 # docker --cpus
+
+env_allowlist:
+  - NODE_ENV
+  - NPM_CONFIG_CACHE
+  - PATH                        # (PATH trimmed below)
+  - CI
+
+# By default, only let builds write to these paths under the project (/workspace).
+default_allowed_writes:
+  - "dist/**"
+  - "build/**"
+  - "public/**"
+  - ".blackroad/**"
+  - "*.log"
+
+# Extra bind mounts available to steps (read/write targets you approve)
+bind_presets:
+  apps_rw: "/var/www/blackroad/apps:/var/www/blackroad/apps:rw"
