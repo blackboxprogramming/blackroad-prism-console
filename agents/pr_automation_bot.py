@@ -22,9 +22,19 @@ class PRAutomationBot:
             self.token = os.getenv("GITHUB_TOKEN")
 
     def run(self, branch: str) -> dict:
-        """Post a comment noting the bot execution."""
+        """Post an execution comment on the pull request.
+
+        Args:
+            branch: The name of the branch the workflow ran on.
+
+        Returns:
+            The JSON response from the GitHub API.
+        """
         url = f"https://api.github.com/repos/{self.repo}/issues/{self.pr_number}/comments"
-        headers = {"Accept": "application/vnd.github+json"}
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "pr-automation-bot",
+        }
         if self.token:
             headers["Authorization"] = f"token {self.token}"
         payload = {"body": f"PR Automation Bot executed on branch `{branch}`."}
