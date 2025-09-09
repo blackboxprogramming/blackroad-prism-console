@@ -1,0 +1,889 @@
+{
+  "queue": [
+    {
+      "number": 1016,
+      "title": "feat: wire nginx health and telemetry",
+      "state": "open",
+      "branch": "codex/implement-nginx-health-checks-and-logs",
+      "impacts": [
+        "api"
+      ],
+      "risks": [
+        "conflicts with PR #1023",
+        "conflicts with PR #1020",
+        "conflicts with PR #1014",
+        "conflicts with PR #1027",
+        "conflicts with PR #1024",
+        "conflicts with PR #1021"
+      ],
+      "preflight": [
+        "systemctl restart blackroad-api"
+      ],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1015,
+      "title": "feat: add observability and readiness for ollama bridge",
+      "state": "open",
+      "branch": "codex/implement-observability-pack-features",
+      "impacts": [
+        "bridge"
+      ],
+      "risks": [
+        "bridge missing package.json with type module",
+        "conflicts with PR #1014",
+        "conflicts with PR #1029",
+        "conflicts with PR #1026",
+        "conflicts with PR #1012"
+      ],
+      "preflight": [
+        "systemctl restart ollama-bridge"
+      ],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1029,
+      "title": "feat: add observability and readiness for ollama bridge",
+      "state": "merged",
+      "branch": "codex/fix-comments-fg1ts4",
+      "impacts": [
+        "bridge"
+      ],
+      "risks": [
+        "bridge missing package.json with type module",
+        "conflicts with PR #1015",
+        "conflicts with PR #1014",
+        "conflicts with PR #1026",
+        "conflicts with PR #1012"
+      ],
+      "preflight": [
+        "systemctl restart ollama-bridge"
+      ],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1026,
+      "title": "feat: secure llm bridge with origin auth and model switcher",
+      "state": "merged",
+      "branch": "codex/fix-comments-r0cj87",
+      "impacts": [
+        "bridge"
+      ],
+      "risks": [
+        "bridge missing package.json with type module",
+        "conflicts with PR #1015",
+        "conflicts with PR #1014",
+        "conflicts with PR #1029",
+        "conflicts with PR #1012"
+      ],
+      "preflight": [
+        "systemctl restart ollama-bridge"
+      ],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1021,
+      "title": "feat: add mtls partner relay",
+      "state": "merged",
+      "branch": "codex/implement-mtls-for-partner-relay",
+      "impacts": [
+        "api",
+        "nginx"
+      ],
+      "risks": [
+        "conflicts with PR #1023",
+        "conflicts with PR #1020",
+        "conflicts with PR #1016",
+        "conflicts with PR #1014",
+        "conflicts with PR #1027",
+        "conflicts with PR #1024"
+      ],
+      "preflight": [
+        "systemctl restart blackroad-api",
+        "nginx -t && systemctl reload nginx"
+      ],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1023,
+      "title": "Add Yjs collaborative editing server and client",
+      "state": "open",
+      "branch": "codex/set-up-yjs-crdt-websocket-server",
+      "impacts": [
+        "api",
+        "ui"
+      ],
+      "risks": [
+        "conflicts with PR #1020",
+        "conflicts with PR #1016",
+        "conflicts with PR #1014",
+        "conflicts with PR #1027",
+        "conflicts with PR #1024",
+        "conflicts with PR #1021"
+      ],
+      "preflight": [
+        "systemctl restart blackroad-api"
+      ],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1022,
+      "title": "Add collaboration presence bus, LED webhooks, and voice room",
+      "state": "open",
+      "branch": "codex/integrate-presence-and-voice-collaboration-features",
+      "impacts": [
+        "ui"
+      ],
+      "risks": [],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1020,
+      "title": "Add devices backplane with WebSocket endpoints and admin UI",
+      "state": "open",
+      "branch": "codex/add-devices-backplane-module",
+      "impacts": [
+        "api",
+        "ui"
+      ],
+      "risks": [
+        "conflicts with PR #1023",
+        "conflicts with PR #1016",
+        "conflicts with PR #1027",
+        "conflicts with PR #1024",
+        "conflicts with PR #1021"
+      ],
+      "preflight": [
+        "systemctl restart blackroad-api"
+      ],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1014,
+      "title": "feat: secure llm bridge with origin auth and model switcher",
+      "state": "open",
+      "branch": "codex/implement-origin-auth-and-rate-limit",
+      "impacts": [
+        "bridge",
+        "ui"
+      ],
+      "risks": [
+        "bridge missing package.json with type module",
+        "conflicts with PR #1023",
+        "conflicts with PR #1016",
+        "conflicts with PR #1015",
+        "conflicts with PR #1029",
+        "conflicts with PR #1026",
+        "conflicts with PR #1021",
+        "conflicts with PR #1012"
+      ],
+      "preflight": [
+        "systemctl restart ollama-bridge"
+      ],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1027,
+      "title": "feat: add project rooms API and UI",
+      "state": "merged",
+      "branch": "codex/integrate-projects-api-module",
+      "impacts": [
+        "api",
+        "ui"
+      ],
+      "risks": [
+        "conflicts with PR #1023",
+        "conflicts with PR #1020",
+        "conflicts with PR #1016",
+        "conflicts with PR #1024",
+        "conflicts with PR #1021"
+      ],
+      "preflight": [
+        "systemctl restart blackroad-api"
+      ],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1024,
+      "title": "Add devices backplane with WebSocket endpoints and admin UI",
+      "state": "merged",
+      "branch": "codex/fix-comments-d9kdol",
+      "impacts": [
+        "api",
+        "ui"
+      ],
+      "risks": [
+        "conflicts with PR #1023",
+        "conflicts with PR #1020",
+        "conflicts with PR #1016",
+        "conflicts with PR #1027",
+        "conflicts with PR #1021"
+      ],
+      "preflight": [
+        "systemctl restart blackroad-api"
+      ],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1012,
+      "title": "feat: identity beacon, streaming bridge, and snapshots",
+      "state": "merged",
+      "branch": "codex/add-identity-verification,-streaming,-and-snapshots",
+      "impacts": [
+        "bridge",
+        "ui",
+        "units"
+      ],
+      "risks": [
+        "bridge missing package.json with type module",
+        "conflicts with PR #1015",
+        "conflicts with PR #1014",
+        "conflicts with PR #1029",
+        "conflicts with PR #1026"
+      ],
+      "preflight": [
+        "systemctl restart ollama-bridge"
+      ],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1017,
+      "title": "fix(webber): centralize prettier execution",
+      "state": "open",
+      "branch": "codex/fix-comments-in-webeditor",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #1011",
+        "conflicts with PR #1007",
+        "conflicts with PR #1006",
+        "conflicts with PR #1013",
+        "conflicts with PR #1008"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1011,
+      "title": "feat(agents): add webber bot for web file editing",
+      "state": "open",
+      "branch": "codex/fix-comments-pze5k9",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #1017",
+        "conflicts with PR #1007",
+        "conflicts with PR #1006",
+        "conflicts with PR #1013",
+        "conflicts with PR #1008"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1010,
+      "title": "Enhance cleanup bot with summary and error handling",
+      "state": "open",
+      "branch": "codex/generate-python-script-for-branch-cleanup-05hmba",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #999",
+        "conflicts with PR #998"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1007,
+      "title": "Add WebberBot for web file formatting",
+      "state": "open",
+      "branch": "codex/implement-webberbot-functionality",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #1017",
+        "conflicts with PR #1011",
+        "conflicts with PR #1006",
+        "conflicts with PR #1013",
+        "conflicts with PR #1008"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1006,
+      "title": "feat(agents): add webber bot for web file editing",
+      "state": "open",
+      "branch": "codex/add-support-for-bulk-editing-web-files",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #1017",
+        "conflicts with PR #1011",
+        "conflicts with PR #1007",
+        "conflicts with PR #1013",
+        "conflicts with PR #1008"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1001,
+      "title": "docs: clarify athena orchestrator",
+      "state": "open",
+      "branch": "codex/ensure-adherence-to-python-style-guidelines",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #1025",
+        "conflicts with PR #1002"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1000,
+      "title": "docs: document active agents",
+      "state": "open",
+      "branch": "codex/cleanup-repository-checklist-tasks",
+      "impacts": [],
+      "risks": [],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 999,
+      "title": "feat: summarize cleanup results",
+      "state": "open",
+      "branch": "codex/generate-python-script-for-branch-cleanup-y3q07h",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #1010",
+        "conflicts with PR #998"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 998,
+      "title": "feat: summarize cleanup results",
+      "state": "open",
+      "branch": "codex/generate-python-script-for-branch-cleanup",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #1010",
+        "conflicts with PR #999"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 996,
+      "title": "Add PR automation bot and workflow",
+      "state": "open",
+      "branch": "codex/add-pr-automation-workflow",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #1004"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 987,
+      "title": "Add agent test runner script",
+      "state": "open",
+      "branch": "codex/add-test-runner-for-agent-modules-poek2e",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #997"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 983,
+      "title": "chore(deps): bump recharts from 2.15.4 to 3.1.2 in /sites/blackroad",
+      "state": "open",
+      "branch": "dependabot/npm_and_yarn/sites/blackroad/recharts-3.1.2",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #982",
+        "conflicts with PR #981"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 982,
+      "title": "chore(deps-dev): bump tailwindcss from 3.4.17 to 4.1.13 in /sites/blackroad",
+      "state": "open",
+      "branch": "dependabot/npm_and_yarn/sites/blackroad/tailwindcss-4.1.13",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #983",
+        "conflicts with PR #981"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 981,
+      "title": "chore(deps): bump react-dom and @types/react-dom in /sites/blackroad",
+      "state": "open",
+      "branch": "dependabot/npm_and_yarn/sites/blackroad/multi-bd7e1a4691",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #983",
+        "conflicts with PR #982"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1031,
+      "title": "Add Collatz campaign framework with CI smoke test",
+      "state": "merged",
+      "branch": "codex/setup-collatz-conjecture-campaign",
+      "impacts": [],
+      "risks": [],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1030,
+      "title": "Fix Hello World Playwright test to use static blog asset",
+      "state": "merged",
+      "branch": "codex/fix-comments-y1x0w3",
+      "impacts": [],
+      "risks": [],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1028,
+      "title": "Add collab presence demo page",
+      "state": "merged",
+      "branch": "codex/add-functionality-to-join-room",
+      "impacts": [],
+      "risks": [],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1025,
+      "title": "docs: clarify athena orchestrator",
+      "state": "merged",
+      "branch": "codex/fix-comments-t4a5cn",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #1001",
+        "conflicts with PR #1002"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1019,
+      "title": "fix: lazy-load lucidia math modules to avoid optional deps",
+      "state": "merged",
+      "branch": "codex/locate-and-fix-a-critical-bug",
+      "impacts": [],
+      "risks": [],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1018,
+      "title": "docs: add micro-os device backplane prompt",
+      "state": "merged",
+      "branch": "codex/add-secure-device-bus-to-blackroad-api",
+      "impacts": [],
+      "risks": [],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1013,
+      "title": "feat(agents): add webber bot for web file editing",
+      "state": "merged",
+      "branch": "codex/fix-comments-u2d0ws",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #1017",
+        "conflicts with PR #1011",
+        "conflicts with PR #1007",
+        "conflicts with PR #1006",
+        "conflicts with PR #1008"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1009,
+      "title": "feat: add Athena orchestrator agent",
+      "state": "merged",
+      "branch": "codex/fix-update_workboard-task-status-handling",
+      "impacts": [],
+      "risks": [],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1008,
+      "title": "Add WebberBot for web file formatting",
+      "state": "merged",
+      "branch": "codex/implement-webberbot-functionality-1q9qyg",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #1017",
+        "conflicts with PR #1011",
+        "conflicts with PR #1007",
+        "conflicts with PR #1006",
+        "conflicts with PR #1013"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1005,
+      "title": "docs: expand agent workboard tasks",
+      "state": "merged",
+      "branch": "codex/deploy-website-using-websitebot",
+      "impacts": [],
+      "risks": [],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1004,
+      "title": "Add PR automation bot and workflow",
+      "state": "merged",
+      "branch": "codex/fix-comments-3w0inq",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #996"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1003,
+      "title": "Add Athena orchestrator and manifest",
+      "state": "merged",
+      "branch": "codex/create-documentation-for-athena-manifest",
+      "impacts": [],
+      "risks": [],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 1002,
+      "title": "feat: add Athena orchestrator",
+      "state": "merged",
+      "branch": "codex/ensure-python-files-follow-pep8-guidelines",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #1001",
+        "conflicts with PR #1025"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    },
+    {
+      "number": 997,
+      "title": "feat: recursively test agents",
+      "state": "merged",
+      "branch": "codex/fix-comments-vue2ul",
+      "impacts": [],
+      "risks": [
+        "conflicts with PR #987"
+      ],
+      "preflight": [],
+      "verify": [
+        "curl -s https://blackroad.io/healthz",
+        "curl -s http://127.0.0.1:4010/api/llm/health",
+        "curl -s http://127.0.0.1:12345/yjs/test",
+        "curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects",
+        "curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/devices"
+      ]
+    }
+  ],
+  "fix_forward": [
+    "Add srv/ollama-bridge/package.json with {\"type\":\"module\"}",
+    "Add srv/ollama-bridge/package.json with {\"type\":\"module\"}",
+    "Add srv/ollama-bridge/package.json with {\"type\":\"module\"}",
+    "Add srv/ollama-bridge/package.json with {\"type\":\"module\"}",
+    "Add srv/ollama-bridge/package.json with {\"type\":\"module\"}"
+  ]
+}
