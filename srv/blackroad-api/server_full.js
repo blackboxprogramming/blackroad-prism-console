@@ -154,6 +154,8 @@ fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 const app = express();
 require('./modules/jsonEnvelope')(app);
 require('./modules/requestGuard')(app);
+require('./modules/truth_identity')({ app });
+require('./modules/truth_api')({ app });
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   path: '/socket.io',
