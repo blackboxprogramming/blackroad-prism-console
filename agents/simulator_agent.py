@@ -11,6 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from hashlib import sha256
 import json
+import os
 from collections import OrderedDict
 from typing import Any, Dict
 
@@ -21,7 +22,7 @@ from lucidia.engines.condor_engine import (
     solve_algebraic,
 )
 
-CACHE_SIZE = 5
+DEFAULT_CACHE_SIZE = 5
 
 
 def _hash_model(source: str, args: Dict[str, Any]) -> str:
@@ -34,12 +35,15 @@ class SimulatorAgent:
     """Minimal simulator agent used in tests and local demos with an LRU cache."""
 
     cache: OrderedDict[str, Dict[str, Any]] = field(default_factory=OrderedDict)
+    cache_size: int = field(
+        default_factory=lambda: int(os.getenv("SIMULATOR_CACHE_SIZE", DEFAULT_CACHE_SIZE))
+    )
 
     def _memoise(self, key: str, value: Dict[str, Any]) -> None:
-        """Store ``value`` under ``key`` keeping cache within ``CACHE_SIZE``."""
+        """Store ``value`` under ``key`` keeping cache within ``cache_size``."""
         self.cache[key] = value
         self.cache.move_to_end(key)
-        if len(self.cache) > CACHE_SIZE:
+        while len(self.cache) > self.cache_size:
             self.cache.popitem(last=False)
 
     def run(
@@ -82,4 +86,4 @@ class SimulatorAgent:
 
 if __name__ == "__main__":
     agent = SimulatorAgent()
-    print("SimulatorAgent ready")
+    print(f"SimulatorAgent ready with cache size {agent.cache_size}")
