@@ -47,7 +47,11 @@ function Window({ id, title, layout, setLayout, children }) {
         })
       }
     >
-      <div className="flex flex-col h-full bg-white border shadow-lg">
+      <div
+        className="flex flex-col h-full bg-white border shadow-lg"
+        role="dialog"
+        aria-label={title}
+      >
         <div className="flex items-center justify-between bg-neutral-800 text-white px-2 py-1 cursor-move">
           <span className="text-sm flex items-center gap-1">
             <span className="text-green-400">●</span>
@@ -138,7 +142,7 @@ export default function Desktop() {
               type="button"
               aria-label={isOpen ? `Hide ${a.title}` : `Show ${a.title}`}
               aria-pressed={isOpen}
-              className="px-2 py-1 text-sm hover:bg-white/50 rounded"
+              className={`px-2 py-1 text-sm rounded ${isOpen ? 'bg-white/50' : 'hover:bg-white/50'}`}
               onClick={() => toggle(a.id)}
             >
               {a.title.split(' ')[0]}
