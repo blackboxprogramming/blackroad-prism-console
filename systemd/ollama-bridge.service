@@ -1,0 +1,15 @@
+[Unit]
+Description=Ollama bridge (Node proxy to Ollama)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/ollama-bridge
+EnvironmentFile=-/etc/default/ollama-bridge
+ExecStartPre=/usr/local/bin/bridge_ready.sh || true
+ExecStart=/usr/bin/env node server.js
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

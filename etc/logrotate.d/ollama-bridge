@@ -1,0 +1,8 @@
+/var/log/blackroad/ollama-bridge.log {
+    daily
+    rotate 14
+    compress
+    missingok
+    copytruncate
+    size 10M
+}

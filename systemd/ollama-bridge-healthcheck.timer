@@ -1,0 +1,10 @@
+[Unit]
+Description=Run ollama bridge health check every minute
+
+[Timer]
+OnUnitActiveSec=1m
+AccuracySec=10s
+Unit=ollama-bridge-healthcheck.service
+
+[Install]
+WantedBy=timers.target
