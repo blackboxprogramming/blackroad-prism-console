@@ -1,0 +1,19 @@
+name: comment-web-editor
+on:
+  pull_request:
+    types: [opened]
+permissions:
+  pull-requests: write
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment a quick link
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          repo="${GITHUB_REPOSITORY}"
+          pr="${{ github.event.pull_request.number }}"
+          url="https://github.dev/$repo"
+          gh pr comment "$pr" --body "✏️ **Open in Web Editor:** $url  \
+          Tip: press \`\.\` to open the editor instantly; use the *auto-fix* workflow for formatting."

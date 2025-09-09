@@ -1,13 +1,2 @@
-# Path-based reviewers
-/sites/blackroad/     @blackboxprogramming
-/api/                 @blackboxprogramming
-/services/            @blackboxprogramming
-/**/*.py              @blackboxprogramming
-/**/*.ts              @blackboxprogramming
-
-* @blackroadprogramming/secops @blackroadprogramming/kernel
-*       @blackroad-owners
-/sites/blackroad/**  @blackroad-web
-.github/**           @blackroad-ci
-/droplet-manager-macos/ @blackboxprogramming
-* @blackboxprogramming/maintainers
+# Default reviewers for all files
+* @blackboxprogramming/core

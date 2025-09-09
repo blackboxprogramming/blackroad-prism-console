@@ -1,0 +1,47 @@
+name: auto-fix
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  autofix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node autofix (if package.json present)
+      - if: ${{ hashFiles('**/package.json') != '' }}
+        uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - if: ${{ hashFiles('**/package.json') != '' }}
+        run: |
+          npm i -g prettier eslint || true
+          npx prettier -w .
+          npx eslint . --fix || true
+
+      # Python autofix (if pyproject/requirements present)
+      - if: ${{ hashFiles('**/pyproject.toml','**/requirements*.txt') != '' }}
+        uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - if: ${{ hashFiles('**/pyproject.toml','**/requirements*.txt') != '' }}
+        run: |
+          pip install --upgrade pip black isort
+          black .
+          isort .
+
+      # Shell autofix
+      - run: sudo apt-get update && sudo apt-get install -y shfmt
+      - run: shfmt -w .
+
+      # Commit back if changes
+      - name: Commit changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "chore(auto-fix): format & lint"
+            git push
+          fi

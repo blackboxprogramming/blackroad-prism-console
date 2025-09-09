@@ -1,47 +1,21 @@
-- name: frontend
-  color: "1d76db"
-  description: "UI, React, TS/JS, styles"
-
-- name: backend
+- name: area/frontend
+  color: "1f6feb"
+  description: UI
+- name: area/backend
   color: "0e8a16"
-  description: "API, services, Python/Go"
-
-- name: docs
-  color: "5319e7"
-  description: "Documentation and guides"
-
-- name: tests
-  color: "b60205"
-  description: "Test code and fixtures"
-
-- name: prompts
+  description: API/server
+- name: prio/urgent
+  color: "d73a4a"
+  description: Must merge soon
+- name: prio/normal
   color: "fbca04"
-  description: "LLM prompts & Codex"
-
-- name: templates
-  color: "c2e0c6"
-  description: "Scaffolds & templates"
-
-- name: devops
-  color: "0052cc"
-  description: "CI/CD, config, tooling"
-
-- name: 'priority: high'
-  color: d73a4a
-  description: Must-do soon
-- name: 'priority: medium'
-  color: fbca04
-  description: Should-do
-- name: 'priority: low'
-  color: c2e0c6
-  description: Nice-to-have
-- name: deps
-  color: 0366d6
-  description: Dependencies
-- name: security
-  color: "d93f0b"
-  description: "Security, policies, secrets"
-
-- name: site-assets
+  description: Default priority
+- name: type/bug
+  color: "d73a4a"
+  description: Defect
+- name: type/feature
+  color: "a2eeef"
+  description: New capability
+- name: status/help-wanted
   color: "5319e7"
-  description: "Static site assets"
+  description: Needs attention

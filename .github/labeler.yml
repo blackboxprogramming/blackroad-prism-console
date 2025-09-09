@@ -1,8 +1,6 @@
-area/site:
-  - "sites/blackroad/**"
-area/api:
-  - "services/api/**"
-area/nginx:
-  - "nginx/**"
-ci:
-  - ".github/workflows/**"
+area/frontend:
+  - "frontend/**"
+  - "sites/**"
+area/backend:
+  - "backend/**"
+  - "services/**"

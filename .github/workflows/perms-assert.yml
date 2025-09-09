@@ -1,0 +1,38 @@
+name: perms-assert
+on:
+  schedule: [{cron: "0 7 * * *"}]
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  assert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check protections & security
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name || github.repository }}
+        run: |
+          set -euo pipefail
+          BR="$(gh repo view "$OWNER/$REPO" --json defaultBranchRef -q .defaultBranchRef.name)"
+          jq -r . <(gh api "/repos/$OWNER/$REPO/branches/$BR/protection") >/tmp/prot.json
+          ADV=$(gh api "/repos/$OWNER/$REPO" -q .security_and_analysis.advanced_security.status || echo "disabled")
+          SEC=$(gh api "/repos/$OWNER/$REPO" -q .security_and_analysis.secret_scanning.status || echo "disabled")
+          PUSH=$(gh api "/repos/$OWNER/$REPO" -q .security_and_analysis.secret_scanning_push_protection.status || echo "disabled")
+          want_checks=("ci" "perms-assert")
+          ok=1
+          for c in "${want_checks[@]}"; do
+            jq -e --arg c "$c" '.required_status_checks.contexts | index($c)' /tmp/prot.json >/dev/null || { echo "Missing status check: $c"; ok=0; }
+          done
+          jq -e '.required_pull_request_reviews.required_approving_review_count >= 1' /tmp/prot.json >/dev/null || { echo "Approvals < 1"; ok=0; }
+          jq -e '.required_pull_request_reviews.require_code_owner_reviews == true' /tmp/prot.json >/dev/null || { echo "Codeowners not required"; ok=0; }
+          jq -e '.required_linear_history == true' /tmp/prot.json >/dev/null || { echo "Linear history OFF"; ok=0; }
+          jq -e '.allow_force_pushes == false' /tmp/prot.json >/dev/null || { echo "Force push allowed"; ok=0; }
+          [[ "$ADV" == "enabled" && "$SEC" == "enabled" && "$PUSH" == "enabled" ]] || { echo "Security flags not all enabled"; ok=0; }
+          if [ $ok -ne 1 ]; then
+            gh issue create -t "POLICY-DRIFT: repo settings out of compliance" -b "$(cat /tmp/prot.json)" || true
+            exit 1
+          fi
+          echo "Policy OK"
