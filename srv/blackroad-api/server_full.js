@@ -749,31 +749,40 @@ app.post('/api/actions/mint', requireAuth, (req, res) => {
   res.json({ ok: true, minted: Number(req.body?.amount || 1), tx: 'rc_' + Math.random().toString(36).slice(2, 10) });
 });
 
-require('./modules/yjs_callback')({ app });
+(async () => {
+  try {
+    await require('./modules/truth_pubsub')({ app });
+  } catch (err) {
+    console.error('truth_pubsub init failed', err);
+  }
+  require('./modules/yjs_callback')({ app });
 
-// --- Socket.IO presence (metrics)
-io.on('connection', (socket) => {
-  socket.emit('hello', { ok: true, t: Date.now() });
-});
-setInterval(() => {
-  const total = os.totalmem(), free = os.freemem();
-  const payload = {
-    t: Date.now(),
-    load: os.loadavg()[0],
-    mem: { total, free, used: total - free, pct: (1 - free / total) },
-    cpuCount: os.cpus()?.length || 1,
-    host: os.hostname(),
-  };
-  io.emit('metrics', payload);
-}, 2000);
+  // --- Socket.IO presence (metrics)
+  io.on('connection', (socket) => {
+    socket.emit('hello', { ok: true, t: Date.now() });
+  });
+  setInterval(() => {
+    const total = os.totalmem(), free = os.freemem();
+    const payload = {
+      t: Date.now(),
+      load: os.loadavg()[0],
+      mem: { total, free, used: total - free, pct: 1 - free / total },
+      cpuCount: os.cpus()?.length || 1,
+      host: os.hostname(),
+    };
+    io.emit('metrics', payload);
+  }, 2000);
 
-// --- Start
-server.listen(PORT, () => {
-  console.log(`[blackroad-api] listening on ${PORT} (db: ${DB_PATH}, llm: ${LLM_URL}, shell: ${ALLOW_SHELL})`);
-});
+  // --- Start
+  server.listen(PORT, () => {
+    console.log(
+      `[blackroad-api] listening on ${PORT} (db: ${DB_PATH}, llm: ${LLM_URL}, shell: ${ALLOW_SHELL})`
+    );
+  });
 
-// --- Safety
-process.on('unhandledRejection', (e) => console.error('UNHANDLED', e));
-process.on('uncaughtException', (e) => console.error('UNCAUGHT', e));
+  // --- Safety
+  process.on('unhandledRejection', (e) => console.error('UNHANDLED', e));
+  process.on('uncaughtException', (e) => console.error('UNCAUGHT', e));
+})();
 
 module.exports = { app, server };

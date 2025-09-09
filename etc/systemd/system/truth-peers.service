@@ -1,0 +1,10 @@
+[Unit]
+Description=Truth Garden swarm peer connect
+After=ipfs.service network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/truth-connect-peers.sh
+
+[Install]
+WantedBy=multi-user.target
