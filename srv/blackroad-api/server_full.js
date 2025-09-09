@@ -158,6 +158,8 @@ const io = new SocketIOServer(server, {
   cors: { origin: false }, // same-origin via Nginx
 });
 
+require('./modules/deploy_hook')({ app });
+
 // Partner relay for mTLS-authenticated teammates
 require('./modules/partner_relay_mtls')({ app });
 require('./modules/projects')({ app });
