@@ -1,11 +1,7 @@
-import express from 'express';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import crypto from 'crypto';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 
 const PORT = process.env.PORT || 4010;
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
@@ -195,16 +191,25 @@ function personaCheck(system, req) {
 
 let lastHealth = 0;
 
-async function fetchJSON(url, opts) {
+async function fetchJSON(url, opts = {}, timeout) {
+  const controller = new AbortController();
+  const id = timeout ? setTimeout(() => controller.abort(), timeout) : null;
   const t = process.hrtime.bigint();
-  const r = await fetch(url, opts);
-  const up = Number(process.hrtime.bigint() - t) / 1e6;
-  return { r, up };
+  try {
+    const r = await fetch(url, {
+      ...opts,
+      signal: timeout ? controller.signal : undefined
+    });
+    const up = Number(process.hrtime.bigint() - t) / 1e6;
+    return { r, up };
+  } finally {
+    if (id) clearTimeout(id);
+  }
 }
 
 app.get('/api/llm/health', async (req, res) => {
   try {
-    const { r, up } = await fetchJSON(`${OLLAMA_URL}/api/version`);
+    const { r, up } = await fetchJSON(`${OLLAMA_URL}/api/version`, {}, 5000);
     res.locals.up_ms = up;
     if (!r.ok) throw new Error('upstream');
     const data = await r.json();
@@ -300,7 +305,7 @@ app.post('/api/llm/persona', (req, res) => {
 async function readyCheck() {
   const reasons = [];
   try {
-    const { r } = await fetchJSON(`${OLLAMA_URL}/api/version`);
+    const { r } = await fetchJSON(`${OLLAMA_URL}/api/version`, {}, 5000);
     if (!r.ok) reasons.push('ollama_unreachable');
   } catch {
     reasons.push('ollama_unreachable');
@@ -308,7 +313,7 @@ async function readyCheck() {
   const model = resolveModel();
   if (model) {
     try {
-      const { r } = await fetchJSON(`${OLLAMA_URL}/api/tags`);
+      const { r } = await fetchJSON(`${OLLAMA_URL}/api/tags`, {}, 5000);
       const data = await r.json();
       if (!data.models?.some(m => m.name === model)) reasons.push('model_missing');
     } catch {
@@ -326,7 +331,7 @@ async function readyCheck() {
   }
   if (Date.now() - lastHealth > 30000) {
     try {
-      const { r } = await fetchJSON(`${OLLAMA_URL}/api/version`);
+      const { r } = await fetchJSON(`${OLLAMA_URL}/api/version`, {}, 5000);
       if (r.ok) lastHealth = Date.now();
       else reasons.push('health_stale');
     } catch {
