@@ -2,6 +2,10 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import { WebSocketServer } from "ws";
+import { Server as SocketIOServer } from "socket.io";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
 
 const PORT = process.env.PORT || 4000;
 const app = express();
@@ -40,6 +44,12 @@ app.post("/api/mini/infer", (req, res) => {
 const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`BlackRoad API bridge listening on :${PORT}`);
 });
+
+// Socket.IO namespaces
+const io = new SocketIOServer(server, { path: "/socket.io" });
+require("./modules/collab_presence.js")({ app, io });
+require("./modules/github_webhook.js")({ app });
+require("./modules/voice_signal.js")({ io });
 
 /**
  * WebSocket channel (diagnostic)

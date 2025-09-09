@@ -1,0 +1,42 @@
+<!doctype html><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlackRoad • Voice</title>
+<style>body{margin:0;background:#0b0b10;color:#e9e9f1;font:14px system-ui;padding:14px} button{border:1px solid #24244a;background:#10102a;color:#e9e9f1;border-radius:10px;padding:8px}</style>
+<h3>Voice Room</h3>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+  <input id="name" placeholder="name"><input id="room" placeholder="room" value="blackroad">
+  <button onclick="join()">Join</button><button onclick="leave()">Leave</button>
+</div>
+<audio id="me" autoplay muted></audio>
+<div id="peers"></div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/var/www/blackroad/lib/simplepeer.min.js"></script>
+<script>
+let sock, stream, peers={};
+async function join(){
+  sock=io('/voice',{path:'/socket.io'});
+  const room=document.getElementById('room').value||'blackroad';
+  stream = await navigator.mediaDevices.getUserMedia({audio:true});
+  document.getElementById('me').srcObject=stream;
+  sock.emit('join', room);
+  sock.on('peer:join', ({id})=> startPeer(id,true));
+  sock.on('signal', ({from,data})=> peers[from]?.signal(data));
+  sock.on('peer:leave', ({id})=> removePeer(id));
+}
+function startPeer(id, initiator){
+  const p = new SimplePeer({initiator, trickle:true, stream});
+  peers[id]=p;
+  p.on('signal', data=> sock.emit('signal',{to:id,data}));
+  p.on('stream', s=>{
+    const au=document.createElement('audio'); au.autoplay=true; au.srcObject=s; au.dataset.id=id;
+    document.getElementById('peers').appendChild(au);
+  });
+  p.on('close', ()=> removePeer(id));
+  p.on('error', ()=> removePeer(id));
+}
+function removePeer(id){
+  const p=peers[id]; if(!p) return; p.destroy(); delete peers[id];
+  const el=[...document.querySelectorAll('audio')].find(a=>a.dataset.id===id); if(el) el.remove();
+}
+function leave(){ for(const id in peers) removePeer(id); sock?.disconnect(); }
+</script>
