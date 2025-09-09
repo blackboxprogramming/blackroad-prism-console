@@ -159,6 +159,9 @@ const io = new SocketIOServer(server, {
   cors: { origin: false }, // same-origin via Nginx
 });
 
+// Devices backplane
+require('./modules/devices')({ app, io, dbPath: DB_PATH });
+
 const emitter = new EventEmitter();
 const jobs = new Map();
 let jobSeq = 0;
