@@ -43,4 +43,20 @@ describe('API security and health', () => {
     expect(res.body.planName).toBe('Free');
     expect(res.body.entitlements.can.math.pro).toBe(false);
   });
+
+  it('computes curvature', async () => {
+    const res = await request(app).get('/api/trust/curvature');
+    expect(res.status).toBe(200);
+    const edge = res.body.find((e) => e.u === 'a' && e.v === 'b');
+    expect(edge.kappa).toBeGreaterThan(0);
+  });
+
+  it('computes CTD between two truths', async () => {
+    const res = await request(app)
+      .get('/api/truth/diff')
+      .query({ cid: ['a', 'b'] });
+    expect(res.status).toBe(200);
+    expect(res.body.ctd).toBe(1);
+    expect(res.body.ops[0].path).toBe('/meta/title');
+  });
 });

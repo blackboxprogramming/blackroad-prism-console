@@ -752,6 +752,8 @@ app.post('/api/actions/mint', requireAuth, (req, res) => {
 });
 
 require('./modules/yjs_callback')({ app });
+require('./modules/trust_curvature')({ app });
+require('./modules/truth_diff')({ app });
 
 // --- Socket.IO presence (metrics)
 io.on('connection', (socket) => {
