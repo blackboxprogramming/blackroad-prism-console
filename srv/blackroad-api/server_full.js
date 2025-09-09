@@ -1,4 +1,4 @@
-<!-- FILE: srv/blackroad-api/server_full.js -->
+<!-- FILE: /srv/blackroad-api/server_full.js -->
 /* BlackRoad API — Express + SQLite + Socket.IO + LLM bridge
    Runs behind Nginx on port 4000 with cookie-session auth.
    Env (optional):
