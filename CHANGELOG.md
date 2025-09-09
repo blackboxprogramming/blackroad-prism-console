@@ -1,5 +1,9 @@
 # Changelog
 
+## 2025-09-09
+
+- enforce JSON envelope and snapshot logging for API routes
+
 ## 2025-08-16
 
 - Cleanup: hardened API, added tests and CI tooling.
