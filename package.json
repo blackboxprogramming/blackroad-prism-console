@@ -41,7 +41,10 @@
     "uuid": "^9.0.1",
     "better-sqlite3": "^9.4.3",
     "stripe": "^12.18.0",
-    "ethers": "^6.10.0"
+    "ethers": "^6.10.0",
+    "bs58": "^5.0.0",
+    "json-canonicalize": "^1.0.4",
+    "ipfs-http-client": "^60.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
