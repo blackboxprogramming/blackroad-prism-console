@@ -11,7 +11,7 @@ psutil
 PyYAML==6.0.2
 python-dotenv
 qiskit-aer==0.17.1
-qiskit-machine-learning==0.7.2
+qiskit-machine-learning==0.8.3
 requests==2.32.4
 streamlit==1.48.1
 torch
