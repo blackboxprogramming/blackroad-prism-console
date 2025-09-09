@@ -1,0 +1,45 @@
+<!doctype html><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BlackRoad • CRDT Editor</title>
+<link rel="preconnect" href="/yjs/" />
+<link rel="preconnect" href="/socket.io/" />
+<style>
+  body{margin:0;background:#0b0b10;color:#e9e9f1;font:14px system-ui}
+  header{display:flex;gap:8px;align-items:center;padding:10px 12px;background:#0f0f1a;border-bottom:1px solid #1e1e2f}
+  .pill{border:1px solid #24244a;border-radius:999px;padding:4px 10px;font-size:12px;background:#141428}
+  main{max-width:1100px;margin:12px auto;padding:0 12px;display:grid;grid-template-columns:280px 1fr;gap:12px}
+  .card{background:#131320;border:1px solid #24244a;border-radius:12px;padding:10px}
+  textarea{width:100%;height:70vh;background:#10102a;border:1px solid #24244a;color:#e9e9f1;border-radius:12px;padding:12px;resize:vertical}
+  input,button{border-radius:10px;border:1px solid #24244a;background:#10102a;color:#e9e9f1;padding:8px}
+  button{cursor:pointer}
+  ul{list-style:none;margin:0;padding:0} li{padding:6px;border-bottom:1px dashed #24244a}
+  small{color:#9aa0aa}
+</style>
+<header>
+  <div class="pill">CRDT Editor (Yjs)</div>
+  <a class="pill" href="/collab.html" style="text-decoration:none;color:#0096FF">Presence/Focus</a>
+</header>
+<main>
+  <div class="card">
+    <h3>Room</h3>
+    <div style="display:flex;gap:6px">
+      <input id="room" placeholder="doc id" value="blackroad-notes" />
+      <input id="name" placeholder="your name" />
+      <button id="join">Join</button>
+    </div>
+    <h3 style="margin-top:10px">Peers</h3>
+    <ul id="peers"></ul>
+  </div>
+  <div class="card">
+    <h3>Document</h3>
+    <textarea id="editor" spellcheck="false" placeholder="Start typing…"></textarea>
+  </div>
+</main>
+<script type="importmap">
+{
+  "imports": {
+    "yjs": "/lib/yjs.mjs"
+  }
+}
+</script>
+<script type="module" src="/lib/crdt-editor.js"></script>
