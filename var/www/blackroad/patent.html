@@ -1,0 +1,51 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlackRoad • PatentNet</title>
+<style>
+ body{margin:0;background:#0b0b10;color:#e9e9f1;font:14px system-ui}
+ header{padding:10px 12px;background:#0f0f1a;border-bottom:1px solid #1f1f2f}
+ main{max-width:900px;margin:12px auto;padding:0 12px}
+ .card{background:#131320;border:1px solid #24244a;border-radius:12px;padding:12px}
+ input,textarea,button{width:100%;margin:6px 0;padding:10px;border-radius:10px;border:1px solid #24244a;background:#10102a;color:#e9e9f1}
+ button{cursor:pointer;background:#0096FF}
+ .row{display:flex;gap:8px}
+ .row>*{flex:1}
+ .pill{display:inline-block;border:1px solid #24244a;border-radius:999px;padding:4px 10px;background:#141428;font-size:12px}
+ pre{white-space:pre-wrap;background:#0e0e20;border-radius:8px;padding:10px}
+</style>
+<header><span class="pill">PatentNet • truth-verified claims</span></header>
+<main>
+<div class="card">
+  <div class="row"><input id="title" placeholder="Claim title"><input id="author" placeholder="Author (optional)"></div>
+  <textarea id="abstract" rows="4" placeholder="Abstract (what & why)"></textarea>
+  <textarea id="claims" rows="8" placeholder="Claims text..."></textarea>
+  <div class="row"><input type="file" id="file"><input id="tags" placeholder="tags (comma-separated)"></div>
+  <button id="mint">Mint defensive publication</button>
+  <div id="out"></div>
+</div>
+<div class="card" style="margin-top:12px">
+  <h3>Today’s archive</h3>
+  <button onclick="list()">Refresh</button>
+  <pre id="list"></pre>
+</div>
+</main>
+<script>
+async function b64(f){ const a=await f.arrayBuffer(); return btoa(String.fromCharCode(...new Uint8Array(a))); }
+async function mint(){
+  const btn=document.getElementById('mint'); btn.disabled=true;
+  const file = document.getElementById('file').files[0];
+  const payload = {
+    title: title.value, abstract: abstract.value, claimsText: claims.value,
+    author: author.value, tags: (tags.value||'').split(',').map(s=>s.trim()).filter(Boolean),
+    claimType: "defensive-publication",
+    attachments: file ? [{name:file.name, b64: await b64(file)}] : []
+  };
+  const r = await fetch('/api/patent/claim',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const j = await r.json(); out.textContent = JSON.stringify(j,null,2);
+  btn.disabled=false;
+}
+async function list(){
+  const r = await fetch('/api/patent/list'); const j = await r.json();
+  document.getElementById('list').textContent = JSON.stringify(j.data||[],null,2);
+}
+document.getElementById('mint').onclick = mint;
+</script>

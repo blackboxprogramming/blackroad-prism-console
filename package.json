@@ -40,7 +40,8 @@
     "systeminformation": "^5.25.11",
     "uuid": "^9.0.1",
     "better-sqlite3": "^9.4.3",
-    "stripe": "^12.18.0"
+    "stripe": "^12.18.0",
+    "ethers": "^6.10.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",

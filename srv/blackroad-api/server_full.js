@@ -165,6 +165,7 @@ const io = new SocketIOServer(server, {
 require('./modules/partner_relay_mtls')({ app });
 require('./modules/projects')({ app });
 require('./modules/pr_proxy')({ app });
+require('./modules/patentnet')({ app });
 
 const emitter = new EventEmitter();
 const jobs = new Map();
