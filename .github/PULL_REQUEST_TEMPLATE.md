@@ -1,13 +1,12 @@
 # Summary
 
-What does this change?
+Describe the change and why it is needed.
 
 # Testing
-- Local build passes
-- `npm run build` (site) / API boots
-- E2E (Playwright) green
+- [ ] `npm test`
+- [ ] other checks as needed
 
 # Checklist
-- Docs/README updated if needed
-- No secrets committed
-- Labels added (area/site, area/api, etc.)
+- [ ] Docs updated if needed
+- [ ] No secrets committed
+- [ ] Labels added

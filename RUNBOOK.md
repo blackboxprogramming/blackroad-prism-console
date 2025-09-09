@@ -1,3 +1,17 @@
+# GitHub Guardian Runbook
+
+After merging the policy baseline PR, apply repository settings:
+
+```bash
+OWNER=<org> REPO=<repo> bash scripts/gh/perms_guard.sh ci,perms-assert main
+OWNER=<org> REPO=<repo> bash scripts/gh/sync_labels.sh
+gh workflow run perms-assert
+```
+
+To rotate tokens, regenerate the PAT used for `gh` and update repository secrets.
+
+---
+
 # Runbook
 
 ## Restoring from Backup
