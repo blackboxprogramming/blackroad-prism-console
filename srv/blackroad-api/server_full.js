@@ -580,6 +580,21 @@ app.get('/api/subscribe/plans', requireAuth, (_req, res) => {
 
 // --- LLM bridge (/api/llm/chat)
 // Forwards body to FastAPI (LLM_URL) and streams raw text back to the client.
+app.get('/api/llm/ready', async (_req, res) => {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 1000);
+    const r = await fetch(LLM_URL, { method: 'HEAD', signal: controller.signal }).catch(() => null);
+    clearTimeout(timer);
+    if (r && (r.ok || r.status === 405)) {
+      return res.json({ ok: true });
+    }
+    return res.status(503).json({ ok: false, upstream: r ? r.status : 0 });
+  } catch (e) {
+    return res.status(503).json({ ok: false, error: String(e) });
+  }
+});
+
 app.post('/api/llm/chat', requireAuth, async (req, res) => {
   try {
     const upstream = await fetch(LLM_URL, {

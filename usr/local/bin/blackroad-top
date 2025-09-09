@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+NGINX_LOG="/var/log/nginx/blackroad.access.json"
+BRIDGE_LOG="/var/log/blackroad/ollama-bridge.log"
+FOLLOW=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --follow) FOLLOW=1; shift ;;
+    --nginx) NGINX_LOG="$2"; shift 2 ;;
+    --bridge) BRIDGE_LOG="$2"; shift 2 ;;
+    *) echo "Usage: blackroad-top [--follow] [--nginx <path>] [--bridge <path>]"; exit 1;;
+  esac
+done
+
+render() {
+  local now lines rps s2 s4 s5 auth rate p50 p95 up_p50 up_p95 top_paths ready model sse bridge_err
+  now=$(date -u +%s)
+
+  if [[ -f "$NGINX_LOG" ]]; then
+    lines=$(tail -n 5000 "$NGINX_LOG")
+    rps=$(echo "$lines" | jq -r '.ts' 2>/dev/null | xargs -I{} date -ud {} +%s 2>/dev/null | awk -v now="$now" '$1>now-60 {c++} END{printf "%.2f", (c+0)/60}')
+    read s2 s4 s5 auth rate <<<$(echo "$lines" | jq -r '.status' 2>/dev/null | awk '{if($1>=200&&$1<300)s2++;else if($1==401)auth++;else if($1==403)auth++;else if($1==429)rate++;else if($1>=400&&$1<500)s4++;else if($1>=500)s5++;} END{print s2+0, s4+0, s5+0, auth+0, rate+0}')
+    p50=$(echo "$lines" | jq -r '.req_time' 2>/dev/null | sort -n | awk 'NF{a[NR]=$1} END{if(NR){print a[int(0.5*NR+0.5)]*1000}else{print 0}}')
+    p95=$(echo "$lines" | jq -r '.req_time' 2>/dev/null | sort -n | awk 'NF{a[NR]=$1} END{if(NR){print a[int(0.95*NR+0.5)]*1000}else{print 0}}')
+    up_p50=$(echo "$lines" | jq -r '.up_time | split(",") | map(tonumber) | add/length' 2>/dev/null | sort -n | awk 'NF{a[NR]=$1} END{if(NR){print a[int(0.5*NR+0.5)]*1000}else{print 0}}')
+    up_p95=$(echo "$lines" | jq -r '.up_time | split(",") | map(tonumber) | add/length' 2>/dev/null | sort -n | awk 'NF{a[NR]=$1} END{if(NR){print a[int(0.95*NR+0.5)]*1000}else{print 0}}')
+    top_paths=$(echo "$lines" | jq -r '.path' 2>/dev/null | grep -vE '\.(css|js|png|jpg|gif|ico)$' | awk '{count[$1]++} END{for(k in count)print count[k],k}' | sort -nr | head -n5)
+  else
+    rps=0;s2=0;s4=0;s5=0;auth=0;rate=0;p50=0;p95=0;up_p50=0;up_p95=0;top_paths=""
+  fi
+
+  ready=$(curl -fsS --max-time 1 http://127.0.0.1:4010/api/llm/ready 2>/dev/null | jq -r '.status? // .ok // "fail"' 2>/dev/null || echo fail)
+  metrics_json=$(curl -fsS --max-time 1 http://127.0.0.1:4010/api/llm/metrics 2>/dev/null || echo '')
+  model=$(echo "$metrics_json" | jq -r '.model // empty' 2>/dev/null)
+  sse=$(echo "$metrics_json" | jq -r '.sse_clients // empty' 2>/dev/null)
+  if [[ -f "$BRIDGE_LOG" ]]; then
+    bridge_err=$(tail -n 5000 "$BRIDGE_LOG" | grep -ci 'error' || true)
+  else
+    bridge_err=0
+  fi
+
+  printf "BlackRoad Top - ready:%s rps:%s 2xx:%s 4xx:%s 5xx:%s auth:%s rate:%s\n" "$ready" "$rps" "$s2" "$s4" "$s5" "$auth" "$rate"
+  printf "req_time p50:%sms p95:%sms | up_time p50:%sms p95:%sms\n" "$p50" "$p95" "$up_p50" "$up_p95"
+  printf "Top paths:\n%s\n" "$top_paths"
+  if [[ -n "$model" || -n "$sse" ]]; then
+    printf "Model:%s SSE:%s\n" "$model" "$sse"
+  fi
+  printf "Bridge errors(last5k):%s\n" "$bridge_err"
+}
+
+if [[ $FOLLOW -eq 1 ]]; then
+  while true; do
+    tput clear
+    render
+    sleep 2
+  done
+else
+  render
+fi
