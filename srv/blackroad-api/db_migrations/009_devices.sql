@@ -1,3 +1,4 @@
+-- FILE: /srv/blackroad-api/db_migrations/009_devices.sql
 -- Devices backplane tables
 PRAGMA journal_mode=WAL;
 
