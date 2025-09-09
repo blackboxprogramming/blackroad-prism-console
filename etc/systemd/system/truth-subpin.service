@@ -1,0 +1,16 @@
+[Unit]
+Description=Truth Garden Auto-Pin (verified pubsub)
+After=ipfs.service network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/node /srv/truth-subpin/truth_subpin_verify.js
+Restart=always
+Environment=TRUTH_TOPIC=truth.garden/v1/announce
+Environment=IPFS_API=http://127.0.0.1:5001
+# Accept only our DIDs (optional): comma-separated did:key list
+# Environment=ALLOW_DIDS=did:key:z6Mk...,did:key:z6M...
+Environment=TRUTH_MAX_AGE_SEC=604800
+
+[Install]
+WantedBy=multi-user.target
