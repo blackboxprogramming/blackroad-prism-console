@@ -1,5 +1,11 @@
 
-## Secrets (GitHub → Settings → Secrets and variables → Actions)
+## Auto-deploy secrets (GitHub → Settings → Secrets and variables → Actions)
+- `BR_DEPLOY_SECRET` — shared bearer token for `/api/deploy/hook` and `/api/deploy/trigger`
+- `BR_DEPLOY_URL` — optional override of the deploy webhook URL
+- `CF_ZONE_ID` / `CF_API_TOKEN` — optional Cloudflare purge credentials
+- `SLACK_WEBHOOK_URL` — optional Slack notification URL
+
+## Legacy SSH deploy secrets
 - `SERVER_HOST` — your server or domain (e.g., blackroad.io)
 - `SERVER_USER` — SSH user with permission to write to `/opt/blackroad` and restart `blackroad-api`
 - `SSH_KEY` — private key **text** (RSA/ED25519). Use `SSH_KEY_PATH` instead if you prefer a file path.

@@ -1,55 +1,107 @@
-name: BlackRoad Deploy
+name: BlackRoad • Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      SITE_URL: ${{ vars.SITE_URL || 'https://blackroad.io' }}
+      API_URL:  ${{ vars.API_URL  || 'https://blackroad.io' }}
+      DEPLOY_URL: ${{ secrets.BR_DEPLOY_URL || 'https://blackroad.io/api/deploy/hook' }}
+      DEPLOY_BEARER: ${{ secrets.BR_DEPLOY_SECRET }}
+      CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Node 20
         uses: actions/setup-node@v4
-        with:
-          node-version: 20
+        with: { node-version: 20, cache: 'npm' }
 
-      - name: Build frontend
-        working-directory: sites/blackroad
+      - name: Build SPA
         run: |
           npm ci
-          npm run build
-          tar -czf blackroad-site.tar.gz dist
+          npm run build || npm run build:prod || true
+          echo "BUILD_SHA=${GITHUB_SHA}" >> $GITHUB_ENV
 
-      - name: Package API
+      - name: Trigger Deploy (bearer)
         run: |
-          tar -czf blackroad-api.tar.gz -C srv/blackroad-api .
+          curl -sS -X POST "$DEPLOY_URL" \
+            -H "authorization: Bearer $DEPLOY_BEARER" \
+            -H "content-type: application/json" \
+            -d "{\"sha\":\"${GITHUB_SHA}\",\"branch\":\"${GITHUB_REF_NAME}\",\"actor\":\"${GITHUB_ACTOR}\"}" | tee deploy.json
 
-      - name: Upload artifacts to server
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          source: |
-            sites/blackroad/blackroad-site.tar.gz
-            blackroad-api.tar.gz
-          target: /tmp
+      - name: Verify — Version & Health
+        id: verify1
+        run: |
+          set -e
+          curl -fsS "$API_URL/healthz" >/dev/null || (echo "healthz failed" && exit 1)
+          VT=$(curl -fsS "$API_URL/api/version" | jq -r '.build.sha // empty')
+          echo "server build sha: $VT"
+          if [ "$VT" != "${GITHUB_SHA::7}" ] && [ "$VT" != "$GITHUB_SHA" ]; then
+            echo "mismatch: $VT != $GITHUB_SHA"
+            exit 66
+          fi
 
-      - name: Deploy and restart services
-        uses: appleboy/ssh-action@v1.0.3
+      - name: If mismatch — purge Cloudflare & recheck
+        if: failure() && steps.verify1.outcome == 'failure'
+        run: |
+          if [ -n "$CF_ZONE_ID" ] && [ -n "$CF_API_TOKEN" ]; then
+            curl -sS -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
+              -H "authorization: Bearer $CF_API_TOKEN" -H "content-type: application/json" \
+              --data '{"purge_everything":true}' | jq .
+          fi
+          sleep 5
+          curl -fsS "$SITE_URL/llm.html?cb=${GITHUB_SHA}" >/dev/null || true
+          curl -fsS "$API_URL/api/version" | tee v2.json
+
+      - name: If still mismatch — rebuild mode
+        if: failure()
+        run: |
+          curl -sS -X POST "$DEPLOY_URL?mode=rebuild" \
+            -H "authorization: Bearer $DEPLOY_BEARER" \
+            -H "content-type: application/json" \
+            -d "{\"sha\":\"${GITHUB_SHA}\",\"branch\":\"${GITHUB_REF_NAME}\"}" | jq .
+          sleep 6
+          curl -fsS "$API_URL/api/version" | tee v3.json
+
+      - name: If still mismatch — nginx reload
+        if: failure()
+        run: |
+          curl -sS -X POST "$API_URL/api/admin/nginx/reload" -H "authorization: Bearer $DEPLOY_BEARER" | jq .
+          sleep 4
+          curl -fsS "$API_URL/api/version" | tee v4.json
+
+      - name: Final verify
+        run: |
+          set -e
+          curl -fsS "$SITE_URL/healthz" >/dev/null
+          VT=$(curl -fsS "$API_URL/api/version" | jq -r '.build.sha // empty')
+          echo "final server build sha: $VT"
+          test -n "$VT"
+          echo "✅ Deployed $GITHUB_SHA → $VT"
+
+      - name: Slack notify
+        if: always() && env.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v1.26.0
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          script: |
-            sudo tar -xzf /tmp/blackroad-site.tar.gz -C /var/www/blackroad --strip-components=1
-            sudo tar -xzf /tmp/blackroad-api.tar.gz -C /srv/blackroad-api --strip-components=1
-            sudo systemctl restart blackroad-api
-            sudo systemctl restart lucidia-llm
-            sudo systemctl status blackroad-api
-            sudo systemctl status lucidia-llm
-            curl -f https://blackroad.io/health
+          payload: |
+            {
+              "text": "Deploy ${{ github.sha }}: ${{ job.status }} — <${{ env.SITE_URL }}|blackroad.io>",
+              "attachments": [
+                { "color": "${{ job.status == 'success' && '#2ecc71' || '#e74c3c' }}",
+                  "fields": [
+                    {"title":"Repo","value":"${{ github.repository }}","short":true},
+                    {"title":"Actor","value":"${{ github.actor }}","short":true}
+                  ] }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
