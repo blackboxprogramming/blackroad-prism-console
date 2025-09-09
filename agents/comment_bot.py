@@ -1,17 +1,43 @@
-"""Post comments to GitHub issues and pull requests.
+"""Post comments to GitHub issues and pull requests with retry logic.
 
 This module provides a small helper class that uses the GitHub REST API to
 create issue or pull request comments. If a token is not supplied explicitly,
-the ``GITHUB_TOKEN`` environment variable is used.
+the ``GITHUB_TOKEN`` environment variable is used. Requests are retried for
+transient failures.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import os
+import time
+from dataclasses import dataclass
 from typing import Optional
 
 import requests
+
+
+def post_with_retry(url, json, headers, timeout: int = 10, max_retries: int = 3):
+    """POST request with retry for transient errors."""
+    response = None
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, json=json, headers=headers, timeout=timeout)
+            response.raise_for_status()
+            return response
+        except (requests.ConnectionError, requests.Timeout):
+            if attempt < max_retries - 1:
+                time.sleep(2**attempt)
+                continue
+            raise
+        except requests.HTTPError:
+            if (
+                response is not None
+                and response.status_code in {502, 503, 504}
+                and attempt < max_retries - 1
+            ):
+                time.sleep(2**attempt)
+                continue
+            raise
 
 
 @dataclass
@@ -48,19 +74,16 @@ class CommentBot:
         if not self.token:
             raise RuntimeError("A GitHub token is required to post comments.")
 
-        url = (
-            f"https://api.github.com/repos/{self.repo}/issues/{issue_number}/comments"
-        )
+        url = f"https://api.github.com/repos/{self.repo}/issues/{issue_number}/comments"
         headers = {
             "Authorization": f"token {self.token}",
             "Accept": "application/vnd.github+json",
             "Content-Type": "application/json",
         }
         payload = {"body": body}
-        response = requests.post(url, json=payload, headers=headers, timeout=10)
-        response.raise_for_status()
+        response = post_with_retry(url, payload, headers)
         return response.json()
 
 
 if __name__ == "__main__":
-    print("CommentBot ready to post comments.")
+    print("CommentBot ready to post comments with retry logic.")
