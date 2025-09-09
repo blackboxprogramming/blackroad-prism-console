@@ -1,0 +1,149 @@
+<!doctype html><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BlackRoad • Collab</title>
+<link rel="preconnect" href="/socket.io/" />
+<style>
+  body {
+    margin: 0;
+    background: #0b0b10;
+    color: #e9e9f1;
+    font: 14px system-ui;
+  }
+  header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    background: #0f0f1a;
+    border-bottom: 1px solid #1e1e2f;
+  }
+  .pill {
+    border: 1px solid #24244a;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    background: #141428;
+  }
+  main {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+  .card {
+    background: #131320;
+    border: 1px solid #24244a;
+    border-radius: 12px;
+    padding: 10px;
+  }
+  input,
+  button {
+    border-radius: 10px;
+    border: 1px solid #24244a;
+    background: #10102a;
+    color: #e9e9f1;
+    padding: 8px;
+  }
+  button {
+    cursor: pointer;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    padding: 6px;
+    border-bottom: 1px dashed #24244a;
+  }
+  small {
+    color: #9aa0aa;
+  }
+</style>
+<header>
+  <div class="pill">Collab Presence</div>
+  <a
+    class="pill"
+    href="/voice.html"
+    style="color: #0096ff; text-decoration: none"
+    >Voice Room</a
+  >
+</header>
+<main>
+  <div class="card">
+    <h3>Room</h3>
+    <div style="display: flex; gap: 6px">
+      <input id="room" placeholder="room name" value="blackroad" />
+      <input id="name" placeholder="your name" />
+      <button onclick="join()">Join</button>
+    </div>
+    <h3 style="margin-top: 10px">Teammates</h3>
+    <ul id="peers"></ul>
+  </div>
+  <div class="card">
+    <h3>Focus</h3>
+    <div style="display: flex; gap: 6px; flex-wrap: wrap">
+      <input id="file" placeholder="/path/to/file.py" style="flex: 1" />
+      <input id="func" placeholder="function name (optional)" style="flex: 1" />
+      <button onclick="setFocus()">Set Focus</button>
+      <button onclick="helpOn()">Help</button>
+      <button onclick="helpOff()">All Good</button>
+    </div>
+    <pre id="focus" style="margin-top: 10px; white-space: pre-wrap"></pre>
+  </div>
+</main>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  let sock,
+    color =
+      '#' +
+      Math.floor(Math.random() * 0xffffff)
+        .toString(16)
+        .padStart(6, '0');
+  function el(id) {
+    return document.getElementById(id);
+  }
+  function join() {
+    sock = io('/collab', { path: '/socket.io' });
+    const user = {
+      id: crypto.randomUUID(),
+      name: el('name').value || 'anon',
+      color,
+    };
+    sock.emit('join', { user, room: el('room').value, file: el('file').value });
+    sock.on('presence:list', (arr) => {
+      el('peers').innerHTML = arr
+        .map(
+          (p) =>
+            `<li><b style="color:${p.color}">●</b> ${p.name} <small>${p.file || ''}</small></li>`
+        )
+        .join('');
+    });
+    sock.on('focus:now', (f) => {
+      el('focus').textContent = `FOCUS:\n${f.file || ''}\n${f.func || ''}`;
+    });
+    sock.on('help', (h) => {
+      if (h.on) document.body.style.boxShadow = 'inset 0 0 0 3px #00ffff';
+      else document.body.style.boxShadow = 'none';
+    });
+    // fake cursor watcher
+    document.addEventListener('mousemove', (e) => {
+      if (!sock) return;
+      sock.emit('presence', {
+        file: el('file').value,
+        cursor: { line: 0, col: e.clientX },
+      });
+    });
+  }
+  function setFocus() {
+    if (!sock) return;
+    sock.emit('focus', { file: el('file').value, func: el('func').value });
+  }
+  function helpOn() {
+    if (sock) sock.emit('help', { on: true });
+  }
+  function helpOff() {
+    if (sock) sock.emit('help', { on: false });
+  }
+</script>
