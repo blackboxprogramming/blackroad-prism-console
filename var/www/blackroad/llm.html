@@ -1,0 +1,111 @@
+<!-- FILE: /var/www/blackroad/llm.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Lucidia LLM</title>
+  <style>
+    body{font-family:sans-serif;background:#0b1324;color:#fff;margin:20px;}
+    .pill{display:inline-block;padding:4px 8px;border-radius:12px;margin-right:6px;font-size:12px;}
+    .pill.green{background:#008C76;}
+    .pill.amber{background:#FDBA2D;color:#000;}
+    textarea{width:100%;min-height:80px;background:#09122a;color:#fff;border:1px solid #444;border-radius:8px;padding:8px;}
+    #messages{max-height:300px;overflow:auto;border:1px solid #444;border-radius:8px;padding:8px;margin-top:10px;white-space:pre-wrap;}
+  </style>
+</head>
+<body>
+  <div id="pills">
+    <span id="health" class="pill amber">offline</span>
+    <span id="self" class="pill amber" title="self">self: unknown</span>
+  </div>
+  <div id="messages"></div>
+  <div style="margin-top:10px;display:flex;align-items:center;gap:6px;">
+    <label class="pill" style="cursor:pointer;">
+      <input type="checkbox" id="streamToggle" checked /> Stream
+    </label>
+    <button id="sendBtn">Send</button>
+  </div>
+  <textarea id="input" placeholder="Say something..."></textarea>
+  <div id="snapshot" style="position:fixed;bottom:5px;left:5px;font-size:12px;color:#ccc"></div>
+<script>
+async function updateHealth(){
+  try{
+    const r=await fetch('/api/llm/health');
+    const j=await r.json();
+    const el=document.getElementById('health');
+    if(j.ok){el.textContent='online';el.className='pill green';}
+    else{el.textContent='offline';el.className='pill amber';}
+  }catch(e){const el=document.getElementById('health');el.textContent='offline';el.className='pill amber';}
+}
+async function updateSelf(){
+  try{
+    const r=await fetch('/api/codex/identity');
+    const j=await r.json();
+    const el=document.getElementById('self');
+    const today=new Date().toISOString().slice(0,10).replace(/-/g,'');
+    const ok=j.code && j.code.startsWith('LUCIDIA-AWAKEN-'+today);
+    el.textContent=ok?'self: verified':'self: unknown';
+    el.className='pill '+(ok?'green':'amber');
+    el.title=j.host+' • '+j.model;
+  }catch(e){const el=document.getElementById('self');el.textContent='self: unknown';el.className='pill amber';}
+}
+async function updateSnapshot(){
+  try{
+    const r=await fetch('/api/backups/last');
+    const j=await r.json();
+    document.getElementById('snapshot').textContent='last snapshot: '+(j.time||'never');
+  }catch(e){document.getElementById('snapshot').textContent='last snapshot: n/a';}
+}
+updateHealth();updateSelf();updateSnapshot();
+setInterval(updateHealth,15000);setInterval(updateSelf,60000);
+const messagesEl=document.getElementById('messages');
+function addMessage(role,content){
+  const div=document.createElement('div');
+  div.innerHTML='<div class="pill">'+role+'</div>'+content;
+  messagesEl.appendChild(div);messagesEl.scrollTop=messagesEl.scrollHeight;
+}
+async function send(){
+  const input=document.getElementById('input');
+  const text=input.value.trim();
+  if(!text) return;input.value='';
+  addMessage('user',text);
+  const stream=document.getElementById('streamToggle').checked;
+  const body={messages:[{role:'user',content:text}]};
+  if(stream){
+    try{
+      const res=await fetch('/api/llm/stream',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+      const reader=res.body.getReader();
+      const decoder=new TextDecoder();
+      let buf='';
+      let bot='';
+      addMessage('assistant','');
+      const last=messagesEl.lastChild;
+      while(true){
+        const {value,done}=await reader.read();
+        if(done) break;
+        buf+=decoder.decode(value,{stream:true});
+        const parts=buf.split('\n\n');
+        for(let i=0;i<parts.length-1;i++){
+          const line=parts[i].trim();
+          if(line.startsWith('data: ')){
+            const data=JSON.parse(line.slice(6));
+            if(data.delta){bot+=data.delta;last.innerHTML='<div class="pill">assistant</div>'+bot;}
+            if(data.done){return;}
+          }
+        }
+        buf=parts[parts.length-1];
+      }
+    }catch(e){return fallback(body,text);}
+  }else{await fallback(body,text);}
+}
+async function fallback(body,original){
+  try{
+    const r=await fetch('/api/llm/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+    const j=await r.json();
+    addMessage('assistant',j.choices[0].message.content);
+  }catch(e){addMessage('assistant',original);}
+}
+document.getElementById('sendBtn').onclick=send;
+</script>
+</body>
+</html>
