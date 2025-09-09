@@ -15,3 +15,24 @@ On the server you can run:
 scripts/nginx-ensure-and-health.sh
 scripts/nginx-enable-tls.sh   # optional TLS helper
 ```
+
+## Cleanup broom
+
+`usr/local/sbin/br-cleanup.sh` audits the API, Yjs, bridges, nginx, IPFS, and more. It defaults to a read-only `audit` mode and can also `fix` or `prune`.
+
+```sh
+sudo br-cleanup.sh audit | tee /srv/ops/cleanup-audit.txt
+sudo br-cleanup.sh fix   | tee /srv/ops/cleanup-fix.txt
+sudo br-cleanup.sh prune | tee /srv/ops/cleanup-prune.txt
+```
+
+To run nightly, install the service and timer from `etc/systemd/system/` and reload systemd:
+
+```sh
+sudo cp etc/systemd/system/br-cleanup-nightly.* /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now br-cleanup-nightly.timer
+```
+
+An optional sudoers snippet is in `etc/sudoers.d/br-cleanup`.
+
