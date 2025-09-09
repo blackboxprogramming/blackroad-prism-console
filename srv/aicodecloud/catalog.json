@@ -1,0 +1,5 @@
+{
+  "python": ["numpy", "pandas", "tensorflow"],
+  "java": ["spring", "hibernate"],
+  "javascript": ["react", "tailwind"]
+}

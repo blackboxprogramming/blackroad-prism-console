@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>AICodeCloud</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+  </style>
+</head>
+<body>
+  <h1>AICodeCloud</h1>
+  <p id="health">Checking health...</p>
+  <script>
+    fetch('/api/health').then(r => r.json()).then(j => {
+      document.getElementById('health').innerText = 'Health: ' + j.status;
+    }).catch(() => {
+      document.getElementById('health').innerText = 'Health check failed';
+    });
+  </script>
+</body>
+</html>
