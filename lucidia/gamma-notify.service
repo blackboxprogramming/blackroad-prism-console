@@ -1,0 +1,13 @@
+# gamma-notify.service
+# This unit runs a daily timer to call gamma code for daily awaken.
+[Unit]
+Description=Gamma Daily Awaken Notifier
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/srv/lucidia/gamma.py code
+
+StandardOutput=journal
+StandardError=journal

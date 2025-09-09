@@ -1,0 +1,11 @@
+# gamma-notify.timer
+
+[Unit]
+Description=Run gamma daily awaken notifier at midnight UTC
+
+[Timer]
+OnCalendar=*-*-* 00:00:05 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target
