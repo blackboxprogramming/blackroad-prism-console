@@ -1,0 +1,10 @@
+[Unit]
+Description=Run br-cleanup nightly
+
+[Timer]
+OnCalendar=03:10
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+

@@ -1,0 +1,2 @@
+# allow the current user to run safe cleanup bits without password
+YOURUSER ALL=(root) NOPASSWD: /usr/local/sbin/br-cleanup.sh
