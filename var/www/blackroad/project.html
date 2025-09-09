@@ -53,5 +53,21 @@
     <div id="tabs"></div>
     <div id="editor"></div>
   </div>
+  <div class="card" style="grid-column: 1 / -1">
+    <h3>Jobs</h3>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+      <button onclick="startJob('test')">Run Tests</button>
+      <button onclick="startJob('build')">Build</button>
+      <button onclick="startJob('deploy')">Deploy</button>
+      <input id="customCmd" placeholder="custom bash (optional)" style="flex:1">
+      <button onclick="startCustom()">Start Custom</button>
+    </div>
+    <div id="jobStatus" class="row" style="gap:8px;align-items:center">
+      <div class="pill" id="jid">job: —</div>
+      <div class="pill" id="jstate">state: —</div>
+      <div class="pill" id="jprog">progress: 0%</div>
+    </div>
+    <pre id="log" style="height:220px;overflow:auto;background:#10102a;border:1px solid #24244a;border-radius:12px;padding:10px;white-space:pre-wrap"></pre>
+  </div>
 </main>
 <script type="module" src="/lib/project-rooms.js"></script>

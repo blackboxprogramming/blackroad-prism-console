@@ -7,6 +7,9 @@ const $ = id => document.getElementById(id);
 let KEY = localStorage.getItem('br_origin_key') || '';
 let currentProject = null;
 let tabs = []; // { path, doc, ytext, provider, editorModel }
+let autosaveTimers = new Map(); // path -> timer
+const AUTOSAVE_MS = 2000;
+const PENDING = JSON.parse(localStorage.getItem('br_autosave_pending')||'{}'); // offline queue
 
 function api(path, opts={}){
   opts.headers = Object.assign({'X-BlackRoad-Key': KEY}, opts.headers||{});
@@ -82,11 +85,41 @@ async function openFile(path){
   const model = monaco.editor.createModel('', detectLanguage(path));
   const binding = new MonacoBinding(ytext, model, new Set([editor]), provider.awareness);
 
+  // AUTOSAVE: watch ytext and throttle PUT
+  ytext.observe(()=> {
+    // queue to local pending buffer (best-effort)
+    PENDING[`${currentProject}:${path}`] = ytext.toString();
+    localStorage.setItem('br_autosave_pending', JSON.stringify(PENDING));
+    if (autosaveTimers.has(path)) clearTimeout(autosaveTimers.get(path));
+    autosaveTimers.set(path, setTimeout(()=> pushAutosave(path), AUTOSAVE_MS));
+    $('hint').textContent = '…autosaving';
+  });
+
   // Track tab
   const tab = { path, doc, ytext, provider, editorModel: model, binding };
   tabs.push(tab);
   addTab(path, model);
   monaco.editor.setModel(model);
+}
+
+async function pushAutosave(path){
+  const key = `${currentProject}:${path}`;
+  const text = PENDING[key];
+  if (text==null) return;
+  try{
+    const r = await api(`/api/projects/${encodeURIComponent(currentProject)}/file?path=${encodeURIComponent(path)}`, {
+      method:'PUT', body: text
+    });
+    if (r.ok){
+      delete PENDING[key];
+      localStorage.setItem('br_autosave_pending', JSON.stringify(PENDING));
+      $('hint').textContent = 'Saved.';
+    } else {
+      $('hint').textContent = 'Autosave failed (will retry).';
+    }
+  }catch{
+    $('hint').textContent = 'Offline (autosave queued).';
+  }
 }
 
 function detectLanguage(p){
@@ -141,4 +174,40 @@ let editor;
 (function boot(){
   editor = monaco.editor.create($('editor'), { value:'', language:'javascript', theme:'vs-dark', minimap:{enabled:false}, automaticLayout:true });
   listProjects();
+  // retry queued autosaves
+  setTimeout(async ()=>{
+    for (const k of Object.keys(PENDING)){
+      const [proj, ...rest] = k.split(':'); const p = rest.join(':');
+      if (proj === currentProject){ await pushAutosave(p); }
+    }
+  }, 1000);
 })();
+
+// === Jobs client ===
+async function startJob(kind){
+  if (!currentProject){ $('hint').textContent = 'Open a project first.'; return; }
+  const r = await api('/api/jobs/start', {method:'POST', headers:{'content-type':'application/json'},
+               body: JSON.stringify({project: currentProject, kind})});
+  const j = await r.json(); if (!j.job_id){ $('hint').textContent='job failed to start'; return; }
+  attachJob(j.job_id);
+}
+async function startCustom(){
+  const script = $('customCmd').value.trim(); if(!script) return;
+  const r = await api('/api/jobs/start', {method:'POST', headers:{'content-type':'application/json'},
+               body: JSON.stringify({project: currentProject, kind:'custom', script})});
+  const j = await r.json(); if (j.job_id) attachJob(j.job_id);
+}
+function attachJob(id){
+  $('jid').textContent = 'job: '+id;
+  $('jstate').textContent = 'state: starting';
+  $('jprog').textContent = 'progress: 0%';
+  $('log').textContent = '';
+  const es = new EventSource('/api/jobs/'+encodeURIComponent(id)+'/events');
+  es.addEventListener('log', ev=> { $('log').textContent += ev.data; $('log').scrollTop = $('log').scrollHeight; });
+  es.addEventListener('progress', ev=> {
+    try{ const p = JSON.parse(ev.data).progress || 0; $('jprog').textContent = 'progress: '+Math.round(p*100)+'%'; }catch{}
+  });
+  es.addEventListener('state', ev=> {
+    try{ const s = JSON.parse(ev.data).status || 'running'; $('jstate').textContent = 'state: '+s; if (s!=='running') es.close(); }catch{}
+  });
+}

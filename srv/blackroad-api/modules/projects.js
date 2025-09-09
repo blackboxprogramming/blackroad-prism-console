@@ -171,42 +171,14 @@ module.exports = function attachProjects({ app }) {
     });
   });
 
-  app.post('/api/projects/:id/deploy', guard, (req,res)=>{
-    const id=slugify(req.params.id); const root=j(BASE,id);
-    if (!fs.existsSync(root)) return bad(res,404,'not_found');
-    let buf=''; req.on('data',d=>buf+=d); req.on('end', ()=>{
-      let body={}; try{ body=JSON.parse(buf||'{}'); }catch{}
-      const dest = j(DEPLOY_ROOT, id);
-      (async ()=>{
-        await sendLED({type:'led.progress', pct:10, ttl_s:180});
-        // If scripts/deploy.sh exists, run it; else static copy from /public
-        const script = j(root, 'scripts/deploy.sh');
-        if (fs.existsSync(script)) {
-          const p = spawn('/bin/bash', ['-lc', 'chmod +x scripts/deploy.sh && scripts/deploy.sh'], { cwd: root });
-          p.on('close', async code=>{
-            await sendLED({type: code===0?'led.celebrate':'led.emotion', emotion: code===0?undefined:'error', ttl_s:20});
-          });
-        } else {
-          // default static deploy: copy /public -> /var/www/blackroad/apps/<id>/
-          fs.mkdirSync(dest, { recursive: true });
-          copyDir(j(root,'public'), dest);
-          await sendLED({type:'led.progress', pct:90, ttl_s:60});
-          await sendLED({type:'led.celebrate', ttl_s:20});
-        }
-        ok(res,{ ok:true, deployed_to: dest });
-      })().catch(e=> bad(res,500,String(e)));
-    });
+  app.post('/api/projects/:id/deploy', guard, async (req,res)=>{
+    try{
+      const id = slugify(req.params.id);
+      if (!fs.existsSync(j(BASE, id))) return bad(res,404,'not_found');
+      const job_id = await app.locals.jobs.start({ project: id, kind:'deploy' });
+      ok(res,{ ok:true, job_id });
+    }catch(e){ bad(res,500,String(e)); }
   });
-
-  function copyDir(src, dst) {
-    if (!fs.existsSync(src)) return;
-    for (const name of fs.readdirSync(src)) {
-      const s = j(src,name), d = j(dst,name);
-      const st = fs.statSync(s);
-      if (st.isDirectory()) { fs.mkdirSync(d,{recursive:true}); copyDir(s,d); }
-      else fs.copyFileSync(s,d);
-    }
-  }
 
   console.log('[projects] mounted at /api/projects  BASE=', BASE);
 };
