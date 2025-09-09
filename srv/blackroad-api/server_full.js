@@ -743,6 +743,8 @@ app.post('/api/actions/mint', requireAuth, (req, res) => {
   res.json({ ok: true, minted: Number(req.body?.amount || 1), tx: 'rc_' + Math.random().toString(36).slice(2, 10) });
 });
 
+require('./modules/yjs_callback')({ app });
+
 // --- Socket.IO presence (metrics)
 io.on('connection', (socket) => {
   socket.emit('hello', { ok: true, t: Date.now() });

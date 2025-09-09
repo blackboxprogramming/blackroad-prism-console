@@ -1,0 +1,18 @@
+[Unit]
+Description=Yjs WebSocket (CRDT) Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/srv/yjs-server
+Environment=HOST=127.0.0.1
+Environment=PORT=12345
+Environment=YPERSISTENCE=/srv/yjs-db
+Environment=CALLBACK_URL=http://127.0.0.1:4000/api/collab/yjs-callback
+ExecStart=/usr/bin/node ./node_modules/y-websocket/bin/server.js
+Restart=always
+RestartSec=1
+User=root
+
+[Install]
+WantedBy=multi-user.target
