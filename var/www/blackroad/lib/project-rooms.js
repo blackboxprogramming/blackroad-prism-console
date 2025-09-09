@@ -120,9 +120,36 @@ async function commit(){
   $('hint').textContent = 'Committed.';
 }
 
-async function deploy(){
-  const r = await api(`/api/projects/${encodeURIComponent(currentProject)}/deploy`, {method:'POST'});
-  $('hint').textContent = 'Deploy requested.';
+async function startJob(kind){
+  if(!currentProject) return;
+  const r = await fetch('/api/jobs/start', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({project: currentProject, kind})
+  });
+  const j = await r.json().catch(()=>({}));
+  if(j.job_id) attachJob(j.job_id);
+}
+
+function attachJob(id){
+  const es = new EventSource('/api/jobs/'+encodeURIComponent(id)+'/events');
+  $('log').textContent='';
+  $('jstate').textContent='state: running';
+  es.addEventListener('log', ev=> { $('log').textContent += ev.data; $('log').scrollTop = $('log').scrollHeight; });
+  es.addEventListener('progress', ev=> {
+    try{ const p = JSON.parse(ev.data).progress||0; $('jstate').textContent = 'state: running '+Math.round(p*100)+'%'; }catch{}
+  });
+  es.addEventListener('state', ev=> {
+    try{ const s = JSON.parse(ev.data).status || 'running'; $('jstate').textContent = 'state: '+s; if(s!=='running') es.close(); }catch{}
+  });
+  es.addEventListener('stage', ev=> {
+    try{ const j = JSON.parse(ev.data); $('log').textContent += `\n[stage ${j.index}/${j.total}] ${j.name} ${j.status}\n`; $('log').scrollTop = $('log').scrollHeight; }catch{}
+  });
+  window._currentJobId = id;
+}
+
+async function cancelJob(){
+  const id = window._currentJobId; if(!id) return;
+  await fetch('/api/jobs/'+encodeURIComponent(id)+'/cancel', {method:'POST'});
 }
 
 async function mkfile(){

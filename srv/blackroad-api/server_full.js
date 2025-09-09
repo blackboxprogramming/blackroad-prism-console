@@ -166,6 +166,7 @@ require('./modules/partner_relay_mtls')({ app });
 require('./modules/projects')({ app });
 require('./modules/pr_proxy')({ app });
 require('./modules/patentnet')({ app });
+require('./modules/jobs')({ app });
 
 const emitter = new EventEmitter();
 const jobs = new Map();
@@ -699,24 +700,7 @@ app.post('/api/git/sync', (req, res) => {
   res.json({ ok: true });
 });
 
-app.get('/api/jobs', (req, res) => {
-  res.json(Array.from(jobs.values()).reverse());
-});
-
-app.get('/api/jobs/:id/log', (req, res) => {
-  const { id } = req.params;
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  const send = (line) => {
-    if (line === null) return res.write('event: end\n\n');
-    res.write(`data: ${line}\n\n`);
-  };
-  const listener = (l) => send(l);
-  emitter.on(id, listener);
-  const job = jobs.get(id);
-  if (job) job.logs.forEach(send);
-  req.on('close', () => emitter.removeListener(id, listener));
-});
+// legacy job log endpoints replaced by modules/jobs
 
 app.post('/api/rollback/:releaseId', (req, res) => {
   if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();

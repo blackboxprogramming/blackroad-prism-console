@@ -44,10 +44,16 @@
       <input id="msg" placeholder="commit message" style="flex:1">
       <button onclick="saveFile()">Save</button>
       <button onclick="commit()">Commit</button>
-      <button onclick="deploy()">Deploy</button>
+      <button onclick="startJob('deploy')">Deploy</button>
+      <button onclick="startJob('pipeline')">Run Pipeline</button>
+      <button onclick="cancelJob()">Cancel</button>
       <button onclick="setKey()">Key</button>
     </div>
     <small id="hint"></small>
+    <div id="job" style="margin-top:8px">
+      <div id="jstate"></div>
+      <pre id="log" style="max-height:150px;overflow:auto;background:#000;padding:6px;border-radius:6px"></pre>
+    </div>
   </div>
   <div class="card">
     <div id="tabs"></div>
