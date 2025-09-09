@@ -1,0 +1,6 @@
+[Unit]
+Description=BlackRoad snapshot
+
+[Service]
+Type=oneshot
+ExecStart=/srv/blackroad-backups/snapshot_now.sh

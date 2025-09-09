@@ -1,0 +1,11 @@
+[Unit]
+Description=Ollama Bridge
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node /srv/ollama-bridge/server.js
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+[Unit]
+Description=Nightly snapshot
+
+[Timer]
+OnCalendar=*-*-* 03:33:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

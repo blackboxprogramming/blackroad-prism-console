@@ -1,0 +1,6 @@
+[Unit]
+Description=BlackRoad identity ping
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/identity_ping.sh
