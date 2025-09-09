@@ -1,0 +1,7 @@
+# One host per line; supports user@host. Examples:
+root@10.0.0.21
+ubuntu@10.0.0.22
+jetson@10.0.0.23
+pi@10.0.0.24
+# ... add the remaining up to 44 hosts
+
