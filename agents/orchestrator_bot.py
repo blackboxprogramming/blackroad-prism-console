@@ -1,7 +1,7 @@
-"""Athena orchestrates agents and maintains the shared workboard.
+"""Athena orchestrates agent workflows and updates a shared workboard.
 
-This module provides utilities for running agents while tracking their
-progress. Athena's coordination logic is intentionally open ended so
+It runs build, deploy, and cleanup bots while recording task progress in
+``AGENT_WORKBOARD.md``. The coordination logic is deliberately minimal so
 contributors can extend or delegate responsibilities as the ecosystem
 evolves.
 """
