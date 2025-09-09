@@ -1,4 +1,10 @@
-"""Orchestrator bot for coordinating agents and updating workboard."""
+"""Athena orchestrates agents and maintains the shared workboard.
+
+This module provides utilities for running agents while tracking their
+progress. Athena's coordination logic is intentionally open ended so
+contributors can extend or delegate responsibilities as the ecosystem
+evolves.
+"""
 
 from __future__ import annotations
 
