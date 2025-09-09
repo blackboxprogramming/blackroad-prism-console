@@ -12,6 +12,27 @@ import os
 from typing import Optional
 
 import requests
+import time
+
+
+def post_with_retry(url, json, headers, timeout=10, max_retries=3):
+    """POST request with retry for transient errors."""
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, json=json, headers=headers, timeout=timeout)
+            response.raise_for_status()
+            return response
+        except (requests.ConnectionError, requests.Timeout):
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)
+                continue
+            raise
+        except requests.HTTPError as exc:
+            code = getattr(exc.response, "status_code", None)
+            if code in {502, 503, 504} and attempt < max_retries - 1:
+                time.sleep(2 ** attempt)
+                continue
+            raise
 
 
 @dataclass
@@ -57,10 +78,9 @@ class CommentBot:
             "Content-Type": "application/json",
         }
         payload = {"body": body}
-        response = requests.post(url, json=payload, headers=headers, timeout=10)
-        response.raise_for_status()
+        response = post_with_retry(url, payload, headers)
         return response.json()
 
 
 if __name__ == "__main__":
-    print("CommentBot ready to post comments.")
+    print("CommentBot ready to post comments with retry logic.")
