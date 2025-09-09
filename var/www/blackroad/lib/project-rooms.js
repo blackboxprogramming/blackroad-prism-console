@@ -113,6 +113,13 @@ async function saveFile(){
 }
 
 async function commit(){
+  // Preflight: simple love check (user fills quick sliders later if we add UI)
+  try{
+    const resp = await fetch('/api/love/score', {method:'POST', headers:{'content-type':'application/json'},
+      body: JSON.stringify({features: {truth:0.8, transparency:0.8, consent:0.8, benefit:0.7, harm:0.1}}) });
+    const j = await resp.json();
+    if (j?.L < 0.35) { $('hint').textContent = `Low love (${(j.L*100|0)}%). Consider revising.`; return; }
+  }catch{}
   const msg = $('msg').value || 'Update';
   const r = await api(`/api/projects/${encodeURIComponent(currentProject)}/commit`, {
     method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({message: msg})

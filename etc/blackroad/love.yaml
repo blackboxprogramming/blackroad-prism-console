@@ -1,0 +1,25 @@
+epsilon: 0.0001
+bias: 0.0
+
+weights:
+  positive:
+    truth:        2.0
+    consent:      1.6
+    benefit:      1.4
+    reciprocity:  1.2
+    transparency: 1.0
+    reversibility:0.8
+  negative:
+    harm:         2.2
+    coercion:     2.0
+    scarcity:     0.8
+    deception:    1.4
+
+ranking:
+  tau_seconds: 172800        # ~2 days half-life-ish (adjust)
+  attest_gamma: 0.5          # weight for log(1+a)
+led:
+  low:    [180, 40, 40]      # reddish for low-L
+  mid:    [230,170, 40]      # amber
+  high:   [ 20,170, 80]      # green
+  celebrate_threshold: 0.85
