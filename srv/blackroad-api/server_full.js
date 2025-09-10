@@ -166,6 +166,8 @@ require('./modules/partner_relay_mtls')({ app });
 require('./modules/projects')({ app });
 require('./modules/pr_proxy')({ app });
 require('./modules/patentnet')({ app });
+// Mount project-specific job runner under a separate prefix so the
+// legacy deployment job endpoints at `/api/jobs` continue to work.
 require('./modules/jobs')({ app, prefix: '/api/project-jobs' });
 
 const emitter = new EventEmitter();
