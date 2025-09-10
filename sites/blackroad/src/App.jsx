@@ -19,6 +19,10 @@ import QuatJuliaLab from "./pages/QuatJuliaLab.jsx";
 import StableFluidsLab from "./pages/StableFluidsLab.jsx";
 import AutoDiffLab from "./pages/AutoDiffLab.jsx";
 import ConformalGridLab from "./pages/ConformalGridLab.jsx";
+import EikonalLab from "./pages/EikonalLab.jsx";
+import PoissonDiskLab from "./pages/PoissonDiskLab.jsx";
+import LSystemLab from "./pages/LSystemLab.jsx";
+import MinimalSurfaceLab from "./pages/MinimalSurfaceLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -114,6 +118,10 @@ function LegacyApp(){
             <Route path="/fluids" element={<StableFluidsLab/>} />
             <Route path="/autodiff" element={<AutoDiffLab/>} />
             <Route path="/conformal" element={<ConformalGridLab/>} />
+            <Route path="/eikonal" element={<EikonalLab/>} />
+            <Route path="/poisson2" element={<PoissonDiskLab/>} />
+            <Route path="/lsys" element={<LSystemLab/>} />
+            <Route path="/minimal" element={<MinimalSurfaceLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -130,6 +138,10 @@ function LegacyApp(){
             <Route path="fluids" element={<StableFluidsLab/>} />
             <Route path="autodiff" element={<AutoDiffLab/>} />
             <Route path="conformal" element={<ConformalGridLab/>} />
+            <Route path="eikonal" element={<EikonalLab/>} />
+            <Route path="poisson2" element={<PoissonDiskLab/>} />
+            <Route path="lsys" element={<LSystemLab/>} />
+            <Route path="minimal" element={<MinimalSurfaceLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
