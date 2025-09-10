@@ -1,6 +1,7 @@
-from flask import Flask, jsonify
-import time
 import os
+import time
+
+from flask import Flask
 
 app = Flask(__name__)
 _start_time = time.time()
@@ -10,7 +11,7 @@ def _system_state():
     uptime = time.time() - _start_time
     try:
         load1m = os.getloadavg()[0]
-    except OSError:
+    except (AttributeError, OSError):
         load1m = 0.0
     if load1m < 0.5:
         load_state = "calm"
@@ -20,6 +21,7 @@ def _system_state():
         load_state = "stressed"
     try:
         import psutil
+
         mem_percent = psutil.virtual_memory().percent
     except Exception:
         mem_percent = 0.0
