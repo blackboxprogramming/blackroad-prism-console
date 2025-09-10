@@ -175,7 +175,7 @@ module.exports = function attachTrustMath({ app }){
     }catch(e){ res.status(500).json({error:String(e)}) }
   });
 
-  // GET /api/truth/diff?cid=a&cid=b&alpha=1&beta=0.5
+  // GET /api/truth/diff?cid=a&cid2=b&alpha=1&beta=0.5
   app.get('/api/truth/diff', async (req,res)=>{
     try{
       const a = String(req.query.cid||''); const b = String(req.query.cid2||req.query.b||'');
