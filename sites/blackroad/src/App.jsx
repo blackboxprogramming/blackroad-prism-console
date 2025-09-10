@@ -23,6 +23,10 @@ import EikonalLab from "./pages/EikonalLab.jsx";
 import PoissonDiskLab from "./pages/PoissonDiskLab.jsx";
 import LSystemLab from "./pages/LSystemLab.jsx";
 import MinimalSurfaceLab from "./pages/MinimalSurfaceLab.jsx";
+import EigenmapsLab from "./pages/EigenmapsLab.jsx";
+import PoissonBlendLab from "./pages/PoissonBlendLab.jsx";
+import NBodyLab from "./pages/NBodyLab.jsx";
+import WaveletLab from "./pages/WaveletLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -122,6 +126,10 @@ function LegacyApp(){
             <Route path="/poisson2" element={<PoissonDiskLab/>} />
             <Route path="/lsys" element={<LSystemLab/>} />
             <Route path="/minimal" element={<MinimalSurfaceLab/>} />
+            <Route path="/eigenmaps" element={<EigenmapsLab/>} />
+            <Route path="/blend" element={<PoissonBlendLab/>} />
+            <Route path="/nbody" element={<NBodyLab/>} />
+            <Route path="/wavelet" element={<WaveletLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -142,6 +150,10 @@ function LegacyApp(){
             <Route path="poisson2" element={<PoissonDiskLab/>} />
             <Route path="lsys" element={<LSystemLab/>} />
             <Route path="minimal" element={<MinimalSurfaceLab/>} />
+            <Route path="eigenmaps" element={<EigenmapsLab/>} />
+            <Route path="blend" element={<PoissonBlendLab/>} />
+            <Route path="nbody" element={<NBodyLab/>} />
+            <Route path="wavelet" element={<WaveletLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
