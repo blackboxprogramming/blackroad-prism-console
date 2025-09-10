@@ -50,10 +50,10 @@ function Window({ id, title, layout, setLayout, children }) {
       <div
         className="flex flex-col h-full bg-white border shadow-lg"
         role="dialog"
-        aria-label={title}
+        aria-labelledby={`${id}-title`}
       >
         <div className="flex items-center justify-between bg-neutral-800 text-white px-2 py-1 cursor-move">
-          <span className="text-sm flex items-center gap-1">
+          <span id={`${id}-title`} className="text-sm flex items-center gap-1">
             <span className="text-green-400">●</span>
             {title}
           </span>
