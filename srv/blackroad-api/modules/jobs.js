@@ -190,6 +190,7 @@ async function wireChild(job_id, child, onClose) {
 // db + sse helpers
 const d = db();
 async function appendEvent(job_id, type, data) {
+  // calculate seq inside the INSERT to avoid race conditions
   await run(
     d,
     `INSERT INTO job_events (job_id,seq,ts,type,data)
