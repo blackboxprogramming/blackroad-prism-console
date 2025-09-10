@@ -1,0 +1,137 @@
+<!--
+  FILE: /var/www/blackroad/operator.html
+  Purpose: Flag-gated Operator + RPA (no-exec) UI
+  Shows status, plans tasks with /api/operator/plan, and validates RPA steps with /api/operator/rpa/dry-run
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BlackRoad • Operator</title>
+  <style>
+    :root{
+      --bg:#0b0b10; --panel:#12121a; --muted:#8b8ca3;
+      --text:#e9e9f1; --accent:#FF4FD8; --accent2:#0096FF; --accent3:#FDBA2D;
+      --ok:#19c37d; --warn:#f3b71b; --err:#ff6b6b;
+    }
+    body{margin:0;background:linear-gradient(180deg,#0b0b10,#0f0f16);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+    .wrap{max-width:1100px;margin:1rem auto;padding:0 1rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    @media (max-width:980px){.wrap{grid-template-columns:1fr}}
+    .card{background:var(--panel);border:1px solid #1b1b26;border-radius:16px;padding:1rem}
+    .row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+    input,textarea,button{background:#0a0a12;color:var(--text);border:1px solid #222336;border-radius:12px;padding:.55rem .7rem}
+    button{cursor:pointer}
+    button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));border:0}
+    pre{white-space:pre-wrap}
+    .pill{padding:.25rem .6rem;border-radius:999px;border:1px solid #252536;font-size:.85rem;color:var(--muted)}
+    .pill.ok{color:var(--ok);border-color:rgba(25,195,125,.35)}
+    .pill.err{color:var(--err);border-color:rgba(255,107,107,.35)}
+    .muted{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h3 style="margin:.2rem 0">Operator Status</h3>
+      <div id="status" class="muted">checking…</div>
+      <div style="margin-top:.5rem">
+        <span id="op-pill" class="pill">operator</span>
+        <span id="rpa-pill" class="pill">rpa</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:.2rem 0">Plan</h3>
+      <div class="row" style="margin:.5rem 0">
+        <input id="objective" placeholder="Objective…" style="flex:1">
+      </div>
+      <textarea id="context" placeholder="Context (optional)…" style="height:110px;width:100%"></textarea>
+      <div class="row" style="margin-top:.5rem">
+        <button id="plan" class="primary">Plan with Operator</button>
+      </div>
+      <pre id="plan-out" class="muted" style="margin-top:.6rem"></pre>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:.2rem 0">RPA Dry-Run (no execution)</h3>
+      <div class="row" style="margin:.4rem 0">
+        <input id="rpa-url" placeholder="https://example.com" style="flex:1">
+      </div>
+      <textarea id="rpa-actions" placeholder='[{"type":"goto","selector":null},{"type":"wait","seconds":2},{"type":"click","selector":"#login"}]' style="height:110px;width:100%"></textarea>
+      <div class="row" style="margin-top:.5rem">
+        <button id="dryrun" class="primary">Validate Plan</button>
+      </div>
+      <pre id="rpa-out" class="muted" style="margin-top:.6rem"></pre>
+      <div class="muted" style="margin-top:.5rem">Note: host allowlist is enforced; set <code>RPA_ALLOW_HOSTS</code>.</div>
+    </div>
+  </div>
+
+  <script>
+    const $ = s => document.querySelector(s);
+    const statusBox = $("#status");
+    const opPill = $("#op-pill");
+    const rpaPill = $("#rpa-pill");
+    const planOut = $("#plan-out");
+    const rpaOut = $("#rpa-out");
+
+    async function boot() {
+      try {
+        const r = await fetch("/api/operator/status", { cache: "no-store" });
+        const j = await r.json();
+        statusBox.textContent = JSON.stringify(j, null, 2);
+        opPill.className = "pill " + (j.enabled ? "ok" : "err");
+        rpaPill.className = "pill " + (j.rpa_enabled ? "ok" : "err");
+        if (!j.enabled) {
+          planOut.textContent = "Operator disabled. Enable via systemd env: ENABLE_OPERATOR=1";
+        }
+        if (!j.rpa_enabled) {
+          rpaOut.textContent = "RPA disabled. Enable via systemd env: ENABLE_RPA=1";
+        }
+      } catch (e) {
+        statusBox.textContent = "status error: " + String(e);
+        opPill.className = "pill err";
+        rpaPill.className = "pill err";
+      }
+    }
+
+    $("#plan").addEventListener("click", async () => {
+      planOut.textContent = "planning…";
+      try {
+        const r = await fetch("/api/operator/plan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            objective: $("#objective").value,
+            context: $("#context").value
+          })
+        });
+        const j = await r.json();
+        planOut.textContent = JSON.stringify(j, null, 2);
+      } catch (e) {
+        planOut.textContent = "plan error: " + String(e);
+      }
+    });
+
+    $("#dryrun").addEventListener("click", async () => {
+      rpaOut.textContent = "validating…";
+      try {
+        const r = await fetch("/api/operator/rpa/dry-run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            url: $("#rpa-url").value,
+            actions: JSON.parse($("#rpa-actions").value || "[]")
+          })
+        });
+        const j = await r.json();
+        rpaOut.textContent = JSON.stringify(j, null, 2);
+      } catch (e) {
+        rpaOut.textContent = "dry-run error: " + String(e);
+      }
+    });
+
+    boot();
+  </script>
+</body>
+</html>
