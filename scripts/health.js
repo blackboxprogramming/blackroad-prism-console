@@ -1,4 +1,3 @@
-<!-- FILE: scripts/health.js -->
 const http = require('http');
 const port = process.env.PORT || 4000;
 const req = http.request({ hostname: '127.0.0.1', port, path: '/api/health', method: 'GET' }, (res) => {
