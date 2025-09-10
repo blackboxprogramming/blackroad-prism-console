@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 // Verified subpin + device attestation publisher.
-const { create } = require('ipfs-http-client');
 const canonicalize = require('json-canonicalize');
 const bs58 = require('bs58');
 const crypto = require('crypto');
@@ -44,7 +43,7 @@ function verify(o) {
   return true;
 }
 
-const ipfs = create({ url: API });
+let ipfs;
 const ident = ensureIdentity();
 
 async function publishAttestation(cid) {
@@ -62,6 +61,9 @@ async function publishAttestation(cid) {
 }
 
 (async () => {
+  const { create } = await import('ipfs-http-client');
+  ipfs = create({ url: API });
+
   console.log(
     '[subpin-verify] api=%s topic=%s DID=%s allow=%s',
     API,

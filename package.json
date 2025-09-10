@@ -44,7 +44,8 @@
     "ethers": "^6.10.0",
     "bs58": "^5.0.0",
     "json-canonicalize": "^1.0.4",
-    "ipfs-http-client": "^60.0.0"
+    "ipfs-http-client": "^60.0.0",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
