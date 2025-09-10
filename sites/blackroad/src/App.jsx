@@ -12,6 +12,8 @@ import InfinityMath from "./pages/InfinityMath.jsx";
 import Agents from "./pages/Agents.jsx";
 import Desktop from "./pages/Desktop.jsx";
 import QuantumConsciousness from "./pages/QuantumConsciousness.jsx";
+import RandomMatrixLab from "./pages/RandomMatrixLab.jsx";
+import TdaMiniLab from "./pages/TdaMiniLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -100,6 +102,8 @@ function LegacyApp(){
             <Route path="/subscribe" element={<Subscribe/>} />
             <Route path="/lucidia" element={<Lucidia/>} />
             <Route path="/math" element={<InfinityMath/>} />
+            <Route path="/spectral" element={<RandomMatrixLab/>} />
+            <Route path="/tda" element={<TdaMiniLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -109,6 +113,8 @@ function LegacyApp(){
             <Route path="subscribe" element={<Subscribe/>} />
             <Route path="lucidia" element={<Lucidia/>} />
             <Route path="math" element={<InfinityMath/>} />
+            <Route path="spectral" element={<RandomMatrixLab/>} />
+            <Route path="tda" element={<TdaMiniLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
