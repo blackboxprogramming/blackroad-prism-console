@@ -1,4 +1,4 @@
-"""Automated pull request manager for BlackRoad repos."""
+"""Automates pull request management tasks for BlackRoad repositories."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ import requests
 
 @dataclass
 class AutomatedPullRequestManager:
-    """Monitor git events and orchestrate draft pull requests."""
+    """Monitor Git events and orchestrate draft pull requests."""
 
     repo: str
     branch_prefix: str = "codex/"
@@ -29,18 +29,19 @@ class AutomatedPullRequestManager:
         logging.basicConfig(filename=self.log_file, level=logging.INFO)
 
     def monitor_repo(self) -> bool:
-        """Return True if repo has uncommitted changes."""
+        """Return True if the repository has uncommitted changes."""
         result = subprocess.run(
             ["git", "status", "--porcelain"], capture_output=True, text=True, check=False
         )
         return bool(result.stdout.strip())
 
     def prepare_draft_pr(self) -> None:
-        """Create a draft pull request from latest commit."""
+        """Create a draft pull request from the latest commit."""
         commit_msg = subprocess.run(
             ["git", "log", "-1", "--pretty=%s"], capture_output=True, text=True, check=False
         ).stdout.strip()
         branch_name = f"{self.branch_prefix}{int(time.time())}"
+        # Use a timestamp to generate a unique branch name.
         subprocess.run(["git", "checkout", "-b", branch_name], check=False)
         subprocess.run(["git", "push", "-u", "origin", branch_name], check=False)
         diff = subprocess.run(
@@ -52,6 +53,7 @@ class AutomatedPullRequestManager:
         logging.info("Opened draft PR #%s", pr["number"])
 
     def _create_pr(self, title: str, head: str, base: str, body: str) -> dict:
+        """Create a pull request via the GitHub API and return its response."""
         url = f"https://api.github.com/repos/{self.repo}/pulls"
         headers = {"Accept": "application/vnd.github+json"}
         if self.token:
@@ -62,6 +64,7 @@ class AutomatedPullRequestManager:
         return response.json()
 
     def _assign_reviewer(self, pr_number: int) -> None:
+        """Request a review from the default reviewer."""
         url = f"https://api.github.com/repos/{self.repo}/pulls/{pr_number}/requested_reviewers"
         headers = {"Accept": "application/vnd.github+json"}
         if self.token:
@@ -70,7 +73,7 @@ class AutomatedPullRequestManager:
         requests.post(url, json=payload, headers=headers, timeout=10)
 
     def handle_trigger(self, phrase: str) -> None:
-        """React to codex trigger phrases."""
+        """Respond to CODEx trigger phrases and run the matching action."""
         phrase_lower = phrase.lower()
         if "fix comments" in phrase_lower:
             self.apply_comment_fixes()
@@ -80,7 +83,7 @@ class AutomatedPullRequestManager:
             self.log("Merging PR (placeholder)")
 
     def apply_comment_fixes(self) -> None:
-        """Run the Codex comment fixer script."""
+        """Execute the CODEx comment fixer script to update code comments."""
         subprocess.run(
             ["node", ".github/tools/codex-apply.js", ".github/prompts/codex-fix-comments.md"],
             check=False,
@@ -88,7 +91,7 @@ class AutomatedPullRequestManager:
         self.log("Applied comment fixes")
 
     def log(self, message: str) -> None:
-        """Log an arbitrary message to the log file."""
+        """Write a message to the log file."""
         logging.info(message)
 
 
