@@ -58,6 +58,8 @@ async function list(){
   sel.textContent='';
   arr.forEach(x=>{
     const opt=document.createElement('option');
+    // set both value and text via DOM APIs to avoid HTML injection
+    opt.value=x.lens_id;
     opt.textContent=x.lens_id;
     sel.appendChild(opt);
   });
