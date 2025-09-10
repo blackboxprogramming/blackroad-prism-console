@@ -15,6 +15,10 @@ import QuantumConsciousness from "./pages/QuantumConsciousness.jsx";
 import OptimalTransportLab from "./pages/OptimalTransportLab.jsx";
 import BifurcationLab from "./pages/BifurcationLab.jsx";
 import ContinuedFractionsLab from "./pages/ContinuedFractionsLab.jsx";
+import DrumWaveLab from "./pages/DrumWaveLab.jsx";
+import PendulumLab from "./pages/PendulumLab.jsx";
+import PowerJuliaLab from "./pages/PowerJuliaLab.jsx";
+import PenroseToyLab from "./pages/PenroseToyLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -106,6 +110,10 @@ function LegacyApp(){
             <Route path="/ot" element={<OptimalTransportLab/>} />
             <Route path="/bifurcate" element={<BifurcationLab/>} />
             <Route path="/cfrac" element={<ContinuedFractionsLab/>} />
+            <Route path="/drum" element={<DrumWaveLab/>} />
+            <Route path="/pendulum" element={<PendulumLab/>} />
+            <Route path="/pzoo" element={<PowerJuliaLab/>} />
+            <Route path="/penrose" element={<PenroseToyLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -118,6 +126,10 @@ function LegacyApp(){
             <Route path="ot" element={<OptimalTransportLab/>} />
             <Route path="bifurcate" element={<BifurcationLab/>} />
             <Route path="cfrac" element={<ContinuedFractionsLab/>} />
+            <Route path="drum" element={<DrumWaveLab/>} />
+            <Route path="pendulum" element={<PendulumLab/>} />
+            <Route path="pzoo" element={<PowerJuliaLab/>} />
+            <Route path="penrose" element={<PenroseToyLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
