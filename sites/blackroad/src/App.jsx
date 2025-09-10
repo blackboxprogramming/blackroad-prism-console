@@ -15,6 +15,10 @@ import QuantumConsciousness from "./pages/QuantumConsciousness.jsx";
 import OptimalTransportLab from "./pages/OptimalTransportLab.jsx";
 import BifurcationLab from "./pages/BifurcationLab.jsx";
 import ContinuedFractionsLab from "./pages/ContinuedFractionsLab.jsx";
+import DLALab from "./pages/DLALab.jsx";
+import SIRLab from "./pages/SIRLab.jsx";
+import BezierBSplineLab from "./pages/BezierBSplineLab.jsx";
+import SpectralClusteringLab from "./pages/SpectralClusteringLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -106,6 +110,10 @@ function LegacyApp(){
             <Route path="/ot" element={<OptimalTransportLab/>} />
             <Route path="/bifurcate" element={<BifurcationLab/>} />
             <Route path="/cfrac" element={<ContinuedFractionsLab/>} />
+            <Route path="/dla" element={<DLALab/>} />
+            <Route path="/sir" element={<SIRLab/>} />
+            <Route path="/curves" element={<BezierBSplineLab/>} />
+            <Route path="/spec" element={<SpectralClusteringLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -118,6 +126,10 @@ function LegacyApp(){
             <Route path="ot" element={<OptimalTransportLab/>} />
             <Route path="bifurcate" element={<BifurcationLab/>} />
             <Route path="cfrac" element={<ContinuedFractionsLab/>} />
+            <Route path="dla" element={<DLALab/>} />
+            <Route path="sir" element={<SIRLab/>} />
+            <Route path="curves" element={<BezierBSplineLab/>} />
+            <Route path="spec" element={<SpectralClusteringLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
