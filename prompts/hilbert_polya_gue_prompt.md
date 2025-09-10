@@ -5,7 +5,7 @@ Objective:
 1. Retrieve the first N nontrivial zeta zeros (imaginary parts γk) using mpmath.
 2. Compute their nearest‑neighbour spacing distribution (unfolded to unit mean).
 3. Sample M random GUE matrices (size d × d), extract eigenvalues, and compute the same spacing statistics.
-4. Compare both spacing distributions to the Wigner surmise p(s)=½π·s·e−πs²/4, and calculate a KS distance to quantify the fit.
+4. Compare both spacing distributions to the Wigner surmise p(s)=(32/π²)·s²·e−4s²/π, and calculate a KS distance to quantify the fit.
 5. Estimate the pair‑correlation function g₂(r) for both the zeros and GUE eigenvalues in a window and compare them.
 6. Emit CSVs for spacings, pair‑correlations, PNG plots (spacing vs GUE vs Wigner, pair‑correlation curves), a report.md summarising parameters and KS distances, and a manifest.json with SHA‑256 digests and the PS‑SHA∞ daily code.
 
