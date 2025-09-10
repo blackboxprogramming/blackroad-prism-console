@@ -61,5 +61,4 @@ if user_input:
             ],
         )
         st.session_state.chat_history.append({"role": "user", "content": user_input})
-        # Placeholder for API call to OpenAI
         st.write("Processing request...")
