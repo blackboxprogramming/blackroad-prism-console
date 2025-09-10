@@ -1,9 +1,10 @@
 // Jobs: start/cancel/query + SSE logs. LED progress + celebrate/error.
-// POST /api/jobs/start {project, kind, cmd?, args?, env?, cwd?}
-// GET  /api/jobs/:id          -> job json
-// GET  /api/jobs/:id/events   -> SSE (event: log|progress|state)
-// POST /api/jobs/:id/cancel
-// GET  /api/jobs?project=foo  -> recent jobs
+// Prefix is configurable (default: `/api/jobs`).
+// POST <prefix>/start {project, kind, cmd?, args?, env?, cwd?}
+// GET  <prefix>/:id          -> job json
+// GET  <prefix>/:id/events   -> SSE (event: log|progress|state)
+// POST <prefix>/:id/cancel
+// GET  <prefix>?project=foo  -> recent jobs
 const { spawn } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs'); const path = require('path');
@@ -31,7 +32,8 @@ async function led(payload){
 
 function clamp01(x){ return Math.max(0, Math.min(1, x)); }
 
-module.exports = function attachJobs({ app }){
+module.exports = function attachJobs({ app, prefix = '/api/jobs' }){
+  const base = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
   const clients = new Map(); // job_id -> Set(res)
 
   async function appendEvent(job_id, type, data){
@@ -117,7 +119,7 @@ module.exports = function attachJobs({ app }){
   }
 
   // --- Routes ---
-  app.post('/api/jobs/start', async (req,res)=>{
+  app.post(`${base}/start`, async (req,res)=>{
     let raw=''; req.on('data',d=>raw+=d); await new Promise(r=>req.on('end',r));
     let body={}; try{ body=JSON.parse(raw||'{}'); }catch{ return res.status(400).json({error:'bad json'}) }
     try{
@@ -126,28 +128,28 @@ module.exports = function attachJobs({ app }){
     }catch(e){ res.status(500).json({error:String(e)}) }
   });
 
-  app.get('/api/jobs/:id', async (req,res)=>{
+  app.get(`${base}/:id`, async (req,res)=>{
     const id = String(req.params.id);
     const j = await get(`SELECT * FROM jobs WHERE job_id=?`, [id]);
     if (!j) return res.status(404).json({error:'not found'});
     res.json(j);
   });
 
-  app.get('/api/jobs', async (req,res)=>{
+  app.get(base, async (req,res)=>{
     const pr = String(req.query.project||'');
     const rows = await all(`SELECT job_id,project_id,kind,status,progress,started_at,finished_at FROM jobs
                                ${pr?'WHERE project_id=?':''} ORDER BY started_at DESC LIMIT 50`, pr?[pr]:[]);
     res.json(rows);
   });
 
-  app.post('/api/jobs/:id/cancel', async (req,res)=>{
+  app.post(`${base}/:id/cancel`, async (req,res)=>{
     // simple: mark canceled; child process would need PID tracking to actually kill
     await updateJob(String(req.params.id), {status:'canceled', finished_at: now()});
     res.json({ok:true});
   });
 
   // SSE
-  app.get('/api/jobs/:id/events', async (req,res)=>{
+  app.get(`${base}/:id/events`, async (req,res)=>{
     const id = String(req.params.id);
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
