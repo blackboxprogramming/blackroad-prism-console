@@ -8,6 +8,7 @@
 <body>
   <h1>BlackRoad</h1>
   <div id="plans"></div>
+  <div id="chat-panel-root"></div>
   <div id="lucidia-brain-badge" style="position:fixed;bottom:5px;right:5px;padding:4px 8px;background:#FF4FD8;color:#fff;font-size:12px">Lucidia Brain: Offline</div>
   <script>
   async function updateBadge(){
@@ -31,5 +32,6 @@
     }
   }).catch(()=>{});
   </script>
+  <script src="/chat-panel.js" defer></script>
 </body>
 </html>
