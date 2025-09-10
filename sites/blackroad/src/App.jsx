@@ -23,6 +23,10 @@ import EikonalLab from "./pages/EikonalLab.jsx";
 import PoissonDiskLab from "./pages/PoissonDiskLab.jsx";
 import LSystemLab from "./pages/LSystemLab.jsx";
 import MinimalSurfaceLab from "./pages/MinimalSurfaceLab.jsx";
+import LaplaceConductorsLab from "./pages/LaplaceConductorsLab.jsx";
+import PoincarePendulumLab from "./pages/PoincarePendulumLab.jsx";
+import CatMapLab from "./pages/CatMapLab.jsx";
+import IsoSliceLab from "./pages/IsoSliceLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -122,6 +126,10 @@ function LegacyApp(){
             <Route path="/poisson2" element={<PoissonDiskLab/>} />
             <Route path="/lsys" element={<LSystemLab/>} />
             <Route path="/minimal" element={<MinimalSurfaceLab/>} />
+            <Route path="/laplace" element={<LaplaceConductorsLab/>} />
+            <Route path="/poincare" element={<PoincarePendulumLab/>} />
+            <Route path="/catmap" element={<CatMapLab/>} />
+            <Route path="/isoslice" element={<IsoSliceLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -142,6 +150,10 @@ function LegacyApp(){
             <Route path="poisson2" element={<PoissonDiskLab/>} />
             <Route path="lsys" element={<LSystemLab/>} />
             <Route path="minimal" element={<MinimalSurfaceLab/>} />
+            <Route path="laplace" element={<LaplaceConductorsLab/>} />
+            <Route path="poincare" element={<PoincarePendulumLab/>} />
+            <Route path="catmap" element={<CatMapLab/>} />
+            <Route path="isoslice" element={<IsoSliceLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
