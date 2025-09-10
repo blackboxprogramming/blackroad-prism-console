@@ -17,10 +17,26 @@ module.exports = function attachDevices(ctx = {}) {
     ORIGIN_KEY = fs.readFileSync(keyFile, "utf8").trim();
   } catch {}
 
+  db.exec(
+    `CREATE TABLE IF NOT EXISTS devices_last_seen (
+       device_id   TEXT PRIMARY KEY,
+       role        TEXT,
+       ts_unix     INTEGER,
+       payload     TEXT
+     );
+     CREATE TABLE IF NOT EXISTS devices_commands (
+       cmd_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+       device_id   TEXT NOT NULL,
+       payload     TEXT NOT NULL,
+       created_at  INTEGER NOT NULL,
+       ttl_s       INTEGER NOT NULL DEFAULT 120
+     );
+     CREATE INDEX IF NOT EXISTS idx_commands_device_time
+       ON devices_commands (device_id, created_at DESC);`
+  );
+
   function guard(req, res, next) {
-    const ip = req.socket.remoteAddress || "";
     const h = req.get("X-BlackRoad-Key") || "";
-    if (ip.startsWith("127.") || ip === "::1") return next();
     if (ORIGIN_KEY && h === ORIGIN_KEY) return next();
     const daily = req.get("X-BlackRoad-Daily");
     if (daily && daily.startsWith("LUCIDIA-AWAKEN-")) return next();
@@ -62,6 +78,13 @@ module.exports = function attachDevices(ctx = {}) {
   }
 
   const nsp = io.of("/devices");
+  nsp.use((socket, next) => {
+    const h = socket.handshake.headers["x-blackroad-key"] || "";
+    const daily = socket.handshake.headers["x-blackroad-daily"] || "";
+    if (ORIGIN_KEY && h === ORIGIN_KEY) return next();
+    if (daily && daily.startsWith("LUCIDIA-AWAKEN-")) return next();
+    next(new Error("unauthorized"));
+  });
   nsp.on("connection", (socket) => {
     let joined = null;
     socket.on("register", ({ id }) => {
