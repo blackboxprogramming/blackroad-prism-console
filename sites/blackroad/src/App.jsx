@@ -12,6 +12,9 @@ import InfinityMath from "./pages/InfinityMath.jsx";
 import Agents from "./pages/Agents.jsx";
 import Desktop from "./pages/Desktop.jsx";
 import QuantumConsciousness from "./pages/QuantumConsciousness.jsx";
+import Ising2DLab from "./pages/Ising2DLab.jsx";
+import PCALab from "./pages/PCALab.jsx";
+import RSAToyLab from "./pages/RSAToyLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -100,6 +103,9 @@ function LegacyApp(){
             <Route path="/subscribe" element={<Subscribe/>} />
             <Route path="/lucidia" element={<Lucidia/>} />
             <Route path="/math" element={<InfinityMath/>} />
+            <Route path="/ising" element={<Ising2DLab/>} />
+            <Route path="/pca" element={<PCALab/>} />
+            <Route path="/rsa" element={<RSAToyLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -109,6 +115,9 @@ function LegacyApp(){
             <Route path="subscribe" element={<Subscribe/>} />
             <Route path="lucidia" element={<Lucidia/>} />
             <Route path="math" element={<InfinityMath/>} />
+            <Route path="ising" element={<Ising2DLab/>} />
+            <Route path="pca" element={<PCALab/>} />
+            <Route path="rsa" element={<RSAToyLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
