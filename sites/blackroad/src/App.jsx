@@ -15,6 +15,10 @@ import QuantumConsciousness from "./pages/QuantumConsciousness.jsx";
 import OptimalTransportLab from "./pages/OptimalTransportLab.jsx";
 import BifurcationLab from "./pages/BifurcationLab.jsx";
 import ContinuedFractionsLab from "./pages/ContinuedFractionsLab.jsx";
+import RiemannMappingToy from "./pages/RiemannMappingToy.jsx";
+import OULab from "./pages/OULab.jsx";
+import VoronoiLloydLab from "./pages/VoronoiLloydLab.jsx";
+import BeliefPropagationLab from "./pages/BeliefPropagationLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -106,6 +110,10 @@ function LegacyApp(){
             <Route path="/ot" element={<OptimalTransportLab/>} />
             <Route path="/bifurcate" element={<BifurcationLab/>} />
             <Route path="/cfrac" element={<ContinuedFractionsLab/>} />
+            <Route path="/riemann" element={<RiemannMappingToy/>} />
+            <Route path="/ou" element={<OULab/>} />
+            <Route path="/vor" element={<VoronoiLloydLab/>} />
+            <Route path="/belief" element={<BeliefPropagationLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -118,6 +126,10 @@ function LegacyApp(){
             <Route path="ot" element={<OptimalTransportLab/>} />
             <Route path="bifurcate" element={<BifurcationLab/>} />
             <Route path="cfrac" element={<ContinuedFractionsLab/>} />
+            <Route path="riemann" element={<RiemannMappingToy/>} />
+            <Route path="ou" element={<OULab/>} />
+            <Route path="vor" element={<VoronoiLloydLab/>} />
+            <Route path="belief" element={<BeliefPropagationLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
