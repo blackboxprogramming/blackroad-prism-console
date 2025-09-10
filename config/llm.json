@@ -1,0 +1,5 @@
+{
+  "provider": "ollama",
+  "model": "qwen2:1.5b",
+  "min_tokens_per_sec": 0.5
+}
