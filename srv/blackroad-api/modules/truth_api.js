@@ -5,7 +5,6 @@
 //  - GET  /api/truth/feed     -> recent CIDs (local file)
 const fs = require('fs');
 const path = require('path');
-const { create } = require('ipfs-http-client');
 const canonicalize = require('json-canonicalize');
 
 const ORIGIN_KEY_PATH = process.env.ORIGIN_KEY_PATH || '/srv/secrets/origin.key';
@@ -33,8 +32,16 @@ async function led(payload) {
   } catch {}
 }
 
+let ipfsClient;
+async function getIpfs() {
+  if (!ipfsClient) {
+    const { create } = await import('ipfs-http-client');
+    ipfsClient = create({ url: process.env.IPFS_API || 'http://127.0.0.1:5001' });
+  }
+  return ipfsClient;
+}
+
 module.exports = function attachTruthApi({ app }) {
-  const ipfs = create({ url: process.env.IPFS_API || 'http://127.0.0.1:5001' });
   const { truthIdentity } = app.locals;
   if (!truthIdentity) throw new Error('truth_api: identity not initialized');
 
@@ -77,6 +84,7 @@ module.exports = function attachTruthApi({ app }) {
       },
     };
 
+    const ipfs = await getIpfs();
     const { cid } = await ipfs.add({ content: Buffer.from(JSON.stringify(obj)) });
     ensureFeed();
     fs.appendFileSync(
@@ -118,9 +126,8 @@ module.exports = function attachTruthApi({ app }) {
         signature: sig,
       },
     };
-    const { cid } = await create({ url: process.env.IPFS_API || 'http://127.0.0.1:5001' }).add({
-      content: Buffer.from(JSON.stringify(signed)),
-    });
+    const ipfs = await getIpfs();
+    const { cid } = await ipfs.add({ content: Buffer.from(JSON.stringify(signed)) });
     ensureFeed();
     fs.appendFileSync(
       FEED,
