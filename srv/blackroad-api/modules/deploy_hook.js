@@ -9,6 +9,7 @@ const REPO_DIR = process.env.REPO_DIR || '/srv/blackroad'; // your checked-out r
 const API_SERVICE = process.env.API_SERVICE || 'blackroad-api';
 const CF_ZONE = process.env.CF_ZONE_ID || process.env.CLOUDFLARE_ZONE_ID || '';
 const CF_TOKEN = process.env.CF_API_TOKEN || process.env.CLOUDFLARE_API_TOKEN || '';
+const { getStatus: getLlmStatus } = require('../routes/admin_llm');
 
 function hmacOk(sigHeader, raw) {
   if (!sigHeader || !BR_DEPLOY_SECRET) return false;
@@ -90,8 +91,11 @@ module.exports = function attachDeployHook({ app }) {
     try {
       const p = path.join(WEB_DIR,'.build-id');
       const j = fs.existsSync(p) ? JSON.parse(fs.readFileSync(p,'utf8')) : null;
-      res.json({ service:'blackroad-api', build: j || null });
-    } catch { res.json({ service:'blackroad-api', build:null }); }
+      const llm = getLlmStatus();
+      res.json({ service:'blackroad-api', build: j || null, llm: { model: llm.model, warmed_at: llm.warmed_at } });
+    } catch {
+      res.json({ service:'blackroad-api', build:null, llm: getLlmStatus() });
+    }
   });
 
   // minimal admin reload guarded by the deploy secret

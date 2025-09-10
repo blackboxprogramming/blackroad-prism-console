@@ -29,6 +29,7 @@ const Stripe = require('stripe');
 const verify = require('./lib/verify');
 const notify = require('./lib/notify');
 const logger = require('./lib/log');
+const attachLlmRoutes = require('./routes/admin_llm');
 
 // --- Config
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -690,6 +691,8 @@ app.post('/api/llm/chat', requireAuth, async (req, res) => {
     res.status(502).type('text/plain').send('(llm upstream error)');
   }
 });
+
+attachLlmRoutes(app);
 
 // --- Optional shell exec (disabled by default)
 app.post('/api/exec', requireAuth, (req, res) => {
