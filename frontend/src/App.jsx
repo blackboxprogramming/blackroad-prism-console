@@ -48,7 +48,7 @@ export default function App(){
 
   useEffect(() => { streamRef.current = stream }, [stream])
 
-  // Bootstrap authentication token from local storage
+  // Restore auth token from local storage on load
   useEffect(()=>{
     const token = localStorage.getItem('token')
     if (token) setToken(token)
@@ -61,7 +61,7 @@ export default function App(){
           connectSocket()
         }
       } catch(e){
-        // Reset state and log the failure
+        // Reset state on auth failure and log for debugging
         resetState()
         console.error('User not authenticated:', e)
       }
