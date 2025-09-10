@@ -130,7 +130,8 @@ def loop():
                 if t == "display.show":
                     show(p)
                 elif t == "display.clear":
-                    subprocess.call(["pkill", "-9", "feh", "mpv", "chromium-browser"])
+                    for proc in ("feh", "mpv", "chromium-browser"):
+                        subprocess.call(["pkill", "-9", proc])
                 elif t == "display.sleep":
                     screen_sleep()
                 elif t == "display.wake":
