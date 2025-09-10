@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Devices</title>
+  <style>
+    :root {
+      --bg: #0c0f14;
+      --panel: #12161d;
+      --text: #e7ecf3;
+      --accent-2: #0096ff;
+      --radius: 10px;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+        'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      gap: 20px;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    input {
+      padding: 8px;
+      border-radius: var(--radius);
+      border: 1px solid #444;
+      background: var(--panel);
+      color: var(--text);
+    }
+    button {
+      background: var(--accent-2);
+      border: none;
+      padding: 10px 20px;
+      margin: 0 6px;
+      border-radius: var(--radius);
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Display Control</h1>
+  <label>API Key (optional)
+    <input id="key" type="password" placeholder="X-BlackRoad-Key" />
+  </label>
+  <div>
+    <button id="sleepBtn">Sleep</button>
+    <button id="wakeBtn">Wake</button>
+  </div>
+  <script>
+    (function () {
+      const keyEl = document.getElementById('key');
+      keyEl.value = localStorage.getItem('br-key') || '';
+      keyEl.addEventListener('input', () =>
+        localStorage.setItem('br-key', keyEl.value)
+      );
+
+      async function send(type) {
+        const headers = { 'Content-Type': 'application/json' };
+        const key = keyEl.value.trim();
+        if (key) headers['X-BlackRoad-Key'] = key;
+        try {
+          const res = await fetch(
+            '/api/devices/display-mini/command',
+            {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({ type }),
+            }
+          );
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          alert(
+            type === 'display.sleep'
+              ? 'Sleep command sent'
+              : 'Wake command sent'
+          );
+        } catch (e) {
+          alert('Request failed: ' + e.message);
+        }
+      }
+
+      document.getElementById('sleepBtn').onclick = () =>
+        send('display.sleep');
+      document.getElementById('wakeBtn').onclick = () =>
+        send('display.wake');
+    })();
+  </script>
+</body>
+</html>
