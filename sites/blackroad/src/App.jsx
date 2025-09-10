@@ -23,6 +23,10 @@ import EikonalLab from "./pages/EikonalLab.jsx";
 import PoissonDiskLab from "./pages/PoissonDiskLab.jsx";
 import LSystemLab from "./pages/LSystemLab.jsx";
 import MinimalSurfaceLab from "./pages/MinimalSurfaceLab.jsx";
+import SpectralGraphLab from "./pages/SpectralGraphLab.jsx";
+import ComplexPotentialsLab from "./pages/ComplexPotentialsLab.jsx";
+import PowerLloydLab from "./pages/PowerLloydLab.jsx";
+import CahnHilliardLab from "./pages/CahnHilliardLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -122,6 +126,10 @@ function LegacyApp(){
             <Route path="/poisson2" element={<PoissonDiskLab/>} />
             <Route path="/lsys" element={<LSystemLab/>} />
             <Route path="/minimal" element={<MinimalSurfaceLab/>} />
+            <Route path="/spectral-graph" element={<SpectralGraphLab/>} />
+            <Route path="/potentials" element={<ComplexPotentialsLab/>} />
+            <Route path="/power-lloyd" element={<PowerLloydLab/>} />
+            <Route path="/cahn" element={<CahnHilliardLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -142,6 +150,10 @@ function LegacyApp(){
             <Route path="poisson2" element={<PoissonDiskLab/>} />
             <Route path="lsys" element={<LSystemLab/>} />
             <Route path="minimal" element={<MinimalSurfaceLab/>} />
+            <Route path="spectral-graph" element={<SpectralGraphLab/>} />
+            <Route path="potentials" element={<ComplexPotentialsLab/>} />
+            <Route path="power-lloyd" element={<PowerLloydLab/>} />
+            <Route path="cahn" element={<CahnHilliardLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
