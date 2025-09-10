@@ -1,0 +1,37 @@
+name: PR Triage
+on:
+  schedule:
+    - cron: '17 2 * * *'   # daily 02:17 UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale-humans:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-stale: 180
+          days-before-close: -1            # never auto-close humans
+          stale-pr-label: stale
+          stale-pr-message: 'Marking stale (>180d). Comment `/keep` to remove.'
+          exempt-pr-labels: bot
+          operations-per-run: 100
+
+  close-bots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          only-pr-labels: bot
+          days-before-stale: 120
+          days-before-close: 7
+          stale-pr-label: stale
+          stale-pr-message: 'Stale automated PR (>120d). Will close in 7 days.'
+          close-pr-message: 'Closing stale automated PR during cleanup. Reopen if needed.'
+          operations-per-run: 100
