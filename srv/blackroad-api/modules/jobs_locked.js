@@ -60,10 +60,12 @@ const whichContainer = (() => {
   const want = (POLICY.runner || 'docker').toLowerCase();
   function ok(bin, probe) {
     try {
-      spawnSync('bash', ['-lc', probe || `${bin} info >/dev/null 2>&1`], {
-        stdio: 'ignore',
-      });
-      return true;
+      const r = spawnSync(
+        'bash',
+        ['-lc', probe || `${bin} info >/dev/null 2>&1`],
+        { stdio: 'ignore' }
+      );
+      return r.status === 0;
     } catch {
       return false;
     }
@@ -82,15 +84,13 @@ function containerAvailable() {
 function resolveImageDigest(image) {
   if (!image || !POLICY.image_pinning) return image;
   try {
-    const r = spawnSync(
-      'bash',
-      ['-lc', `skopeo inspect docker://${image} | jq -r .Digest`],
-      {
-        encoding: 'utf8',
-      }
-    );
-    if (r.status === 0)
-      return `${image.split('@')[0].split(':')[0]}@${r.stdout.trim()}`;
+    const r = spawnSync('skopeo', ['inspect', `docker://${image}`], {
+      encoding: 'utf8',
+    });
+    if (r.status === 0) {
+      const digest = JSON.parse(r.stdout || '{}').Digest;
+      if (digest) return `${image.split('@')[0].split(':')[0]}@${digest}`;
+    }
   } catch {}
   try {
     const bin = whichContainer || 'docker';
@@ -239,36 +239,39 @@ function buildContainerArgs({
 }
 
 // core streaming/LED updates
-async function wireChild(job_id, child, onClose) {
-  let lastPct = 0;
-  const handleChunk = async (buf, source) => {
-    const s = buf.toString();
-    await appendEvent(job_id, 'log', s);
-    for (const line of s.split(/\r?\n/)) {
-      const p = parseProgressLine(line);
-      if (p != null && Math.abs(p - lastPct) >= 0.01) {
-        lastPct = clamp01(p);
-        await updateJob(job_id, { progress: lastPct });
-        await led({
-          type: 'led.progress',
-          pct: Math.round(lastPct * 100),
-          ttl_s: 90,
-        });
+function wireChild(job_id, child, onClose) {
+  return new Promise((resolve) => {
+    let lastPct = 0;
+    const handleChunk = async (buf, source) => {
+      const s = buf.toString();
+      await appendEvent(job_id, 'log', s);
+      for (const line of s.split(/\r?\n/)) {
+        const p = parseProgressLine(line);
+        if (p != null && Math.abs(p - lastPct) >= 0.01) {
+          lastPct = clamp01(p);
+          await updateJob(job_id, { progress: lastPct });
+          await led({
+            type: 'led.progress',
+            pct: Math.round(lastPct * 100),
+            ttl_s: 90,
+          });
+        }
+        const stage = parseStageLine(line);
+        if (stage && stage.name) {
+          await appendEvent(job_id, 'stage', {
+            name: stage.name,
+            status: stage.error ? 'error' : stage.done ? 'done' : 'start',
+          });
+        }
       }
-      const stage = parseStageLine(line);
-      if (stage && stage.name) {
-        await appendEvent(job_id, 'stage', {
-          name: stage.name,
-          status: stage.error ? 'error' : stage.done ? 'done' : 'start',
-        });
-      }
-    }
-  };
-  child.stdout?.on('data', (buf) => handleChunk(buf, 'stdout'));
-  child.stderr?.on('data', (buf) => handleChunk(buf, 'stderr'));
-  child.on('close', async (code) => {
-    PROCS.delete(job_id);
-    await onClose(code, lastPct);
+    };
+    child.stdout?.on('data', (buf) => handleChunk(buf, 'stdout'));
+    child.stderr?.on('data', (buf) => handleChunk(buf, 'stderr'));
+    child.on('close', async (code) => {
+      PROCS.delete(job_id);
+      await onClose(code, lastPct);
+      resolve();
+    });
   });
 }
 
