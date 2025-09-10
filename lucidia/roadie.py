@@ -18,6 +18,7 @@ EVENT_LOG_PATH = STATE_DIR / "events.log"
 
 class Roadie:
     def __init__(self):
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
         self.last_health_check = 0.0
 
     def event(self, kind: str, payload: dict) -> None:
