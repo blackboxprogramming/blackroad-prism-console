@@ -1,0 +1,532 @@
+<!--
+  FILE: /var/www/blackroad/llm-chat.html
+  Purpose: Standalone, zero-deps streaming chat UI wired to /api/llm/chat (+ models picker)
+  Brand: --accent #FF4FD8; --accent-2 #0096FF; --accent-3 #FDBA2D
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BlackRoad • LLM Chat</title>
+    <style>
+      :root {
+        --bg: #0b0b10;
+        --panel: #12121a;
+        --muted: #8b8ca3;
+        --text: #e9e9f1;
+        --accent: #ff4fd8;
+        --accent2: #0096ff;
+        --accent3: #fdba2d;
+        --ok: #19c37d;
+        --warn: #f3b71b;
+        --err: #ff6b6b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, #0b0b10, #0f0f16);
+        color: var(--text);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Inter,
+          Arial;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        background: rgba(12, 12, 18, 0.7);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid #1b1b26;
+        z-index: 2;
+      }
+      .bar {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      .title {
+        font-weight: 700;
+        letter-spacing: 0.3px;
+      }
+      .pill {
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid #252536;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .pill.ok {
+        color: var(--ok);
+        border-color: rgba(25, 195, 125, 0.35);
+      }
+      .pill.err {
+        color: var(--err);
+        border-color: rgba(255, 107, 107, 0.35);
+      }
+      main {
+        max-width: 1100px;
+        margin: 1rem auto;
+        padding: 0 1rem;
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 1rem;
+      }
+      @media (max-width: 980px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid #1b1b26;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      }
+      .chat {
+        display: flex;
+        flex-direction: column;
+        height: 75vh;
+        min-height: 520px;
+      }
+      .messages {
+        flex: 1;
+        overflow: auto;
+        padding: 1rem 1rem 0 1rem;
+      }
+      .msg {
+        padding: 0.8rem 1rem;
+        border-radius: 16px;
+        max-width: 80%;
+        margin: 0.4rem 0;
+        line-height: 1.45;
+      }
+      .user {
+        background: rgba(255, 79, 216, 0.08);
+        border: 1px solid rgba(255, 79, 216, 0.25);
+        margin-left: auto;
+      }
+      .bot {
+        background: #0d0d15;
+        border: 1px solid #232333;
+      }
+      .msg pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        margin: 0;
+      }
+      .composer {
+        border-top: 1px solid #1b1b26;
+        padding: 0.75rem;
+        display: grid;
+        gap: 0.5rem;
+      }
+      .composer textarea {
+        width: 100%;
+        height: 110px;
+        resize: vertical;
+        background: #0a0a12;
+        color: var(--text);
+        border: 1px solid #222336;
+        border-radius: 14px;
+        padding: 0.65rem 0.75rem;
+        outline: none;
+      }
+      .row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      select,
+      button,
+      .toggle {
+        background: #0a0a12;
+        color: var(--text);
+        border: 1px solid #222336;
+        border-radius: 12px;
+        padding: 0.55rem 0.7rem;
+      }
+      button {
+        cursor: pointer;
+      }
+      button.primary {
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        border: 0;
+      }
+      button.ghost {
+        background: transparent;
+      }
+      .right {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .card {
+        padding: 1rem;
+        border-radius: 16px;
+        border: 1px solid #1b1b26;
+        background: #0c0c14;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .mono {
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          'Liberation Mono', 'Courier New', monospace;
+      }
+      .hidden {
+        display: none;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+      }
+      .dot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 999px;
+        background: var(--warn);
+      }
+      .dot.ok {
+        background: var(--ok);
+      }
+      .dot.err {
+        background: var(--err);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="bar">
+        <div class="title">BlackRoad • LLM Chat</div>
+        <div id="health-pill" class="pill">checking…</div>
+      </div>
+    </header>
+
+    <main>
+      <!-- Chat -->
+      <section class="panel chat">
+        <div id="messages" class="messages"></div>
+
+        <div class="composer">
+          <div class="row">
+            <select id="model"></select>
+            <label class="badge"
+              ><span class="dot" id="stream-dot"></span> stream</label
+            >
+            <button id="send" class="primary">Send</button>
+            <button id="stop" class="ghost">Stop</button>
+            <button id="clear" class="ghost">Clear</button>
+            <button id="save" class="ghost">Save</button>
+          </div>
+          <textarea
+            id="input"
+            placeholder="Say something to Lucidia…"
+          ></textarea>
+        </div>
+      </section>
+
+      <!-- Right rail -->
+      <aside class="right">
+        <div class="card">
+          <div class="muted">Upstream</div>
+          <div id="health" class="mono">—</div>
+        </div>
+
+        <div class="card" id="operator-card" class="hidden">
+          <div
+            class="row"
+            style="justify-content: space-between; align-items: center"
+          >
+            <div>
+              <strong>Operator</strong>
+              <span class="pill" id="op-status">disabled</span>
+            </div>
+          </div>
+          <div style="margin-top: 0.5rem" class="muted">
+            Plan tasks using on-device LLM (no execution).
+          </div>
+          <div style="margin-top: 0.75rem; display: grid; gap: 0.4rem">
+            <input
+              id="op-objective"
+              placeholder="Objective…"
+              style="
+                padding: 0.55rem 0.7rem;
+                background: #0a0a12;
+                color: var(--text);
+                border: 1px solid #222336;
+                border-radius: 12px;
+              "
+            />
+            <textarea
+              id="op-context"
+              placeholder="Context (optional)..."
+              style="
+                height: 90px;
+                padding: 0.55rem 0.7rem;
+                background: #0a0a12;
+                color: var(--text);
+                border: 1px solid #222336;
+                border-radius: 12px;
+              "
+            ></textarea>
+            <button id="op-plan" class="primary">Plan</button>
+          </div>
+          <pre
+            id="op-out"
+            class="mono"
+            style="margin-top: 0.75rem; white-space: pre-wrap"
+          ></pre>
+        </div>
+
+        <div class="card muted">
+          Tip: this page reads streaming chunks (SSE or NDJSON) and prints text
+          as it arrives.
+        </div>
+      </aside>
+    </main>
+
+    <script>
+      const $ = (sel) => document.querySelector(sel);
+      const messagesEl = $('#messages');
+      const inputEl = $('#input');
+      const sendBtn = $('#send');
+      const stopBtn = $('#stop');
+      const clearBtn = $('#clear');
+      const saveBtn = $('#save');
+      const modelSel = $('#model');
+      const healthPill = $('#health-pill');
+      const healthBox = $('#health');
+      const streamDot = $('#stream-dot');
+
+      const opCard = $('#operator-card');
+      const opStatus = $('#op-status');
+      const opObjective = $('#op-objective');
+      const opContext = $('#op-context');
+      const opBtn = $('#op-plan');
+      const opOut = $('#op-out');
+
+      let convo = [];
+      let controller = null; // AbortController for streaming
+
+      function addMsg(role, text) {
+        const div = document.createElement('div');
+        div.className = 'msg ' + (role === 'user' ? 'user' : 'bot');
+        const pre = document.createElement('pre');
+        pre.textContent = text;
+        div.appendChild(pre);
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        return pre; // return the <pre> to stream into it
+      }
+
+      function setHealth(ok, text) {
+        healthPill.textContent = ok ? 'healthy' : 'unreachable';
+        healthPill.className = 'pill ' + (ok ? 'ok' : 'err');
+        healthBox.textContent = text;
+      }
+
+      async function fetchHealth() {
+        try {
+          const r = await fetch('/api/llm/health', { cache: 'no-store' });
+          const j = await r.json();
+          const txt = JSON.stringify(j, null, 2);
+          setHealth(j.ok, txt);
+        } catch (e) {
+          setHealth(false, String(e));
+        }
+      }
+
+      async function loadModels() {
+        modelSel.innerHTML = '';
+        try {
+          const r = await fetch('/api/llm/models', { cache: 'no-store' });
+          const j = await r.json();
+          if (j.ok && Array.isArray(j.models) && j.models.length) {
+            j.models.forEach((m) => {
+              const opt = document.createElement('option');
+              opt.value = m.id;
+              opt.textContent = m.id + (m.provider ? ` • ${m.provider}` : '');
+              modelSel.appendChild(opt);
+            });
+            return;
+          }
+        } catch {}
+        // Fallback defaults
+        ['lucidia', 'qwen2:1.5b', 'mistral-nemo:latest'].forEach((id) => {
+          const opt = document.createElement('option');
+          opt.value = id;
+          opt.textContent = id + ' • fallback';
+          modelSel.appendChild(opt);
+        });
+      }
+
+      async function operatorStatus() {
+        try {
+          const r = await fetch('/api/operator/status', { cache: 'no-store' });
+          const j = await r.json();
+          if (j.ok && j.enabled) {
+            opCard.classList.remove('hidden');
+            opStatus.textContent = 'enabled';
+            opStatus.className = 'pill ok';
+          } else {
+            opCard.classList.remove('hidden');
+            opStatus.textContent = 'disabled';
+            opStatus.className = 'pill';
+          }
+        } catch {
+          // hide if endpoint missing
+          opCard.classList.add('hidden');
+        }
+      }
+
+      function parseAndAppend(pre, chunk) {
+        // Accept raw text, SSE "data: ...", or NDJSON lines
+        const text = chunk;
+        const lines = text.split(/\r?\n/);
+        for (const line of lines) {
+          if (!line) continue;
+          if (line.startsWith('data:')) {
+            const payload = line.slice(5).trim();
+            if (!payload || payload === '[DONE]') continue;
+            let printed = false;
+            try {
+              const j = JSON.parse(payload);
+              const candidates = [
+                j?.delta,
+                j?.text,
+                j?.response,
+                j?.message?.content,
+                j?.choices?.[0]?.delta?.content,
+                j?.choices?.[0]?.message?.content,
+                j?.choices?.[0]?.text,
+              ].filter(Boolean);
+              if (candidates.length) {
+                pre.textContent += candidates[0];
+                printed = true;
+              }
+            } catch {}
+            if (!printed) pre.textContent += payload;
+          } else {
+            // plain chunk
+            pre.textContent += line;
+          }
+        }
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      async function send() {
+        const userText = inputEl.value.trim();
+        if (!userText) return;
+        inputEl.value = '';
+        addMsg('user', userText);
+        const botPre = addMsg('assistant', '');
+        convo.push({ role: 'user', content: userText });
+
+        // Stream
+        controller = new AbortController();
+        streamDot.classList.add('ok');
+        try {
+          const r = await fetch('/api/llm/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: modelSel.value,
+              messages: convo,
+              stream: true,
+            }),
+            signal: controller.signal,
+          });
+          const reader = r.body.getReader();
+          const decoder = new TextDecoder();
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            if (value)
+              parseAndAppend(botPre, decoder.decode(value, { stream: true }));
+          }
+        } catch (e) {
+          botPre.textContent += `\n[stream error] ${String(e)}`;
+        } finally {
+          streamDot.classList.remove('ok');
+        }
+        // push the assistant turn into convo (final text)
+        convo.push({ role: 'assistant', content: botPre.textContent });
+      }
+
+      function stop() {
+        if (controller)
+          try {
+            controller.abort();
+          } catch {}
+      }
+      function clearChat() {
+        messagesEl.innerHTML = '';
+        convo = [];
+      }
+      function saveChat() {
+        const blob = new Blob(
+          [
+            JSON.stringify(
+              { ts: new Date().toISOString(), messages: convo },
+              null,
+              2
+            ),
+          ],
+          { type: 'application/json' }
+        );
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'blackroad-chat-' + Date.now() + '.json';
+        a.click();
+      }
+
+      async function planOperator() {
+        const objective = opObjective.value.trim();
+        const context = opContext.value.trim();
+        opOut.textContent = 'planning…';
+        try {
+          const r = await fetch('/api/operator/plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ objective, context }),
+          });
+          const j = await r.json();
+          opOut.textContent = JSON.stringify(j, null, 2);
+        } catch (e) {
+          opOut.textContent = 'error: ' + String(e);
+        }
+      }
+
+      sendBtn.addEventListener('click', send);
+      stopBtn.addEventListener('click', stop);
+      clearBtn.addEventListener('click', clearChat);
+      saveBtn.addEventListener('click', saveChat);
+      inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) send();
+      });
+      opBtn.addEventListener('click', planOperator);
+
+      (async function boot() {
+        await fetchHealth();
+        await loadModels();
+        await operatorStatus();
+      })();
+    </script>
+  </body>
+</html>
