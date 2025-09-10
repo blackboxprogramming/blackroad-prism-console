@@ -20,6 +20,11 @@ import StableFluidsLab from "./pages/StableFluidsLab.jsx";
 import AutoDiffLab from "./pages/AutoDiffLab.jsx";
 import ConformalGridLab from "./pages/ConformalGridLab.jsx";
 
+import FastMarchTreeLab from "./pages/FastMarchTreeLab.jsx";
+import HungarianLab from "./pages/HungarianLab.jsx";
+import QuaternionRotLab from "./pages/QuaternionRotLab.jsx";
+import ComplexBarycentricLab from "./pages/ComplexBarycentricLab.jsx";
+
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
   useEffect(()=>{ let dead=false;
@@ -114,6 +119,10 @@ function LegacyApp(){
             <Route path="/fluids" element={<StableFluidsLab/>} />
             <Route path="/autodiff" element={<AutoDiffLab/>} />
             <Route path="/conformal" element={<ConformalGridLab/>} />
+            <Route path="/fmm-tree" element={<FastMarchTreeLab/>} />
+            <Route path="/hungarian" element={<HungarianLab/>} />
+            <Route path="/quat" element={<QuaternionRotLab/>} />
+            <Route path="/bary" element={<ComplexBarycentricLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -130,6 +139,10 @@ function LegacyApp(){
             <Route path="fluids" element={<StableFluidsLab/>} />
             <Route path="autodiff" element={<AutoDiffLab/>} />
             <Route path="conformal" element={<ConformalGridLab/>} />
+            <Route path="fmm-tree" element={<FastMarchTreeLab/>} />
+            <Route path="hungarian" element={<HungarianLab/>} />
+            <Route path="quat" element={<QuaternionRotLab/>} />
+            <Route path="bary" element={<ComplexBarycentricLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
