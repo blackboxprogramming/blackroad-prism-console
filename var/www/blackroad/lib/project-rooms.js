@@ -186,14 +186,14 @@ let editor;
 // === Jobs client ===
 async function startJob(kind){
   if (!currentProject){ $('hint').textContent = 'Open a project first.'; return; }
-  const r = await api('/api/jobs/start', {method:'POST', headers:{'content-type':'application/json'},
+  const r = await api('/api/project-jobs/start', {method:'POST', headers:{'content-type':'application/json'},
                body: JSON.stringify({project: currentProject, kind})});
   const j = await r.json(); if (!j.job_id){ $('hint').textContent='job failed to start'; return; }
   attachJob(j.job_id);
 }
 async function startCustom(){
   const script = $('customCmd').value.trim(); if(!script) return;
-  const r = await api('/api/jobs/start', {method:'POST', headers:{'content-type':'application/json'},
+  const r = await api('/api/project-jobs/start', {method:'POST', headers:{'content-type':'application/json'},
                body: JSON.stringify({project: currentProject, kind:'custom', script})});
   const j = await r.json(); if (j.job_id) attachJob(j.job_id);
 }
@@ -202,7 +202,7 @@ function attachJob(id){
   $('jstate').textContent = 'state: starting';
   $('jprog').textContent = 'progress: 0%';
   $('log').textContent = '';
-  const es = new EventSource('/api/jobs/'+encodeURIComponent(id)+'/events');
+  const es = new EventSource('/api/project-jobs/'+encodeURIComponent(id)+'/events');
   es.addEventListener('log', ev=> { $('log').textContent += ev.data; $('log').scrollTop = $('log').scrollHeight; });
   es.addEventListener('progress', ev=> {
     try{ const p = JSON.parse(ev.data).progress || 0; $('jprog').textContent = 'progress: '+Math.round(p*100)+'%'; }catch{}
