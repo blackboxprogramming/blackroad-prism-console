@@ -1,7 +1,6 @@
 // Quorum subscriber + API: verifies PinAttestation messages and records quorum.
 // Env: TRUTH_TOPIC (default "truth.garden/v1/announce"), TRUTH_MAX_AGE_SEC (default 7d)
 //      QUORUM_TARGET (default 2) -> when reached, optional LED celebrate.
-const { create } = require('ipfs-http-client');
 const canonicalize = require('json-canonicalize');
 const bs58 = require('bs58');
 const sqlite3 = require('sqlite3').verbose();
@@ -85,6 +84,7 @@ async function celebrateIf(db, cid) {
 }
 
 module.exports = async function attachTruthQuorum({ app }) {
+  const { create } = await import('ipfs-http-client');
   const ipfs = create({ url: IPFS_API });
   const d = db();
 
