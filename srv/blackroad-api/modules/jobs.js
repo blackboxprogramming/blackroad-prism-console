@@ -117,8 +117,7 @@ module.exports = function attachJobs({ app }){
     return child;
   }
 
-  async function runSingle(job_id, cwd, cmd, args, env){
-    const child = spawnTracked(job_id, cmd, args, { cwd, env: { ...process.env, ...env }, shell:false });
+  async function runSingle(job_id, child){
     let lastPct = 0;
     child.stdout.on('data', async (buf)=>{
       const s = buf.toString();
@@ -263,7 +262,7 @@ module.exports = function attachJobs({ app }){
     } else {
       const child = spawnTracked(id, cmd, args, { cwd, env: { ...process.env, ...env }, shell:false });
       await run(d, `UPDATE jobs SET pid=? WHERE job_id=?`, [child.pid, id]);
-      runSingle(id, cwd, cmd, args, env); // handles close & LEDs
+      runSingle(id, child); // handles close & LEDs
     }
     return id;
   }
