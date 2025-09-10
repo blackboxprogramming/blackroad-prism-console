@@ -1,0 +1,22 @@
+{
+  "name": "BlackRoad Skills",
+  "version": "1.0",
+  "base_url": "https://blackroad.io",
+  "endpoints": {
+    "normalize": {"method":"POST","path":"/api/normalize","body":{"text?":"string","path?":"string","kind?":"auto|json|yaml|toml|xml|csv|text"}},
+    "projects_list": {"method":"GET","path":"/api/projects"},
+    "projects_tree": {"method":"GET","path":"/api/projects/{id}/tree"},
+    "projects_get":  {"method":"GET","path":"/api/projects/{id}/file?path={p}"},
+    "projects_put":  {"method":"PUT","path":"/api/projects/{id}/file?path={p}"},
+    "projects_commit":{"method":"POST","path":"/api/projects/{id}/commit"},
+    "projects_deploy":{"method":"POST","path":"/api/projects/{id}/deploy"},
+    "llm_chat":      {"method":"POST","path":"/api/brain/chat"},
+    "memory_index":  {"method":"POST","path":"/api/memory/index"},
+    "memory_search": {"method":"POST","path":"/api/memory/search"},
+    "devices_cmd":   {"method":"POST","path":"/api/devices/{id}/command","auth":"X-BlackRoad-Key"}
+  },
+  "notes": [
+    "Use /api/normalize before indexing files or pasted text.",
+    "For devices_cmd, do not call directly unless I provide the key; otherwise print a curl."
+  ]
+}
