@@ -153,6 +153,7 @@ fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 // --- App & server
 const app = express();
 require('./modules/jsonEnvelope')(app);
+require('./modules/jsonify_proxy')({ app });
 require('./modules/requestGuard')(app);
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
@@ -165,7 +166,6 @@ const io = new SocketIOServer(server, {
 require('./modules/partner_relay_mtls')({ app });
 require('./modules/projects')({ app });
 require('./modules/pr_proxy')({ app });
-require('./modules/jsonify_proxy')({ app });
 
 const emitter = new EventEmitter();
 const jobs = new Map();
