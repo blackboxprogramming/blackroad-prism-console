@@ -44,7 +44,7 @@ class CleanupBot:
             )
         except CalledProcessError as exc:
             logging.error("Failed to list merged branches: %s", exc)
-            return []
+            raise RuntimeError("Could not list merged branches") from exc
         branches: List[str] = []
         for line in result.stdout.splitlines():
             name = line.strip().lstrip("*").strip()
@@ -112,7 +112,11 @@ def main(argv: List[str] | None = None) -> int:
     # --- Logging setup ---
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
 
-    bot = CleanupBot.from_merged(base=args.base, dry_run=args.dry_run)
+    try:
+        bot = CleanupBot.from_merged(base=args.base, dry_run=args.dry_run)
+    except RuntimeError as exc:
+        logging.error("%s", exc)
+        return 1
     if not bot.branches:
         logging.info("No merged branches to clean up.")
         return 0
