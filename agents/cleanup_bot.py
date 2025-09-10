@@ -39,6 +39,8 @@ class CleanupBot:
             text=True,
             check=True,
         )
+        # Extract branch names from the command output while ignoring
+        # the base branch and "HEAD" references.
         branches: List[str] = []
         for line in result.stdout.splitlines():
             name = line.strip().lstrip("*").strip()
@@ -106,11 +108,20 @@ def main(argv: List[str] | None = None) -> int:
 
     bot = CleanupBot.from_merged(base=args.base, dry_run=args.dry_run)
     results = bot.cleanup()
+
+    if not results:
+        logging.info("No merged branches to clean up.")
+        return 0
+
     for branch, deleted in results.items():
         status = "deleted" if deleted else "failed"
         logging.info("%s: %s", branch, status)
 
-    return 0 if all(results.values()) else 1
+    successes = sum(1 for deleted in results.values() if deleted)
+    failures = len(results) - successes
+    logging.info("Summary: %d deleted, %d failed", successes, failures)
+
+    return 0 if failures == 0 else 1
 
 
 if __name__ == "__main__":
