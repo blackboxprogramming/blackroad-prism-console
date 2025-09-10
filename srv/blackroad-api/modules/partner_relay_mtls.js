@@ -17,7 +17,14 @@ module.exports = function attachPartnerRelay({ app }) {
   try { ORIGIN_KEY = fs.readFileSync(ORIGIN_KEY_PATH, 'utf8').trim(); } catch { console.warn('[partner] WARN: origin.key not found'); }
   try { if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, {recursive:true}); } catch {}
 
-  const TYPES = new Set(['led.emotion','display.show','display.clear','fan.set']);
+  const TYPES = new Set([
+    'led.emotion',
+    'display.show',
+    'display.clear',
+    'display.sleep',
+    'display.wake',
+    'fan.set'
+  ]);
 
   function audit(obj){
     try { fs.appendFileSync(LOG_FILE, JSON.stringify(obj)+'\n'); } catch {}
