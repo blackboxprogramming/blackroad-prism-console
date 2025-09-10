@@ -23,6 +23,10 @@ import EikonalLab from "./pages/EikonalLab.jsx";
 import PoissonDiskLab from "./pages/PoissonDiskLab.jsx";
 import LSystemLab from "./pages/LSystemLab.jsx";
 import MinimalSurfaceLab from "./pages/MinimalSurfaceLab.jsx";
+import RRTSmoothLab from "./pages/RRTSmoothLab.jsx";
+import DiffusionMapsLab from "./pages/DiffusionMapsLab.jsx";
+import PerlinTerrainLab from "./pages/PerlinTerrainLab.jsx";
+import PDELiveLab from "./pages/PDELiveLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -118,6 +122,10 @@ function LegacyApp(){
             <Route path="/fluids" element={<StableFluidsLab/>} />
             <Route path="/autodiff" element={<AutoDiffLab/>} />
             <Route path="/conformal" element={<ConformalGridLab/>} />
+            <Route path="/rrt-smooth" element={<RRTSmoothLab/>} />
+            <Route path="/diffmaps" element={<DiffusionMapsLab/>} />
+            <Route path="/terrain" element={<PerlinTerrainLab/>} />
+            <Route path="/pde" element={<PDELiveLab/>} />
             <Route path="/eikonal" element={<EikonalLab/>} />
             <Route path="/poisson2" element={<PoissonDiskLab/>} />
             <Route path="/lsys" element={<LSystemLab/>} />
@@ -138,6 +146,10 @@ function LegacyApp(){
             <Route path="fluids" element={<StableFluidsLab/>} />
             <Route path="autodiff" element={<AutoDiffLab/>} />
             <Route path="conformal" element={<ConformalGridLab/>} />
+            <Route path="rrt-smooth" element={<RRTSmoothLab/>} />
+            <Route path="diffmaps" element={<DiffusionMapsLab/>} />
+            <Route path="terrain" element={<PerlinTerrainLab/>} />
+            <Route path="pde" element={<PDELiveLab/>} />
             <Route path="eikonal" element={<EikonalLab/>} />
             <Route path="poisson2" element={<PoissonDiskLab/>} />
             <Route path="lsys" element={<LSystemLab/>} />
