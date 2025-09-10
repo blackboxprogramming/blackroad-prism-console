@@ -84,6 +84,16 @@ npm_ci_if_needed(){
   fi
 }
 
+check_node_install(){
+  local dir="$1"
+  [[ -f "$dir/package.json" ]] || return 0
+  if [[ -d "$dir/node_modules" ]]; then
+    grn "✓ node_modules present in $dir"
+  else
+    ylw "• node_modules missing in $dir"
+  fi
+}
+
 audit(){
   sec "FILES & DIRECTORIES"
   check_file "$ORIGIN_KEY" || true
@@ -106,8 +116,8 @@ audit(){
   else ylw "• ss not found"; fi
 
   sec "NODE INSTALL CHECKS"
-  npm_ci_if_needed "$API_DIR"
-  npm_ci_if_needed "$YJS_DIR"
+  check_node_install "$API_DIR"
+  check_node_install "$YJS_DIR"
 
   sec "DATABASE HEALTH"
   if [[ -f "$API_DB" ]] && have sqlite3; then
