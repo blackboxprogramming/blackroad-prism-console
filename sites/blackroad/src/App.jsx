@@ -31,6 +31,10 @@ import PoissonBoltzmannLab from './pages/PoissonBoltzmannLab.jsx';
 import RidgeRegressionLab from './pages/RidgeRegressionLab.jsx';
 import KernelPCALab from './pages/KernelPCALab.jsx';
 import BrushfirePathLab from './pages/BrushfirePathLab.jsx';
+import BlueNoiseTSPLab from './pages/BlueNoiseTSPLab.jsx';
+import BezierShadedSurfaceLab from './pages/BezierShadedSurfaceLab.jsx';
+import Kalman2DTrackerLab from './pages/Kalman2DTrackerLab.jsx';
+import VorticityStreamLab from './pages/VorticityStreamLab.jsx';
 
 function useApiHealth() {
   const [state, setState] = useState({ ok: null, info: '' });
@@ -182,7 +186,11 @@ function LegacyApp() {
             <Route path="/pb" element={<PoissonBoltzmannLab />} />
             <Route path="/ridge" element={<RidgeRegressionLab />} />
             <Route path="/kpca" element={<KernelPCALab />} />
-            <Route path="/brushfire" element={<BrushfirePathLab />} />
+             <Route path="/brushfire" element={<BrushfirePathLab />} />
+             <Route path="/blue-tsp" element={<BlueNoiseTSPLab />} />
+             <Route path="/bezier-lit" element={<BezierShadedSurfaceLab />} />
+             <Route path="/kf-2d" element={<Kalman2DTrackerLab />} />
+             <Route path="/vorticity" element={<VorticityStreamLab />} />
             <Route path="chat" element={<Chat />} />
             <Route path="canvas" element={<Canvas />} />
             <Route path="editor" element={<Editor />} />
@@ -210,8 +218,12 @@ function LegacyApp() {
             <Route path="pb" element={<PoissonBoltzmannLab />} />
             <Route path="ridge" element={<RidgeRegressionLab />} />
             <Route path="kpca" element={<KernelPCALab />} />
-            <Route path="brushfire" element={<BrushfirePathLab />} />
-            <Route path="*" element={<div>Not found</div>} />
+             <Route path="brushfire" element={<BrushfirePathLab />} />
+             <Route path="blue-tsp" element={<BlueNoiseTSPLab />} />
+             <Route path="bezier-lit" element={<BezierShadedSurfaceLab />} />
+             <Route path="kf-2d" element={<Kalman2DTrackerLab />} />
+             <Route path="vorticity" element={<VorticityStreamLab />} />
+             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
       </main>
