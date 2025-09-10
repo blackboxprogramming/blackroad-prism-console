@@ -44,13 +44,42 @@ async function save(){
 }
 async function list(){
   const r=await fetch('/api/lenses'); const arr=await r.json();
-  document.getElementById('list').innerHTML = arr.map(x=>`<li><b>${x.lens_id}</b> λ=${x.lambda} seeds=${Object.keys(x.seeds).length}</li>`).join('');
-  document.getElementById('sel').innerHTML = arr.map(x=>`<option>${x.lens_id}</option>`).join('');
+  const listEl=document.getElementById('list');
+  listEl.innerHTML='';
+  arr.forEach(x=>{
+    const li=document.createElement('li');
+    const b=document.createElement('b');
+    b.textContent=x.lens_id;
+    li.appendChild(b);
+    li.append(` λ=${x.lambda} seeds=${Object.keys(x.seeds).length}`);
+    listEl.appendChild(li);
+  });
+  const selEl=document.getElementById('sel');
+  selEl.innerHTML='';
+  arr.forEach(x=>{
+    const opt=document.createElement('option');
+    opt.textContent=x.lens_id;
+    selEl.appendChild(opt);
+  });
 }
 async function load(){
   const lid=document.getElementById('sel').value;
   const r=await fetch('/api/truth/feed:lens?lid='+encodeURIComponent(lid)); const arr=await r.json();
-  document.getElementById('feed').innerHTML = arr.map(x=>`<li><b>${x.title}</b><br><small>${x.cid}</small><br>score=${x.score.toFixed(3)} love=${(x.love*100|0)}% trust=${(x.trust*100|0)}%</li>`).join('');
+  const feedEl=document.getElementById('feed');
+  feedEl.innerHTML='';
+  arr.forEach(x=>{
+    const li=document.createElement('li');
+    const b=document.createElement('b');
+    b.textContent=x.title;
+    li.appendChild(b);
+    li.appendChild(document.createElement('br'));
+    const small=document.createElement('small');
+    small.textContent=x.cid;
+    li.appendChild(small);
+    li.appendChild(document.createElement('br'));
+    li.append(`score=${x.score.toFixed(3)} love=${(x.love*100|0)}% trust=${(x.trust*100|0)}%`);
+    feedEl.appendChild(li);
+  });
 }
 list();
 </script>
