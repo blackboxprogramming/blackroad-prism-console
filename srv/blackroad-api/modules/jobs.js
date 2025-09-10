@@ -190,18 +190,13 @@ async function wireChild(job_id, child, onClose) {
 // db + sse helpers
 const d = db();
 async function appendEvent(job_id, type, data) {
-  const row = await get(
-    d,
-    `SELECT max(seq)+1 AS n FROM job_events WHERE job_id=?`,
-    [job_id]
-  );
-  const seq = row && row.n ? row.n : 1;
   await run(
     d,
-    `INSERT INTO job_events (job_id,seq,ts,type,data) VALUES (?,?,?,?,?)`,
+    `INSERT INTO job_events (job_id,seq,ts,type,data)
+       VALUES (?, (SELECT COALESCE(MAX(seq),0)+1 FROM job_events WHERE job_id=?), ?, ?, ?)`,
     [
       job_id,
-      seq,
+      job_id,
       now(),
       type,
       typeof data === 'string' ? data : JSON.stringify(data),
