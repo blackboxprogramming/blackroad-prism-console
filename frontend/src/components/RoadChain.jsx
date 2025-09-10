@@ -14,13 +14,14 @@ export default function RoadChain(){
         const b = await fetchBlocks()
         setBlocks(b)
       }catch(e){
-        // Surface initial fetch issues so they aren't missed during debugging
+        // Log and display initial block fetch failures
         console.error('Failed to fetch initial blocks', e)
         setError('Failed to fetch initial blocks')
       }
     })()
   }, [])
 
+  // Clear stale search results when the query is empty or whitespace
   useEffect(() => {
     if (!query.trim()) {
       setResult(null)
