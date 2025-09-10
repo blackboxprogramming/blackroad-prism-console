@@ -88,6 +88,9 @@ function diffChanged(before, after){
     const b = before.get(k);
     if (!b || b!==v) changed.push(k);
   }
+  for (const k of before.keys()){
+    if (!after.has(k)) changed.push(k);
+  }
   return changed;
 }
 function passesAllowedWrites(changed, patterns){
