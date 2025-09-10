@@ -33,9 +33,16 @@ async function led(payload) {
 }
 
 module.exports = function attachTruthApi({ app }) {
-  const ipfsP = import('ipfs-http-client').then(({ create }) =>
-    create({ url: process.env.IPFS_API || 'http://127.0.0.1:5001' })
-  );
+  let ipfsClientPromise;
+  const getIpfsClient = () => {
+    if (!ipfsClientPromise) {
+      ipfsClientPromise = import('ipfs-http-client').then(({ create }) =>
+        create({ url: process.env.IPFS_API || 'http://127.0.0.1:5001' })
+      );
+    }
+    return ipfsClientPromise;
+  };
+
   const { truthIdentity } = app.locals;
   if (!truthIdentity) throw new Error('truth_api: identity not initialized');
 
@@ -78,7 +85,7 @@ module.exports = function attachTruthApi({ app }) {
       },
     };
 
-    const ipfs = await ipfsP;
+    const ipfs = await getIpfsClient();
     const { cid } = await ipfs.add({ content: Buffer.from(JSON.stringify(obj)) });
     ensureFeed();
     fs.appendFileSync(
@@ -120,7 +127,7 @@ module.exports = function attachTruthApi({ app }) {
         signature: sig,
       },
     };
-    const ipfs = await ipfsP;
+    const ipfs = await getIpfsClient();
     const { cid } = await ipfs.add({
       content: Buffer.from(JSON.stringify(signed)),
     });
