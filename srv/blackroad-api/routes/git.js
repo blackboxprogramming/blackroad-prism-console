@@ -5,7 +5,8 @@ const router = express.Router();
 
 const REPO_PATH = process.env.GIT_REPO_PATH || '/srv/blackroad';
 const REMOTE_NAME = process.env.GIT_REMOTE_NAME || 'origin';
-const ALLOW_GIT_ACTIONS = String(process.env.ALLOW_GIT_ACTIONS || 'false').toLowerCase() === 'true';
+const ALLOW_GIT_ACTIONS =
+  String(process.env.ALLOW_GIT_ACTIONS || 'false').toLowerCase() === 'true';
 
 function runGit(args) {
   return new Promise((resolve, reject) => {
@@ -25,7 +26,9 @@ router.get('/health', async (_req, res) => {
     try {
       const out = await runGit(['remote', 'get-url', REMOTE_NAME]);
       remoteUrl = out.stdout.trim();
-    } catch {}
+    } catch {
+      /* ignore missing remote */
+    }
     res.json({
       ok: true,
       repoPath: REPO_PATH,
@@ -63,8 +66,12 @@ router.get('/status', async (_req, res) => {
       }
     }
     const isDirty = staged > 0 || unstaged > 0 || untracked > 0;
-    const shortHash = (await runGit(['rev-parse', '--short', 'HEAD'])).stdout.trim();
-    const lastCommitMsg = (await runGit(['log', '-1', '--pretty=%s'])).stdout.trim();
+    const shortHash = (
+      await runGit(['rev-parse', '--short', 'HEAD'])
+    ).stdout.trim();
+    const lastCommitMsg = (
+      await runGit(['log', '-1', '--pretty=%s'])
+    ).stdout.trim();
     res.json({
       branch,
       ahead,

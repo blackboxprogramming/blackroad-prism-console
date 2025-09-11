@@ -2,6 +2,8 @@ process.env.SESSION_SECRET = 'test-secret';
 process.env.INTERNAL_TOKEN = 'x';
 process.env.ALLOW_ORIGINS = 'https://example.com';
 process.env.GIT_REPO_PATH = process.cwd();
+process.env.MINT_PK = '0x' + '1'.repeat(64);
+process.env.CLAIMREG_ADDR = '0x' + '2'.repeat(40);
 
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
@@ -16,9 +18,7 @@ describe('Git API', () => {
       .post('/api/login')
       .send({ username: 'root', password: 'Codex2025' });
     const cookie = login.headers['set-cookie'];
-    const res = await request(app)
-      .get('/api/git/health')
-      .set('Cookie', cookie);
+    const res = await request(app).get('/api/git/health').set('Cookie', cookie);
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
     expect(typeof res.body.repoPath).toBe('string');
@@ -30,9 +30,7 @@ describe('Git API', () => {
       .post('/api/login')
       .send({ username: 'root', password: 'Codex2025' });
     const cookie = login.headers['set-cookie'];
-    const res = await request(app)
-      .get('/api/git/status')
-      .set('Cookie', cookie);
+    const res = await request(app).get('/api/git/status').set('Cookie', cookie);
     expect(res.status).toBe(200);
     expect(typeof res.body.branch).toBe('string');
     expect(res.body.counts).toBeDefined();
