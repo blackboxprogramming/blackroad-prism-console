@@ -10,12 +10,13 @@ def parse_numeric_prefix(text: str) -> float:
 
     This uses :func:`ast.literal_eval` for safety instead of ``eval`` and
     accepts inputs like ``"2, something"``. Non-numeric or invalid values
-    default to ``1.0``.
+    raise ``ValueError`` or ``SyntaxError``, which are suppressed and
+    result in a default return of ``1.0``.
     """
     try:
         value = ast.literal_eval(text.split(",", maxsplit=1)[0].strip())
         if isinstance(value, (int, float)):
             return float(value)
-    except Exception:
+    except (ValueError, SyntaxError):
         pass
     return 1.0
