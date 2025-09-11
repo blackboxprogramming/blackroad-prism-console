@@ -269,8 +269,13 @@ function wireChild(job_id, child, onClose) {
     child.stderr?.on('data', (buf) => handleChunk(buf, 'stderr'));
     child.on('close', async (code) => {
       PROCS.delete(job_id);
-      await onClose(code, lastPct);
-      resolve();
+      try {
+        await onClose(code, lastPct);
+      } catch (err) {
+        console.error('onClose error', err);
+      } finally {
+        resolve();
+      }
     });
   });
 }
