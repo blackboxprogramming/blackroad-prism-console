@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
 
     <script>
-    // --- Console-only runtime sanity checks ---
+    // --- Console-only runtime self-checks ---
     (function(){
       const log = console.log.bind(console, '[runtime]');
       const warn = console.warn.bind(console, '[runtime]');
@@ -21,7 +21,7 @@
 
         if (!window.math || !math.expm) error('math.js missing or no expm');
         else {
-          // quick unitary sanity
+          // quick unitary check
           const H = math.matrix([[1,0.1,0],[0.1,0,-0.2],[0,-0.2,-0.9]]);
           const U  = math.expm(math.multiply(math.complex(0,-1), H));
           const Ud = math.ctranspose(U);
@@ -30,7 +30,7 @@
           if (frob > 1e-6) warn(`Unitary borderline: ||U†U−I||≈${frob.toExponential(2)}`); else log('Unitary OK');
         }
 
-        // density sanity
+        // density check
         if (window.math) {
           const psi = math.divide(math.matrix([1,1,1]), Math.sqrt(3));
           const rho = math.multiply(math.reshape(psi,[3,1]), math.ctranspose(math.reshape(psi,[3,1])));
@@ -1480,7 +1480,7 @@
             log('✅', 'math.js present');
           }
 
-          // 2) math.js expm sanity + unitary check
+          // 2) math.js expm check + unitary verification
           if (window.math && math.expm) {
             const H = math.matrix([
               [1, 0.2, 0],
@@ -1505,7 +1505,7 @@
             log('⚠️', 'math.expm unavailable');
           }
 
-          // 3) Density matrix sanity (trace≈1, 1/3≤Tr(ρ²)≤1)
+          // 3) Density matrix check (trace≈1, 1/3≤Tr(ρ²)≤1)
           if (window.math) {
             const psi = math.divide(math.matrix([1, 1, 1]), Math.sqrt(3)); // balanced
             const rho = math.multiply(
@@ -1554,7 +1554,7 @@
             c.remove();
           }
 
-          // 5) Frame loop / timing sanity
+          // 5) Frame loop / timing check
           let rafHit = false;
           const p1 = new Promise((res) =>
             requestAnimationFrame(() => {
