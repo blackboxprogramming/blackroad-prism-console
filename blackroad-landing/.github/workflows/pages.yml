@@ -20,6 +20,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: '3.x' }
       - name: Generate daily proof & bake files
+        working-directory: blackroad-landing
         env:
           AWAKEN_SEED: ${{ secrets.AWAKEN_SEED }}
           GODADDY_API_KEY: ${{ secrets.GODADDY_API_KEY }}
@@ -44,7 +45,9 @@ jobs:
           fi
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
-        with: { path: . }
+        with:
+          # Only publish the landing site, not the whole monorepo
+          path: blackroad-landing
       - name: Deploy to Pages
         id: deployment
         uses: actions/deploy-pages@v4
