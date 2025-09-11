@@ -267,6 +267,9 @@ app.post('/api/logout', (req, res) => {
   res.json({ ok: true });
 });
 
+// --- Git operations
+app.use('/api/git', requireAuth, require('./routes/git'));
+
 // --- Billing (stubs)
 app.get('/api/billing/plans', (req, res) => {
   res.json(
