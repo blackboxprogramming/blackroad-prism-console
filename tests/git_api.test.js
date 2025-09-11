@@ -5,13 +5,7 @@ process.env.GIT_REPO_PATH = process.cwd();
 
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
-
-async function getAuthCookie() {
-  const login = await request(app)
-    .post('/api/login')
-    .send({ username: 'root', password: 'Codex2025' });
-  return login.headers['set-cookie'];
-}
+const { getAuthCookie } = require('./helpers/auth.js');
 
 describe('Git API', () => {
   afterAll((done) => {
