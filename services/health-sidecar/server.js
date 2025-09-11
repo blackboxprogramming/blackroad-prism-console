@@ -10,13 +10,13 @@ const PORT = process.env.PORT || 8088;
 const API_ROOT = process.env.API_ROOT || '/var/www/blackroad/api';
 const HEALTH_FILE = path.join(API_ROOT, 'health.json');
 
-// simple cache-control for JSON responses
+// Simple cache-control for JSON responses.
 app.use((_req, res, next) => {
   res.set('Cache-Control', 'no-store');
   next();
 });
 
-// GET /api/health (primary)
+// GET /api/health (primary endpoint).
 app.get('/api/health', (_req, res) => {
   let body = {
     status: 'ok',
@@ -37,7 +37,7 @@ app.get('/api/health', (_req, res) => {
   res.json(body);
 });
 
-// Liveness/Readiness endpoints (K8s or uptime monitors)
+// Liveness/readiness endpoints (K8s or uptime monitors).
 app.get('/livez', (_req, res) => res.send('OK'));
 app.get('/readyz', (_req, res) => {
   try {
