@@ -25,7 +25,9 @@ router.get('/health', async (_req, res) => {
     try {
       const out = await runGit(['remote', 'get-url', REMOTE_NAME]);
       remoteUrl = out.stdout.trim();
-    } catch {}
+    } catch {
+      // Ignore if the remote is not configured
+    }
     res.json({
       ok: true,
       repoPath: REPO_PATH,
