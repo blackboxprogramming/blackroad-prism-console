@@ -1,3 +1,5 @@
+"""Streamlit app for the BlackRoad Prism Generator with GPT and voice input."""
+
 import io
 import os
 import tempfile
@@ -10,8 +12,6 @@ from openai import OpenAI
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 from prism_utils import parse_numeric_prefix
-
-"""Streamlit app for the BlackRoad Prism Generator with GPT and voice input."""
 
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")

@@ -1,3 +1,5 @@
+"""Tests for :func:`prism_utils.parse_numeric_prefix`."""
+
 from prism_utils import parse_numeric_prefix
 
 
