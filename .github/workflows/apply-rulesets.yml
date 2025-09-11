@@ -1,0 +1,57 @@
+name: Apply Rulesets (best-effort)
+
+on:
+  push: { branches: [main] }
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rulesets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Preflight admin token
+        id: pre
+        run: |
+          if [ -z "${ADMIN_TOKEN:-}" ]; then echo "go=no" >> "$GITHUB_OUTPUT"; else echo "go=yes" >> "$GITHUB_OUTPUT"; fi
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+      - uses: cli/cli-action@v2
+        if: steps.pre.outputs.go == 'yes'
+      - name: Upsert ruleset
+        if: steps.pre.outputs.go == 'yes'
+        env:
+          GH_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+        run: |
+          set -e
+          header='-H Accept: application/vnd.github+json'
+          base="/repos/$OWNER/$REPO/rulesets"
+          gh api $header "$base" >/tmp/rs.json || { echo "Rulesets list failed; skipping"; exit 0; }
+          cat > /tmp/rs.json.new <<'JSON'
+          {
+            "name":"Main protections",
+            "target":"branch",
+            "enforcement":"active",
+            "conditions":{"ref_name":{"include":["~DEFAULT_BRANCH","main"],"exclude":[]}},
+            "rules":[
+              {"type":"required_linear_history"},
+              {"type":"required_signatures"},
+              {"type":"pull_request","parameters":{"required_approving_review_count":1,"require_code_owner_review":true}},
+              {"type":"required_status_checks","parameters":{"strict_required_status_checks":true,"required_status_checks":[{"context":"Deploy Quantum App (safe)"},{"context":"CodeQL"},{"context":"Super-Linter"},{"context":"OSSF Scorecard"}]}}
+            ]
+          }
+          JSON
+          def=$(gh api $header "/repos/$OWNER/$REPO" --jq .default_branch)
+          jq --arg d "$def" '(..|strings|select(.=="~DEFAULT_BRANCH")) |= $d' /tmp/rs.json.new >/tmp/rs.final
+          id=$(jq -r '.[]|select(.name=="Main protections")|.id' /tmp/rs.json || true)
+          if [ -n "$id" ] && [ "$id" != "null" ]; then
+            gh api $header -X PATCH "$base/$id" --input /tmp/rs.final >/dev/null || echo "PATCH failed; skipping"
+          else
+            gh api $header -X POST "$base" --input /tmp/rs.final >/dev/null || echo "POST failed; skipping"
+          fi
+      - name: Summary
+        if: steps.pre.outputs.go != 'yes'
+        run: echo "ℹ️ Skipping rulesets (no ADMIN_TOKEN)." >> $GITHUB_STEP_SUMMARY
