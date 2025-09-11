@@ -25,6 +25,4 @@
   "prHourlyLimit": 4,
   "prConcurrentLimit": 10,
   "rebaseWhen": "behind-base-branch"
-  "extends": ["config:base"],
-  "labels": ["dependencies", "automerge"]
 }

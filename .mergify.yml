@@ -4,32 +4,16 @@ pull_request_rules:
       - author~=^(dependabot|renovate)\[bot\]$
       - status-success=build
       - status-success=CodeQL
-      - status-success=Deploy Quantum App (safe)
       - check-success>=1
       - base=main
-      - '#approved-reviews-by>=1'
+      - "#approved-reviews-by>=1"
     actions:
       merge:
         method: squash
       delete_head_branch: {}
   - name: Label and request review
     conditions:
-      - '#files-changed>0'
-    actions:
-      label:
-        add: ['needs-review']
-  - name: Auto-merge bot dependency updates
-    conditions:
-      - author~=^(dependabot|renovate)\[bot\]$
-      - label=automerge
-      - status-success=Deploy Quantum App (safe)
-      - status-success=CodeQL
-      - base=main
-    actions:
-      merge: { method: squash }
-      delete_head_branch: {}
-  - name: Label & request review
-    conditions:
       - "#files-changed>0"
     actions:
-      label: { add: ["needs-review"] }
+      label:
+        add: ["needs-review"]
