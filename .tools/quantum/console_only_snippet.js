@@ -39,4 +39,4 @@
     console.error('[runtime] Global error:', msg, src, line, col);
   };
 })();
-/// ==== CONSOLE-ONLY CHECKS END ====
+// ==== CONSOLE-ONLY CHECKS END (Block N) ====
