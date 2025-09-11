@@ -1,12 +1,20 @@
+import pytest
+
 from prism_utils import parse_numeric_prefix
 
 
-def test_parse_numeric_prefix_valid():
-    assert parse_numeric_prefix("2, rest") == 2.0
-    assert parse_numeric_prefix("3.5") == 3.5
-    assert parse_numeric_prefix("-4, things") == -4.0
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        ("2, rest", 2.0),
+        ("3.5", 3.5),
+        ("-4, things", -4.0),
+    ],
+)
+def test_parse_numeric_prefix_valid(text, expected):
+    assert parse_numeric_prefix(text) == expected
 
 
-def test_parse_numeric_prefix_invalid():
-    assert parse_numeric_prefix("abc") == 1.0
-    assert parse_numeric_prefix("1a") == 1.0
+@pytest.mark.parametrize("text", ["abc", "1a", "("])
+def test_parse_numeric_prefix_invalid(text):
+    assert parse_numeric_prefix(text) == 1.0
