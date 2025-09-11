@@ -41,12 +41,14 @@ export default function EikonalPathLab(){
   useEffect(()=>{
     const c=cnv.current; if(!c) return;
     const ctx=c.getContext("2d",{alpha:false});
+    let frame;
     const draw=()=>{
       solve(sim,iters);
       render(ctx, sim, start, goal, extractPath(sim, start, goal));
-      requestAnimationFrame(draw);
+      frame=requestAnimationFrame(draw);
     };
     draw();
+    return()=>{ if(frame) cancelAnimationFrame(frame); };
   },[sim,iters,start,goal]);
 
   return (
