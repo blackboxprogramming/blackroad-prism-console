@@ -1,3 +1,5 @@
+// Verify that the git route's applyPatches function writes a diff to disk and
+// reports success.
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
