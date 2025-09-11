@@ -2,17 +2,22 @@ const { spawn } = require('node:child_process');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
+// Apply unified diff patches to the repository while ensuring paths stay within
+// the repo root. Each diff header is rewritten to reference the provided file
+// path, preventing arbitrary file writes.
 const repoRoot = process.cwd();
 
+// Replace diff header paths with the sanitized file path.
 function sanitizeDiff(diff, filePath) {
   const lines = diff.split('\n');
-  let i = lines.findIndex(l => l.startsWith('--- '));
+  let i = lines.findIndex((l) => l.startsWith('--- '));
   if (i !== -1) lines[i] = `--- ${filePath}`;
-  i = lines.findIndex(l => l.startsWith('+++ '));
+  i = lines.findIndex((l) => l.startsWith('+++ '));
   if (i !== -1) lines[i] = `+++ ${filePath}`;
   return lines.join('\n');
 }
 
+// Apply a single patch object with shape { path, diff }.
 async function applyPatch(patch) {
   const { path: filePath, diff } = patch || {};
   if (typeof filePath !== 'string' || typeof diff !== 'string') {
@@ -30,8 +35,8 @@ async function applyPatch(patch) {
       stdio: ['pipe', 'ignore', 'pipe'],
     });
     let err = '';
-    child.stderr.on('data', d => (err += d));
-    child.on('close', code => {
+    child.stderr.on('data', (d) => (err += d));
+    child.on('close', (code) => {
       if (code === 0) resolve();
       else reject(new Error(err.trim() || `patch exited ${code}`));
     });
@@ -40,6 +45,8 @@ async function applyPatch(patch) {
   return 'ok';
 }
 
+// Express-style handler: apply an array of patches and report individual
+// results without failing the entire request.
 async function applyPatches(req, res) {
   const { patches } = req.body || {};
   if (!Array.isArray(patches)) {
