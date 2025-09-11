@@ -4,7 +4,7 @@
 
 // PR quality checks executed by Danger.js
 
-const files = danger.git.modified_files.concat(danger.git.created_files);
+const files = [...danger.git.modified_files, ...danger.git.created_files];
 const big = files.filter((f) => f.endsWith('.html') || f.endsWith('.js'));
 
 if (big.length > 0) {
