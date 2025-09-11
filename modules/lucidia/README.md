@@ -13,3 +13,5 @@ portal = LucidiaPortal([AutoNovelAdapter()])
 responses = portal.chat("tell me a story about exploration")
 print(responses["AutoNovelAgent"])  # -> short story
 ```
+
+_Last updated on 2025-09-11_

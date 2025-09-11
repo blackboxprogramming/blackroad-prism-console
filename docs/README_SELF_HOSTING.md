@@ -28,3 +28,5 @@ These steps install the stack on a fresh Ubuntu 22.04 server.
 
 ## Air-gap deployment
 Run `make airgap` on a connected machine. Copy the `airgap/` directory to the target host before running `make up`.
+
+_Last updated on 2025-09-11_

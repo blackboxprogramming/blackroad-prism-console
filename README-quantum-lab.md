@@ -21,3 +21,5 @@ simulations.
 - Session summaries are recorded to a local SQLite database with SHA3-256
   hashes for integrity.
 - The optional `ollama_client` only talks to localhost.
+
+_Last updated on 2025-09-11_

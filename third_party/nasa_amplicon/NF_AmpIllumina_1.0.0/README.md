@@ -5,3 +5,5 @@ Only configuration scaffolding is provided to enable offline and reproducible ex
 within the BlackRoad/Lucidia stack.  The actual workflow sources should be added here
 when mirroring the official release.
 
+
+_Last updated on 2025-09-11_

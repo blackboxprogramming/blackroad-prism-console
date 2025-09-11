@@ -13,3 +13,5 @@ hosting. All playbooks are currently placeholders awaiting implementation.
 
 Customize `ansible/inventory.ini` with hostnames or IPs for your environment before
 running the bootstrap script.
+
+_Last updated on 2025-09-11_

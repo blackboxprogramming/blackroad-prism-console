@@ -19,3 +19,5 @@ This folder stores sensitive credentials and is ignored by Git.
    ```
 
 `droplet_key` and `droplet.env` remain private and are not committed to the repository.
+
+_Last updated on 2025-09-11_

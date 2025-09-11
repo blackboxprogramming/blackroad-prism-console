@@ -8,3 +8,5 @@ Protect branches:
 ```
 docker exec -it dev-gitea gitea admin repo signing enable --owner admin --repo lucidia --branch main
 ```
+
+_Last updated on 2025-09-11_

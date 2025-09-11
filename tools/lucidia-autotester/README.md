@@ -21,3 +21,5 @@ make test ENV=staging
 2. Create a test module under `tests/services/<service_slug>/`
 3. Include service requirements referencing `tests/common_requirements.txt`
 4. Run `pre-commit run --files <changed files>`
+
+_Last updated on 2025-09-11_

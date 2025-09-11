@@ -18,3 +18,5 @@ python -m src.main
 ```
 
 Discord App setup: enable Message Content Intent; grant Send Messages, Send Messages in Threads, Create Public Threads, Read Message History, Use Application Commands; invite the bot to your guild(s).
+
+_Last updated on 2025-09-11_

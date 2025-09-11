@@ -15,3 +15,5 @@ The project targets Python 3.11+ and uses a schema-first approach. CLI entry poi
 exposed via `lucidia-monitor` with subcommands `qualify`, `probe`, `load`, and `report`.
 
 > **Note**: Implementation is minimal; functionality is not yet complete.
+
+_Last updated on 2025-09-11_

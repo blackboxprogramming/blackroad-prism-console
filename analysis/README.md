@@ -15,3 +15,5 @@ Notebooks:
 - `selectors_autocorr.ipynb`
 - `variance_surfaces.ipynb`
 - `nphase_weierstrass.ipynb`
+
+_Last updated on 2025-09-11_

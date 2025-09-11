@@ -33,3 +33,5 @@
 ## CI/CD
 GitHub Actions workflow (`mlops.yml`) lints, tests, builds, and optionally pushes the container to GHCR when `GHCR_USERNAME` and `GHCR_TOKEN` secrets are set.
 
+
+_Last updated on 2025-09-11_

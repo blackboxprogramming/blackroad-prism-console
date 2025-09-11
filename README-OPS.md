@@ -36,3 +36,5 @@ sudo systemctl enable --now br-cleanup-nightly.timer
 
 An optional sudoers snippet is in `etc/sudoers.d/br-cleanup`.
 
+
+_Last updated on 2025-09-11_
