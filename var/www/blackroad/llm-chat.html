@@ -73,7 +73,8 @@ async function send(){
   const body={messages:[{role:'user',content:text}]};
   if(stream){
     try{
-      const res=await fetch('/api/llm/stream',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+      const res=await fetch('/api/llm/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...body,stream:true})});
+      if(!res.ok) return fallback(body,text);
       const reader=res.body.getReader();
       const decoder=new TextDecoder();
       let buf='';
