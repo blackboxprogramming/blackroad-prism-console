@@ -5,6 +5,7 @@ process.env.GIT_REPO_PATH = process.cwd();
 
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
+// Helper to log in and retrieve the auth cookie for authenticated requests
 const { getAuthCookie } = require('./helpers/auth');
 
 describe('Git API', () => {
