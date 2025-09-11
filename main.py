@@ -1,3 +1,5 @@
+"""Streamlit app for the BlackRoad Prism Generator with GPT and voice input."""
+
 import io
 import os
 import tempfile
@@ -11,12 +13,10 @@ from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 from prism_utils import parse_numeric_prefix
 
-"""Streamlit app for the BlackRoad Prism Generator with GPT and voice input."""
-
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")
 
-# Configure OpenAI client
+# Configure the OpenAI client
 _api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=_api_key) if _api_key else None
 if client is None:
