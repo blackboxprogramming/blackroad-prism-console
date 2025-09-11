@@ -68,6 +68,7 @@ router.get('/status', async (_req, res) => {
     const shortHash = (await runGit(['rev-parse', '--short', 'HEAD'])).stdout.trim();
     const lastCommitMsg = (await runGit(['log', '-1', '--pretty=%s'])).stdout.trim();
     res.json({
+      ok: true,
       branch,
       ahead,
       behind,
