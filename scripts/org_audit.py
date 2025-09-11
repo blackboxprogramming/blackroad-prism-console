@@ -15,7 +15,6 @@ import datetime as dt
 import json
 import os
 import pathlib
-import subprocess
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
