@@ -102,7 +102,11 @@ async function send(){
 }
 async function fallback(body,original){
   try{
-    const r=await fetch('/api/llm/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+    const r=await fetch('/api/llm/chat',{
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({...body,stream:false})
+    });
     const j=await r.json();
     addMessage('assistant',j.choices[0].message.content);
   }catch(e){addMessage('assistant',original);}
