@@ -1,0 +1,17 @@
+id: node-eresolve
+title: "Node: ERESOLVE dependency conflict"
+match:
+  - errorRegex: ["ERESOLVE", "peer dep conflict"]
+    lang: ["node"]
+questions:
+  - id: use_legacy_peer_deps
+    text: "Allow legacy peer deps for this install?"
+    kind: boolean
+plan:
+  steps:
+    - kind: cmd
+      when: [{ answerId: "use_legacy_peer_deps", equals: true }]
+      cmd: "npm i --legacy-peer-deps"
+    - kind: cmd
+      when: [{ answerId: "use_legacy_peer_deps", equals: false }]
+      cmd: "npm i"

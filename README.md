@@ -412,3 +412,33 @@ scripts/blackroad_sync.py sync-connectors
 See [docs/blackroad-equation-backbone.md](docs/blackroad-equation-backbone.md) for a curated list of one hundred foundational equations across mathematics, physics, computer science, and engineering.
 
 _Last updated on 2025-09-11_
+
+## Runbook DSL
+
+Runbooks live in `prism/runbooks` and describe how Prism diagnoses and fixes issues.
+Each YAML file contains match signals, questions, optional probes, and a plan that
+produces diffs and commands.
+
+Example:
+
+```yaml
+id: python-importerror
+title: "Python: ModuleNotFoundError / ImportError"
+```
+
+Use the 20-question wizard in Developer Mode to walk through questions, run probes,
+and synthesize a fix plan.
+
+### Tests
+
+Run server runbook tests:
+
+```bash
+pnpm -C apps/prism/server test:runbooks
+```
+
+Run web runbook tests:
+
+```bash
+pnpm -C apps/prism/apps/web test:runbooks
+```

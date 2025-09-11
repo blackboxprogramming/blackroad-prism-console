@@ -1,0 +1,18 @@
+id: db-migrations-pending
+title: "Database: Migrations pending"
+match:
+  - errorRegex: ["migration.*pending", "run.*migrate"]
+questions:
+  - id: env
+    text: "Which environment are you targeting?"
+    kind: select
+    options: ["dev","staging","prod"]
+plan:
+  steps:
+    - kind: cmd
+      cmd: "prisma migrate deploy"
+    - kind: diff
+      path: ".env"
+      template: |
+        # ensure DATABASE_URL present for ${{answers.env}}
+        # (add or edit accordingly)
