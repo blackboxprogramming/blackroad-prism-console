@@ -414,3 +414,21 @@ scripts/blackroad_sync.py sync-connectors
 See [docs/blackroad-equation-backbone.md](docs/blackroad-equation-backbone.md) for a curated list of one hundred foundational equations across mathematics, physics, computer science, and engineering.
 
 _Last updated on 2025-09-11_
+
+## Prism Developer Mode
+
+Start the development server:
+
+```bash
+cd prism/server
+npm install
+npm run dev
+```
+
+Run the web console with Approvals panel:
+
+```bash
+cd apps/prismweb
+npm install
+npm run dev
+```
