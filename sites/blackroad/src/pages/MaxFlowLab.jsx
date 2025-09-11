@@ -74,31 +74,36 @@ export default function MaxFlowLab(){
   };
 
   // drag nodes
-  const [drag,setDrag]=useState(null);
+  const dragRef = useRef(null);
+  const downRef = useRef(false);
+  const nodesRef = useRef(nodes);
+  useEffect(()=>{ nodesRef.current = nodes; });
   useEffect(()=>{
     const svg = svgRef.current; if(!svg) return;
-    let down=false;
     const downH=(e)=>{
       const {x,y} = clientToSvg(e, svg);
-      const id = nodes.findIndex(p=> (p.x-x)**2+(p.y-y)**2 < 18**2);
-      if(id>=0){ down=true; setDrag(id); }
+      const id = nodesRef.current.findIndex(p=> (p.x-x)**2+(p.y-y)**2 < 18**2);
+      if(id>=0){ downRef.current=true; dragRef.current=id; }
     };
     const moveH=(e)=>{
-      if(!down || drag==null) return;
+      if(!downRef.current || dragRef.current==null) return;
       const {x,y} = clientToSvg(e, svg);
-      setNodes(ns=> ns.map((p,i)=> i===drag ? {...p,x,y} : p));
+      const id = dragRef.current;
+      setNodes(ns=> ns.map((p,i)=> i===id ? {...p,x,y} : p));
     };
-    const upH=()=>{ down=false; setDrag(null); };
+    const upH=()=>{ downRef.current=false; dragRef.current=null; };
     svg.addEventListener("mousedown",downH);
     window.addEventListener("mousemove",moveH);
     window.addEventListener("mouseup",upH);
     return ()=>{ svg.removeEventListener("mousedown",downH); window.removeEventListener("mousemove",moveH); window.removeEventListener("mouseup",upH); };
-  },[drag,nodes]);
+  },[]);
 
   // augmenting path step-by-step
   const step = ()=>{
-    const {paths} = edmondsKarp(C, 0, n-1);
-    if(!paths.length) return setLastAug(null);
+    const r = edmondsKarp(C, 0, n-1);
+    setResult(r);
+    const {paths} = r;
+    if(!paths.length){ setLastAug(null); return; }
     const idx = lastAug==null ? 0 : Math.min(paths.length-1, lastAug+1);
     setLastAug(idx);
   };
