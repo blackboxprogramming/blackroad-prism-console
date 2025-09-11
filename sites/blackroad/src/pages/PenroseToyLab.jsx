@@ -94,7 +94,7 @@ function Tiling({tiles, scale0}){
       <rect x="0" y="0" width={W} height={H} fill="none"/>
       {polys.map((poly,i)=>{
         const pts = poly.map(([x,y])=> `${X(x)},${Y(y)}`).join(' ');
-        return <polyline key={i} points={pts} fill="none" strokeWidth="1.5"/>;
+        return <polyline key={i} points={pts} fill="none" stroke="currentColor" strokeWidth="1.5"/>;
       })}
     </svg>
   );

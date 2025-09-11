@@ -71,8 +71,8 @@ function PhasePlot({traj, field}){
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
       <rect x="0" y="0" width={W} height={H} fill="none"/>
-      {field.map((seg,i)=>(<polyline key={i} points={seg.map(([th,p])=>`${X(th)},${Y(p)}`).join(' ')} fill="none" strokeWidth="0.5" opacity="0.35"/>))}
-      <polyline points={traj.map(([th,p])=>`${X(th)},${Y(p)}`).join(' ')} fill="none" strokeWidth="2"/>
+      {field.map((seg,i)=>(<polyline key={i} points={seg.map(([th,p])=>`${X(th)},${Y(p)}`).join(' ')} fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.35"/>))}
+      <polyline points={traj.map(([th,p])=>`${X(th)},${Y(p)}`).join(' ')} fill="none" stroke="currentColor" strokeWidth="2"/>
       <text x={pad} y={14} fontSize="10">Phase space (θ, p)</text>
     </svg>
   );
