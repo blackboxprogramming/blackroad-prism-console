@@ -7,8 +7,7 @@ on:
   schedule:
     - cron: '5 6 * * *' # daily UTC
 permissions:
-  contents: write
-  pages: write
+  contents: read
   id-token: write
 concurrency:
   group: blackroad-pages
@@ -45,14 +44,11 @@ jobs:
           else
             echo "::notice title=DNS::Set TXT stage-proof.blackroad.io = $PROOF (TTL 600)"
           fi
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload stage build artifact
+        uses: actions/upload-artifact@v4
         with:
-          # Only publish the staging site, not the whole monorepo
+          name: blackroad-stage
           path: blackroad-stage
-      - name: Deploy to Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
       - name: Circuit-breaker health check (STAGE)
         run: |
           ok=0
