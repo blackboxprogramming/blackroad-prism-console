@@ -16,9 +16,9 @@ from prism_utils import parse_numeric_prefix
 st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")
 
-# Configure the OpenAI client
-_api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=_api_key) if _api_key else None
+# Initialize the OpenAI client if an API key is provided
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key) if api_key else None
 if client is None:
     st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
 
