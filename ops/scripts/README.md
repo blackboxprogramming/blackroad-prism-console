@@ -29,3 +29,5 @@ sudo br-cleanup.sh audit | tee /srv/ops/cleanup-audit.txt
 ```
 
 An optional systemd timer can be used to run the audit and prune steps nightly.
+
+_Last updated on 2025-09-11_

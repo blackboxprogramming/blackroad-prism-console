@@ -12,3 +12,5 @@ Use local registry:
 ```
 docker pull localhost:5001/myimage
 ```
+
+_Last updated on 2025-09-11_

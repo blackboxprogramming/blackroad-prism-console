@@ -34,3 +34,5 @@ If you want, I can add:
 - a **vLLM** backend (OpenAI-*compatible* local server, still no OpenAI),  
 - a **results dashboard** (tiny HTML that parses `evaluate_functional_correctness` output), or  
 - a **Lucidia agent hook** so your Codex agent logs contradictions and pass@k deltas directly into your Ψ′ logs.
+
+_Last updated on 2025-09-11_

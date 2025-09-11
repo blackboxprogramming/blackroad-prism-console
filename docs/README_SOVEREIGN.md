@@ -42,3 +42,5 @@ git clone https://example.com/blackroad-prism-console.git
 cd blackroad-prism-console
 bash provision/00_sys.sh
 ```
+
+_Last updated on 2025-09-11_

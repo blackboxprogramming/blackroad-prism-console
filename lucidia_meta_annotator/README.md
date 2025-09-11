@@ -20,3 +20,5 @@ result, removed = annotate_dataset(meta, cfg)
 * Optional signature files contain a SHA256 digest of the config and are
   verified on load.
 * Temporary attributes never persist to outputs.
+
+_Last updated on 2025-09-11_

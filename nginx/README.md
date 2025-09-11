@@ -23,3 +23,5 @@ Expected curls:
 - `curl -sS http://127.0.0.1/health` → JSON ok
 - `curl -sS https://blackroad.io/health` → JSON ok
 - `curl -sS https://blackroad.io/api/health` → JSON from blackroad-api
+
+_Last updated on 2025-09-11_

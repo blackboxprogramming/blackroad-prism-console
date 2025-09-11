@@ -10,3 +10,5 @@ contradiction reports, snapshots, and collaborative symphonies.
 - `contradictions/` – contradiction reports
 - `snapshots/` – memory dumps for resilience
 - `symphonies/` – collaborative compositions
+
+_Last updated on 2025-09-11_

@@ -44,3 +44,5 @@ Usage notes
 Raster icons
 
 Run ./build_brand_assets.sh to generate PNGs and favicon.ico from SVG sources.
+
+_Last updated on 2025-09-11_

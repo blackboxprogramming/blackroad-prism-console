@@ -16,3 +16,5 @@ python3 codex/tools/codex_build.py sync-connectors
 The script currently contains placeholders for connectors, Working Copy,
 and Droplet interactions.  Integrate the real APIs or automation hooks as
 needed for your environment.
+
+_Last updated on 2025-09-11_

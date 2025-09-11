@@ -43,3 +43,5 @@ Notes
 - Wire contradictions to your Ψ′ log by reading `/var/log/blackroad/mpe/*.jsonl` and computing deltas between tags.
 
 If you want the FastAPI microservice or a lean PPO policy added, say the word and I’ll drop two more nano-ready files.
+
+_Last updated on 2025-09-11_

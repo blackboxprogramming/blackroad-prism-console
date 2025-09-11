@@ -38,3 +38,5 @@ bash scripts/run_local.sh
 
 1. No counterexample up to N (monotone increase of checked bound).
 2. New records: largest stopping time / maximum excursion discovered with full witnesses.
+
+_Last updated on 2025-09-11_

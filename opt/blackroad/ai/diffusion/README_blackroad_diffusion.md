@@ -110,3 +110,5 @@ How to make this “machine-native” inside Lucidia
 •Chit-chat: the diffusion_cli.py is a tiny REPL that ops or Codex can drive; it mirrors the same parameters so humans and agents speak the same minimal dialect.
 
 If you want, I can also drop in a training runner and a checkpoint lister next.
+
+_Last updated on 2025-09-11_

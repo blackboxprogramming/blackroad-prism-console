@@ -18,3 +18,5 @@ API calls.
 Attempts to restore the previous state using
 `/srv/blackroad-backups/rollback_latest.sh` when available, otherwise
 falls back to `git revert`.
+
+_Last updated on 2025-09-11_

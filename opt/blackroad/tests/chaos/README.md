@@ -10,3 +10,5 @@ Use k6 script `kill_node.js` to terminate a container and confirm Traefik shifts
 
 ## Model corruption
 Use k6 script `corrupt_model.js` to replace a model file and ensure loader detects SHA mismatch and loads fallback.
+
+_Last updated on 2025-09-11_

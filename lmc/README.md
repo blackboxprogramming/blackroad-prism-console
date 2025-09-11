@@ -11,3 +11,5 @@ This directory contains an early skeleton for the Lucidia/BlackRoad metadata man
 
 The implementation is intentionally minimal and independent from NASA CMR
 or Earthdata services.  It serves as a starting point for further work.
+
+_Last updated on 2025-09-11_

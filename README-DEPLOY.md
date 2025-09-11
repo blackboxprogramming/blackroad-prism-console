@@ -62,3 +62,5 @@ Monorepo notes
 
 ### That’s it
 This **one** pipeline handles **build → artifact → SSH deploy → atomic switch → health → auto‑rollback** and retains the **last 3** releases. If you want me to tailor it to a specific repo layout (e.g., exact web/api paths, extra build steps, Prisma migrations, PM2 instead of systemd), say the word and I’ll adapt the files accordingly.
+
+_Last updated on 2025-09-11_

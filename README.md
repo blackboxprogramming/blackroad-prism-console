@@ -410,3 +410,5 @@ scripts/blackroad_sync.py sync-connectors
 ## Backbone Equations Reference
 
 See [docs/blackroad-equation-backbone.md](docs/blackroad-equation-backbone.md) for a curated list of one hundred foundational equations across mathematics, physics, computer science, and engineering.
+
+_Last updated on 2025-09-11_

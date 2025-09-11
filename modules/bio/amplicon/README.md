@@ -6,3 +6,5 @@ assets under `third_party/nasa_amplicon`.
 
 ## Usage
 Run `runner.py` with a runsheet CSV describing local FASTQ inputs and parameters.
+
+_Last updated on 2025-09-11_

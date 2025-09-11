@@ -25,3 +25,5 @@ are written to disk.
 ## Screenshots
 
 Screenshots of the application will be added in a future update.
+
+_Last updated on 2025-09-11_

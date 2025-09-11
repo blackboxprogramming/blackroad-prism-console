@@ -59,3 +59,5 @@ bash scripts/run_local.sh logs
 The code under `local/` is modular and torch-only, making it easy to plug in new
 environments or policies.  MuJoCo or Atari environments can be added by
 installing the appropriate extras and modifying `run_cartpole.py`.
+
+_Last updated on 2025-09-11_
