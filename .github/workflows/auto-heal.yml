@@ -6,20 +6,46 @@ on:
     workflows: ["Super-Linter","CodeQL","Tests","HTML Validate","Broken Links"]
     types: [completed]
 permissions: { contents: write, pull-requests: write }
+
 jobs:
   heal:
     if: github.event_name == 'pull_request' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { persist-credentials: false, ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref }} }
-      - run: |
+        with:
+          persist-credentials: false
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref }}
+
+      - name: Configure bot git author
+        run: |
           git config user.name  "${{ secrets.BOT_USER || 'blackroad-bot' }}"
           git config user.email "${{ secrets.BOT_USER || 'blackroad-bot' }}@users.noreply.github.com"
-      - id: heal
+
+      - name: Run auto-heal script
+        id: heal
         run: .github/tools/autoheal.sh
-      - if: steps.heal.outputs.committed == '1'
-        env: { BOT_TOKEN: ${{ secrets.BOT_TOKEN }} }
+
+      - name: Push fixes (if any)
+        if: steps.heal.outputs.committed == '1'
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
-          [ -z "$BOT_TOKEN" ] && { echo "::notice::No BOT_TOKEN"; exit 0; }
+          [ -z "$BOT_TOKEN" ] && { echo "::warning::No BOT_TOKEN secret; cannot push auto-heal changes."; exit 0; }
           git push "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:$(git rev-parse --abbrev-ref HEAD)"
+
+      - name: PR comment summary
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const committed = `${{ steps.heal.outputs.committed }}` === '1';
+            const body = committed
+              ? "🤖 Auto-Heal committed fixes (configs, formatting, linting)."
+              : "✅ Auto-Heal found nothing to change.";
+            await github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body
+            });

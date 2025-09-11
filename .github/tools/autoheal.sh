@@ -1,20 +1,51 @@
 #!/usr/bin/env bash
 set -euo pipefail
-changed=false; add(){ git add "$@" && changed=true; }
-if [ ! -f package.json ]; then npm init -y >/dev/null 2>&1 || true; add package.json; fi
-node - <<'JS' && changed=true || true
-const fs=require("fs"), p="package.json";
-const j=JSON.parse(fs.readFileSync(p,"utf8")); j.scripts=j.scripts||{};
+
+# Track whether the fixer changed anything
+changed=false
+git_add() { git add "$@" && changed=true; }
+
+# 0) Ensure Node project & basic scripts
+if [ ! -f package.json ]; then
+  npm init -y >/dev/null 2>&1 || true
+  git_add package.json
+fi
+
+node - <<'JS'
+const fs = require("fs");
+const p = "package.json";
+const j = JSON.parse(fs.readFileSync(p, "utf8"));
+j.scripts = j.scripts || {};
 j.scripts.test   ||= "echo \"No tests specified\" && exit 0";
 j.scripts.lint   ||= "eslint . --ext .js,.mjs,.cjs";
 j.scripts.format ||= "prettier -w .";
-fs.writeFileSync(p, JSON.stringify(j,null,2));
+fs.writeFileSync(p, JSON.stringify(j, null, 2));
 JS
-add package.json || true
-[ -f .prettierrc.json ] || { echo '{ "printWidth": 100, "singleQuote": true, "trailingComma": "es5" }' > .prettierrc.json; add .prettierrc.json; }
-[ -f eslint.config.js ] || { echo 'export default [];' > eslint.config.js; add eslint.config.js; }
+git_add package.json || true
+
+# 1) Lint/format configs
+[ -f .prettierrc.json ] || {
+  echo '{ "printWidth": 100, "singleQuote": true, "trailingComma": "es5" }' > .prettierrc.json
+  git_add .prettierrc.json
+}
+
+[ -f eslint.config.js ] || {
+  echo 'export default [];' > eslint.config.js
+  git_add eslint.config.js
+}
+
+# 2) Install tools and apply fixes (best effort)
 npm i -D prettier eslint eslint-config-prettier >/dev/null 2>&1 || true
 npx --yes prettier -w .  >/dev/null 2>&1 || true
 npx --yes eslint . --ext .js,.mjs,.cjs --fix >/dev/null 2>&1 || true
+
+# Stage any new changes from format/fix
 git diff --quiet || { git add -A && changed=true; }
-if $changed; then git commit -m "chore(auto-heal): baseline + prettier/eslint --fix" || true; echo "committed=1" >> "$GITHUB_OUTPUT"; else echo "committed=0" >> "$GITHUB_OUTPUT"; fi
+
+# 3) Commit if anything changed
+if $changed; then
+  git commit -m "chore(auto-heal): baseline configs + prettier/eslint --fix" || true
+  echo "committed=1" >> "$GITHUB_OUTPUT"
+else
+  echo "committed=0" >> "$GITHUB_OUTPUT"
+fi
