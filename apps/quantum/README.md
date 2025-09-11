@@ -1,9 +1,11 @@
 # Ternary Quantum Consciousness (v3)
 
 <!-- BADGES START -->
+
 [![Deploy](https://github.com/blackboxprogramming/BlackRoad/actions/workflows/deploy-quantum.yml/badge.svg)](../../actions/workflows/deploy-quantum.yml)
 [![CodeQL](https://github.com/blackboxprogramming/BlackRoad/actions/workflows/codeql.yml/badge.svg)](../../actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/blackboxprogramming/BlackRoad/badge)](https://securityscorecards.dev/viewer/?uri=github.com/blackboxprogramming/BlackRoad)
+
 <!-- BADGES END -->
 
 Interactive qutrit lab: Lindbladian dynamics (γφ, γrel), von Neumann entropy S(ρ), selectable observables (Pauli-like/Gell-Mann), Hamiltonian editor, session recording + CSV, barycentric visualization.
@@ -12,10 +14,6 @@ Interactive qutrit lab: Lindbladian dynamics (γφ, γrel), von Neumann entropy 
 
 Open `apps/quantum/ternary_consciousness_v3.html` in a browser (no build step required).
 
-Interactive qutrit lab: Lindbladian dynamics (γφ, γrel), von Neumann entropy S(ρ), selectable observables (Pauli-like/Gell-Mann), Hamiltonian editor, session recording + CSV, barycentric visualization.
-
-## Run
-Open `apps/quantum/ternary_consciousness_v3.html` in a browser (no build step required).
 - Keyboard: Space=Play/Pause, R=Reset, M=Measure, 1–4=Presets
 - Sliders + selects drive state, evolution model, and observables.
 
@@ -28,9 +26,6 @@ Open `apps/quantum/ternary_consciousness_v3.html` in a browser (no build step re
 
 ## Files
 
-- `apps/quantum/ternary_consciousness_v3.html` — standalone app
-- `.github/workflows/deploy-quantum.yml` — CI/CD to server via rsync
-How to use, math notes (S(ρ)=−Tr ρ log ρ, P=Tr ρ²), Lindblad params (γφ, γrel), CSV export, and keyboard shortcuts.
 - `apps/quantum/ternary_consciousness_v3.html` — standalone app
 - `.github/workflows/deploy-quantum.yml` — CI/CD to server via rsync
 
