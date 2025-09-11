@@ -24,7 +24,6 @@ npm -v >/dev/null || { echo "npm missing"; exit 1; }
 
 # 3) GitHub CLI (gh)
 if ! command -v gh >/dev/null 2>&1; then
-  type -p curl >/dev/null || apt-get install -y curl
   curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
     | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
   chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
@@ -63,7 +62,7 @@ HOME_DIR="$(eval echo ~${TARGET_USER})"
 mkdir -p "$HOME_DIR/.ssh"
 chmod 700 "$HOME_DIR/.ssh"
 touch "$HOME_DIR/.ssh/known_hosts"
-ssh-keyscan -t rsa github.com >> "$HOME_DIR/.ssh/known_hosts" 2>/dev/null || true
+ssh-keyscan -H github.com >> "$HOME_DIR/.ssh/known_hosts" 2>/dev/null || true
 chown -R "$TARGET_USER":"$TARGET_USER" "$HOME_DIR/.ssh"
 echo "✅ SSH known_hosts primed for github.com"
 
