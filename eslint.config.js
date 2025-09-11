@@ -6,7 +6,20 @@ module.exports = [
       "build/**",
       ".github/**",
       "public/vendor/**",
-      "var/**"
+      "var/**",
+      "backend/**",
+      "frontend/**",
+      "sites/**",
+      "src/**",
+      "srv/**",
+      "apps/**",
+      "packages/**",
+      ".tools/**",
+      "modules/**",
+      "scripts/**",
+      "services/**",
+      "design/**",
+      "connectors.js"
     ]
   },
   {
