@@ -1,10 +1,22 @@
 #!/usr/bin/env python3
-import json, subprocess, time, pathlib
+"""Generate `api/health.json` with build metadata.
+
+The script captures the current commit and a UTC timestamp so deployments can
+expose a simple health document. It writes the JSON file to `api/health.json`
+relative to the repository root.
+"""
+
+import json
+import pathlib
+import subprocess
+import time
 
 def main():
     repo_root = pathlib.Path(__file__).resolve().parent.parent
-    commit = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode().strip()
-    ts = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+
+    # Record the exact commit of the working tree and a UTC timestamp.
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
+    ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     data = {
         'status': 'ok',
         'app': 'quantum-v3',
