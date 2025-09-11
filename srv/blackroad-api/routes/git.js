@@ -77,7 +77,7 @@ router.get('/status', async (_req, res) => {
       lastCommitMsg,
     });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ ok: false, error: e.message });
   }
 });
 
