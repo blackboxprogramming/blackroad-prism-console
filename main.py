@@ -61,4 +61,11 @@ if user_input:
             ],
         )
         st.session_state.chat_history.append({"role": "user", "content": user_input})
-        st.write("Processing request...")
+        with st.spinner("Processing request..."):
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=st.session_state.chat_history,
+            )
+        reply = response.choices[0].message.content
+        st.session_state.chat_history.append({"role": "assistant", "content": reply})
+        st.markdown(f"**Assistant:** {reply}")
