@@ -2,15 +2,25 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ActiveReflection from "./ActiveReflection.jsx";
 
 export default function FourierOpticsLab(){
-  const [N,setN]=useState(128);
+  const [N,setN]=useState(64);
   const [ap,setAp]=useState("circle");
   const [param,setParam]=useState(0.3); // radius or slit width
   const cnvA=useRef(null), cnvF=useRef(null);
+  const worker=useRef(null);
+  const [F,setF]=useState(null);
 
   const A = useMemo(()=>makeAperture(N, ap, param),[N,ap,param]);
-  const F = useMemo(()=>dft2(A),[A]); // returns magnitude
 
-  useEffect(()=>{ drawField(cnvA.current, A, false); drawField(cnvF.current, F, true); },[A,F]);
+  useEffect(()=>{
+    worker.current = new Worker(new URL("../workers/fourierWorker.js", import.meta.url));
+    worker.current.onmessage = e => setF(e.data);
+    return ()=>{ worker.current?.terminate(); };
+  },[]);
+
+  useEffect(()=>{ if(worker.current) worker.current.postMessage({N,ap,param}); },[N,ap,param]);
+
+  useEffect(()=>{ drawField(cnvA.current, A, false); },[A]);
+  useEffect(()=>{ if(F) drawField(cnvF.current, F, true); },[F]);
 
   return (
     <div className="p-4 space-y-3">
@@ -30,7 +40,7 @@ export default function FourierOpticsLab(){
         <section className="p-3 rounded-lg bg-white/5 border border-white/10">
           <Radio name="ap" value={ap} set={setAp} opts={[["circle","circle"],["slit","slit"],["rect","rect"],["checker","checker"]]} />
           <Slider label="param" v={param} set={setParam} min={0.05} max={0.5} step={0.01}/>
-          <Slider label="grid N" v={N} set={setN} min={64} max={192} step={16}/>
+          <Slider label="grid N" v={N} set={setN} min={32} max={128} step={16}/>
           <ActiveReflection
             title="Active Reflection — Fourier Optics"
             storageKey="reflect_fourier"
@@ -58,30 +68,6 @@ function makeAperture(N, ap, p){
     A[y][x]=v;
   }
   return A;
-}
-function dft2(A){
-  const N=A.length, M=A[0].length;
-  const mag=Array.from({length:N},()=>Array(M).fill(0));
-  for(let u=0;u<N;u++){
-    for(let v=0;v<M;v++){
-      let re=0, im=0;
-      for(let y=0;y<N;y++) for(let x=0;x<M;x++){
-        const ang=-2*Math.PI*(u*x/N + v*y/M);
-        const c=Math.cos(ang), s=Math.sin(ang);
-        re += A[y][x]*c; im += A[y][x]*s;
-      }
-      const m = re*re + im*im;
-      mag[u][v]=m;
-    }
-  }
-  // shift to center & log scale
-  const B=Array.from({length:N},()=>Array(M).fill(0));
-  let mx=0; for(let u=0;u<N;u++) for(let v=0;v<M;v++) mx=Math.max(mx,mag[u][v]);
-  for(let u=0;u<N;u++) for(let v=0;v<M;v++){
-    const us=(u+N/2|0)%N, vs=(v+M/2|0)%M;
-    B[us][vs]=Math.log(1+mag[u][v]/(mx+1e-9));
-  }
-  return B;
 }
 function drawField(canvas, A, hot){
   if(!canvas) return; const N=A.length, M=A[0].length; canvas.width=N; canvas.height=M;
