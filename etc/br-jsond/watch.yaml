@@ -1,0 +1,16 @@
+# Watch directories and normalize new/changed files automatically.
+watch:
+  # Ingest Nginx JSON access logs -> write normalized copies
+  - path: /var/log/nginx
+    glob: blackroad.access.json*
+    write_dir: /srv/ingest/nginx-json
+
+  # Projects: normalize textish assets and post into devices backplane as telemetry
+  - path: /srv/projects
+    glob: "**/*"
+    post: http://127.0.0.1:4000/api/devices/pi-01/telemetry
+
+  # Media folder: create JSON envelopes with ffprobe/image EXIF
+  - path: /srv/media
+    glob: "**/*"
+    write_dir: /srv/ingest/media-json

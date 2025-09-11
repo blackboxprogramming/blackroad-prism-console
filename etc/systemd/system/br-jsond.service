@@ -1,0 +1,16 @@
+[Unit]
+Description=BlackRoad JSON Normalizer (br_jsond)
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python3 /srv/br-jsond/br_jsond.py
+WorkingDirectory=/srv/br-jsond
+Restart=always
+User=root
+Environment=BR_JSOND_HOST=127.0.0.1
+Environment=BR_JSOND_PORT=4505
+Environment=BR_JSOND_WATCH=/etc/br-jsond/watch.yaml
+Environment=ORIGIN_KEY_PATH=/srv/secrets/origin.key
+
+[Install]
+WantedBy=multi-user.target

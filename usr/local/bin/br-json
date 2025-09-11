@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# One-shot file -> JSON (prints to stdout)
+exec /usr/bin/python3 /srv/br-jsond/br_jsond.py --file "$@"

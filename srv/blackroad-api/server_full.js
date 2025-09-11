@@ -152,6 +152,7 @@ fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 // --- App & server
 const app = express();
 require('./modules/jsonEnvelope')(app);
+require('./modules/jsonify_proxy')({ app });
 require('./modules/requestGuard')(app);
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
