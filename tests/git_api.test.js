@@ -34,6 +34,7 @@ describe('Git API', () => {
       .get('/api/git/status')
       .set('Cookie', cookie);
     expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
     expect(typeof res.body.branch).toBe('string');
     expect(typeof res.body.shortHash).toBe('string');
     expect(typeof res.body.ahead).toBe('number');
