@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Codex Issue Opener (GitHub)
+Codex Issue Opener for GitHub
 - Reads recent audit events (repo.audit.baseline)
 - For each repo with missing baseline files, opens/ensures a tracking issue
 - Idempotent: searches open issues by a stable title tag and avoids duplicates
@@ -16,29 +16,41 @@ Reads:
 Emits:
   repo.issues.opened
 """
+
 import json
 import os
 import re
 import time
-from datetime import datetime
-import urllib.request, urllib.error, urllib.parse
-from pathlib import Path
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime
+from pathlib import Path
 
 BASE = Path("codex")
-EVENTS = BASE/"runtime"/"events"
-MANIFEST = BASE/"runtime"/"manifests"/"codex_repos_manifest.json"
+EVENTS = BASE / "runtime" / "events"
+MANIFEST = BASE / "runtime" / "manifests" / "codex_repos_manifest.json"
 OUT_EVENTS = EVENTS
 
 TOKEN = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN") or os.getenv("PERSONAL_ACCESS_TOKEN")
+
 
 def emit(kind, payload):
     OUT_EVENTS.mkdir(parents=True, exist_ok=True)
     fn = OUT_EVENTS / f"{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}_{kind}.jsonl"
     with fn.open("a") as f:
-        f.write(json.dumps({"id": f"{kind}:{int(time.time()*1000)}", "kind": kind, "ts": datetime.utcnow().isoformat()+"Z", "payload": payload}) + "\n")
+        f.write(
+            json.dumps(
+                {
+                    "id": f"{kind}:{int(time.time()*1000)}",
+                    "kind": kind,
+                    "ts": datetime.utcnow().isoformat() + "Z",
+                    "payload": payload,
+                }
+            )
+            + "\n"
+        )
+
 
 def recent_audits(limit=200):
     files = sorted(EVENTS.glob("*.jsonl"))
@@ -58,6 +70,7 @@ def recent_audits(limit=200):
             continue
     return list(reversed(audits))
 
+
 def parse_github_owner_repo(origin_url: str):
     # Supports ssh: git@github.com:owner/repo.git  or https: https://github.com/owner/repo.git
     # Original regex failed to handle repository names containing periods
@@ -70,28 +83,45 @@ def parse_github_owner_repo(origin_url: str):
         return None, None
     return m.group("owner"), m.group("repo")
 
+
 def gh_api(path, method="GET", body=None):
     if not TOKEN:
         raise RuntimeError("GITHUB_TOKEN is required to open issues.")
     url = f"https://api.github.com{path}"
-    hdrs = {"Accept": "application/vnd.github+json", "User-Agent": "codex-issue-opener/1.0", "Authorization": f"Bearer {TOKEN}"}
+    hdrs = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "codex-issue-opener/1.0",
+        "Authorization": f"Bearer {TOKEN}",
+    }
     data = json.dumps(body).encode("utf-8") if body is not None else None
     req = urllib.request.Request(url, headers=hdrs, method=method, data=data)
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.loads(r.read().decode("utf-8"))
 
+
 def ensure_issue(owner, repo, title, body):
-    # search existing open issues
+    # Search existing open issues
     q = f'repo:{owner}/{repo} is:issue is:open in:title "{title}"'
     res = gh_api(f"/search/issues?q={urllib.parse.quote(q)}")
-    if res.get("total_count",0) > 0:
+    if res.get("total_count", 0) > 0:
         return {"owner": owner, "repo": repo, "title": title, "existing": True}
     # create
-    created = gh_api(f"/repos/{owner}/{repo}/issues", method="POST", body={"title": title, "body": body})
-    return {"owner": owner, "repo": repo, "title": title, "number": created.get("number"), "url": created.get("html_url"), "existing": False}
+    created = gh_api(
+        f"/repos/{owner}/{repo}/issues", method="POST", body={"title": title, "body": body}
+    )
+    return {
+        "owner": owner,
+        "repo": repo,
+        "title": title,
+        "number": created.get("number"),
+        "url": created.get("html_url"),
+        "existing": False,
+    }
 
 
-def open_issue(issue_tracker: str, issue_repo: str, title: str, body: str, token_env: str | None = None):
+def open_issue(
+    issue_tracker: str, issue_repo: str, title: str, body: str, token_env: str | None = None
+):
     """Open an issue on the given tracker.
 
     Currently only the GitHub tracker is supported. ``issue_repo`` should be in
@@ -120,11 +150,13 @@ def open_issue(issue_tracker: str, issue_repo: str, title: str, body: str, token
     with urllib.request.urlopen(req, timeout=30) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
+
 def load_manifest():
     try:
         return json.loads(MANIFEST.read_text())
     except Exception:
         return {"repos": []}
+
 
 def origin_url_for(repo_name, manifest):
     for r in manifest.get("repos", []):
@@ -132,14 +164,15 @@ def origin_url_for(repo_name, manifest):
             return r.get("url")
     return None
 
+
 def main():
     manifest = load_manifest()
     audits = recent_audits()
     opened = []
     for evt in audits:
-        name = evt.get("payload",{}).get("name")
-        findings = evt.get("payload",{}).get("findings",{})
-        missing = findings.get("missing",[])
+        name = evt.get("payload", {}).get("name")
+        findings = evt.get("payload", {}).get("findings", {})
+        missing = findings.get("missing", [])
         if not name or not missing:
             continue
         origin = origin_url_for(name, manifest)
@@ -149,8 +182,7 @@ def main():
         if not owner:
             continue
         title = f"[Codex] Baseline missing files: {name}"
-        body = (
- f"""Codex baseline audit detected missing required files in **{name}**:
+        body = f"""Codex baseline audit detected missing required files in **{name}**:
 
 - {os.linesep.join(f"* `{m}`" for m in missing)}
 
@@ -158,7 +190,7 @@ def main():
 Please add the missing files. This issue was opened automatically by Codex.
 
 _Opened: {datetime.utcnow().isoformat()}Z_
-""")
+"""
         try:
             info = ensure_issue(owner, repo, title, body)
             opened.append(info)
@@ -170,6 +202,7 @@ _Opened: {datetime.utcnow().isoformat()}Z_
     if opened:
         emit("repo.issues.opened", {"items": opened})
     print(f"Issues processed: {len(opened)}")
+
 
 if __name__ == "__main__":
     main()
