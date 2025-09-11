@@ -53,24 +53,13 @@ fi
 if [ -f package.json ]; then
   # Ensure safe scripts
   node - <<'JS' && changed=true || true
-set -euo pipefail
-DEFAULT_BRANCH="${DEFAULT_BRANCH:-main}"
-BOT_USER="${BOT_USER:-blackroad-bot}"
-BOT_EMAIL="${BOT_USER}@users.noreply.github.com"
-git config user.name  "$BOT_USER" || true
-git config user.email "$BOT_EMAIL" || true
-changed=false; add(){ git add "$@" && changed=true; }
-
-# Node baseline
-if [ ! -f package.json ]; then npm init -y >/dev/null 2>&1 || true; add package.json; fi
-node - <<'JS' && changed=true || true
 const fs=require("fs"), p="package.json";
 const j=JSON.parse(fs.readFileSync(p,"utf8"));
 j.scripts=j.scripts||{};
 j.scripts.test   ||= "echo \"No tests specified\" && exit 0";
 j.scripts.lint   ||= "eslint . --ext .js,.mjs,.cjs";
 j.scripts.format ||= "prettier -w .";
-fs.writeFileSync(p, JSON.stringify(j,null,2));
+fs.writeFileSync(p, JSON.stringify(j, null, 2));
 JS
   git_add package.json
 fi
