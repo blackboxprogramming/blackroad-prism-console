@@ -21,11 +21,12 @@ export default function RoadChain(){
     })()
   }, [])
 
-  // Clear stale search results when the query is empty or whitespace
+  // Clear stale search results and collapse blocks when the query is empty or whitespace
   useEffect(() => {
     if (!query.trim()) {
       setResult(null)
       setError('')
+      setExpanded({})
     }
   }, [query])
 
