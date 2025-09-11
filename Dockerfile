@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim
+FROM node:24-bookworm-slim
 
 # System deps for native addons (sharp/canvas etc.)
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
