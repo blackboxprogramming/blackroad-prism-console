@@ -97,9 +97,10 @@ export default function MaxFlowLab(){
 
   // augmenting path step-by-step
   const step = ()=>{
-    const {paths} = edmondsKarp(C, 0, n-1);
-    if(!paths.length) return setLastAug(null);
-    const idx = lastAug==null ? 0 : Math.min(paths.length-1, lastAug+1);
+    const r = edmondsKarp(C, 0, n-1);
+    setResult(r);
+    if(!r.paths.length) return setLastAug(null);
+    const idx = lastAug==null ? 0 : Math.min(r.paths.length-1, lastAug+1);
     setLastAug(idx);
   };
 
@@ -132,7 +133,9 @@ const Graph = forwardRef(function Graph({nodes, edges, C, result, lastAug, onEdg
   const W=800,H=400, pad=20;
   const augEdges = useMemo(()=>{
     if(lastAug==null || !result?.paths?.length) return [];
-    const {par} = result.paths[lastAug];
+    const idx = Math.min(lastAug, result.paths.length-1);
+    const {par} = result.paths[idx] || {};
+    if(!par) return [];
     const list=[];
     let v=nodes.length-1;
     while(par[v]!==-2 && par[v]!==-1){ list.push([par[v], v]); v=par[v]; }
