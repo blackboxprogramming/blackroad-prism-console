@@ -1,7 +1,5 @@
 const express = require('express');
 const { execFile } = require('child_process');
-const fs = require('fs');
-const path = require('path');
 
 const router = express.Router();
 
