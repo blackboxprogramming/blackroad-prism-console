@@ -4,15 +4,16 @@ module.exports = function requestGuard(app){
   const keyPath = process.env.ORIGIN_KEY_PATH || '/srv/secrets/origin.key';
   let ORIGIN_KEY = ''; try { ORIGIN_KEY = fs.readFileSync(keyPath,'utf8').trim(); } catch {}
   const SKIP = ['/api/normalize'];
+  const skip = (p) => SKIP.some(s => p === s || p.startsWith(s + '/'));
   app.use((req,res,next)=>{
-    if (SKIP.includes(req.path)) return next();
+    if (skip(req.path)) return next();
     // parse JSON (small, safe)
     if (req.method !== 'GET' && (req.headers['content-type']||'').includes('application/json')) {
       let b=''; req.on('data',d=>b+=d); req.on('end',()=>{ try{ req.body = JSON.parse(b||'{}'); }catch{ req.body={}; } ; next(); });
     } else next();
   });
   app.use((req,res,next)=>{
-    if (SKIP.includes(req.path)) return next();
+    if (skip(req.path)) return next();
     const ip = req.socket.remoteAddress || '';
     if (ip.startsWith('127.') || ip==='::1') return next();
     const k = req.get('X-BlackRoad-Key') || '';
