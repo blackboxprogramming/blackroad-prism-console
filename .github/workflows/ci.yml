@@ -2,7 +2,7 @@ name: BlackRoad CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   workflow_dispatch:
 
 # Prevent overlapping prod deploys
@@ -118,8 +118,8 @@ jobs:
           HEALTH_URL: https://blackroad.io/health
           API_HEALTH_URL: https://blackroad.io/api/health
           RELEASE: ${{ github.sha }}
-          KEEP_RELEASES: "3"
-          DO_API_DEPLOY: "1"
+          KEEP_RELEASES: '3'
+          DO_API_DEPLOY: '1'
         run: |
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh release.tar.gz
