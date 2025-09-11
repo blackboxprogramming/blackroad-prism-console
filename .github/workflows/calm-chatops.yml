@@ -1,13 +1,14 @@
 name: Calm ChatOps v2
 on: { issue_comment: { types: [created] } }
-permissions: { contents: write, pull-requests: write, issues: write, actions: read }
+permissions:
+  { contents: write, pull-requests: write, issues: write, actions: read }
 jobs:
   chatops:
-    if: startsWith(github.event.comment.body, '/')
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '/')
     runs-on: ubuntu-latest
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-      BOT_USER:  ${{ secrets.BOT_USER || 'blackroad-bot' }}
+      BOT_USER: ${{ secrets.BOT_USER || 'blackroad-bot' }}
     steps:
       - uses: actions/checkout@v4
         with: { persist-credentials: false, fetch-depth: 0 }
