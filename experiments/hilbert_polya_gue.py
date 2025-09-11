@@ -29,6 +29,8 @@ def ks_distance(sample: np.ndarray, cdf: Callable[[np.ndarray], np.ndarray]) -> 
     """Return the two-sided Kolmogorov–Smirnov distance between a sample and a CDF."""
     x = np.sort(sample)
     n = x.size
+    if n == 0:
+        raise ValueError("sample must contain at least one element")
     cdf_vals = cdf(x)
     ecdf_right = np.arange(1, n + 1) / n
     ecdf_left = np.arange(0, n) / n
