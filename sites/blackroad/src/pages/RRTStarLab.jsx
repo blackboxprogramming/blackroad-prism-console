@@ -9,14 +9,14 @@ function segIntersectsRect(a,b, R){ // axis-aligned rectangle R={x,y,w,h}
   const p=[-dx, dx, -dy, dy];
   const q=[a.x-R.x, R.x+R.w-a.x, a.y-R.y, R.y+R.h-a.y];
   for(let i=0;i<4;i++){
-    if(p[i]===0){ if(q[i]<0) return true; }
+    if(p[i]===0){ if(q[i]<0) return false; }
     else {
       const r=q[i]/p[i];
-      if(p[i]<0){ if(r>t1) return true; if(r>t0) t0=r; }
-      else { if(r<t0) return true; if(r<t1) t1=r; }
+      if(p[i]<0){ if(r>t1) return false; if(r>t0) t0=r; }
+      else { if(r<t0) return false; if(r<t1) t1=r; }
     }
   }
-  return false;
+  return true;
 }
 function collision(a,b, obstacles){ for(const R of obstacles){ if(segIntersectsRect(a,b,R)) return true; } return false; }
 
