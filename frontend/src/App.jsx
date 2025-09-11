@@ -33,6 +33,7 @@ import RoadView from './pages/RoadView.jsx'
 import Orchestrator from './Orchestrator.jsx'
 import Manifesto from './components/Manifesto.jsx'
 import AutoHeal from './pages/AutoHeal.jsx'
+import Git from './pages/Git.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -141,6 +142,7 @@ export default function App(){
               <NavItem to="/datasets" icon={<Database size={18} />} text="Datasets" />
               <NavItem to="/models" icon={<ShieldCheck size={18} />} text="Models" />
               <NavItem to="/integrations" icon={<Settings size={18} />} text="Integrations" />
+              <NavItem to="/git" icon={<GitCommit size={18} />} text="Git" />
               <NavItem to="/roadview" icon={<LayoutGrid size={18} />} text="RoadView" />
               <NavItem to="/autoheal" icon={<HeartPulse size={18} />} text="Auto-Heal" />
               <NavItem to="/novelty" icon={<Sparkles size={18} />} text="Novelty Dashboard" />
@@ -219,6 +221,7 @@ export default function App(){
               <Route path="/" element={<Dashboard tab={tab} setTab={setTab} timeline={timeline} tasks={tasks} commits={commits} onAction={onAction} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
               <Route path="/roadview" element={<RoadView agents={agents} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
               <Route path="/autoheal" element={<AutoHeal />} />
+              <Route path="/git" element={<Git />} />
             </Routes>
           </main>
         </>
