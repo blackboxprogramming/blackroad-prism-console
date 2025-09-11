@@ -34,6 +34,7 @@ describe('Git API', () => {
       .get('/api/git/status')
       .set('Cookie', cookie);
     expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
     expect(typeof res.body.branch).toBe('string');
     expect(res.body.counts).toBeDefined();
     expect(res.body.counts).toHaveProperty('staged');
