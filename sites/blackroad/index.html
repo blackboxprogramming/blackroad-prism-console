@@ -421,6 +421,7 @@
           <a href="#docs">Docs</a>
           <a href="#portal">Portal</a>
           <a href="#pricing">Pricing</a>
+          <a href="/subscribe" onclick="return go('/subscribe')">Subscribe</a>
         </nav>
 
         <button
@@ -445,6 +446,7 @@
     </header>
 
     <main>
+      <div id="view" class="tag"></div>
       <!-- Hero -->
       <section class="hero">
         <div class="container">
@@ -687,6 +689,29 @@ chat("Hello, BlackRoad").then(console.log).catch(console.error);
           </div>
         </div>
       </section>
+      <section id="subscribe-section" class="card" style="margin-top:16px">
+        <div class="tag">Subscribe</div>
+        <form id="subscribe-form" autocomplete="email" style="display:grid;gap:12px;max-width:520px">
+          <label>Email
+            <input id="sub-email" type="email" required placeholder="you@example.com"
+              style="width:100%;padding:10px;border-radius:10px;border:1px solid #272a38;background:#0b0f1b;color:#eaeaf2">
+          </label>
+          <label>Name (optional)
+            <input id="sub-name" type="text" placeholder="Your name"
+              style="width:100%;padding:10px;border-radius:10px;border:1px solid #272a38;background:#0b0f1b;color:#eaeaf2">
+          </label>
+          <label style="display:none">Leave blank
+            <input id="sub-hp" type="text" value="">
+          </label>
+          <button id="sub-btn" type="submit"
+            style="justify-self:start;border:0;border-radius:14px;padding:10px 14px;
+                   background:linear-gradient(90deg,var(--accent),var(--blue));color:#0b0b12;font-weight:700">
+            Join the list
+          </button>
+          <div id="sub-msg" class="tag"></div>
+          <div class="tag">We’ll send a single confirmation email (double opt-in). Unsubscribe anytime.</div>
+        </form>
+      </section>
     </main>
 
     <footer>
@@ -718,6 +743,45 @@ chat("Hello, BlackRoad").then(console.log).catch(console.error);
         // Year
         document.getElementById('year').textContent = new Date().getFullYear();
       })();
+    </script>
+    <script>
+      const routes = {
+        '/': 'Welcome to BlackRoad.io — site is LIVE via GitHub Pages.',
+        '/login': 'Login placeholder (static).',
+        '/chat': 'Chat placeholder (local-only LLM to be wired later).',
+        '/memories': 'Memories placeholder.',
+        '/coding': 'Coding portal placeholder.',
+        '/backend': 'Backend portal placeholder.',
+        '/subscribe': 'Subscribe to updates.'
+      };
+
+      function route() {
+        const path = location.pathname.replace(/\/+$/, '') || '/';
+        const view = document.getElementById('view');
+        if (view) view.textContent = routes[path] || '404 — routed to SPA root. Use header links.';
+        if (path === '/subscribe') {
+          document.getElementById('subscribe-section')?.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+      window.addEventListener('popstate', route);
+
+      document.addEventListener('DOMContentLoaded', () => {
+        route();
+        const form = document.getElementById('subscribe-form');
+        if (!form) return;
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const msgEl = document.getElementById('sub-msg');
+          msgEl.textContent = 'Subscribe temporarily offline';
+          form.reset();
+        });
+      });
+
+      function go(p) {
+        history.pushState({}, '', p);
+        route();
+        return false;
+      }
     </script>
   </body>
 </html>
