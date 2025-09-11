@@ -6,7 +6,7 @@ changed=false
 
 # Convenient helper to add files and mark the repo as changed
 add() {
-  git add "$@"
+  git add -- "$@"
   changed=true
 }
 
