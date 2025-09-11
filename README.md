@@ -146,7 +146,9 @@ python codex/tools/blackroad_sync.py sync
 ```
 
 Extend the script with real webhooks, Slack posts, or droplet deployments as
-needed.
+needed. For example, `scripts/blackroad_ci.py` will post connector sync
+updates to Slack when a `SLACK_WEBHOOK_URL` environment variable points to an
+incoming webhook.
 
 ---
 

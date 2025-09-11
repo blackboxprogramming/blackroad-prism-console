@@ -6,6 +6,7 @@ connectors, refreshing Working Copy, and deploying to the droplet. The
 implementation is intentionally minimal and serves as a starting point for the
 full automation pipeline described in the project brief.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -13,6 +14,8 @@ import logging
 import os
 import subprocess
 from dataclasses import dataclass
+
+import requests
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
@@ -71,8 +74,20 @@ class LinearConnector(Connector):
 
 
 class SlackConnector(Connector):
-    def notify(self, message: str) -> None:  # pragma: no cover - placeholder
-        logging.info("Posting Slack message (placeholder): %s", message)
+    def notify(self, message: str) -> None:
+        """Post ``message`` to a Slack incoming webhook.
+
+        The ``token`` attribute is treated as the webhook URL.  If it is not
+        configured the notification is skipped gracefully.
+        """
+        if not self.token:
+            logging.info("Slack webhook not configured; skipping notification")
+            return
+        try:
+            resp = requests.post(self.token, json={"text": message}, timeout=10)
+            resp.raise_for_status()
+        except Exception as exc:  # pragma: no cover - network
+            logging.warning("Slack notification failed: %s", exc)
 
 
 def sync_connectors() -> None:
@@ -80,7 +95,7 @@ def sync_connectors() -> None:
     sf = SalesforceConnector(token=os.getenv("SALESFORCE_TOKEN"))
     at = AirtableConnector(token=os.getenv("AIRTABLE_TOKEN"))
     ln = LinearConnector(token=os.getenv("LINEAR_TOKEN"))
-    slack = SlackConnector(token=os.getenv("SLACK_TOKEN"))
+    slack = SlackConnector(token=os.getenv("SLACK_WEBHOOK_URL"))
 
     for conn in (sf, at, ln):
         conn.sync()
