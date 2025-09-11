@@ -1,3 +1,5 @@
+"""Unit tests for `parse_numeric_prefix` utility."""
+
 from prism_utils import parse_numeric_prefix
 
 
