@@ -4,9 +4,7 @@ sshprivate.sh
 publicssh.sh
 
 # Node
-node_modules/
 **/node_modules/
-services/*/node_modules/
 dist/
 .cache/
 .env
