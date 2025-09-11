@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-# Match optional leading whitespace, an optional sign, digits, and an optional
+# Matches optional leading whitespace, an optional sign, digits, and an optional
 # fractional part.
 _NUMERIC_PREFIX = re.compile(r"^\s*([+-]?\d+(?:\.\d+)?)")
 
