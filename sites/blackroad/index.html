@@ -421,7 +421,7 @@
           <a href="#docs">Docs</a>
           <a href="#portal">Portal</a>
           <a href="#pricing">Pricing</a>
-          <a href="/subscribe" onclick="return go('/subscribe')">Subscribe</a>
+          <a href="#subscribe-section">Subscribe</a>
         </nav>
 
         <button
@@ -751,17 +751,13 @@ chat("Hello, BlackRoad").then(console.log).catch(console.error);
         '/chat': 'Chat placeholder (local-only LLM to be wired later).',
         '/memories': 'Memories placeholder.',
         '/coding': 'Coding portal placeholder.',
-        '/backend': 'Backend portal placeholder.',
-        '/subscribe': 'Subscribe to updates.'
+        '/backend': 'Backend portal placeholder.'
       };
 
       function route() {
         const path = location.pathname.replace(/\/+$/, '') || '/';
         const view = document.getElementById('view');
         if (view) view.textContent = routes[path] || '404 — routed to SPA root. Use header links.';
-        if (path === '/subscribe') {
-          document.getElementById('subscribe-section')?.scrollIntoView({ behavior: 'smooth' });
-        }
       }
       window.addEventListener('popstate', route);
 
@@ -776,12 +772,6 @@ chat("Hello, BlackRoad").then(console.log).catch(console.error);
           form.reset();
         });
       });
-
-      function go(p) {
-        history.pushState({}, '', p);
-        route();
-        return false;
-      }
     </script>
   </body>
 </html>
