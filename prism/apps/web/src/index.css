@@ -1,0 +1,10 @@
+body {
+  font-family: sans-serif;
+  margin: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
