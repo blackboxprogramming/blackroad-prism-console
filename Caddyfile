@@ -1,0 +1,9 @@
+# Optional: put your email for Let's Encrypt rate-limit friendliness
+{
+  email you@blackroad.io
+}
+
+blackroad.io, www.blackroad.io {
+  encode gzip
+  reverse_proxy web:3000
+}

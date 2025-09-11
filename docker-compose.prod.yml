@@ -1,0 +1,29 @@
+services:
+  web:
+    image: ghcr.io/blackroad-prism/blackroad-prism-console:latest
+    restart: always
+    env_file: .env
+    networks: [webnet]
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [webnet]
+    depends_on:
+      - web
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  webnet:

@@ -1,0 +1,116 @@
+name: CI & Deploy to Droplet
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write   # push to GHCR
+  id-token: write
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  DO_HOST: ${{ vars.DO_HOST }}
+  DO_USER: ${{ vars.DO_USER }}
+  DOMAIN:  ${{ vars.DOMAIN }}
+
+jobs:
+  build-test-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps & run quality gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          # detect PM and install
+          if [ -f pnpm-lock.yaml ]; then
+            corepack enable && corepack prepare pnpm@latest --activate
+            pm="pnpm"; install="pnpm install --frozen-lockfile"
+          elif [ -f yarn.lock ]; then
+            corepack enable || true
+            pm="yarn"; install="yarn install --frozen-lockfile"
+          elif [ -f package-lock.json ]; then
+            pm="npm"; install="npm ci --no-audit --no-fund"
+          else
+            pm="npm"; install="npm install --no-audit --no-fund"
+          fi
+          eval "$install"
+
+          # quality gates (only if scripts exist)
+          jq -e '.scripts.format' package.json >/dev/null 2>&1 && ($pm run format)
+          jq -e '.scripts.lint' package.json   >/dev/null 2>&1 && ($pm run lint)
+          jq -e '.scripts.typecheck' package.json >/dev/null 2>&1 && ($pm run typecheck)
+          jq -e '.scripts.test' package.json   >/dev/null 2>&1 && ($pm run test -- --ci)
+          jq -e '.scripts.build' package.json  >/dev/null 2>&1 && ($pm run build)
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push container image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ghcr.io/${{ env.IMAGE_NAME }}:latest
+
+      - name: Copy deploy files to droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.DO_HOST }}
+          username: ${{ env.DO_USER }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          source: "docker-compose.prod.yml,Caddyfile"
+          target: "/opt/blackroad"
+
+      - name: Deploy on droplet
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.DO_HOST }}
+          username: ${{ env.DO_USER }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          script: |
+            set -e
+            mkdir -p /opt/blackroad
+            cd /opt/blackroad
+
+            # Create/refresh .env for the web service
+            cat > .env <<'EOF_ENV'
+            NODE_ENV=production
+            PORT=3000
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            # add any other APP_* secrets your app needs
+            EOF_ENV
+
+            # Login to GHCR if your image is private
+            if [ -n "${{ secrets.GHCR_TOKEN }}" ]; then
+              echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ vars.GHCR_USER || github.actor }}" --password-stdin
+            fi
+
+            # Pull & run newest image
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker system prune -f
+
