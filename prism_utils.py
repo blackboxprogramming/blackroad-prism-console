@@ -6,16 +6,17 @@ import ast
 
 
 def parse_numeric_prefix(text: str) -> float:
-    """Return the leading numeric value in ``text`` or ``1.0`` if not found.
+    """Extract the numeric prefix from ``text``.
 
-    This uses :func:`ast.literal_eval` for safety instead of ``eval`` and
-    accepts inputs like ``"2, something"``. Non-numeric or invalid values
-    default to ``1.0``.
+    The first comma-separated token is safely evaluated with
+    :func:`ast.literal_eval`. If that token is missing or not numeric the
+    function returns ``1.0``.
     """
     try:
         value = ast.literal_eval(text.split(",", maxsplit=1)[0].strip())
         if isinstance(value, (int, float)):
             return float(value)
-    except Exception:
+    except (ValueError, SyntaxError):
+        # Non-numeric or malformed prefixes fall through to the default below.
         pass
     return 1.0
