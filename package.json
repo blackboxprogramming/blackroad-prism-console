@@ -13,7 +13,7 @@
     "lint": "eslint srv/blackroad-api/server_full.js tests/api_health.test.js tests/git_api.test.js",
     "format": "prettier . --write",
     "format:check": "prettier package.json tests/api_health.test.js srv/lucidia-llm/test_app.py var/www/blackroad/.prettierrc.json .prettierrc.json RUNME.sh Makefile .github/workflows/ci.yml CLEANUP_PLAN.md CLEANUP_DECISIONS.md CLEANUP_RESULTS.md ROLLBACK.md CHANGELOG.md --check --ignore-unknown",
-    "test": "jest",
+    "test": "npx jest",
     "typecheck": "echo 'no typecheck'",
     "health": "node scripts/health.js",
     "dev:site": "npm --prefix sites/blackroad run dev",
