@@ -195,11 +195,11 @@ export GITHUB_TOKEN SCOPE OWNER REPO GH_URL RUNNER_VERSION RUNNER_BASE RUNNER_NA
 
 # Kick off in parallel
 if command -v xargs >/dev/null 2>&1; then
-  cat "$HOSTS_FILE" | grep -v '^\s*$' | grep -v '^\s*#' | xargs -I{} -P "$PARALLEL" bash -lc 'fix_one "$@"' _ {}
+  cat "$HOSTS_FILE" | grep -v '^[[:space:]]*$' | grep -v '^[[:space:]]*#' | xargs -I{} -P "$PARALLEL" bash -lc 'fix_one "$@"' _ {}
 else
   # Fallback: sequential
   while IFS= read -r h; do
-    [[ -z "$h" || "$h" =~ ^# ]] && continue
+    [[ "$h" =~ ^[[:space:]]*$ || "$h" =~ ^[[:space:]]*# ]] && continue
     fix_one "$h"
   done < "$HOSTS_FILE"
 fi
