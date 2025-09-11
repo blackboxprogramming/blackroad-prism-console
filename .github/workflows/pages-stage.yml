@@ -1,6 +1,8 @@
-name: Deploy Pages + Proof + Circuit Breaker
+name: Deploy Stage Pages + Proof + Circuit Breaker
 on:
-  push: { branches: [main] }
+  push:
+    branches: [main]
+    paths: ['blackroad-stage/**']
   workflow_dispatch:
   schedule:
     - cron: '5 6 * * *' # daily UTC
