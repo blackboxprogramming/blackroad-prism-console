@@ -1,4 +1,3 @@
-// FILE: /srv/blackroad-api/src/routes/timeline.js
 'use strict';
 
 const express = require('express');

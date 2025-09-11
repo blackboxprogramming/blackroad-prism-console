@@ -1,4 +1,3 @@
-// FILE: /srv/blackroad-api/src/routes/health.js
 'use strict';
 
 const express = require('express');
