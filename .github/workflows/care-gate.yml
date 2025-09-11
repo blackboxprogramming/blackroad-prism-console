@@ -6,34 +6,52 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with: { python-version: '3.11' }
       - run: pip install nltk pytest
       - name: Score care
         run: |
           python - <<'PY'
-import os, re, subprocess, json
-root='.'
-todo=fix=long=0
-for dp,_,fs in os.walk(root):
-  if '.git' in dp: continue
-  for f in fs:
-    p=os.path.join(dp,f)
-    try: txt=open(p,'r',errors='ignore').read()
-    except: continue
-    todo+=len(re.findall(r'\bTODO\b',txt))
-    fix +=len(re.findall(r'\bFIXME\b',txt))
-    if sum(1 for _ in open(p,'r',errors='ignore'))>800: long+=1
-# try tests
-try:
-  r=subprocess.run(['pytest','-q'],capture_output=True,text=True,timeout=180)
-  failing = 0 if r.returncode==0 else 1
-except Exception: failing=1
-score = todo*0.5 + fix*1.0 + long*2 + failing*5
-report={"todo":todo,"fixme":fix,"long_files":long,"tests_failing":failing,"score":score}
-print("CARE-REPORT:", json.dumps(report))
-threshold=float(os.environ.get("CARE_THRESHOLD","10"))
-open(os.environ.get("GITHUB_STEP_SUMMARY","/dev/null"),'a').write(f"\n**Care score:** {score} (≤ {threshold} passes)\n")
-exit(0 if score<=threshold else 1)
-PY
+          import os, re, subprocess, json, shlex
+
+          # determine files changed in this PR
+          base = os.environ.get('GITHUB_BASE_REF')
+          if base:
+              subprocess.run(['git', 'fetch', 'origin', base, '--depth=1'], check=True)
+              diff_cmd = ['git', 'diff', '--name-only', f'origin/{base}']
+          else:
+              diff_cmd = ['git', 'ls-files']
+          files = subprocess.check_output(diff_cmd, text=True).splitlines()
+
+          todo = fix = long = 0
+          for p in files:
+              if not os.path.isfile(p):
+                  continue
+              try:
+                  txt = open(p, 'r', errors='ignore').read()
+              except Exception:
+                  continue
+              todo += len(re.findall(r'\bTODO\b', txt))
+              fix  += len(re.findall(r'\bFIXME\b', txt))
+              try:
+                  lines = sum(1 for _ in open(p, 'r', errors='ignore'))
+              except Exception:
+                  lines = 0
+              if lines > 800:
+                  long += 1
+
+          # try tests
+          try:
+              r = subprocess.run(['pytest', '-q'], capture_output=True, text=True, timeout=180)
+              failing = 0 if r.returncode == 0 else 1
+          except Exception:
+              failing = 1
+
+          score = todo * 0.5 + fix * 1.0 + long * 2 + failing * 5
+          report = {"todo": todo, "fixme": fix, "long_files": long, "tests_failing": failing, "score": score}
+          print("CARE-REPORT:", json.dumps(report))
+          threshold = float(os.environ.get('CARE_THRESHOLD', '10'))
+          open(os.environ.get('GITHUB_STEP_SUMMARY', '/dev/null'), 'a').write(f"\n**Care score:** {score} (≤ {threshold} passes)\n")
+          exit(0 if score <= threshold else 1)
+          PY
         env:
-          CARE_THRESHOLD: "12"
+          CARE_THRESHOLD: '12'
