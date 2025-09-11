@@ -1,6 +1,8 @@
 # BlackRoad.io — Dependency & Ops Bundle
 Date: 2025-08-22
 
+Requires Node.js 20 or later.
+
 This bundle is a **drop-in helper** to resolve “missing dependencies etc.” without requiring
 connector access. Push it into your working copy, then run one script on the server to scan
 your API, install missing npm packages, set up env defaults, and (optionally) boot a local
