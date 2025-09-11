@@ -37,7 +37,11 @@ export default async function diffsRoutes(fastify: FastifyInstance) {
     const workRoot = path.resolve(process.cwd(), '../work');
     for (const d of body.diffs) {
       const result = applyPatch('', d.patch);
-      const target = path.join(workRoot, d.path);
+      const target = path.resolve(workRoot, d.path);
+      if (!target.startsWith(workRoot + path.sep)) {
+        reply.code(400).send({ error: 'Invalid path' });
+        return;
+      }
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.writeFileSync(target, result);
       const event: PrismEvent = {
