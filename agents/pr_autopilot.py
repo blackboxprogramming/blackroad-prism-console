@@ -7,6 +7,7 @@ import os
 import subprocess
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
 import requests
@@ -29,7 +30,7 @@ class AutomatedPullRequestManager:
         logging.basicConfig(filename=self.log_file, level=logging.INFO)
 
     def monitor_repo(self) -> bool:
-        """Return True if the repository has uncommitted changes."""
+        """Check whether the repository has uncommitted changes."""
         result = subprocess.run(
             ["git", "status", "--porcelain"], capture_output=True, text=True, check=False
         )
@@ -84,11 +85,16 @@ class AutomatedPullRequestManager:
 
     def apply_comment_fixes(self) -> None:
         """Execute the CODEx comment fixer script to update code comments."""
-        subprocess.run(
-            ["node", ".github/tools/codex-apply.js", ".github/prompts/codex-fix-comments.md"],
-            check=False,
-        )
-        self.log("Applied comment fixes")
+        repo_root = Path(__file__).resolve().parents[1]
+        try:
+            subprocess.run(
+                ["node", ".github/tools/codex-apply.js", ".github/prompts/codex-fix-comments.md"],
+                check=True,
+                cwd=repo_root,
+            )
+            self.log("Applied comment fixes")
+        except (OSError, subprocess.CalledProcessError) as exc:
+            self.log(f"Failed to apply comment fixes: {exc}")
 
     def log(self, message: str) -> None:
         """Write a message to the log file."""
