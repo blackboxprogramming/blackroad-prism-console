@@ -1,0 +1,20 @@
+name: debugger
+version: 0.1.0
+role: "Triage failures and propose minimal-fix diffs."
+capabilities: [ "read", "write" ]
+triggers:
+  - kind: run.end
+    match: "status:error"
+inputs:
+  - logs.recent
+  - traces.failedSpan
+  - diffs.latest
+outputs:
+  - hypothesis
+  - fix.diff
+  - tests.toRun
+tools:
+  - fs
+  - git
+policyHints:
+  requiresApproval: true

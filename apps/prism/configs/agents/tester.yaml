@@ -1,0 +1,18 @@
+name: tester
+version: 0.1.0
+role: "Run tests and report diagnostics."
+capabilities: [ "exec" ]
+triggers:
+  - kind: file.write
+    match: "**/*"
+  - kind: command
+    match: "test:*"
+inputs:
+  - context.tests
+outputs:
+  - test.report
+  - coverage.summary
+tools:
+  - shell
+policyHints:
+  requiresApproval: false

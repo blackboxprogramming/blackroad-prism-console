@@ -1,0 +1,29 @@
+title: "Add Google OAuth login"
+intent: "Enable Google sign-in on web app."
+steps:
+  - id: deps
+    agent: coder
+    action: "add dependency"
+    files:
+      requirements.txt: |
+        # TODO: add 'authlib' or 'google-auth'...
+  - id: routes
+    agent: coder
+    action: "add routes"
+    files:
+      src/auth.py: |
+        # TODO: implement OAuth route handlers
+  - id: env
+    agent: planner
+    action: "require env"
+    requires:
+      - GOOGLE_CLIENT_ID
+      - GOOGLE_CLIENT_SECRET
+  - id: tests
+    agent: tester
+    action: "run tests"
+    command: "pytest -q"
+  - id: deploy
+    agent: deployer
+    action: "promote to staging"
+    command: "deploy:staging"

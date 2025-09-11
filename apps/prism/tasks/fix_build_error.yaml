@@ -1,0 +1,15 @@
+title: "Fix build error"
+intent: "Resolve failing build in CI."
+steps:
+  - id: triage
+    agent: debugger
+    action: "analyze logs and propose fix"
+  - id: patch
+    agent: coder
+    action: "apply minimal patch"
+  - id: verify
+    agent: tester
+    action: "rerun failing tests only"
+  - id: commit
+    agent: coder
+    action: "commit with message"
