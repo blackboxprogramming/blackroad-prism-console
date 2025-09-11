@@ -3,6 +3,7 @@
 const { create } = require('ipfs-http-client');
 const canonicalize = require('json-canonicalize');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const TOPIC = process.env.TRUTH_TOPIC || 'truth.garden/v1/announce';
 const IPFS_API = process.env.IPFS_API || 'http://127.0.0.1:5001';
@@ -13,10 +14,46 @@ const FEED_APPEND = (line) => {
   } catch {}
 };
 
+function ensureIdentity() {
+  const path = '/srv/truth/identity.json';
+  try {
+    const raw = fs.readFileSync(path, 'utf8');
+    const data = JSON.parse(raw);
+    const key = crypto.createPrivateKey({
+      key: Buffer.from(data.privateKey, 'base64'),
+      format: 'der',
+      type: 'pkcs8',
+    });
+    return {
+      did: data.did,
+      signJcs(buf) {
+        return crypto.sign(null, buf, key).toString('base64');
+      },
+    };
+  } catch {
+    const { privateKey, publicKey } = crypto.generateKeyPairSync('ed25519');
+    const did = 'did:key:' + publicKey.export({ format: 'der', type: 'spki' }).toString('base64');
+    fs.mkdirSync('/srv/truth', { recursive: true });
+    fs.writeFileSync(
+      path,
+      JSON.stringify({
+        did,
+        privateKey: privateKey.export({ format: 'der', type: 'pkcs8' }).toString('base64'),
+      })
+    );
+    return {
+      did,
+      signJcs(buf) {
+        return crypto.sign(null, buf, privateKey).toString('base64');
+      },
+    };
+  }
+}
+
 module.exports = async function attachTruthPubSub({ app }) {
   const ipfs = create({ url: IPFS_API });
-  const ident = app.locals.truthIdentity; // from truth_identity
-  if (!ident) throw new Error('truth_pubsub: identity missing');
+  const ident = app.locals.truthIdentity || ensureIdentity();
+  app.locals.truthIdentity = ident;
 
   // Subscriber: pin on receipt (simple allow-all; you can add DID allowlist later)
   await ipfs.pubsub.subscribe(TOPIC, async (msg) => {
