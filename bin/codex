@@ -4,7 +4,7 @@ set -euo pipefail
 # === Codex: single entrypoint ===
 # Subcommands:
 #   up            -> pin hosts (if needed) + discover + grab + merge + operator --watch
-#   discover      -> discover all repos for owner/org and sync
+#   discover      -> discover all repos for owner or org and sync
 #   merge         -> auto pull/rebase/ff-merge + push (non-read-only)
 #   watch         -> operator --watch (live alerts + report)
 #   once          -> operator --once (process new events then exit)
@@ -87,7 +87,7 @@ WIZ
     ;;
 
   audit)
-    # re-use the wizard’s baseline audit emitter
+    # Reuse the wizard’s baseline audit emitter
     run python3 "$ROOT/codex/tools/codex_repo_wizard.py" --audit
     ;;
 
