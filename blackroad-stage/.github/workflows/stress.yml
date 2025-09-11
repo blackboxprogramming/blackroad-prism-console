@@ -1,0 +1,27 @@
+name: Stage Stress (safe)
+on:
+  workflow_dispatch:
+    inputs:
+      STRESS:
+        description: 'true to hammer stage'
+        default: 'false'
+  push:
+    branches: [stage]
+permissions: { contents: read }
+concurrency:
+  group: blackroad-stage-stress
+  cancel-in-progress: true
+jobs:
+  stress:
+    if: ${{ github.event.inputs.STRESS == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Warm-up check
+        run: |
+          curl -fsS https://stage.blackroad.io/ >/dev/null
+          curl -fsS https://stage.blackroad.io/health.json >/dev/null
+      - name: Safe load (autocannon)
+        run: |
+          npm i -g autocannon
+          autocannon -d 30 -c 20 https://stage.blackroad.io/health.json
+          autocannon -d 30 -c 50 https://stage.blackroad.io/
