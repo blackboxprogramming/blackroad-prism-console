@@ -54,7 +54,9 @@ function Window({ id, title, layout, setLayout, children }) {
       >
         <div className="flex items-center justify-between bg-neutral-800 text-white px-2 py-1 cursor-move">
           <span id={`${id}-title`} className="text-sm flex items-center gap-1">
-            <span className="text-green-400">●</span>
+            <span className="text-green-400" aria-hidden="true">
+              ●
+            </span>
             {title}
           </span>
           <div className="space-x-1">
