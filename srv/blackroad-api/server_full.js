@@ -30,6 +30,7 @@ const verify = require('./lib/verify');
 const notify = require('./lib/notify');
 const logger = require('./lib/log');
 const attachLlmRoutes = require('./routes/admin_llm');
+const gitRouter = require('./routes/git');
 
 // --- Config
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -477,6 +478,9 @@ for (const row of qSeed) {
     'INSERT OR IGNORE INTO quantum_ai (topic, summary) VALUES (?, ?)'
   ).run(row.topic, row.summary);
 }
+
+// Git API
+app.use('/api/git', requireAuth, gitRouter);
 
 // Helpers
 function listRows(t) {
