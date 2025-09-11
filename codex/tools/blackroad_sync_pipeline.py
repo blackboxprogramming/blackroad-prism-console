@@ -21,6 +21,8 @@ import os
 import subprocess
 from typing import List
 
+from tools.atlassian import create_jira_issue
+
 # ---------------------------------------------------------------------------
 # Utility helpers
 # ---------------------------------------------------------------------------
@@ -48,13 +50,18 @@ def git_push(message: str = "Sync changes via Codex"):
 # ---------------------------------------------------------------------------
 
 def run_connector_jobs():
-    """Placeholder for connector sync logic.
+    """Run placeholder connector sync jobs with optional Atlassian hook."""
 
-    Implement OAuth flows and webhook listeners for services such as
-    Salesforce, Airtable, Slack and Linear.  This function simply notifies the
-    user that connector jobs should run here.
-    """
     print("[connectors] run background sync jobs here …")
+    try:
+        create_jira_issue(
+            "Automated sync",
+            "Background connector sync triggered by pipeline",
+            os.getenv("ATLASSIAN_PROJECT_KEY", "BR"),
+        )
+        print("[connectors] created JIRA issue")
+    except Exception as exc:  # pragma: no cover - best effort
+        print(f"[connectors] JIRA integration unavailable: {exc}")
 
 # ---------------------------------------------------------------------------
 # Working Copy automation
