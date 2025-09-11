@@ -21,7 +21,9 @@
     "test-agents-pack": "node tests/test_agents_mega.js",
     "frontend:dev": "npm --prefix sites/blackroad run dev",
     "frontend:build": "npm --prefix sites/blackroad run build",
-    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
+    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true",
+    "prism:test:intel": "pnpm -C prism/server test:intel",
+    "prism:test:ui": "pnpm -C prism/apps/web test"
   },
   "engines": {
     "node": ">=20"
