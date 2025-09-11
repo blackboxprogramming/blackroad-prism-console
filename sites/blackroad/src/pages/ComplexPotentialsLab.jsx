@@ -22,6 +22,8 @@ export default function ComplexPotentialsLab(){
     {x: 0.3, y:0.5, q:+1},
     {x: 0.7, y:0.5, q:-1},
   ]);
+  const chargesRef = useRef(charges);
+  useEffect(() => { chargesRef.current = charges; }, [charges]);
   const [arrows,setArrows]=useState(24);
   const [levels,setLevels]=useState(14);
 
@@ -93,7 +95,7 @@ export default function ComplexPotentialsLab(){
     let drag=-1;
     const down=e=>{
       const r=c.getBoundingClientRect(); const x=(e.clientX-r.left)/r.width, y=1-(e.clientY-r.top)/r.height;
-      drag = charges.findIndex(q=> (q.x-x)**2 + (q.y-y)**2 < (12/W)*(12/W)*4 );
+      drag = chargesRef.current.findIndex(q=> (q.x-x)**2 + (q.y-y)**2 < (12/W)*(12/W)*4 );
     };
     const move=e=>{
       if(drag<0) return;
@@ -103,7 +105,7 @@ export default function ComplexPotentialsLab(){
     const up=()=>{ drag=-1; };
     c.addEventListener("mousedown",down); window.addEventListener("mousemove",move); window.addEventListener("mouseup",up);
     return ()=>{ c.removeEventListener("mousedown",down); window.removeEventListener("mousemove",move); window.removeEventListener("mouseup",up); };
-  },[charges,W]);
+  },[W]);
 
   const flip = (i)=> setCharges(cs=> cs.map((q,k)=> k===i? {...q, q: -q.q } : q));
   const add = (sign)=> setCharges(cs=> cs.concat([{x:0.5+0.02*(cs.length%3), y:0.5, q: sign}]));
