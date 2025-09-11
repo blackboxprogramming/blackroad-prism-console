@@ -6,16 +6,20 @@ process.env.GIT_REPO_PATH = process.cwd();
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
 
+async function getAuthCookie() {
+  const login = await request(app)
+    .post('/api/login')
+    .send({ username: 'root', password: 'Codex2025' });
+  return login.headers['set-cookie'];
+}
+
 describe('Git API', () => {
   afterAll((done) => {
     server.close(done);
   });
 
   it('returns git health info', async () => {
-    const login = await request(app)
-      .post('/api/login')
-      .send({ username: 'root', password: 'Codex2025' });
-    const cookie = login.headers['set-cookie'];
+    const cookie = await getAuthCookie();
     const res = await request(app)
       .get('/api/git/health')
       .set('Cookie', cookie);
@@ -26,10 +30,7 @@ describe('Git API', () => {
   });
 
   it('returns git status info', async () => {
-    const login = await request(app)
-      .post('/api/login')
-      .send({ username: 'root', password: 'Codex2025' });
-    const cookie = login.headers['set-cookie'];
+    const cookie = await getAuthCookie();
     const res = await request(app)
       .get('/api/git/status')
       .set('Cookie', cookie);
@@ -41,5 +42,7 @@ describe('Git API', () => {
     expect(res.body.counts).toHaveProperty('unstaged');
     expect(res.body.counts).toHaveProperty('untracked');
     expect(typeof res.body.isDirty).toBe('boolean');
+    expect(typeof res.body.shortHash).toBe('string');
+    expect(typeof res.body.lastCommitMsg).toBe('string');
   });
 });
