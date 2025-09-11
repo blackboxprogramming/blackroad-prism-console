@@ -1,4 +1,3 @@
-// FILE: /srv/blackroad-api/src/routes/users.js
 'use strict';
 
 const express = require('express');

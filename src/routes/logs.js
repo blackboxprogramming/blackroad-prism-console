@@ -1,4 +1,3 @@
-// FILE: /srv/blackroad-api/src/routes/logs.js
 'use strict';
 
 const express = require('express');

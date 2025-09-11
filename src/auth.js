@@ -1,4 +1,3 @@
-// FILE: /srv/blackroad-api/src/auth.js
 'use strict';
 
 const bcrypt = require('bcrypt');
