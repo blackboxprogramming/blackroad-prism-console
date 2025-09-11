@@ -4,6 +4,16 @@ Date: 2025-08-22
 
 Requires Node.js 20 or later.
 
+## Prism Developer Mode
+
+Run the developer mode server and web UI:
+
+```bash
+pnpm -C prism/server dev
+pnpm -C prism/apps/web dev
+```
+
+
 This bundle is a **drop-in helper** to resolve “missing dependencies etc.” without requiring
 connector access. Push it into your working copy, then run one script on the server to scan
 your API, install missing npm packages, set up env defaults, and (optionally) boot a local
