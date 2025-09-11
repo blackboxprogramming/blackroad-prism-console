@@ -88,7 +88,7 @@ pass "/api/devices"
 # yjs backend listen check
 ss -ltn | grep -q ':12345 ' && pass "yjs listen" || fail "yjs not listening"
 # CSP worker-src for Monaco
-curl -Is https://blackroad.io/editor-monaco.html | tr -d '\r' | grep -i '^content-security-policy:' | grep -q "worker-src 'self'" && pass "CSP worker-src" || echo "[VERIFY] WARN: CSP worker-src not found"
+curl -Is https://blackroad.io/project.html | tr -d '\r' | grep -i '^content-security-policy:' | grep -q "worker-src 'self'" && pass "CSP worker-src" || echo "[VERIFY] WARN: CSP worker-src not found"
 echo "[VERIFY] success."
 SH
   chmod +x "$dir/verify.sh"

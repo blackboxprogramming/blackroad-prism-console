@@ -99,7 +99,7 @@ audit(){
   check_file "$ORIGIN_KEY" || true
   check_file "$API_DB" || true
   check_file "$WEB_DIR/llm.html" || true
-  for p in "$WEB_DIR/project.html" "$WEB_DIR/editor-monaco.html" "$WEB_DIR/collab.html" "$WEB_DIR/truth.html" "$WEB_DIR/trust.html"; do
+  for p in "$WEB_DIR/project.html" "$WEB_DIR/editor.html" "$WEB_DIR/collab.html" "$WEB_DIR/truth.html" "$WEB_DIR/trust.html"; do
     check_file "$p" || true
   done
   [[ -d "$PROJECTS" ]] && grn "✓ projects dir $PROJECTS" || ylw "• projects dir missing: $PROJECTS"
