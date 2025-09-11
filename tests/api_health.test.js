@@ -3,6 +3,7 @@ process.env.INTERNAL_TOKEN = 'x';
 process.env.ALLOW_ORIGINS = 'https://example.com';
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
+// Helper to obtain an auth cookie for requests requiring authentication
 const { getAuthCookie } = require('./helpers/auth');
 
 describe('API security and health', () => {
