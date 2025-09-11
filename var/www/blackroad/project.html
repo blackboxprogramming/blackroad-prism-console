@@ -1,27 +1,111 @@
 <!doctype html><meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>BlackRoad • Project Rooms</title>
-<link rel="preconnect" href="/yjs/"><link rel="preconnect" href="/socket.io/">
+<link rel="preconnect" href="/yjs/" /><link
+  rel="preconnect"
+  href="/socket.io/"
+/>
 <style>
-  body{margin:0;background:#0b0b10;color:#e9e9f1;font:14px system-ui}
-  header{display:flex;gap:8px;align-items:center;padding:10px 12px;background:#0f0f1a;border-bottom:1px solid #1e1e2f}
-  .pill{border:1px solid #24244a;border-radius:999px;padding:4px 10px;font-size:12px;background:#141428}
-  .row{display:flex;gap:8px;align-items:center}
-  main{display:grid;grid-template-columns:300px 1fr;gap:12px;padding:12px}
-  .card{background:#131320;border:1px solid #24244a;border-radius:12px;padding:10px}
-  input,button,select{border-radius:10px;border:1px solid #24244a;background:#10102a;color:#e9e9f1;padding:8px}
-  button{cursor:pointer}
-  #tree{max-height:72vh;overflow:auto}
-  #editor{height:72vh;border:1px solid #24244a;border-radius:12px;overflow:hidden}
-  ul{list-style:none;margin:0;padding:0} li{padding:4px 0;cursor:pointer}
-  small{color:#9aa0aa}
-  .tab{display:inline-block;padding:6px 10px;border:1px solid #24244a;border-bottom:none;border-top-left-radius:10px;border-top-right-radius:10px;margin-right:6px;background:#0f0f1a}
-  .tab.active{background:#171730}
+  body {
+    margin: 0;
+    background: #0b0b10;
+    color: #e9e9f1;
+    font: 14px system-ui;
+  }
+  header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    background: #0f0f1a;
+    border-bottom: 1px solid #1e1e2f;
+  }
+  .pill {
+    border: 1px solid #24244a;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    background: #141428;
+  }
+  .row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  main {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+  .card {
+    background: #131320;
+    border: 1px solid #24244a;
+    border-radius: 12px;
+    padding: 10px;
+  }
+  input,
+  button,
+  select {
+    border-radius: 10px;
+    border: 1px solid #24244a;
+    background: #10102a;
+    color: #e9e9f1;
+    padding: 8px;
+  }
+  button {
+    cursor: pointer;
+  }
+  #tree {
+    max-height: 72vh;
+    overflow: auto;
+  }
+  #editor {
+    height: 72vh;
+    border: 1px solid #24244a;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    padding: 4px 0;
+    cursor: pointer;
+  }
+  small {
+    color: #9aa0aa;
+  }
+  .tab {
+    display: inline-block;
+    padding: 6px 10px;
+    border: 1px solid #24244a;
+    border-bottom: none;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    margin-right: 6px;
+    background: #0f0f1a;
+  }
+  .tab.active {
+    background: #171730;
+  }
 </style>
 <header>
   <div class="pill">Project Rooms</div>
-  <a class="pill" href="/editor-monaco.html" style="text-decoration:none;color:#0096FF">Single Doc</a>
-  <a class="pill" href="/collab.html" style="text-decoration:none;color:#0096FF">Presence</a>
+  <a
+    class="pill"
+    href="/editor.html"
+    style="text-decoration: none; color: #0096ff"
+    >Single Doc</a
+  >
+  <a
+    class="pill"
+    href="/collab.html"
+    style="text-decoration: none; color: #0096ff"
+    >Presence</a
+  >
 </header>
 <main>
   <div class="card">
@@ -30,18 +114,23 @@
       <select id="proj"></select>
       <button onclick="loadProj()">Open</button>
     </div>
-    <div class="row" style="margin-top:6px">
-      <input id="newname" placeholder="new project name"><button onclick="createProj()">Create</button>
+    <div class="row" style="margin-top: 6px">
+      <input id="newname" placeholder="new project name" /><button
+        onclick="createProj()"
+      >
+        Create
+      </button>
     </div>
-    <h3 style="margin-top:10px">Tree</h3>
+    <h3 style="margin-top: 10px">Tree</h3>
     <div id="tree"></div>
-    <div class="row" style="margin-top:8px">
-      <input id="newpath" placeholder="path/in/project.txt" style="flex:1">
-      <button onclick="mkfile()">+file</button><button onclick="mkdir()">+dir</button>
+    <div class="row" style="margin-top: 8px">
+      <input id="newpath" placeholder="path/in/project.txt" style="flex: 1" />
+      <button onclick="mkfile()">+file</button
+      ><button onclick="mkdir()">+dir</button>
     </div>
-    <h3 style="margin-top:10px">Actions</h3>
-    <div class="row" style="gap:6px;flex-wrap:wrap">
-      <input id="msg" placeholder="commit message" style="flex:1">
+    <h3 style="margin-top: 10px">Actions</h3>
+    <div class="row" style="gap: 6px; flex-wrap: wrap">
+      <input id="msg" placeholder="commit message" style="flex: 1" />
       <button onclick="saveFile()">Save</button>
       <button onclick="commit()">Commit</button>
       <button onclick="deploy()">Deploy</button>
