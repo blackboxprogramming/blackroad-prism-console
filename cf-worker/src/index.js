@@ -180,7 +180,7 @@ function confirmHtml(url){
     <h2 style="margin:0 0 12px">Confirm your subscription</h2>
     <p>Click the button below to confirm your email for BlackRoad updates.</p>
     <p><a href="${url}" style="display:inline-block;padding:12px 18px;border-radius:10px;text-decoration:none;background:linear-gradient(90deg,#FF4FD8,#0096FF);color:#0b0b12;font-weight:700">Confirm</a></p>
-    <p style="color:#555;font-size:12px">If you didn't request this, ignore this email.</p>
+    <p style="color:#555555;font-size:12px">If you didn't request this, ignore this email.</p>
   </div>`;
 }
 function unsubHtml(url){
@@ -189,7 +189,7 @@ function unsubHtml(url){
     <h2 style="margin:0 0 12px">Confirm unsubscribe</h2>
     <p>Click below to stop receiving BlackRoad emails for this address.</p>
     <p><a href="${url}" style="display:inline-block;padding:12px 18px;border-radius:10px;text-decoration:none;background:linear-gradient(90deg,#FF4FD8,#0096FF);color:#0b0b12;font-weight:700">Unsubscribe</a></p>
-    <p style="color:#555;font-size:12px">If you didn't request this, ignore this email.</p>
+    <p style="color:#555555;font-size:12px">If you didn't request this, ignore this email.</p>
   </div>`;
 }
 
