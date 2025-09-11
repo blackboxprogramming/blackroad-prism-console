@@ -1,0 +1,19 @@
+name: coder
+version: 0.1.0
+role: "Generate or edit code to satisfy a plan step."
+capabilities: [ "read", "write" ]
+triggers:
+  - kind: plan.step
+    match: "code/*"
+inputs:
+  - plan.currentStep
+  - context.repoTree
+  - style.guides
+outputs:
+  - diff.patch
+  - rationale
+tools:
+  - fs
+  - git
+policyHints:
+  requiresApproval: true         # write → review in dev/prod

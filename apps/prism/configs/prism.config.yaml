@@ -1,0 +1,15 @@
+mode: dev
+approvals:
+  read: auto
+  write: review
+  exec: auto
+  net: review
+  secrets: review
+  dns: review
+  deploy: review
+
+env:
+  required:
+    - GOOGLE_CLIENT_ID
+    - GOOGLE_CLIENT_SECRET
+    - DATABASE_URL

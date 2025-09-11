@@ -1,0 +1,17 @@
+name: planner
+version: 0.1.0
+role: "Turn user intent into an executable plan (steps, files, tests)."
+capabilities: [ "read" ]
+triggers:
+  - kind: prompt
+    match: "plan:"               # e.g., "plan: add Google login"
+inputs:
+  - context.projectOverview
+  - context.repoTree
+outputs:
+  - plan.steps
+  - plan.risks
+  - plan.estimatedDiffs
+tools: []
+policyHints:
+  requiresApproval: false

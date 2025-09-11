@@ -1,0 +1,19 @@
+name: deployer
+version: 0.1.0
+role: "Build, package, and promote to environments."
+capabilities: [ "exec", "deploy", "dns", "net" ]
+triggers:
+  - kind: command
+    match: "deploy:*"
+inputs:
+  - env.targets
+  - build.artifacts
+outputs:
+  - deploy.report
+  - endpoint.url
+tools:
+  - cloud
+  - shell
+  - http
+policyHints:
+  requiresApproval: true
