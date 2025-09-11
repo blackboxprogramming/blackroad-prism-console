@@ -34,7 +34,7 @@ jobs:
           [ -z "$BOT_TOKEN" ] && { echo "::warning::No BOT_TOKEN secret; cannot push auto-heal changes."; exit 0; }
           git push "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:$(git rev-parse --abbrev-ref HEAD)"
 
-      - name: PR comment summary
+      - name: Post summary comment
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
@@ -42,7 +42,7 @@ jobs:
             const committed = `${{ steps.heal.outputs.committed }}` === '1';
             const body = committed
               ? "🤖 Auto-Heal committed fixes (configs, formatting, linting)."
-              : "✅ Auto-Heal found nothing to change.";
+              : "✅ Auto-Heal found no changes to apply.";
             await github.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
