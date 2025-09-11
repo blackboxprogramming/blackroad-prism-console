@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>BlackRoad</title>
+    <style>
+      :root {
+        --accent: #ff4fd8;
+        --accent-2: #0096ff;
+        --accent-3: #fdba2d;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0b0b0f;
+        color: #eaeaf0;
+        font-family: Inter, system-ui, sans-serif;
+      }
+      .wrap {
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+      }
+      .card {
+        padding: 24px;
+        border: 1px solid #222;
+        border-radius: 16px;
+        background: linear-gradient(180deg, #0f0f16, #0b0b0f);
+      }
+      .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 9999px;
+        background: var(--accent);
+        color: #0b0b0f;
+        font-weight: 700;
+      }
+      a {
+        color: var(--accent-2);
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- BLACKROAD OK -->
+    <div class="wrap">
+      <div class="card">
+        <div class="badge">BlackRoad</div>
+        <h1>We’re online.</h1>
+        <p>Daily proof: <code id="proof">%%PROOF%%</code></p>
+        <p><a href="/health.json">/health.json</a></p>
+        <small>Palette: #FF4FD8 · #0096FF · #FDBA2D</small>
+      </div>
+    </div>
+  </body>
+</html>

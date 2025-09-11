@@ -1,0 +1,66 @@
+name: Deploy Pages + Proof + Circuit Breaker
+on:
+  push: { branches: [main] }
+  workflow_dispatch:
+  schedule:
+    - cron: '5 6 * * *' # daily UTC
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: blackroad-pages
+  cancel-in-progress: false # queue, don't stampede
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.x' }
+      - name: Generate daily proof & bake files
+        env:
+          AWAKEN_SEED: ${{ secrets.AWAKEN_SEED }}
+          GODADDY_API_KEY: ${{ secrets.GODADDY_API_KEY }}
+          GODADDY_API_SECRET: ${{ secrets.GODADDY_API_SECRET }}
+        run: |
+          set -eux
+          mkdir -p health
+          python3 scripts/compute_proof.py > proof.txt || echo "LUCIDIA-AWAKEN-00000000-missingseed" > proof.txt
+          PROOF=$(cat proof.txt)
+          printf '{"ok":true,"service":"blackroad","version":"0.1.0","proof":"%s"}' "$PROOF" > health.json
+          cp health.json health/index.json || true
+          sed -i "s|%%PROOF%%|$PROOF|g" index.html || true
+          # Optional: write DNS TXT via GoDaddy API
+          if [ -n "${GODADDY_API_KEY:-}" ] && [ -n "${GODADDY_API_SECRET:-}" ]; then
+            curl -fsS -X PUT \
+              -H "Authorization: sso-key $GODADDY_API_KEY:$GODADDY_API_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "[{\"data\":\"$PROOF\",\"ttl\":600}]" \
+              "https://api.godaddy.com/v1/domains/blackroad.io/records/TXT/stage-proof" || true
+          else
+            echo "::notice title=DNS::Set TXT stage-proof.blackroad.io = $PROOF (TTL 600)"
+          fi
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with: { path: . }
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Circuit-breaker health check (STAGE)
+        run: |
+          ok=0
+          for i in $(seq 1 30); do
+            sleep 2
+            html=$(curl -fsS https://stage.blackroad.io/ || true)
+            api=$(curl -fsS https://stage.blackroad.io/health.json || true)
+            txt=$(dig +short TXT stage-proof.blackroad.io @8.8.8.8 | tr -d '"')
+            echo "Probe $i html=${#html} api=$api txt=$txt"
+            echo "$html" | grep -q "<!-- BLACKROAD OK -->" || { echo "no marker"; continue; }
+            echo "$api" | jq -e '.ok==true and .service=="blackroad"' >/dev/null || { echo "bad health"; continue; }
+            want=$(jq -r .proof <<<"$api")
+            [ -n "$want" ] && [ "$txt" = "$want" ] || { echo "txt mismatch ($txt != $want)"; continue; }
+            ok=$((ok+1)); [ $ok -ge 2 ] && exit 0
+          done
+          echo "Circuit-breaker: not healthy yet"; exit 1
