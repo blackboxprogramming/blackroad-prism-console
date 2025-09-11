@@ -1,0 +1,34 @@
+id: python-importerror
+title: "Python: ModuleNotFoundError / ImportError"
+match:
+  - errorRegex: ["ModuleNotFoundError", "ImportError"]
+    lang: ["python"]
+questions:
+  - id: venv
+    text: "Are you using a virtual environment for this project?"
+    kind: boolean
+  - id: module_name
+    text: "Which module failed to import? (as shown in the error)"
+    kind: text
+probes:
+  - id: pip_freeze
+    type: cmdOk
+    args: { cmd: "python -m pip show ${{answers.module_name}}", cwd: "prism/work" }
+    set: "pkg_installed"
+  - id: google_client_id
+    type: envPresent
+    args: { key: "GOOGLE_CLIENT_ID" }
+    set: "google_client_id"
+plan:
+  steps:
+    - kind: cmd
+      when: [{ answerId: "venv", equals: true }]
+      cmd: "python -m pip install ${{answers.module_name}}"
+    - kind: diff
+      path: "requirements.txt"
+      when: [{ answerId: "venv", equals: false }]
+      template: |
+        + ${{answers.module_name}}>=0.0.1   # added by runbook
+  tests:
+    - framework: pytest
+      args: ["-q"]
