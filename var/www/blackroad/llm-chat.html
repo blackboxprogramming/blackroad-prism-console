@@ -161,10 +161,8 @@
                 let finished = false;
                 for (let i = 0; i < lines.length - 1; i++) {
                   const line = lines[i].trim();
-                  if (!line) continue;
-                  const data = line.startsWith('data: ')
-                    ? JSON.parse(line.slice(6))
-                    : JSON.parse(line);
+                  if (!line || !line.startsWith('data:')) continue;
+                  const data = JSON.parse(line.slice(5).trim());
                   if (data.delta) {
                     bot += data.delta;
                     last.innerHTML = '<div class="pill">assistant</div>' + bot;
@@ -178,13 +176,13 @@
                 if (finished) {
                   if (buf.trim()) {
                     const line = buf.trim();
-                    const data = line.startsWith('data: ')
-                      ? JSON.parse(line.slice(6))
-                      : JSON.parse(line);
-                    if (data.delta) {
-                      bot += data.delta;
-                      last.innerHTML =
-                        '<div class="pill">assistant</div>' + bot;
+                    if (line.startsWith('data:')) {
+                      const data = JSON.parse(line.slice(5).trim());
+                      if (data.delta) {
+                        bot += data.delta;
+                        last.innerHTML =
+                          '<div class="pill">assistant</div>' + bot;
+                      }
                     }
                   }
                   return;
@@ -196,12 +194,12 @@
             }
             if (isEvent && buf.trim()) {
               const line = buf.trim();
-              const data = line.startsWith('data: ')
-                ? JSON.parse(line.slice(6))
-                : JSON.parse(line);
-              if (data.delta) {
-                bot += data.delta;
-                last.innerHTML = '<div class="pill">assistant</div>' + bot;
+              if (line.startsWith('data:')) {
+                const data = JSON.parse(line.slice(5).trim());
+                if (data.delta) {
+                  bot += data.delta;
+                  last.innerHTML = '<div class="pill">assistant</div>' + bot;
+                }
               }
             }
           } catch (e) {
