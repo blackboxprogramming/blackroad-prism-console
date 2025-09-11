@@ -26,11 +26,15 @@ def wigner_cdf(s: np.ndarray) -> np.ndarray:
 
 
 def ks_distance(sample: np.ndarray, cdf: Callable[[np.ndarray], np.ndarray]) -> float:
-    """Return the Kolmogorov–Smirnov distance between a sample and a CDF."""
+    """Return the two-sided Kolmogorov–Smirnov distance between a sample and a CDF."""
     x = np.sort(sample)
     n = x.size
-    ecdf = np.arange(1, n + 1) / n
-    return float(np.max(np.abs(ecdf - cdf(x))))
+    cdf_vals = cdf(x)
+    ecdf_right = np.arange(1, n + 1) / n
+    ecdf_left = np.arange(0, n) / n
+    d_plus = np.max(ecdf_right - cdf_vals)
+    d_minus = np.max(cdf_vals - ecdf_left)
+    return float(max(d_plus, d_minus))
 
 
 def riemann_zeros(n: int) -> np.ndarray:
