@@ -10,6 +10,8 @@
 - [ ] Label issues/PRs (`LabelBot`)
 - [ ] Request reviews (`ReviewBot`)
 - [ ] Send notifications (`NotificationBot`)
+- [ ] Assign tasks from job board (`WorkerBot`)
+- [ ] Watch for idle periods (`IdleBot`)
 
 ## In Progress
 <!-- Agents move tasks here when running -->
