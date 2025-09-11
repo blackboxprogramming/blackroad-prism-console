@@ -32,3 +32,4 @@ repos:
       - id: eslint
         args: ['--fix']
         files: "\\.(js|jsx|ts|tsx)$"
+        additional_dependencies: ['@eslint/js']
