@@ -69,7 +69,18 @@ def sync_connectors(ctx: PipelineContext) -> bool:
 
 
 def refresh_working_copy(ctx: PipelineContext) -> bool:
-    """Refresh Working Copy mirror at the designated path."""
+    """Refresh the iOS Working Copy mirror.
+
+    If ``WORKING_COPY_CMD`` is set in the environment, that command is executed
+    to allow custom integration with the Working Copy app (for example via
+    x-callback-url).  Otherwise the function falls back to running ``git pull``
+    in the configured ``WORKING_COPY_PATH``.
+    """
+    cmd = os.getenv("WORKING_COPY_CMD")
+    if cmd:
+        LOG.info("Refreshing Working Copy via command: %s", cmd)
+        return run(cmd)
+
     wc = ctx.working_copy
     wc.mkdir(parents=True, exist_ok=True)
     LOG.info("Refreshing Working Copy mirror at %s", wc)
