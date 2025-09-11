@@ -3,5 +3,8 @@ module.exports = {
   testEnvironment: 'node',
   verbose: true,
   roots: ['<rootDir>/tests'],
-  testMatch: ['**/*.test.js'],
+  testMatch: [
+    '**/?(*.)+(spec|test).[jt]s?(x)',
+    '**/?(*.)+(spec|test).mjs',
+  ],
 };
