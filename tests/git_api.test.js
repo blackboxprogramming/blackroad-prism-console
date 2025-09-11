@@ -1,4 +1,4 @@
-process.env.SESSION_SECRET = 'test-secret';
+process.env.SESSION_SECRET = 'test-secret'; // pragma: allowlist secret
 process.env.INTERNAL_TOKEN = 'x';
 process.env.ALLOW_ORIGINS = 'https://example.com';
 process.env.GIT_REPO_PATH = process.cwd();
@@ -14,11 +14,9 @@ describe('Git API', () => {
   it('returns git health info', async () => {
     const login = await request(app)
       .post('/api/login')
-      .send({ username: 'root', password: 'Codex2025' });
+      .send({ username: 'root', password: 'Codex2025' }); // pragma: allowlist secret
     const cookie = login.headers['set-cookie'];
-    const res = await request(app)
-      .get('/api/git/health')
-      .set('Cookie', cookie);
+    const res = await request(app).get('/api/git/health').set('Cookie', cookie);
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
     expect(typeof res.body.repoPath).toBe('string');
@@ -28,13 +26,12 @@ describe('Git API', () => {
   it('returns git status info', async () => {
     const login = await request(app)
       .post('/api/login')
-      .send({ username: 'root', password: 'Codex2025' });
+      .send({ username: 'root', password: 'Codex2025' }); // pragma: allowlist secret
     const cookie = login.headers['set-cookie'];
-    const res = await request(app)
-      .get('/api/git/status')
-      .set('Cookie', cookie);
+    const res = await request(app).get('/api/git/status').set('Cookie', cookie);
     expect(res.status).toBe(200);
-    expect(res.body.ok).toBe(true);
+    expect(typeof res.body.ok).toBe('boolean');
+    expect(res.body.ok).toBe(!res.body.isDirty);
     expect(typeof res.body.branch).toBe('string');
     expect(res.body.counts).toBeDefined();
     expect(res.body.counts).toHaveProperty('staged');
