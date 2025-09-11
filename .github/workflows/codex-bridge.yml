@@ -8,8 +8,8 @@ jobs:
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       BOT_USER: ${{ secrets.BOT_USER || 'blackroad-bot' }}
-      CODEx_BODY: ${{ github.event.comment.body }}
-      CODEx_PERMISSION: ${{ github.event.comment.author_association }}
+      CODEX_BODY: ${{ github.event.comment.body }}
+      CODEX_PERMISSION: ${{ github.event.comment.author_association }}
     steps:
       - uses: actions/checkout@v4
         with: { persist-credentials: false, fetch-depth: 0 }

@@ -91,8 +91,8 @@ BASH
   cat > "$ROOT/.github/tools/codex-apply.js" <<'JS'
 import { execSync as sh } from 'node:child_process';
 import fs from 'node:fs'; import path from 'node:path';
-const MAX=200*1024, body=(process.env.CODEx_BODY||'').replace(/\r/g,'');
-const perm=process.env.CODEx_PERMISSION||''; if(!/(write|admin|maintain|triage)/.test(perm)){console.log('not collaborator'); process.exit(0);}
+const MAX=200*1024, body=(process.env.CODEX_BODY||'').replace(/\r/g,'');
+const perm=process.env.CODEX_PERMISSION||''; if(!/(write|admin|maintain|triage)/.test(perm)){console.log('not collaborator'); process.exit(0);}
 const repo=((body.match(/\/codex\s+repo\s+([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)(?:\s+([A-Za-z0-9._\/-]+))?/)||[])[1])||'';
 const branch=((body.match(/\/codex\s+repo\s+[^\s]+\s+([A-Za-z0-9._\/-]+)/)||[])[1])||'';
 const apply=/\/codex\s+apply\b/.test(body), patch=/\/codex\s+patch\b/.test(body);
@@ -126,8 +126,8 @@ jobs:
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       BOT_USER:  ${{ secrets.BOT_USER || 'blackroad-bot' }}
-      CODEx_BODY: ${{ github.event.comment.body }}
-      CODEx_PERMISSION: ${{ github.event.comment.author_association }}
+      CODEX_BODY: ${{ github.event.comment.body }}
+      CODEX_PERMISSION: ${{ github.event.comment.author_association }}
     steps:
       - uses: actions/checkout@v4
         with: { persist-credentials: false, fetch-depth: 0 }

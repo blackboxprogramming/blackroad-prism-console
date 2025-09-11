@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const MAX = 200 * 1024;
-let body = (process.env.CODEx_BODY || '').replace(/\r/g, '');
+let body = (process.env.CODEX_BODY || '').replace(/\r/g, '');
 if (body.startsWith('@codex')) {
   if (/^@codex\s+fix comments/i.test(body)) {
     body = body.replace(
@@ -14,7 +14,7 @@ if (body.startsWith('@codex')) {
     body = body.replace(/^@codex/, '/codex');
   }
 }
-const perm = process.env.CODEx_PERMISSION || '';
+const perm = process.env.CODEX_PERMISSION || '';
 if (!/(write|admin|maintain|triage)/.test(perm)) {
   console.log('not collaborator');
   process.exit(0);
