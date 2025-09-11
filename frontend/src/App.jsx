@@ -48,17 +48,19 @@ export default function App(){
 
   useEffect(() => { streamRef.current = stream }, [stream])
 
-  // Restore auth token from local storage on load
+  // Restore auth token from local storage on load and clear state if missing
   useEffect(()=>{
     const token = localStorage.getItem('token')
-    if (token) setToken(token)
-    (async ()=>{
+    setToken(token || '')
+    ;(async ()=>{
       try {
         if (token) {
           const u = await me()
           setUser(u)
           await bootData()
           connectSocket()
+        } else {
+          resetState()
         }
       } catch(e){
         // Reset state on auth failure and log for debugging
