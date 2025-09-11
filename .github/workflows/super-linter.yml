@@ -1,19 +1,19 @@
 name: Super-Linter
-on: { pull_request: {}, push: { branches: [ main ] } }
+on: { pull_request: {}, push: { branches: [main] } }
 permissions: { contents: read }
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with: { fetch-depth: 0 }
-      - uses: github/super-linter/slim@v6
+      - uses: github/super-linter/slim@4e51915f4a812abf59fed160bb14595c0a38a9e7 # v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BRANCH: main
           VALIDATE_ALL_CODEBASE: true
           LOG_LEVEL: warn
-          FILTER_REGEX_EXCLUDE: "node_modules/|dist/|build/"
+          FILTER_REGEX_EXCLUDE: 'node_modules/|dist/|build/'
           VALIDATE_HTML: true
           VALIDATE_MARKDOWN: true
           VALIDATE_YAML: true

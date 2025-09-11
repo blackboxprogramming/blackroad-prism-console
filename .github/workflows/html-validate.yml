@@ -5,11 +5,16 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - id: chk
         run: f="apps/quantum/ternary_consciousness_v3.html"; [ -f "$f" ] && echo ok=1 >> $GITHUB_OUTPUT || echo ok=0 >> $GITHUB_OUTPUT
-      - uses: Cyb3r-Jak3/html5validator-action@v7
+      - uses: Cyb3r-Jak3/html5validator-action@41633d488eb36e18fd1a95ffc83daf1bf22a75bd # v7.2.0
         if: steps.chk.outputs.ok == '1'
-        with: { root: ., paths: apps/quantum/ternary_consciousness_v3.html, blacklist: node_modules }
+        with:
+          {
+            root: .,
+            paths: apps/quantum/ternary_consciousness_v3.html,
+            blacklist: node_modules,
+          }
       - if: steps.chk.outputs.ok != '1'
         run: echo "ℹ️ HTML missing, skipping." >> $GITHUB_STEP_SUMMARY
