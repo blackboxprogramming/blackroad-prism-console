@@ -27,10 +27,10 @@ fi
 # 3) JS quick syntax
 section "JavaScript Syntax"
 errs=0
-grep -RIl --include="*.js" . | while read -r f; do
+while read -r f; do
   node -c "$f" >/dev/null 2>&1 || { echo "❌ $f" >> "$OUT"; errs=$((errs+1)); }
-done
-[ "${errs:-0}" = "0" ] && line "✅ no syntax errors detected"
+done < <(grep -RIl --include="*.js" . || true)
+[ "$errs" = "0" ] && line "✅ no syntax errors detected"
 
 # 4) License headers (sample check)
 section "License Headers (sample)"

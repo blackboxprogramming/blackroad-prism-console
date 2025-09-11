@@ -1,15 +1,5 @@
 /* Dangerfile: comment on PRs with quick quality checks */
-/* global danger, message, warn */
-
-// Removed unused fs import; Danger provides necessary context.
 /* eslint-env node */
-/* global danger, message, warn */
-/* eslint-env node */
-/* global danger, warn, message */
-
-// Quick quality checks for pull requests
-/* eslint-env node */
-/* global danger, warn, message */
 /* global danger, warn, message */
 
 // PR quality checks executed by Danger.js
@@ -23,7 +13,9 @@ if (big.length > 0) {
 
 const added = danger.github.pr.additions || 0;
 if (added > 1500) {
-  warn(`PR is quite large (${added} additions). Consider splitting if possible.`);
+  warn(
+    `PR is quite large (${added} additions). Consider splitting if possible.`
+  );
 }
 
 if (!danger.github.pr.body || danger.github.pr.body.length < 20) {
@@ -34,4 +26,3 @@ const hasScreenshot = /!\[.*\]\(.*\)/.test(danger.github.pr.body || '');
 if (!hasScreenshot && files.some((f) => f.endsWith('.html'))) {
   warn('UI change detected, but no screenshot in the PR body.');
 }
-
