@@ -16,6 +16,7 @@ def parse_numeric_prefix(text: str) -> float:
         value = ast.literal_eval(text.split(",", maxsplit=1)[0].strip())
         if isinstance(value, (int, float)):
             return float(value)
-    except Exception:
+    except (ValueError, SyntaxError):
+        # Raised when the leading segment isn't a valid Python literal
         pass
     return 1.0
