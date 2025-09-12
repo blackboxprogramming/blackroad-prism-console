@@ -1,0 +1,117 @@
+# Flow definitions for "ALL CONNECTIONS" orchestrator
+profiles:
+  staging:
+    env: staging
+  prod:
+    env: prod
+flows:
+  - name: opp_to_task_notify
+    trigger: salesforce.opportunity.updated(stage in ["Negotiation", "Closed Won"])
+    actions:
+      - asana.task.create(project:"GTM-Pipeline", assignee:"{{owner}}", due:"{{closeDate}}")
+      - slack.post(channel:"#sales-updates", text:":rocket: {{name}} {{stage}}")
+    observability:
+      metrics: [flow.total, flow.success, flow.latency_ms]
+      logs:
+        splunk: audit_integrations
+    idempotency:
+      key: sf_{{id}}_{{stage}}
+      retries:
+        attempts: 3
+        exp: true
+      dlq: dlq_opp
+  - name: hubspot_to_salesforce_sync
+    trigger: hubspot.contact.created
+    actions:
+      - salesforce.lead.upsert
+      - asana.task.create
+      - slack.post("#announcements")
+    observability:
+      metrics: [flow.total, flow.success]
+  - name: zendesk_sev_escalation
+    trigger: zendesk.ticket.updated(severity in ["Sev-1", "Sev-2"])
+    actions:
+      - slack.war_room.create("#support-war-room")
+      - zoom.create
+      - jira.incident.create
+      - rca.generate
+    slo:
+      mttr_h_lte: 2
+      rca_due_days: 5
+  - name: release_train
+    trigger: github.push(branch:"main", tag:true)
+    actions:
+      - ci.run: release
+      - asana.task.create(project:"Release Train")
+      - notion.append(changelog)
+      - slack.post("#releases")
+    on_failure:
+      - jira.incident.create
+      - pagerduty.page
+  - name: snyk_to_pr
+    trigger: snyk.vuln.detected
+    actions:
+      - github.pr.patch
+      - slack.post
+      - asana.task.create
+  - name: product_events_to_dw
+    trigger: app.events(stream:"product")
+    actions:
+      - etl.load(snowflake.table:"product_events")
+      - datadog.gauge("ingest.rate")
+      - slack.post("#data-ops")
+    freshness: "D+0 06:00 UTC"
+  - name: vertexai_batch_inference
+    trigger: schedule(cron:"0 2 * * *")
+    actions:
+      - vertexai.run
+      - snowflake.upsert("predictions")
+      - datadog.metrics
+      - slack.post
+  - name: stripe_paid_to_provision
+    trigger: stripe.invoice.paid
+    actions:
+      - launchdarkly.flag.enable
+      - product.api.post(/tenants)
+      - customerio.trigger
+      - netsuite.sync
+      - dw.insert("revenue_events")
+      - slack.post("#announcements")
+    idempotency:
+      key: stripe_{{invoice.id}}
+      retries:
+        attempts: 3
+        exp: true
+  - name: brex_ramp_spend_to_dw
+    trigger: [brex.txn.posted, ramp.txn.posted]
+    actions:
+      - quickbooks.post
+      - netsuite.post
+      - dw.insert("spend_events")
+      - finops.alerts
+  - name: hire_to_access
+    trigger: workday.hire.created
+    actions:
+      - okta.scim.provision(groups:["ENG","REVOPS","FINANCE"])
+      - asana.project.onboarding
+      - slack.post("#announcements")
+    evidence: worm_store
+  - name: figma_export_to_notion
+    trigger: figma.file.versioned
+    actions:
+      - notion.embed
+      - asana.task.create(review)
+      - slack.post
+  - name: edge_telemetry_threshold
+    trigger: iot.telemetry(device in [Jetson,Pi,Arduino,ESP32], threshold_exceeded:true)
+    actions:
+      - slack.post("#ops")
+      - jira.issue.create
+      - dw.insert("iot_events")
+      - datadog.event
+  - name: social_to_crm
+    trigger: social.metric.delta(channel in [X,LinkedIn,YouTube], change>threshold)
+    actions:
+      - hubspot.campaign.note
+      - salesforce.campaign.update
+      - slack.post("#announcements")
