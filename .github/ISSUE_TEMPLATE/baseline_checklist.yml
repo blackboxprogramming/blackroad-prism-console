@@ -1,0 +1,35 @@
+name: Repository baseline checklist
+description: Track key tasks for a hardened, production-ready project
+body:
+  - type: checkboxes
+    id: baseline
+    attributes:
+      label: Items
+      options:
+        - label: 'LICENSE'
+        - label: 'CODEOWNERS'
+        - label: 'CONTRIBUTING.md / SECURITY.md'
+        - label: 'Issue & PR templates'
+        - label: 'README (quickstart/dev/arch/release)'
+        - label: 'Dev environment: .devcontainer or toolchain pinning'
+        - label: 'docker-compose.dev.yml (hot reload + seed)'
+        - label: '.env.example'
+        - label: 'Makefile/Taskfile'
+        - label: 'Lint/format config'
+        - label: 'Unit tests + coverage gate'
+        - label: 'E2E smoke'
+        - label: 'Pre-commit hooks'
+        - label: 'CI: lint/test/build artifacts'
+        - label: 'Release automation (tags/changelog/publish)'
+        - label: 'Dependabot/Renovate'
+        - label: 'CodeQL + secrets scanning'
+        - label: 'Image scan (Trivy)'
+        - label: 'Health/ready/metrics endpoints'
+        - label: 'OpenTelemetry wiring'
+        - label: 'Build-time version endpoint'
+        - label: 'DB migration strategy'
+        - label: 'ADRs + system diagram'
+        - label: 'OpenAPI + published docs (if API)'
+        - label: 'Branch protection rules'
+        - label: 'SBOM on build'
+        - label: 'Threat model lite'
