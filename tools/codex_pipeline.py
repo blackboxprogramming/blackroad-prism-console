@@ -23,10 +23,9 @@ import time
 import traceback
 from pathlib import Path
 from typing import Any, Callable, Dict
-from urllib import error, request
+from urllib import request
 
 import requests
-
 
 # ---------------------------------------------------------------------------
 # Logging and constants
@@ -257,8 +256,12 @@ def main(argv: list[str] | None = None) -> int:
     """Entry point for the small command line interface."""
 
     parser = argparse.ArgumentParser(description="BlackRoad Codex pipeline")
-    parser.add_argument("--dry-run", action="store_true", help="Simulate actions without executing commands")
-    parser.add_argument("--skip-validate", action="store_true", help="Skip service health validation")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Simulate actions without executing commands"
+    )
+    parser.add_argument(
+        "--skip-validate", action="store_true", help="Skip service health validation"
+    )
 
     sub = parser.add_subparsers(dest="command")
     sub.add_parser("push", help="Push latest to BlackRoad.io")
@@ -301,4 +304,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
