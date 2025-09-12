@@ -4,15 +4,15 @@ from __future__ import annotations
 
 import re
 
-# Regex for a decimal number, allowing leading whitespace, optional sign and fraction.
+# Matches a decimal number with optional leading whitespace, sign, and fractional part.
 _NUMERIC_PREFIX = re.compile(r"^\s*([+-]?\d+(?:\.\d+)?)")
 
 
 def parse_numeric_prefix(text: str) -> float:
-    """Extracts the leading decimal value from ``text``.
+    """Return the leading decimal value in ``text``.
 
-    Allows leading whitespace, an optional sign, and an optional fractional
-    part, ignoring trailing characters. Returns ``1.0`` when no valid number is
+    Allows leading whitespace, an optional sign, and fractional part while
+    ignoring trailing characters. Returns ``1.0`` when no valid number is
     found.
     """
     match = _NUMERIC_PREFIX.match(text)

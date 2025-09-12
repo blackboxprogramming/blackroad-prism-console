@@ -1,4 +1,4 @@
-"""Tests for parse_numeric_prefix."""
+"""Tests for ``parse_numeric_prefix``."""
 
 from prism_utils import parse_numeric_prefix
 
