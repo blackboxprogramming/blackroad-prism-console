@@ -1,4 +1,4 @@
-"""Bot for closing stale GitHub pull requests."""
+"""Bot for closing stale GitHub pull requests and comments."""
 
 from __future__ import annotations
 
@@ -13,12 +13,12 @@ import requests
 
 @dataclass
 class PullRequestCleanupBot:
-    """Close stale pull requests in a repository.
+    """Close stale pull requests and delete aged comments.
 
     Attributes:
         repo: Repository in ``owner/name`` format.
         token: GitHub token with repo scope. Uses ``GITHUB_TOKEN`` env var if omitted.
-        days: Pull requests with no updates for this many days are considered stale.
+        days: Items with no updates for this many days are considered stale.
     """
 
     repo: str
@@ -64,6 +64,31 @@ class PullRequestCleanupBot:
                 closed.append(pr["number"])
         return closed
 
+    def _get_comments(self, number: int) -> List[dict]:
+        """Return comments for a pull request."""
+        url = f"https://api.github.com/repos/{self.repo}/issues/{number}/comments"
+        response = requests.get(url, headers=self._headers(), timeout=10)
+        response.raise_for_status()
+        return response.json()
+
+    def _delete_comment(self, comment_id: int) -> None:
+        """Delete a comment by ``comment_id``."""
+        url = f"https://api.github.com/repos/{self.repo}/issues/comments/{comment_id}"
+        response = requests.delete(url, headers=self._headers(), timeout=10)
+        response.raise_for_status()
+
+    def cleanup_stale_comments(self) -> List[int]:
+        """Remove comments on open pull requests stale for ``days`` days."""
+        cutoff = datetime.now(timezone.utc) - timedelta(days=self.days)
+        deleted: List[int] = []
+        for pr in self.get_open_pull_requests():
+            for comment in self._get_comments(pr["number"]):
+                updated = datetime.fromisoformat(comment["updated_at"].replace("Z", "+00:00"))
+                if updated < cutoff:
+                    self._delete_comment(comment["id"])
+                    deleted.append(comment["id"])
+        return deleted
+
 
 def main(argv: List[str] | None = None) -> int:
     """CLI entry point to close stale pull requests."""
@@ -77,6 +102,12 @@ def main(argv: List[str] | None = None) -> int:
         print(f"Closed pull request #{pr_number}")
     if not closed:
         print("No stale pull requests found.")
+
+    deleted = bot.cleanup_stale_comments()
+    for comment_id in deleted:
+        print(f"Deleted comment {comment_id}")
+    if not deleted:
+        print("No stale comments found.")
     return 0
 
 
