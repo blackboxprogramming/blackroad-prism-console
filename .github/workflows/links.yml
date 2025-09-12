@@ -1,6 +1,8 @@
 name: Broken Links
 on: { pull_request: {}, schedule: [{ cron: '0 2 * * *' }] }
-permissions: { contents: read }
+permissions:
+  contents: read
+  pull-requests: read
 jobs:
   lychee:
     runs-on: ubuntu-latest

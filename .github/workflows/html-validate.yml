@@ -1,6 +1,8 @@
 name: HTML Validate
 on: { pull_request: {}, workflow_dispatch: {} }
-permissions: { contents: read }
+permissions:
+  contents: read
+  pull-requests: read
 jobs:
   validate:
     runs-on: ubuntu-latest
