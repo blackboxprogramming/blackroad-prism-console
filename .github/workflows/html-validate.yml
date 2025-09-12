@@ -5,11 +5,13 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - # v4.3.0 https://github.com/actions/checkout/releases/tag/v4.3.0
+      - name: Checkout
+        # v4.3.0 https://github.com/actions/checkout/releases/tag/v4.3.0
         uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - id: chk
         run: f="apps/quantum/ternary_consciousness_v3.html"; [ -f "$f" ] && echo ok=1 >> $GITHUB_OUTPUT || echo ok=0 >> $GITHUB_OUTPUT
-      - # v7.2.0 https://github.com/Cyb3r-Jak3/html5validator-action/releases/tag/v7.2.0
+      - name: HTML5 Validate
+        # v7.2.0 https://github.com/Cyb3r-Jak3/html5validator-action/releases/tag/v7.2.0
         uses: Cyb3r-Jak3/html5validator-action@41633d488eb36e18fd1a95ffc83daf1bf22a75bd
         if: steps.chk.outputs.ok == '1'
         with:
