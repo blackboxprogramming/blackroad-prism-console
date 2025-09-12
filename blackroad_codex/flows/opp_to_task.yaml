@@ -1,0 +1,27 @@
+name: opp_to_task
+env: staging
+trigger:
+  source: salesforce
+  event: opportunity.updated
+  filter: stage in ["Negotiation","Closed Won"]
+actions:
+  - asana.task.create:
+      project: 'GTM-Pipeline'
+      name: 'Follow-up: {{opportunity.name}}'
+      assignee: '{{opportunity.owner.email}}'
+      custom_fields:
+        amount: '{{opportunity.amount}}'
+        close_date: '{{opportunity.closeDate}}'
+  - slack.post:
+      channel: '#sales-updates'
+      text: ':rocket: Task created for {{opportunity.name}} ({{opportunity.amount}})'
+observability:
+  metrics: [flow.total, flow.success, flow.latency_ms, flow.errors_by_stage]
+  logs: { splunk: { index: 'audit_integrations', hec: '{SPLUNK_HEC_STG}' } }
+retries: { attempts: 3, strategy: exponential, base_ms: 1000 }
+idempotency: { key: 'sf_{{opportunity.id}}_{{opportunity.stage}}' }
+dlq: { type: queue, name: 'dlq_opp_to_task' }
+tests:
+  - name: stage_to_task
+    given: { stage: 'Negotiation' }
+    expect: { task_created: true, slack_posted: true, latency_ms_lt: 15000 }

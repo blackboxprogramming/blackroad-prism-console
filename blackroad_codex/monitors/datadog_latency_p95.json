@@ -1,0 +1,12 @@
+{
+  "name": "Flow Latency P95 ({{env}})",
+  "type": "query alert",
+  "query": "percentile(last_15m):p95:flow.latency_ms{env:{{env}}} > 60000",
+  "message": "Auto-remediate then page if unresolved. Runbook: /runbooks/flows/latency.md",
+  "tags": ["org:BlackRoad", "env:{{env}}", "owner:platform"],
+  "options": {
+    "renotify_interval": 60,
+    "include_tags": true,
+    "notify_no_data": false
+  }
+}

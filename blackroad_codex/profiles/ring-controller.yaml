@@ -1,0 +1,8 @@
+name: ring_promotion
+evaluate:
+  success_window_h: 24
+  promote_if: { success_rate_gte: 0.995, p95_ms_lt: 60000 }
+  demote_if: { error_budget_burn_pct_gt: 20 }
+actions:
+  promote: ['announce:#change-cab', 'write:signed_promotion_log']
+  demote: ['freeze_flow', 'announce:#change-cab', 'open:RCA']

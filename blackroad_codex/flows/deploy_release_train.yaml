@@ -1,0 +1,27 @@
+name: deploy_release_train
+trigger:
+  { source: github, event: push, filter: branch == "main" and tag != null }
+actions:
+  - ci.run: { pipeline: release }
+  - asana.task.create:
+      {
+        project: 'Release Train',
+        name: 'Release {{tag}}',
+        section: 'In Progress',
+      }
+  - notion.append:
+      { page: 'Changelog', content: 'Released {{tag}} with PRs: {{prs}}' }
+  - slack.post:
+      { channel: '#releases', text: ':package: Release {{tag}} shipped.' }
+on_failure:
+  - jira.issue.create:
+      {
+        project: 'INC',
+        severity: 'Sev-3',
+        summary: 'Failed release {{tag}}',
+        assignee: 'oncall',
+      }
+  - pagerduty.page: { service: 'platform' }
+observability:
+  metrics: [flow.total, flow.success, flow.latency_ms]
+  logs: { splunk: { index: 'audit_release', hec: '{SPLUNK_HEC_STG}' } }

@@ -1,0 +1,10 @@
+{
+  "stage": "Negotiation",
+  "opportunity": {
+    "id": "001",
+    "name": "Example Opp",
+    "owner": { "email": "rep@example.com" },
+    "amount": 1000,
+    "closeDate": "2025-01-01"
+  }
+}

@@ -1,0 +1,1 @@
+# Datadog module outputs placeholder

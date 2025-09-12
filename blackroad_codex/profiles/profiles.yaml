@@ -1,0 +1,17 @@
+defaults:
+  channels:
+    announcements: '#announcements'
+    releases: '#releases'
+    sales_updates: '#sales-updates'
+    ops: '#ops'
+  limits: { retry_attempts: 3, p95_ms_budget: 60000 }
+staging:
+  env: 'staging'
+  datadog_site: 'datadoghq.com'
+  splunk_hec: '{SPLUNK_HEC_STG}'
+  ring: { min_users: 5 }
+prod:
+  env: 'prod'
+  datadog_site: 'datadoghq.com'
+  splunk_hec: '{SPLUNK_HEC_PROD}'
+  ring: { min_users: 50 }

@@ -1,0 +1,25 @@
+name: stripe_paid_to_provision
+env: staging
+trigger: { source: stripe, event: invoice.paid }
+actions:
+  - launchdarkly.flag.enable: { account: '{{customer.id}}', flag: onboarding }
+  - product.api.post:
+      {
+        url: '/tenants',
+        body: { plan: '{{invoice.plan}}', seats: '{{invoice.quantity}}' },
+      }
+  - customerio.trigger:
+      { campaign: 'welcome_series', email: '{{customer.email}}' }
+  - slack.post:
+      {
+        channel: '#announcements',
+        text: ':tada: New customer {{customer.name}} activated!',
+      }
+analytics:
+  warehouse: { table: revenue_events }
+observability:
+  metrics: [flow.total, flow.success, flow.latency_ms]
+  logs: { splunk: { index: 'audit_revenue', hec: '{SPLUNK_HEC_STG}' } }
+retries: { attempts: 3, strategy: exponential, base_ms: 1000 }
+idempotency: { key: 'stripe_{{invoice.id}}' }
+dlq: { type: queue, name: 'dlq_stripe_paid_to_provision' }

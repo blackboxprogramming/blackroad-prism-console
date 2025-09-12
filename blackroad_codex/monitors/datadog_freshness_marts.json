@@ -1,0 +1,7 @@
+{
+  "name": "Freshness Breach – Marts ({{env}})",
+  "type": "query alert",
+  "query": "avg(last_15m):max:mart.freshness_min{env:{{env}},mart:(sales_funnel,product_activation,revenue_mrr,support_health)} > 360",
+  "message": "Freshness > 6h. Backfill, annotate dashboards, and post to #data-ops.",
+  "tags": ["org:BlackRoad", "env:{{env}}", "owner:data"]
+}

@@ -1,0 +1,9 @@
+stages:
+  - sso: { okta_apply: true }
+  - crm: { salesforce_auth: true }
+  - tasks: { asana_projects: ['Implementation – MasterPack'] }
+  - comms: { slack_channels: ['#announcements', '#releases'] }
+  - billing: { stripe_webhooks: true }
+  - data: { snowflake_marts: ['product_activation', 'sales_funnel'] }
+  - observability: { datadog_monitors: true, splunk_saved_searches: true }
+on_error: { rollback: true, notify: '#change-cab', create_tickets: true }

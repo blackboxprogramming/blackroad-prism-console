@@ -1,0 +1,3 @@
+index=audit_freshness env={{env}} mart IN (sales_funnel,product_activation,revenue_mrr,support_health)
+| stats latest(freshness_min) as freshness by env, mart
+| where freshness > 360
