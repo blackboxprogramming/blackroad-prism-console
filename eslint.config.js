@@ -2,6 +2,7 @@ module.exports = [
   {
     ignores: [
       ".github/**",
+      ".tools/**",
       "apps/**",
       "backend/**",
       "build/**",
