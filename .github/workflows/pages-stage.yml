@@ -1,4 +1,5 @@
-name: Deploy Stage Pages + Proof + Circuit Breaker
+name: Stage Proof Artifact
+# Generates a proof and uploads the build artifact without publishing or verifying a site.
 on:
   push:
     branches: [main]
