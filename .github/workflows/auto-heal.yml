@@ -34,7 +34,7 @@ jobs:
           [ -z "$BOT_TOKEN" ] && { echo "::warning::No BOT_TOKEN secret; cannot push auto-heal changes."; exit 0; }
           git push "https://${BOT_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:$(git rev-parse --abbrev-ref HEAD)"
 
-      - name: Post summary comment
+      - name: Post auto-heal summary comment
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
