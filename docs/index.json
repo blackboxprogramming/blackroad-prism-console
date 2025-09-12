@@ -3,5 +3,12 @@
   "Development": [],
   "Build": [],
   "Tests": [],
-  "Experiments & Funnels": []
+  "Experiments & Funnels": [],
+  "Corporate": [
+    {
+      "title": "From Idea to Empire — Developer Mode Research Report (2025)",
+      "url": "docs/company/from-idea-to-empire-report-2025.pdf",
+      "notes": "Placeholder for planning phase report"
+    }
+  ]
 }
