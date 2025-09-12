@@ -1,8 +1,12 @@
 # Runbook
 
 ## Failover
-1. Run `make -C infrastructure drill-failover` to simulate outage.
+1. Run `make -C infrastructure drill-failover` to simulate single-region outage.
 2. Verify services on mirror: `curl -k https://blackroad.io/healthz`.
+
+## Multi-Region Active-Active
+1. Execute `make -C infrastructure drill-multi-region` for region failover.
+2. Consult `resilience/multi-region-failover-runbook.md` for full procedure.
 
 ## Certificate renewal
 1. Use step-ca to issue cert:

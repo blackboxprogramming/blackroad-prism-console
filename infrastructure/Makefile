@@ -2,7 +2,7 @@ SHELL := /bin/bash
 COMPOSE := docker-compose.yml
 AIRGAP_DIR := ../airgap
 
-.PHONY: bootstrap build airgap push-local up down promote drill-failover
+.PHONY: bootstrap build airgap push-local up down promote drill-failover drill-multi-region
 
 bootstrap:
 	../ops/scripts/seed.sh ../ops/seed-manifest.yaml
@@ -27,3 +27,6 @@ promote:
 
 drill-failover:
 	../ops/scripts/drill-failover.sh
+
+drill-multi-region:
+	../ops/scripts/drill-multi-region.sh
