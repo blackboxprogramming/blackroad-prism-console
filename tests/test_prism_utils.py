@@ -10,6 +10,8 @@ def test_parse_numeric_prefix_valid():
     assert parse_numeric_prefix("3.5") == 3.5
     assert parse_numeric_prefix("-1 stuff") == -1.0
     assert parse_numeric_prefix("+4") == 4.0
+    assert parse_numeric_prefix(".5 pears") == 0.5
+    assert parse_numeric_prefix("-.25") == -0.25
 
 
 def test_parse_numeric_prefix_invalid():
