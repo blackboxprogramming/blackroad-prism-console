@@ -1,0 +1,17 @@
+- name: 'Flow Latency Audit - {{env}}'
+  search: |
+    index=audit_flow env={{env}} flow={{flow}}
+    | stats avg(latency_ms) p95(latency_ms) by env, flow
+  schedule: '*/15 * * * *'
+  actions:
+    - email: platform@blackroad.io
+    - webhook: https://hooks.slack.com/services/{SLACK_HOOK}
+- name: 'Freshness Breach – {{mart}} – {{env}}'
+  search: |
+    index=audit_freshness env={{env}} mart={{mart}}
+    | stats latest(freshness_min) as freshness by env, mart
+    | where freshness > 360
+  schedule: '0 6 * * *'
+  actions:
+    - email_pdf: data-ops@blackroad.io
+    - webhook: https://hooks.slack.com/services/{SLACK_HOOK_DATA_OPS}

@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Flow Latency P95 ({{env}})",
+    "type": "query alert",
+    "query": "percentile(last_15m):p95:flow.latency_ms{env:{{env}}} > 60000",
+    "message": "Auto-remediate then page if unresolved. See runbook: /runbooks/flows/latency.md",
+    "tags": ["org:BlackRoad", "env:{{env}}", "owner:platform", "flow:{{flow}}"],
+    "options": {
+      "notify_audit": false,
+      "renotify_interval": 60,
+      "include_tags": true
+    }
+  },
+  {
+    "name": "Flow Uptime SLO ({{env}})",
+    "type": "query alert",
+    "query": "(sum(last_30d):flow.success{env:{{env}}}.as_count() / sum(last_30d):flow.total{env:{{env}}}.as_count()) < 0.999",
+    "message": "Uptime below 99.9%. Auto-remediate then page if unresolved. See runbook: /runbooks/flows/uptime.md",
+    "tags": ["org:BlackRoad", "env:{{env}}", "owner:platform", "flow:{{flow}}"],
+    "options": {
+      "notify_audit": false,
+      "renotify_interval": 60,
+      "include_tags": true
+    }
+  },
+  {
+    "name": "Freshness Breach ({{mart}} {{env}})",
+    "type": "query alert",
+    "query": "sum(last_1d):mart.freshness_minutes{env:{{env}},mart:{{mart}}} > 360",
+    "message": "Data freshness > 6h. Auto-remediate then page if unresolved. See runbook: /runbooks/flows/freshness.md",
+    "tags": ["org:BlackRoad", "env:{{env}}", "owner:platform", "mart:{{mart}}"],
+    "options": {
+      "notify_audit": false,
+      "renotify_interval": 60,
+      "include_tags": true
+    }
+  }
+]
