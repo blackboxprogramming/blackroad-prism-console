@@ -1,0 +1,40 @@
+name: prism-ci
+
+on:
+  push:
+    paths:
+      - 'prism/**'
+      - '.github/workflows/prism-ci.yml'
+  pull_request:
+    paths:
+      - 'prism/**'
+      - '.github/workflows/prism-ci.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm --prefix prism/server ci
+      - run: npm --prefix prism/server run lint
+      - run: npm --prefix prism/server test -- --coverage
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: pip install -r requirements-dev.txt
+      - run: pytest tests/prism
+      - uses: codecov/codecov-action@v3
+        with:
+          files: prism/server/coverage/coverage-final.json
+      - run: docker build -t ghcr.io/blackroad/prism:${{ github.sha }} prism
+      - if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - if: github.ref == 'refs/heads/main'
+        run: docker push ghcr.io/blackroad/prism:${{ github.sha }}
