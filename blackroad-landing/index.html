@@ -18,41 +18,103 @@
         color: #eaeaf0;
         font-family: Inter, system-ui, sans-serif;
       }
-      .wrap {
-        min-height: 100dvh;
-        display: grid;
-        place-items: center;
-      }
-      .card {
-        padding: 24px;
-        border: 1px solid #222;
-        border-radius: 16px;
-        background: linear-gradient(180deg, #0f0f16, #0b0b0f);
-      }
-      .badge {
-        display: inline-block;
-        padding: 6px 10px;
-        border-radius: 9999px;
-        background: var(--accent);
-        color: #0b0b0f;
-        font-weight: 700;
+      h1,
+      h2,
+      h3 {
+        margin: 0;
       }
       a {
         color: var(--accent-2);
         text-decoration: none;
       }
+      header {
+        text-align: center;
+        padding: 80px 20px;
+        background: linear-gradient(180deg, #0f0f16, #0b0b0f);
+      }
+      .hero-title {
+        font-size: 3rem;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+      section {
+        padding: 40px 0;
+        border-bottom: 1px solid #222;
+      }
+      .pricing-grid {
+        display: grid;
+        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        margin-top: 20px;
+      }
+      .tier {
+        border: 1px solid #222;
+        border-radius: 16px;
+        padding: 24px;
+        background: #0f0f16;
+        text-align: center;
+      }
+      footer {
+        text-align: center;
+        padding: 40px 20px;
+        font-size: 0.875rem;
+        color: #aaa;
+      }
     </style>
   </head>
   <body>
-    <!-- BLACKROAD OK -->
-    <div class="wrap">
-      <div class="card">
-        <div class="badge">BlackRoad</div>
-        <h1>We’re online.</h1>
-        <p>Daily proof: <code id="proof">%%PROOF%%</code></p>
-        <p><a href="/health.json">/health.json</a></p>
-        <small>Palette: #FF4FD8 · #0096FF · #FDBA2D</small>
-      </div>
-    </div>
+    <!-- Brand landing page for BlackRoad -->
+    <header>
+      <h1 class="hero-title">BlackRoad</h1>
+      <p>Build in chat. Ship anywhere.</p>
+    </header>
+    <main>
+      <section id="studio">
+        <h2>Studio</h2>
+        <p>Code collaboratively with AI agents, manage files, and ship PRs without leaving the conversation.</p>
+      </section>
+      <section id="animator">
+        <h2>Animator</h2>
+        <p>Turn dropped assets into storyboards and timelines, then render on demand in the browser.</p>
+      </section>
+      <section id="game">
+        <h2>Game Maker</h2>
+        <p>Gather assets and export ready-to-build Unity or Unreal projects with a single command.</p>
+      </section>
+      <section id="homework">
+        <h2>Homework</h2>
+        <p>Research, draft, cite, and export finished reports from a chat-first workflow.</p>
+      </section>
+      <section id="pricing">
+        <h2>Pricing</h2>
+        <div class="pricing-grid">
+          <div class="tier">
+            <h3>Free</h3>
+            <p>$0/mo</p>
+            <p>Chat with agents and preview outputs.</p>
+          </div>
+          <div class="tier">
+            <h3>Pro</h3>
+            <p>$29/mo</p>
+            <p>Includes worker credits and project exports.</p>
+          </div>
+          <div class="tier">
+            <h3>Enterprise</h3>
+            <p>Contact us</p>
+            <p>Custom graphs, on‑prem connectors, and support.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer>© <span id="year"></span> BlackRoad.io</footer>
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
   </body>
 </html>
