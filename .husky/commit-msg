@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 . "$(dirname "$0")/_/husky.sh" 2>/dev/null || true
-msg=$(cat "$1")
-if ! echo "$msg" | grep -Eq '^(feat|fix|chore|docs|refactor|perf|test)(\(.+\))?:'; then
-  echo "ℹ️ Conventional commit not detected — continuing anyway (advisory)."
+if command -v commitlint >/dev/null 2>&1; then
+  npx commitlint --edit "$1"
+else
+  echo "commitlint not installed, skipping check"
 fi

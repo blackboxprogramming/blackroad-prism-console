@@ -1,8 +1,15 @@
 # Architecture
 
-This document outlines the structure of the research pipeline used in this repository.
+```
+[Client]
+   |
+   v
+[Express API] --> [Postgres]
+   |
+   v
+[S3 Bucket for assets]
+```
 
-* **Analysis scripts** live in `analysis/` and can be run as standalone Python modules.
-* Each script reads raw experiment data and produces figures or tables consumed by the wider project.
-* Supporting utilities and shared components are kept minimal so that analyses remain transparent.
+The client communicates with a Node/Express API which persists data in Postgres and stores static assets in S3.
+Docker and docker-compose orchestrate local services while Terraform provisions cloud resources.
 

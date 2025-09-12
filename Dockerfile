@@ -1,27 +1,33 @@
-FROM node:20-bookworm-slim
-
-# System deps for native addons (sharp/canvas etc.)
-RUN apt-get update -y && apt-get install -y --no-install-recommends \
-    ca-certificates python3 make g++ libvips libvips-dev \
- && rm -rf /var/lib/apt/lists/*
-
+# Base dependencies
+FROM node:20-bookworm-slim AS base
 WORKDIR /app
-ENV NODE_ENV=production
-
-# Use pnpm/yarn/npm based on the lockfile you have
 COPY package.json* pnpm-lock.yaml* yarn.lock* package-lock.json* ./
-RUN corepack enable && \
-    if [ -f pnpm-lock.yaml ]; then corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile; \
-    elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
-    elif [ -f package-lock.json ]; then npm ci --no-audit --no-fund; \
-    else npm install --no-audit --no-fund; fi
+RUN corepack enable
 
+# Development environment
+FROM base AS dev
+ENV NODE_ENV=development
+RUN if [ -f package-lock.json ]; then npm install; \
+    elif [ -f pnpm-lock.yaml ]; then corepack prepare pnpm@latest --activate && pnpm install; \
+    elif [ -f yarn.lock ]; then yarn install; \
+    else npm install; fi
 COPY . .
+CMD ["npm", "run", "dev"]
 
-# Build if build script exists
-RUN node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.build ? 0 : 1)" \
-  && (npm run build || yarn build || pnpm build) || echo "No build script, skipping."
+# Build for production
+FROM base AS build
+ENV NODE_ENV=production
+RUN if [ -f package-lock.json ]; then npm ci --no-audit --no-fund; \
+    elif [ -f pnpm-lock.yaml ]; then corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile; \
+    elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
+    else npm install --no-audit --no-fund; fi
+COPY . .
+RUN npm run build --if-present
 
+# Production runtime
+FROM node:20-bookworm-slim AS production
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=build /app .
 EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=5s --retries=5 CMD curl -f http://localhost:3000/ || exit 1
-CMD [ "sh", "-c", "pnpm start || yarn start || npm run start" ]
+CMD ["npm", "start"]

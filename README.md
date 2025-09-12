@@ -1,4 +1,5 @@
 # BlackRoad.io — Dependency & Ops Bundle
+[![CI](https://github.com/<org>/prism/actions/workflows/ci.yml/badge.svg)](https://github.com/<org>/prism/actions/workflows/ci.yml)
 
 Date: 2025-08-22
 
@@ -432,3 +433,16 @@ cd apps/prismweb
 npm install
 npm run dev
 ```
+
+## Running Tests
+
+Install dependencies and execute the Jest suite:
+
+```bash
+npm install
+npm test
+```
+
+## Infrastructure
+
+Terraform examples live in `infra/terraform`. Configure a remote backend (e.g. S3 state bucket) inside `terraform {}` before running `terraform init`.
