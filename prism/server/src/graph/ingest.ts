@@ -1,9 +1,11 @@
 import Database from 'better-sqlite3';
+import { EventEmitter } from 'events';
 import { GraphNode, GraphEdge } from '../types';
 
-export class GraphStore {
+export class GraphStore extends EventEmitter {
   db: Database;
   constructor() {
+    super();
     this.db = new Database(':memory:');
     this.init();
   }
@@ -35,12 +37,14 @@ export class GraphStore {
       VALUES(@id,@projectId,@kind,@label,@attrs,@updatedAt)
       ON CONFLICT(id) DO UPDATE SET label=@label, attrs=@attrs, updatedAt=@updatedAt`);
     stmt.run({ id, projectId, kind, label, attrs: JSON.stringify(attrs || {}), updatedAt: new Date().toISOString() });
+    this.emit('node', projectId, { id, kind, label, attrs });
   }
   upsertLink(projectId: string, id: string, fromId: string, toId: string, kind: string, attrs: any) {
     const stmt = this.db.prepare(`INSERT INTO links(id, projectId, fromId, toId, kind, attrs, updatedAt)
       VALUES(@id,@projectId,@fromId,@toId,@kind,@attrs,@updatedAt)
       ON CONFLICT(id) DO UPDATE SET attrs=@attrs, updatedAt=@updatedAt`);
     stmt.run({ id, projectId, fromId, toId, kind, attrs: JSON.stringify(attrs || {}), updatedAt: new Date().toISOString() });
+    this.emit('edge', projectId, { id, from: fromId, to: toId, kind, attrs });
   }
   ingest(projectId: string, event: any) {
     if (event.type === 'run.start') {
