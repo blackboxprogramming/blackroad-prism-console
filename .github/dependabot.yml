@@ -4,6 +4,14 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/prism/server"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/prism/apps/web"
+    schedule:
+      interval: "daily"
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
