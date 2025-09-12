@@ -1,0 +1,1202 @@
+[
+  {
+    "id": "W1P1",
+    "name": "Assess Identity",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "alice@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Identity",
+    "rollback": "Rollback Identity assess changes"
+  },
+  {
+    "id": "W2P1",
+    "name": "Assess CRM",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "bob@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess CRM",
+    "rollback": "Rollback CRM assess changes"
+  },
+  {
+    "id": "W3P1",
+    "name": "Assess Billing",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "carol@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Billing",
+    "rollback": "Rollback Billing assess changes"
+  },
+  {
+    "id": "W4P1",
+    "name": "Assess Data",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "dave@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Data",
+    "rollback": "Rollback Data assess changes"
+  },
+  {
+    "id": "W5P1",
+    "name": "Assess Observability",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "eve@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Observability",
+    "rollback": "Rollback Observability assess changes"
+  },
+  {
+    "id": "W6P1",
+    "name": "Assess Support",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "frank@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Support",
+    "rollback": "Rollback Support assess changes"
+  },
+  {
+    "id": "W7P1",
+    "name": "Assess Security",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "grace@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Security",
+    "rollback": "Rollback Security assess changes"
+  },
+  {
+    "id": "W8P1",
+    "name": "Assess Automation",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "heidi@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Automation",
+    "rollback": "Rollback Automation assess changes"
+  },
+  {
+    "id": "W9P1",
+    "name": "Assess Deployment",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "ivan@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Deployment",
+    "rollback": "Rollback Deployment assess changes"
+  },
+  {
+    "id": "W10P1",
+    "name": "Assess Testing",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "judy@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Testing",
+    "rollback": "Rollback Testing assess changes"
+  },
+  {
+    "id": "W11P1",
+    "name": "Assess Performance",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "karl@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Performance",
+    "rollback": "Rollback Performance assess changes"
+  },
+  {
+    "id": "W12P1",
+    "name": "Assess Documentation",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "laura@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Documentation",
+    "rollback": "Rollback Documentation assess changes"
+  },
+  {
+    "id": "W13P1",
+    "name": "Assess Compliance",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "mallory@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Compliance",
+    "rollback": "Rollback Compliance assess changes"
+  },
+  {
+    "id": "W14P1",
+    "name": "Assess Analytics",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "neil@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Analytics",
+    "rollback": "Rollback Analytics assess changes"
+  },
+  {
+    "id": "W15P1",
+    "name": "Assess Infrastructure",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "olivia@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Infrastructure",
+    "rollback": "Rollback Infrastructure assess changes"
+  },
+  {
+    "id": "W16P1",
+    "name": "Assess API",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "peggy@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess API",
+    "rollback": "Rollback API assess changes"
+  },
+  {
+    "id": "W17P1",
+    "name": "Assess UI/UX",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "quentin@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess UI/UX",
+    "rollback": "Rollback UI/UX assess changes"
+  },
+  {
+    "id": "W18P1",
+    "name": "Assess Notifications",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "ruth@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Notifications",
+    "rollback": "Rollback Notifications assess changes"
+  },
+  {
+    "id": "W19P1",
+    "name": "Assess Reporting",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "sybil@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Reporting",
+    "rollback": "Rollback Reporting assess changes"
+  },
+  {
+    "id": "W20P1",
+    "name": "Assess Training",
+    "start": "2025-09-15T09:00:00Z",
+    "end": "2025-09-19T17:00:00Z",
+    "owner": "trent@company.com",
+    "deps": [],
+    "acceptance": "Acceptance criteria met for Assess Training",
+    "rollback": "Rollback Training assess changes"
+  },
+  {
+    "id": "W1P2",
+    "name": "Plan Identity",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "alice@company.com",
+    "deps": ["W1P1"],
+    "acceptance": "Acceptance criteria met for Plan Identity",
+    "rollback": "Rollback Identity plan changes"
+  },
+  {
+    "id": "W2P2",
+    "name": "Plan CRM",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "bob@company.com",
+    "deps": ["W2P1"],
+    "acceptance": "Acceptance criteria met for Plan CRM",
+    "rollback": "Rollback CRM plan changes"
+  },
+  {
+    "id": "W3P2",
+    "name": "Plan Billing",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "carol@company.com",
+    "deps": ["W3P1"],
+    "acceptance": "Acceptance criteria met for Plan Billing",
+    "rollback": "Rollback Billing plan changes"
+  },
+  {
+    "id": "W4P2",
+    "name": "Plan Data",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "dave@company.com",
+    "deps": ["W4P1"],
+    "acceptance": "Acceptance criteria met for Plan Data",
+    "rollback": "Rollback Data plan changes"
+  },
+  {
+    "id": "W5P2",
+    "name": "Plan Observability",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "eve@company.com",
+    "deps": ["W5P1"],
+    "acceptance": "Acceptance criteria met for Plan Observability",
+    "rollback": "Rollback Observability plan changes"
+  },
+  {
+    "id": "W6P2",
+    "name": "Plan Support",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "frank@company.com",
+    "deps": ["W6P1"],
+    "acceptance": "Acceptance criteria met for Plan Support",
+    "rollback": "Rollback Support plan changes"
+  },
+  {
+    "id": "W7P2",
+    "name": "Plan Security",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "grace@company.com",
+    "deps": ["W7P1"],
+    "acceptance": "Acceptance criteria met for Plan Security",
+    "rollback": "Rollback Security plan changes"
+  },
+  {
+    "id": "W8P2",
+    "name": "Plan Automation",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "heidi@company.com",
+    "deps": ["W8P1"],
+    "acceptance": "Acceptance criteria met for Plan Automation",
+    "rollback": "Rollback Automation plan changes"
+  },
+  {
+    "id": "W9P2",
+    "name": "Plan Deployment",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "ivan@company.com",
+    "deps": ["W9P1"],
+    "acceptance": "Acceptance criteria met for Plan Deployment",
+    "rollback": "Rollback Deployment plan changes"
+  },
+  {
+    "id": "W10P2",
+    "name": "Plan Testing",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "judy@company.com",
+    "deps": ["W10P1"],
+    "acceptance": "Acceptance criteria met for Plan Testing",
+    "rollback": "Rollback Testing plan changes"
+  },
+  {
+    "id": "W11P2",
+    "name": "Plan Performance",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "karl@company.com",
+    "deps": ["W11P1"],
+    "acceptance": "Acceptance criteria met for Plan Performance",
+    "rollback": "Rollback Performance plan changes"
+  },
+  {
+    "id": "W12P2",
+    "name": "Plan Documentation",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "laura@company.com",
+    "deps": ["W12P1"],
+    "acceptance": "Acceptance criteria met for Plan Documentation",
+    "rollback": "Rollback Documentation plan changes"
+  },
+  {
+    "id": "W13P2",
+    "name": "Plan Compliance",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "mallory@company.com",
+    "deps": ["W13P1"],
+    "acceptance": "Acceptance criteria met for Plan Compliance",
+    "rollback": "Rollback Compliance plan changes"
+  },
+  {
+    "id": "W14P2",
+    "name": "Plan Analytics",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "neil@company.com",
+    "deps": ["W14P1"],
+    "acceptance": "Acceptance criteria met for Plan Analytics",
+    "rollback": "Rollback Analytics plan changes"
+  },
+  {
+    "id": "W15P2",
+    "name": "Plan Infrastructure",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "olivia@company.com",
+    "deps": ["W15P1"],
+    "acceptance": "Acceptance criteria met for Plan Infrastructure",
+    "rollback": "Rollback Infrastructure plan changes"
+  },
+  {
+    "id": "W16P2",
+    "name": "Plan API",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "peggy@company.com",
+    "deps": ["W16P1"],
+    "acceptance": "Acceptance criteria met for Plan API",
+    "rollback": "Rollback API plan changes"
+  },
+  {
+    "id": "W17P2",
+    "name": "Plan UI/UX",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "quentin@company.com",
+    "deps": ["W17P1"],
+    "acceptance": "Acceptance criteria met for Plan UI/UX",
+    "rollback": "Rollback UI/UX plan changes"
+  },
+  {
+    "id": "W18P2",
+    "name": "Plan Notifications",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "ruth@company.com",
+    "deps": ["W18P1"],
+    "acceptance": "Acceptance criteria met for Plan Notifications",
+    "rollback": "Rollback Notifications plan changes"
+  },
+  {
+    "id": "W19P2",
+    "name": "Plan Reporting",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "sybil@company.com",
+    "deps": ["W19P1"],
+    "acceptance": "Acceptance criteria met for Plan Reporting",
+    "rollback": "Rollback Reporting plan changes"
+  },
+  {
+    "id": "W20P2",
+    "name": "Plan Training",
+    "start": "2025-09-22T09:00:00Z",
+    "end": "2025-09-26T17:00:00Z",
+    "owner": "trent@company.com",
+    "deps": ["W20P1"],
+    "acceptance": "Acceptance criteria met for Plan Training",
+    "rollback": "Rollback Training plan changes"
+  },
+  {
+    "id": "W1P3",
+    "name": "Build Identity",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "alice@company.com",
+    "deps": ["W1P2"],
+    "acceptance": "Acceptance criteria met for Build Identity",
+    "rollback": "Rollback Identity build changes"
+  },
+  {
+    "id": "W2P3",
+    "name": "Build CRM",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "bob@company.com",
+    "deps": ["W2P2"],
+    "acceptance": "Acceptance criteria met for Build CRM",
+    "rollback": "Rollback CRM build changes"
+  },
+  {
+    "id": "W3P3",
+    "name": "Build Billing",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "carol@company.com",
+    "deps": ["W3P2"],
+    "acceptance": "Acceptance criteria met for Build Billing",
+    "rollback": "Rollback Billing build changes"
+  },
+  {
+    "id": "W4P3",
+    "name": "Build Data",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "dave@company.com",
+    "deps": ["W4P2"],
+    "acceptance": "Acceptance criteria met for Build Data",
+    "rollback": "Rollback Data build changes"
+  },
+  {
+    "id": "W5P3",
+    "name": "Build Observability",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "eve@company.com",
+    "deps": ["W5P2"],
+    "acceptance": "Acceptance criteria met for Build Observability",
+    "rollback": "Rollback Observability build changes"
+  },
+  {
+    "id": "W6P3",
+    "name": "Build Support",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "frank@company.com",
+    "deps": ["W6P2"],
+    "acceptance": "Acceptance criteria met for Build Support",
+    "rollback": "Rollback Support build changes"
+  },
+  {
+    "id": "W7P3",
+    "name": "Build Security",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "grace@company.com",
+    "deps": ["W7P2"],
+    "acceptance": "Acceptance criteria met for Build Security",
+    "rollback": "Rollback Security build changes"
+  },
+  {
+    "id": "W8P3",
+    "name": "Build Automation",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "heidi@company.com",
+    "deps": ["W8P2"],
+    "acceptance": "Acceptance criteria met for Build Automation",
+    "rollback": "Rollback Automation build changes"
+  },
+  {
+    "id": "W9P3",
+    "name": "Build Deployment",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "ivan@company.com",
+    "deps": ["W9P2"],
+    "acceptance": "Acceptance criteria met for Build Deployment",
+    "rollback": "Rollback Deployment build changes"
+  },
+  {
+    "id": "W10P3",
+    "name": "Build Testing",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "judy@company.com",
+    "deps": ["W10P2"],
+    "acceptance": "Acceptance criteria met for Build Testing",
+    "rollback": "Rollback Testing build changes"
+  },
+  {
+    "id": "W11P3",
+    "name": "Build Performance",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "karl@company.com",
+    "deps": ["W11P2"],
+    "acceptance": "Acceptance criteria met for Build Performance",
+    "rollback": "Rollback Performance build changes"
+  },
+  {
+    "id": "W12P3",
+    "name": "Build Documentation",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "laura@company.com",
+    "deps": ["W12P2"],
+    "acceptance": "Acceptance criteria met for Build Documentation",
+    "rollback": "Rollback Documentation build changes"
+  },
+  {
+    "id": "W13P3",
+    "name": "Build Compliance",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "mallory@company.com",
+    "deps": ["W13P2"],
+    "acceptance": "Acceptance criteria met for Build Compliance",
+    "rollback": "Rollback Compliance build changes"
+  },
+  {
+    "id": "W14P3",
+    "name": "Build Analytics",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "neil@company.com",
+    "deps": ["W14P2"],
+    "acceptance": "Acceptance criteria met for Build Analytics",
+    "rollback": "Rollback Analytics build changes"
+  },
+  {
+    "id": "W15P3",
+    "name": "Build Infrastructure",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "olivia@company.com",
+    "deps": ["W15P2"],
+    "acceptance": "Acceptance criteria met for Build Infrastructure",
+    "rollback": "Rollback Infrastructure build changes"
+  },
+  {
+    "id": "W16P3",
+    "name": "Build API",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "peggy@company.com",
+    "deps": ["W16P2"],
+    "acceptance": "Acceptance criteria met for Build API",
+    "rollback": "Rollback API build changes"
+  },
+  {
+    "id": "W17P3",
+    "name": "Build UI/UX",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "quentin@company.com",
+    "deps": ["W17P2"],
+    "acceptance": "Acceptance criteria met for Build UI/UX",
+    "rollback": "Rollback UI/UX build changes"
+  },
+  {
+    "id": "W18P3",
+    "name": "Build Notifications",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "ruth@company.com",
+    "deps": ["W18P2"],
+    "acceptance": "Acceptance criteria met for Build Notifications",
+    "rollback": "Rollback Notifications build changes"
+  },
+  {
+    "id": "W19P3",
+    "name": "Build Reporting",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "sybil@company.com",
+    "deps": ["W19P2"],
+    "acceptance": "Acceptance criteria met for Build Reporting",
+    "rollback": "Rollback Reporting build changes"
+  },
+  {
+    "id": "W20P3",
+    "name": "Build Training",
+    "start": "2025-09-29T09:00:00Z",
+    "end": "2025-10-03T17:00:00Z",
+    "owner": "trent@company.com",
+    "deps": ["W20P2"],
+    "acceptance": "Acceptance criteria met for Build Training",
+    "rollback": "Rollback Training build changes"
+  },
+  {
+    "id": "W1P4",
+    "name": "Pilot Identity",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "alice@company.com",
+    "deps": ["W1P3"],
+    "acceptance": "Acceptance criteria met for Pilot Identity",
+    "rollback": "Rollback Identity pilot changes"
+  },
+  {
+    "id": "W2P4",
+    "name": "Pilot CRM",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "bob@company.com",
+    "deps": ["W2P3"],
+    "acceptance": "Acceptance criteria met for Pilot CRM",
+    "rollback": "Rollback CRM pilot changes"
+  },
+  {
+    "id": "W3P4",
+    "name": "Pilot Billing",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "carol@company.com",
+    "deps": ["W3P3"],
+    "acceptance": "Acceptance criteria met for Pilot Billing",
+    "rollback": "Rollback Billing pilot changes"
+  },
+  {
+    "id": "W4P4",
+    "name": "Pilot Data",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "dave@company.com",
+    "deps": ["W4P3"],
+    "acceptance": "Acceptance criteria met for Pilot Data",
+    "rollback": "Rollback Data pilot changes"
+  },
+  {
+    "id": "W5P4",
+    "name": "Pilot Observability",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "eve@company.com",
+    "deps": ["W5P3"],
+    "acceptance": "Acceptance criteria met for Pilot Observability",
+    "rollback": "Rollback Observability pilot changes"
+  },
+  {
+    "id": "W6P4",
+    "name": "Pilot Support",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "frank@company.com",
+    "deps": ["W6P3"],
+    "acceptance": "Acceptance criteria met for Pilot Support",
+    "rollback": "Rollback Support pilot changes"
+  },
+  {
+    "id": "W7P4",
+    "name": "Pilot Security",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "grace@company.com",
+    "deps": ["W7P3"],
+    "acceptance": "Acceptance criteria met for Pilot Security",
+    "rollback": "Rollback Security pilot changes"
+  },
+  {
+    "id": "W8P4",
+    "name": "Pilot Automation",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "heidi@company.com",
+    "deps": ["W8P3"],
+    "acceptance": "Acceptance criteria met for Pilot Automation",
+    "rollback": "Rollback Automation pilot changes"
+  },
+  {
+    "id": "W9P4",
+    "name": "Pilot Deployment",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "ivan@company.com",
+    "deps": ["W9P3"],
+    "acceptance": "Acceptance criteria met for Pilot Deployment",
+    "rollback": "Rollback Deployment pilot changes"
+  },
+  {
+    "id": "W10P4",
+    "name": "Pilot Testing",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "judy@company.com",
+    "deps": ["W10P3"],
+    "acceptance": "Acceptance criteria met for Pilot Testing",
+    "rollback": "Rollback Testing pilot changes"
+  },
+  {
+    "id": "W11P4",
+    "name": "Pilot Performance",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "karl@company.com",
+    "deps": ["W11P3"],
+    "acceptance": "Acceptance criteria met for Pilot Performance",
+    "rollback": "Rollback Performance pilot changes"
+  },
+  {
+    "id": "W12P4",
+    "name": "Pilot Documentation",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "laura@company.com",
+    "deps": ["W12P3"],
+    "acceptance": "Acceptance criteria met for Pilot Documentation",
+    "rollback": "Rollback Documentation pilot changes"
+  },
+  {
+    "id": "W13P4",
+    "name": "Pilot Compliance",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "mallory@company.com",
+    "deps": ["W13P3"],
+    "acceptance": "Acceptance criteria met for Pilot Compliance",
+    "rollback": "Rollback Compliance pilot changes"
+  },
+  {
+    "id": "W14P4",
+    "name": "Pilot Analytics",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "neil@company.com",
+    "deps": ["W14P3"],
+    "acceptance": "Acceptance criteria met for Pilot Analytics",
+    "rollback": "Rollback Analytics pilot changes"
+  },
+  {
+    "id": "W15P4",
+    "name": "Pilot Infrastructure",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "olivia@company.com",
+    "deps": ["W15P3"],
+    "acceptance": "Acceptance criteria met for Pilot Infrastructure",
+    "rollback": "Rollback Infrastructure pilot changes"
+  },
+  {
+    "id": "W16P4",
+    "name": "Pilot API",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "peggy@company.com",
+    "deps": ["W16P3"],
+    "acceptance": "Acceptance criteria met for Pilot API",
+    "rollback": "Rollback API pilot changes"
+  },
+  {
+    "id": "W17P4",
+    "name": "Pilot UI/UX",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "quentin@company.com",
+    "deps": ["W17P3"],
+    "acceptance": "Acceptance criteria met for Pilot UI/UX",
+    "rollback": "Rollback UI/UX pilot changes"
+  },
+  {
+    "id": "W18P4",
+    "name": "Pilot Notifications",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "ruth@company.com",
+    "deps": ["W18P3"],
+    "acceptance": "Acceptance criteria met for Pilot Notifications",
+    "rollback": "Rollback Notifications pilot changes"
+  },
+  {
+    "id": "W19P4",
+    "name": "Pilot Reporting",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "sybil@company.com",
+    "deps": ["W19P3"],
+    "acceptance": "Acceptance criteria met for Pilot Reporting",
+    "rollback": "Rollback Reporting pilot changes"
+  },
+  {
+    "id": "W20P4",
+    "name": "Pilot Training",
+    "start": "2025-10-06T09:00:00Z",
+    "end": "2025-10-10T17:00:00Z",
+    "owner": "trent@company.com",
+    "deps": ["W20P3"],
+    "acceptance": "Acceptance criteria met for Pilot Training",
+    "rollback": "Rollback Training pilot changes"
+  },
+  {
+    "id": "W1P5",
+    "name": "Rollout Identity",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "alice@company.com",
+    "deps": ["W1P4"],
+    "acceptance": "Acceptance criteria met for Rollout Identity",
+    "rollback": "Rollback Identity rollout changes"
+  },
+  {
+    "id": "W2P5",
+    "name": "Rollout CRM",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "bob@company.com",
+    "deps": ["W2P4"],
+    "acceptance": "Acceptance criteria met for Rollout CRM",
+    "rollback": "Rollback CRM rollout changes"
+  },
+  {
+    "id": "W3P5",
+    "name": "Rollout Billing",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "carol@company.com",
+    "deps": ["W3P4"],
+    "acceptance": "Acceptance criteria met for Rollout Billing",
+    "rollback": "Rollback Billing rollout changes"
+  },
+  {
+    "id": "W4P5",
+    "name": "Rollout Data",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "dave@company.com",
+    "deps": ["W4P4"],
+    "acceptance": "Acceptance criteria met for Rollout Data",
+    "rollback": "Rollback Data rollout changes"
+  },
+  {
+    "id": "W5P5",
+    "name": "Rollout Observability",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "eve@company.com",
+    "deps": ["W5P4"],
+    "acceptance": "Acceptance criteria met for Rollout Observability",
+    "rollback": "Rollback Observability rollout changes"
+  },
+  {
+    "id": "W6P5",
+    "name": "Rollout Support",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "frank@company.com",
+    "deps": ["W6P4"],
+    "acceptance": "Acceptance criteria met for Rollout Support",
+    "rollback": "Rollback Support rollout changes"
+  },
+  {
+    "id": "W7P5",
+    "name": "Rollout Security",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "grace@company.com",
+    "deps": ["W7P4"],
+    "acceptance": "Acceptance criteria met for Rollout Security",
+    "rollback": "Rollback Security rollout changes"
+  },
+  {
+    "id": "W8P5",
+    "name": "Rollout Automation",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "heidi@company.com",
+    "deps": ["W8P4"],
+    "acceptance": "Acceptance criteria met for Rollout Automation",
+    "rollback": "Rollback Automation rollout changes"
+  },
+  {
+    "id": "W9P5",
+    "name": "Rollout Deployment",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "ivan@company.com",
+    "deps": ["W9P4"],
+    "acceptance": "Acceptance criteria met for Rollout Deployment",
+    "rollback": "Rollback Deployment rollout changes"
+  },
+  {
+    "id": "W10P5",
+    "name": "Rollout Testing",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "judy@company.com",
+    "deps": ["W10P4"],
+    "acceptance": "Acceptance criteria met for Rollout Testing",
+    "rollback": "Rollback Testing rollout changes"
+  },
+  {
+    "id": "W11P5",
+    "name": "Rollout Performance",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "karl@company.com",
+    "deps": ["W11P4"],
+    "acceptance": "Acceptance criteria met for Rollout Performance",
+    "rollback": "Rollback Performance rollout changes"
+  },
+  {
+    "id": "W12P5",
+    "name": "Rollout Documentation",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "laura@company.com",
+    "deps": ["W12P4"],
+    "acceptance": "Acceptance criteria met for Rollout Documentation",
+    "rollback": "Rollback Documentation rollout changes"
+  },
+  {
+    "id": "W13P5",
+    "name": "Rollout Compliance",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "mallory@company.com",
+    "deps": ["W13P4"],
+    "acceptance": "Acceptance criteria met for Rollout Compliance",
+    "rollback": "Rollback Compliance rollout changes"
+  },
+  {
+    "id": "W14P5",
+    "name": "Rollout Analytics",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "neil@company.com",
+    "deps": ["W14P4"],
+    "acceptance": "Acceptance criteria met for Rollout Analytics",
+    "rollback": "Rollback Analytics rollout changes"
+  },
+  {
+    "id": "W15P5",
+    "name": "Rollout Infrastructure",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "olivia@company.com",
+    "deps": ["W15P4"],
+    "acceptance": "Acceptance criteria met for Rollout Infrastructure",
+    "rollback": "Rollback Infrastructure rollout changes"
+  },
+  {
+    "id": "W16P5",
+    "name": "Rollout API",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "peggy@company.com",
+    "deps": ["W16P4"],
+    "acceptance": "Acceptance criteria met for Rollout API",
+    "rollback": "Rollback API rollout changes"
+  },
+  {
+    "id": "W17P5",
+    "name": "Rollout UI/UX",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "quentin@company.com",
+    "deps": ["W17P4"],
+    "acceptance": "Acceptance criteria met for Rollout UI/UX",
+    "rollback": "Rollback UI/UX rollout changes"
+  },
+  {
+    "id": "W18P5",
+    "name": "Rollout Notifications",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "ruth@company.com",
+    "deps": ["W18P4"],
+    "acceptance": "Acceptance criteria met for Rollout Notifications",
+    "rollback": "Rollback Notifications rollout changes"
+  },
+  {
+    "id": "W19P5",
+    "name": "Rollout Reporting",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "sybil@company.com",
+    "deps": ["W19P4"],
+    "acceptance": "Acceptance criteria met for Rollout Reporting",
+    "rollback": "Rollback Reporting rollout changes"
+  },
+  {
+    "id": "W20P5",
+    "name": "Rollout Training",
+    "start": "2025-10-13T09:00:00Z",
+    "end": "2025-10-17T17:00:00Z",
+    "owner": "trent@company.com",
+    "deps": ["W20P4"],
+    "acceptance": "Acceptance criteria met for Rollout Training",
+    "rollback": "Rollback Training rollout changes"
+  },
+  {
+    "id": "W1P6",
+    "name": "Harden Identity",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "alice@company.com",
+    "deps": ["W1P5"],
+    "acceptance": "Acceptance criteria met for Harden Identity",
+    "rollback": "Rollback Identity harden changes"
+  },
+  {
+    "id": "W2P6",
+    "name": "Harden CRM",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "bob@company.com",
+    "deps": ["W2P5"],
+    "acceptance": "Acceptance criteria met for Harden CRM",
+    "rollback": "Rollback CRM harden changes"
+  },
+  {
+    "id": "W3P6",
+    "name": "Harden Billing",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "carol@company.com",
+    "deps": ["W3P5"],
+    "acceptance": "Acceptance criteria met for Harden Billing",
+    "rollback": "Rollback Billing harden changes"
+  },
+  {
+    "id": "W4P6",
+    "name": "Harden Data",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "dave@company.com",
+    "deps": ["W4P5"],
+    "acceptance": "Acceptance criteria met for Harden Data",
+    "rollback": "Rollback Data harden changes"
+  },
+  {
+    "id": "W5P6",
+    "name": "Harden Observability",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "eve@company.com",
+    "deps": ["W5P5"],
+    "acceptance": "Acceptance criteria met for Harden Observability",
+    "rollback": "Rollback Observability harden changes"
+  },
+  {
+    "id": "W6P6",
+    "name": "Harden Support",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "frank@company.com",
+    "deps": ["W6P5"],
+    "acceptance": "Acceptance criteria met for Harden Support",
+    "rollback": "Rollback Support harden changes"
+  },
+  {
+    "id": "W7P6",
+    "name": "Harden Security",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "grace@company.com",
+    "deps": ["W7P5"],
+    "acceptance": "Acceptance criteria met for Harden Security",
+    "rollback": "Rollback Security harden changes"
+  },
+  {
+    "id": "W8P6",
+    "name": "Harden Automation",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "heidi@company.com",
+    "deps": ["W8P5"],
+    "acceptance": "Acceptance criteria met for Harden Automation",
+    "rollback": "Rollback Automation harden changes"
+  },
+  {
+    "id": "W9P6",
+    "name": "Harden Deployment",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "ivan@company.com",
+    "deps": ["W9P5"],
+    "acceptance": "Acceptance criteria met for Harden Deployment",
+    "rollback": "Rollback Deployment harden changes"
+  },
+  {
+    "id": "W10P6",
+    "name": "Harden Testing",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "judy@company.com",
+    "deps": ["W10P5"],
+    "acceptance": "Acceptance criteria met for Harden Testing",
+    "rollback": "Rollback Testing harden changes"
+  },
+  {
+    "id": "W11P6",
+    "name": "Harden Performance",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "karl@company.com",
+    "deps": ["W11P5"],
+    "acceptance": "Acceptance criteria met for Harden Performance",
+    "rollback": "Rollback Performance harden changes"
+  },
+  {
+    "id": "W12P6",
+    "name": "Harden Documentation",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "laura@company.com",
+    "deps": ["W12P5"],
+    "acceptance": "Acceptance criteria met for Harden Documentation",
+    "rollback": "Rollback Documentation harden changes"
+  },
+  {
+    "id": "W13P6",
+    "name": "Harden Compliance",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "mallory@company.com",
+    "deps": ["W13P5"],
+    "acceptance": "Acceptance criteria met for Harden Compliance",
+    "rollback": "Rollback Compliance harden changes"
+  },
+  {
+    "id": "W14P6",
+    "name": "Harden Analytics",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "neil@company.com",
+    "deps": ["W14P5"],
+    "acceptance": "Acceptance criteria met for Harden Analytics",
+    "rollback": "Rollback Analytics harden changes"
+  },
+  {
+    "id": "W15P6",
+    "name": "Harden Infrastructure",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "olivia@company.com",
+    "deps": ["W15P5"],
+    "acceptance": "Acceptance criteria met for Harden Infrastructure",
+    "rollback": "Rollback Infrastructure harden changes"
+  },
+  {
+    "id": "W16P6",
+    "name": "Harden API",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "peggy@company.com",
+    "deps": ["W16P5"],
+    "acceptance": "Acceptance criteria met for Harden API",
+    "rollback": "Rollback API harden changes"
+  },
+  {
+    "id": "W17P6",
+    "name": "Harden UI/UX",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "quentin@company.com",
+    "deps": ["W17P5"],
+    "acceptance": "Acceptance criteria met for Harden UI/UX",
+    "rollback": "Rollback UI/UX harden changes"
+  },
+  {
+    "id": "W18P6",
+    "name": "Harden Notifications",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "ruth@company.com",
+    "deps": ["W18P5"],
+    "acceptance": "Acceptance criteria met for Harden Notifications",
+    "rollback": "Rollback Notifications harden changes"
+  },
+  {
+    "id": "W19P6",
+    "name": "Harden Reporting",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "sybil@company.com",
+    "deps": ["W19P5"],
+    "acceptance": "Acceptance criteria met for Harden Reporting",
+    "rollback": "Rollback Reporting harden changes"
+  },
+  {
+    "id": "W20P6",
+    "name": "Harden Training",
+    "start": "2025-10-20T09:00:00Z",
+    "end": "2025-10-24T17:00:00Z",
+    "owner": "trent@company.com",
+    "deps": ["W20P5"],
+    "acceptance": "Acceptance criteria met for Harden Training",
+    "rollback": "Rollback Training harden changes"
+  }
+]
