@@ -46,6 +46,22 @@ export default function App(){
     })
   }, [])
 
+  const bootData = useCallback(async ()=>{
+    const [tl, ts, cs, ag, w, c, n] = await Promise.all([
+      fetchTimeline(), fetchTasks(), fetchCommits(), fetchAgents(), fetchWallet(), fetchContradictions(), getNotes()
+    ])
+    setTimeline(tl); setTasks(ts); setCommits(cs); setAgents(ag); setWallet(w); setContradictions(c); setNotesState(n || '')
+  }, [])
+
+  const connectSocket = useCallback(()=>{
+    const s = io(API_BASE, { transports: ['websocket'] })
+    s.on('system:update', d => { if(streamRef.current) setSystem(d) })
+    s.on('timeline:new', d => setTimeline(prev => [d.item, ...prev]))
+    s.on('wallet:update', w => setWallet(w))
+    s.on('notes:update', n => setNotesState(n || ''))
+    setSocket(s)
+  }, [])
+
   useEffect(() => { streamRef.current = stream }, [stream])
 
   // Restore auth token from local storage on load and reset when missing
@@ -70,22 +86,6 @@ export default function App(){
       }
     })()
   }, [bootData, connectSocket, resetState])
-
-  const bootData = useCallback(async ()=>{
-    const [tl, ts, cs, ag, w, c, n] = await Promise.all([
-      fetchTimeline(), fetchTasks(), fetchCommits(), fetchAgents(), fetchWallet(), fetchContradictions(), getNotes()
-    ])
-    setTimeline(tl); setTasks(ts); setCommits(cs); setAgents(ag); setWallet(w); setContradictions(c); setNotesState(n || '')
-  }, [])
-
-  const connectSocket = useCallback(()=>{
-    const s = io(API_BASE, { transports: ['websocket'] })
-    s.on('system:update', d => { if(streamRef.current) setSystem(d) })
-    s.on('timeline:new', d => setTimeline(prev => [d.item, ...prev]))
-    s.on('wallet:update', w => setWallet(w))
-    s.on('notes:update', n => setNotesState(n || ''))
-    setSocket(s)
-  }, [])
 
   async function handleLogin(usr, pass){
     try{

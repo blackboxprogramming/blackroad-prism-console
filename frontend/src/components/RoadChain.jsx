@@ -21,12 +21,14 @@ export default function RoadChain(){
     })()
   }, [])
 
-  // Clear stale search results when the query changes, collapsing blocks if empty
+  // Clear errors on query change and collapse blocks when the query is empty
   useEffect(() => {
     const q = query.trim()
-    setResult(null)
     setError('')
-    if (!q) setExpanded({})
+    if (!q) {
+      setResult(null)
+      setExpanded({})
+    }
   }, [query])
 
   function toggle(hash){
