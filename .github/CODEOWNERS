@@ -1,2 +1,7 @@
 # Default reviewers for all files
 * @blackboxprogramming/core
+
+/infra/            @platform-team
+/flows/            @integration-team
+/monitors/         @sre-team
+/runbooks/         @platform-team
