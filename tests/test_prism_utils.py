@@ -11,6 +11,7 @@ from prism_utils import parse_numeric_prefix
         ("2, rest", 2.0),
         ("3.5", 3.5),
         ("-4, things", -4.0),
+        ("-0.5", -0.5),
     ],
 )
 def test_parse_numeric_prefix_valid(text: str, expected: float) -> None:
