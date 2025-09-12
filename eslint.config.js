@@ -1,25 +1,25 @@
 module.exports = [
   {
     ignores: [
-      "node_modules/**",
-      "dist/**",
-      "build/**",
       ".github/**",
-      "public/vendor/**",
-      "var/**",
+      "apps/**",
       "backend/**",
+      "build/**",
+      "connectors.js",
+      "design/**",
+      "dist/**",
       "frontend/**",
+      "modules/**",
+      "node_modules/**",
+      "packages/**",
+      "public/vendor/**",
+      "scripts/**",
+      "services/**",
       "sites/**",
       "src/**",
       "srv/**",
-      "apps/**",
-      "packages/**",
-      ".tools/**",
-      "modules/**",
-      "scripts/**",
-      "services/**",
-      "design/**",
-      "connectors.js"
+      "tools/**",
+      "var/**"
     ]
   },
   {
