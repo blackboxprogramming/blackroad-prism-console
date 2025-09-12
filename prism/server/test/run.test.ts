@@ -23,6 +23,25 @@ describe('run and approvals', () => {
     expect(events).toEqual(['start', 'out', 'end']);
   });
 
+  it('handles escaped quotes in run command', async () => {
+    process.env.PRISM_RUN_ALLOW = 'node';
+    const app = buildServer();
+    await app.listen({ port: 0 });
+    const events: string[] = [];
+    bus.on('event', (e: any) => {
+      if (e.kind === 'run.start') events.push('start');
+      if (e.kind === 'run.out' && e.data.chunk.trim() === 'hi') events.push('out');
+      if (e.kind === 'run.end') events.push('end');
+    });
+    await supertest(app.server)
+      .post('/run')
+      .send({ projectId: 'p', sessionId: 's', cmd: 'node -e "console.log(\\"hi\\")"' })
+      .expect(200);
+    await new Promise((r) => setTimeout(r, 500));
+    await app.close();
+    expect(events).toEqual(['start', 'out', 'end']);
+  });
+
   it('requires approval for diffs when policy is review', async () => {
     const app = buildServer();
     await app.listen({ port: 0 });

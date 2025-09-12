@@ -5,6 +5,7 @@ import { spawn } from 'child_process';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join, dirname, resolve, sep } from 'path';
 import { z } from 'zod';
+import { parse as parseShell } from 'shell-quote';
 
 interface PrismDiffHunk { lines: string[]; }
 interface PrismDiff { path: string; hunks: PrismDiffHunk[]; }
@@ -58,33 +59,9 @@ export function buildServer() {
   });
 
   function parseCmd(cmd: string): string[] {
-    const args: string[] = [];
-    let cur = '';
-    let quote: string | null = null;
-    for (let i = 0; i < cmd.length; i++) {
-      const c = cmd[i];
-      if (quote) {
-        if (c === quote) {
-          quote = null;
-        } else {
-          cur += c;
-        }
-      } else {
-        if (c === '"' || c === "'") {
-          quote = c;
-        } else if (/\s/.test(c)) {
-          if (cur) {
-            args.push(cur);
-            cur = '';
-          }
-        } else {
-          cur += c;
-        }
-      }
-    }
-    if (quote) throw new Error('unclosed quote');
-    if (cur) args.push(cur);
-    return args;
+    const parts = parseShell(cmd);
+    if (parts.some((p) => typeof p !== 'string')) throw new Error('invalid cmd');
+    return parts as string[];
   }
 
   app.post('/run', async (req, reply) => {
