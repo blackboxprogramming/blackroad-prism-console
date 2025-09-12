@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import re
 
-# Matches optional leading whitespace, an optional sign, digits, and an optional
-# fractional part.
+# Regex for a decimal number, allowing leading whitespace, optional sign and fraction.
 _NUMERIC_PREFIX = re.compile(r"^\s*([+-]?\d+(?:\.\d+)?)")
 
 
 def parse_numeric_prefix(text: str) -> float:
-    """Extract the leading decimal value from ``text``.
+    """Extracts the leading decimal value from ``text``.
 
     Allows leading whitespace, an optional sign, and an optional fractional
     part, ignoring trailing characters. Returns ``1.0`` when no valid number is
