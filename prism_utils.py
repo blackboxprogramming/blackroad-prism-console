@@ -11,8 +11,9 @@ _NUMERIC_PREFIX_RE = re.compile(r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\
 def parse_numeric_prefix(text: str) -> float:
     """Return the leading numeric value in ``text`` or ``1.0`` if not found.
 
-    The function extracts an optional sign and numeric token at the start of
-    ``text`` using a regular expression. The extracted token is parsed with
+    The function extracts an optional sign and numeric token—supporting
+    integers, decimals, and scientific notation—at the start of ``text`` using
+    a regular expression. The extracted token is parsed with
     :func:`ast.literal_eval` for safety. If the token cannot be parsed or is
     absent, ``1.0`` is returned.
     """
