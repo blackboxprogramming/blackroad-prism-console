@@ -1,0 +1,12 @@
+{
+  "invoice": {
+    "id": "inv_001",
+    "plan": "pro",
+    "quantity": 10
+  },
+  "customer": {
+    "id": "cust_001",
+    "name": "Acme Co",
+    "email": "admin@acme.co"
+  }
+}

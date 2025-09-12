@@ -1,0 +1,2 @@
+index=audit_integrations env={{env}}
+| stats count by flow, status

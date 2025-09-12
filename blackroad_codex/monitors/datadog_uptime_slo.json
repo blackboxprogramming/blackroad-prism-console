@@ -1,0 +1,10 @@
+{
+  "name": "Flow Uptime ({{env}}) – 30d 99.9%",
+  "type": "metric",
+  "thresholds": [{ "timeframe": "30d", "target": 99.9, "warning": 99.5 }],
+  "query": {
+    "numerator": "sum:flow.success{env:{{env}}}.as_count()",
+    "denominator": "sum:flow.total{env:{{env}}}.as_count()"
+  },
+  "tags": ["org:BlackRoad", "env:{{env}}", "owner:platform"]
+}
