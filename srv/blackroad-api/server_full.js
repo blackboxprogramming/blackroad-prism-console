@@ -31,6 +31,7 @@ const notify = require('./lib/notify');
 const logger = require('./lib/log');
 const attachLlmRoutes = require('./routes/admin_llm');
 const gitRouter = require('./routes/git');
+const providersRouter = require('./routes/providers');
 
 // --- Config
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -493,6 +494,7 @@ for (const row of qSeed) {
 
 // Git API
 app.use('/api/git', requireAuth, gitRouter);
+app.use('/v1/providers', providersRouter);
 
 // Helpers
 function listRows(t) {
