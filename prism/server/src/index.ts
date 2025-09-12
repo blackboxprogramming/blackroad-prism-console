@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
 import { spawn } from 'child_process';
 import { writeFileSync, mkdirSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, resolve, sep } from 'path';
 import { z } from 'zod';
 
 interface PrismDiffHunk { lines: string[]; }
@@ -57,6 +57,36 @@ export function buildServer() {
     env: z.record(z.string()).optional(),
   });
 
+  function parseCmd(cmd: string): string[] {
+    const args: string[] = [];
+    let cur = '';
+    let quote: string | null = null;
+    for (let i = 0; i < cmd.length; i++) {
+      const c = cmd[i];
+      if (quote) {
+        if (c === quote) {
+          quote = null;
+        } else {
+          cur += c;
+        }
+      } else {
+        if (c === '"' || c === "'") {
+          quote = c;
+        } else if (/\s/.test(c)) {
+          if (cur) {
+            args.push(cur);
+            cur = '';
+          }
+        } else {
+          cur += c;
+        }
+      }
+    }
+    if (quote) throw new Error('unclosed quote');
+    if (cur) args.push(cur);
+    return args;
+  }
+
   app.post('/run', async (req, reply) => {
     const parsed = runSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -64,8 +94,25 @@ export function buildServer() {
       return;
     }
     const { projectId, sessionId, cmd, cwd, env } = parsed.data;
+    let parts: string[];
+    try {
+      parts = parseCmd(cmd);
+    } catch {
+      reply.code(400).send({ error: 'invalid cmd' });
+      return;
+    }
+    if (!parts.length) {
+      reply.code(400).send({ error: 'cmd required' });
+      return;
+    }
     const allow = (process.env.PRISM_RUN_ALLOW || '').split(',').filter(Boolean);
-    if (allow.length && !allow.includes(cmd.split(' ')[0])) {
+    const command = parts[0];
+    if (allow.length && !allow.includes(command)) {
+      reply.code(400).send({ error: 'cmd not allowed' });
+      return;
+    }
+    const dangerous = ['&&', ';', '|', '||', '>', '<'];
+    if (parts.some((p) => dangerous.includes(p))) {
       reply.code(400).send({ error: 'cmd not allowed' });
       return;
     }
@@ -81,7 +128,7 @@ export function buildServer() {
       startedAt,
     };
     runs.push(rec);
-    const child = spawn(cmd, { cwd, env, shell: true });
+    const child = spawn(command, parts.slice(1), { cwd, env });
     (rec as any).child = child;
     emit('run.start', { runId: id, cmd, cwd });
     child.stdout.on('data', (c) => emit('run.out', { runId: id, chunk: c.toString() }));
@@ -124,8 +171,12 @@ export function buildServer() {
   });
 
   function writeDiffs(diffs: PrismDiff[]) {
+    const base = join(process.cwd(), 'prism', 'work');
     for (const d of diffs) {
-      const filePath = join(process.cwd(), 'prism', 'work', d.path);
+      const filePath = resolve(base, d.path);
+      if (!filePath.startsWith(base + sep)) {
+        throw new Error('invalid path');
+      }
       mkdirSync(dirname(filePath), { recursive: true });
       const content = d.hunks.map((h: PrismDiffHunk) => h.lines.join('\n')).join('\n');
       writeFileSync(filePath, content);
@@ -154,8 +205,12 @@ export function buildServer() {
       emit('plan', { summary: 'Write requires approval', ctx: { approvalId } });
       reply.send({ status: 'pending', approvalId });
     } else {
-      writeDiffs(diffs as any);
-      reply.send({ status: 'applied' });
+      try {
+        writeDiffs(diffs as any);
+        reply.send({ status: 'applied' });
+      } catch (e: any) {
+        reply.code(400).send({ error: e.message });
+      }
     }
   });
 
@@ -186,7 +241,12 @@ export function buildServer() {
     a.decidedBy = 'user';
     a.decidedAt = new Date().toISOString();
     if (a.capability === 'write') {
-      writeDiffs(a.payload as any);
+      try {
+        writeDiffs(a.payload as any);
+      } catch (e: any) {
+        reply.code(400).send({ error: e.message });
+        return;
+      }
     }
     emit('approval.approved', { id });
     reply.send({ status: 'approved' });
