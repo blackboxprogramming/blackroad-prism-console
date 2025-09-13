@@ -475,3 +475,13 @@ class MyBot(BaseBot):
     def run(self, task: Task) -> BotResponse:
         ...
 ```
+
+## Growth & Experimentation Quickstart
+
+Run an experiment offline:
+
+```
+python -m cli.console exp:new --id EXP01 --name "Paywall copy" --feature paywall_v2 --variants A,B --split 0.5,0.5 --unit user
+python -m cli.console exp:assign --id EXP01 --unit user --value 12345
+python -m cli.console exp:analyze --id EXP01 --metrics configs/experiments/metrics.yaml
+```

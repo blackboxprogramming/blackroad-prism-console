@@ -1,0 +1,10 @@
+{"ts":"2025-07-01T00:00:00","user":1,"event":"signup","value":0,"feature_flags":["paywall_v2"],"cohort":[]}
+{"ts":"2025-07-02T00:00:00","user":1,"event":"activation","value":0,"feature_flags":["paywall_v2"],"cohort":[]}
+{"ts":"2025-07-03T00:00:00","user":1,"event":"paywall","value":0,"feature_flags":["paywall_v2"],"cohort":[]}
+{"ts":"2025-07-04T00:00:00","user":1,"event":"purchase","value":100,"feature_flags":["paywall_v2"],"cohort":[]}
+{"ts":"2025-07-01T00:00:00","user":5,"event":"signup","value":0,"feature_flags":[],"cohort":[]}
+{"ts":"2025-07-02T00:00:00","user":5,"event":"activation","value":0,"feature_flags":[],"cohort":[]}
+{"ts":"2025-07-03T00:00:00","user":5,"event":"paywall","value":0,"feature_flags":[],"cohort":[]}
+{"ts":"2025-07-04T00:00:00","user":5,"event":"purchase","value":50,"feature_flags":[],"cohort":[]}
+{"ts":"2025-07-05T00:00:00","user":1,"event":"retention","value":0,"feature_flags":["paywall_v2"],"cohort":[]}
+{"ts":"2025-07-05T00:00:00","user":5,"event":"retention","value":0,"feature_flags":[],"cohort":[]}
