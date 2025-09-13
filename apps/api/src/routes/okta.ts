@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { Issuer, generators } from 'openid-client';
 import { setSessionCookie } from '../middleware/session.js';
+import fs from 'fs';
+import path from 'path';
 
 const router = Router();
 const oktaIssuer = process.env.OKTA_ISSUER || '';
@@ -39,6 +41,16 @@ router.get('/callback', async (req, res) => {
   const { email, sub } = tokenSet.claims();
   // Create or find user and issue your own session cookie
   setSessionCookie(res, { uid: sub, email }, process.env.SESSION_SECRET || '', 60 * 60 * 24 * 7);
+  // Lucidia memory hook
+  try {
+    const memoryFile = path.resolve(process.cwd(), 'session_memory.json');
+    const memory = JSON.parse(fs.readFileSync(memoryFile, 'utf-8'));
+    memory.logins = memory.logins || [];
+    memory.logins.push({ email, ts: new Date().toISOString() });
+    fs.writeFileSync(memoryFile, JSON.stringify(memory, null, 2));
+  } catch (err) {
+    console.error('Memory write failed', err);
+  }
   res.redirect('/');
 });
 

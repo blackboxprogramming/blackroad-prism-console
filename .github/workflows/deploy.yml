@@ -32,6 +32,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Verify encrypted secrets
+        run: |
+          test -f .env.enc
+          grep -q 'sops' .env.enc
+
       - name: Setup Node 20
         uses: actions/setup-node@v4
         with:

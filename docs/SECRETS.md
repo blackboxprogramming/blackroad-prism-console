@@ -1,7 +1,22 @@
-# Managing Secrets with SOPS & age
+# Secrets Management
 
-We use [sops](https://github.com/getsops/sops) and [age](https://github.com/FiloSottile/age) to encrypt our secret files.  Generate a keypair with `age-keygen` [oai_citation:9‡msound.net](https://msound.net/blog/2023/05/managing-secrets/#:~:text=Keys) and store it in `~/.config/sops/age/keys.txt`.  Encrypt a `.env` file with:
+BlackRoad uses [SOPS](https://github.com/getsops/sops) with [age](https://age-encryption.org/) keys to protect sensitive configuration.
 
-sops -e -a  .env > .env.enc 
+## Encrypting
 
-Do **not** commit unencrypted files.  The `.sops.yaml` config ensures files ending with `.env.enc` are encrypted via age.  Use `scripts/encrypt_secret.sh` to simplify encryption.
+Run `scripts/encrypt_secret.sh` to generate an age key (if missing) and encrypt the local `.env` file to `.env.enc`.
+Commit only the encrypted `.env.enc` file; never commit the raw `.env`.
+
+## Decrypting
+
+Export `SOPS_AGE_KEY_FILE=secrets/age.key` and run:
+
+```bash
+sops -d .env.enc > .env
+```
+
+## Compliance
+
+The deployment workflow verifies that `.env.enc` exists and contains SOPS metadata before running. This enforces that secrets are encrypted prior to deployment.
+
+These safeguards align with BlackRoad's governance strategy: strong secrets hygiene enables focus, clear trade-offs, and an auditable activity fit for enterprise environments.

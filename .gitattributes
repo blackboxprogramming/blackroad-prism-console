@@ -6,3 +6,5 @@
 *.db binary
 # Treat unencrypted env files as binary so Git won’t diff them
 .env* -text
+# Ensure encrypted env files are treated as binary blobs
+.env.enc binary
