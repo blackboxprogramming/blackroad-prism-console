@@ -475,3 +475,14 @@ class MyBot(BaseBot):
     def run(self, task: Task) -> BotResponse:
         ...
 ```
+
+## AIOps & Self-Healing Quickstart
+
+```bash
+python -m cli.console aiops:correlate
+python -m cli.console aiops:plan --correlations artifacts/aiops/correlations_*.json
+python -m cli.console aiops:execute --plan artifacts/aiops/plan.json --dry-run
+python -m cli.console aiops:canary --base artifacts/healthchecks/CoreAPI/baseline.json --canary artifacts/healthchecks/CoreAPI/latest.json
+python -m cli.console aiops:baseline:record && python -m cli.console aiops:drift:check
+python -m cli.console aiops:budget --service CoreAPI --window 30d && python -m cli.console aiops:window --service CoreAPI --action remediate
+```

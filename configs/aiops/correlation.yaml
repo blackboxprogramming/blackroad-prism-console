@@ -1,0 +1,11 @@
+rules:
+  - name: coreapi_brownout
+    when:
+      - source: healthchecks
+        match: {service: "CoreAPI", status: "degraded"}
+      - source: incidents
+        match: {service: "CoreAPI", severity: "high"}
+      - source: changes
+        within_minutes: 60
+        match: {service: "CoreAPI", type: "deploy"}
+    emit: {kind: "brownout", priority: "p1"}

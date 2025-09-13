@@ -1,0 +1,4 @@
+thresholds:
+  latency_p50: 20
+  latency_p95: 20
+  error_rate: 0.05
