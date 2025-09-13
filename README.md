@@ -432,3 +432,19 @@ cd apps/prismweb
 npm install
 npm run dev
 ```
+
+## Prism Console Bots
+
+### Plugin How-To
+Drop a new `*_bot.py` under `/plugins/` exposing `NAME`, `MISSION`, `SUPPORTED_TASKS`, and a `BaseBot` implementation. Call `register()` from `orchestrator.registry` and it will be auto-discovered.
+
+### Metrics & Logging
+- Metrics written to `orchestrator/metrics.jsonl`
+- Structured logs written to `orchestrator/memory.jsonl`
+
+### Example Commands
+```bash
+python -m cli.console bot:list
+python -m cli.console bot:run --bot "RevOps-BOT" --goal "Check forecast accuracy for Q3"
+python -m cli.console bot:run --bot "SRE-BOT" --goal "Compute error-budget burn for Service A"
+```

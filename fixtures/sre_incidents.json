@@ -1,0 +1,8 @@
+{
+  "slo_target": 99.9,
+  "period_hours": 720,
+  "incidents": [
+    {"id": "inc1", "duration_minutes": 30},
+    {"id": "inc2", "duration_minutes": 15}
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "forecast": [100000, 120000, 150000],
+  "actuals": [95000, 130000, 140000],
+  "opps": [
+    {"name": "Alpha", "last_activity": 45, "stage_age": 10, "has_close_date": true},
+    {"name": "Beta", "last_activity": 5, "stage_age": 70, "has_close_date": false}
+  ]
+}
