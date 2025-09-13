@@ -17,5 +17,10 @@ jobs:
           A1=$(sha256sum artifacts/plm/items.json | cut -d' ' -f1)
           A2=$(sha256sum artifacts/plm/items.json | cut -d' ' -f1)
           test "$A1" = "$A2"
-      - name: Contract validation
-        run: python scripts/validate_contracts.py
+    - name: Contract validation
+      run: python scripts/validate_contracts.py
+    - name: Changelog guard
+      run: |
+        CHANGED=$(git diff --name-only HEAD~1 | grep -E '^(plm|mfg|cli|contracts)/' || true)
+        if [ -n "$CHANGED" ] && ! git diff --name-only HEAD~1 | grep -q '^CHANGELOG.md$'; then
+          echo 'Please update CHANGELOG.md'; exit 1; fi

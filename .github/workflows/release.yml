@@ -1,0 +1,33 @@
+name: release
+on:
+  push:
+    tags: ['v*.*.*']
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: python -m pip install -U pip pytest jsonschema
+      - run: python -m pip install -e .
+      - run: pytest -q
+      - name: Demo + Hash
+        run: |
+          python -m cli.console plm:items:load --dir fixtures/plm/items
+          python -m cli.console plm:bom:load --dir fixtures/plm/boms
+          python -m cli.console mfg:wc:load --file fixtures/mfg/work_centers.csv
+          python -m cli.console mfg:routing:load --dir fixtures/mfg/routings
+          python -m cli.console mfg:routing:capcheck --item PROD-100 --rev B --qty 1000
+          python -m cli.console mfg:wi:render --item PROD-100 --rev B
+          python -m cli.console mfg:spc:analyze --op OP-200 --window 50
+          python -m cli.console mfg:yield --period 2025-09
+          python -m cli.console mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv
+          python -m cli.console mfg:coq --period 2025-Q3
+          bash scripts/hash_artifacts.sh || true
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: public/artifacts.sha256
+
