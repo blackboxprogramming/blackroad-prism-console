@@ -1,13 +1,15 @@
 import inspect
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Type
 
-from .protocols import Task, BotResponse
-from .base import BaseBot, assert_guardrails
-from tools import storage
 from bots import available_bots
+from tools import storage
+
+from .base import BaseBot, assert_guardrails
+from .perf import perf_timer
+from .protocols import BotResponse, Task
+from .slo import SLO_CATALOG
 
 _memory_path = Path(__file__).resolve().with_name("memory.jsonl")
 _current_doc = ""
@@ -33,7 +35,16 @@ def route(task: Task, bot_name: str) -> BotResponse:
     global _current_doc
     _current_doc = inspect.getdoc(bot) or ""
 
-    response = bot.run(task)
+    slo = SLO_CATALOG.get(bot_name)
+    with perf_timer("bot_run") as perf:
+        response = bot.run(task)
+    response.elapsed_ms = perf.get("elapsed_ms")
+    response.rss_mb = perf.get("rss_mb")
+    if slo:
+        response.slo_name = slo.name
+        response.p50_target = slo.p50_ms
+        response.p95_target = slo.p95_ms
+        response.max_mem_mb = slo.max_mem_mb
     assert_guardrails(response)
     red_team(response)
 
@@ -42,6 +53,13 @@ def route(task: Task, bot_name: str) -> BotResponse:
         "task": task.model_dump(mode="json"),
         "bot": bot_name,
         "response": response.model_dump(mode="json"),
+        "perf": perf,
     }
+    if slo:
+        record["slo"] = {
+            "p50_target": slo.p50_ms,
+            "p95_target": slo.p95_ms,
+            "max_mem_mb": slo.max_mem_mb,
+        }
     storage.write(str(_memory_path), record)
     return response
