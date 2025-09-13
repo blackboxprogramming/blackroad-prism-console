@@ -1,0 +1,12 @@
+macros:
+  acknowledge:
+    note: "Thanks for reaching out — we've received your ticket and will follow up shortly."
+    status: "pending"
+    tags: ["ack"]
+  request_logs:
+    note: "Could you share logs/screenshots and exact timestamps?"
+    tags: ["needs-info"]
+  close_resolved:
+    note: "Marking this as solved. If the issue persists, reply and we'll reopen."
+    status: "solved"
+    tags: ["resolved"]

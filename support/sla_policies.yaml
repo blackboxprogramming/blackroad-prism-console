@@ -1,0 +1,13 @@
+plans:
+  STARTER: { first_response_min: 480, resolve_hours: 72 }
+  PRO:     { first_response_min: 120, resolve_hours: 24 }
+  ENTERPRISE: { first_response_min: 30, resolve_hours: 8 }
+
+priorities:
+  P1: { first_response_min: 15, resolve_hours: 4 }
+  P2: { first_response_min: 60, resolve_hours: 8 }
+  P3: { first_response_min: 240, resolve_hours: 48 }
+
+defaults:
+  plan: STARTER
+  priority: P3
