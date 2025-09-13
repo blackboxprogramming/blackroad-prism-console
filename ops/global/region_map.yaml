@@ -1,0 +1,5 @@
+regions:
+  us: { origin: "https://us.blackroad.io", healthy: true }
+  eu: { origin: "https://eu.blackroad.io", healthy: true }
+  apac:{ origin: "https://apac.blackroad.io", healthy: false }
+fallback: us

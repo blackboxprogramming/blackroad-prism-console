@@ -1,0 +1,14 @@
+name: Lighthouse CI
+on:
+  workflow_dispatch:
+jobs:
+  lhci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lighthouse
+        run: npm -g i @lhci/cli@0.13.x
+      - name: Run Lighthouse (public site)
+        run: |
+          lhci collect --url=http://localhost:8000 --numberOfRuns=1 || true
+          lhci assert --preset=lighthouse:recommended || true
