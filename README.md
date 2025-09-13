@@ -465,3 +465,29 @@ class MyBot(BaseBot):
     def run(self, task: Task) -> BotResponse:
         ...
 ```
+
+## Flags
+
+```
+python -m cli.console flags:list
+python -m cli.console flags:set --name bot.SRE-BOT.postmortem_v2 --value true
+```
+
+## Migrations
+
+```
+python -m cli.console migrate:status
+python -m cli.console migrate:up
+```
+
+## Tenancy
+
+```
+python -m cli.console --tenant ACME task:create --goal "Tenant task"
+```
+
+## Quotas
+
+```
+python -m cli.console quota:show --as-user U_PM
+```

@@ -1,13 +1,15 @@
 import inspect
-import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Type
 
-from .protocols import Task, BotResponse
-from .base import BaseBot, assert_guardrails
-from tools import storage
 from bots import available_bots
+from finance import costing
+from tools import storage
+
+from .base import BaseBot, assert_guardrails
+from .protocols import BotResponse, Task
 
 _memory_path = Path(__file__).resolve().with_name("memory.jsonl")
 _current_doc = ""
@@ -44,4 +46,5 @@ def route(task: Task, bot_name: str) -> BotResponse:
         "response": response.model_dump(mode="json"),
     }
     storage.write(str(_memory_path), record)
+    costing.log(bot_name, user=os.getenv("PRISM_USER"), tenant=os.getenv("PRISM_TENANT"))
     return response
