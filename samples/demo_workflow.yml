@@ -1,0 +1,9 @@
+version: 1
+steps:
+  - bot: "RevOps-BOT"
+    intent: "forecast_check"
+    inputs: { quarter: "Q3" }
+  - bot: "SRE-BOT"
+    intent: "error_budget"
+    when: "{{ steps[0]['ok'] }}"
+  - gather: "ExecutiveSummary"

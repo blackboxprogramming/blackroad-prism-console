@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": ["ok"],
+  "properties": {
+    "ok": {"type": "boolean"},
+    "content": {"type": "string"},
+    "data": {"type": "object"}
+  }
+}

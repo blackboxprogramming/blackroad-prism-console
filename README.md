@@ -432,3 +432,29 @@ cd apps/prismweb
 npm install
 npm run dev
 ```
+
+## Plugin SDK
+See `sdk/plugin_api.py` for building bots. HelloBot example:
+```python
+from sdk import plugin_api
+class HelloBot(plugin_api.BaseBot):
+    NAME = "Hello-BOT"
+    def handle(self, task: plugin_api.Task) -> plugin_api.BotResponse:
+        return plugin_api.BotResponse(ok=True, content="hi")
+plugin_api.register_plugin_bot(HelloBot)
+```
+
+## Sandboxed Execution
+Set `settings.EXECUTION_MODE="sandbox"` to run bots in a subprocess.
+
+## Workflow DSL
+`python -m cli.console wf:run --file path.yml` executes YAML workflows and writes summaries to `artifacts/`.
+
+## Health Checks
+`python -m cli.console health:check` performs basic diagnostics.
+
+## Schemas
+JSON schemas live in `/schemas` and are enforced via `io.validate.validate_json`.
+
+## i18n & Themes
+Translate messages with `i18n.translate.t` and run the TUI with `--theme light|dark`.

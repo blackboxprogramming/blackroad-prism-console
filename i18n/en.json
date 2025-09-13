@@ -1,0 +1,6 @@
+{
+  "bot_list_header": "Registered Bots",
+  "no_bots": "No bots registered",
+  "health_ok": "All systems nominal",
+  "greeting": "Hello {name}"
+}

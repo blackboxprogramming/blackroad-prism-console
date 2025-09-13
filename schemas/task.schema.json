@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": ["intent", "inputs"],
+  "properties": {
+    "intent": {"type": "string"},
+    "inputs": {"type": "object"}
+  }
+}
