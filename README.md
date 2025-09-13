@@ -475,3 +475,14 @@ class MyBot(BaseBot):
     def run(self, task: Task) -> BotResponse:
         ...
 ```
+
+### Legal Ops & Contracts Quickstart
+
+```bash
+python -m cli.console legal:contract:new --type MSA --counterparty "Acme Ltd."
+python -m cli.console legal:assemble --template MSA --options configs/legal/options/acme.yml --out artifacts/legal/C001_v1.md
+python -m cli.console legal:redline --old artifacts/legal/C001_v1.md --new artifacts/legal/C001_v2.md
+python -m cli.console legal:approve:request --id C001 --for-role CFO && python -m cli.console legal:contract:approve --id C001 --as-user U_CFO
+python -m cli.console legal:obligations:extract --id C001 && python -m cli.console legal:obligations:list --due-within 90
+python -m cli.console legal:export:screen --partner P001 --order samples/sales/order_lines.json
+```

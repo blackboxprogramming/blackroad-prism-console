@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["id", "type", "counterparty", "status"],
+  "properties": {
+    "id": {"type": "string"},
+    "type": {"type": "string"},
+    "counterparty": {"type": "string"},
+    "status": {"type": "string"},
+    "version": {"type": "integer"}
+  }
+}
