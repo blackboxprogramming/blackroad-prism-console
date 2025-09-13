@@ -1,0 +1,13 @@
+title: Quarter Close
+purpose: Finance close procedure
+scope: Finance team
+steps:
+  - Invoices reconciled
+  - Dunning resolved or reserved
+  - Revenue recognized
+  - Expenses accrued
+  - Bank rec complete
+  - Close posted
+qc:
+  reviewer: CFO
+  notes: All steps verified

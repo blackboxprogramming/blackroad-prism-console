@@ -1,0 +1,10 @@
+title: Expansion Play
+purpose: Identify and convert expansion opportunities in active accounts
+triggers: [ "Usage spike", "New team invited" ]
+steps:
+  - name: Create expansion opportunity
+    action: salesforce.upsertOpportunity
+    params: { StageName: "Qualification" }
+  - name: Post Slack
+    action: slack.post
+    params: { channel: "#sales", message: "Expansion opp created" }

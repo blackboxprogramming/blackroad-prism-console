@@ -1,0 +1,10 @@
+title: Prospecting Play
+purpose: Convert marketing qualified lead to sales accepted lead
+triggers: [ "MQL created", "Inbound demo request" ]
+steps:
+  - name: Enrich lead
+    action: hubspot.upsertLead
+    params: { source: "prospecting" }
+  - name: Notify Slack
+    action: slack.post
+    params: { channel: "#sales", message: "New MQL assigned" }

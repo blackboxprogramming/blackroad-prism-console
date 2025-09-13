@@ -1,0 +1,10 @@
+title: Opportunity Play
+purpose: Advance qualified opportunity to proposal
+triggers: [ "Stage: qualified" ]
+steps:
+  - name: Create proposal doc
+    action: docs.create
+    params: { template: "proposal_v1" }
+  - name: Update CRM
+    action: hubspot.upsertDeal
+    params: { stage: "proposal" }

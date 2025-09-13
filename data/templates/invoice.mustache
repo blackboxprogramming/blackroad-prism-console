@@ -1,0 +1,13 @@
+Invoice {{id}}
+Date: {{date}}
+From: {{from}}
+To: {{to.name}} ({{to.email}})
+
+Items:
+{{#items}}
+- {{qty}} x {{sku}} @ {{unit}} {{currency}}
+{{/items}}
+
+Total: {{total}} {{currency}}
+Terms: {{terms}}
+Due: {{due_at}}

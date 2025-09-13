@@ -1,0 +1,16 @@
+name: Dunning Cycle (Daily)
+on:
+  schedule: [{ cron: "15 13 * * *" }]
+  workflow_dispatch:
+jobs:
+  dunning:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix apps/api
+      - run: node scripts/dunning_cycle.ts
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          DUNNING_EMAIL_WEBHOOK: ${{ secrets.DUNNING_EMAIL_WEBHOOK }}
