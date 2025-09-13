@@ -1,0 +1,10 @@
+name: ML Shadow Deploy
+on:
+  workflow_dispatch:
+jobs:
+  shadow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shadow enable flag
+        run: echo "FLAGS_SHADOW_MODEL=1" >> $GITHUB_ENV

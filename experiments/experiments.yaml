@@ -1,0 +1,6 @@
+experiments:
+  - key: pricing_banner
+    variants: [A, B]
+    metric: conversion_rate
+    start: 2025-09-01
+    end: 2025-12-31
