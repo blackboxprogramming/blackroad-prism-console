@@ -25,6 +25,12 @@ import supMacros from './routes/support/macros.js';
 import supKb from './routes/support/kb.js';
 import supChat from './routes/support/chat.js';
 import supEmail from './routes/support/email.js';
+import cpqCatalog from './routes/cpq/catalog.js';
+import cpqPricing from './routes/cpq/pricing.js';
+import cpqQuotes from './routes/cpq/quotes.js';
+import cpqApprovals from './routes/cpq/approvals.js';
+import cpqOrders from './routes/cpq/orders.js';
+import cpqSubs from './routes/cpq/subscriptions.js';
 
 dotenv.config();
 
@@ -53,6 +59,7 @@ app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
 app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
 app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
+app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 
 const port = process.env.PORT || 4000;
 
