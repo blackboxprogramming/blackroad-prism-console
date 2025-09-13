@@ -1,14 +1,19 @@
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+import json
+import re
 import typer
 
 from orchestrator.protocols import Task
 from orchestrator import orchestrator
 from tools import storage
 from bots import available_bots
+from contracts.validate import ContractError, validate_file
+from lakeio.parquet_csv_bridge import export_table, import_table
+from retrieval import index as retrieval_index
+from semantic.query import evaluate, MODEL
 
 app = typer.Typer()
 
@@ -65,6 +70,84 @@ def task_status(id: str = typer.Option(..., "--id")):
 def bot_list():
     for name, cls in available_bots().items():
         typer.echo(f"{name}\t{cls.mission}")
+
+
+def _parse_filters(exprs: list[str]) -> dict:
+    filters = {}
+    for expr in exprs:
+        m = re.match(r"(\w+)([<>=]+)(.+)", expr)
+        if not m:
+            continue
+        field, op, value = m.groups()
+        value = value.strip()
+        if op == ">=":
+            filters[field] = lambda x, v=value: x >= v
+        elif op == "<=":
+            filters[field] = lambda x, v=value: x <= v
+        else:
+            filters[field] = lambda x, v=value: x == v
+    return filters
+
+
+@app.command("contract:validate")
+def contract_validate(
+    table: str = typer.Option(..., "--table"),
+    file: Path = typer.Option(..., "--file", exists=True, dir_okay=False),
+):
+    try:
+        validate_file(table, file)
+        typer.echo("OK")
+    except ContractError as e:
+        typer.echo(str(e))
+        raise typer.Exit(code=1)
+
+
+@app.command("lake:export")
+def lake_export(
+    table: str = typer.Option(..., "--table"),
+    fmt: str = typer.Option(..., "--fmt"),
+    out: Path = typer.Option(..., "--out"),
+):
+    export_table(table, fmt, out)
+    typer.echo(str(out))
+
+
+@app.command("lake:import")
+def lake_import(
+    table: str = typer.Option(..., "--table"),
+    fmt: str = typer.Option(..., "--fmt"),
+    in_path: Path = typer.Option(..., "--in", exists=True, dir_okay=False),
+):
+    import_table(table, fmt, in_path)
+
+
+@app.command("index:build")
+def index_build():
+    retrieval_index.build()
+
+
+@app.command("search")
+def search(q: str = typer.Option(..., "--q")):
+    hits = retrieval_index.search(q)
+    for hit in hits:
+        typer.echo(f"{hit['score']:.2f}\t{hit['path']}")
+
+
+@app.command("sem:metrics")
+def sem_metrics():
+    for m in MODEL.metrics:
+        typer.echo(m)
+
+
+@app.command("sem:query")
+def sem_query(
+    metric: str = typer.Option(..., "--metric"),
+    group_by: list[str] = typer.Option([], "--group-by"),
+    filters: list[str] = typer.Option([], "--filter"),
+):
+    parsed = _parse_filters(filters)
+    rows = evaluate(metric, parsed, group_by)
+    typer.echo(json.dumps(rows))
 
 
 if __name__ == "__main__":

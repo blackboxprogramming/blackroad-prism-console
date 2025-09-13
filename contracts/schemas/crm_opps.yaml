@@ -1,0 +1,13 @@
+id:
+  type: int
+  required: true
+name:
+  type: str
+  required: true
+stage:
+  type: str
+  required: true
+  enum: [open, won, lost]
+amount:
+  type: float
+  required: true

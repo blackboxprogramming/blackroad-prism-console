@@ -1,0 +1,15 @@
+date:
+  type: str
+  required: true
+region:
+  type: str
+  required: true
+product:
+  type: str
+  required: true
+amount:
+  type: float
+  required: true
+profit:
+  type: float
+  required: true

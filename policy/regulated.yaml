@@ -1,0 +1,4 @@
+# Simple policy indicating contract validation required before import
+preconditions:
+  lake:import:
+    - contract:validate

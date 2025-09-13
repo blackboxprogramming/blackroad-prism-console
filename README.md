@@ -465,3 +465,13 @@ class MyBot(BaseBot):
     def run(self, task: Task) -> BotResponse:
         ...
 ```
+
+## Data Layer Quickstart
+
+Build and query the offline lake:
+
+```
+python -m cli.console index:build
+python -m cli.console sem:metrics
+```
+

@@ -1,0 +1,12 @@
+date:
+  type: str
+  required: true
+region:
+  type: str
+  required: true
+downtime:
+  type: float
+  required: true
+window:
+  type: float
+  required: true
