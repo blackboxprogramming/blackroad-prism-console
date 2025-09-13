@@ -1,0 +1,12 @@
+{
+  "source": "salesforce",
+  "type": "opportunity.closed_won",
+  "id": "00000000-0000-0000-0000-000000000000",
+  "ts": "2024-01-01T00:00:00Z",
+  "actor": "ae@example.com",
+  "payload": {
+    "account": {"id": "acc-001", "name": "Acme Corp"},
+    "opportunity": {"id": "opp-123", "amount": 120000}
+  },
+  "headers": {}
+}

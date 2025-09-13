@@ -1,0 +1,15 @@
+global:
+  kill_switch: false
+policies:
+  salesforce.opportunity.closed_won:
+    mode: auto
+    max_risk: 6
+    compensations: true
+  github.push:
+    mode: auto
+    max_risk: 4
+    compensations: true
+  github.pr.merged:
+    mode: auto
+    max_risk: 5
+    compensations: true
