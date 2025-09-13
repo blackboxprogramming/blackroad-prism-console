@@ -1,0 +1,6 @@
+id,rev,type,uom,lead_time_days,cost,suppliers
+PROD-100,A,assembly,ea,10,50,SUP-A;SUP-B
+PROD-100,B,assembly,ea,10,55,SUP-A
+COMP-1,A,component,ea,5,5,SUP-C
+COMP-2,A,component,ea,5,3,SUP-D
+RAW-1,A,raw,kg,2,1,SUP-E

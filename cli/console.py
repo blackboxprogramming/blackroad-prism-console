@@ -19,6 +19,12 @@ from healthchecks import synthetic as hc_synth
 from change import calendar as change_calendar
 from status import generator as status_gen
 import time
+import importlib
+
+from plm import bom as plm_bom, eco as plm_eco
+from mfg import routing as mfg_routing, work_instructions as mfg_wi, spc as mfg_spc, coq as mfg_coq, mrp as mfg_mrp
+
+mfg_yield = importlib.import_module("mfg.yield")
 
 from close import calendar as close_calendar, journal as close_journal, recon as close_recon, flux as close_flux, sox as close_sox, packet as close_packet
 
@@ -347,6 +353,97 @@ def close_packet_cmd(period: str = typer.Option(..., "--period")):
 def close_sign(period: str = typer.Option(..., "--period"), role: str = typer.Option(..., "--role"), as_user: str = typer.Option(..., "--as-user")):
     close_packet.sign(period, role, as_user)
     typer.echo("signed")
+
+
+@app.command("plm:items:load")
+def plm_items_load(dir: Path = typer.Option(..., "--dir", exists=True, file_okay=False)):
+    plm_bom.load_items(str(dir))
+    typer.echo("ok")
+
+
+@app.command("plm:bom:load")
+def plm_bom_load(dir: Path = typer.Option(..., "--dir", exists=True, file_okay=False)):
+    plm_bom.load_boms(str(dir))
+    typer.echo("ok")
+
+
+@app.command("plm:bom:explode")
+def plm_bom_explode(item: str = typer.Option(..., "--item"), rev: str = typer.Option(..., "--rev"), level: int = typer.Option(1, "--level")):
+    lines = plm_bom.explode(item, rev, level)
+    for lvl, comp, qty in lines:
+        typer.echo(f"{lvl}\t{comp}\t{qty}")
+
+
+@app.command("plm:eco:new")
+def plm_eco_new(item: str = typer.Option(..., "--item"), from_rev: str = typer.Option(..., "--from"), to_rev: str = typer.Option(..., "--to"), reason: str = typer.Option(..., "--reason")):
+    ch = plm_eco.new_change(item, from_rev, to_rev, reason)
+    typer.echo(ch.id)
+
+
+@app.command("plm:eco:impact")
+def plm_eco_impact(id: str = typer.Option(..., "--id")):
+    impact = plm_eco.impact(id)
+    typer.echo(f"impact {impact}")
+
+
+@app.command("plm:eco:approve")
+def plm_eco_approve(id: str = typer.Option(..., "--id"), as_user: str = typer.Option(..., "--as-user")):
+    plm_eco.approve(id, as_user)
+    typer.echo("approved")
+
+
+@app.command("plm:eco:release")
+def plm_eco_release(id: str = typer.Option(..., "--id")):
+    plm_eco.release(id)
+    typer.echo("released")
+
+
+@app.command("mfg:wc:load")
+def mfg_wc_load(file: Path = typer.Option(..., "--file", exists=True, dir_okay=False)):
+    mfg_routing.load_work_centers(str(file))
+    typer.echo("ok")
+
+
+@app.command("mfg:routing:load")
+def mfg_routing_load(dir: Path = typer.Option(..., "--dir", exists=True, file_okay=False)):
+    mfg_routing.load_routings(str(dir))
+    typer.echo("ok")
+
+
+@app.command("mfg:routing:capcheck")
+def mfg_routing_capcheck(item: str = typer.Option(..., "--item"), rev: str = typer.Option(..., "--rev"), qty: int = typer.Option(..., "--qty")):
+    res = mfg_routing.capacity_check(item, rev, qty)
+    typer.echo(json.dumps(res))
+
+
+@app.command("mfg:wi:render")
+def mfg_wi_render(item: str = typer.Option(..., "--item"), rev: str = typer.Option(..., "--rev")):
+    path = mfg_wi.render(item, rev)
+    typer.echo(str(path))
+
+
+@app.command("mfg:spc:analyze")
+def mfg_spc_analyze(op: str = typer.Option(..., "--op"), window: int = typer.Option(50, "--window")):
+    findings = mfg_spc.analyze(op, window)
+    typer.echo(" ".join(findings))
+
+
+@app.command("mfg:yield")
+def mfg_yield_cmd(period: str = typer.Option(..., "--period")):
+    stats = mfg_yield.compute(period)
+    typer.echo(json.dumps(stats))
+
+
+@app.command("mfg:coq")
+def mfg_coq_cmd(period: str = typer.Option(..., "--period")):
+    totals = mfg_coq.build(period)
+    typer.echo(json.dumps(totals))
+
+
+@app.command("mfg:mrp")
+def mfg_mrp_cmd(demand: Path = typer.Option(..., "--demand", exists=True), inventory: Path = typer.Option(..., "--inventory", exists=True), pos: Path = typer.Option(..., "--pos", exists=True)):
+    plan = mfg_mrp.plan(str(demand), str(inventory), str(pos))
+    typer.echo(json.dumps(plan))
 
 @app.command("status:build")
 def status_build():
