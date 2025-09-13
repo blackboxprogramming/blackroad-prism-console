@@ -1,0 +1,9 @@
+id: Q-SE-101
+pass_percent: 80
+questions:
+  - id: q1
+    type: mcq
+    answer: 'A'
+  - id: q2
+    type: tf
+    answer: true

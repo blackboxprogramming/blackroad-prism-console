@@ -1,32 +1,49 @@
+import importlib
 import json
+import time
+from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
-from dataclasses import asdict
 
 import typer
 
 from bench import runner as bench_runner
 from bots import available_bots
+from change import calendar as change_calendar
+from enablement import calendar as en_cal
+from enablement import certify as en_cert
+from enablement import courses as en_courses
+from enablement import feedback as en_fb
+from enablement import labs as en_labs
+from enablement import paths as en_paths
+from enablement import quizzes as en_quizzes
+from enablement import readiness as en_read
+from healthchecks import synthetic as hc_synth
+from mfg import coq as mfg_coq
+from mfg import mrp as mfg_mrp
+from mfg import routing as mfg_routing
+from mfg import spc as mfg_spc
+from mfg import work_instructions as mfg_wi
 from orchestrator import orchestrator, slo_report
 from orchestrator.perf import perf_timer
 from orchestrator.protocols import Task
-from tools import storage
+from plm import bom as plm_bom
+from plm import eco as plm_eco
+from runbooks import executor as rb_executor
 from services import catalog as svc_catalog
 from services import deps as svc_deps
-from runbooks import executor as rb_executor
-from healthchecks import synthetic as hc_synth
-from change import calendar as change_calendar
 from status import generator as status_gen
-import time
-import importlib
-
-from plm import bom as plm_bom, eco as plm_eco
-from mfg import routing as mfg_routing, work_instructions as mfg_wi, spc as mfg_spc, coq as mfg_coq, mrp as mfg_mrp
+from tools import storage
 
 mfg_yield = importlib.import_module("mfg.yield")
 
-from close import calendar as close_calendar, journal as close_journal, recon as close_recon, flux as close_flux, sox as close_sox, packet as close_packet
+from close import calendar as close_calendar
+from close import flux as close_flux
+from close import journal as close_journal
+from close import packet as close_packet
+from close import recon as close_recon
+from close import sox as close_sox
 
 app = typer.Typer()
 
@@ -87,9 +104,7 @@ def bot_list():
 
 def _perf_footer(perf: bool, data: dict) -> None:
     if perf:
-        typer.echo(
-            f"time={data.get('elapsed_ms')} rss={data.get('rss_mb')} cache=na exec=inproc"
-        )
+        typer.echo(f"time={data.get('elapsed_ms')} rss={data.get('rss_mb')} cache=na exec=inproc")
 
 
 @app.command("bench:list")
@@ -175,7 +190,10 @@ def svc_load(dir: str = typer.Option("configs/services", "--dir")):
 
 
 @app.command("svc:deps")
-def svc_deps_cmd(service: str = typer.Option(..., "--service"), dir: str = typer.Option("configs/services", "--dir")):
+def svc_deps_cmd(
+    service: str = typer.Option(..., "--service"),
+    dir: str = typer.Option("configs/services", "--dir"),
+):
     services = svc_catalog.load_services(f"{dir}/*.yaml")
     for dep in svc_deps.blast_radius(service, services):
         typer.echo(dep)
@@ -225,7 +243,9 @@ def change_add(
     risk: str = typer.Option(..., "--risk"),
 ):
     cid = f"chg-{int(time.time())}"
-    ch = change_calendar.Change(id=cid, service=service, type=type, start=start, end=end, owner="cli", risk=risk)
+    ch = change_calendar.Change(
+        id=cid, service=service, type=type, start=start, end=end, owner="cli", risk=risk
+    )
     change_calendar.add_change(ch)
     typer.echo(cid)
 
@@ -250,25 +270,11 @@ def change_conflicts(service: str = typer.Option(..., "--service")):
     typer.echo("ok")
 
 
-@app.command("status:build")
-def status_build():
-    status_gen.build()
-    typer.echo("built")
-
-
-if __name__ == "__main__":
-    app()
-
-from close import calendar as close_calendar
-from close import journal as close_journal
-from close import recon as close_recon
-from close import flux as close_flux
-from close import sox as close_sox
-from close import packet as close_packet
-
-
 @app.command("close:cal:new")
-def close_cal_new(period: str = typer.Option(..., "--period"), template: Path = typer.Option(..., "--template", exists=True)):
+def close_cal_new(
+    period: str = typer.Option(..., "--period"),
+    template: Path = typer.Option(..., "--template", exists=True),
+):
     cal = close_calendar.CloseCalendar.from_template(period, str(template))
     cal.save()
     typer.echo("ok")
@@ -310,7 +316,10 @@ def close_jrnl_post(period: str = typer.Option(..., "--period")):
 
 
 @app.command("close:recon:run")
-def close_recon_run(period: str = typer.Option(..., "--period"), fixtures: Path = typer.Option(..., "--fixtures", exists=True)):
+def close_recon_run(
+    period: str = typer.Option(..., "--period"),
+    fixtures: Path = typer.Option(..., "--fixtures", exists=True),
+):
     close_recon.run_recons(period, str(fixtures))
     typer.echo("recons")
 
@@ -350,7 +359,11 @@ def close_packet_cmd(period: str = typer.Option(..., "--period")):
 
 
 @app.command("close:sign")
-def close_sign(period: str = typer.Option(..., "--period"), role: str = typer.Option(..., "--role"), as_user: str = typer.Option(..., "--as-user")):
+def close_sign(
+    period: str = typer.Option(..., "--period"),
+    role: str = typer.Option(..., "--role"),
+    as_user: str = typer.Option(..., "--as-user"),
+):
     close_packet.sign(period, role, as_user)
     typer.echo("signed")
 
@@ -368,14 +381,23 @@ def plm_bom_load(dir: Path = typer.Option(..., "--dir", exists=True, file_okay=F
 
 
 @app.command("plm:bom:explode")
-def plm_bom_explode(item: str = typer.Option(..., "--item"), rev: str = typer.Option(..., "--rev"), level: int = typer.Option(1, "--level")):
+def plm_bom_explode(
+    item: str = typer.Option(..., "--item"),
+    rev: str = typer.Option(..., "--rev"),
+    level: int = typer.Option(1, "--level"),
+):
     lines = plm_bom.explode(item, rev, level)
     for lvl, comp, qty in lines:
         typer.echo(f"{lvl}\t{comp}\t{qty}")
 
 
 @app.command("plm:eco:new")
-def plm_eco_new(item: str = typer.Option(..., "--item"), from_rev: str = typer.Option(..., "--from"), to_rev: str = typer.Option(..., "--to"), reason: str = typer.Option(..., "--reason")):
+def plm_eco_new(
+    item: str = typer.Option(..., "--item"),
+    from_rev: str = typer.Option(..., "--from"),
+    to_rev: str = typer.Option(..., "--to"),
+    reason: str = typer.Option(..., "--reason"),
+):
     ch = plm_eco.new_change(item, from_rev, to_rev, reason)
     typer.echo(ch.id)
 
@@ -387,7 +409,9 @@ def plm_eco_impact(id: str = typer.Option(..., "--id")):
 
 
 @app.command("plm:eco:approve")
-def plm_eco_approve(id: str = typer.Option(..., "--id"), as_user: str = typer.Option(..., "--as-user")):
+def plm_eco_approve(
+    id: str = typer.Option(..., "--id"), as_user: str = typer.Option(..., "--as-user")
+):
     plm_eco.approve(id, as_user)
     typer.echo("approved")
 
@@ -411,7 +435,11 @@ def mfg_routing_load(dir: Path = typer.Option(..., "--dir", exists=True, file_ok
 
 
 @app.command("mfg:routing:capcheck")
-def mfg_routing_capcheck(item: str = typer.Option(..., "--item"), rev: str = typer.Option(..., "--rev"), qty: int = typer.Option(..., "--qty")):
+def mfg_routing_capcheck(
+    item: str = typer.Option(..., "--item"),
+    rev: str = typer.Option(..., "--rev"),
+    qty: int = typer.Option(..., "--qty"),
+):
     res = mfg_routing.capacity_check(item, rev, qty)
     typer.echo(json.dumps(res))
 
@@ -423,7 +451,9 @@ def mfg_wi_render(item: str = typer.Option(..., "--item"), rev: str = typer.Opti
 
 
 @app.command("mfg:spc:analyze")
-def mfg_spc_analyze(op: str = typer.Option(..., "--op"), window: int = typer.Option(50, "--window")):
+def mfg_spc_analyze(
+    op: str = typer.Option(..., "--op"), window: int = typer.Option(50, "--window")
+):
     findings = mfg_spc.analyze(op, window)
     typer.echo(" ".join(findings))
 
@@ -441,14 +471,125 @@ def mfg_coq_cmd(period: str = typer.Option(..., "--period")):
 
 
 @app.command("mfg:mrp")
-def mfg_mrp_cmd(demand: Path = typer.Option(..., "--demand", exists=True), inventory: Path = typer.Option(..., "--inventory", exists=True), pos: Path = typer.Option(..., "--pos", exists=True)):
+def mfg_mrp_cmd(
+    demand: Path = typer.Option(..., "--demand", exists=True),
+    inventory: Path = typer.Option(..., "--inventory", exists=True),
+    pos: Path = typer.Option(..., "--pos", exists=True),
+):
     plan = mfg_mrp.plan(str(demand), str(inventory), str(pos))
     typer.echo(json.dumps(plan))
+
+
+@app.command("learn:courses:load")
+def learn_courses_load(dir: Path = typer.Option(..., "--dir", exists=True, file_okay=False)):
+    en_courses.load_courses(str(dir))
+    typer.echo("ok")
+
+
+@app.command("learn:courses:list")
+def learn_courses_list(role_track: str = typer.Option(..., "--role_track")):
+    for c in en_courses.list_courses(role_track):
+        typer.echo(f"{c['id']}	{c['title']}")
+
+
+@app.command("learn:path:new")
+def learn_path_new(
+    name: str = typer.Option(..., "--name"),
+    role_track: str = typer.Option(..., "--role_track"),
+    courses: str = typer.Option(..., "--courses"),
+    required: int = typer.Option(..., "--required"),
+):
+    p = en_paths.new_path(name, role_track, courses.split(","), required)
+    typer.echo(p.id)
+
+
+@app.command("learn:assign")
+def learn_assign(
+    user: str = typer.Option(..., "--user"),
+    path: str = typer.Option(..., "--path"),
+    due: str = typer.Option(..., "--due"),
+):
+    en_paths.assign(user, path, due)
+    typer.echo("ok")
+
+
+@app.command("learn:quiz:grade")
+def learn_quiz_grade(
+    quiz: str = typer.Option(..., "--quiz"),
+    answers: Path = typer.Option(..., "--answers", exists=True),
+):
+    res = en_quizzes.grade(quiz, str(answers))
+    typer.echo(json.dumps(res))
+
+
+@app.command("learn:lab:run")
+def learn_lab_run(
+    lab: str = typer.Option(..., "--lab"),
+    submission: Path = typer.Option(..., "--submission", exists=True),
+):
+    res = en_labs.run_lab(lab, str(submission))
+    typer.echo(json.dumps(res))
+
+
+@app.command("learn:cert:check")
+def learn_cert_check(
+    user: str = typer.Option(..., "--user"), cert: str = typer.Option(..., "--cert")
+):
+    ok = en_cert.check(user, cert)
+    typer.echo("awarded" if ok else "not met")
+
+
+@app.command("learn:cert:list")
+def learn_cert_list(user: str = typer.Option(..., "--user")):
+    for c in en_cert.list_user(user):
+        typer.echo(c)
+
+
+@app.command("learn:readiness")
+def learn_readiness():
+    en_read.build()
+    typer.echo("ok")
+
+
+@app.command("learn:event:add")
+def learn_event_add(
+    title: str = typer.Option(..., "--title"),
+    type: str = typer.Option(..., "--type"),
+    date: str = typer.Option(..., "--date"),
+    capacity: int = typer.Option(..., "--capacity"),
+):
+    ev = en_cal.add_event(title, type, date, capacity)
+    typer.echo(ev.id)
+
+
+@app.command("learn:event:join")
+def learn_event_join(id: str = typer.Option(..., "--id"), user: str = typer.Option(..., "--user")):
+    en_cal.join(id, user)
+    typer.echo("ok")
+
+
+@app.command("learn:feedback:add")
+def learn_feedback_add(
+    course: str = typer.Option(..., "--course"),
+    user: str = typer.Option(..., "--user"),
+    score: int = typer.Option(..., "--score"),
+    comment: str = typer.Option(..., "--comment"),
+):
+    en_fb.add(course, user, score, comment)
+    typer.echo("ok")
+
+
+@app.command("learn:feedback:summary")
+def learn_feedback_summary(course: str = typer.Option(..., "--course")):
+    res = en_fb.summary(course)
+    typer.echo(json.dumps(res))
+
 
 @app.command("status:build")
 def status_build():
     status_gen.build()
     typer.echo("built")
+
 
 if __name__ == "__main__":
     app()

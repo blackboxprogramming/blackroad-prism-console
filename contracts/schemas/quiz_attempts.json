@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["user", "quiz", "score", "pass", "breakdown"],
+  "properties": {
+    "user": { "type": "string" },
+    "quiz": { "type": "string" },
+    "score": { "type": "number" },
+    "pass": { "type": "boolean" },
+    "breakdown": { "type": "object" }
+  }
+}
