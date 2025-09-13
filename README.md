@@ -491,3 +491,12 @@ python -m cli.console close:sox:check --period 2025-09
 python -m cli.console close:packet --period 2025-09
 python -m cli.console close:sign --period 2025-09 --role CFO --as-user U_CFO
 ```
+
+## Master Data & Governance Quickstart
+
+```bash
+python -m cli.console mdm:stage --domain account --file fixtures/mdm/account.csv
+python -m cli.console mdm:match --domain account --config configs/mdm/match_account.yaml
+python -m cli.console mdm:golden --domain account --policy configs/mdm/survivorship_account.yaml
+python -m cli.console mdm:dq --domain account --config configs/mdm/dq_account.yaml
+```

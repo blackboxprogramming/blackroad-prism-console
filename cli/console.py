@@ -19,6 +19,16 @@ from healthchecks import synthetic as hc_synth
 from change import calendar as change_calendar
 from status import generator as status_gen
 import time
+from mdm import (
+    domains as mdm_domains,
+    match as mdm_match,
+    survivorship as mdm_survivorship,
+    quality as mdm_quality,
+    catalog as mdm_catalog,
+    steward as mdm_steward,
+    lineage_diff as mdm_lineage_diff,
+    changes as mdm_changes,
+)
 
 from close import calendar as close_calendar, journal as close_journal, recon as close_recon, flux as close_flux, sox as close_sox, packet as close_packet
 
@@ -347,6 +357,66 @@ def close_packet_cmd(period: str = typer.Option(..., "--period")):
 def close_sign(period: str = typer.Option(..., "--period"), role: str = typer.Option(..., "--role"), as_user: str = typer.Option(..., "--as-user")):
     close_packet.sign(period, role, as_user)
     typer.echo("signed")
+
+
+@app.command("mdm:stage")
+def mdm_stage(domain: str = typer.Option(..., "--domain"), file: Path = typer.Option(..., "--file", exists=True)):
+    mdm_domains.stage(domain, file)
+    typer.echo("staged")
+
+
+@app.command("mdm:match")
+def mdm_match_cmd(domain: str = typer.Option(..., "--domain"), config: Path = typer.Option(..., "--config", exists=True)):
+    mdm_match.match(domain, config)
+    typer.echo("matched")
+
+
+@app.command("mdm:golden")
+def mdm_golden(domain: str = typer.Option(..., "--domain"), policy: Path = typer.Option(..., "--policy", exists=True)):
+    mdm_survivorship.merge(domain, policy)
+    typer.echo("golden")
+
+
+@app.command("mdm:dq")
+def mdm_dq_cmd(domain: str = typer.Option(..., "--domain"), config: Path = typer.Option(..., "--config", exists=True)):
+    mdm_quality.dq(domain, config)
+    typer.echo("dq")
+
+
+@app.command("mdm:catalog:build")
+def mdm_catalog_build():
+    mdm_catalog.build()
+    typer.echo("catalog")
+
+
+@app.command("mdm:steward:queue")
+def mdm_steward_queue(domain: str = typer.Option(..., "--domain")):
+    mdm_steward.queue(domain)
+    typer.echo("queued")
+
+
+@app.command("mdm:lineage:diff")
+def mdm_lineage_diff_cmd(domain: str = typer.Option(..., "--domain")):
+    mdm_lineage_diff.diff(domain)
+    typer.echo("diff")
+
+
+@app.command("mdm:change:new")
+def mdm_change_new(domain: str = typer.Option(..., "--domain"), type: str = typer.Option(..., "--type"), payload: Path = typer.Option(..., "--payload", exists=True)):
+    chg = mdm_changes.new(domain, type, payload)
+    typer.echo(chg.id)
+
+
+@app.command("mdm:change:approve")
+def mdm_change_approve(id: str = typer.Option(..., "--id"), as_user: str = typer.Option(..., "--as-user")):
+    mdm_changes.approve(id, as_user)
+    typer.echo("approved")
+
+
+@app.command("mdm:change:apply")
+def mdm_change_apply(id: str = typer.Option(..., "--id")):
+    mdm_changes.apply(id)
+    typer.echo("applied")
 
 @app.command("status:build")
 def status_build():
