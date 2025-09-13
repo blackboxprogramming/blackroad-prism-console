@@ -1,0 +1,4 @@
+[
+  {"Account": "4000", "Period": "2024-05", "Debit": 5000, "Credit": 0, "Entity": "US"},
+  {"Account": "4010", "Period": "2024-05", "Debit": 0, "Credit": 3000, "Entity": "US"}
+]

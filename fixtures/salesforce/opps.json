@@ -1,0 +1,4 @@
+[
+  {"Id": "OPP1", "Owner": "Alice", "Stage": "Prospecting", "Amount": 10000, "CloseDate": "2024-06-30", "AgeDays": 10},
+  {"Id": "OPP2", "Owner": "Bob", "Stage": "Closed Won", "Amount": 20000, "CloseDate": "2024-07-15", "AgeDays": 30}
+]
