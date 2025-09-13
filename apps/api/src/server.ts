@@ -13,8 +13,10 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 import hooks from './routes/hooks.js';
 import metrics from './routes/metrics.js';
+import okta from './routes/okta.js';
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
+app.use('/api/auth/okta', okta);
 
 const port = process.env.PORT || 4000;
 
