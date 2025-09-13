@@ -24,7 +24,12 @@ import supSla from './routes/support/sla.js';
 import supMacros from './routes/support/macros.js';
 import supKb from './routes/support/kb.js';
 import supChat from './routes/support/chat.js';
-import supEmail from './routes/support/email.js';
+import productIdeas from './routes/product/ideas.js';
+import productPrd from './routes/product/prd.js';
+import productRoadmap from './routes/product/roadmap.js';
+import productReleases from './routes/product/releases.js';
+import productFlags from './routes/product/flags.js';
+import productFeedback from './routes/product/feedback.js';
 
 dotenv.config();
 
@@ -53,6 +58,7 @@ app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
 app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
 app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
+app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
 
 const port = process.env.PORT || 4000;
 
