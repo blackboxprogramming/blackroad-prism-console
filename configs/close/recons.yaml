@@ -1,0 +1,7 @@
+accounts:
+  "1000":
+    method: bank
+    fixture: bank_stmt.csv
+  "2000":
+    method: ar_aging
+    fixture: ar_aging.csv

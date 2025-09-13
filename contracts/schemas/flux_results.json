@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "current": {"type": "number"},
+    "prev": {"type": "number"},
+    "change": {"type": "number"},
+    "pct": {"type": "number"},
+    "flag": {"type": "boolean"}
+  },
+  "required": ["current", "prev", "change", "pct", "flag"],
+  "additionalProperties": false
+}
