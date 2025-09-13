@@ -432,3 +432,51 @@ cd apps/prismweb
 npm install
 npm run dev
 ```
+
+## Program Board
+
+The CLI exposes a lightweight portfolio view that persists to `program/board.json`.
+Example:
+
+```bash
+python -m cli.console program:add --id P001 --title "APAC Launch" --owner "Regional-Ops" --bot "Regional-Ops-BOT" --start 2025-10-01 --due 2026-01-15
+python -m cli.console program:list
+python -m cli.console program:roadmap
+```
+
+Roadmap output is rendered as an ASCII Gantt chart with 13 week buckets.
+
+## Dependencies & Scheduling
+
+Tasks may depend on other tasks and be scheduled for a specific time.  The
+polling scheduler will run tasks whose dependencies are complete:
+
+```bash
+python -m cli.console scheduler:run --every-seconds 5
+```
+
+Metrics about dependency blocks and schedule SLAs are written to
+`orchestrator/metrics.jsonl`.
+
+## CSV Import/Export
+
+Bulk task management is supported with CSV files.  Columns:
+
+`id, goal, context_json, depends_on_csv, scheduled_for_iso, bot`
+
+```bash
+python -m cli.console task:import --csv samples/sample_tasks.csv
+python -m cli.console task:export --csv out.csv
+```
+
+Sample files live under `samples/`.
+
+## Retail Industry Pack
+
+The repository ships with a minimal retail example consisting of two bots:
+
+- **Merchandising-BOT** – plans seasonal assortments from sales history.
+- **Store-Ops-BOT** – generates labor plans and checklists for promotions.
+
+Fixtures are under `fixtures/retail/` and an example workflow is available at
+`examples/retail_launch.md`.

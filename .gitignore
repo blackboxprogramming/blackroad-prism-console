@@ -66,6 +66,10 @@ target/
 **/target/
 *.db
 *.sqlite
+program/board.json
+orchestrator/tasks.json
+orchestrator/metrics.jsonl
+orchestrator/schedule.log.jsonl
 
 # Never commit SSH private keys
 id_ed25519

@@ -1,0 +1,3 @@
+id,goal,context_json,depends_on_csv,scheduled_for_iso,bot
+T001,Plan fall assortment,{},,2025-01-01T09:00:00,Merchandising-BOT
+T002,Plan promotion weekend,{},T001,2025-01-02T09:00:00,Store-Ops-BOT
