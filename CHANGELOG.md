@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.0.0...v1.1.0) (2025-09-13)
+
+
+### Features
+
+* add benchmark suite and SLO tooling ([#1382](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1382)) ([31d5856](https://github.com/blackboxprogramming/blackroad-prism-console/commit/31d5856332fa2ca66dd066ebb1a9e4b94ebafe1d))
+* add codex router and worker stubs ([#1361](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1361)) ([6f891dd](https://github.com/blackboxprogramming/blackroad-prism-console/commit/6f891ddaf1a47247c74c1a922b01725691186644))
+* add enablement hub ([#1415](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1415)) ([005fdfa](https://github.com/blackboxprogramming/blackroad-prism-console/commit/005fdfa2a69e4931e5cd4d67ef60d7b7386320a6))
+* add offline financial close workflow ([#1408](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1408)) ([9835818](https://github.com/blackboxprogramming/blackroad-prism-console/commit/983581809e8510c40a45050711392015063f5042))
+* add offline plm and mfg ops ([#1409](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1409)) ([7605181](https://github.com/blackboxprogramming/blackroad-prism-console/commit/760518187a01d17d8b6091cba27d5f7b6c4f2cbe))
+* add prism architecture docs and tooling ([#1355](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1355)) ([0f8cba0](https://github.com/blackboxprogramming/blackroad-prism-console/commit/0f8cba0e30c32b9967bb5c5734f9e4d9650552e5))
+* add service catalog and runbook automation ([#1394](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1394)) ([2308816](https://github.com/blackboxprogramming/blackroad-prism-console/commit/230881626eedbb17dbde3916c5b1ee14b1b8e11f))
+
 ## 1.0.0 (2025-09-12)
 
 
