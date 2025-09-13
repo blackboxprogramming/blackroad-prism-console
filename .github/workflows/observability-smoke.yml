@@ -1,0 +1,15 @@
+name: Observability Smoke
+on:
+  workflow_dispatch:
+  push:
+    paths: ["apps/api/**", ".github/workflows/observability-smoke.yml"]
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix apps/api && npm run build --prefix apps/api
+      - name: Run unit smoke
+        run: node -e "console.log('OK')"

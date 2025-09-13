@@ -1,0 +1,17 @@
+name: FinOps Guardrails
+on:
+  schedule: [{ cron: "0 2 * * *" }]
+  workflow_dispatch:
+jobs:
+  costcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix apps/api
+      - run: node scripts/finops_check.ts
+        env:
+          BILLING_EXPORT_URL: ${{ secrets.BILLING_EXPORT_URL }}
+          FINOPS_BUDGET_JSON: ${{ secrets.FINOPS_BUDGET_JSON }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

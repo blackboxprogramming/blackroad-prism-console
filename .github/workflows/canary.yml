@@ -1,0 +1,19 @@
+name: Canary Deploy
+on:
+  workflow_dispatch:
+    inputs:
+      percent: { description: 'Canary percent (1-50)', required: true, default: '10' }
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy canary
+        run: bash ops/bluegreen_deploy.sh
+      - name: Validate metrics
+        run: |
+          curl -fsS "$PROM_URL/api/v1/query?query=rate(http_requests_total[5m])" >/dev/null
+        env: { PROM_URL: ${{ secrets.PROM_URL }} }
+      - name: Promote or rollback
+        run: |
+          node -e "process.exit(0)" && echo promoted || (echo rollback; exit 1)

@@ -2,12 +2,15 @@ import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import './lib/otel.js';
+import { canaryMiddleware } from './middleware/canary.js';
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(morgan('dev'));
+app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 

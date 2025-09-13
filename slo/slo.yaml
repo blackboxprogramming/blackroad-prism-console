@@ -1,0 +1,14 @@
+service: blackroad-api
+objectives:
+  - name: availability
+    target: 99.9
+    window: 30d
+    indicator: promql: 1 - (sum(rate(http_requests_errors_total[5m])) / sum(rate(http_requests_total[5m])))
+  - name: latency_p95
+    target: 99
+    window: 30d
+    indicator: promql: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))
+alerts:
+  - name: error_budget_burn_fast
+    condition: "burn_rate > 2 for 1h"
+    action: dispatch:auto_remediate
