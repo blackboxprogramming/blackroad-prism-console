@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CodexPrompt",
+  "type": "object",
+  "required": ["type","id","slug","title","summary","tags","updated","version","copy_filename"],
+  "properties": {
+    "type": {"const": "codex-prompt"},
+    "id": {"type":"string"},
+    "slug": {"type":"string"},
+    "title": {"type":"string"},
+    "summary": {"type":"string"},
+    "owner": {"type":"string"},
+    "tags": {"type":"array","items":{"type":"string"}},
+    "model_hint": {"type":"string"},
+    "temperature": {"type":"number"},
+    "updated": {"type":"string","format":"date"},
+    "version": {"type":"string"},
+    "canonical_repo": {"type":"string"},
+    "copy_filename": {"type":"string"}
+  }
+}

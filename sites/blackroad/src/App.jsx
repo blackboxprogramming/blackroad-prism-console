@@ -35,6 +35,7 @@ import BlueNoiseTSPLab from './pages/BlueNoiseTSPLab.jsx';
 import BezierShadedSurfaceLab from './pages/BezierShadedSurfaceLab.jsx';
 import Kalman2DTrackerLab from './pages/Kalman2DTrackerLab.jsx';
 import VorticityStreamLab from './pages/VorticityStreamLab.jsx';
+import CodexPromptPage from './pages/CodexPrompt.jsx';
 
 function useApiHealth() {
   const [state, setState] = useState({ ok: null, info: '' });
@@ -168,6 +169,7 @@ function LegacyApp() {
             <Route path="/subscribe" element={<Subscribe />} />
             <Route path="/lucidia" element={<Lucidia />} />
             <Route path="/math" element={<InfinityMath />} />
+            <Route path="/codex/:slug" element={<CodexPromptPage />} />
             <Route path="/ot" element={<OptimalTransportLab />} />
             <Route path="/bifurcate" element={<BifurcationLab />} />
             <Route path="/cfrac" element={<ContinuedFractionsLab />} />
@@ -200,6 +202,7 @@ function LegacyApp() {
             <Route path="subscribe" element={<Subscribe />} />
             <Route path="lucidia" element={<Lucidia />} />
             <Route path="math" element={<InfinityMath />} />
+            <Route path="codex/:slug" element={<CodexPromptPage />} />
             <Route path="ot" element={<OptimalTransportLab />} />
             <Route path="bifurcate" element={<BifurcationLab />} />
             <Route path="cfrac" element={<ContinuedFractionsLab />} />
