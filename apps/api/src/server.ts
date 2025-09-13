@@ -14,6 +14,8 @@ import webpush from './routes/notify/webpush.js';
 import hooks from './routes/hooks.js';
 import metrics from './routes/metrics.js';
 import okta from './routes/okta.js';
+import itsmOncall from './routes/itsm/oncall.js';
+import itsmIncidents from './routes/itsm/incidents.js';
 
 dotenv.config();
 
@@ -37,6 +39,7 @@ app.use('/api/notify/webpush', webpush);
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
+app.use('/api/itsm', itsmOncall, itsmIncidents);
 
 const port = process.env.PORT || 4000;
 

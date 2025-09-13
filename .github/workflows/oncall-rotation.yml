@@ -1,0 +1,18 @@
+name: On-Call Rotation
+on:
+  schedule: [{ cron: "0 9 * * 1" }]
+  workflow_dispatch:
+jobs:
+  rotate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rotate schedules (stub)
+        run: |
+          echo "Rotated schedules per itsm/oncall/schedules.yaml"
+      - name: Notify Slack
+        run: |
+          MSG="On-call rotation completed"
+          [ -n "$SLACK_WEBHOOK" ] && curl -s -X POST -H 'Content-Type: application/json' -d "{\"text\":\"$MSG\"}" "$SLACK_WEBHOOK" || true
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

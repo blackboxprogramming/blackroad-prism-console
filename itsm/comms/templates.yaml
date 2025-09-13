@@ -1,0 +1,9 @@
+internal_update: |
+  [IM-{id}] {sev} update · {service}
+  {msg}
+
+customer_status: |
+  We are investigating an issue impacting {service}. Next update in 30 minutes. Incident: IM-{id}
+
+exec_ping: |
+  IM-{id} {sev} — {summary}
