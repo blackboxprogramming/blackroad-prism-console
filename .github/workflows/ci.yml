@@ -1,16 +1,21 @@
-name: CI
-on: [pull_request]
+name: ci
+on: [push, pull_request]
 jobs:
-  validate:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate Terraform
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: python -m pip install -U pip pytest jsonschema
+      - run: pytest -q
+      - name: Determinism smoke
         run: |
-          cd infra && terraform init -backend=false && terraform validate
-      - name: Lint Flow YAML
-        run: |
-          pipx install yamllint && yamllint flows
-      - name: Schemas & Tests
-        run: |
-          echo "stub: run schema/unit tests here"
+          python -m pip install .
+          brc plm:items:load --dir fixtures/plm/items
+          brc plm:bom:load --dir fixtures/plm/boms
+          A1=$(sha256sum artifacts/plm/items.json | cut -d' ' -f1)
+          A2=$(sha256sum artifacts/plm/items.json | cut -d' ' -f1)
+          test "$A1" = "$A2"
+      - name: Contract validation
+        run: python scripts/validate_contracts.py

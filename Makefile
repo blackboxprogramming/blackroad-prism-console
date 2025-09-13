@@ -1,32 +1,27 @@
 .RECIPEPREFIX = >
-.PHONY: install dev start format lint test health migrate clean
+.PHONY: setup test lint demo validate
 
-install:
->npm install
-
-dev:
->npm run dev
-
-start:
->npm start
-
-format:
->npm run format
-
-lint:
->npm run lint
+setup:
+>python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff
 
 test:
->npm test
+>. .venv/bin/activate && pytest
 
-health:
->npm run health
+lint:
+>. .venv/bin/activate && ruff .
 
-migrate:
->@echo "no migrations"
+validate:
+>. .venv/bin/activate && python scripts/validate_contracts.py
 
-clean:
->rm -rf node_modules coverage
-
-analysis:
->python analysis/run_all.py
+demo:
+>brc plm:items:load --dir fixtures/plm/items && \
+>brc plm:bom:load --dir fixtures/plm/boms && \
+>brc plm:bom:explode --item PROD-100 --rev A --level 3 && \
+>brc mfg:wc:load --file fixtures/mfg/work_centers.csv && \
+>brc mfg:routing:load --dir fixtures/mfg/routings && \
+>brc mfg:routing:capcheck --item PROD-100 --rev B --qty 1000 && \
+>brc mfg:wi:render --item PROD-100 --rev B && \
+>brc mfg:spc:analyze --op OP-200 --window 50 && \
+>brc mfg:yield --period 2025-09 && \
+>brc mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv && \
+>brc mfg:coq --period 2025-Q3
