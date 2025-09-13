@@ -9,6 +9,7 @@ from orchestrator.protocols import Task
 from orchestrator import orchestrator
 from tools import storage
 from bots import available_bots
+from twin import snapshots, replay, stress, compare
 
 app = typer.Typer()
 
@@ -65,6 +66,53 @@ def task_status(id: str = typer.Option(..., "--id")):
 def bot_list():
     for name, cls in available_bots().items():
         typer.echo(f"{name}\t{cls.mission}")
+
+
+@app.command("twin:checkpoint")
+def twin_checkpoint(name: str = typer.Option(..., "--name")):
+    path = snapshots.create_checkpoint(name)
+    typer.echo(path)
+
+
+@app.command("twin:list")
+def twin_list():
+    for info in snapshots.list_checkpoints():
+        typer.echo(f"{info['name']}\t{info['created_at']}")
+
+
+@app.command("twin:restore")
+def twin_restore(name: str = typer.Option(..., "--name")):
+    snapshots.restore_checkpoint(name)
+    typer.echo("restored")
+
+
+@app.command("twin:replay")
+def twin_replay(
+    range_from: Optional[str] = typer.Option(None, "--from"),
+    range_to: Optional[str] = typer.Option(None, "--to"),
+    mode: str = typer.Option("verify", "--mode"),
+):
+    report = replay.replay(range_from, range_to, mode=mode)
+    typer.echo(str(report))
+
+
+@app.command("twin:stress")
+def twin_stress(
+    profile: str = typer.Option("default", "--profile"),
+    duration: int = typer.Option(60, "--duration"),
+):
+    prof = stress.load_profile(profile)
+    stress.run_load(prof, duration)
+    typer.echo("ok")
+
+
+@app.command("twin:compare")
+def twin_compare(
+    left: str = typer.Option(..., "--left"),
+    right: str = typer.Option(..., "--right"),
+):
+    res = compare.compare_runs(left, right)
+    typer.echo(str(res))
 
 
 if __name__ == "__main__":
