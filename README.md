@@ -465,3 +465,18 @@ class MyBot(BaseBot):
     def run(self, task: Task) -> BotResponse:
         ...
 ```
+
+## Air-Gapped Install
+
+1. `python build/repro/compile_deps.py`
+2. `python build/offline_wheels.py`
+3. `bash install/offline_install.sh`
+4. `python -m cli.console integrity:verify`
+5. `bash install/offline_uninstall.sh`
+
+### Integrity Verification
+
+```
+python build/signing/verify_wheels.py
+python build/attest.py && gpg --verify dist/attestation.json.asc dist/attestation.json
+```

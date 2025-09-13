@@ -1,0 +1,6 @@
+allowed:
+  - MIT
+  - BSD
+  - Apache-2.0
+disallowed:
+  - GPL
