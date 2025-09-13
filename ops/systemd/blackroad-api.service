@@ -1,0 +1,13 @@
+[Unit]
+Description=BlackRoad API
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/srv/blackroad-api
+ExecStart=/usr/bin/node /srv/blackroad-api/server.js
+Restart=always
+Environment=PORT=4000
+
+[Install]
+WantedBy=multi-user.target
