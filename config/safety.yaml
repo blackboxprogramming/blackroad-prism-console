@@ -1,0 +1,6 @@
+packs_enabled: ["baseline"]
+duty_of_care: true
+thresholds:
+  fairness: 0.1
+  completeness: 0.9
+  redaction: strict

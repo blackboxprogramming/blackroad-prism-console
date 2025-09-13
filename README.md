@@ -81,6 +81,14 @@ python -m cli.console slo:report
 python -m cli.console slo:gate --fail-on regressions
 ```
 
+## Trust & Safety quickstart
+
+```bash
+python -m cli.console safety:list-packs
+python -m cli.console redteam:list
+python -m cli.console quality:assess --artifact artifacts/reports/exec_latest.md --config configs/quality/exec.yaml
+```
+
 ---
 
 ## Notes & assumptions
