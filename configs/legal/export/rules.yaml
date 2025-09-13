@@ -1,0 +1,7 @@
+restricted_regions:
+  - IR
+restricted_entities:
+  - BadCorp
+sku_rules:
+  DEVICE1:
+    restricted_regions: [IR]

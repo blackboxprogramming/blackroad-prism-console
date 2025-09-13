@@ -19,6 +19,7 @@ from change import calendar as change_calendar
 from status import generator as status_gen
 import time
 
+from legal import clm, clauses, redline, obligations, compliance_calendar, export_controls, data_room
 app = typer.Typer()
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -245,6 +246,104 @@ def change_conflicts(service: str = typer.Option(..., "--service")):
 def status_build():
     status_gen.build()
     typer.echo("built")
+
+
+# Legal Ops -----------------------------------------------------------------
+
+
+@app.command("legal:contract:new")
+def legal_contract_new(type: str = typer.Option(..., "--type"), counterparty: str = typer.Option(..., "--counterparty")):
+    c = clm.create(type, counterparty)
+    typer.echo(c.id)
+
+
+@app.command("legal:contract:route")
+def legal_contract_route(id: str = typer.Option(..., "--id"), to_role: str = typer.Option(..., "--to-role")):
+    clm.route_for_review(id, to_role)
+    typer.echo("routed")
+
+
+@app.command("legal:contract:approve")
+def legal_contract_approve(id: str = typer.Option(..., "--id"), as_user: str = typer.Option(..., "--as-user")):
+    clm.approve(id, as_user)
+    typer.echo("approved")
+
+
+@app.command("legal:contract:execute")
+def legal_contract_execute(id: str = typer.Option(..., "--id"), date: str = typer.Option(..., "--date")):
+    clm.execute(id, date)
+    typer.echo("executed")
+
+
+@app.command("legal:approve:request")
+def legal_approve_request(id: str = typer.Option(..., "--id"), for_role: str = typer.Option(..., "--for-role"), note: str = typer.Option("", "--note")):
+    clm.route_for_review(id, for_role)
+    typer.echo("requested")
+
+
+@app.command("legal:esign")
+def legal_esign(id: str = typer.Option(..., "--id"), user: str = typer.Option(..., "--user"), text: str = typer.Option(..., "--text")):
+    clm.esign(id, user, text)
+    typer.echo("signed")
+
+
+@app.command("legal:clauses:list")
+def legal_clauses_list(tag: str = typer.Option(None, "--tag")):
+    for c in clauses.load_clauses(tag):
+        typer.echo(c["id"])
+
+
+@app.command("legal:assemble")
+def legal_assemble(template: str = typer.Option(..., "--template"), options: Path = typer.Option(..., "--options", exists=True, dir_okay=False), out: Path = typer.Option(..., "--out")):
+    doc, _ = clauses.assemble(template, str(options))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(doc)
+    typer.echo(str(out))
+
+
+@app.command("legal:redline")
+def legal_redline_cmd(old: Path = typer.Option(..., "--old"), new: Path = typer.Option(..., "--new")):
+    diff = redline.write_redline(str(old), str(new), str(ROOT / "artifacts" / "legal" / "redlines" / f"{new.stem}_vs_{old.stem}"))
+    typer.echo(json.dumps(diff))
+
+
+@app.command("legal:obligations:extract")
+def legal_obligations_extract(id: str = typer.Option(..., "--id")):
+    obs = obligations.extract(id)
+    typer.echo(json.dumps(obs))
+
+
+@app.command("legal:obligations:list")
+def legal_obligations_list(due_within: int = typer.Option(None, "--due-within")):
+    obs = obligations.list_obligations(due_within)
+    for ob in obs:
+        typer.echo(json.dumps(ob))
+
+
+@app.command("legal:calendar:build")
+def legal_calendar_build():
+    items = compliance_calendar.build()
+    typer.echo(len(items))
+
+
+@app.command("legal:calendar:list")
+def legal_calendar_list(from_date: str = typer.Option(..., "--from"), to_date: str = typer.Option(..., "--to")):
+    items = compliance_calendar.list_items(from_date, to_date)
+    for it in items:
+        typer.echo(json.dumps(it))
+
+
+@app.command("legal:export:screen")
+def legal_export_screen(partner: str = typer.Option(..., "--partner"), order: Path = typer.Option(..., "--order", exists=True, dir_okay=False)):
+    res = export_controls.screen(partner, str(order))
+    typer.echo(json.dumps(res))
+
+
+@app.command("legal:dataroom:build")
+def legal_dataroom_build(include: str = typer.Option(..., "--include")):
+    includes = [s.strip() for s in include.split(",") if s.strip()]
+    manifest = data_room.build(includes)
+    typer.echo(len(manifest))
 
 
 if __name__ == "__main__":
