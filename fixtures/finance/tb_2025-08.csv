@@ -1,0 +1,3 @@
+account,entity,dept,amount,drcr
+1000,ENT,DEPT,800,dr
+2000,ENT,DEPT,800,cr

@@ -1,0 +1,11 @@
+tasks:
+  - id: TB-LOAD
+    name: Load TB
+    owner_role: ACCOUNTANT
+    due: 2025-09-05
+    deps: []
+  - id: REV-CUT
+    name: Revenue Cutoff
+    owner_role: ACCOUNTANT
+    due: 2025-09-06
+    deps: [TB-LOAD]

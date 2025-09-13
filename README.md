@@ -19,6 +19,15 @@ LLM stub on port **8000** if none is running.
 - `srv/lucidia-llm/` — minimal FastAPI echo stub (only used if you don’t already run an LLM on 8000)
 - `srv/lucia-llm/` — same stub (duplicate dir name for compatibility with earlier scripts)
 
+## Financial Close & Controls Quickstart
+
+This repo includes a deterministic offline Record-to-Report layer. See
+`docs/close-process.md` and run for example:
+
+```
+python -m cli.console close:cal:new --period 2025-09 --template configs/close/template.yaml
+```
+
 > Nothing here overwrites your existing code. The scripts are defensive: they detect paths,
 > **merge** deps, and only generate files if missing.
 

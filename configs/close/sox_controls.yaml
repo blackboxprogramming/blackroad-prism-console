@@ -1,0 +1,5 @@
+controls:
+  TB-LOAD:
+    - C-TB-01
+  REV-CUT:
+    - C-REV-01
