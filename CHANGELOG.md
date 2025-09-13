@@ -1,5 +1,15 @@
 # Changelog
 
+## 2025-09-30
+
+### Features
+
+- wire up where-used CLI
+- scaffold Next.js site for Codex prompts with page, component, API, and sitemap
+- add deterministic artifact hashing with optional tag-based release workflow
+- document quickstart commands in README
+- allow optional strict schema validation for routing
+
 ## 1.0.0 (2025-09-12)
 
 

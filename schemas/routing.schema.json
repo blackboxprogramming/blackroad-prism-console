@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "item_rev": {"type": "string"},
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "wc": {"type": "string"},
+          "op": {"type": "string"},
+          "std_time_min": {"type": "number"},
+          "yield_pct": {"type": "number"},
+          "instructions_path": {"type": "string"}
+        },
+        "required": ["wc", "op", "std_time_min", "yield_pct"]
+      }
+    }
+  },
+  "required": ["item_rev", "steps"]
+}

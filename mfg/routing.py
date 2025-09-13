@@ -10,6 +10,11 @@ import yaml
 
 from tools import storage
 
+try:  # optional strict validation
+    import jsonschema
+except Exception:  # pragma: no cover
+    jsonschema = None
+
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "mfg"
 
@@ -62,10 +67,19 @@ def load_work_centers(file: str) -> Dict[str, WorkCenter]:
     return wcs
 
 
-def load_routings(directory: str) -> Dict[str, Routing]:
+def load_routings(directory: str, strict: bool = False) -> Dict[str, Routing]:
     rts: Dict[str, Routing] = {}
+    schema = None
+    if strict and jsonschema:
+        schema_path = ROOT / "schemas" / "routing.schema.json"
+        try:
+            schema = json.loads(storage.read(str(schema_path)))
+        except Exception:
+            schema = None
     for path in Path(directory).glob("*.yaml"):
         data = yaml.safe_load(path.read_text())
+        if schema and jsonschema:
+            jsonschema.validate(data, schema)
         steps = [RoutingStep(**s) for s in data.get("steps", [])]
         rt = Routing(item_rev=data["item_rev"], steps=steps)
         rts[rt.item_rev] = rt

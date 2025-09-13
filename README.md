@@ -498,4 +498,21 @@ python -m cli.console close:sign --period 2025-09 --role CFO --as-user U_CFO
 python -m cli.console plm:items:load --dir fixtures/plm/items
 python -m cli.console plm:bom:load --dir fixtures/plm/boms
 python -m cli.console plm:bom:explode --item PROD-100 --rev A --level 2
+python -m cli.console plm:bom:where-used --component COMP-1
 ```
+
+## Codex Prompt Site Quickstart
+
+```
+npm --prefix sites/codex-prompts run dev
+```
+
+Serves the markdown prompts directory as a Next.js site with plain-text API and sitemap.
+
+## Artifact Release
+
+```
+python -m tools.artifacts artifacts/data.json --schema schemas/routing.schema.json --tag
+```
+
+Generates a deterministic hash for the artifact and optionally tags the current commit.

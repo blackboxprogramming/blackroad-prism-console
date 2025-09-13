@@ -374,6 +374,13 @@ def plm_bom_explode(item: str = typer.Option(..., "--item"), rev: str = typer.Op
         typer.echo(f"{lvl}\t{comp}\t{qty}")
 
 
+@app.command("plm:bom:where-used")
+def plm_bom_where_used(component: str = typer.Option(..., "--component")):
+    used = plm_bom.where_used(component)
+    for item_id, rev in used:
+        typer.echo(f"{item_id}\t{rev}")
+
+
 @app.command("plm:eco:new")
 def plm_eco_new(item: str = typer.Option(..., "--item"), from_rev: str = typer.Option(..., "--from"), to_rev: str = typer.Option(..., "--to"), reason: str = typer.Option(..., "--reason")):
     ch = plm_eco.new_change(item, from_rev, to_rev, reason)
@@ -405,8 +412,11 @@ def mfg_wc_load(file: Path = typer.Option(..., "--file", exists=True, dir_okay=F
 
 
 @app.command("mfg:routing:load")
-def mfg_routing_load(dir: Path = typer.Option(..., "--dir", exists=True, file_okay=False)):
-    mfg_routing.load_routings(str(dir))
+def mfg_routing_load(
+    dir: Path = typer.Option(..., "--dir", exists=True, file_okay=False),
+    strict: bool = typer.Option(False, "--strict"),
+):
+    mfg_routing.load_routings(str(dir), strict)
     typer.echo("ok")
 
 
