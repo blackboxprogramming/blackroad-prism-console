@@ -1,0 +1,27 @@
+name: Incident
+description: Track a production incident
+title: "[INCIDENT] <summary>"
+labels: ["incident"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: User impact, scope, detection
+    validations: { required: true }
+  - type: textarea
+    id: timeline
+    attributes:
+      label: Timeline
+      description: Key events with timestamps
+  - type: textarea
+    id: mitigations
+    attributes:
+      label: Mitigations
+      description: Immediate actions taken
+  - type: textarea
+    id: followups
+    attributes:
+      label: Follow-ups
+      description: Action items and owners
+

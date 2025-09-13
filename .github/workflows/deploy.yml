@@ -114,3 +114,16 @@ jobs:
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
             docker system prune -f
 
+      - name: Notify success
+        if: success()
+        run: bash scripts/notify.sh "deploy" "success" "${{ github.sha }}"
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+
+      - name: Notify failure
+        if: failure()
+        run: bash scripts/notify.sh "deploy" "failure" "${{ github.sha }}"
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

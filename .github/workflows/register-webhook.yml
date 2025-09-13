@@ -1,0 +1,18 @@
+name: Register Matomo Webhook
+
+on:
+  workflow_dispatch:
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          REPO="${{ github.repository }}"
+          curl -H "Authorization: token ${{ secrets.GITHUB_PAT }}" \
+            -H "Accept: application/vnd.github+json" \
+            -d "{\"config\":{\"url\":\"https://blackroad.io/webhooks/matomo\",\"content_type\":\"json\",\"secret\":\"${{ secrets.WEBHOOK_SECRET }}\"},\"events\":[\"push\",\"issues\",\"pull_request\"]}" \
+            https://api.github.com/repos/${REPO}/hooks
+          echo "Test ping:"
+          curl -X POST -H "X-GitHub-Event: ping" -H "X-Hub-Signature-256: sha256=<REPLACE_ME>" https://blackroad.io/webhooks/matomo || true
+

@@ -1,0 +1,29 @@
+{
+  "name": "blackroad-api",
+  "version": "0.1.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "lint": "eslint . || true",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "morgan": "^1.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.0",
+    "stripe": "^16.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "tsx": "^4.7.0",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.3"
+  }
+}
+

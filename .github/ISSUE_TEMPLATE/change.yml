@@ -1,0 +1,21 @@
+name: Change Request
+description: Planned change with rollout plan
+title: "[CHANGE] <summary>"
+labels: ["change"]
+body:
+  - type: input
+    id: window
+    attributes:
+      label: Change window (UTC)
+      placeholder: "2025-09-13 01:00–02:00"
+  - type: textarea
+    id: plan
+    attributes:
+      label: Plan
+      description: Steps with rollback
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risk Assessment
+      description: User impact, blast radius, mitigation
+
