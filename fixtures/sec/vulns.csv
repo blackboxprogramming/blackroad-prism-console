@@ -1,0 +1,4 @@
+asset_id,cve,severity,age_days,fix_available
+SVC1,CVE-0001,high,10,yes
+DB1,CVE-0002,medium,40,no
+END1,CVE-0003,low,5,yes

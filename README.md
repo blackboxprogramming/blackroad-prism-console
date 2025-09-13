@@ -475,3 +475,13 @@ class MyBot(BaseBot):
     def run(self, task: Task) -> BotResponse:
         ...
 ```
+
+## Security Ops Quickstart
+
+```
+python -m cli.console sec:assets:load --dir fixtures/sec
+python -m cli.console sec:assets:list --type service
+python -m cli.console sec:detect:run --rules configs/sec/rules --logs fixtures/sec/logs
+python -m cli.console sec:vuln:import --file fixtures/sec/vulns.csv
+python -m cli.console sec:sbom:watch --sbom dist/SBOM.spdx.json --cves fixtures/sec/cves_local.json
+```

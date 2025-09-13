@@ -1,0 +1,6 @@
+name: suspicious_login
+source: auth.jsonl
+select: ["ts","user","ip","result"]
+where: 'result=="FAIL" and count_fail("user", "5m") >= 5'
+severity: high
+tags: ["auth","bruteforce"]
