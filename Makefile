@@ -1,5 +1,5 @@
 .RECIPEPREFIX = >
-.PHONY: setup test lint demo validate
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell
 
 setup:
 >python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff
@@ -25,3 +25,12 @@ demo:
 >brc mfg:yield --period 2025-09 && \
 >brc mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv && \
 >brc mfg:coq --period 2025-Q3
+
+dc-up:
+>docker compose up --build app
+
+dc-test:
+>docker compose run --rm tests
+
+dc-shell:
+>docker compose run --rm app bash

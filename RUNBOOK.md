@@ -1,3 +1,15 @@
+# Local Development Runbook
+
+## VS Code
+Use **Dev Containers: Reopen in Container** and ensure port 3000 is forwarded.
+
+```bash
+npm run dev                   # website at http://localhost:3000
+pytest -q                    # run tests
+brc plm:items:load --dir fixtures/plm/items
+brc mfg:spc:analyze --op OP-200 --window 50
+```
+
 # GitHub Guardian Runbook
 
 After merging the policy baseline PR, apply repository settings:
