@@ -1,0 +1,8 @@
+title: Access Control Policy
+purpose: Least privilege & need-to-know
+scope: Workforce, contractors, service accounts
+controls:
+  - mfa_required: true
+  - just_in_time: true
+  - access_expiry_days: 90
+review_cycle: 180d

@@ -1,0 +1,18 @@
+name: SOC2 Evidence Pack
+on:
+  schedule: [{ cron: "0 6 * * 1" }]
+  workflow_dispatch:
+jobs:
+  gather:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect evidence
+        run: |
+          mkdir -p security/evidence/out
+          echo "{}" > security/evidence/out/ci_artifacts.json
+          echo "{}" > security/evidence/out/access_snapshot.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: soc2-evidence
+          path: security/evidence/out

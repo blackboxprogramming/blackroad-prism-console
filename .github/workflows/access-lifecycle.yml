@@ -1,0 +1,23 @@
+name: Access Lifecycle
+on:
+  workflow_dispatch:
+    inputs:
+      action: { description: 'onboard|offboard', required: true, default: 'onboard' }
+      email:  { description: 'user email', required: true }
+jobs:
+  access:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix apps/api
+      - run: node access/scripts/${{ github.event.inputs.action == 'offboard' && 'revoke_access.ts' || 'provision_access.ts' }} "${{ github.event.inputs.email }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
+          SLACK_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          JIRA_BASE: ${{ secrets.JIRA_BASE }}
+          JIRA_USER: ${{ secrets.JIRA_USER }}
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+          LINEAR_TOKEN: ${{ secrets.LINEAR_TOKEN }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}

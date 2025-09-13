@@ -1,0 +1,11 @@
+name: DR Drill
+on:
+  schedule: [{ cron: "30 8 * * 6" }]
+  workflow_dispatch:
+jobs:
+  drill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash dr/scripts/restore_verify.sh
+      - run: node dr/scripts/drill.ts

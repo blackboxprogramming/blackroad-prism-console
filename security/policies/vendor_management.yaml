@@ -1,0 +1,7 @@
+title: Vendor Management Policy
+purpose: Assess and monitor third-party risk
+scope: All vendors and subprocessors
+controls:
+  - security_review_before_production: true
+  - data_processing_addendum_required: true
+review_cycle: 365d
