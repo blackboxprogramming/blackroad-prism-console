@@ -86,6 +86,9 @@ def approve(change_id: str, user: str) -> Change:
 
 
 def _spc_unstable(item_id: str) -> bool:
+    flag = ROOT / "artifacts" / "mfg" / "spc" / "blocking.flag"
+    if flag.exists():
+        return True
     findings = ROOT / "artifacts" / "mfg" / "spc" / "findings.json"
     if not findings.exists():
         return False

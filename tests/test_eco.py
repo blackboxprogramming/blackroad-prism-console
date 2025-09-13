@@ -1,6 +1,7 @@
-from pathlib import Path
 import json
+import os
 import pytest
+from pathlib import Path
 
 from plm import bom, eco
 from tools import storage
@@ -28,3 +29,18 @@ def test_eco_flow(tmp_path):
     storage.write(str(spc_dir / 'findings.json'), json.dumps(['issue']))
     with pytest.raises(RuntimeError):
         eco.release(ch2.id)
+
+
+def test_dual_approval_required(tmp_path, monkeypatch):
+    monkeypatch.setattr(eco, 'ART_DIR', tmp_path / "changes")
+    os.makedirs(eco.ART_DIR, exist_ok=True)
+    ch = eco.new_change("PROD-100", "A", "B", "Test")
+    p = eco._path(ch.id)
+    with open(p) as f:
+        data = json.load(f)
+    data["risk"] = "high"
+    with open(p, "w") as f:
+        json.dump(data, f)
+    eco.approve(ch.id, "U_QA")
+    with pytest.raises(RuntimeError):
+        eco.release(ch.id)

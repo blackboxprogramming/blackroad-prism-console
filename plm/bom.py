@@ -121,3 +121,14 @@ def where_used(component_id: str) -> List[Tuple[str, str]]:
                 used.append((parent_id, rev))
                 break
     return used
+
+
+def cli_bom_where_used(argv):
+    import argparse
+
+    p = argparse.ArgumentParser(prog="plm:bom:where-used")
+    p.add_argument("--component", required=True)
+    a = p.parse_args(argv)
+    rows = where_used(a.component)
+    for item_id, rev in rows:
+        print(f"{item_id}@{rev}")

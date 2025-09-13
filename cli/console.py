@@ -24,6 +24,9 @@ import importlib
 from plm import bom as plm_bom, eco as plm_eco
 from mfg import routing as mfg_routing, work_instructions as mfg_wi, spc as mfg_spc, coq as mfg_coq, mrp as mfg_mrp
 
+VERB_FUN: dict[str, str] = {}
+VERB_FUN['plm:bom:where-used'] = 'cli_bom_where_used'
+
 mfg_yield = importlib.import_module("mfg.yield")
 
 from close import calendar as close_calendar, journal as close_journal, recon as close_recon, flux as close_flux, sox as close_sox, packet as close_packet
@@ -374,6 +377,13 @@ def plm_bom_explode(item: str = typer.Option(..., "--item"), rev: str = typer.Op
         typer.echo(f"{lvl}\t{comp}\t{qty}")
 
 
+@app.command("plm:bom:where-used")
+def plm_bom_where_used(component: str = typer.Option(..., "--component")):
+    rows = plm_bom.where_used(component)
+    for item_id, rev in rows:
+        typer.echo(f"{item_id}@{rev}")
+
+
 @app.command("plm:eco:new")
 def plm_eco_new(item: str = typer.Option(..., "--item"), from_rev: str = typer.Option(..., "--from"), to_rev: str = typer.Option(..., "--to"), reason: str = typer.Option(..., "--reason")):
     ch = plm_eco.new_change(item, from_rev, to_rev, reason)
@@ -451,4 +461,8 @@ def status_build():
     typer.echo("built")
 
 if __name__ == "__main__":
+    app()
+
+
+def main():
     app()

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -21,6 +22,13 @@ def render(item: str, rev: str) -> Path:
     lines = [f"# Work Instructions for {item} rev {rev}\n"]
     for idx, step in enumerate(rt.steps, 1):
         lines.append(f"{idx}. {step.op} at {step.wc} - {step.std_time_min} min")
+    routing_key = f"{item}_{rev}"
+    routing_dir = os.path.join("fixtures", "mfg", "routings")
+    expected_yaml = os.path.join(routing_dir, f"{item}_{rev}.yaml")
+    if not os.path.exists(expected_yaml):
+        raise SystemExit(
+            "DUTY_REV_MISMATCH: routing & BOM revs mismatch or missing routing fixture"
+        )
     ART_DIR.mkdir(parents=True, exist_ok=True)
     md_path = ART_DIR / f"{item}_{rev}.md"
     storage.write(str(md_path), "\n".join(lines))
