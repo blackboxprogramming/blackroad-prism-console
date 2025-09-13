@@ -8,6 +8,8 @@ publicssh.sh
 dist/
 .cache/
 .env
+artifacts.sha256
+public/artifacts.sha256
 
 # Local data
 srv/blackroad-api/blackroad.db
