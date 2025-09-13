@@ -1,0 +1,15 @@
+name: Load Test (k6)
+on:
+  workflow_dispatch:
+  schedule: [{ cron: "0 5 * * *" }]
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install k6
+        run: sudo apt-get update -y && sudo apt-get install -y ca-certificates && curl -sSL https://github.com/grafana/k6/releases/download/v0.49.0/k6-v0.49.0-linux-amd64.deb -L -o k6.deb && sudo dpkg -i k6.deb
+      - name: k6 smoke
+        run: k6 run load/k6_smoke.js
+      - name: k6 spike
+        run: k6 run load/k6_spike.js

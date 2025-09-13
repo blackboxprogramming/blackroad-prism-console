@@ -1,0 +1,3 @@
+-- minimal seed data for local/integration tests
+-- users
+-- INSERT INTO User (id,email,name) VALUES ('u_1','seed@example.com','Seed User');
