@@ -19,6 +19,12 @@ import adminLic from './routes/admin/licensing.js';
 import adminDev from './routes/admin/devices.js';
 import adminVend from './routes/admin/vendors.js';
 import adminPO from './routes/admin/procurement.js';
+import mktSegments from './routes/mkt/segments.js';
+import mktCampaigns from './routes/mkt/campaigns.js';
+import mktJourneys from './routes/mkt/journeys.js';
+import mktTemplates from './routes/mkt/templates.js';
+import mktScore from './routes/mkt/score.js';
+import mktUtm from './routes/mkt/utm.js';
 
 dotenv.config();
 
@@ -43,6 +49,7 @@ app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
 app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
+app.use('/api/mkt', mktSegments, mktCampaigns, mktJourneys, mktTemplates, mktScore, mktUtm);
 
 const port = process.env.PORT || 4000;
 

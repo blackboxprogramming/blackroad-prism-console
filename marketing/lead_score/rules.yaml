@@ -1,0 +1,9 @@
+rules:
+  - event: signup
+    points: 20
+  - event: purchase
+    points: 50
+  - trait: opened_email_last_7d
+    points: 10
+decay:
+  points_per_day: 1

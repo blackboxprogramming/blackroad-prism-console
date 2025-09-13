@@ -1,0 +1,16 @@
+name: Marketing Monthly Report
+on:
+  schedule: [{ cron: "10 4 1 * *" }]
+  workflow_dispatch:
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/mkt/report.ts
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(marketing): monthly report"
+          file_pattern: "marketing/reports/MKT_*.md"

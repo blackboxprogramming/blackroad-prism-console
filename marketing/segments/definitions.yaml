@@ -1,0 +1,18 @@
+segments:
+  all_users:
+    where:
+      any: true
+  trial_expiring_7d:
+    where:
+      and:
+        - trait: plan
+          eq: trial
+        - trait: trial_ends_at
+          lte_days_from_now: 7
+  high_value:
+    where:
+      or:
+        - trait: arr
+          gte: 10000
+        - event: purchases_30d
+          gte: 2
