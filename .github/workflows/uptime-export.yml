@@ -1,0 +1,21 @@
+name: Uptime Export
+on:
+  schedule: [{ cron: "*/10 * * * *" }]
+  workflow_dispatch:
+jobs:
+  uptime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ping API
+        run: |
+          TS=$(date -Is)
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" https://blackroad.io/api/health || echo 0)
+          mkdir -p apps/status
+          touch apps/status/feed.json
+          jq -c --arg ts "$TS" --arg code "$CODE" '. + [{"ts":$ts,"code":($code|tonumber)}]' apps/status/feed.json 2>/dev/null | tee /tmp/feed.json || echo '[{"ts":"'$TS'","code":'${CODE:-0}'}]' > /tmp/feed.json
+          mv /tmp/feed.json apps/status/feed.json
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(status): append uptime sample"
+          file_pattern: "apps/status/feed.json"

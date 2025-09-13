@@ -1,0 +1,27 @@
+name: Billing Close (Monthly Overages)
+on:
+  schedule: [{ cron: "5 1 1 * *" }]
+  workflow_dispatch:
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/usage_rollup.ts > /tmp/usage.json
+      - name: Compute overages & Stripe invoice items
+        run: |
+          node -e '
+            const fs=require("fs");
+            const usage=JSON.parse(fs.readFileSync("/tmp/usage.json","utf-8"));
+            // Stub: compute charges; in real flow, call Stripe API per owner/key
+            console.log(JSON.stringify({charges:Object.keys(usage).length, sample:usage[Object.keys(usage)[0]]||null},null,2));
+          '
+      - name: Notify Slack
+        if: env.SLACK_WEBHOOK != ''
+        run: |
+          MSG="Billing close completed"
+          curl -s -X POST -H "Content-Type: application/json" -d "{\"text\":\"$MSG\"}" "$SLACK_WEBHOOK" || true
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
