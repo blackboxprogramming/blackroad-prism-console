@@ -1,0 +1,15 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "account": {"type": "string"},
+      "current": {"type": "number"},
+      "prev": {"type": "number"},
+      "delta": {"type": "number"},
+      "pct": {"type": ["number", "null"]},
+      "flag": {"type": "boolean"}
+    },
+    "required": ["account", "current", "prev", "delta", "pct", "flag"]
+  }
+}
