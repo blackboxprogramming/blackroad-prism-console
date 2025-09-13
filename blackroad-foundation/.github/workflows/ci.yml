@@ -1,0 +1,21 @@
+name: CI
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - run: pnpm i --frozen-lockfile=false
+      - run: pnpm -w run lint
+      - run: pnpm -w run test
+      - name: Post status to Slack on failure
+        if: failure()
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"CI failed on $GITHUB_REPOSITORY@$GITHUB_SHA\"}" \
+            "$SLACK_WEBHOOK"

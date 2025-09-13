@@ -1,0 +1,23 @@
+name: Deploy to Droplet
+on:
+  push:
+    branches: [ main ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 159.65.43.12 >> ~/.ssh/known_hosts
+      - name: Build
+        uses: pnpm/action-setup@v4
+      - run: pnpm i --frozen-lockfile=false && pnpm -w run build:all
+      - name: Deploy
+        env:
+          DROPLET_HOST: 159.65.43.12
+          USER: root
+        run: bash scripts/deploy_to_droplet.sh

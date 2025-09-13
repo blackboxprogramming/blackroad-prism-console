@@ -1,0 +1,12 @@
+name: Bug Report
+description: File a bug report
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
