@@ -1,0 +1,4 @@
+default:
+  p0_banned: []
+  p1_sensitive: []
+  regex_blocklist: []
