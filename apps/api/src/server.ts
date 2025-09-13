@@ -14,6 +14,11 @@ import webpush from './routes/notify/webpush.js';
 import hooks from './routes/hooks.js';
 import metrics from './routes/metrics.js';
 import okta from './routes/okta.js';
+import clmTemplates from './routes/clm/templates.js';
+import clmContracts from './routes/clm/contracts.js';
+import clmApprovals from './routes/clm/approvals.js';
+import clmEsign from './routes/clm/esign.js';
+import clmOblig from './routes/clm/obligations.js';
 
 dotenv.config();
 
@@ -37,6 +42,11 @@ app.use('/api/notify/webpush', webpush);
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
+
+// raw body for e-sign verification
+app.use((req:any,res,next)=>{ if (req.url.startsWith('/api/clm/esign')) { const b:Buffer[]=[]; req.on('data',(c)=>b.push(c)); req.on('end',()=>{ req.rawBody = Buffer.concat(b).toString(); next(); }); } else next(); });
+
+app.use('/api/clm', clmTemplates, clmContracts, clmApprovals, clmEsign, clmOblig);
 
 const port = process.env.PORT || 4000;
 
