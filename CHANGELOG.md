@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.1.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.0.0...v1.1.0) (2025-09-13)
+
+
+### Features
+
+* add api tests and deployment tooling ([#1432](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1432)) ([a4c3718](https://github.com/blackboxprogramming/blackroad-prism-console/commit/a4c37188af42b9f85b3578a726034485a0861499))
+* add artifacts browser and hash verification ([#1426](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1426)) ([658c49a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/658c49a05ff7aab476f6e1434a78cc53e48b2206))
+* add benchmark suite and SLO tooling ([#1382](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1382)) ([31d5856](https://github.com/blackboxprogramming/blackroad-prism-console/commit/31d5856332fa2ca66dd066ebb1a9e4b94ebafe1d))
+* add codex index page ([#1424](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1424)) ([1045f62](https://github.com/blackboxprogramming/blackroad-prism-console/commit/1045f625d67dc4b0add339095d85f2ee5f9df08a))
+* add codex router and worker stubs ([#1361](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1361)) ([6f891dd](https://github.com/blackboxprogramming/blackroad-prism-console/commit/6f891ddaf1a47247c74c1a922b01725691186644))
+* add container release and security tooling ([#1436](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1436)) ([e87230b](https://github.com/blackboxprogramming/blackroad-prism-console/commit/e87230b4b79d984ee192d5e537f6ed028254c57a))
+* add enablement hub ([#1415](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1415)) ([005fdfa](https://github.com/blackboxprogramming/blackroad-prism-console/commit/005fdfa2a69e4931e5cd4d67ef60d7b7386320a6))
+* add Lucidia foundation system scaffolding ([#1429](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1429)) ([1a1b52c](https://github.com/blackboxprogramming/blackroad-prism-console/commit/1a1b52c42aa28b6a353da68644443d3be0ec732f))
+* add Next.js stack bootstrap script ([#1419](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1419)) ([8abc9e4](https://github.com/blackboxprogramming/blackroad-prism-console/commit/8abc9e496a6fde1071bde1691e835dcdf2efea70))
+* add offline financial close workflow ([#1408](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1408)) ([9835818](https://github.com/blackboxprogramming/blackroad-prism-console/commit/983581809e8510c40a45050711392015063f5042))
+* add offline plm and mfg ops ([#1409](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1409)) ([7605181](https://github.com/blackboxprogramming/blackroad-prism-console/commit/760518187a01d17d8b6091cba27d5f7b6c4f2cbe))
+* add okta sso and warehouse sync ([#1437](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1437)) ([b4d4f3e](https://github.com/blackboxprogramming/blackroad-prism-console/commit/b4d4f3e337cadeeda7e061417e0a0e2474174f13))
+* add prism architecture docs and tooling ([#1355](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1355)) ([0f8cba0](https://github.com/blackboxprogramming/blackroad-prism-console/commit/0f8cba0e30c32b9967bb5c5734f9e4d9650552e5))
+* add release automation and security workflows ([#1435](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1435)) ([a8a5670](https://github.com/blackboxprogramming/blackroad-prism-console/commit/a8a567098f092251f4e87f3d3df3c903fb72be40))
+* add service catalog and runbook automation ([#1394](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1394)) ([2308816](https://github.com/blackboxprogramming/blackroad-prism-console/commit/230881626eedbb17dbde3916c5b1ee14b1b8e11f))
+* **codex:** add seo feed robots and auth ([#1423](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1423)) ([f7a900f](https://github.com/blackboxprogramming/blackroad-prism-console/commit/f7a900f67992630df7410aceb59525f8e56609c2))
+
+
+### Bug Fixes
+
+* **saga:** wire demo to core and add mesh stubs ([#1430](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1430)) ([6cad73b](https://github.com/blackboxprogramming/blackroad-prism-console/commit/6cad73be5ec5d5be33e5dbac3a8e5b75ca7045f1))
+
 ## 1.0.0 (2025-09-12)
 
 
