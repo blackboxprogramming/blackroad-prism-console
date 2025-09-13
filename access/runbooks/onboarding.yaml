@@ -1,0 +1,7 @@
+title: Onboarding
+steps:
+  - create_github_user
+  - add_to_team_engineering
+  - invite_slack
+  - grant_jira_linear
+  - set_expiry_90d

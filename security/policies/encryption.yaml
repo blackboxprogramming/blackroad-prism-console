@@ -1,0 +1,8 @@
+title: Encryption Policy
+purpose: Protect data in transit and at rest
+scope: "All systems, services, and data classes"
+requirements:
+  - at_rest: AES-256 or stronger
+  - in_transit: TLS 1.2+
+  - key_rotation: 90d
+review_cycle: 180d

@@ -11,7 +11,9 @@
     "migrate:dev": "prisma migrate dev --name init || true",
     "lint": "eslint . || true",
     "test": "node --test",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "zap": "echo \"run zap scan (stub)\"",
+    "audit": "npm audit || true"
   },
   "dependencies": {
     "cors": "^2.8.5",

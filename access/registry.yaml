@@ -1,0 +1,17 @@
+roles:
+  admin:
+    github: write
+    slack: admin
+    jira: admin
+    linear: admin
+  engineer:
+    github: write
+    slack: user
+    jira: user
+    linear: user
+  viewer:
+    github: read
+    slack: user
+    jira: browse
+    linear: none
+users: []

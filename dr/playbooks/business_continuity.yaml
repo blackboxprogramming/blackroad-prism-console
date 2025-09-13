@@ -1,0 +1,5 @@
+title: Business Continuity
+scenarios:
+  - loss_of_primary_region
+  - loss_of_idp
+  - data_corruption

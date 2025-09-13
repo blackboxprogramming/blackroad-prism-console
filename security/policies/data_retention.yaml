@@ -1,0 +1,9 @@
+title: Data Retention Policy
+purpose: Minimize PII exposure & cost
+rules:
+  - dataset: logs
+    retention_days: 30
+  - dataset: csat
+    retention_days: 365
+  - dataset: backups
+    retention_days: 30

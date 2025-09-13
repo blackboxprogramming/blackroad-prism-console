@@ -1,0 +1,7 @@
+title: Disaster Recovery
+rto_minutes: 60
+rpo_minutes: 15
+steps:
+  - restore_database
+  - swap_dns_to_warm_site
+  - verify_healthchecks

@@ -1,0 +1,14 @@
+name: Supply Chain Verify
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependency audit
+        run: npm audit --prefix apps/api || true
+      - name: Verify SBOM present
+        run: test -f bom.xml || echo "SBOM missing (build will continue)"

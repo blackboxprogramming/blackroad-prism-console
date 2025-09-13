@@ -1,0 +1,10 @@
+cc:
+  cc1: Control environment documented
+  cc2: Communication and information
+  cc3: Risk assessment
+  cc4: Monitoring activities
+  cc5: Control activities
+mapping:
+  encryption_policy: cc3
+  access_control_policy: cc5
+  vendor_management_policy: cc3
