@@ -1,0 +1,10 @@
+pricebook:
+  - sku: F500-CORE
+    base_price: 100
+    tiers:
+      - min_qty: 10
+        unit_price: 90
+      - min_qty: 50
+        unit_price: 80
+    currency: USD
+    region: NA

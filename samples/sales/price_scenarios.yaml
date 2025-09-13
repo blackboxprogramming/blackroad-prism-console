@@ -1,0 +1,4 @@
+scenarios:
+  - sku: F500-CORE
+    price_delta_pct: -0.1
+    promo: false

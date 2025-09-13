@@ -1,0 +1,6 @@
+products:
+  - id: P1
+    name: F500 Core
+    family: infra
+    skus: [F500-CORE]
+    constraints: {}

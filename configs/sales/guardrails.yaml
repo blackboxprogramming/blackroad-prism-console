@@ -1,0 +1,5 @@
+max_discount_pct: 15
+floor_prices:
+  F500-CORE: 70
+approvals:
+  CFO: {max_discount_pct: 30}

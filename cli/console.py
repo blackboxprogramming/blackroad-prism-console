@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+import yaml
 
 from bench import runner as bench_runner
 from bots import available_bots
@@ -11,6 +12,9 @@ from orchestrator import orchestrator, slo_report
 from orchestrator.perf import perf_timer
 from orchestrator.protocols import Task
 from tools import storage
+
+from sales import catalog as sales_catalog, cpq, deal_desk, quote_pack, winloss
+from pricing import elasticity
 
 app = typer.Typer()
 
@@ -150,6 +154,91 @@ def slo_gate(
     _perf_footer(perf, p)
     if not ok:
         raise typer.Exit(code=1)
+
+
+@app.command("sales:catalog:load")
+def catalog_load(dir: Path = typer.Option(..., "--dir", exists=True, file_okay=False)):
+    sales_catalog.load(dir)
+
+
+@app.command("sales:catalog:show")
+def catalog_show(sku: str = typer.Option(..., "--sku")):
+    data = sales_catalog.show(sku)
+    typer.echo(json.dumps(data, indent=2))
+
+
+@app.command("cpq:price")
+def cpq_price(
+    lines: Path = typer.Option(..., "--lines", exists=True, dir_okay=False),
+    region: str = typer.Option(..., "--region"),
+    currency: str = typer.Option(..., "--currency"),
+    out: Path = typer.Option(Path("artifacts/sales/quote.json"), "--out"),
+):
+    order_lines = json.loads(lines.read_text())
+    cfg = cpq.configure(order_lines)
+    quote = cpq.price(cfg, region, currency, policies={"bundle_discount_pct": 10})
+    cpq.save_quote(quote, out)
+    typer.echo(str(out))
+
+
+@app.command("deal:new")
+def deal_new(
+    account: str = typer.Option(..., "--account"),
+    quote: Path = typer.Option(..., "--quote", exists=True, dir_okay=False),
+    request_disc: float = typer.Option(0, "--request-disc"),
+):
+    deal = deal_desk.new_deal(account, quote, request_disc)
+    typer.echo(deal.id)
+
+
+@app.command("deal:check")
+def deal_check(id: str = typer.Option(..., "--id")):
+    deal = deal_desk.load_deal(id)
+    codes = deal_desk.check_deal(deal)
+    for c in codes:
+        typer.echo(c)
+
+
+@app.command("deal:request-approval")
+def deal_request(id: str = typer.Option(..., "--id"), for_role: str = typer.Option(..., "--for-role")):
+    deal = deal_desk.load_deal(id)
+    deal_desk.request_approval(deal, for_role)
+
+
+@app.command("deal:status")
+def deal_status(id: str = typer.Option(..., "--id")):
+    deal = deal_desk.load_deal(id)
+    typer.echo(deal.status)
+
+
+@app.command("price:simulate")
+def price_simulate(
+    scenarios: Path = typer.Option(..., "--scenarios", exists=True, dir_okay=False),
+    horizon: int = typer.Option(6, "--horizon"),
+):
+    cfg = yaml.safe_load(scenarios.read_text())
+    elasticity.simulate(cfg.get("scenarios", []), horizon)
+
+
+@app.command("quote:pack")
+def quote_pack_cmd(
+    quote: Path = typer.Option(..., "--quote", exists=True, dir_okay=False),
+    account: str = typer.Option(..., "--account"),
+    out: Path = typer.Option(Path("artifacts/sales/pack"), "--out"),
+):
+    quote_pack.build_pack(quote, account, out)
+    typer.echo(str(out))
+
+
+@app.command("sales:winloss")
+def winloss_cmd(
+    from_date: str = typer.Option(..., "--from"),
+    to_date: str = typer.Option(..., "--to"),
+):
+    start = datetime.fromisoformat(from_date)
+    end = datetime.fromisoformat(to_date)
+    path = winloss.build_report(start, end)
+    typer.echo(str(path))
 
 
 if __name__ == "__main__":
