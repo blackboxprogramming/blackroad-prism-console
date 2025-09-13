@@ -1,0 +1,9 @@
+rules:
+  - metric: revenue
+    group_by: region
+    condition: "pct_drop >= 10"
+    severity: high
+  - metric: uptime
+    group_by: service
+    condition: "value < 99.9"
+    severity: critical

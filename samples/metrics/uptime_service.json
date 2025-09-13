@@ -1,0 +1,12 @@
+[
+  {"date": "2025-01-01", "service": "api", "value": 99.95},
+  {"date": "2025-01-08", "service": "api", "value": 99.96},
+  {"date": "2025-01-15", "service": "api", "value": 99.97},
+  {"date": "2025-01-22", "service": "api", "value": 99.98},
+  {"date": "2025-01-29", "service": "api", "value": 99.99},
+  {"date": "2025-01-01", "service": "db", "value": 99.95},
+  {"date": "2025-01-08", "service": "db", "value": 99.94},
+  {"date": "2025-01-15", "service": "db", "value": 99.96},
+  {"date": "2025-01-22", "service": "db", "value": 99.97},
+  {"date": "2025-01-29", "service": "db", "value": 99.8}
+]

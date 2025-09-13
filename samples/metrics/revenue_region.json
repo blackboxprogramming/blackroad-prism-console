@@ -1,0 +1,12 @@
+[
+  {"date": "2025-01-01", "region": "APAC", "value": 100},
+  {"date": "2025-01-08", "region": "APAC", "value": 110},
+  {"date": "2025-01-15", "region": "APAC", "value": 120},
+  {"date": "2025-01-22", "region": "APAC", "value": 130},
+  {"date": "2025-01-29", "region": "APAC", "value": 90},
+  {"date": "2025-01-01", "region": "EMEA", "value": 100},
+  {"date": "2025-01-08", "region": "EMEA", "value": 100},
+  {"date": "2025-01-15", "region": "EMEA", "value": 100},
+  {"date": "2025-01-22", "region": "EMEA", "value": 100},
+  {"date": "2025-01-29", "region": "EMEA", "value": 100}
+]

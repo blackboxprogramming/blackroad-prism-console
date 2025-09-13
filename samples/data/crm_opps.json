@@ -1,0 +1,50 @@
+[
+  {
+    "date": "2025-07-15",
+    "region": "APAC",
+    "product": "Flagship",
+    "signup_month": "2025-07",
+    "revenue": 1000,
+    "cost": 600,
+    "nps": 40,
+    "return_rate": 0.1,
+    "uptime": 99.9,
+    "mttr": 2
+  },
+  {
+    "date": "2025-08-15",
+    "region": "APAC",
+    "product": "Flagship",
+    "signup_month": "2025-07",
+    "revenue": 1200,
+    "cost": 700,
+    "nps": 45,
+    "return_rate": 0.05,
+    "uptime": 99.8,
+    "mttr": 1
+  },
+  {
+    "date": "2025-07-15",
+    "region": "EMEA",
+    "product": "Flagship",
+    "signup_month": "2025-07",
+    "revenue": 900,
+    "cost": 500,
+    "nps": 50,
+    "return_rate": 0.08,
+    "uptime": 99.9,
+    "mttr": 1
+  },
+  {
+    "date": "2025-08-15",
+    "region": "APAC",
+    "product": "Basic",
+    "signup_month": "2025-07",
+    "revenue": 800,
+    "cost": 500,
+    "nps": 42,
+    "return_rate": 0.07,
+    "uptime": 99.7,
+    "mttr": 3
+  }
+]

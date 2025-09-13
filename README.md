@@ -58,6 +58,17 @@ When you're ready to share changes:
    ```bash
    git commit -m "feat: describe your change"
    ```
+
+## Executive Autopilot
+
+Offline analytics helpers:
+
+```bash
+python -m cli.console cohort:new --name apac_flagship --criteria samples/cohorts/apac_flagship.json
+python -m cli.console anomaly:run --rules configs/anomaly_rules.yaml --window W
+python -m cli.console decide:plan --anomalies artifacts/anomalies/latest.json --goals configs/goals.yaml --constraints configs/constraints.yaml
+python -m cli.console narrative:build --plan artifacts/decisions/plan_*.json --out artifacts/reports/exec_latest
+```
 3. Push the branch:
    ```bash
    git push origin <branch-name>

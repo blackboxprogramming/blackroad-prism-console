@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["actions", "raci"],
+  "properties": {
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action", "bot", "owner", "credits", "impact"],
+        "properties": {
+          "action": {"type": "string"},
+          "bot": {"type": "string"},
+          "owner": {"type": "string"},
+          "credits": {"type": "number"},
+          "impact": {"type": "number"}
+        }
+      }
+    },
+    "raci": {
+      "type": "object",
+      "additionalProperties": {"type": "string"}
+    }
+  }
+}
