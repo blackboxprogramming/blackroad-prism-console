@@ -1,0 +1,17 @@
+name: local-ci
+on:
+  push:
+    branches: ["*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lint
+        run: make lint
+      - name: Typecheck
+        run: make typecheck
+      - name: Tests
+        run: pytest
+      - name: Dist
+        run: make dist
