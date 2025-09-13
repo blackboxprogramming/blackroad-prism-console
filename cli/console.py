@@ -12,6 +12,12 @@ from orchestrator import orchestrator, slo_report
 from orchestrator.perf import perf_timer
 from orchestrator.protocols import Task
 from tools import storage
+from strategy import okr as strat_okr
+from strategy import bets as strat_bets
+from strategy import scorecard as strat_scorecard
+from strategy import reviews as strat_reviews
+from strategy import tradeoffs as strat_tradeoffs
+from strategy import memos as strat_memos
 from services import catalog as svc_catalog
 from services import deps as svc_deps
 from runbooks import executor as rb_executor
@@ -449,6 +455,80 @@ def mfg_mrp_cmd(demand: Path = typer.Option(..., "--demand", exists=True), inven
 def status_build():
     status_gen.build()
     typer.echo("built")
+
+
+# Strategy commands
+
+@app.command("okr:new:obj")
+def okr_new_obj(level: str = typer.Option(..., "--level"), owner: str = typer.Option(..., "--owner"), period: str = typer.Option(..., "--period"), text: str = typer.Option(..., "--text")):
+    obj = strat_okr.new_objective(level, owner, period, text)
+    typer.echo(obj.id)
+
+
+@app.command("okr:new:kr")
+def okr_new_kr(obj: str = typer.Option(..., "--obj"), metric: str = typer.Option(..., "--metric"), target: float = typer.Option(..., "--target"), unit: str = typer.Option(..., "--unit"), scoring: str = typer.Option(..., "--scoring")):
+    kr = strat_okr.new_key_result(obj, metric, target, unit, scoring)
+    typer.echo(kr.id)
+
+
+@app.command("okr:link")
+def okr_link(child: str = typer.Option(..., "--child"), parent: str = typer.Option(..., "--parent")):
+    strat_okr.link(child, parent)
+    typer.echo("linked")
+
+
+@app.command("okr:validate")
+def okr_validate(period: str = typer.Option(..., "--period")):
+    ok = strat_okr.validate(period)
+    typer.echo("ok" if ok else "invalid")
+
+
+@app.command("bets:new")
+def bets_new(title: str = typer.Option(..., "--title"), owner: str = typer.Option(..., "--owner"), period: str = typer.Option(..., "--period"), est_cost: float = typer.Option(..., "--est_cost"), est_impact: float = typer.Option(..., "--est_impact"), risk: str = typer.Option(..., "--risk"), ttv: int = typer.Option(..., "--ttv")):
+    bet = strat_bets.new_bet(title, owner, period, est_cost, est_impact, risk, ttv)
+    typer.echo(bet.id)
+
+
+@app.command("bets:rank")
+def bets_rank(period: str = typer.Option(..., "--period"), scoring: Path = typer.Option(..., "--scoring", exists=False)):
+    strat_bets.rank(period, scoring)
+    typer.echo("ranked")
+
+
+@app.command("scorecard:build")
+def scorecard_build(period: str = typer.Option(..., "--period"), level: str = typer.Option(..., "--level"), owner: str = typer.Option(..., "--owner")):
+    strat_scorecard.build(period, level, owner)
+    typer.echo("built")
+
+
+@app.command("review:prepare")
+def review_prepare(date: str = typer.Option(..., "--date")):
+    strat_reviews.prepare(date)
+    typer.echo("prepared")
+
+
+@app.command("review:packet")
+def review_packet(date: str = typer.Option(..., "--date")):
+    strat_reviews.packet(date)
+    typer.echo("packet")
+
+
+@app.command("tradeoff:select")
+def tradeoff_select(period: str = typer.Option(..., "--period"), budget: float = typer.Option(..., "--budget")):
+    strat_tradeoffs.select(period, budget)
+    typer.echo("selected")
+
+
+@app.command("tradeoff:frontier")
+def tradeoff_frontier(period: str = typer.Option(..., "--period")):
+    strat_tradeoffs.frontier(period)
+    typer.echo("frontier")
+
+
+@app.command("memo:build")
+def memo_build(period: str = typer.Option(..., "--period"), theme: str = typer.Option(..., "--theme")):
+    strat_memos.build(period, theme)
+    typer.echo("memo")
 
 if __name__ == "__main__":
     app()
