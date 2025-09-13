@@ -1,5 +1,5 @@
 {
-  "Quickstart": [],
+  "Quickstart": ["accessibility.md"],
   "Development": [],
   "Build": [],
   "Tests": [],

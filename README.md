@@ -465,3 +465,15 @@ class MyBot(BaseBot):
     def run(self, task: Task) -> BotResponse:
         ...
 ```
+
+## Compliance Readiness
+
+Example commands:
+
+```bash
+python -m cli.console esign:keygen --user U_PM
+python -m cli.console sop:new --name release --from sop/templates/release.yaml
+python -m cli.console hitl:enqueue --task T100 --type security --artifact artifacts/T100/response.json --reviewers U_SEC,U_CTO
+python -m cli.console records:status
+python -m cli.console tui:run --theme high_contrast --lang es
+```
