@@ -1,0 +1,16 @@
+name: Payroll Export (Monthly)
+on:
+  schedule: [{ cron: "0 6 25 * *" }]
+  workflow_dispatch:
+jobs:
+  payroll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/hr/payroll_export.ts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: payroll
+          path: /tmp/payroll_*.csv

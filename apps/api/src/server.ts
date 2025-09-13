@@ -14,6 +14,12 @@ import webpush from './routes/notify/webpush.js';
 import hooks from './routes/hooks.js';
 import metrics from './routes/metrics.js';
 import okta from './routes/okta.js';
+import hrOnOff from './routes/hr/onoff.js';
+import hrOrg from './routes/hr/org.js';
+import hrPto from './routes/hr/pto.js';
+import hrReviews from './routes/hr/reviews.js';
+import hrTraining from './routes/hr/training.js';
+import hrPolicies from './routes/hr/policies.js';
 
 dotenv.config();
 
@@ -37,6 +43,7 @@ app.use('/api/notify/webpush', webpush);
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
+app.use('/api/hr', hrOnOff, hrOrg, hrPto, hrReviews, hrTraining, hrPolicies);
 
 const port = process.env.PORT || 4000;
 
