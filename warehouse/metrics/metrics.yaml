@@ -1,0 +1,10 @@
+metrics:
+  - name: ARR
+    model: finance_arr
+    value_field: value
+  - name: FRTBreaches
+    model: support_sla
+    value_field: value
+  - name: FunnelSignup
+    model: growth_funnel
+    value_field: count

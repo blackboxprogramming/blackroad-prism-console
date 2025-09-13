@@ -1,0 +1,9 @@
+models:
+  - name: finance_arr
+    description: MRR/ARR rollup from ERP AR + plans
+    sources: [ erp_ar, pricing_plans ]
+    sql: |
+      -- pseudo: aggregate AR invoices to ARR
+      SELECT "ARR" AS metric, 1200000 AS value
+    owner: Finance
+    sla_hours: 24

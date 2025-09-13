@@ -19,6 +19,8 @@ import adminLic from './routes/admin/licensing.js';
 import adminDev from './routes/admin/devices.js';
 import adminVend from './routes/admin/vendors.js';
 import adminPO from './routes/admin/procurement.js';
+import biDatasets from './routes/bi/datasets.js';
+import biMetrics from './routes/bi/metrics.js';
 
 dotenv.config();
 
@@ -42,6 +44,7 @@ app.use('/api/notify/webpush', webpush);
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
+app.use('/api/bi', biDatasets, biMetrics);
 app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
 
 const port = process.env.PORT || 4000;
