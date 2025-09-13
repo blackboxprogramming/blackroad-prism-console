@@ -1,0 +1,3 @@
+{"req":"R2","candidate":"C2","stage":"applied","ts":"2024-09-01"}
+{"req":"R2","candidate":"C2","stage":"screen","ts":"2024-09-03"}
+{"req":"R2","candidate":"C2","stage":"reject","ts":"2024-09-05"}

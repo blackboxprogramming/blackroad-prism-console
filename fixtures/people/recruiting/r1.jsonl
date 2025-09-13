@@ -1,0 +1,5 @@
+{"req":"R1","candidate":"C1","stage":"applied","ts":"2024-10-01"}
+{"req":"R1","candidate":"C1","stage":"screen","ts":"2024-10-02"}
+{"req":"R1","candidate":"C1","stage":"interview","ts":"2024-10-05"}
+{"req":"R1","candidate":"C1","stage":"offer","ts":"2024-10-07"}
+{"req":"R1","candidate":"C1","stage":"accept","ts":"2024-10-08"}

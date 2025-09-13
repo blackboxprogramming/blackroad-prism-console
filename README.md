@@ -39,6 +39,13 @@ sudo bash ops/install.sh
 bash tools/verify-runtime.sh
 ```
 
+## People Ops Suite Quickstart
+
+```bash
+python -m cli.console people:hc:forecast --plans fixtures/people/plans.csv --attrition fixtures/people/attrition.csv --transfers fixtures/people/transfers.csv --policy configs/people/hc_policy.yaml
+```
+
+
 - The installer will:
   - Locate your API (prefers `./srv/blackroad-api`, then `/srv/blackroad-api`, else searches for `server_full.js`)
   - Create `package.json` if missing and **auto-install** any missing npm packages it finds
