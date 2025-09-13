@@ -1,0 +1,56 @@
+model Partner {
+  id          String       @id @default(cuid())
+  name        String
+  email       String
+  website     String?
+  status      String       @default("pending") // pending|approved|suspended
+  apps        PartnerApp[]
+  createdAt   DateTime     @default(now())
+}
+
+model PartnerApp {
+  id          String    @id @default(cuid())
+  partnerId   String
+  name        String
+  slug        String    @unique
+  scopes      String    // space-delimited scopes
+  webhookUrl  String?
+  clientId    String    @unique
+  clientSecret String
+  approved    Boolean   @default(false)
+  visible     Boolean   @default(false)
+  installs    AppInstall[]
+  createdAt   DateTime  @default(now())
+  partner     Partner   @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+}
+
+model OAuthToken {
+  id         String   @id @default(cuid())
+  appId      String
+  orgId      String
+  scope      String
+  accessToken  String  @unique
+  refreshToken String?
+  expiresAt    DateTime
+  createdAt  DateTime @default(now())
+}
+
+model AppInstall {
+  id        String   @id @default(cuid())
+  appId     String
+  orgId     String
+  plan      String   @default("STARTER")
+  installedAt DateTime @default(now())
+  uninstalledAt DateTime?
+  app       PartnerApp @relation(fields: [appId], references: [id], onDelete: Cascade)
+}
+
+model RevenueShareReport {
+  id        String   @id @default(cuid())
+  month     String
+  appId     String
+  installId String
+  usage     Int      @default(0)
+  amountUsd Float    @default(0)
+  createdAt DateTime @default(now())
+}

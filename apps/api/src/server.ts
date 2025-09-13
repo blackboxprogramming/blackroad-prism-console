@@ -14,6 +14,17 @@ import webpush from './routes/notify/webpush.js';
 import hooks from './routes/hooks.js';
 import metrics from './routes/metrics.js';
 import okta from './routes/okta.js';
+import partnersOnboard from './routes/partners/onboard.js';
+import partnersApps from './routes/partners/apps.js';
+import marketList from './routes/marketplace/list.js';
+import marketInstall from './routes/marketplace/install.js';
+import marketUninstall from './routes/marketplace/uninstall.js';
+import partnerRev from './routes/partners/revshare.js';
+import sandboxEcho from './routes/sandbox/echo.js';
+import oauthAuthorize from './routes/oauth/authorize.js';
+import oauthToken from './routes/oauth/token.js';
+import oauthRevoke from './routes/oauth/revoke.js';
+import oauthRotate from './routes/oauth/rotate.js';
 
 dotenv.config();
 
@@ -37,6 +48,12 @@ app.use('/api/notify/webpush', webpush);
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
+app.use('/api/partners', partnersOnboard);
+app.use('/api/partners', partnersApps);
+app.use('/api/marketplace', marketList, marketInstall, marketUninstall);
+app.use('/api/partners', partnerRev);
+app.use('/api/sandbox', sandboxEcho);
+app.use('/oauth', oauthAuthorize, oauthToken, oauthRevoke, oauthRotate);
 
 const port = process.env.PORT || 4000;
 

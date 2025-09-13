@@ -1,0 +1,19 @@
+name: Partner App Review
+on:
+  workflow_dispatch:
+    inputs:
+      app_id: { description: 'PartnerApp ID', required: true }
+      approve: { description: 'true|false', required: true, default: 'false' }
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Post review status
+        run: |
+          MSG="Partner App ${APP_ID} review: ${APPROVE}"
+          if [ -n "${SLACK}" ]; then curl -s -X POST -H "Content-Type: application/json" -d "{\"text\":\"$MSG\"}" "$SLACK" || true; fi
+        env:
+          APP_ID: ${{ inputs.app_id }}
+          APPROVE: ${{ inputs.approve }}
+          SLACK: ${{ secrets.PARTNER_REVIEW_SLACK_WEBHOOK }}
