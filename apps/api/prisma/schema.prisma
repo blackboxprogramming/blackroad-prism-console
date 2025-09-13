@@ -1,0 +1,66 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Organization {
+  id          String       @id @default(cuid())
+  name        String
+  createdAt   DateTime     @default(now())
+  memberships Membership[]
+  invites     Invite[]
+  apiKeys     ApiKey[]
+  auditLogs   AuditLog[]
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  role      String   // owner|admin|member|viewer
+  userId    String
+  orgId     String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Invite {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  orgId     String
+  role      String   @default("member")
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  acceptedBy String?
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  orgId     String
+  actorId   String?
+  action    String
+  meta      Json
+  ts        DateTime @default(now())
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  owner     String   // human label
+  orgId     String
+  createdAt DateTime @default(now())
+  revokedAt DateTime?
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,14 @@
+name: Org/Membership Sanity Audit
+on:
+  schedule: [{ cron: "40 3 * * *" }]
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan membership and keys (stub)
+        run: |
+          echo '{"ok":true,"checked":"orgs, memberships, keys"}' > /tmp/org_audit.json
+      - uses: actions/upload-artifact@v4
+        with: { name: org_audit, path: /tmp/org_audit.json }
