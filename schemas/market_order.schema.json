@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["id", "tenant", "listing_id", "qty", "status"],
+  "properties": {
+    "id": {"type": "string"},
+    "tenant": {"type": "string"},
+    "listing_id": {"type": "string"},
+    "qty": {"type": "integer"},
+    "status": {"type": "string"}
+  }
+}
