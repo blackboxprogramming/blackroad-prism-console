@@ -1,0 +1,25 @@
+name: Board Pack (Monthly)
+on:
+  schedule: [{ cron: "0 10 1 * *" }]
+  workflow_dispatch:
+jobs:
+  board:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/kpi_etl.ts
+        env:
+          PROM_URL: ${{ secrets.PROM_URL }}
+          FINANCE_CSV_URL: ${{ secrets.FINANCE_CSV_URL }}
+      - run: node scripts/forecast.ts
+      - run: node scripts/board_pack.ts
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(board): monthly board pack"
+          file_pattern: "board/BOARD_*.md data/kpi/kpi_latest.json data/finance/forecast.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: board-pack
+          path: board/BOARD_*.md

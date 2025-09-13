@@ -1,0 +1,19 @@
+start_month: 2025-09
+months: 12
+assumptions:
+  base:
+    start_arr: 1200000
+    new_mrr: 100000
+    gross_churn_rate: 0.02
+    expansion_rate: 0.03
+    cac_payback_months: 12
+  bull:
+    start_arr: 1200000
+    new_mrr: 140000
+    gross_churn_rate: 0.015
+    expansion_rate: 0.04
+  bear:
+    start_arr: 1200000
+    new_mrr: 70000
+    gross_churn_rate: 0.03
+    expansion_rate: 0.02
