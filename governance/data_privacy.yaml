@@ -1,0 +1,13 @@
+title: "Data Privacy Policy"
+purpose: "Safeguard personal and sensitive information across BlackRoad systems"
+scope: "All data collected, processed, or stored by BlackRoad"
+procedure:
+  - "Collect only necessary data and document consent"
+  - "Encrypt data at rest and in transit"
+  - "Handle subject access requests within regulatory timelines"
+quality_control: "Periodic audits verify encryption and access controls"
+responsible_role: "Data Protection Officer"
+enforcement_steps:
+  - "Immediate containment of any privacy incident"
+  - "Notification to authorities and affected parties"
+review_cycle: "semi-annually"

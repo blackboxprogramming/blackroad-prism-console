@@ -1,0 +1,15 @@
+- id: R1
+  description: "Data breach"
+  likelihood: 0.3
+  impact: 0.8
+  mitigation: "Encrypt data and monitor access"
+- id: R2
+  description: "Service outage"
+  likelihood: 0.2
+  impact: 0.9
+  mitigation: "Multi-region deployment"
+- id: R3
+  description: "Compliance violation"
+  likelihood: 0.1
+  impact: 0.7
+  mitigation: "Regular training and audits"

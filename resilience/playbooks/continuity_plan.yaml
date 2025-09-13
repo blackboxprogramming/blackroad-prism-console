@@ -1,0 +1,10 @@
+title: "Business Continuity Plan"
+purpose: "Maintain essential functions during prolonged disruptions"
+scope: "All critical business processes"
+procedure:
+  - "Activate remote work protocols"
+  - "Prioritize services based on customer impact"
+  - "Coordinate with vendors and partners"
+quality_control: "Quarterly tabletop exercises validate continuity steps"
+responsible_role: "Operations Manager"
+review_cycle: "quarterly"

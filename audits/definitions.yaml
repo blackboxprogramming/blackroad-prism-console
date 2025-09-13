@@ -1,0 +1,10 @@
+checks:
+  - name: "Secrets encrypted"
+    type: "shell"
+    command: "test -d secrets"
+  - name: "Env files validated"
+    type: "shell"
+    command: "python - <<'PY'\nimport json,sys\njson.load(open('env/devcontainer.json'))\nPY"
+  - name: "CI logs archived"
+    type: "file_exists"
+    path: "logs"

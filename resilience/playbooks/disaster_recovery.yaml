@@ -1,0 +1,10 @@
+title: "Disaster Recovery Plan"
+purpose: "Restore services after catastrophic failure"
+scope: "Core infrastructure and data stores"
+procedure:
+  - "Assess disaster impact"
+  - "Fail over to secondary region"
+  - "Recover data from backups"
+quality_control: "Annual failover drills validate recovery objectives"
+responsible_role: "Infrastructure Director"
+review_cycle: "annually"
