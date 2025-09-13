@@ -1,7 +1,5 @@
-from datetime import datetime
-
 from orchestrator.base import BaseBot
-from orchestrator.protocols import Task, BotResponse
+from orchestrator.protocols import BotResponse, Task
 
 
 class TreasuryBot(BaseBot):
@@ -24,6 +22,7 @@ class TreasuryBot(BaseBot):
             data = {
                 "weekly_cash": [10000 + i * 100 for i in range(13)],
                 "currency": "USD",
+                "kpis": {"accuracy": 0.9},
             }
             artifacts = [f"/artifacts/{task.id}/cash_forecast.csv"]
             next_actions = ["Review forecast", "Adjust assumptions"]
@@ -32,7 +31,8 @@ class TreasuryBot(BaseBot):
             data = {
                 "hedges": [
                     {"instrument": "forward", "amount": 50000, "rate": 1.1}
-                ]
+                ],
+                "kpis": {"coverage": 0.8},
             }
             artifacts = [f"/artifacts/{task.id}/hedging_plan.md"]
             next_actions = ["Confirm exposures", "Execute hedges"]

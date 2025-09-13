@@ -465,3 +465,18 @@ class MyBot(BaseBot):
     def run(self, task: Task) -> BotResponse:
         ...
 ```
+
+## Policy Enforcement
+Runtime tasks and bot responses are checked by a central policy layer. Violations such as forbidden intents, oversized context, or missing risks raise `BotExecutionError` and block execution.
+
+## PII Redaction & Lineage
+All task context and bot outputs are scrubbed for emails, phone numbers, SSNs and credit cards. Values are replaced with deterministic tokens like `{{REDACTED:email:hash8}}`. Data lineage traces are recorded to `orchestrator/lineage.jsonl` linking datasets and artifacts.
+
+## Integrations (Stubs)
+Offline importers for Salesforce, SAP, ServiceNow and Workday read fixtures under `fixtures/` and write normalized rows to `artifacts/imports/*.json` via the CLI.
+
+## Observability
+Run `python -m cli.console obs:report` to generate a local dashboard under `artifacts/observability/` summarising bot usage, policy violations, redactions and lineage coverage.
+
+## Dry-Run Mode
+Pass `--dry-run` to any CLI command to skip writing artifacts. The action still executes but prints `DRY-RUN: no artifacts written`.

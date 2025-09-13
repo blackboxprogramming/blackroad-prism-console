@@ -1,0 +1,4 @@
+[
+  {"Id": "INC1", "Sev": "P1", "OpenedAt": "2024-06-01", "ClosedAt": "2024-06-02", "Service": "Email"},
+  {"Id": "INC2", "Sev": "P3", "OpenedAt": "2024-06-05", "ClosedAt": null, "Service": "VPN"}
+]

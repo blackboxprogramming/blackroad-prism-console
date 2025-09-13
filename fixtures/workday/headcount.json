@@ -1,0 +1,4 @@
+[
+  {"EmployeeID": "E1", "Dept": "Sales", "Role": "Rep", "Grade": "G7", "Region": "NA", "StartDate": "2023-01-01", "Status": "active"},
+  {"EmployeeID": "E2", "Dept": "Eng", "Role": "Dev", "Grade": "G8", "Region": "EU", "StartDate": "2022-05-10", "Status": "active"}
+]
