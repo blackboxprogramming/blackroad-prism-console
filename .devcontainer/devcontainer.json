@@ -1,27 +1,26 @@
 {
-  "name": "blackroad",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
-  "features": {
-    "ghcr.io/devcontainers/features/python:1": {},
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-    "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {}
+  "name": "blackroad-prism-console",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": ".."
   },
-  "postCreateCommand": "bash scripts/bootstrap.sh || true",
+  "workspaceFolder": "/workspace",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
   "customizations": {
     "vscode": {
-      "settings": { "editor.formatOnSave": true, "files.eol": "\\n" },
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
       "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
         "esbenp.prettier-vscode",
-        "dbaeumer.vscode-eslint",
-        "ms-playwright.playwright"
+        "dbaeumer.vscode-eslint"
       ]
     }
   },
-  "remoteEnv": {
-    "VITE_SITE_URL": "http://localhost:5173",
-    "VITE_TELEMETRY": "off"
-  },
-  "forwardPorts": [5173],
-  "remoteUser": "node"
+  "forwardPorts": [3000],
+  "postCreateCommand": "pip install -U pip pytest jsonschema && (npm ci || true)"
 }
