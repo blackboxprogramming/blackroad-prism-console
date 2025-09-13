@@ -491,3 +491,11 @@ python -m cli.console close:sox:check --period 2025-09
 python -m cli.console close:packet --period 2025-09
 python -m cli.console close:sign --period 2025-09 --role CFO --as-user U_CFO
 ```
+
+## PLM & Manufacturing Ops
+
+```
+python -m cli.console plm:items:load --dir fixtures/plm/items
+python -m cli.console plm:bom:load --dir fixtures/plm/boms
+python -m cli.console plm:bom:explode --item PROD-100 --rev A --level 2
+```

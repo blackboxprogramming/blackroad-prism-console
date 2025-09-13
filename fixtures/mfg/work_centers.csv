@@ -1,0 +1,3 @@
+id,name,capacity_per_shift,skills,cost_rate
+WC-1,Assembly,100,assemble,30
+WC-2,Test,80,test,40

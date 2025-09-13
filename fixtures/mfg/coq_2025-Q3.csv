@@ -1,0 +1,5 @@
+bucket,cost
+Prevention,100
+Appraisal,50
+Internal Failure,20
+External Failure,30
