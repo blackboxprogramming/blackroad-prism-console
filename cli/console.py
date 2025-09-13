@@ -152,5 +152,103 @@ def slo_gate(
         raise typer.Exit(code=1)
 
 
+@app.command("ir:kpi:compute")
+def ir_kpi_compute(period: str = typer.Option(..., "--period")):
+    from ir import kpi_sot
+
+    rows = kpi_sot.compute(period)
+    typer.echo(json.dumps(rows, indent=2))
+
+
+@app.command("ir:kpi:signoff")
+def ir_kpi_signoff(
+    kpi: str = typer.Option(..., "--kpi"),
+    period: str = typer.Option(..., "--period"),
+):
+    from ir import kpi_signoff
+
+    kpi_signoff.request_signoff(kpi, period)
+
+
+@app.command("ir:kpi:approve")
+def ir_kpi_approve(
+    kpi: str = typer.Option(..., "--kpi"),
+    period: str = typer.Option(..., "--period"),
+    as_user: str = typer.Option(..., "--as-user"),
+):
+    from ir import kpi_signoff
+
+    kpi_signoff.approve(kpi, period, as_user)
+
+
+@app.command("ir:kpi:reject")
+def ir_kpi_reject(
+    kpi: str = typer.Option(..., "--kpi"),
+    period: str = typer.Option(..., "--period"),
+    as_user: str = typer.Option(..., "--as-user"),
+):
+    from ir import kpi_signoff
+
+    kpi_signoff.reject(kpi, period, as_user)
+
+
+@app.command("ir:earnings:build")
+def ir_earnings_build(
+    period: str = typer.Option(..., "--period"),
+    as_user: str = typer.Option(..., "--as-user"),
+):
+    from ir import earnings
+
+    earnings.build(period, user=as_user)
+
+
+@app.command("ir:guidance")
+def ir_guidance_run(
+    period: str = typer.Option(..., "--period"),
+    assumptions: Path = typer.Option(..., "--assumptions", exists=True, dir_okay=False),
+):
+    from ir import guidance
+
+    guidance.run(period, assumptions)
+
+
+@app.command("ir:blackouts:status")
+def ir_blackouts_status(date: str = typer.Option(..., "--date")):
+    from ir import blackouts
+
+    code = blackouts.status(date)
+    typer.echo(code or "CLEAR")
+
+
+@app.command("ir:disclose")
+def ir_disclose(
+    type: str = typer.Option(..., "--type"),
+    path: Path = typer.Option(..., "--path", exists=True, dir_okay=False),
+    as_user: str = typer.Option(..., "--as-user"),
+):
+    from ir import disclosures
+
+    disclosures.log_disclosure(type, str(path), as_user)
+
+
+@app.command("board:pack")
+def board_pack_cmd(month: str = typer.Option(..., "--month")):
+    from board import pack
+
+    pack.build(month)
+
+
+@app.command("ir:faq")
+def ir_faq(
+    q: str = typer.Option(..., "--q"),
+    mode: str = typer.Option("internal", "--mode"),
+    as_user: str = typer.Option("U_IR", "--as-user"),
+):
+    from ir import faq_bot
+
+    resp = faq_bot.answer(q, mode=mode, user=as_user)
+    typer.echo(json.dumps(resp, indent=2))
+
+
 if __name__ == "__main__":
     app()
