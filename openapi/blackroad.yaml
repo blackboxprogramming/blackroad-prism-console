@@ -1,0 +1,22 @@
+openapi: 3.0.3
+info: { title: BlackRoad Public API, version: "0.1.0" }
+paths:
+  /api/public/ping:
+    get:
+      summary: Health ping
+      responses: { "200": { description: OK } }
+  /api/partner/enqueue:
+    post:
+      summary: Enqueue a webhook test (partner-scope)
+      parameters:
+        - in: header
+          name: x-br-key
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { url: {type:string}, event:{type:string}, data:{type:object} }, required:[url,event] }
+      responses:
+        "200": { description: OK }
