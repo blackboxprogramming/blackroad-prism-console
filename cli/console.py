@@ -19,6 +19,17 @@ from change import calendar as change_calendar
 from status import generator as status_gen
 import time
 
+from ir import (
+    kpi_sot,
+    kpi_signoff,
+    earnings,
+    guidance,
+    blackouts,
+    disclosures,
+    faq_bot,
+)
+from board import pack as board_pack
+
 app = typer.Typer()
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -207,6 +218,90 @@ def hc_summary(service: str = typer.Option(..., "--service")):
     typer.echo(json.dumps(data))
 
 
+@app.command("ir:kpi:compute")
+def ir_kpi_compute(period: str = typer.Option(..., "--period")):
+    kpi_sot.compute(period)
+    typer.echo("ok")
+
+
+@app.command("ir:kpi:signoff")
+def ir_kpi_signoff(
+    kpi: str = typer.Option(..., "--kpi"),
+    period: str = typer.Option(..., "--period"),
+    request: bool = typer.Option(False, "--request"),
+    as_user: str = typer.Option("system", "--as-user"),
+):
+    if request:
+        kpi_signoff.request_signoff(kpi, period, as_user)
+        typer.echo("requested")
+
+
+@app.command("ir:kpi:approve")
+def ir_kpi_approve(
+    kpi: str = typer.Option(..., "--kpi"),
+    period: str = typer.Option(..., "--period"),
+    as_user: str = typer.Option(..., "--as-user"),
+):
+    kpi_signoff.approve(kpi, period, as_user)
+    typer.echo("approved")
+
+
+@app.command("ir:kpi:reject")
+def ir_kpi_reject(
+    kpi: str = typer.Option(..., "--kpi"),
+    period: str = typer.Option(..., "--period"),
+    as_user: str = typer.Option(..., "--as-user"),
+):
+    kpi_signoff.reject(kpi, period, as_user)
+    typer.echo("rejected")
+
+
+@app.command("ir:earnings:build")
+def ir_earnings_build(
+    period: str = typer.Option(..., "--period"),
+    as_user: str = typer.Option("U_IR", "--as-user"),
+):
+    earnings.build(period, as_user)
+    typer.echo("built")
+
+
+@app.command("ir:guidance")
+def ir_guidance_cmd(
+    period: str = typer.Option(..., "--period"),
+    assumptions: Path = typer.Option(..., "--assumptions", exists=True),
+):
+    guidance.run(period, str(assumptions))
+    typer.echo("ok")
+
+
+@app.command("ir:blackouts:status")
+def ir_blackouts_status(date: str = typer.Option(..., "--date")):
+    typer.echo(blackouts.status(date))
+
+
+@app.command("ir:disclose")
+def ir_disclose(
+    type: str = typer.Option(..., "--type"),
+    path: Path = typer.Option(..., "--path", exists=True, dir_okay=False),
+    as_user: str = typer.Option("U_IR", "--as-user"),
+):
+    if not as_user.startswith("U_IR"):
+        raise typer.Exit(code=1)
+    disclosures.log_file(type, str(path), as_user)
+    typer.echo("logged")
+
+
+@app.command("ir:faq")
+def ir_faq(q: str = typer.Option(..., "--q"), mode: str = typer.Option("internal", "--mode")):
+    typer.echo(json.dumps(faq_bot.answer(q, mode)))
+
+
+@app.command("board:pack")
+def board_pack_cmd(month: str = typer.Option(..., "--month")):
+    board_pack.build(month)
+    typer.echo("built")
+
+
 @app.command("change:add")
 def change_add(
     service: str = typer.Option(..., "--service"),
@@ -243,6 +338,11 @@ def change_conflicts(service: str = typer.Option(..., "--service")):
 
 @app.command("status:build")
 def status_build():
+    try:
+        blackouts.enforce("status:build")
+    except PermissionError as e:
+        typer.echo(str(e))
+        raise typer.Exit(code=1)
     status_gen.build()
     typer.echo("built")
 

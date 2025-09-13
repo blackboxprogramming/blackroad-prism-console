@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "revenue": {
+      "type": "object",
+      "properties": {
+        "base": {"type": "number"},
+        "upside": {"type": "number"},
+        "downside": {"type": "number"}
+      },
+      "required": ["base", "upside", "downside"]
+    },
+    "gm_percent": {
+      "type": "object",
+      "properties": {
+        "base": {"type": "number"},
+        "upside": {"type": "number"},
+        "downside": {"type": "number"}
+      },
+      "required": ["base", "upside", "downside"]
+    },
+    "op_inc": {
+      "type": "object",
+      "properties": {
+        "base": {"type": "number"},
+        "upside": {"type": "number"},
+        "downside": {"type": "number"}
+      },
+      "required": ["base", "upside", "downside"]
+    }
+  },
+  "required": ["revenue", "gm_percent", "op_inc"]
+}
