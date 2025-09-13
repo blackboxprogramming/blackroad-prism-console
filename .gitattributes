@@ -4,3 +4,5 @@
 *.{js,jsx,ts,tsx} linguist-language=JavaScript
 *.py text eol=lf
 *.db binary
+# Treat unencrypted env files as binary so Git won’t diff them
+.env* -text
