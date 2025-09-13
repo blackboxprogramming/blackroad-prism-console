@@ -19,6 +19,12 @@ import adminLic from './routes/admin/licensing.js';
 import adminDev from './routes/admin/devices.js';
 import adminVend from './routes/admin/vendors.js';
 import adminPO from './routes/admin/procurement.js';
+import supTickets from './routes/support/tickets.js';
+import supSla from './routes/support/sla.js';
+import supMacros from './routes/support/macros.js';
+import supKb from './routes/support/kb.js';
+import supChat from './routes/support/chat.js';
+import supEmail from './routes/support/email.js';
 
 dotenv.config();
 
@@ -28,6 +34,9 @@ app.use(morgan('dev'));
 app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));
 app.use(regionMiddleware());
 app.use(localeMiddleware());
+
+// raw body for email signature verification
+app.use((req:any,res,next)=>{ if (req.url.startsWith('/api/support/email/ingest')) { const b:Buffer[]=[]; req.on('data',(c)=>b.push(c)); req.on('end',()=>{ req.rawBody = Buffer.concat(b).toString(); next(); }); } else next(); });
 
 app.get('/api/health', cacheHeaders('health'), (_req,res)=> res.json({ ok:true, ts: Date.now() }));
 
@@ -43,6 +52,7 @@ app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
 app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
+app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
 
 const port = process.env.PORT || 4000;
 
