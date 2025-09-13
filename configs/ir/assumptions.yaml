@@ -1,0 +1,6 @@
+seasonality: 0.05
+pipeline_quality: 0.9
+supply_constraints: 0.95
+fx: 1.0
+gm_margin: 0.6
+opinc_margin: 0.15
