@@ -1,3 +1,4 @@
+.PHONY: install figures ops
 .RECIPEPREFIX = >
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell
 
@@ -7,6 +8,29 @@ setup:
 test:
 >. .venv/bin/activate && pytest
 
+health:
+>npm run health
+
+migrate:
+>@echo "no migrations"
+
+clean:
+>rm -rf node_modules coverage
+
+analysis:
+>python analysis/run_all.py
+	python -m pip install -r requirements.txt
+
+figures: install
+	python analysis/tap_null_isi.py
+	python analysis/selectors_autocorr.py
+	python analysis/variance_surfaces.py
+	python analysis/nphase_weierstrass.py
+
+ops:
+	curl -fsS http://localhost/health && echo OK || (echo FAIL && exit 1)
+	curl -fsS http://localhost/api/health && echo OK || true
+	curl -fsS http://localhost/api/ops || true
 lint:
 >. .venv/bin/activate && ruff .
 

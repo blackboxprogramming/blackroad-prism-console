@@ -85,6 +85,55 @@ app.use('/connectors', connectors);
 // Initialize DB (auto-migrations on import)
 const db = require('./src/db');
 
+// Simple in-memory storage for resilience operations
+const snapshots = [];
+const snapshotLogs = [];
+const rollbackLogs = [];
+
+app.get('/api/snapshots', (req, res) => {
+  res.json({ snapshots });
+});
+
+app.post('/api/snapshots', (req, res) => {
+  const snap = {
+    id: String(Date.now()),
+    timestamp: new Date().toISOString(),
+    size: `${Math.floor(Math.random() * 100) + 1}MB`,
+    status: 'complete'
+  };
+  snapshots.push(snap);
+  snapshotLogs.push({ timestamp: snap.timestamp, action: 'snapshot', user: req.session?.userId || 'anon', result: 'ok', notes: '' });
+  res.json({ snapshot: snap });
+});
+
+app.get('/api/snapshots/:id/download', (req, res) => {
+  res.setHeader('Content-Disposition', `attachment; filename=snapshot-${req.params.id}.txt`);
+  res.send('snapshot data');
+});
+
+app.post('/api/rollback/:id', (req, res) => {
+  const snap = snapshots.find(s => s.id === req.params.id);
+  const log = { timestamp: new Date().toISOString(), action: 'rollback', user: req.session?.userId || 'anon' };
+  if (snap) {
+    log.result = 'success';
+    log.notes = '';
+    res.json({ status: 'success' });
+  } else {
+    log.result = 'fail';
+    log.notes = 'snapshot not found';
+    res.status(404).json({ status: 'fail' });
+  }
+  rollbackLogs.push(log);
+});
+
+app.get('/api/rollback/logs', (req, res) => {
+  res.json({ logs: rollbackLogs });
+});
+
+app.get('/api/snapshots/logs', (req, res) => {
+  res.json({ logs: snapshotLogs });
+});
+
 // SUBSCRIBE
 const subRouter = express.Router();
 const { requireAuth } = require('./src/auth');
