@@ -475,3 +475,13 @@ class MyBot(BaseBot):
     def run(self, task: Task) -> BotResponse:
         ...
 ```
+
+## DX Quickstart
+
+Run developer tooling:
+
+```
+python -m cli.console dx:onboard:doctor
+python -m cli.console dx:quality
+```
+

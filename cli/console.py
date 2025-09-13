@@ -11,6 +11,17 @@ from orchestrator import orchestrator, slo_report
 from orchestrator.perf import perf_timer
 from orchestrator.protocols import Task
 from tools import storage
+from dx import (
+    monorepo,
+    quality,
+    test_matrix,
+    flaky,
+    pr_runner,
+    docs_lint,
+    style as style_lint,
+    onboard,
+    commits,
+)
 
 app = typer.Typer()
 
@@ -149,6 +160,95 @@ def slo_gate(
         ok = slo_report.gate(fail_on)
     _perf_footer(perf, p)
     if not ok:
+        raise typer.Exit(code=1)
+
+
+@app.command("dx:pkgs:list")
+def dx_pkgs_list():
+    for name in monorepo.discover_packages().keys():
+        typer.echo(name)
+
+
+@app.command("dx:pkgs:graph")
+def dx_pkgs_graph():
+    pkgs = monorepo.discover_packages()
+    monorepo.write_graph(pkgs)
+    typer.echo(str((monorepo.ARTIFACTS / "pkgs_graph.json")))
+
+
+@app.command("dx:pkgs:changed")
+def dx_pkgs_changed(since: str = typer.Option(..., "--since")):
+    for name in monorepo.changed_packages(since):
+        typer.echo(name)
+
+
+@app.command("dx:quality")
+def dx_quality():
+    res = quality.run()
+    for k, v in res.items():
+        typer.echo(f"{k}: {v}")
+    if any(v == "failed" for v in res.values()):
+        raise typer.Exit(code=1)
+
+
+@app.command("dx:matrix")
+def dx_matrix(cases: Path = typer.Option(..., "--cases", exists=True)):
+    cs = test_matrix.load_cases(cases)
+    test_matrix.run_matrix(cs)
+
+
+@app.command("dx:flaky")
+def dx_flaky(pattern: str = typer.Option(..., "--pattern"), n: int = typer.Option(10, "-n")):
+    data = flaky.run(pattern, n)
+    typer.echo(json.dumps(data))
+
+
+@app.command("dx:quarantine:update")
+def dx_quarantine_update():
+    flaky.quarantine_update()
+
+
+@app.command("dx:pr:run")
+def dx_pr_run(spec: Path = typer.Option(..., "--spec", exists=True)):
+    pr_runner.run(spec)
+
+
+@app.command("dx:docs:lint")
+def dx_docs_lint():
+    problems = docs_lint.lint()
+    for p in problems:
+        typer.echo(p)
+    if problems:
+        raise typer.Exit(code=1)
+
+
+@app.command("dx:style:lint")
+def dx_style_lint():
+    problems = style_lint.lint()
+    for p in problems:
+        typer.echo(p)
+    if problems:
+        raise typer.Exit(code=1)
+
+
+@app.command("dx:onboard:doctor")
+def dx_onboard_doctor():
+    ok = onboard.doctor()
+    if not ok:
+        raise typer.Exit(code=1)
+
+
+@app.command("dx:onboard:bootstrap")
+def dx_onboard_bootstrap():
+    onboard.bootstrap()
+
+
+@app.command("dx:commits:lint")
+def dx_commits_lint(since: str = typer.Option(None, "--since"), log: Optional[Path] = typer.Option(None, "--log", exists=True, dir_okay=False)):
+    bad = commits.lint(since=since, log_file=log)
+    for m in bad:
+        typer.echo(m)
+    if bad:
         raise typer.Exit(code=1)
 
 
