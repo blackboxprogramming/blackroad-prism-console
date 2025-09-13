@@ -1,3 +1,19 @@
+[project]
+name = "blackroad-prism-console"
+version = "0.1.0"
+requires-python = ">=3.10"
+description = "Offline PLM & Manufacturing Ops (Phase 37) — deterministic, file-backed."
+readme = "README.md"
+authors = [{ name = "Blackroad", email = "eng@blackroadinc.us" }]
+dependencies = ["typer"]
+
+[project.scripts]
+brc = "cli.console:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "-q"
+
 [tool.black]
 line-length = 100
 target-version = ["py311"]
@@ -8,8 +24,3 @@ profile = "black"
 [tool.ruff]
 line-length = 100
 extend-select = ["I"]
-
-[tool.pytest.ini_options]
-pythonpath = ["."]
-extend-select = ["I"]  # import sort
-

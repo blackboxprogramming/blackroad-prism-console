@@ -36,6 +36,9 @@ from services import deps as svc_deps
 from status import generator as status_gen
 from tools import storage
 
+VERB_FUN: dict[str, str] = {}
+VERB_FUN['plm:bom:where-used'] = 'cli_bom_where_used'
+
 mfg_yield = importlib.import_module("mfg.yield")
 
 from close import calendar as close_calendar
@@ -391,6 +394,13 @@ def plm_bom_explode(
         typer.echo(f"{lvl}\t{comp}\t{qty}")
 
 
+@app.command("plm:bom:where-used")
+def plm_bom_where_used(component: str = typer.Option(..., "--component")):
+    rows = plm_bom.where_used(component)
+    for item_id, rev in rows:
+        typer.echo(f"{item_id}@{rev}")
+
+
 @app.command("plm:eco:new")
 def plm_eco_new(
     item: str = typer.Option(..., "--item"),
@@ -592,4 +602,8 @@ def status_build():
 
 
 if __name__ == "__main__":
+    app()
+
+
+def main():
     app()
