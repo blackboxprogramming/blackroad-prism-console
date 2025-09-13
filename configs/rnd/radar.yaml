@@ -1,0 +1,12 @@
+- last_review: '2025-09-13'
+  owner: cli
+  quadrant: Languages
+  rationale: fast
+  ring: Adopt
+  tech: Rust
+- last_review: '2025-09-13'
+  owner: cli
+  quadrant: Languages
+  rationale: r
+  ring: Trial
+  tech: Go

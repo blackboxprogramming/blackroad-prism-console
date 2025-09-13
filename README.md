@@ -491,3 +491,9 @@ python -m cli.console close:sox:check --period 2025-09
 python -m cli.console close:packet --period 2025-09
 python -m cli.console close:sign --period 2025-09 --role CFO --as-user U_CFO
 ```
+
+## R&D Lab Quickstart
+
+```bash
+python -m cli.console rnd:idea:new --title "Example" --problem x --solution y --owner U1 --tags demo
+```

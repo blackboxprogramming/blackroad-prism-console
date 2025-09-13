@@ -1,0 +1,6 @@
+weights:
+  impact: 0.4
+  confidence: 0.3
+  effort: 0.1
+  strategic_fit: 0.1
+  risk: -0.1

@@ -1,0 +1,15 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["tech", "ring", "quadrant", "rationale", "owner", "last_review"],
+    "properties": {
+      "tech": {"type": "string"},
+      "ring": {"type": "string"},
+      "quadrant": {"type": "string"},
+      "rationale": {"type": "string"},
+      "owner": {"type": "string"},
+      "last_review": {"type": "string"}
+    }
+  }
+}

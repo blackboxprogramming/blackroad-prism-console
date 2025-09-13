@@ -1,0 +1,18 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "idea_id", "title", "inventors", "jurisdictions", "status", "hash"],
+    "properties": {
+      "id": {"type": "string"},
+      "idea_id": {"type": "string"},
+      "title": {"type": "string"},
+      "inventors": {"type": "array", "items": {"type": "string"}},
+      "prior_art": {"type": "array", "items": {"type": "string"}},
+      "jurisdictions": {"type": "array", "items": {"type": "string"}},
+      "status": {"type": "string"},
+      "created_at": {"type": "string"},
+      "hash": {"type": "string"}
+    }
+  }
+}

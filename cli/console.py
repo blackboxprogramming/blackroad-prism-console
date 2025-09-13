@@ -23,6 +23,13 @@ import time
 from close import calendar as close_calendar, journal as close_journal, recon as close_recon, flux as close_flux, sox as close_sox, packet as close_packet
 
 app = typer.Typer()
+from rnd import ideas as rnd_ideas
+from rnd import experiments as rnd_exp
+from rnd import radar as rnd_radar
+from rnd import ip as rnd_ip
+from rnd import notes as rnd_notes
+from rnd import merge as rnd_merge
+from rnd import dashboard as rnd_dashboard
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / "artifacts"
@@ -352,6 +359,100 @@ def close_sign(period: str = typer.Option(..., "--period"), role: str = typer.Op
 def status_build():
     status_gen.build()
     typer.echo("built")
+
+if __name__ == "__main__":
+
+@app.command("rnd:idea:new")
+def rnd_idea_new(title: str = typer.Option(..., "--title"), problem: str = typer.Option(..., "--problem"), solution: str = typer.Option(..., "--solution"), owner: str = typer.Option(..., "--owner"), tags: str = typer.Option("", "--tags"), status: str = typer.Option("new", "--status")):
+    idea = rnd_ideas.new(title, problem, solution, owner, [t.strip() for t in tags.split(",") if t.strip()], status)
+    typer.echo(idea.id)
+
+
+@app.command("rnd:idea:score")
+def rnd_idea_score(id: str = typer.Option(..., "--id")):
+    idea = next((i for i in rnd_ideas.list() if i.id == id), None)
+    if not idea:
+        raise typer.Exit(code=1)
+    typer.echo(str(rnd_ideas.score(idea)))
+
+
+@app.command("rnd:idea:list")
+def rnd_idea_list(status: Optional[str] = typer.Option(None, "--status")):
+    for i in rnd_ideas.list(status):
+        typer.echo(f"{i.id}\t{i.title}\t{i.status}")
+
+
+@app.command("rnd:exp:design")
+def rnd_exp_design(idea: str = typer.Option(..., "--idea"), hypothesis: str = typer.Option(..., "--hypothesis"), method: str = typer.Option(..., "--method")):
+    exp = rnd_exp.design(idea, hypothesis, method)
+    typer.echo(exp.id)
+
+
+@app.command("rnd:exp:run")
+def rnd_exp_run_cmd(id: str = typer.Option(..., "--id")):
+    rnd_exp.run(id)
+    typer.echo("ran")
+
+
+@app.command("rnd:exp:decide")
+def rnd_exp_decide(id: str = typer.Option(..., "--id"), decision: str = typer.Option(..., "--decision"), reason: str = typer.Option(..., "--reason")):
+    rnd_exp.decide(id, decision, reason)
+    typer.echo("ok")
+
+
+@app.command("rnd:radar:build")
+def rnd_radar_build():
+    rnd_radar.build()
+    typer.echo("built")
+
+
+@app.command("rnd:radar:add")
+def rnd_radar_add(tech: str = typer.Option(..., "--tech"), ring: str = typer.Option(..., "--ring"), quadrant: str = typer.Option(..., "--quadrant"), rationale: str = typer.Option(..., "--rationale")):
+    rnd_radar.add(tech, ring, quadrant, rationale)
+    typer.echo("added")
+
+
+@app.command("rnd:radar:list")
+def rnd_radar_list(quadrant: Optional[str] = typer.Option(None, "--quadrant")):
+    for e in rnd_radar.list(quadrant):
+        typer.echo(f"{e.tech}\t{e.ring}\t{e.quadrant}")
+
+
+@app.command("rnd:ip:new")
+def rnd_ip_new(idea: str = typer.Option(..., "--idea"), title: str = typer.Option(..., "--title"), inventors: str = typer.Option(..., "--inventors"), jurisdictions: str = typer.Option(..., "--jurisdictions")):
+    disc = rnd_ip.new(idea, title, inventors.split(","), jurisdictions.split(","))
+    typer.echo(disc.id)
+
+
+@app.command("rnd:ip:update")
+def rnd_ip_update(id: str = typer.Option(..., "--id"), status: str = typer.Option(..., "--status")):
+    rnd_ip.update(id, status)
+    typer.echo("ok")
+
+
+@app.command("rnd:notes:index")
+def rnd_notes_index_cmd():
+    rnd_notes.index()
+    typer.echo("indexed")
+
+
+@app.command("rnd:notes:link")
+def rnd_notes_link(idea: str = typer.Option(..., "--idea"), note: Path = typer.Option(..., "--note", exists=True)):
+    rnd_notes.link(idea, str(note))
+    typer.echo("linked")
+
+
+@app.command("rnd:merge")
+def rnd_merge_cmd(idea: str = typer.Option(..., "--idea")):
+    rnd_merge.merge(idea)
+    typer.echo("merged")
+
+
+@app.command("rnd:dashboard")
+def rnd_dashboard_cmd():
+    rnd_dashboard.build()
+    typer.echo("built")
+
 
 if __name__ == "__main__":
     app()
