@@ -14,6 +14,9 @@ import webpush from './routes/notify/webpush.js';
 import hooks from './routes/hooks.js';
 import metrics from './routes/metrics.js';
 import okta from './routes/okta.js';
+import agentsCommand from './routes/agents/command.js';
+import agentsSlack from './routes/agents/slack.js';
+import agentsDiscord from './routes/agents/discord.js';
 
 dotenv.config();
 
@@ -37,6 +40,12 @@ app.use('/api/notify/webpush', webpush);
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
+// raw body for Slack signature
+app.use((req:any,res,next)=>{ if (req.url.startsWith('/api/agents/slack')) { const b:Buffer[]=[]; req.on('data',(c)=>b.push(c)); req.on('end',()=>{ req.rawBody = Buffer.concat(b).toString(); next(); }); } else next(); });
+
+app.use('/api/agents/command', agentsCommand);
+app.use('/api/agents/slack', agentsSlack);
+app.use('/api/agents/discord', agentsDiscord);
 
 const port = process.env.PORT || 4000;
 
