@@ -30,6 +30,12 @@ import productRoadmap from './routes/product/roadmap.js';
 import productReleases from './routes/product/releases.js';
 import productFlags from './routes/product/flags.js';
 import productFeedback from './routes/product/feedback.js';
+import cpqCatalog from './routes/cpq/catalog.js';
+import cpqPricing from './routes/cpq/pricing.js';
+import cpqQuotes from './routes/cpq/quotes.js';
+import cpqApprovals from './routes/cpq/approvals.js';
+import cpqOrders from './routes/cpq/orders.js';
+import cpqSubs from './routes/cpq/subscriptions.js';
 
 dotenv.config();
 
@@ -59,6 +65,7 @@ app.use('/api/auth/okta', okta);
 app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
 app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
 app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
+app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 
 const port = process.env.PORT || 4000;
 
