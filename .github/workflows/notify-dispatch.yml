@@ -1,0 +1,23 @@
+name: Notify Dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      channel: { description: 'email|sms|webpush', required: true, default: 'email' }
+      to: { description: 'recipient (email/sms)', required: true }
+      message: { description: 'message text', required: true }
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix apps/api
+      - run: node apps/api/src/jobs/notify_worker.ts "${{ github.event.inputs.channel }}" "${{ github.event.inputs.to }}" "${{ github.event.inputs.message }}"
+        env:
+          SMTP_URL: ${{ secrets.SMTP_URL }}
+          TWILIO_SID: ${{ secrets.TWILIO_SID }}
+          TWILIO_TOKEN: ${{ secrets.TWILIO_TOKEN }}
+          TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
+          WEBPUSH_PRIVATE_KEY: ${{ secrets.WEBPUSH_PRIVATE_KEY }}
+          WEBPUSH_PUBLIC_KEY:  ${{ secrets.WEBPUSH_PUBLIC_KEY }}

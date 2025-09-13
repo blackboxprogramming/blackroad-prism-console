@@ -1,0 +1,21 @@
+name: i18n Keys Check
+on:
+  pull_request:
+    paths: ["apps/web/i18n/**", ".github/workflows/i18n-check.yml"]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check keys parity
+        run: |
+          node - <<'JS'
+          const fs=require('fs'), path='apps/web/i18n';
+          const langs=['en','es','fr'];
+          const base=JSON.parse(fs.readFileSync(`${path}/en.json`,'utf-8'));
+          for(const l of langs){
+            const j=JSON.parse(fs.readFileSync(`${path}/${l}.json`,'utf-8'));
+            const miss=Object.keys(base).filter(k=>!(k in j));
+            if(miss.length) console.log(`[WARN] ${l} missing:`, miss.join(', '));
+          }
+          JS
