@@ -1,0 +1,8 @@
+{
+  "accounts": [
+    {"id": "acc-001", "name": "Acme Corp", "crm_id": "SF-001"}
+  ],
+  "services": [],
+  "repos": [],
+  "environments": []
+}

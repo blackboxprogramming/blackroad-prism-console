@@ -1,0 +1,12 @@
+{
+  "source": "github",
+  "type": "pr.merged",
+  "id": "00000000-0000-0000-0000-000000000002",
+  "ts": "2024-01-01T00:00:00Z",
+  "actor": "dev@example.com",
+  "payload": {
+    "repository": {"full_name": "org/repo", "default_branch": "main"},
+    "pull_request": {"number": 1, "title": "Update"}
+  },
+  "headers": {}
+}
