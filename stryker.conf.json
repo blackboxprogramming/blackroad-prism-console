@@ -1,0 +1,8 @@
+{
+  "$schema": "https://stryker-mutator.io/stryker.schema.json",
+  "testRunner": "jest",
+  "reporters": ["progress", "clear-text", "html"],
+  "mutate": ["apps/api/src/**/*.ts", "!apps/api/src/**/__tests__/**"],
+  "jest": { "projectType": "custom" },
+  "thresholds": { "high": 70, "low": 50, "break": 0 }
+}

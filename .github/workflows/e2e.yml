@@ -1,0 +1,21 @@
+name: E2E (Playwright)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["e2e/**", ".github/workflows/e2e.yml"]
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Install Playwright
+        run: |
+          npm -g i playwright@1.47.0
+          npx playwright install --with-deps
+      - name: Run E2E
+        run: npx playwright test
+        env:
+          BASE_URL: ${{ vars.BASE_URL || 'http://localhost:4000' }}
