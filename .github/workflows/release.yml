@@ -1,0 +1,33 @@
+name: Release & Publish Image
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+  packages: write
+  issues: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix apps/api
+      - name: Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN || '' }}
+        run: npx --yes semantic-release
+      - name: Log version
+        id: getver
+        run: |
+          VER=$(jq -r '.version' apps/api/package.json || echo "0.0.0")
+          echo "ver=$VER" >> $GITHUB_OUTPUT
+      - name: Login ghcr
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Build image
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/blackroad-api:${{ steps.getver.outputs.ver }} -t ghcr.io/${{ github.repository_owner }}/blackroad-api:latest apps/api
+      - name: Push image
+        run: docker push ghcr.io/${{ github.repository_owner }}/blackroad-api --all-tags
