@@ -19,3 +19,5 @@ streamlit==1.48.1
 torch
 uvicorn
 whisper
+typer
+pytest

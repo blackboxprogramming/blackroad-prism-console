@@ -432,3 +432,36 @@ cd apps/prismweb
 npm install
 npm run dev
 ```
+
+## Console Quickstart
+
+```bash
+pip install -r requirements.txt
+python -m cli.console bot:list
+python -m cli.console task:create --goal "Build 13-week cash view"
+python -m cli.console task:route --id <ID> --bot "Treasury-BOT"
+```
+
+## Add a new bot
+
+Create `bots/my_bot.py`:
+
+```python
+from orchestrator.base import BaseBot
+from orchestrator.protocols import Task, BotResponse
+
+class MyBot(BaseBot):
+    """
+    MISSION: ...
+    INPUTS: ...
+    OUTPUTS: ...
+    KPIS: ...
+    GUARDRAILS: ...
+    HANDOFFS: ...
+    """
+    name = "My-BOT"
+    mission = "..."
+
+    def run(self, task: Task) -> BotResponse:
+        ...
+```
