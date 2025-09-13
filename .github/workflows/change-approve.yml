@@ -1,0 +1,14 @@
+name: Change Approval Gate
+on:
+  workflow_dispatch:
+    inputs:
+      token: { description: 'approval token', required: true }
+      intent: { description: 'deploy|schema:migrate|rotate:secrets', required: true }
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - run: echo "APPROVED ${{ inputs.intent }}"; echo "${{ inputs.token }}" > /tmp/approval.token
+      - uses: actions/upload-artifact@v4
+        with: { name: approval-token, path: /tmp/approval.token }
