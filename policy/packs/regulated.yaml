@@ -1,0 +1,13 @@
+name: regulated
+version: '1.0'
+rules:
+  approvals:
+    treasury: strict
+    change: strict
+    privacy: strict
+    retention_days: 365
+  roles:
+    auditor:
+      - view
+  guardrails:
+    dpi_required: true

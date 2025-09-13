@@ -1,0 +1,12 @@
+name: public-company
+version: '1.0'
+rules:
+  approvals:
+    sox_cadence: quarterly
+    blackout_windows: true
+    ir_review: required
+  roles:
+    finance:
+      - approve
+  guardrails:
+    earnings_mode: lock

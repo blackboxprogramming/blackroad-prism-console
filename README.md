@@ -432,3 +432,12 @@ cd apps/prismweb
 npm install
 npm run dev
 ```
+
+## Policy Packs
+Default governance policies can be applied via the CLI.
+
+## Encryption at Rest
+Data under the data/ directory can be encrypted with AES-GCM.
+
+## Docs Site
+Documentation can be generated with `python -m cli.console docs:generate`.

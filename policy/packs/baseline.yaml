@@ -1,0 +1,13 @@
+name: baseline
+version: '1.0'
+rules:
+  approvals:
+    logging: true
+    network: false
+    red_team: required
+  roles:
+    admin:
+      - '*'
+  guardrails:
+    required_fields: ['id']
+    max_task_size: 1000
