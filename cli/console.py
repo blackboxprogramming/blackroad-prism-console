@@ -35,6 +35,7 @@ from services import catalog as svc_catalog
 from services import deps as svc_deps
 from status import generator as status_gen
 from tools import storage
+from sops.engine import SOPEngine, SOPValidationError
 
 VERB_FUN: dict[str, str] = {}
 VERB_FUN['plm:bom:where-used'] = 'cli_bom_where_used'
@@ -49,6 +50,7 @@ from close import recon as close_recon
 from close import sox as close_sox
 
 app = typer.Typer()
+sops_app = typer.Typer()
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / "artifacts"
@@ -599,6 +601,24 @@ def learn_feedback_summary(course: str = typer.Option(..., "--course")):
 def status_build():
     status_gen.build()
     typer.echo("built")
+
+
+@sops_app.command("run")
+def sops_run(procedure: str = typer.Argument(...)):
+    """Execute a Standard Operating Procedure by name."""
+    engine = SOPEngine()
+    try:
+        record = engine.run(procedure)
+        typer.echo(str(record))
+    except SOPValidationError as exc:  # pragma: no cover - user feedback
+        typer.echo(f"Validation error: {exc}")
+        raise typer.Exit(code=1)
+    except FileNotFoundError:
+        typer.echo("Procedure not found")
+        raise typer.Exit(code=1)
+
+
+app.add_typer(sops_app, name="sops")
 
 
 if __name__ == "__main__":

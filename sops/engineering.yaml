@@ -1,0 +1,29 @@
+release_deployment_flow:
+  title: Release Deployment Flow
+  purpose: Deploy code from GitHub to production
+  scope: Engineering
+  procedure:
+    - id: pr
+      action: github_pr
+    - id: merge
+      action: squash_merge
+    - id: tag
+      action: auto_tag
+    - id: deploy
+      action: droplet_deploy
+  quality_control:
+    - review: post_deploy_verification
+
+incident_response_flow:
+  title: Incident Response Flow
+  purpose: Coordinate response to production incidents
+  scope: Engineering
+  procedure:
+    - id: detect
+      action: sev_detection
+    - id: warroom
+      action: slack_war_room
+    - id: ticket
+      action: ticket_creation
+  quality_control:
+    - review: retrospective
