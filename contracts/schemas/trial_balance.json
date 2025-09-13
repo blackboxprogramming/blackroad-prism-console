@@ -1,0 +1,12 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "account": {"type": "string"},
+      "drcr": {"type": "string"},
+      "amount": {"type": "number"}
+    },
+    "required": ["account", "drcr", "amount"]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "account": {"type": "string"},
+      "status": {"type": "string"},
+      "delta": {"type": "number"},
+      "evidence": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": ["account", "status", "delta", "evidence"]
+  }
+}

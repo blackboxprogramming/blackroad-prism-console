@@ -1,0 +1,9 @@
+journals:
+  - id: ACCRUAL1
+    lines:
+      - account: '3000'
+        drcr: dr
+        amount: 100.0
+      - account: '4000'
+        drcr: cr
+        amount: 100.0

@@ -475,3 +475,19 @@ class MyBot(BaseBot):
     def run(self, task: Task) -> BotResponse:
         ...
 ```
+
+## Financial Close & Controls
+
+Run an offline monthly close:
+
+```bash
+python -m cli.console close:cal:new --period 2025-09 --template configs/close/template.yaml
+python -m cli.console close:jrnl:propose --period 2025-09 --rules configs/close/journals/accruals.yaml
+python -m cli.console close:jrnl:post --period 2025-09
+python -m cli.console close:recon:run --period 2025-09 --fixtures fixtures/finance/recons
+python -m cli.console close:flux --period 2025-09 --prev 2025-08 --py 2024-09 --threshold 10
+python -m cli.console close:sox:add --period 2025-09 --control C-REV-01 --path artifacts/close/REV/cut.md
+python -m cli.console close:sox:check --period 2025-09
+python -m cli.console close:packet --period 2025-09
+python -m cli.console close:sign --period 2025-09 --role CFO --as-user U_CFO
+```

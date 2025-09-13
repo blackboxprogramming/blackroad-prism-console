@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {"type": "string"},
+    "control_id": {"type": "string"},
+    "period": {"type": "string"},
+    "path": {"type": "string"},
+    "owner": {"type": "string"},
+    "checksum": {"type": "string"},
+    "signed": {"type": "boolean"}
+  },
+  "required": ["id", "control_id", "period", "path", "owner", "checksum", "signed"]
+}

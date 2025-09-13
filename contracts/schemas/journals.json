@@ -1,0 +1,22 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {"type": "string"},
+      "lines": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "account": {"type": "string"},
+            "drcr": {"type": "string"},
+            "amount": {"type": "number"}
+          },
+          "required": ["account", "drcr", "amount"]
+        }
+      }
+    },
+    "required": ["id", "lines"]
+  }
+}

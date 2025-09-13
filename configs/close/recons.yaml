@@ -1,0 +1,12 @@
+'1000':
+  method: bank
+  fixture: bank_stmt.csv
+'3000':
+  method: ap
+  fixture: ap_aging.csv
+'4000':
+  method: prepaids
+  fixture: prepaids.csv
+'5000':
+  method: fixed_assets
+  fixture: fixed_assets.csv
