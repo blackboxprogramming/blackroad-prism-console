@@ -1,0 +1,1 @@
+{"type":"array","items":{"type":"object","required":["id","rev","type","uom","lead_time_days","cost","suppliers"],"properties":{"id":{"type":"string"},"rev":{"type":"string"},"type":{"enum":["assembly","component","raw"]},"uom":{"type":"string"},"lead_time_days":{"type":"integer"},"cost":{"type":"number"},"suppliers":{"type":"array","items":{"type":"string"}}}}}

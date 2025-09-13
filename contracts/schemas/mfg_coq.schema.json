@@ -1,0 +1,1 @@
+{"type":"array","items":{"type":"object","required":["bucket","amount"],"properties":{"bucket":{"type":"string"},"amount":{"type":"number"}}}}

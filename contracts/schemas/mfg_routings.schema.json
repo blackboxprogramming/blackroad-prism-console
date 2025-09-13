@@ -1,0 +1,1 @@
+{"type":"object","required":["item","rev","steps"],"properties":{"item":{"type":"string"},"rev":{"type":"string"},"steps":{"type":"array","items":{"type":"object","required":["wc","op","std_time_min"],"properties":{"wc":{"type":"string"},"op":{"type":"string"},"std_time_min":{"type":"number"},"yield_pct":{"type":["number","string"]}}}}}}

@@ -1,0 +1,1 @@
+{"type":"object","additionalProperties":{"type":"object","properties":{"planned":{"type":"number"},"kit_list":{"type":"array","items":{"type":"string"}}}}}

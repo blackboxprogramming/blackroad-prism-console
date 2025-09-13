@@ -1,5 +1,5 @@
 .RECIPEPREFIX = >
-.PHONY: install dev start format lint test health migrate clean
+.PHONY: install dev start jsformat lint test health migrate clean analysis format coverage
 
 install:
 >npm install
@@ -10,8 +10,13 @@ dev:
 start:
 >npm start
 
-format:
+jsformat:
 >npm run format
+
+format:
+>python - <<'PY'
+print('No external formatter by policy; keep deterministic ordering.')
+PY
 
 lint:
 >npm run lint
@@ -30,3 +35,6 @@ clean:
 
 analysis:
 >python analysis/run_all.py
+
+coverage:
+>pytest --maxfail=1 --disable-warnings -q --cov=. --cov-report=term-missing

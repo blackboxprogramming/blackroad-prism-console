@@ -1,10 +1,5 @@
-item_rev: PROD-100_B
+item: PROD-100
+rev: B
 steps:
-  - wc: WC-1
-    op: OP-100
-    std_time_min: 5
-    yield_pct: 0.95
-  - wc: WC-2
-    op: OP-200
-    std_time_min: 3
-    yield_pct: 0.98
+  - wc: WC-ASM, op: OP-100, std_time_min: 6.0, yield_pct: 98
+  - wc: WC-TEST, op: OP-200, std_time_min: 3.0, yield_pct: 99

@@ -1,2 +1,2 @@
-item_id,qty,arrival
-COMP-1,50,2025-08-01
+item_id,qty_open
+PROD-100,2

@@ -1,0 +1,1 @@
+{"type":"object","properties":{"op":{"type":"string"},"m":{"type":"number"},"s":{"type":"number"},"ucl":{"type":"number"},"lcl":{"type":"number"},"findings":{"type":"array"}}}
