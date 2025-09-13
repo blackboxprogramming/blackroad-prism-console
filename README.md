@@ -499,3 +499,10 @@ python -m cli.console plm:items:load --dir fixtures/plm/items
 python -m cli.console plm:bom:load --dir fixtures/plm/boms
 python -m cli.console plm:bom:explode --item PROD-100 --rev A --level 2
 ```
+
+## Training & Enablement Hub Quickstart
+
+```bash
+python -m cli.console learn:courses:load --dir configs/enablement/courses
+python -m cli.console learn:courses:list --role_track "Solutions Engineer"
+```

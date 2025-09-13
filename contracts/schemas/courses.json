@@ -1,0 +1,19 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "title", "role_track", "modules"],
+    "properties": {
+      "id": { "type": "string" },
+      "title": { "type": "string" },
+      "role_track": { "type": "string" },
+      "duration_min": { "type": "number" },
+      "prereqs": { "type": "array", "items": { "type": "string" } },
+      "modules": {
+        "type": "array",
+        "items": { "type": "object" }
+      },
+      "version": { "type": "string" }
+    }
+  }
+}

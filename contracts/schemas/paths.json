@@ -1,0 +1,14 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "name", "role_track", "courses", "required_percent"],
+    "properties": {
+      "id": { "type": "string" },
+      "name": { "type": "string" },
+      "role_track": { "type": "string" },
+      "courses": { "type": "array", "items": { "type": "string" } },
+      "required_percent": { "type": "number" }
+    }
+  }
+}

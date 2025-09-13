@@ -1,0 +1,5 @@
+id: CERT-SE-ASSOC
+title: SE Associate
+quizzes: [Q-SE-101]
+labs: [L-SE-CLI]
+min_score: 80

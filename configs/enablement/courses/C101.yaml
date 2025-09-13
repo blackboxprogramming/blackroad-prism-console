@@ -1,0 +1,17 @@
+id: C101
+title: Intro to CLI
+role_track: Solutions Engineer
+duration_min: 30
+prereqs: []
+modules:
+  - id: M1
+    type: reading
+    title: Basics
+    est_min: 10
+    resources: [doc1]
+  - id: M2
+    type: lab
+    title: CLI Lab
+    est_min: 20
+    resources: [L-SE-CLI]
+version: '1'

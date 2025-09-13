@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": ["user", "cert"],
+  "properties": {
+    "user": { "type": "string" },
+    "cert": { "type": "string" }
+  }
+}

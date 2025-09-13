@@ -1,0 +1,17 @@
+id: C201
+title: Advanced CLI
+role_track: Solutions Engineer
+duration_min: 45
+prereqs: [C101]
+modules:
+  - id: M3
+    type: video
+    title: Advanced
+    est_min: 15
+    resources: []
+  - id: M4
+    type: quiz
+    title: Final Quiz
+    est_min: 30
+    resources: [Q-SE-101]
+version: '1'

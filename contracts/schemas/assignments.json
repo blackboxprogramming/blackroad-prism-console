@@ -1,0 +1,13 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["user_id", "path_id", "due_date", "progress"],
+    "properties": {
+      "user_id": { "type": "string" },
+      "path_id": { "type": "string" },
+      "due_date": { "type": "string" },
+      "progress": { "type": "object" }
+    }
+  }
+}
