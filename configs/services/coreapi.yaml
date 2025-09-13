@@ -1,0 +1,6 @@
+id: CoreAPI
+name: Core API
+tier: 1
+owners: ["sre@corp.local"]
+sli: { uptime: 99.99 }
+dependencies: ["AuthService"]

@@ -1,0 +1,4 @@
+name: simple_notify
+steps:
+  - action: notify
+    params: { channel: "local_alerts", message: "All good" }

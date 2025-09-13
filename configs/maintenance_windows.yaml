@@ -1,0 +1,7 @@
+weekly:
+  CoreAPI:
+    - { day: Wed, start: "08:00", end: "10:00" }
+  AuthService:
+    - { day: Tue, start: "09:00", end: "11:00" }
+blackout:
+  - "2025-12-25"

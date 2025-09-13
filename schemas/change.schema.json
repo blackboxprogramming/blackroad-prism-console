@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": {"type": "string"},
+    "service": {"type": "string"},
+    "type": {"type": "string"},
+    "start": {"type": "string"},
+    "end": {"type": "string"},
+    "owner": {"type": "string"},
+    "risk": {"type": "string"},
+    "approved": {"type": "boolean"}
+  },
+  "required": ["id", "service", "type", "start", "end", "owner", "risk", "approved"]
+}
