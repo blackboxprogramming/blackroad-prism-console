@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "properties": {
+    "segment": {"type": "string"},
+    "contact_id": {"type": "string"}
+  },
+  "required": ["segment", "contact_id"]
+}

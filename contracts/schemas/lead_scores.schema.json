@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "contact_id": {"type": "string"},
+    "score": {"type": "number"},
+    "bucket": {"type": "string"}
+  },
+  "required": ["contact_id", "score", "bucket"]
+}
