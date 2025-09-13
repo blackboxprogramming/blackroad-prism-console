@@ -73,6 +73,16 @@ When you're ready to share changes:
 
 ---
 
+## Performance
+
+```bash
+python -m cli.console bench:run --name "Treasury-BOT" --iter 30 --warmup 5
+python -m cli.console slo:report
+python -m cli.console slo:gate --fail-on regressions
+```
+
+---
+
 ## Notes & assumptions
 
 - Stack recorded in memory (Aug 2025): SPA on `/var/www/blackroad/index.html`, Express API on port **4000**

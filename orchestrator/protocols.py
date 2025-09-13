@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 from pydantic import BaseModel
 
 
@@ -19,3 +20,9 @@ class BotResponse(BaseModel):
     artifacts: List[str]
     next_actions: List[str]
     ok: bool
+    elapsed_ms: Optional[int] = None
+    rss_mb: Optional[int] = None
+    slo_name: Optional[str] = None
+    p50_target: Optional[int] = None
+    p95_target: Optional[int] = None
+    max_mem_mb: Optional[int] = None
