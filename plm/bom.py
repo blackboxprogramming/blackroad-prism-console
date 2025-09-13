@@ -1,18 +1,15 @@
 from __future__ import annotations
-
-import csv
-import json
+import csv, json, os, argparse
 from dataclasses import dataclass, asdict
-from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List, Dict, Any
 
-from tools import storage
+ART_DIR = os.path.join('artifacts', 'plm')
+ITEMS_PATH = os.path.join(ART_DIR, 'items.json')
+BOMS_PATH = os.path.join(ART_DIR, 'boms.json')
 
-ROOT = Path(__file__).resolve().parents[1]
-ART_DIR = ROOT / "artifacts" / "plm"
+os.makedirs(ART_DIR, exist_ok=True)
 
-
-@dataclass
+@dataclass(frozen=True)
 class Item:
     id: str
     rev: str
@@ -22,102 +19,140 @@ class Item:
     cost: float
     suppliers: List[str]
 
-
-@dataclass
-class BOMLine:
-    component_id: str
-    qty: float
-    refdes: str = ""
-    scrap_pct: float = 0.0
-
-
-@dataclass
+@dataclass(frozen=True)
 class BOM:
     item_id: str
     rev: str
-    lines: List[BOMLine]
+    lines: List[Dict[str, Any]]
+
+_ITEMS: List[Item] = []
+_BOMS: List[BOM] = []
 
 
-ITEMS: Dict[Tuple[str, str], Item] = {}
-BOMS: Dict[Tuple[str, str], BOM] = {}
-
-
-def _write_json(path: Path, data) -> None:
-    storage.write(str(path), json.dumps(data, indent=2))
-
-
-def load_items(directory: str) -> Dict[Tuple[str, str], Item]:
-    items: Dict[Tuple[str, str], Item] = {}
-    for csv_path in Path(directory).glob("*.csv"):
-        with open(csv_path, newline="", encoding="utf-8") as fh:
-            reader = csv.DictReader(fh)
-            for row in reader:
-                itm = Item(
-                    id=row["id"],
-                    rev=row["rev"],
-                    type=row["type"],
-                    uom=row["uom"],
-                    lead_time_days=int(row["lead_time_days"]),
-                    cost=float(row["cost"]),
-                    suppliers=[s.strip() for s in row.get("suppliers", "").split(";") if s.strip()],
-                )
-                items[(itm.id, itm.rev)] = itm
-    global ITEMS
-    ITEMS = items
-    ART_DIR.mkdir(parents=True, exist_ok=True)
-    _write_json(ART_DIR / "items.json", [asdict(i) for i in items.values()])
+def _load_csv_items(dirpath: str) -> List[Item]:
+    items: List[Item] = []
+    for name in sorted(os.listdir(dirpath)):
+        if not name.endswith('.csv'):
+            continue
+        with open(os.path.join(dirpath, name), newline='') as f:
+            r = csv.DictReader(f)
+            for row in r:
+                suppliers = [s.strip() for s in row.get('suppliers','').split('|') if s.strip()]
+                items.append(Item(
+                    id=row['id'].strip(), rev=row['rev'].strip(), type=row['type'].strip(),
+                    uom=row['uom'].strip(), lead_time_days=int(row['lead_time_days']),
+                    cost=float(row['cost']), suppliers=suppliers))
+    items.sort(key=lambda x: (x.id, x.rev))
     return items
 
 
-def load_boms(directory: str) -> Dict[Tuple[str, str], BOM]:
-    boms: Dict[Tuple[str, str], BOM] = {}
-    for csv_path in Path(directory).glob("*.csv"):
-        with open(csv_path, newline="", encoding="utf-8") as fh:
-            reader = csv.DictReader(fh)
-            for row in reader:
-                key = (row["item_id"], row["rev"])
-                bom = boms.setdefault(key, BOM(item_id=row["item_id"], rev=row["rev"], lines=[]))
-                bom.lines.append(
-                    BOMLine(
-                        component_id=row["component_id"],
-                        qty=float(row["qty"]),
-                        refdes=row.get("refdes", ""),
-                        scrap_pct=float(row.get("scrap_pct", 0) or 0),
-                    )
-                )
-    global BOMS
-    BOMS = boms
-    ART_DIR.mkdir(parents=True, exist_ok=True)
-    _write_json(ART_DIR / "boms.json", [
-        {"item_id": b.item_id, "rev": b.rev, "lines": [asdict(l) for l in b.lines]}
-        for b in boms.values()
-    ])
-    return boms
+def _load_csv_boms(dirpath: str) -> List[BOM]:
+    boms: Dict[tuple, List[Dict[str, Any]]] = {}
+    for name in sorted(os.listdir(dirpath)):
+        if not name.endswith('.csv'):
+            continue
+        with open(os.path.join(dirpath, name), newline='') as f:
+            r = csv.DictReader(f)
+            for row in r:
+                key = (row['item_id'].strip(), row['rev'].strip())
+                boms.setdefault(key, []).append({
+                    'component_id': row['component_id'].strip(),
+                    'qty': float(row['qty']),
+                    'refdes': row.get('refdes','').strip() or None,
+                    'scrap_pct': float(row.get('scrap_pct', '0') or 0.0)
+                })
+    bom_list = [BOM(item_id=k[0], rev=k[1], lines=sorted(v, key=lambda d:(d['component_id'], d.get('refdes') or '')))
+                for k,v in sorted(boms.items())]
+    return bom_list
 
 
-def explode(item_id: str, rev: str, level: int = 1) -> List[Tuple[int, str, float]]:
-    result: List[Tuple[int, str, float]] = []
+def save_catalogs(items: List[Item], boms: List[BOM]):
+    with open(ITEMS_PATH, 'w') as f:
+        json.dump([asdict(i) for i in items], f, indent=2, sort_keys=True)
+    with open(BOMS_PATH, 'w') as f:
+        json.dump([asdict(b) for b in boms], f, indent=2, sort_keys=True)
 
-    def _exp(item_id: str, rev: str, lvl: int, qty_scale: float = 1.0):
-        if lvl > level:
+
+def load_items(dirpath: str):
+    global _ITEMS
+    _ITEMS = _load_csv_items(dirpath)
+    save_catalogs(_ITEMS, _BOMS)
+
+
+def load_boms(dirpath: str):
+    global _BOMS
+    _BOMS = _load_csv_boms(dirpath)
+    save_catalogs(_ITEMS, _BOMS)
+
+
+def explode(item_id: str, rev: str, level: int = 99) -> List[Dict[str, Any]]:
+    bom_map = {(b.item_id, b.rev): b for b in _BOMS}
+    out = []
+    def walk(it, rv, qty, lvl):
+        if lvl>level:
             return
-        bom = BOMS.get((item_id, rev))
-        if not bom:
+        b = bom_map.get((it, rv))
+        if not b:
             return
-        for line in bom.lines:
-            qty = line.qty * qty_scale * (1 + line.scrap_pct / 100.0)
-            result.append((lvl, line.component_id, qty))
-            _exp(line.component_id, "A", lvl + 1, qty)
+        for line in b.lines:
+            row = {
+                'parent_id': it, 'parent_rev': rv,
+                'component_id': line['component_id'], 'qty': qty*line['qty'],
+                'level': lvl
+            }
+            out.append(row)
+            walk(line['component_id'], _pick_latest_rev(line['component_id']), qty*line['qty'], lvl+1)
+    walk(item_id, rev, 1.0, 1)
+    out.sort(key=lambda r:(r['level'], r['parent_id'], r['component_id']))
+    return out
 
-    _exp(item_id, rev, 1)
-    return result
+
+def where_used(component_id: str) -> List[Dict[str, str]]:
+    uses = []
+    for b in _BOMS:
+        for line in b.lines:
+            if line['component_id']==component_id:
+                uses.append({'item_id': b.item_id, 'rev': b.rev})
+    uses.sort(key=lambda r:(r['item_id'], r['rev']))
+    return uses
 
 
-def where_used(component_id: str) -> List[Tuple[str, str]]:
-    used = []
-    for (parent_id, rev), bom in BOMS.items():
-        for line in bom.lines:
-            if line.component_id == component_id:
-                used.append((parent_id, rev))
-                break
-    return used
+def _pick_latest_rev(item_id: str) -> str:
+    revs = [i.rev for i in _ITEMS if i.id==item_id]
+    return sorted(set(revs))[-1] if revs else 'A'
+
+# CLI
+
+def cli_items_load(argv):
+    p = argparse.ArgumentParser(prog='plm:items:load')
+    p.add_argument('--dir', required=True)
+    a = p.parse_args(argv)
+    load_items(a.dir)
+    print(f"plm_items_written={len(_ITEMS)} -> {ITEMS_PATH}")
+
+
+def cli_bom_load(argv):
+    p = argparse.ArgumentParser(prog='plm:bom:load')
+    p.add_argument('--dir', required=True)
+    a = p.parse_args(argv)
+    load_boms(a.dir)
+    print(f"plm_boms_written={len(_BOMS)} -> {BOMS_PATH}")
+
+
+def cli_bom_explode(argv):
+    p = argparse.ArgumentParser(prog='plm:bom:explode')
+    p.add_argument('--item', required=True)
+    p.add_argument('--rev', required=True)
+    p.add_argument('--level', type=int, default=3)
+    a = p.parse_args(argv)
+    rows = explode(a.item, a.rev, a.level)
+    for r in rows:
+        print(f"L{r['level']} {r['parent_id']}->{r['component_id']} x{r['qty']:.3f}")
+
+def cli_bom_where_used(argv):
+    p = argparse.ArgumentParser(prog='plm:bom:where-used')
+    p.add_argument('--component', required=True)
+    a = p.parse_args(argv)
+    rows = where_used(a.component)
+    for r in rows:
+        print(f"{r['item_id']}@{r['rev']}")

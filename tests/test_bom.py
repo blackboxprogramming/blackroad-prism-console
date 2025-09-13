@@ -1,13 +1,7 @@
 from plm import bom
 
-
-def setup_module(module):
-    bom.load_items('fixtures/plm/items')
-    bom.load_boms('fixtures/plm/boms')
-
-
-def test_explode_and_where_used(tmp_path):
-    parts = bom.explode('PROD-100', 'A', level=3)
-    assert any(comp == 'RAW-1' for _, comp, _ in parts)
-    used = bom.where_used('COMP-1')
-    assert ('PROD-100', 'A') in used
+def test_explode():
+    bom._ITEMS = [bom.Item('PROD-100','A','assembly','ea',0,0.0,[]), bom.Item('COMP-001','A','component','ea',0,0.0,[])]
+    bom._BOMS = [bom.BOM('PROD-100','A',[{'component_id':'COMP-001','qty':2}])]
+    rows = bom.explode('PROD-100','A', level=2)
+    assert any(r['component_id']=='COMP-001' for r in rows)

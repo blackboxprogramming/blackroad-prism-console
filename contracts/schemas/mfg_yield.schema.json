@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","required":["period"],"properties":{"period":{"type":"string","pattern":"^[0-9]{4}-(0[1-9]|1[0-2])$"},"fpy":{"type":"number","minimum":0,"maximum":1},"rty":{"type":"number","minimum":0,"maximum":1}}}
