@@ -19,6 +19,10 @@ LLM stub on port **8000** if none is running.
 - `srv/lucidia-llm/` — minimal FastAPI echo stub (only used if you don’t already run an LLM on 8000)
 - `srv/lucia-llm/` — same stub (duplicate dir name for compatibility with earlier scripts)
 
+## Strategy & OKR Governance
+
+Minimal offline tooling to manage objectives, bets, scorecards, reviews, trade-offs, and memos.
+
 > Nothing here overwrites your existing code. The scripts are defensive: they detect paths,
 > **merge** deps, and only generate files if missing.
 
