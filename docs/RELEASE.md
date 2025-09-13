@@ -1,22 +1,9 @@
-# Release Strategy
+# Release Checklist
 
-We follow [SemVer](https://semver.org). Increment:
+1. **Branch clean:** All CI green; `CHANGELOG.md` updated under [Unreleased].
+2. **Version bump:** `make release-minor` (or patch/major) → commit + tag.
+3. **Push tags:** `git push --follow-tags`.
+4. **CI release:** Wait for tag workflow to publish GitHub Release and `public/artifacts.sha256`.
+5. **Website:** Vercel picks latest main; confirm `/artifacts` renders hash and downloads.
+6. **Post:** Move [Unreleased] notes to the new version section with date.
 
-- **MAJOR** for incompatible API changes
-- **MINOR** for backwards-compatible features
-- **PATCH** for backwards-compatible fixes
-
-## Release Notes Template
-
-```
-## vX.Y.Z - YYYY-MM-DD
-### Added
--
-### Changed
--
-### Fixed
--
-```
-
-Tagged releases are created via GitHub Actions (`tag-and-release.yml`) and the
-changelog is derived from commit messages.

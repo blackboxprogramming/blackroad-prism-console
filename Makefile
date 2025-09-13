@@ -25,3 +25,11 @@ demo:
 >brc mfg:yield --period 2025-09 && \
 >brc mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv && \
 >brc mfg:coq --period 2025-Q3
+
+.PHONY: release-patch release-minor release-major
+release-patch:
+>python scripts/bump_version.py patch
+release-minor:
+>python scripts/bump_version.py minor
+release-major:
+>python scripts/bump_version.py major
