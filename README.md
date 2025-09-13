@@ -39,6 +39,16 @@ sudo bash ops/install.sh
 bash tools/verify-runtime.sh
 ```
 
+## Supply Chain & Finance Twin
+
+```
+python -m cli.console sop:reconcile --demand samples/generated/supply/demand.csv --supply samples/generated/supply/capacity.csv --policy configs/sop/policy.yaml
+python -m cli.console inv:simulate --params configs/supply/inventory.yaml --horizon 90
+python -m cli.console log:optimize --demand artifacts/sop/allocations.csv --lanes fixtures/supply/lanes.csv --constraints configs/supply/log_constraints.yaml
+python -m cli.console procure:award --demand artifacts/sop/allocations.csv --suppliers fixtures/procure/suppliers.csv --policy configs/procure/policy.yaml
+python -m cli.console wc:simulate --demand artifacts/sop/allocations.csv --awards artifacts/procure/award.json --log artifacts/supply/log_plan_*/plan.json --terms configs/finance/terms.yaml
+```
+
 - The installer will:
   - Locate your API (prefers `./srv/blackroad-api`, then `/srv/blackroad-api`, else searches for `server_full.js`)
   - Create `package.json` if missing and **auto-install** any missing npm packages it finds

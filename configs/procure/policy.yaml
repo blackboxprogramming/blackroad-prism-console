@@ -1,0 +1,4 @@
+risk_weight: 0.1
+defect_penalty: 10
+dual_source_min_pct: 0.2
+max_supplier_count: 2

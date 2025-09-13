@@ -1,0 +1,4 @@
+max_air_pct: 0.4
+budget_cap: 1000
+sla_days: 7
+sla_target: 0.9

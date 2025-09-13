@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["origin", "dest", "mode", "units"],
+  "properties": {
+    "origin": {"type": "string"},
+    "dest": {"type": "string"},
+    "mode": {"type": "string"},
+    "units": {"type": "number"},
+    "cost": {"type": "number"}
+  }
+}

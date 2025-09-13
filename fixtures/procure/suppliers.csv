@@ -1,0 +1,3 @@
+supplier,sku,unit_price,moq,lead_time,defect_ppm
+S1,sku,5,50,10,100
+S2,sku,6,30,8,50

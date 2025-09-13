@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": ["sku", "date", "on_hand"],
+  "properties": {
+    "sku": {"type": "string"},
+    "date": {"type": "string"},
+    "on_hand": {"type": "number"}
+  }
+}

@@ -1,0 +1,10 @@
+starting_inventory: 120
+reorder_point: 60
+lead_time: 5
+moq: 50
+lot_size: 50
+unit_cost: 5.0
+carrying_cost_pct: 0.1
+logistics_cost_per_unit: 0.5
+demand_series: [30, 20, 40]
+returns_pct: 0.05
