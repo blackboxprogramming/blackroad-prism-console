@@ -30,3 +30,9 @@ clean:
 
 analysis:
 >python analysis/run_all.py
+
+samples:
+>python -m cli.console samples:gen --overwrite
+
+goldens:
+>python scripts/update_goldens.py

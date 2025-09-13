@@ -432,3 +432,27 @@ cd apps/prismweb
 npm install
 npm run dev
 ```
+
+## Samples & Pipelines Quickstart
+
+```bash
+make samples
+python -m pipelines.finance_margin_pipeline
+python -m pipelines.reliability_pipeline
+```
+
+## Cookbook Index
+
+See [cookbook/README.md](cookbook/README.md) for 25 example tasks. Run any recipe via:
+
+```bash
+python -m cli.console cookbook:run --name <slug>
+```
+
+## Fuzzing & Goldens
+
+Property-based fuzz tests live under `tests/fuzz`. Regenerate golden artifacts offline:
+
+```bash
+make goldens
+```

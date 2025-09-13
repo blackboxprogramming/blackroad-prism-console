@@ -1,0 +1,10 @@
+[
+  {
+    "covenant": "debt_ratio",
+    "threshold": 0.6
+  },
+  {
+    "covenant": "liquidity",
+    "threshold": 1.5
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "severity": "low",
+    "date": "2024-02-01"
+  },
+  {
+    "id": 2,
+    "severity": "high",
+    "date": "2024-02-02"
+  },
+  {
+    "id": 3,
+    "severity": "low",
+    "date": "2024-02-03"
+  },
+  {
+    "id": 4,
+    "severity": "low",
+    "date": "2024-02-04"
+  }
+]

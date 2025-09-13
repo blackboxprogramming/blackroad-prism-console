@@ -1,0 +1,30 @@
+[
+  {
+    "opportunity": "O1",
+    "stage": "close",
+    "owner": "user1",
+    "amount": 3433,
+    "date": "2024-01-11"
+  },
+  {
+    "opportunity": "O2",
+    "stage": "prospect",
+    "owner": "user2",
+    "amount": 3999,
+    "date": "2024-01-12"
+  },
+  {
+    "opportunity": "O3",
+    "stage": "prospect",
+    "owner": "user3",
+    "amount": 1239,
+    "date": "2024-01-13"
+  },
+  {
+    "opportunity": "O4",
+    "stage": "close",
+    "owner": "user4",
+    "amount": 5093,
+    "date": "2024-01-14"
+  }
+]
