@@ -74,43 +74,9 @@ jobs:
             ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
             ghcr.io/${{ env.IMAGE_NAME }}:latest
 
-      - name: Copy deploy files to droplet
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ env.DO_HOST }}
-          username: ${{ env.DO_USER }}
-          key: ${{ secrets.DO_SSH_KEY }}
-          source: "docker-compose.prod.yml,Caddyfile"
-          target: "/opt/blackroad"
-
-      - name: Deploy on droplet
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ env.DO_HOST }}
-          username: ${{ env.DO_USER }}
-          key: ${{ secrets.DO_SSH_KEY }}
-          script: |
-            set -e
-            mkdir -p /opt/blackroad
-            cd /opt/blackroad
-
-            # Create/refresh .env for the web service
-            cat > .env <<'EOF_ENV'
-            NODE_ENV=production
-            PORT=3000
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
-            NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            # add any other APP_* secrets your app needs
-            EOF_ENV
-
-            # Login to GHCR if your image is private
-            if [ -n "${{ secrets.GHCR_TOKEN }}" ]; then
-              echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ vars.GHCR_USER || github.actor }}" --password-stdin
-            fi
-
-            # Pull & run newest image
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
-            docker system prune -f
-
+      - name: Rsync staged release
+        run: |
+          RELEASE="/srv/releases/api-$(date +%Y%m%d%H%M%S)"
+          ssh root@${{ vars.DROPLET_HOST || '159.65.43.12' }} "mkdir -p ${RELEASE}"
+          rsync -az --delete ./apps/api/dist/ root@${{ vars.DROPLET_HOST || '159.65.43.12' }}:${RELEASE}/
+          ssh root@${{ vars.DROPLET_HOST || '159.65.43.12' }} "ln -sfn ${RELEASE} /srv/blackroad-api && systemctl restart blackroad-api || pm2 restart blackroad-api || true"

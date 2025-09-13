@@ -21,3 +21,18 @@ jobs:
         run: python scripts/validate_contracts.py
       - name: Artifacts hash
         run: bash scripts/hash_artifacts.sh || true
+
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix apps/api
+      - run: npm run build --prefix apps/api
+      - run: npm test --prefix apps/api --if-present
+      - name: Upload API dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-dist
+          path: apps/api/dist

@@ -1,0 +1,21 @@
+name: Publish Web Public
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web-public/**'
+jobs:
+  gh-pages:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build public site
+        run: |
+          mkdir -p out && cp -r apps/web-public/* out/
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out

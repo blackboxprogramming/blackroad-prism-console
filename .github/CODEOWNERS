@@ -2,3 +2,7 @@
 /flows/            @integration-team
 /monitors/         @sre-team
 /runbooks/         @platform-team
+/apps/api/       @platform-team
+/apps/web-public/ @platform-team
+/ops/            @sre-team
+/scripts/        @platform-team
