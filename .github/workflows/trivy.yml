@@ -1,0 +1,20 @@
+name: Trivy Image Scan
+on:
+  pull_request:
+    paths:
+      - "apps/api/**"
+      - ".github/workflows/trivy.yml"
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build local image
+        run: docker build -t local/blackroad-api:pr apps/api
+      - name: Scan with Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: local/blackroad-api:pr
+          format: table
+          exit-code: '0'
+          vuln-type: 'os,library'
