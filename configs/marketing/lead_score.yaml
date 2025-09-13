@@ -1,0 +1,11 @@
+events:
+  page_view: 1
+  demo_request: 10
+decay_per_day: 1
+firmographic_boost:
+  company_size:
+    enterprise: 5
+buckets:
+  A: 15
+  B: 10
+  C: 5

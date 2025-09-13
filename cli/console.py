@@ -19,6 +19,16 @@ from change import calendar as change_calendar
 from status import generator as status_gen
 import time
 
+from marketing import segments as mkt_segments
+from marketing import lead_score as mkt_lead
+from marketing import attribution as mkt_attr
+from marketing import seo_audit as mkt_seo
+from marketing import social as mkt_social
+from marketing import calendar as mkt_cal
+from marketing import creatives as mkt_creatives
+from marketing import dashboards as mkt_dash
+from marketing import campaigns as mkt_campaigns
+
 app = typer.Typer()
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -245,6 +255,78 @@ def change_conflicts(service: str = typer.Option(..., "--service")):
 def status_build():
     status_gen.build()
     typer.echo("built")
+
+
+@app.command("mkt:segments:build")
+def mkt_segments_build(config: str = typer.Option(..., "--config")):
+    segs = mkt_segments.build_segments(config)
+    typer.echo(json.dumps(segs))
+
+
+@app.command("mkt:leadscore")
+def mkt_leadscore(config: str = typer.Option(..., "--config")):
+    scores = mkt_lead.score_leads(config)
+    typer.echo(json.dumps(scores))
+
+
+@app.command("mkt:attr")
+def mkt_attr_cmd(model: str = typer.Option("linear", "--model")):
+    mkt_attr.run_attribution(model)
+    typer.echo("ok")
+
+
+@app.command("mkt:seo:audit")
+def mkt_seo_cmd(site: str = typer.Option(..., "--site")):
+    res = mkt_seo.audit_site(site)
+    typer.echo(json.dumps(res))
+
+
+@app.command("mkt:social:queue")
+def mkt_social_queue(channel: str = typer.Option(..., "--channel"), text: str = typer.Option(..., "--text")):
+    post = mkt_social.queue_post(channel, text)
+    typer.echo(post.id)
+
+
+@app.command("mkt:social:run")
+def mkt_social_run(dry_run: bool = typer.Option(False, "--dry-run")):
+    mkt_social.run_queue(dry_run)
+    typer.echo("done")
+
+
+@app.command("mkt:cal:add")
+def mkt_cal_add(title: str = typer.Option(..., "--title"), type: str = typer.Option(..., "--type"), due: str = typer.Option(..., "--due"), owner: str = typer.Option(..., "--owner")):
+    item = mkt_cal.add_item(title, type, due, owner)
+    typer.echo(item["id"])
+
+
+@app.command("mkt:cal:view")
+def mkt_cal_view(month: str = typer.Option(..., "--month")):
+    txt = mkt_cal.view_month(month)
+    typer.echo(txt)
+
+
+@app.command("mkt:creative:variants")
+def mkt_creative_variants(in_path: str = typer.Option(..., "--in"), out: str = typer.Option(..., "--out")):
+    mkt_creatives.generate_variants(in_path, out)
+    typer.echo("ok")
+
+
+@app.command("mkt:dashboard")
+def mkt_dashboard_cmd():
+    mkt_dash.build_dashboard()
+    typer.echo("built")
+
+
+@app.command("mkt:campaign:new")
+def mkt_campaign_new(id: str = typer.Option(..., "--id"), channel: str = typer.Option(..., "--channel"), segment: str = typer.Option(..., "--segment"), creatives: str = typer.Option(..., "--creatives")):
+    mkt_campaigns.new_campaign(id, channel, segment, [creatives])
+    typer.echo("ok")
+
+
+@app.command("mkt:campaign:validate")
+def mkt_campaign_validate(id: str = typer.Option(..., "--id")):
+    mkt_campaigns.validate_campaign(id)
+    typer.echo("ok")
 
 
 if __name__ == "__main__":

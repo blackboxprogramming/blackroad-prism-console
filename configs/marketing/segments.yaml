@@ -1,0 +1,8 @@
+segments:
+  seg_us:
+    filters:
+      country: US
+  seg_demo_recent:
+    filters:
+      has_event: demo_request
+      recency_days: 30

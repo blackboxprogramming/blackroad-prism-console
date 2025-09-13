@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "contact_id": {"type": "string"},
+    "model": {"type": "string"},
+    "channel": {"type": "string"},
+    "credit": {"type": "number"}
+  },
+  "required": ["contact_id", "model", "channel", "credit"]
+}

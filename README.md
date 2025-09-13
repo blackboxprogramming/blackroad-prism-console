@@ -475,3 +475,11 @@ class MyBot(BaseBot):
     def run(self, task: Task) -> BotResponse:
         ...
 ```
+
+## Marketing & Content Ops Quickstart
+
+```bash
+python -m cli.console mkt:segments:build --config configs/marketing/segments.yaml
+python -m cli.console mkt:leadscore --config configs/marketing/lead_score.yaml
+python -m cli.console mkt:attr --model linear
+```

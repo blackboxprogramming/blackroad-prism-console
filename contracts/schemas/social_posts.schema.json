@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {"type": "string"},
+    "channel": {"type": "string"},
+    "text": {"type": "string"},
+    "scheduled_at": {"type": "string"},
+    "status": {"type": "string"}
+  },
+  "required": ["id", "channel", "text", "scheduled_at", "status"]
+}
