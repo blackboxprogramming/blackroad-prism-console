@@ -6,9 +6,14 @@ from __future__ import annotations
 import argparse
 import logging
 import subprocess
+<<<<<<< Headdd
+from subprocess import CalledProcessError
+from typing import List
+=======
 import sys
 from dataclasses import dataclass
 from subprocess import CalledProcessError
+>>>>>>> droplet/Headdd
 from typing import Dict, List
 
 
@@ -88,6 +93,20 @@ class CleanupBot:
         """
         results: Dict[str, bool] = {}
         for branch in self.branches:
+            if self.dry_run:
+                print(f"Would delete branch '{branch}' locally and remotely")
+                continue
+            try:
+                subprocess.run(["git", "branch", "-D", branch], check=True)
+            except CalledProcessError:
+                print(f"Failed to delete local branch '{branch}'")
+            try:
+                subprocess.run(
+                    ["git", "push", "origin", "--delete", branch],
+                    check=True,
+                )
+            except CalledProcessError:
+                print(f"Failed to delete remote branch '{branch}'")
             results[branch] = self.delete_branch(branch)
         return results
 

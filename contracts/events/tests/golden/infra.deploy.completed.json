@@ -1,0 +1,13 @@
+{
+  "source": "infra",
+  "type": "deploy.completed",
+  "id": "00000000-0000-0000-0000-000000000004",
+  "ts": "2024-01-01T00:00:00Z",
+  "actor": "deploybot",
+  "payload": {
+    "service": {"id": "svc-001"},
+    "env": "prod",
+    "status": "success"
+  },
+  "headers": {}
+}

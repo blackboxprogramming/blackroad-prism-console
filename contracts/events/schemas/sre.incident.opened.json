@@ -1,0 +1,12 @@
+{
+  "source": "sre",
+  "type": "incident.opened",
+  "id": "00000000-0000-0000-0000-000000000003",
+  "ts": "2024-01-01T00:00:00Z",
+  "actor": "pagerduty",
+  "payload": {
+    "incident": {"id": "inc-001", "severity": "sev1"},
+    "service": {"id": "svc-001"}
+  },
+  "headers": {}
+}

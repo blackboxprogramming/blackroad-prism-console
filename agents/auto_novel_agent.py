@@ -33,13 +33,43 @@ class AutoNovelAgent:
         """
         return engine.lower() in self.SUPPORTED_ENGINES
 
-    def create_game(self, engine: str, include_weapons: bool = False) -> None:
-        """Create a basic game using a supported engine without weapons.
+    def add_supported_engine(self, engine: str) -> None:
+        """Add a new engine to the supported list.
+
+        Engines are stored in lowercase to keep lookups case-insensitive.
 
         Args:
-            engine: Game engine to use.
-            include_weapons: If True, raise a ``ValueError`` because weapons are not
-                allowed.
+            engine: Name of the engine to add.
+        """
+        self.SUPPORTED_ENGINES.add(engine.lower())
+
+    def remove_supported_engine(self, engine: str) -> None:
+        """Remove an engine from the supported list.
+
+        Engines are matched in a case-insensitive manner.
+
+        Args:
+            engine: Name of the engine to remove.
+
+        Raises:
+            ValueError: If the engine is not currently supported.
+        """
+        normalized = engine.lower()
+        if normalized not in self.SUPPORTED_ENGINES:
+            raise ValueError(f"{engine} is not a supported engine.")
+        self.SUPPORTED_ENGINES.remove(normalized)
+
+    def create_game(self, engine: str, include_weapons: bool = False) -> None:
+        """Create a basic game using a supported engine.
+
+        Args:
+            engine: Game engine to use (case-insensitive).
+            include_weapons: Whether to include weapons. Setting this to ``True``
+                raises a ``ValueError`` because weapons are not allowed.
+
+        Raises:
+            ValueError: If the engine is unsupported.
+            ValueError: If weapons are included.
         """
         engine_lower = engine.lower()
         if not self.supports_engine(engine_lower):
@@ -66,6 +96,25 @@ class AutoNovelAgent:
             engine: Name of the engine to remove.
         """
         self.SUPPORTED_ENGINES.discard(engine.lower())
+        """Remove a game engine from the supported list.
+
+        Args:
+            engine: Name of the engine to remove. The lookup is
+                case-insensitive.
+
+        Raises:
+            ValueError: If the engine is not currently supported.
+        """
+        try:
+            self.SUPPORTED_ENGINES.remove(engine.lower())
+        except KeyError as exc:
+            raise ValueError(f"Unsupported engine: {engine}.") from exc
+
+        Args:
+            engine: Name of the engine to allow. The value is stored in
+                lowercase for case-insensitive matching.
+        """
+        self.SUPPORTED_ENGINES.add(engine.lower())
 
     def list_supported_engines(self) -> List[str]:
         """Return a list of supported game engines."""
