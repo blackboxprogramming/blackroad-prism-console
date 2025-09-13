@@ -432,3 +432,24 @@ cd apps/prismweb
 npm install
 npm run dev
 ```
+
+## RBAC
+Roles and permissions are defined in `config/users.json`. Use `--as-user` to run CLI commands as a specific user.
+
+## Approvals
+Approval rules live in `config/approvals.yaml`. Use `approval:create`, `approval:list`, and `approval:decide` to manage approvals.
+
+## Audit
+All orchestrator events are signed and stored in `orchestrator/memory.jsonl`. Verify integrity with `audit:verify`.
+
+## Docker
+Build and run the console in a container:
+
+```sh
+make build
+make run
+```
+
+Mount a volume at `/app/data` to persist data.
+
+> Security note: the signing key in `config/dev_signing_key.txt` is for development only and should be rotated for production.
