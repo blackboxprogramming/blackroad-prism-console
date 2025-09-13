@@ -1,0 +1,16 @@
+name: Procurement PO Export (Monthly)
+on:
+  schedule: [{ cron: "0 14 1 * *" }]
+  workflow_dispatch:
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/procurement/export_pos.ts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: po-export
+          path: /tmp/pos_export.csv
