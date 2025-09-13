@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    image: ghcr.io/<REPLACE_ME_ORG>/blackroad-api:latest
+    container_name: blackroad-api
+    environment:
+      - PORT=4000
+      - SESSION_SECRET=${SESSION_SECRET}
+      - DATABASE_URL=${DATABASE_URL:-file:/data/blackroad.db}
+    volumes:
+      - brapi_data:/data
+    ports:
+      - "4000:4000"
+    restart: unless-stopped
+volumes:
+  brapi_data: {}
