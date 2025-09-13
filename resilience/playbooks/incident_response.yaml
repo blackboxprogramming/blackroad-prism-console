@@ -1,0 +1,10 @@
+title: "Incident Response Playbook"
+purpose: "Coordinate response to operational incidents"
+scope: "All production services"
+procedure:
+  - "Detect incident and assign incident commander"
+  - "Communicate status to stakeholders"
+  - "Mitigate issue and document timeline"
+quality_control: "Post-incident reviews ensure continual improvement"
+responsible_role: "Site Reliability Engineering Lead"
+review_cycle: "after every major incident"
