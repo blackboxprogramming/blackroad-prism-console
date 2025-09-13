@@ -19,3 +19,6 @@ streamlit==1.48.1
 torch
 uvicorn
 whisper
+openpyxl==3.1.5
+rich==13.7.1
+typer==0.12.3

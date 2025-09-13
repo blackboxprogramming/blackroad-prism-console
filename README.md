@@ -432,3 +432,45 @@ cd apps/prismweb
 npm install
 npm run dev
 ```
+
+## Performance & Caching
+
+The console includes a small pluggable cache with in-memory and file backends.
+Cache usage is transparent to bots that perform deterministic computations.
+
+## Scenario Simulator
+
+A lightweight engine can execute multi-step scenarios and collect results.  Two
+scenarios are bundled for demos.
+
+Example:
+
+```bash
+python -m cli.console sim:list
+python -m cli.console sim:run --id finance_margin_push
+```
+
+## TUI
+
+A minimal text UI is available for demonstrations:
+
+```bash
+python -m cli.console tui:run
+```
+
+```
++--------------------+
+| Bots | Tasks | Log |
++--------------------+
+|        demo        |
++--------------------+
+```
+
+## Backups
+
+Local snapshots can be created and restored using:
+
+```bash
+python -m cli.console backup:snapshot --to backups/demo
+python -m cli.console backup:restore --from backups/demo
+```
