@@ -1,0 +1,15 @@
+name: Auto Remediate
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [slo_burn]
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/auto_remediate.sh
+        env:
+          DROPLET_HOST: ${{ vars.DROPLET_HOST }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

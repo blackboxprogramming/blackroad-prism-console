@@ -1,0 +1,6 @@
+budgets:
+  monthly_total_usd: 500.0
+  services:
+    api: 200.0
+    observability: 100.0
+    misc: 200.0

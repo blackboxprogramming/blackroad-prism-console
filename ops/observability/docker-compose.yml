@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports: ["9090:9090"]
+  loki:
+    image: grafana/loki:2.9.0
+    ports: ["3100:3100"]
+    command: -config.expand-env=true -config.file=/etc/loki/local-config.yaml
+  tempo:
+    image: grafana/tempo:2.5.0
+    ports: ["3200:3200"]
+  grafana:
+    image: grafana/grafana:10.4.0
+    ports: ["3001:3000"]
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
