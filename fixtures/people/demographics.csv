@@ -1,0 +1,4 @@
+employee_id,name,dept,role,level,manager_id,location,gender,ethnicity,salary
+E1,Alice,Engineering,Engineer,L2,CEO,NYC,F,Latinx,100000
+E2,Bob,Engineering,Engineer,L1,E1,NYC,M,White,80000
+E3,Carol,Sales,Rep,L1,CEO,SF,F,Asian,70000

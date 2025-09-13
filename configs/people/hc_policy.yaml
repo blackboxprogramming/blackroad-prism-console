@@ -1,0 +1,7 @@
+hiring_freeze: false
+priority_weights:
+  high: 2
+  medium: 1
+  low: 0
+lead_time_days: 30
+approval_limits: 5

@@ -1,0 +1,9 @@
+phases:
+  - self-review
+  - peer
+  - manager
+  - calibration
+  - finalize
+competencies:
+  - impact
+  - teamwork

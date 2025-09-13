@@ -1,0 +1,3 @@
+req_id,dept,role,level,location,requested_start,priority,manager
+R1,Engineering,Engineer,L1,NYC,2025-01-01,high,E1
+R2,Sales,Rep,L1,SF,2025-02-01,medium,CEO
