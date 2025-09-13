@@ -1,0 +1,3 @@
+MATCH (d:Decision)-[:DERIVED_FROM]->(a:Artifact)
+WHERE d.risk>="high" AND NOT EXISTS(d.review_id)
+RETURN d.id

@@ -1,0 +1,7 @@
+rules:
+  - name: orphan_artifacts
+    match: 'MATCH (a:Artifact) WHERE a.task_id=NULL RETURN a.id'
+    action: 'flag:orphan'
+  - name: risky_decisions_without_review
+    match: 'MATCH (d:Decision)-[:DERIVED_FROM]->(a:Artifact) WHERE d.risk>="high" AND NOT EXISTS(d.review_id) RETURN d.id'
+    action: 'alert'

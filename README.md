@@ -465,3 +465,15 @@ class MyBot(BaseBot):
     def run(self, task: Task) -> BotResponse:
         ...
 ```
+
+## Knowledge Graph
+
+Offline provenance tracking and query engine.
+
+Example commands:
+
+```
+python -m cli.console kg:stats
+python -m cli.console kg:query --file samples/kql/last_treasury_runs.kql
+python -m cli.console chain:run --plan configs/chain_examples/uptime_then_release.yaml
+```

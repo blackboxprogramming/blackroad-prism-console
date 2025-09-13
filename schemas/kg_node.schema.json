@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["id", "label", "props"],
+  "properties": {
+    "id": { "type": "string" },
+    "label": { "type": "string" },
+    "props": { "type": "object" }
+  }
+}
