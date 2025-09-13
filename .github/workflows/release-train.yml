@@ -1,0 +1,25 @@
+name: Product Release Train
+on:
+  workflow_dispatch:
+    inputs:
+      train: { description: "e.g., 2025.09-train", required: true }
+      version: { description: "e.g., 1.4.0", required: true }
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare notes
+        run: |
+          echo "## Release ${{ inputs.version }} (${{ inputs.train }})" > /tmp/notes.md
+          [ -f product/changelog.md ] && tail -n 50 product/changelog.md >> /tmp/notes.md || true
+      - name: Notify Slack
+        run: |
+          MSG="Release ${{ inputs.version }} (${{ inputs.train }}) prepared"
+          [ -n "$SLACK_WEBHOOK" ] && curl -s -X POST -H 'Content-Type: application/json' -d "{\"text\":\"$MSG\"}" "$SLACK_WEBHOOK" || true
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-notes
+          path: /tmp/notes.md
