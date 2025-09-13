@@ -1,14 +1,17 @@
 import json
+from contextlib import nullcontext
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 import typer
 
-from orchestrator.protocols import Task
-from orchestrator import orchestrator
-from tools import storage
+from bench import runner as bench_runner
 from bots import available_bots
+from orchestrator import orchestrator, slo_report
+from orchestrator.perf import perf_timer
+from orchestrator.protocols import Task
+from tools import storage
 
 app = typer.Typer()
 
@@ -65,6 +68,86 @@ def task_status(id: str = typer.Option(..., "--id")):
 def bot_list():
     for name, cls in available_bots().items():
         typer.echo(f"{name}\t{cls.mission}")
+
+
+def _footer(perf: bool, stats: dict, cache: str = "na"):
+    if perf:
+        typer.echo(
+            f"time={stats.get('elapsed_ms', 0)} rss={stats.get('rss_mb')} cache={cache} exec=inproc"
+        )
+
+
+@app.command("bench:list")
+def bench_list(perf: bool = typer.Option(False, "--perf", is_flag=True)):
+    ctx = perf_timer("bench_list") if perf else nullcontext({})
+    with ctx as p:
+        for name in bench_runner.list_scenarios():
+            typer.echo(name)
+    _footer(perf, p)
+
+
+@app.command("bench:show")
+def bench_show(
+    name: str = typer.Option(..., "--name"),
+    perf: bool = typer.Option(False, "--perf", is_flag=True),
+):
+    ctx = perf_timer("bench_show") if perf else nullcontext({})
+    with ctx as p:
+        data = bench_runner.show_scenario(name)
+        typer.echo(json.dumps(data))
+    _footer(perf, p)
+
+
+@app.command("bench:run")
+def bench_run(
+    name: str = typer.Option(..., "--name"),
+    iter: int = typer.Option(20, "--iter"),
+    warmup: int = typer.Option(5, "--warmup"),
+    cache: str = typer.Option("na", "--cache"),
+    export_csv: Optional[Path] = typer.Option(None, "--export-csv"),
+    perf: bool = typer.Option(False, "--perf", is_flag=True),
+    as_user: Optional[str] = typer.Option(None, "--as-user"),
+):
+    ctx = perf_timer("bench_run") if perf else nullcontext({})
+    with ctx as p:
+        res = bench_runner.run_bench(name, iterations=iter, warmup=warmup, cache=cache)
+        if export_csv:
+            src = Path(res["env"]).with_name("timings.csv")
+            storage.write(str(export_csv), Path(src).read_text())
+    _footer(perf, p, cache=cache)
+
+
+@app.command("bench:all")
+def bench_all(
+    iter: int = typer.Option(20, "--iter"),
+    warmup: int = typer.Option(5, "--warmup"),
+    perf: bool = typer.Option(False, "--perf", is_flag=True),
+):
+    ctx = perf_timer("bench_all") if perf else nullcontext({})
+    with ctx as p:
+        bench_runner.run_all(iterations=iter, warmup=warmup)
+    _footer(perf, p)
+
+
+@app.command("slo:report")
+def slo_report_cmd(perf: bool = typer.Option(False, "--perf", is_flag=True)):
+    ctx = perf_timer("slo_report") if perf else nullcontext({})
+    with ctx as p:
+        slo_report.build_report()
+    _footer(perf, p)
+
+
+@app.command("slo:gate")
+def slo_gate(
+    fail_on: str = typer.Option("regressions", "--fail-on"),
+    perf: bool = typer.Option(False, "--perf", is_flag=True),
+):
+    ctx = perf_timer("slo_gate") if perf else nullcontext({})
+    with ctx as p:
+        rc = slo_report.gate(fail_on=fail_on)
+    _footer(perf, p)
+    if rc:
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

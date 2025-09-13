@@ -71,6 +71,16 @@ When you're ready to share changes:
 3. Open this repository in VS Code and select **Reopen in Container** to use `.devcontainer/devcontainer.json`.
 4. Once the container is running, use the integrated terminal to run commands like `npm install`, `npm run lint`, or `npm test`.
 
+## Performance
+
+Simple benchmark utilities are available:
+
+```bash
+python -m cli.console bench:run --name "Treasury-BOT"
+python -m cli.console slo:report
+python -m cli.console slo:gate --fail-on regressions
+```
+
 ---
 
 ## Notes & assumptions
