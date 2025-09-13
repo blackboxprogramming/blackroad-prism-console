@@ -1,0 +1,6 @@
+id: AuthService
+name: Auth Service
+tier: 2
+owners: ["auth@corp.local"]
+sli: { uptime: 99.9 }
+dependencies: ["Database"]

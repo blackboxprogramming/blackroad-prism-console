@@ -1,0 +1,6 @@
+id: Database
+name: Main DB
+tier: 2
+owners: ["db@corp.local"]
+sli: { uptime: 99.95 }
+dependencies: []

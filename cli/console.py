@@ -11,6 +11,13 @@ from orchestrator import orchestrator, slo_report
 from orchestrator.perf import perf_timer
 from orchestrator.protocols import Task
 from tools import storage
+from services import catalog as svc_catalog
+from services import deps as svc_deps
+from runbooks import executor as rb_executor
+from healthchecks import synthetic as hc_synth
+from change import calendar as change_calendar
+from status import generator as status_gen
+import time
 
 app = typer.Typer()
 
@@ -150,6 +157,94 @@ def slo_gate(
     _perf_footer(perf, p)
     if not ok:
         raise typer.Exit(code=1)
+
+
+@app.command("svc:load")
+def svc_load(dir: str = typer.Option("configs/services", "--dir")):
+    svc_catalog.load_services(f"{dir}/*.yaml")
+    typer.echo("catalog loaded")
+
+
+@app.command("svc:deps")
+def svc_deps_cmd(service: str = typer.Option(..., "--service"), dir: str = typer.Option("configs/services", "--dir")):
+    services = svc_catalog.load_services(f"{dir}/*.yaml")
+    for dep in svc_deps.blast_radius(service, services):
+        typer.echo(dep)
+
+
+@app.command("svc:validate")
+def svc_validate(dir: str = typer.Option("configs/services", "--dir")):
+    services = svc_catalog.load_services(f"{dir}/*.yaml")
+    errs = svc_deps.validate_dependencies(services)
+    if errs:
+        for e in errs:
+            typer.echo(e)
+        raise typer.Exit(code=1)
+    typer.echo("ok")
+
+
+@app.command("rb:run")
+def rb_run(file: str = typer.Option(..., "--file")):
+    code = rb_executor.run(file)
+    typer.echo(code)
+
+
+@app.command("rb:list")
+def rb_list():
+    for name in rb_executor.list_examples():
+        typer.echo(name)
+
+
+@app.command("hc:run")
+def hc_run(service: str = typer.Option(..., "--service")):
+    results = hc_synth.run_checks(service)
+    typer.echo(json.dumps(results))
+
+
+@app.command("hc:summary")
+def hc_summary(service: str = typer.Option(..., "--service")):
+    data = hc_synth.summary(service)
+    typer.echo(json.dumps(data))
+
+
+@app.command("change:add")
+def change_add(
+    service: str = typer.Option(..., "--service"),
+    type: str = typer.Option(..., "--type"),
+    start: str = typer.Option(..., "--start"),
+    end: str = typer.Option(..., "--end"),
+    risk: str = typer.Option(..., "--risk"),
+):
+    cid = f"chg-{int(time.time())}"
+    ch = change_calendar.Change(id=cid, service=service, type=type, start=start, end=end, owner="cli", risk=risk)
+    change_calendar.add_change(ch)
+    typer.echo(cid)
+
+
+@app.command("change:list")
+def change_list(
+    service: str = typer.Option(None, "--service"),
+    start: str = typer.Option(None, "--from"),
+    end: str = typer.Option(None, "--to"),
+):
+    for c in change_calendar.list_changes(service, start, end):
+        typer.echo(json.dumps(c))
+
+
+@app.command("change:conflicts")
+def change_conflicts(service: str = typer.Option(..., "--service")):
+    issues = change_calendar.conflicts(service)
+    if issues:
+        for i in issues:
+            typer.echo(i)
+        raise typer.Exit(code=1)
+    typer.echo("ok")
+
+
+@app.command("status:build")
+def status_build():
+    status_gen.build()
+    typer.echo("built")
 
 
 if __name__ == "__main__":

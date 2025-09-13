@@ -1,0 +1,10 @@
+name: sre_error_budget_burn
+steps:
+  - action: query_metric
+    params: { metric: "uptime", window: "7d", service: "CoreAPI" }
+  - action: gate
+    params: { when: "value < 99.95", on_fail: "abort:burn_exceeded" }
+  - action: create_task
+    params: { bot: "SRE-BOT", intent: "postmortem_skeleton", inputs: { service: "CoreAPI" } }
+  - action: notify
+    params: { channel: "local_alerts", message: "Postmortem started for CoreAPI" }

@@ -1,0 +1,6 @@
+name: gate_fail
+steps:
+  - action: query_metric
+    params: { metric: "uptime", window: "7d", service: "CoreAPI" }
+  - action: gate
+    params: { when: "value > 200", on_fail: "abort:too_low" }
