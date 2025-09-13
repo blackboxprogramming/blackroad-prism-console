@@ -1,0 +1,21 @@
+company_objectives:
+  - key: O1
+    title: Grow sustainable revenue
+    owner: CRO
+    key_results:
+      - kr: O1-KR1
+        metric: ARR
+        target: 2500000
+      - kr: O1-KR2
+        metric: NetDollarRetention
+        target: 1.10
+  - key: O2
+    title: Reliability & trust
+    owner: CTO
+    key_results:
+      - kr: O2-KR1
+        metric: Availability
+        target: 99.95
+      - kr: O2-KR2
+        metric: P95Latency_ms
+        target: 200

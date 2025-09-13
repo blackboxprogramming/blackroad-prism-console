@@ -1,0 +1,26 @@
+kpis:
+  - name: ARR
+    source: finance
+    formula: sum(monthly_recurring_revenue)
+    owner: Finance
+    target: 2500000
+  - name: NetDollarRetention
+    source: finance
+    formula: ndr = (expanding + renewing + resurrected) / starting
+    owner: Finance
+    target: 1.10
+  - name: Availability
+    source: prometheus
+    query: 1 - (sum(rate(http_requests_errors_total[30d])) / sum(rate(http_requests_total[30d])))
+    owner: SRE
+    target: 0.9995
+  - name: P95Latency_ms
+    source: prometheus
+    query: 1000*histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[30d])) by (le))
+    owner: SRE
+    target: 200
+  - name: DAU
+    source: product
+    formula: distinct(active_users_last_24h)
+    owner: Product
+    target: 5000
