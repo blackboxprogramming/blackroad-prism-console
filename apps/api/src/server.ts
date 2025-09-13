@@ -30,6 +30,11 @@ import productRoadmap from './routes/product/roadmap.js';
 import productReleases from './routes/product/releases.js';
 import productFlags from './routes/product/flags.js';
 import productFeedback from './routes/product/feedback.js';
+import socDet from './routes/soc/detections.js';
+import socAlerts from './routes/soc/alerts.js';
+import socEnrich from './routes/soc/enrich.js';
+import socCases from './routes/soc/cases.js';
+import socPlay from './routes/soc/playbooks.js';
 
 dotenv.config();
 
@@ -59,6 +64,7 @@ app.use('/api/auth/okta', okta);
 app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
 app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
 app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
+app.use('/api/soc', socDet, socAlerts, socEnrich, socCases, socPlay);
 
 const port = process.env.PORT || 4000;
 

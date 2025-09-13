@@ -1,0 +1,13 @@
+name: SOC Detections Lint
+on:
+  pull_request:
+    paths: ["soc/detections/**", ".github/workflows/soc-lint.yml"]
+  workflow_dispatch:
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/soc/detections_lint.ts
