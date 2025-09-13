@@ -14,6 +14,9 @@ import webpush from './routes/notify/webpush.js';
 import hooks from './routes/hooks.js';
 import metrics from './routes/metrics.js';
 import okta from './routes/okta.js';
+import privacyConsent from './routes/privacy/consent.js';
+import privacyPrefs from './routes/privacy/preferences.js';
+import privacyDsar from './routes/privacy/dsar.js';
 
 dotenv.config();
 
@@ -36,7 +39,7 @@ app.use('/api/notify/webpush', webpush);
 
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
-app.use('/api/auth/okta', okta);
+app.use('/api/privacy', privacyConsent, privacyPrefs, privacyDsar);
 
 const port = process.env.PORT || 4000;
 
