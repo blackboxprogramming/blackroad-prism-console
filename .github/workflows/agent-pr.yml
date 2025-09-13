@@ -1,0 +1,24 @@
+name: Agent PR Autopilot
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr: { description: 'PR number', required: false }
+jobs:
+  autopilot:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' &&
+       contains(github.event.comment.body, '@codex fix comments'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix apps/api
+      - name: Run PR autopilot
+        run: node scripts/agents/pr_autopilot.ts "${{ github.event.issue.number || inputs.pr || '' }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}

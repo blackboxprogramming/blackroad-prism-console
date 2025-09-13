@@ -1,0 +1,20 @@
+intents:
+  - key: deploy
+    match: ["deploy", "push live", "ship it"]
+    action: "script:ops/deploy_to_droplet.sh"
+    requires_approval: true
+  - key: reindex
+    match: ["reindex search", "rebuild index"]
+    action: "http:POST:/api/search/reindex"
+  - key: test
+    match: ["run tests", "tests please", "verify build"]
+    action: "shell:npm test --prefix apps/api"
+  - key: fix_comments
+    match: ["fix comments", "apply suggestions", "autofix"]
+    action: "workflow:agent-pr.yml"
+  - key: open_ticket
+    match: ["open ticket", "create bug"]
+    action: "script:scripts/support_sync.ts"
+  - key: generate_doc
+    match: ["draft doc", "write readme"]
+    action: "shell:node scripts/ai_docs.js"
