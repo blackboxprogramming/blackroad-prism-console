@@ -1,0 +1,18 @@
+name: GTM Sync
+on:
+  schedule: [{ cron: "5 2 * * *" }]
+  workflow_dispatch:
+jobs:
+  gtm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci --prefix apps/api
+      - run: node scripts/gtm_sync.ts
+        env:
+          HUBSPOT_TOKEN: ${{ secrets.HUBSPOT_TOKEN }}
+          SALESFORCE_URL: ${{ secrets.SALESFORCE_URL }}
+          SALESFORCE_TOKEN: ${{ secrets.SALESFORCE_TOKEN }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
