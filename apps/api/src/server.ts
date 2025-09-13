@@ -14,6 +14,14 @@ import webpush from './routes/notify/webpush.js';
 import hooks from './routes/hooks.js';
 import metrics from './routes/metrics.js';
 import okta from './routes/okta.js';
+import samlMeta from './routes/saml/metadata.js';
+import samlAcs from './routes/saml/acs.js';
+import samlSlo from './routes/saml/slo.js';
+import scimUsers from './routes/scim/users.js';
+import scimGroups from './routes/scim/groups.js';
+import { dlpRedact } from './middleware/dlp.js';
+import edrHold from './routes/edr/legal_hold.js';
+import edrExport from './routes/edr/export_audit.js';
 
 dotenv.config();
 
@@ -23,6 +31,8 @@ app.use(morgan('dev'));
 app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));
 app.use(regionMiddleware());
 app.use(localeMiddleware());
+// DLP must run early for inbound JSON
+app.use(dlpRedact());
 
 app.get('/api/health', cacheHeaders('health'), (_req,res)=> res.json({ ok:true, ts: Date.now() }));
 
@@ -37,6 +47,16 @@ app.use('/api/notify/webpush', webpush);
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
+
+// SAML
+app.use('/saml', samlMeta, samlAcs, samlSlo);
+
+// SCIM
+app.use('/scim/v2', scimUsers);
+app.use('/scim/v2', scimGroups);
+
+// eDiscovery / legal hold (admin scope in real deployment)
+app.use('/api/edr', edrHold, edrExport);
 
 const port = process.env.PORT || 4000;
 
