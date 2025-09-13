@@ -3,7 +3,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Type
 
+import metrics
+import settings
 from bots import available_bots
+from safety import duty_of_care, policy
 from tools import storage
 
 from .base import BaseBot, assert_guardrails
@@ -25,7 +28,7 @@ def red_team(response: BotResponse) -> None:
         raise AssertionError("KPIs not referenced")
 
 
-def route(task: Task, bot_name: str) -> BotResponse:
+def route(task: Task, bot_name: str, safety_packs: list[str] | None = None) -> BotResponse:
     """Route a task to the named bot and log the interaction."""
     registry: Dict[str, Type[BaseBot]] = available_bots()
     if bot_name not in registry:
@@ -47,6 +50,11 @@ def route(task: Task, bot_name: str) -> BotResponse:
         response.max_mem_mb = slo.max_mem_mb
     assert_guardrails(response)
     red_team(response)
+    violations = policy.evaluate(response, safety_packs or settings.PACKS_ENABLED)
+    if settings.DUTY_OF_CARE:
+        err = duty_of_care.gate(violations)
+        if err:
+            raise RuntimeError(err)
 
     record = {
         "ts": datetime.utcnow().isoformat(),
@@ -62,4 +70,5 @@ def route(task: Task, bot_name: str) -> BotResponse:
             "max_mem_mb": slo.max_mem_mb,
         }
     storage.write(str(_memory_path), record)
+    metrics.record("orchestrator_run", {"bot": bot_name, "task": task.id})
     return response
