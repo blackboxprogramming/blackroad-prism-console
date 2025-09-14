@@ -40,6 +40,12 @@ import cpmDrivers from './routes/cpm/drivers.js';
 import cpmForecast from './routes/cpm/forecast.js';
 import cpmVariance from './routes/cpm/variance.js';
 import cpmPacks from './routes/cpm/packs.js';
+import soxRCM from './routes/sox/rcm.js';
+import soxNarr from './routes/sox/narratives.js';
+import soxTests from './routes/sox/tests.js';
+import soxDef from './routes/sox/deficiency.js';
+import soxSoD from './routes/sox/sod.js';
+import soxScope from './routes/sox/scope.js';
 
 dotenv.config();
 
@@ -71,6 +77,7 @@ app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail)
 app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 app.use('/api/cpm', cpmDrivers, cpmForecast, cpmVariance, cpmPacks);
+app.use('/api/sox', soxRCM, soxNarr, soxTests, soxDef, soxSoD, soxScope);
 
 const port = process.env.PORT || 4000;
 
