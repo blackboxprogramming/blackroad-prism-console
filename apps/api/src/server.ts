@@ -46,6 +46,16 @@ import soxTests from './routes/sox/tests.js';
 import soxDef from './routes/sox/deficiency.js';
 import soxSoD from './routes/sox/sod.js';
 import soxScope from './routes/sox/scope.js';
+import p2pV from './routes/p2p/vendors.js';
+import p2pI from './routes/p2p/items.js';
+import p2pReq from './routes/p2p/req.js';
+import p2pPO from './routes/p2p/po.js';
+import p2pRec from './routes/p2p/receipts.js';
+import p2pAP from './routes/p2p/ap.js';
+import p2pPol from './routes/p2p/policy.js';
+import expRep from './routes/expenses/reports.js';
+import expCard from './routes/expenses/cards.js';
+import p2pPay from './routes/p2p/payments.js';
 
 dotenv.config();
 
@@ -78,6 +88,8 @@ app.use('/api/product', productIdeas, productPrd, productRoadmap, productRelease
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 app.use('/api/cpm', cpmDrivers, cpmForecast, cpmVariance, cpmPacks);
 app.use('/api/sox', soxRCM, soxNarr, soxTests, soxDef, soxSoD, soxScope);
+app.use('/api/p2p', p2pV, p2pI, p2pReq, p2pPO, p2pRec, p2pAP, p2pPol, p2pPay);
+app.use('/api/expenses', expRep, expCard);
 
 const port = process.env.PORT || 4000;
 
