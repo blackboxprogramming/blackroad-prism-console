@@ -1,0 +1,12 @@
+name: Facilities Daily (Occupancy + Visitor Digest)
+on:
+  schedule: [{ cron: "10 8 * * *" }]
+  workflow_dispatch:
+jobs:
+  fac-daily:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/fac/occupancy_report.ts
