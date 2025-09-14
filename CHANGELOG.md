@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.3.0...v1.4.0) (2025-09-14)
+
+
+### Features
+
+* **sox:** add internal controls layer ([#1481](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1481)) ([4db0dca](https://github.com/blackboxprogramming/blackroad-prism-console/commit/4db0dcae13efd3079a881b7e0e2ff039cea520c1))
+
 ## [1.3.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.2.0...v1.3.0) (2025-09-14)
 
 
