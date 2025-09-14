@@ -113,6 +113,12 @@ import portalPrefs from './routes/portal/prefs_acks.js';
 import portalBan from './routes/portal/banners.js';
 import portalI18n from './routes/portal/i18n.js';
 import portalSearch from './routes/portal/search.js';
+import esgFA from './routes/esg/factors_activity.js';
+import esgCalc from './routes/esg/calc.js';
+import esgTargets from './routes/esg/targets.js';
+import esgOffsets from './routes/esg/offsets.js';
+import esgSup from './routes/esg/suppliers.js';
+import esgRep from './routes/esg/report.js';
 
 dotenv.config();
 
@@ -158,6 +164,7 @@ app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
 app.use('/api/dev', devApis, devKeys, devPlans, devGW, devHooks, devDocs, devAnalytics);
 app.use('/api/tprm', tprmV, tprmQ, tprmR, tprmM, tprmMap, tprmB);
 app.use('/api/portal', portalAnn, portalCh, portalPrefs, portalBan, portalI18n, portalSearch);
+app.use('/api/esg', esgFA, esgCalc, esgTargets, esgOffsets, esgSup, esgRep);
 
 const port = process.env.PORT || 4000;
 

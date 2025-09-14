@@ -1,0 +1,12 @@
+import { Router } from 'express';
+import fs from 'fs';
+const r = Router(); const F='esg/factors.json', A='data/esg/activity.jsonl';
+const fread=()=> fs.existsSync(F)? JSON.parse(fs.readFileSync(F,'utf-8')):{ sources:{} };
+const fwrite=(o:any)=>{ fs.mkdirSync('esg',{recursive:true}); fs.writeFileSync(F, JSON.stringify(o,null,2)); };
+const append=(row:any)=>{ fs.mkdirSync('data/esg',{recursive:true}); fs.appendFileSync(A, JSON.stringify(row)+'\n'); };
+const lines=()=> fs.existsSync(A)? fs.readFileSync(A,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[];
+r.post('/factors/upsert',(req,res)=>{ const o=fread(); const {source,version,items}=req.body||{}; o.sources[source]={version,items:items||[]}; fwrite(o); res.json({ ok:true }); });
+r.get('/factors/:source',(req,res)=>{ res.json(fread().sources[String(req.params.source)]||null); });
+r.post('/activity/ingest',(req,res)=>{ append({ ts:Date.now(), ...req.body }); res.json({ ok:true }); });
+r.get('/activity/recent',(req,res)=>{ const cat=String(req.query.category||''), per=String(req.query.period||''); const items=lines().reverse().filter((x:any)=>(!cat||x.category===cat)&&(!per||x.period===per)).slice(0,200); res.json({ items }); });
+export default r;

@@ -1,0 +1,13 @@
+name: ESG Annual (Suppliers + Report)
+on:
+  schedule: [{ cron: "35 8 5 1 *" }]
+  workflow_dispatch:
+jobs:
+  esg-annual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/esg/supplier_digest.ts
+      - run: node scripts/esg/annual_report.ts
