@@ -68,6 +68,14 @@ import foBud from './routes/finops/budgets.js';
 import foAnom from './routes/finops/anomaly.js';
 import foRecs from './routes/finops/recs.js';
 import foUnit from './routes/finops/unit.js';
+import cmdbCI from './routes/cmdb/ci.js';
+import cmdbBase from './routes/cmdb/baseline.js';
+import changeCRQ from './routes/change/crq.js';
+import changeCal from './routes/change/calendar.js';
+import relRel from './routes/release/rel.js';
+import patchV from './routes/patch/vuln.js';
+import patchP from './routes/patch/plan.js';
+import lic from './routes/cmdb/license.js';
 
 dotenv.config();
 
@@ -104,6 +112,10 @@ app.use('/api/p2p', p2pV, p2pI, p2pReq, p2pPO, p2pRec, p2pAP, p2pPol, p2pPay);
 app.use('/api/expenses', expRep, expCard);
 app.use('/api/payroll', prEmp, prSched, prTime, prRun, prForms);
 app.use('/api/finops', foProv, foCost, foAlloc, foBud, foAnom, foRecs, foUnit);
+app.use('/api/cmdb', cmdbCI, cmdbBase, lic);
+app.use('/api/change', changeCRQ, changeCal);
+app.use('/api/release', relRel);
+app.use('/api/patch', patchV, patchP);
 
 const port = process.env.PORT || 4000;
 
