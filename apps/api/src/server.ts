@@ -76,6 +76,15 @@ import relRel from './routes/release/rel.js';
 import patchV from './routes/patch/vuln.js';
 import patchP from './routes/patch/plan.js';
 import lic from './routes/cmdb/license.js';
+import iamIdp from './routes/iam/idp.js';
+import iamDir from './routes/iam/directory.js';
+import iamPol from './routes/iam/policies.js';
+import iamPdp from './routes/iam/pdp.js';
+import iamScim from './routes/iam/scim.js';
+import iamAccess from './routes/iam/access.js';
+import iamTokens from './routes/iam/tokens.js';
+import iamSecrets from './routes/iam/secrets.js';
+import iamDevices from './routes/iam/devices.js';
 
 dotenv.config();
 
@@ -116,6 +125,7 @@ app.use('/api/cmdb', cmdbCI, cmdbBase, lic);
 app.use('/api/change', changeCRQ, changeCal);
 app.use('/api/release', relRel);
 app.use('/api/patch', patchV, patchP);
+app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamTokens, iamSecrets, iamDevices);
 
 const port = process.env.PORT || 4000;
 
