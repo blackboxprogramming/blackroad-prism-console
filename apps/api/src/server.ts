@@ -46,6 +46,13 @@ import soxTests from './routes/sox/tests.js';
 import soxDef from './routes/sox/deficiency.js';
 import soxSoD from './routes/sox/sod.js';
 import soxScope from './routes/sox/scope.js';
+import faPolicy from './routes/fa/policy.js';
+import faAssets from './routes/fa/assets.js';
+import faDepr from './routes/fa/depr.js';
+import faGL from './routes/fa/gl.js';
+import leaseContracts from './routes/leases/contracts.js';
+import leaseSchedule from './routes/leases/schedule.js';
+import leaseJournal from './routes/leases/journal.js';
 
 dotenv.config();
 
@@ -78,6 +85,8 @@ app.use('/api/product', productIdeas, productPrd, productRoadmap, productRelease
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 app.use('/api/cpm', cpmDrivers, cpmForecast, cpmVariance, cpmPacks);
 app.use('/api/sox', soxRCM, soxNarr, soxTests, soxDef, soxSoD, soxScope);
+app.use('/api/fa', faPolicy, faAssets, faDepr, faGL);
+app.use('/api/leases', leaseContracts, leaseSchedule, leaseJournal);
 
 const port = process.env.PORT || 4000;
 

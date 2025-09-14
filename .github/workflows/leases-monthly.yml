@@ -1,0 +1,13 @@
+name: Leases Monthly (Schedules → Journals)
+on:
+  schedule: [{ cron: "20 10 1 * *" }]
+  workflow_dispatch:
+jobs:
+  leases:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/leases/build_schedule.ts
+      - run: node scripts/leases/journalize.ts
