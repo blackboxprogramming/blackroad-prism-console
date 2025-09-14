@@ -119,6 +119,11 @@ import ppmIN from './routes/ppm/initiatives.js';
 import ppmRM from './routes/ppm/roadmaps.js';
 import ppmCP from './routes/ppm/capacity.js';
 import ppmST from './routes/ppm/status_raid.js';
+import wfmTS from './routes/wfm/teams_shifts.js';
+import wfmRS from './routes/wfm/rosters.js';
+import wfmTM from './routes/wfm/time.js';
+import wfmLV from './routes/wfm/leave.js';
+import wfmOT from './routes/wfm/overtime_export.js';
 
 dotenv.config();
 
@@ -166,6 +171,7 @@ app.use('/api/tprm', tprmV, tprmQ, tprmR, tprmM, tprmMap, tprmB);
 app.use('/api/okr', okrOK, okrCK);
 app.use('/api/ppm', ppmIN, ppmRM, ppmCP, ppmST);
 app.use('/api/portal', portalAnn, portalCh, portalPrefs, portalBan, portalI18n, portalSearch);
+app.use('/api/wfm', wfmTS, wfmRS, wfmTM, wfmLV, wfmOT);
 
 const port = process.env.PORT || 4000;
 
