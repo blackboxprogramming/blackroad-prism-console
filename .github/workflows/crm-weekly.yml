@@ -1,0 +1,13 @@
+name: CRM Weekly (Pipeline Health + Forecast)
+on:
+  schedule: [{ cron: "15 7 * * 1" }]
+  workflow_dispatch:
+jobs:
+  crm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/crm/pipeline_health.ts
+      - run: node scripts/crm/forecast_roll.ts

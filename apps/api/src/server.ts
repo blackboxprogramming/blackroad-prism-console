@@ -55,6 +55,16 @@ import p2pAP from './routes/p2p/ap.js';
 import p2pPol from './routes/p2p/policy.js';
 import expRep from './routes/expenses/reports.js';
 import expCard from './routes/expenses/cards.js';
+import crmAcc from './routes/crm/accounts.js';
+import crmCon from './routes/crm/contacts.js';
+import crmLead from './routes/crm/leads.js';
+import crmOpp from './routes/crm/opps.js';
+import crmStages from './routes/crm/stages.js';
+import crmF from './routes/crm/forecast.js';
+import crmTer from './routes/crm/territory.js';
+import crmQ from './routes/crm/quotas.js';
+import crmICM from './routes/crm/icm.js';
+import crmRen from './routes/crm/renewals.js';
 import p2pPay from './routes/p2p/payments.js';
 
 dotenv.config();
@@ -79,6 +89,7 @@ app.get('/api/search', cacheHeaders('search'), query);
 app.use('/api/notify', notifySend);
 app.use('/api/notify/webpush', webpush);
 
+app.use('/api/crm', crmAcc, crmCon, crmLead, crmOpp, crmStages, crmF, crmTer, crmQ, crmICM, crmRen);
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
