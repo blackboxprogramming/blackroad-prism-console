@@ -1,0 +1,11 @@
+import { Router } from 'express';
+import fs from 'fs';
+const r = Router(); const C='data/mkt/campaigns.jsonl', CR='mkt/creatives.json';
+const append=(row:any)=>{ fs.mkdirSync('data/mkt',{recursive:true}); fs.appendFileSync(C, JSON.stringify(row)+'\n'); };
+const readC=()=> fs.existsSync(CR)? JSON.parse(fs.readFileSync(CR,'utf-8')):{ creatives:{} };
+const writeC=(o:any)=>{ fs.mkdirSync('mkt',{recursive:true}); fs.writeFileSync(CR, JSON.stringify(o,null,2)); };
+const list=()=> fs.existsSync(C)? fs.readFileSync(C,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
+r.post('/campaigns/create',(req,res)=>{ append({ ts:Date.now(), ...req.body }); res.json({ ok:true }); });
+r.post('/creatives/upsert',(req,res)=>{ const o=readC(); const v=req.body||{}; o.creatives[v.id]=v; writeC(o); res.json({ ok:true }); });
+r.get('/campaigns/:campaignId',(req,res)=>{ const it=list().reverse().find((x:any)=>x.campaignId===String(req.params.campaignId))||null; res.json(it); });
+export default r;
