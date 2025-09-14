@@ -1,0 +1,7 @@
+sections:
+  - id: 302
+    name: Energy
+    metrics: [scope1, scope2, scope3, energy_consumption]
+  - id: 401
+    name: Employment (DEI)
+    metrics: [headcount, diversity_mix]

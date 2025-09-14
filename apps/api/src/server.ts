@@ -36,6 +36,11 @@ import cpqQuotes from './routes/cpq/quotes.js';
 import cpqApprovals from './routes/cpq/approvals.js';
 import cpqOrders from './routes/cpq/orders.js';
 import cpqSubs from './routes/cpq/subscriptions.js';
+import esgActivity from './routes/esg/activity.js';
+import esgCarbon from './routes/esg/carbon.js';
+import esgDei from './routes/esg/dei.js';
+import esgEthics from './routes/esg/ethics.js';
+import esgReports from './routes/esg/reports.js';
 
 dotenv.config();
 
@@ -66,6 +71,7 @@ app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
 app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
 app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
+app.use('/api/esg', esgActivity, esgCarbon, esgDei, esgEthics, esgReports);
 
 const port = process.env.PORT || 4000;
 

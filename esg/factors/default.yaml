@@ -1,0 +1,4 @@
+factors:
+  electricity_kwh: 0.0004   # tCO2e per kWh (placeholder)
+  diesel_l:       2.68      # tCO2e per liter
+  flight_km:      0.00015   # tCO2e per passenger-km
