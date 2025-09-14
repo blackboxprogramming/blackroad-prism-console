@@ -40,6 +40,12 @@ import cpmDrivers from './routes/cpm/drivers.js';
 import cpmForecast from './routes/cpm/forecast.js';
 import cpmVariance from './routes/cpm/variance.js';
 import cpmPacks from './routes/cpm/packs.js';
+import rrPolicy from './routes/revrec/policy.js';
+import rrContracts from './routes/revrec/contracts.js';
+import rrAlloc from './routes/revrec/allocate.js';
+import rrSched from './routes/revrec/schedule.js';
+import rrJournal from './routes/revrec/journal.js';
+import rrPack from './routes/revrec/pack.js';
 
 dotenv.config();
 
@@ -71,6 +77,7 @@ app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail)
 app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 app.use('/api/cpm', cpmDrivers, cpmForecast, cpmVariance, cpmPacks);
+app.use('/api/revrec', rrPolicy, rrContracts, rrAlloc, rrSched, rrJournal, rrPack);
 
 const port = process.env.PORT || 4000;
 
