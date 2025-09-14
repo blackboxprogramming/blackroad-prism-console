@@ -36,6 +36,10 @@ import cpqQuotes from './routes/cpq/quotes.js';
 import cpqApprovals from './routes/cpq/approvals.js';
 import cpqOrders from './routes/cpq/orders.js';
 import cpqSubs from './routes/cpq/subscriptions.js';
+import cpmDrivers from './routes/cpm/drivers.js';
+import cpmForecast from './routes/cpm/forecast.js';
+import cpmVariance from './routes/cpm/variance.js';
+import cpmPacks from './routes/cpm/packs.js';
 
 dotenv.config();
 
@@ -66,6 +70,7 @@ app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
 app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
 app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
+app.use('/api/cpm', cpmDrivers, cpmForecast, cpmVariance, cpmPacks);
 
 const port = process.env.PORT || 4000;
 
