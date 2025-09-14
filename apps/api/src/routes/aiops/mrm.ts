@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import fs from 'fs';
+const r = Router(); const FILE='aiops/mrm.json', AUD='data/aiops/mrm_audit.jsonl';
+const read=()=> fs.existsSync(FILE)? JSON.parse(fs.readFileSync(FILE,'utf-8')):{ assessments:{} };
+const write=(o:any)=>{ fs.mkdirSync('aiops',{recursive:true}); fs.writeFileSync(FILE, JSON.stringify(o,null,2)); };
+const append=(row:any)=>{ fs.mkdirSync('data/aiops',{recursive:true}); fs.appendFileSync(AUD, JSON.stringify(row)+'\n'); };
+r.post('/mrm/assessment',(req,res)=>{ const o=read(); const { modelId, version } = req.body||{}; const key=`${modelId}@${version}`; o.assessments[key]=req.body||{}; write(o); append({ ts:Date.now(), event:'assessment', key, owner:req.body?.owner, approval:req.body?.approval }); res.json({ ok:true }); });
+r.post('/mrm/approve',(req,res)=>{ const o=read(); const key=`${req.body?.modelId}@${req.body?.version}`; if(!o.assessments[key]) return res.status(404).json({error:'not_found'}); o.assessments[key].approval=req.body?.decision; write(o); append({ ts:Date.now(), event:'approve', key, approver:req.body?.approver, decision:req.body?.decision }); res.json({ ok:true }); });
+r.get('/mrm/status',(req,res)=>{ const key=`${String(req.query.modelId)}@${String(req.query.version)}`; const o=read(); res.json(o.assessments[key]||null); });
+export default r;
