@@ -93,6 +93,12 @@ import md from './routes/aiops/models.js';
 import mrm from './routes/aiops/mrm.js';
 import dep from './routes/aiops/deploy.js';
 import mon from './routes/aiops/monitor.js';
+import eltConn from './routes/elt/connectors.js';
+import eltP from './routes/elt/pipelines.js';
+import eltDag from './routes/elt/dag.js';
+import eltLin from './routes/elt/lineage.js';
+import eltLake from './routes/elt/lakehouse.js';
+import eltQC from './routes/elt/quality_costs.js';
 
 dotenv.config();
 
@@ -135,6 +141,7 @@ app.use('/api/release', relRel);
 app.use('/api/patch', patchV, patchP);
 app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamTokens, iamSecrets, iamDevices);
 app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
+app.use('/api/elt', eltConn, eltP, eltDag, eltLin, eltLake, eltQC);
 
 const port = process.env.PORT || 4000;
 
