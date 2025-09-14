@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.4.0...v1.5.0) (2025-09-14)
+
+
+### Features
+
+* add spend management and p2p layer ([#1485](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1485)) ([9301018](https://github.com/blackboxprogramming/blackroad-prism-console/commit/93010184912964e8dc37fb479a3b3d7bb5118614))
+
 ## [1.4.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.3.0...v1.4.0) (2025-09-14)
 
 
