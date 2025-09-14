@@ -46,6 +46,14 @@ import soxTests from './routes/sox/tests.js';
 import soxDef from './routes/sox/deficiency.js';
 import soxSoD from './routes/sox/sod.js';
 import soxScope from './routes/sox/scope.js';
+import consEntities from './routes/cons/entities.js';
+import consCOA from './routes/cons/coa.js';
+import consTB from './routes/cons/tb.js';
+import consFX from './routes/cons/fx.js';
+import consIC from './routes/cons/ic.js';
+import consRun from './routes/cons/run.js';
+import consTasks from './routes/cons/tasks.js';
+import consPack from './routes/cons/pack.js';
 
 dotenv.config();
 
@@ -78,6 +86,7 @@ app.use('/api/product', productIdeas, productPrd, productRoadmap, productRelease
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 app.use('/api/cpm', cpmDrivers, cpmForecast, cpmVariance, cpmPacks);
 app.use('/api/sox', soxRCM, soxNarr, soxTests, soxDef, soxSoD, soxScope);
+app.use('/api/cons', consEntities, consCOA, consTB, consFX, consIC, consRun, consTasks, consPack);
 
 const port = process.env.PORT || 4000;
 

@@ -1,0 +1,1 @@
+console.log('consolidate (stub)');

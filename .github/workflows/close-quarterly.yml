@@ -1,0 +1,10 @@
+name: Consolidation Quarterly (Disclosures)
+on:
+  schedule: [{ cron: "35 9 1 1,4,7,10 *" }]
+  workflow_dispatch:
+jobs:
+  qclose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "quarterly disclosure pack (stub)"

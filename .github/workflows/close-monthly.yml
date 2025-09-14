@@ -1,0 +1,16 @@
+name: Consolidation Monthly (TB → FX → IC → Consolidate → Pack)
+on:
+  schedule: [{ cron: "25 9 1 * *" }]
+  workflow_dispatch:
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/cons/import_tb.ts
+      - run: node scripts/cons/translate_fx.ts
+      - run: node scripts/cons/ic_eliminate.ts
+      - run: node scripts/cons/consolidate.ts
+      - run: node scripts/cons/close_pack.ts
