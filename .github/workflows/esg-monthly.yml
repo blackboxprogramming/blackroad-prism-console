@@ -1,0 +1,12 @@
+name: ESG Monthly (Calc + Snapshot)
+on:
+  schedule: [{ cron: "30 8 1 * *" }]
+  workflow_dispatch:
+jobs:
+  esg-monthly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/esg/calc_monthly.ts
