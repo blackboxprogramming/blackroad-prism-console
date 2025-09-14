@@ -1,0 +1,13 @@
+name: Data Contracts Lint (PR)
+on:
+  pull_request:
+    paths:
+      - "dq/schemas/**"
+      - "dq/contracts/**"
+      - ".github/workflows/dq-pr.yml"
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node -e "const fs=require('fs');let ok=true;if(fs.existsSync('dq/schemas/index.json')){const i=JSON.parse(fs.readFileSync('dq/schemas/index.json','utf-8'));if(!i.schemas)ok=false;}process.exit(ok?0:1);"

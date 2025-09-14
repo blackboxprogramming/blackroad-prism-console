@@ -1,0 +1,14 @@
+name: Data Quality Nightly
+on:
+  schedule: [{ cron: "35 2 * * *" }]
+  workflow_dispatch:
+jobs:
+  dq:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/dq/run_after_model.ts
+      - run: node scripts/dq/anomaly_scan.ts
+      - run: node scripts/dq/sla_guard.ts
