@@ -1,0 +1,11 @@
+import { Router } from 'express';
+import fs from 'fs';
+import { v4 as uuid } from 'uuid';
+const r = Router(); const C='data/clm/contracts.jsonl', A='data/clm/attachments.jsonl', R='data/clm/redlines.jsonl';
+const append=(p:string,row:any)=>{ fs.mkdirSync('data/clm',{recursive:true}); fs.appendFileSync(p, JSON.stringify(row)+'\n'); };
+const list=(p:string)=> fs.existsSync(p)? fs.readFileSync(p,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
+r.post('/contracts/create',(req,res)=>{ const id=req.body?.contractId||uuid(); append(C,{ ts:Date.now(), contractId:id, ...req.body, state:'drafting' }); res.json({ ok:true, contractId:id }); });
+r.post('/contracts/attach',(req,res)=>{ append(A,{ ts:Date.now(), ...req.body }); res.json({ ok:true }); });
+r.post('/contracts/redline',(req,res)=>{ append(R,{ ts:Date.now(), ...req.body }); res.json({ ok:true }); });
+r.get('/contracts/:contractId',(req,res)=>{ const c=list(C).find((x:any)=>x.contractId===String(req.params.contractId))||null; const red=list(R).filter((x:any)=>x.contractId===String(req.params.contractId)); const att=list(A).filter((x:any)=>x.contractId===String(req.params.contractId)); res.json({ contract:c, redlines:red, attachments:att }); });
+export default r;

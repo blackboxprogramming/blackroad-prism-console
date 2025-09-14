@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import fs from 'fs';
+const r = Router(); const FILE='data/clm/requests.jsonl';
+const append=(row:any)=>{ fs.mkdirSync('data/clm',{recursive:true}); fs.appendFileSync(FILE, JSON.stringify(row)+'\n'); };
+const read=()=> fs.existsSync(FILE)? fs.readFileSync(FILE,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
+r.post('/requests/create',(req,res)=>{ append({ ts:Date.now(), state:'intake', ...req.body }); res.json({ ok:true }); });
+r.post('/requests/assign',(req,res)=>{ const rows=read().map((x:any)=> x.reqId===req.body?.reqId?{...x,owner:req.body?.owner,assignedAt:Date.now()}:x); fs.writeFileSync(FILE, rows.map(x=>JSON.stringify(x)).join('\n')+'\n'); res.json({ ok:true }); });
+r.post('/requests/state',(req,res)=>{ const rows=read().map((x:any)=> x.reqId===req.body?.reqId?{...x,state:req.body?.state,updatedAt:Date.now()}:x); fs.writeFileSync(FILE, rows.map(x=>JSON.stringify(x)).join('\n')+'\n'); res.json({ ok:true }); });
+r.get('/requests/recent',(_req,res)=>{ res.json({ items: read().reverse().slice(0,200) }); });
+export default r;

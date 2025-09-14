@@ -85,6 +85,14 @@ import iamAccess from './routes/iam/access.js';
 import iamTokens from './routes/iam/tokens.js';
 import iamSecrets from './routes/iam/secrets.js';
 import iamDevices from './routes/iam/devices.js';
+import clmT from './routes/clm/templates.js';
+import clmC from './routes/clm/clauses.js';
+import clmR from './routes/clm/requests.js';
+import clmCt from './routes/clm/contracts.js';
+import clmEs from './routes/clm/esign.js';
+import clmAp from './routes/clm/approvals.js';
+import clmOb from './routes/clm/oblig.js';
+import clmRepo from './routes/clm/repo.js';
 
 dotenv.config();
 
@@ -126,6 +134,7 @@ app.use('/api/change', changeCRQ, changeCal);
 app.use('/api/release', relRel);
 app.use('/api/patch', patchV, patchP);
 app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamTokens, iamSecrets, iamDevices);
+app.use('/api/clm', clmT, clmC, clmR, clmCt, clmEs, clmAp, clmOb, clmRepo);
 
 const port = process.env.PORT || 4000;
 
