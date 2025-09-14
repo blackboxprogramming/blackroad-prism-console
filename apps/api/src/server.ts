@@ -36,6 +36,11 @@ import cpqQuotes from './routes/cpq/quotes.js';
 import cpqApprovals from './routes/cpq/approvals.js';
 import cpqOrders from './routes/cpq/orders.js';
 import cpqSubs from './routes/cpq/subscriptions.js';
+import dqSchemas from './routes/dq/schemas.js';
+import dqContracts from './routes/dq/contracts.js';
+import dqExpects from './routes/dq/expectations.js';
+import dqRun from './routes/dq/run.js';
+import dqSla from './routes/dq/sla.js';
 
 dotenv.config();
 
@@ -66,6 +71,7 @@ app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
 app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
 app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
+app.use('/api/dq', dqSchemas, dqContracts, dqExpects, dqRun, dqSla);
 
 const port = process.env.PORT || 4000;
 

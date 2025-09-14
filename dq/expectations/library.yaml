@@ -1,0 +1,11 @@
+expectations:
+  not_null:
+    params: { columns: [] }
+  unique:
+    params: { columns: [] }
+  between:
+    params: { column: "", min: 0, max: 1 }
+  freshness:
+    params: { column: "_loaded_at", minutes: 60 }
+  volume_min:
+    params: { min_rows: 100 }
