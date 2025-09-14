@@ -1,0 +1,14 @@
+name: AR Monthly (Aging + Leakage + Dunning)
+on:
+  schedule: [{ cron: "12 8 1 * *" }]
+  workflow_dispatch:
+jobs:
+  ar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/ar/aging_schedule.ts
+      - run: node scripts/ar/leakage_report.ts
+      - run: curl -s -X POST -H 'Content-Type: application/json' -d '{"asof":"auto"}' http://localhost:4000/api/ar/dunning/run || true
