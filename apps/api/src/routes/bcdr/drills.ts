@@ -1,0 +1,11 @@
+import { Router } from 'express';
+import fs from 'fs';
+const r = Router(); const CAL='bcdr/drill_calendar.json', LOG='data/bcdr/drills.jsonl';
+const read=()=> fs.existsSync(CAL)? JSON.parse(fs.readFileSync(CAL,'utf-8')):{ periods:{} };
+const write=(o:any)=>{ fs.mkdirSync('bcdr',{recursive:true}); fs.writeFileSync(CAL, JSON.stringify(o,null,2)); };
+const append=(row:any)=>{ fs.mkdirSync('data/bcdr',{recursive:true}); fs.appendFileSync(LOG, JSON.stringify(row)+'\n'); };
+const lines=()=> fs.existsSync(LOG)? fs.readFileSync(LOG,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[];
+r.post('/drill/schedule',(req,res)=>{ const o=read(); const p=req.body?.period||''; o.periods[p]=req.body; write(o); res.json({ ok:true }); });
+r.post('/drill/log',(req,res)=>{ append({ ts:Date.now(), ...req.body }); res.json({ ok:true }); });
+r.get('/drill/recent',(req,res)=>{ const p=String(req.query.period||''); const items=lines().filter((x:any)=>!p||String(x.date||'').slice(0,7)===p).reverse().slice(0,50); res.json({ items }); });
+export default r;

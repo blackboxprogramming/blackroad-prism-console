@@ -68,6 +68,12 @@ import foBud from './routes/finops/budgets.js';
 import foAnom from './routes/finops/anomaly.js';
 import foRecs from './routes/finops/recs.js';
 import foUnit from './routes/finops/unit.js';
+import bcdrPolicy from './routes/bcdr/policy.js';
+import bcdrBackups from './routes/bcdr/backups.js';
+import bcdrRestore from './routes/bcdr/restore.js';
+import bcdrFailover from './routes/bcdr/failover.js';
+import bcdrPlans from './routes/bcdr/plans.js';
+import bcdrDrills from './routes/bcdr/drills.js';
 
 dotenv.config();
 
@@ -104,6 +110,7 @@ app.use('/api/p2p', p2pV, p2pI, p2pReq, p2pPO, p2pRec, p2pAP, p2pPol, p2pPay);
 app.use('/api/expenses', expRep, expCard);
 app.use('/api/payroll', prEmp, prSched, prTime, prRun, prForms);
 app.use('/api/finops', foProv, foCost, foAlloc, foBud, foAnom, foRecs, foUnit);
+app.use('/api/bcdr', bcdrPolicy, bcdrBackups, bcdrRestore, bcdrFailover, bcdrPlans, bcdrDrills);
 
 const port = process.env.PORT || 4000;
 
