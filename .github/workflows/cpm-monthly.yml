@@ -1,0 +1,19 @@
+name: CPM Monthly (Forecast + Variance + Pack)
+on:
+  schedule: [{ cron: "15 6 1 * *" }]
+  workflow_dispatch:
+jobs:
+  cpm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/cpm/evaluate_trees.ts
+      - run: node scripts/cpm/run_forecasts.ts
+      - run: node scripts/cpm/variance_calc.ts
+      - run: node scripts/cpm/make_pack.ts
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(cpm): monthly forecast, variance, pack"
+          file_pattern: "data/cpm/**"
