@@ -46,6 +46,13 @@ import soxTests from './routes/sox/tests.js';
 import soxDef from './routes/sox/deficiency.js';
 import soxSoD from './routes/sox/sod.js';
 import soxScope from './routes/sox/scope.js';
+import costItems from './routes/cost/items.js';
+import costRoll from './routes/cost/rollup.js';
+import invTxn from './routes/inv/txn.js';
+import costMO from './routes/cost/mo.js';
+import costVar from './routes/cost/variance.js';
+import invCount from './routes/inv/count.js';
+import costGL from './routes/cost/gl.js';
 
 dotenv.config();
 
@@ -78,6 +85,8 @@ app.use('/api/product', productIdeas, productPrd, productRoadmap, productRelease
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 app.use('/api/cpm', cpmDrivers, cpmForecast, cpmVariance, cpmPacks);
 app.use('/api/sox', soxRCM, soxNarr, soxTests, soxDef, soxSoD, soxScope);
+app.use('/api/cost', costItems, costRoll, costMO, costVar, costGL);
+app.use('/api/inv', invTxn, invCount);
 
 const port = process.env.PORT || 4000;
 
