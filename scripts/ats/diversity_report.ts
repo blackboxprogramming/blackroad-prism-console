@@ -1,0 +1,10 @@
+import fs from 'fs';
+const C='ats/candidates.json', A='data/ats/applications.jsonl'; const ym=new Date().toISOString().slice(0,7).replace('-','');
+const cs=fs.existsSync(C)? JSON.parse(fs.readFileSync(C,'utf-8')).candidates||{}:{};
+const apps=fs.existsSync(A)? fs.readFileSync(A,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)).slice(-200):[];
+const gender:Record<string,number>={}, ethnicity:Record<string,number>={};
+apps.forEach((a:any)=>{ const c=cs[a.candidateId]||{}; const d=(c.diversity||{}); if(d.gender) gender[d.gender]=(gender[d.gender]||0)+1; if(d.ethnicity) ethnicity[d.ethnicity]=(ethnicity[d.ethnicity]||0)+1; });
+let md=`# DEI ${ym}\n\n## Gender\n`; Object.entries(gender).forEach(([k,v])=> md+=`- ${k}: ${v}\n`);
+md+=`\n## Ethnicity\n`; Object.entries(ethnicity).forEach(([k,v])=> md+=`- ${k}: ${v}\n`);
+fs.mkdirSync('ats/reports',{recursive:true}); fs.writeFileSync(`ats/reports/DEI_${ym}.md`, md);
+console.log('ats diversity report written');

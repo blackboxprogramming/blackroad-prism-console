@@ -113,6 +113,12 @@ import portalPrefs from './routes/portal/prefs_acks.js';
 import portalBan from './routes/portal/banners.js';
 import portalI18n from './routes/portal/i18n.js';
 import portalSearch from './routes/portal/search.js';
+import atsJC from './routes/ats/jobs_candidates.js';
+import atsAPP from './routes/ats/applications.js';
+import atsINT from './routes/ats/interviews.js';
+import atsOF from './routes/ats/offers_bg.js';
+import atsOB from './routes/ats/onboarding.js';
+import atsAR from './routes/ats/analytics_reports.js';
 
 dotenv.config();
 
@@ -158,6 +164,7 @@ app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
 app.use('/api/dev', devApis, devKeys, devPlans, devGW, devHooks, devDocs, devAnalytics);
 app.use('/api/tprm', tprmV, tprmQ, tprmR, tprmM, tprmMap, tprmB);
 app.use('/api/portal', portalAnn, portalCh, portalPrefs, portalBan, portalI18n, portalSearch);
+app.use('/api/ats', atsJC, atsAPP, atsINT, atsOF, atsOB, atsAR);
 
 const port = process.env.PORT || 4000;
 

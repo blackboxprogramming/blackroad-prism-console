@@ -1,0 +1,11 @@
+import fs from 'fs';
+const A='data/ats/applications.jsonl', O='data/ats/offers.jsonl';
+const ym=new Date().toISOString().slice(0,7).replace('-','');
+const apps=fs.existsSync(A)? fs.readFileSync(A,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
+const offs=fs.existsSync(O)? fs.readFileSync(O,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
+const byJob:Record<string,{apps:number,offers:number,accepted:number}>={};
+apps.forEach(a=>{ const j=a.jobId; byJob[j]=byJob[j]||{apps:0,offers:0,accepted:0}; byJob[j].apps++; });
+offs.forEach(o=>{ const j=(apps.find(a=>a.appId===o.appId)||{} as any).jobId||'unknown'; byJob[j]=byJob[j]||{apps:0,offers:0,accepted:0}; if(o.state==='sent'||o.state==='accepted') byJob[j].offers++; if(o.state==='accepted') byJob[j].accepted++; });
+let md=`# ATS Pipeline ${ym}\n\n`; Object.entries(byJob).forEach(([j,v])=>{ md+=`- ${j}: apps=${v.apps} offers=${v.offers} accepted=${v.accepted}\n`; });
+fs.mkdirSync('ats/reports',{recursive:true}); fs.writeFileSync(`ats/reports/PIPE_${ym}.md`, md);
+console.log('ats pipeline report written');
