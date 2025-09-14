@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.2.0...v1.3.0) (2025-09-14)
+
+
+### Features
+
+* **compliance:** add risk registry API and CLI ([#1472](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1472)) ([6c58e35](https://github.com/blackboxprogramming/blackroad-prism-console/commit/6c58e35f1e4b29dc0f06a7f7855d63cbfbd85178))
+* scaffold supply chain ops ([#1475](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1475)) ([4b9a2a0](https://github.com/blackboxprogramming/blackroad-prism-console/commit/4b9a2a09b97ff8e25cb914319512de21c20349ca))
+
 ## [1.2.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.1.0...v1.2.0) (2025-09-14)
 
 
