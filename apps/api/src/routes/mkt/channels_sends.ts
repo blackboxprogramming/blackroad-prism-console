@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import fs from 'fs';
+import { v4 as uuid } from 'uuid';
+const r = Router(); const CH='mkt/channels.json', S='data/mkt/sends.jsonl', D='data/mkt/deliveries.jsonl';
+const cread=()=> fs.existsSync(CH)? JSON.parse(fs.readFileSync(CH,'utf-8')):{ channels:{} };
+const cwrite=(o:any)=>{ fs.mkdirSync('mkt',{recursive:true}); fs.writeFileSync(CH, JSON.stringify(o,null,2)); };
+const append=(p:string,row:any)=>{ fs.mkdirSync('data/mkt',{recursive:true}); fs.appendFileSync(p, JSON.stringify(row)+'\n'); };
+const items=(p:string)=> fs.existsSync(p)? fs.readFileSync(p,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
+r.post('/channels/register',(req,res)=>{ const o=cread(); const v=req.body||{}; o.channels[v.key]=v; cwrite(o); res.json({ ok:true }); });
+r.post('/send',(req,res)=>{ const mid=`msg_${uuid().slice(0,8)}`; append(S,{ ts:Date.now(), messageId:mid, ...req.body, status:'queued' }); res.json({ ok:true, messageId: mid }); });
+r.post('/delivery',(req,res)=>{ append(D,{ ts:req.body?.ts||Date.now(), ...req.body }); res.json({ ok:true }); });
+r.get('/sends/recent',(req,res)=>{ const ch=String(req.query.channel||''); const a=items(S).reverse().filter((x:any)=>!ch||x.channel===ch).slice(0,200); const b=items(D).reverse().filter((x:any)=>!ch||x.channel===ch).slice(0,200); res.json({ sends:a, deliveries:b }); });
+export default r;
