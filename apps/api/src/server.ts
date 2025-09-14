@@ -85,6 +85,13 @@ import iamAccess from './routes/iam/access.js';
 import iamTokens from './routes/iam/tokens.js';
 import iamSecrets from './routes/iam/secrets.js';
 import iamDevices from './routes/iam/devices.js';
+import knConn from './routes/kn/connectors.js';
+import knAcl from './routes/kn/acl.js';
+import knIngest from './routes/kn/ingest.js';
+import knIndex from './routes/kn/index.js';
+import knSearch from './routes/kn/search.js';
+import knKG from './routes/kn/kg.js';
+import knRag from './routes/kn/rag.js';
 
 dotenv.config();
 
@@ -126,6 +133,7 @@ app.use('/api/change', changeCRQ, changeCal);
 app.use('/api/release', relRel);
 app.use('/api/patch', patchV, patchP);
 app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamTokens, iamSecrets, iamDevices);
+app.use('/api/kn', knConn, knAcl, knIngest, knIndex, knSearch, knKG, knRag);
 
 const port = process.env.PORT || 4000;
 
