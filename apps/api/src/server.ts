@@ -107,6 +107,12 @@ import tprmR from './routes/tprm/risk_issues.js';
 import tprmM from './routes/tprm/monitor_sla.js';
 import tprmMap from './routes/tprm/mapping.js';
 import tprmB from './routes/tprm/breach.js';
+import portalAnn from './routes/portal/announcements.js';
+import portalCh from './routes/portal/channels.js';
+import portalPrefs from './routes/portal/prefs_acks.js';
+import portalBan from './routes/portal/banners.js';
+import portalI18n from './routes/portal/i18n.js';
+import portalSearch from './routes/portal/search.js';
 
 dotenv.config();
 
@@ -151,6 +157,7 @@ app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamToken
 app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
 app.use('/api/dev', devApis, devKeys, devPlans, devGW, devHooks, devDocs, devAnalytics);
 app.use('/api/tprm', tprmV, tprmQ, tprmR, tprmM, tprmMap, tprmB);
+app.use('/api/portal', portalAnn, portalCh, portalPrefs, portalBan, portalI18n, portalSearch);
 
 const port = process.env.PORT || 4000;
 

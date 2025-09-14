@@ -1,0 +1,13 @@
+name: Portal Daily (Digest + Ack Gaps)
+on:
+  schedule: [{ cron: "15 7 * * *" }]
+  workflow_dispatch:
+jobs:
+  portal-daily:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/portal/daily_digest.ts
+      - run: node scripts/portal/ack_gaps.ts
