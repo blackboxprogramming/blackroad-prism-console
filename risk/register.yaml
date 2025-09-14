@@ -1,15 +1,21 @@
 - id: R1
-  description: "Data breach"
+  description: 'Data breach'
+  owner: security
   likelihood: 0.3
   impact: 0.8
-  mitigation: "Encrypt data and monitor access"
+  mitigation: 'Encrypt data and monitor access'
+  residual_risk: 0.24
 - id: R2
-  description: "Service outage"
+  description: 'Service outage'
+  owner: operations
   likelihood: 0.2
   impact: 0.9
-  mitigation: "Multi-region deployment"
+  mitigation: 'Multi-region deployment'
+  residual_risk: 0.18
 - id: R3
-  description: "Compliance violation"
+  description: 'Compliance violation'
+  owner: legal
   likelihood: 0.1
   impact: 0.7
-  mitigation: "Regular training and audits"
+  mitigation: 'Regular training and audits'
+  residual_risk: 0.07
