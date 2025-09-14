@@ -1,0 +1,15 @@
+name: Payroll Semi-Monthly (Calc → Approve → ACH/GL)
+on:
+  schedule: [{ cron: "0 12 15,30 * *" }]
+  workflow_dispatch:
+jobs:
+  payroll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/payroll/calc_run.ts
+      - run: node scripts/payroll/ach_file.ts
+      - run: node scripts/payroll/gl_export.ts
+
