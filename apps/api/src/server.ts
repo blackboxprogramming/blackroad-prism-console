@@ -76,6 +76,14 @@ import relRel from './routes/release/rel.js';
 import patchV from './routes/patch/vuln.js';
 import patchP from './routes/patch/plan.js';
 import lic from './routes/cmdb/license.js';
+import ds from './routes/aiops/datasets.js';
+import ft from './routes/aiops/features.js';
+import ex from './routes/aiops/experiments.js';
+import tr from './routes/aiops/training.js';
+import md from './routes/aiops/models.js';
+import mrm from './routes/aiops/mrm.js';
+import dep from './routes/aiops/deploy.js';
+import mon from './routes/aiops/monitor.js';
 
 dotenv.config();
 
@@ -116,6 +124,7 @@ app.use('/api/cmdb', cmdbCI, cmdbBase, lic);
 app.use('/api/change', changeCRQ, changeCal);
 app.use('/api/release', relRel);
 app.use('/api/patch', patchV, patchP);
+app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
 
 const port = process.env.PORT || 4000;
 
