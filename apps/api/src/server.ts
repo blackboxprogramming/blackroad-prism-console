@@ -113,6 +113,12 @@ import portalPrefs from './routes/portal/prefs_acks.js';
 import portalBan from './routes/portal/banners.js';
 import portalI18n from './routes/portal/i18n.js';
 import portalSearch from './routes/portal/search.js';
+import okrOK from './routes/okr/objectives_krs.js';
+import okrCK from './routes/okr/checkins.js';
+import ppmIN from './routes/ppm/initiatives.js';
+import ppmRM from './routes/ppm/roadmaps.js';
+import ppmCP from './routes/ppm/capacity.js';
+import ppmST from './routes/ppm/status_raid.js';
 
 dotenv.config();
 
@@ -157,6 +163,8 @@ app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamToken
 app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
 app.use('/api/dev', devApis, devKeys, devPlans, devGW, devHooks, devDocs, devAnalytics);
 app.use('/api/tprm', tprmV, tprmQ, tprmR, tprmM, tprmMap, tprmB);
+app.use('/api/okr', okrOK, okrCK);
+app.use('/api/ppm', ppmIN, ppmRM, ppmCP, ppmST);
 app.use('/api/portal', portalAnn, portalCh, portalPrefs, portalBan, portalI18n, portalSearch);
 
 const port = process.env.PORT || 4000;
