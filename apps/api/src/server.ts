@@ -55,6 +55,11 @@ import p2pAP from './routes/p2p/ap.js';
 import p2pPol from './routes/p2p/policy.js';
 import expRep from './routes/expenses/reports.js';
 import expCard from './routes/expenses/cards.js';
+import prEmp from './routes/payroll/employees.js';
+import prSched from './routes/payroll/schedule.js';
+import prTime from './routes/payroll/time.js';
+import prRun from './routes/payroll/run.js';
+import prForms from './routes/payroll/forms.js';
 import p2pPay from './routes/p2p/payments.js';
 
 dotenv.config();
@@ -90,6 +95,7 @@ app.use('/api/cpm', cpmDrivers, cpmForecast, cpmVariance, cpmPacks);
 app.use('/api/sox', soxRCM, soxNarr, soxTests, soxDef, soxSoD, soxScope);
 app.use('/api/p2p', p2pV, p2pI, p2pReq, p2pPO, p2pRec, p2pAP, p2pPol, p2pPay);
 app.use('/api/expenses', expRep, expCard);
+app.use('/api/payroll', prEmp, prSched, prTime, prRun, prForms);
 
 const port = process.env.PORT || 4000;
 
