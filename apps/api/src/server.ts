@@ -76,6 +76,14 @@ import relRel from './routes/release/rel.js';
 import patchV from './routes/patch/vuln.js';
 import patchP from './routes/patch/plan.js';
 import lic from './routes/cmdb/license.js';
+import pvPolicies from './routes/privacy/policies.js';
+import pvRopa from './routes/privacy/ropa.js';
+import pvConsent from './routes/privacy/consent.js';
+import pvDsar from './routes/privacy/dsar.js';
+import pvDpia from './routes/privacy/dpia.js';
+import pvRetention from './routes/privacy/retention.js';
+import pvDlp from './routes/privacy/dlp.js';
+import pvTokens from './routes/privacy/tokens.js';
 
 dotenv.config();
 
@@ -116,6 +124,7 @@ app.use('/api/cmdb', cmdbCI, cmdbBase, lic);
 app.use('/api/change', changeCRQ, changeCal);
 app.use('/api/release', relRel);
 app.use('/api/patch', patchV, patchP);
+app.use('/api/privacy', pvPolicies, pvRopa, pvConsent, pvDsar, pvDpia, pvRetention, pvDlp, pvTokens);
 
 const port = process.env.PORT || 4000;
 

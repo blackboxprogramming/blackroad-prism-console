@@ -1,0 +1,12 @@
+name: Privacy Monthly (Retention Sweep + Reports)
+on:
+  schedule: [{ cron: "45 2 1 * *" }]
+  workflow_dispatch:
+jobs:
+  privacy-monthly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/privacy/retention_sweep.ts

@@ -1,0 +1,10 @@
+name: Privacy Weekly (Consent & ROPA Audit)
+on:
+  schedule: [{ cron: "30 2 * * 1" }]
+  workflow_dispatch:
+jobs:
+  privacy-weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Weekly consent + ROPA audit (stub)"
