@@ -93,6 +93,13 @@ import md from './routes/aiops/models.js';
 import mrm from './routes/aiops/mrm.js';
 import dep from './routes/aiops/deploy.js';
 import mon from './routes/aiops/monitor.js';
+import devApis from './routes/dev/apis.js';
+import devKeys from './routes/dev/keys_oauth.js';
+import devPlans from './routes/dev/plans.js';
+import devGW from './routes/dev/gateway.js';
+import devHooks from './routes/dev/webhooks.js';
+import devDocs from './routes/dev/docs.js';
+import devAnalytics from './routes/dev/analytics.js';
 
 dotenv.config();
 
@@ -135,6 +142,7 @@ app.use('/api/release', relRel);
 app.use('/api/patch', patchV, patchP);
 app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamTokens, iamSecrets, iamDevices);
 app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
+app.use('/api/dev', devApis, devKeys, devPlans, devGW, devHooks, devDocs, devAnalytics);
 
 const port = process.env.PORT || 4000;
 
