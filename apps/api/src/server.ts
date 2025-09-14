@@ -61,6 +61,13 @@ import prTime from './routes/payroll/time.js';
 import prRun from './routes/payroll/run.js';
 import prForms from './routes/payroll/forms.js';
 import p2pPay from './routes/p2p/payments.js';
+import foProv from './routes/finops/providers.js';
+import foCost from './routes/finops/cost.js';
+import foAlloc from './routes/finops/allocation.js';
+import foBud from './routes/finops/budgets.js';
+import foAnom from './routes/finops/anomaly.js';
+import foRecs from './routes/finops/recs.js';
+import foUnit from './routes/finops/unit.js';
 
 dotenv.config();
 
@@ -96,6 +103,7 @@ app.use('/api/sox', soxRCM, soxNarr, soxTests, soxDef, soxSoD, soxScope);
 app.use('/api/p2p', p2pV, p2pI, p2pReq, p2pPO, p2pRec, p2pAP, p2pPol, p2pPay);
 app.use('/api/expenses', expRep, expCard);
 app.use('/api/payroll', prEmp, prSched, prTime, prRun, prForms);
+app.use('/api/finops', foProv, foCost, foAlloc, foBud, foAnom, foRecs, foUnit);
 
 const port = process.env.PORT || 4000;
 

@@ -1,0 +1,14 @@
+name: FinOps Monthly (Allocation + Budgets + Recs + Report)
+on:
+  schedule: [{ cron: "10 4 1 * *" }]
+  workflow_dispatch:
+jobs:
+  finops-monthly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: curl -s -X POST -H 'Content-Type: application/json' -d "{\"period\":\"$(date +%Y-%m)\"}" http://localhost:4000/api/finops/allocation/run || true
+      - run: curl -s -X POST -H 'Content-Type: application/json' -d "{\"period\":\"$(date +%Y-%m)\"}" http://localhost:4000/api/finops/budgets/evaluate || true
+      - run: node scripts/finops/report.ts
