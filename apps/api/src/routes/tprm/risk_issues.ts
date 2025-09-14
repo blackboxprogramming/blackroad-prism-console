@@ -1,0 +1,11 @@
+import { Router } from 'express';
+import fs from 'fs';
+const r = Router(); const RISK='tprm/risk.json', ISS='data/tprm/issues.jsonl';
+const rRead=()=> fs.existsSync(RISK)? JSON.parse(fs.readFileSync(RISK,'utf-8')):{ risks:{} };
+const rWrite=(o:any)=>{ fs.mkdirSync('tprm',{recursive:true}); fs.writeFileSync(RISK, JSON.stringify(o,null,2)); };
+const append=(row:any)=>{ fs.mkdirSync('data/tprm',{recursive:true}); fs.appendFileSync(ISS, JSON.stringify(row)+'\n'); };
+const recent=()=> fs.existsSync(ISS)? fs.readFileSync(ISS,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[];
+r.post('/risk/score',(req,res)=>{ const o=rRead(); const v=req.body||{}; o.risks[v.vendorId]=v; rWrite(o); res.json({ ok:true }); });
+r.post('/issues/log',(req,res)=>{ append({ ts:Date.now(), ...req.body }); res.json({ ok:true }); });
+r.get('/issues/recent',(req,res)=>{ const vid=String(req.query.vendorId||''); const items=recent().reverse().filter((x:any)=>!vid||x.vendorId===vid).slice(0,200); res.json({ items }); });
+export default r;
