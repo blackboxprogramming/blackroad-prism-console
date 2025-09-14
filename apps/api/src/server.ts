@@ -99,7 +99,12 @@ import devPlans from './routes/dev/plans.js';
 import devGW from './routes/dev/gateway.js';
 import devHooks from './routes/dev/webhooks.js';
 import devDocs from './routes/dev/docs.js';
-import devAnalytics from './routes/dev/analytics.js';
+import expFS from './routes/exp/flags_segments.js';
+import expEX from './routes/exp/experiments.js';
+import expEV from './routes/exp/events.js';
+import expMT from './routes/exp/metrics.js';
+import expRG from './routes/exp/ramps_guardrails.js';
+import expAP from './routes/exp/approvals.js';
 
 dotenv.config();
 
@@ -142,7 +147,7 @@ app.use('/api/release', relRel);
 app.use('/api/patch', patchV, patchP);
 app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamTokens, iamSecrets, iamDevices);
 app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
-app.use('/api/dev', devApis, devKeys, devPlans, devGW, devHooks, devDocs, devAnalytics);
+app.use('/api/exp', expFS, expEX, expEV, expMT, expRG, expAP);
 
 const port = process.env.PORT || 4000;
 
