@@ -1,0 +1,12 @@
+name: Support Weekly (CSAT + KB)
+on:
+  schedule: [{ cron: "37 6 * * 1" }]
+  workflow_dispatch:
+jobs:
+  support-weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/support/csat_report.ts
