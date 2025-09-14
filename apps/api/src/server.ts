@@ -76,6 +76,13 @@ import relRel from './routes/release/rel.js';
 import patchV from './routes/patch/vuln.js';
 import patchP from './routes/patch/plan.js';
 import lic from './routes/cmdb/license.js';
+import mdmDomains from './routes/mdm/domains.js';
+import mdmRules from './routes/mdm/rules.js';
+import mdmStage from './routes/mdm/stage.js';
+import mdmMatch from './routes/mdm/match.js';
+import mdmMerge from './routes/mdm/merge.js';
+import mdmPublish from './routes/mdm/publish.js';
+import mdmXref from './routes/mdm/xref.js';
 
 dotenv.config();
 
@@ -116,6 +123,7 @@ app.use('/api/cmdb', cmdbCI, cmdbBase, lic);
 app.use('/api/change', changeCRQ, changeCal);
 app.use('/api/release', relRel);
 app.use('/api/patch', patchV, patchP);
+app.use('/api/mdm', mdmDomains, mdmRules, mdmStage, mdmMatch, mdmMerge, mdmPublish, mdmXref);
 
 const port = process.env.PORT || 4000;
 
