@@ -1,0 +1,13 @@
+name: Treasury Weekly (Recon + FX)
+on:
+  schedule: [{ cron: "5 11 * * 1" }]
+  workflow_dispatch:
+jobs:
+  tre-weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/tre/recon_report.ts
+      - run: node scripts/tre/fx_report.ts

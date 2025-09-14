@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import fs from 'fs';
+const r = Router(); const P='treasury/pooling.json', S='data/treasury/pool_settlements.jsonl';
+const read=()=> fs.existsSync(P)? JSON.parse(fs.readFileSync(P,'utf-8')):{ structure:[] };
+const write=(o:any)=>{ fs.mkdirSync('treasury',{recursive:true}); fs.writeFileSync(P, JSON.stringify(o,null,2)); };
+const append=(row:any)=>{ fs.mkdirSync('data/treasury',{recursive:true}); fs.appendFileSync(S, JSON.stringify(row)+'\n'); };
+r.post('/pooling/set',(req,res)=>{ write({ structure: req.body?.structure||[] }); res.json({ ok:true }); });
+r.get('/pooling/structure',(_req,res)=>{ res.json(read()); });
+r.post('/pooling/settle',(req,res)=>{ const row={ ts:Date.now(), date:req.body?.date||new Date().toISOString().slice(0,10), note:'stub settlement' }; append(row); res.json({ ok:true, row }); });
+export default r;
