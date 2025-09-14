@@ -3,7 +3,7 @@ import fs from 'fs';
 const r = Router(); const C='revrec/contracts.jsonl', A='revrec/allocations.jsonl', POL='revrec/policy.json';
 const contracts=()=> fs.existsSync(C)? fs.readFileSync(C,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[];
 const append=(f:string,row:any)=>{ fs.mkdirSync('revrec',{recursive:true}); fs.appendFileSync(f, JSON.stringify(row)+'\n'); };
-const policy=()=> fs.existsExists?{}: (fs.existsSync(POL)? JSON.parse(fs.readFileSync(POL,'utf-8')).policy : { ssp_method:'ratio' });
+const policy=()=> fs.existsSync(POL)? JSON.parse(fs.readFileSync(POL,'utf-8')).policy : { ssp_method:'ratio' };
 
 r.post('/allocate',(req,res)=>{
   const id=String(req.body?.contractId||''); const c=contracts().find((x:any)=>x.id===id); if(!c) return res.status(404).json({error:'not_found'});
