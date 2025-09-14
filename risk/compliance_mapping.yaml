@@ -1,0 +1,10 @@
+- framework: SOC2
+  control: CC6.1
+  internal_policy: 'Access control policy'
+  evidence:
+    - ev1
+- framework: ISO27001
+  control: A.9.2.6
+  internal_policy: 'User access review'
+  evidence:
+    - ev2
