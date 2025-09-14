@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.2.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.1.0...v1.2.0) (2025-09-14)
+
+
+### Features
+
+* add CPQ catalog pricing and orders ([#1468](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1468)) ([21cf80a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/21cf80a21f6a52d93a5b924bdfaa8dc906e1c6c0))
+* add enterprise admin controls ([#1459](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1459)) ([9a64126](https://github.com/blackboxprogramming/blackroad-prism-console/commit/9a64126d95ba5df14eba9a726494ea754c17284f))
+* add global scale and ux hardening ([#1449](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1449)) ([11752da](https://github.com/blackboxprogramming/blackroad-prism-console/commit/11752daae66f26b02935c8aea89b9a861137c347))
+* add observability and finops tooling ([#1441](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1441)) ([f00ff63](https://github.com/blackboxprogramming/blackroad-prism-console/commit/f00ff639e2415a780a3dd7ee7b2cab5c7a0ad89f))
+* add offline plm and manufacturing ops layer ([#1474](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1474)) ([5857a67](https://github.com/blackboxprogramming/blackroad-prism-console/commit/5857a6742218c5614c5e1fabd92dd03049a11445))
+* add SSO and governance utilities ([#1439](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1439)) ([82e3498](https://github.com/blackboxprogramming/blackroad-prism-console/commit/82e349837a01977e7662a43571bf64a0feac40d9))
+* **cpm:** add corporate performance management layer ([#1476](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1476)) ([bd12797](https://github.com/blackboxprogramming/blackroad-prism-console/commit/bd12797d05345713f3021c338603e9544ab51f34))
+* **exec-ops:** add okr kpi forecasting and dashboards ([#1453](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1453)) ([108501a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/108501a4e9e4154e8c5bf99e2d11eebe0427a748))
+* **product:** add roadmap and release management ([#1465](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1465)) ([ec7098f](https://github.com/blackboxprogramming/blackroad-prism-console/commit/ec7098fb09a4fbf659010f032de305cfc4a03f30))
+* **support:** add help center and support desk ([#1462](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1462)) ([432c79f](https://github.com/blackboxprogramming/blackroad-prism-console/commit/432c79f2b1dc36e3b0a207a96a2f3024d7bfe7c5))
+
+
+### Bug Fixes
+
+* correct route imports in test helper ([#1456](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1456)) ([d387815](https://github.com/blackboxprogramming/blackroad-prism-console/commit/d387815dad546aab22f2672a92ec0d0c0812b8d0))
+
 ## [1.1.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.0.0...v1.1.0) (2025-09-13)
 
 
