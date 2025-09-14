@@ -56,6 +56,13 @@ import p2pPol from './routes/p2p/policy.js';
 import expRep from './routes/expenses/reports.js';
 import expCard from './routes/expenses/cards.js';
 import p2pPay from './routes/p2p/payments.js';
+import psaProj from './routes/psa/projects.js';
+import psaTime from './routes/psa/time.js';
+import psaExp from './routes/psa/expense.js';
+import psaWip from './routes/psa/wip.js';
+import psaBill from './routes/psa/billing.js';
+import psaRev from './routes/psa/revenue.js';
+import psaAR from './routes/psa/ar.js';
 
 dotenv.config();
 
@@ -90,6 +97,7 @@ app.use('/api/cpm', cpmDrivers, cpmForecast, cpmVariance, cpmPacks);
 app.use('/api/sox', soxRCM, soxNarr, soxTests, soxDef, soxSoD, soxScope);
 app.use('/api/p2p', p2pV, p2pI, p2pReq, p2pPO, p2pRec, p2pAP, p2pPol, p2pPay);
 app.use('/api/expenses', expRep, expCard);
+app.use('/api/psa', psaProj, psaTime, psaExp, psaWip, psaBill, psaRev, psaAR);
 
 const port = process.env.PORT || 4000;
 

@@ -1,0 +1,13 @@
+name: PSA Monthly (Utilization & Margin)
+on:
+  schedule: [{ cron: "5 11 1 * *" }]
+  workflow_dispatch:
+jobs:
+  psa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/psa/utilization.ts
+      - run: node scripts/psa/margin_report.ts
