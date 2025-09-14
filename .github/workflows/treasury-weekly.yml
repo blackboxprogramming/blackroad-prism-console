@@ -1,0 +1,12 @@
+name: Treasury Weekly (ALM + Hedges)
+on:
+  schedule: [{ cron: "20 7 * * 1" }]
+  workflow_dispatch:
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/treasury/alm_gap.ts

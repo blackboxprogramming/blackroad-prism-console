@@ -36,6 +36,12 @@ import cpqQuotes from './routes/cpq/quotes.js';
 import cpqApprovals from './routes/cpq/approvals.js';
 import cpqOrders from './routes/cpq/orders.js';
 import cpqSubs from './routes/cpq/subscriptions.js';
+import trCash from './routes/treasury/cash.js';
+import trAlm from './routes/treasury/alm.js';
+import trMkt from './routes/treasury/market.js';
+import trCred from './routes/treasury/credit.js';
+import trHedge from './routes/treasury/hedges.js';
+import trPol from './routes/treasury/policy.js';
 
 dotenv.config();
 
@@ -66,6 +72,7 @@ app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
 app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
 app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
+app.use('/api/treasury', trCash, trAlm, trMkt, trCred, trHedge, trPol);
 
 const port = process.env.PORT || 4000;
 
