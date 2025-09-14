@@ -1,0 +1,13 @@
+import fs from 'fs';
+const N='data/cs/nps.jsonl';
+if (!fs.existsSync(N)) process.exit(0);
+const rows=fs.readFileSync(N,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l));
+const period=new Date().toISOString().slice(0,7);
+const scores=rows.filter((r:any)=> (r.ts && new Date(r.ts).toISOString().slice(0,7)===period) || (r.period===period)).map((r:any)=>Number(r.score||0));
+const promoters=scores.filter(s=>s>=Number(process.env.CS_NPS_PROMOTER||9)).length;
+const detractors=scores.filter(s=>s<=Number(process.env.CS_NPS_DETRACTOR||6)).length;
+const total=scores.length||1;
+const nps=((promoters/total)-(detractors/total))*100;
+const md = `# CS NPS ${period}\n\n- Responses: ${scores.length}\n- Promoters: ${promoters}\n- Detractors: ${detractors}\n- NPS: ${nps.toFixed(1)}\n`;
+fs.mkdirSync('cs/reports',{recursive:true}); fs.writeFileSync(`cs/reports/NPS_${period.replace('-','')}.md`, md);
+console.log('cs nps report written');

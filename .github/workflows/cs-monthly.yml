@@ -1,0 +1,12 @@
+name: CS Monthly (NPS + QBR Digest)
+on:
+  schedule: [{ cron: "35 7 1 * *" }]
+  workflow_dispatch:
+jobs:
+  cs-monthly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/cs/nps_report.ts

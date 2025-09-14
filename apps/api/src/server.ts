@@ -55,6 +55,13 @@ import p2pAP from './routes/p2p/ap.js';
 import p2pPol from './routes/p2p/policy.js';
 import expRep from './routes/expenses/reports.js';
 import expCard from './routes/expenses/cards.js';
+import csWeights from './routes/cs/weights.js';
+import csSignals from './routes/cs/signals.js';
+import csHealth from './routes/cs/health.js';
+import csPlay from './routes/cs/playbooks.js';
+import csOnb from './routes/cs/onboarding.js';
+import csQbr from './routes/cs/qbr.js';
+import csAlerts from './routes/cs/alerts.js';
 import p2pPay from './routes/p2p/payments.js';
 
 dotenv.config();
@@ -90,6 +97,7 @@ app.use('/api/cpm', cpmDrivers, cpmForecast, cpmVariance, cpmPacks);
 app.use('/api/sox', soxRCM, soxNarr, soxTests, soxDef, soxSoD, soxScope);
 app.use('/api/p2p', p2pV, p2pI, p2pReq, p2pPO, p2pRec, p2pAP, p2pPol, p2pPay);
 app.use('/api/expenses', expRep, expCard);
+app.use('/api/cs', csWeights, csSignals, csHealth, csPlay, csOnb, csQbr, csAlerts);
 
 const port = process.env.PORT || 4000;
 

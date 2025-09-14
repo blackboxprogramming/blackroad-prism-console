@@ -1,0 +1,12 @@
+name: CS Weekly (Health + Alerts)
+on:
+  schedule: [{ cron: "30 7 * * 1" }]
+  workflow_dispatch:
+jobs:
+  cs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/cs/health_score.ts
