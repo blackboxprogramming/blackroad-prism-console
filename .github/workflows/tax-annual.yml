@@ -1,0 +1,13 @@
+name: Tax Annual (1099/1042-S)
+on:
+  schedule: [{ cron: "50 7 5 1 *" }]
+  workflow_dispatch:
+jobs:
+  annual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/tax/build_1099.ts
+      - run: node scripts/tax/build_1042s.ts

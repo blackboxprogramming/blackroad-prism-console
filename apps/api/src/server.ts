@@ -40,6 +40,15 @@ import cpmDrivers from './routes/cpm/drivers.js';
 import cpmForecast from './routes/cpm/forecast.js';
 import cpmVariance from './routes/cpm/variance.js';
 import cpmPacks from './routes/cpm/packs.js';
+import taxJ from './routes/tax/jurisdictions.js';
+import taxT from './routes/tax/taxability.js';
+import taxQ from './routes/tax/quote.js';
+import taxN from './routes/tax/nexus.js';
+import taxP from './routes/tax/payees.js';
+import taxIRS from './routes/tax/irs.js';
+import taxFATCA from './routes/tax/fatca.js';
+import taxEINV from './routes/tax/einvoice.js';
+import taxFiles from './routes/tax/files.js';
 
 dotenv.config();
 
@@ -71,6 +80,7 @@ app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail)
 app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 app.use('/api/cpm', cpmDrivers, cpmForecast, cpmVariance, cpmPacks);
+app.use('/api/tax', taxJ, taxT, taxQ, taxN, taxP, taxIRS, taxFATCA, taxEINV, taxFiles);
 
 const port = process.env.PORT || 4000;
 

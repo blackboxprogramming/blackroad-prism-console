@@ -1,0 +1,13 @@
+name: Tax Monthly (Returns + E-Invoices)
+on:
+  schedule: [{ cron: "40 7 1 * *" }]
+  workflow_dispatch:
+jobs:
+  tax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/tax/reconcile_returns.ts
+      - run: node scripts/tax/einv_batch.ts
