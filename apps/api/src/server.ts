@@ -100,6 +100,12 @@ import devGW from './routes/dev/gateway.js';
 import devHooks from './routes/dev/webhooks.js';
 import devDocs from './routes/dev/docs.js';
 import devAnalytics from './routes/dev/analytics.js';
+import tprmV from './routes/tprm/vendors.js';
+import tprmQ from './routes/tprm/questionnaires.js';
+import tprmR from './routes/tprm/risk_issues.js';
+import tprmM from './routes/tprm/monitor_sla.js';
+import tprmMap from './routes/tprm/mapping.js';
+import tprmB from './routes/tprm/breach.js';
 
 dotenv.config();
 
@@ -143,6 +149,7 @@ app.use('/api/patch', patchV, patchP);
 app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamTokens, iamSecrets, iamDevices);
 app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
 app.use('/api/dev', devApis, devKeys, devPlans, devGW, devHooks, devDocs, devAnalytics);
+app.use('/api/tprm', tprmV, tprmQ, tprmR, tprmM, tprmMap, tprmB);
 
 const port = process.env.PORT || 4000;
 

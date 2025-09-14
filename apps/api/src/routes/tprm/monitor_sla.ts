@@ -1,0 +1,14 @@
+import { Router } from 'express';
+import fs from 'fs';
+const r = Router(); const MON='tprm/monitors.json', EVT='data/tprm/monitor_events.jsonl', SLA='tprm/sla.json';
+const mRead=()=> fs.existsSync(MON)? JSON.parse(fs.readFileSync(MON,'utf-8')):{ monitors:{} };
+const mWrite=(o:any)=>{ fs.mkdirSync('tprm',{recursive:true}); fs.writeFileSync(MON, JSON.stringify(o,null,2)); };
+const sRead=()=> fs.existsSync(SLA)? JSON.parse(fs.readFileSync(SLA,'utf-8')):{ sla:{} };
+const sWrite=(o:any)=>{ fs.mkdirSync('tprm',{recursive:true}); fs.writeFileSync(SLA, JSON.stringify(o,null,2)); };
+const append=(row:any)=>{ fs.mkdirSync('data/tprm',{recursive:true}); fs.appendFileSync(EVT, JSON.stringify(row)+'\n'); };
+const lines=()=> fs.existsSync(EVT)? fs.readFileSync(EVT,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[];
+r.post('/monitor/upsert',(req,res)=>{ const o=mRead(); const v=req.body||{}; o.monitors[v.vendorId]=v.monitors||[]; mWrite(o); res.json({ ok:true }); });
+r.post('/monitor/event',(req,res)=>{ append({ ts:req.body?.ts||Date.now(), ...req.body }); res.json({ ok:true }); });
+r.post('/sla/set',(req,res)=>{ const o=sRead(); const v=req.body||{}; o.sla[v.vendorId]=v; sWrite(o); res.json({ ok:true }); });
+r.get('/monitor/recent',(req,res)=>{ const vid=String(req.query.vendorId||''); const items=lines().reverse().filter((x:any)=>!vid||x.vendorId===vid).slice(0,200); res.json({ items }); });
+export default r;
