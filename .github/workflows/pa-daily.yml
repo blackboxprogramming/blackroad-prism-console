@@ -1,0 +1,13 @@
+name: Product Analytics Daily (Rollup + Alerts)
+on:
+  schedule: [{ cron: "5 13 * * *" }]
+  workflow_dispatch:
+jobs:
+  pa-daily:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/pa/rollup.ts
+      - run: curl -s -X POST -H 'Content-Type: application/json' -d "{\"period\":\"$(date +%Y-%m)\"}" http://localhost:4000/api/pa/alerts/run || true

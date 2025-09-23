@@ -127,6 +127,11 @@ import treSG from './routes/tre/signatories.js';
 import treFX from './routes/tre/fx.js';
 import treDB from './routes/tre/debt.js';
 import trePL from './routes/tre/pooling.js';
+import paSchema from './routes/pa/schema_keys.js';
+import paIngest from './routes/pa/ingest_identify.js';
+import paSessions from './routes/pa/sessions.js';
+import paFunnels from './routes/pa/funnels_cohorts.js';
+import paMetrics from './routes/pa/metrics_alerts.js';
 
 dotenv.config();
 
@@ -175,6 +180,7 @@ app.use('/api/okr', okrOK, okrCK);
 app.use('/api/ppm', ppmIN, ppmRM, ppmCP, ppmST);
 app.use('/api/portal', portalAnn, portalCh, portalPrefs, portalBan, portalI18n, portalSearch);
 app.use('/api/tre', treBA, treSR, trePF, trePY, treSG, treFX, treDB, trePL);
+app.use('/api/pa', paSchema, paIngest, paSessions, paFunnels, paMetrics);
 
 const port = process.env.PORT || 4000;
 
