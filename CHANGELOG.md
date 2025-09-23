@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.6.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.5.0...v1.6.0) (2025-09-23)
+
+
+### Features
+
+* add cmdb change release patch modules ([#1497](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1497)) ([4a36840](https://github.com/blackboxprogramming/blackroad-prism-console/commit/4a3684069e1343e9fe6589c74e0ec803bc53b84f))
+* add FinOps cost management layer ([#1495](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1495)) ([c841a9a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/c841a9a8a2e2d71b2baf7d5859c988a6b939d705))
+* add IAM zero trust layer ([#1500](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1500)) ([ee52229](https://github.com/blackboxprogramming/blackroad-prism-console/commit/ee5222966aae9abcdd607527cd7fc6f29ccb79c1))
+* add intranet portal communications hub ([#1515](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1515)) ([78ed729](https://github.com/blackboxprogramming/blackroad-prism-console/commit/78ed729930c42dedc1f55eca0f1446bf200d4322))
+* add okr and ppm modules ([#1518](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1518)) ([602ac57](https://github.com/blackboxprogramming/blackroad-prism-console/commit/602ac570f5b850fa3b46a85dabfa5b1afd28778f))
+* add product analytics telemetry layer ([#1525](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1525)) ([5d4f5f5](https://github.com/blackboxprogramming/blackroad-prism-console/commit/5d4f5f544cdfa52cb2f115d2ffbe111019ff459e))
+* add support desk module ([#1512](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1512)) ([1e063b0](https://github.com/blackboxprogramming/blackroad-prism-console/commit/1e063b09a7f5512d15cb343f322e5894a5168c4c))
+* add TPRM layer with vendors and risk ([#1509](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1509)) ([37ad682](https://github.com/blackboxprogramming/blackroad-prism-console/commit/37ad682c6c52e9586a985fe53e6b39174b136ae0))
+* **aiops:** add ML platform and risk management ([#1504](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1504)) ([9321644](https://github.com/blackboxprogramming/blackroad-prism-console/commit/9321644e41044c7f6d453457445968337af947e9))
+* **dev-portal:** add api platform and developer portal ([#1507](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1507)) ([8fab6dd](https://github.com/blackboxprogramming/blackroad-prism-console/commit/8fab6dd93cf32ecd5477f0d756f5d5138e76cc16))
+* **payroll:** add payroll layer with employees time pay runs ([#1491](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1491)) ([fd09490](https://github.com/blackboxprogramming/blackroad-prism-console/commit/fd09490c6556914ce4afd90bde3fff13fdd2e0bf))
+* **treasury:** add cash management layer ([#1520](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1520)) ([5356f83](https://github.com/blackboxprogramming/blackroad-prism-console/commit/5356f830a0728eedb0a7bb87e8606f10a538a114))
+
 ## [1.5.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.4.0...v1.5.0) (2025-09-14)
 
 
