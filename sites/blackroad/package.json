@@ -6,6 +6,7 @@
   "scripts": {
     "prebuild": "node ./scripts/build-docs.cjs && node ./scripts/build-blog.cjs",
     "dev": "vite",
+    "watch-content": "node ./scripts/watch-content.cjs",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx || true",
@@ -14,28 +15,33 @@
     "e2e": "playwright test || true"
   },
   "dependencies": {
-    "react": "^18.3.1",
+    "react": "^19.1.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.2",
+    "react-rnd": "10.5.2",
+    "react-router-dom": "7.8.2",
     "recharts": "^2.11.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.9.0",
     "@playwright/test": "^1.47.0",
+    "@size-limit/file": "^11.1.5",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^18.3.7",
     "@typescript-eslint/eslint-plugin": "^8.4.0",
     "@typescript-eslint/parser": "^8.4.0",
-    "@eslint/js": "^9.9.0",
-    "@types/react": "^18.3.4",
-    "@types/react-dom": "^18.3.0",
-    "eslint": "^9.9.0",
+    "@vitejs/plugin-react": "5.0.2",
+    "autoprefixer": "10.4.21",
+    "chokidar": "^3.6.0",
+    "eslint": "^9.34.0",
     "eslint-config-prettier": "^9.1.0",
     "gray-matter": "^4.0.3",
     "husky": "^9.1.5",
-    "marked": "^12.0.2",
+    "marked": "^16.2.1",
     "monaco-editor": "^0.49.0",
+    "postcss": "8.5.6",
     "prettier": "^3.3.3",
     "size-limit": "^11.1.5",
-    "@size-limit/file": "^11.1.5",
-    "tailwindcss": "^3.4.10",
-    "vite": "^5.4.2"
+    "tailwindcss": "3.4.17",
+    "vite": "^7.1.4"
   }
 }

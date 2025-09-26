@@ -1,0 +1,21 @@
+# FILE: /etc/systemd/system/lucidia-llm.service
+[Unit]
+Description=Lucidia LLM Stub (FastAPI)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/lucidia-llm
+ExecStart=/srv/lucidia-llm/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=3
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/srv/lucidia-llm
+
+[Install]
+WantedBy=multi-user.target

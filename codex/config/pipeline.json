@@ -1,0 +1,16 @@
+{
+  "github_repo": "blackboxprogramming/blackroad",
+  "droplet": {
+    "host": "root@droplet",
+    "repo_path": "/srv/blackroad"
+  },
+  "working_copy": {
+    "path": "/srv/working-copy"
+  },
+  "connectors": {
+    "salesforce": { "webhook": "" },
+    "airtable": { "webhook": "" },
+    "slack": { "webhook": "" },
+    "linear": { "webhook": "" }
+  }
+}

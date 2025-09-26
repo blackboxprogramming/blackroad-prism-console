@@ -1,0 +1,5 @@
+.theme-blackroad { --primary-gradient: var(--accent); }
+.theme-roadchain  { --primary-gradient: var(--accent-2); }
+.theme-roadview   { --primary-gradient: var(--accent); }
+.theme-homework   { --primary-gradient: var(--accent-3); }
+.theme-quest      { --primary-gradient: color-mix(in oklch, var(--accent) 50%, var(--accent-2)); }

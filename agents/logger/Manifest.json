@@ -1,0 +1,8 @@
+{
+  "name": "logger",
+  "description": "Minimal logging agent",
+  "capabilities": ["log", "contradiction"],
+  "ipc": "/prism/ipc/logger",
+  "log": "/prism/logs/logger.log",
+  "contradictions": "/prism/contradictions/logger.json"
+}

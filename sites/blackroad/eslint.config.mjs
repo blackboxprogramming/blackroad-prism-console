@@ -7,11 +7,14 @@ export default [
       "public/vendor/",
       ".tools/",
       ".github/",
-      "src/",
-      "tests/",
       "vite.config.js",
       "api/",
-      "scripts/"
+      "scripts/",
+      ".eslintrc.cjs",
+      "src/lib/",
+      "src/pages/",
+      "src/ui/",
+      "tests/"
     ]
   },
   {

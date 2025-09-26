@@ -1,0 +1,88 @@
+name: Publish model to Hugging Face
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo_id:
+        description: "Target HF repo (user-or-org/repo)"
+        required: true
+        default: "${{ github.repository_owner }}/my-model"
+      source_dir:
+        description: "Local folder to upload"
+        required: true
+        default: "models/my_model"
+      private:
+        description: "Make HF repo private? (true/false)"
+        required: false
+        default: "false"
+
+concurrency:
+  group: hf-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      HF_HUB_ENABLE_HF_TRANSFER: "1"
+    steps:
+      - name: Verify HF_TOKEN secret exists
+        run: |
+          if [ -z "${{ secrets.HF_TOKEN }}" ]; then
+            echo "Missing HF_TOKEN repo secret. Create one in Settings → Secrets and rerun."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "huggingface_hub>=0.25" hf_transfer
+
+      - name: Login + whoami
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'PY'
+          import os
+          from huggingface_hub import HfApi, login
+          tok = os.environ.get("HF_TOKEN")
+          assert tok, "HF_TOKEN missing"
+          login(tok)
+          who = HfApi().whoami()
+          print("HF whoami:", who)
+          PY
+
+      - name: Create repo (idempotent) + upload folder
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_REPO_ID: ${{ inputs.repo_id }}
+          SRC_DIR: ${{ inputs.source_dir }}
+          PRIVATE: ${{ inputs.private }}
+        run: |
+          python - <<'PY'
+          import os
+          from huggingface_hub import login, create_repo, upload_folder
+          tok = os.environ["HF_TOKEN"]
+          login(tok)
+          repo_id = os.environ["HF_REPO_ID"]
+          src     = os.environ["SRC_DIR"]
+          is_priv = os.environ.get("PRIVATE","false").lower()=="true"
+          create_repo(repo_id, repo_type="model", private=is_priv, exist_ok=True)
+          print(f"Uploading '{src}' -> {repo_id}")
+          upload_folder(
+            folder_path=src,
+            repo_id=repo_id,
+            repo_type="model",
+            commit_message="ci: publish to HF from GitHub Actions",
+            ignore_patterns=["**/__pycache__/**","*.ipynb_checkpoints/*",".DS_Store"]
+          )
+          print("✅ Upload complete.")
+          PY

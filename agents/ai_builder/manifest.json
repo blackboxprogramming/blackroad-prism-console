@@ -1,0 +1,6 @@
+{
+  "name": "ai_builder",
+  "version": "1.0.0",
+  "description": "ai_builder elite coding agent",
+  "capabilities": ["ping", "analyze", "codegen"]
+}

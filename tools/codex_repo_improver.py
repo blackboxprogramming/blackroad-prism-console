@@ -27,11 +27,17 @@ BASELINE_CONTENT: Dict[str, str] = {
 def ensure_file(path: Path, content: str) -> bool:
     """Create ``path`` with ``content`` if it does not already exist.
 
-    Returns ``True`` if a file was created.
+    Any missing parent directories are created automatically.  Returns
+    ``True`` if a file was created.
     """
 
     if path.exists():
         return False
+
+    # Ensure the parent directory exists so that nested files can be created
+    # without raising ``FileNotFoundError``.
+    path.parent.mkdir(parents=True, exist_ok=True)
+
     path.write_text(content, encoding="utf-8")
     return True
 
@@ -74,7 +80,11 @@ def main() -> None:
         print(f"Manifest not found: {manifest_path}")
         return
 
-    manifest = json.loads(manifest_path.read_text())
+    try:
+        manifest = json.loads(manifest_path.read_text())
+    except json.JSONDecodeError as exc:
+        print(f"Failed to parse manifest: {exc}")
+        return
 
     total_changes: Dict[str, List[str]] = {}
     for repo in manifest.get("repos", []):

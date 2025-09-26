@@ -1,13 +1,19 @@
 # Purpose: Clone/pull many repos declared in config/repos.json and emit a manifest for Lucidia.
 # Usage:   python3 tools/codex_multi_repo_loader.py [--config config/repos.json]
 # Notes:   Supports SSH (with optional key) or HTTPS (with or without token).
-import argparse, json, os, subprocess, sys, shutil
-from pathlib import Path
+import argparse
+import json
+import os
+import subprocess
+import sys
 from datetime import datetime
+from pathlib import Path
 
 
 def run(cmd, cwd=None, env=None):
-    p = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    p = subprocess.Popen(
+        cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+    )
     out, _ = p.communicate()
     if p.returncode != 0:
         raise RuntimeError(f"Command failed ({' '.join(cmd)}):\n{out}")
@@ -38,12 +44,14 @@ def build_env(cfg):
     return env
 
 
-def tokenize_url(url: str, token: str):
+def tokenize_url(url: str, token: str) -> str:
     """Return a token-authenticated HTTPS URL.
 
-    If ``token`` is empty or ``None`` the original ``url`` is returned
-    unchanged.  This guards against creating URLs with an empty username
-    portion such as ``https://@github.com/...`` which Git would reject.
+    The function embeds ``token`` as the username portion of an HTTPS
+    repository URL.  URLs that are not HTTPS, already contain user
+    information, or are provided an empty ``token`` are returned
+    unchanged.  This avoids producing malformed URLs such as
+    ``https://@github.com/...`` or double-userinfo segments.
 
     Parameters
     ----------
@@ -59,12 +67,22 @@ def tokenize_url(url: str, token: str):
         token authentication is not applicable.
     """
 
-    # Only HTTPS URLs can be tokenized; others (e.g. SSH) are returned as-is.
-    if not url.startswith("https://") or not token:
+    from urllib.parse import urlparse, urlunparse
+
+    if not token:
         return url
 
-    parts = url.split("https://", 1)[1]
-    return f"https://{token}@{parts}"
+    parsed = urlparse(url)
+    if parsed.scheme != "https" or not parsed.netloc:
+        return url
+
+    # If credentials are already present, leave the URL unchanged to
+    # prevent introducing a second username segment.
+    if "@" in parsed.netloc:
+        return url
+
+    netloc = f"{token}@{parsed.netloc}"
+    return urlunparse(parsed._replace(netloc=netloc))
 
 
 def repo_state(repo_dir: Path):
@@ -97,7 +115,7 @@ def clone_or_pull(repo, base_dir: Path, cfg, env):
         if shallow:
             clone_cmd += ["--depth", "1", "--no-single-branch"]
         clone_cmd += [final_url, str(repo_dir)]
-        out = run(clone_cmd, env=env)
+        run(clone_cmd, env=env)
         action = "cloned"
     else:
         # existing repo: fetch + checkout + pull
@@ -115,7 +133,7 @@ def clone_or_pull(repo, base_dir: Path, cfg, env):
                 run(["git", "fetch", "--depth", "50", "origin", branch], cwd=repo_dir, env=env)
             except Exception:
                 pass
-        out = run(pull_args, cwd=repo_dir, env=env)
+        run(pull_args, cwd=repo_dir, env=env)
         action = "updated"
 
     sha, br = repo_state(repo_dir)
@@ -127,7 +145,7 @@ def clone_or_pull(repo, base_dir: Path, cfg, env):
         "url": url,
         "auth": auth,
         "read_only": bool(repo.get("read_only", False)),
-        "action": action
+        "action": action,
     }
 
 
@@ -165,7 +183,7 @@ def main():
         "generated_at": datetime.utcnow().isoformat() + "Z",
         "base_dir": str(base.resolve()),
         "repos": results,
-        "errors": errors
+        "errors": errors,
     }
 
     out_dir = Path("runtime/manifests")

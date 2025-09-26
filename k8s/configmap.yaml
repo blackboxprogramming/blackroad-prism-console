@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prism-config
+  namespace: prism
+data:
+  DATABASE_PATH: "/data/blackroad.db"
+  MATH_OUTPUT_DIR: "/output"
+  NODE_ENV: "production"

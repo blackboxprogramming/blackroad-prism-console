@@ -1,0 +1,7 @@
+{
+  "slug": "deploying-with-confidence",
+  "title": "Deploying with Confidence",
+  "date": "2025-05-29",
+  "description": "How consistent automation keeps releases steady.",
+  "html": "<p>Even small deployments benefit from consistent tooling. By scripting checks and builds, we catch issues early and ship with confidence.</p>\n"
+}

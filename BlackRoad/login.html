@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login · BlackRoad</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h1>Login</h1>
+    </header>
+    <main>
+      <form onsubmit="handleLogin(event)">
+        <div>
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" />
+        </div>
+        <div>
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" />
+        </div>
+        <button type="submit">Sign In</button>
+        <p>
+          <small
+            >Development credentials: user=blackboxprogramming,
+            pass=Codex2025</small
+          >
+        </p>
+      </form>
+    </main>
+    <footer>
+      <p>&copy; 2024 BlackRoad Inc.</p>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "slug": "hello-blackroad",
+  "title": "Hello, BlackRoad",
+  "date": "2025-08-15",
+  "description": "What BlackRoad.io ships today and what's coming next.",
+  "html": "<p>Welcome to <strong>BlackRoad.io</strong> — a flag-aware, bot-powered dev workflow.</p>\n<ul>\n<li>PR Previews on GitHub Pages, Vercel, and Cloudflare Pages.</li>\n<li>Uptime JSON + daily screenshots.</li>\n<li>ChatOps to deploy, toggle flags, and snapshot on demand.</li>\n</ul>\n<p>Stay tuned for per-PR screenshot diffs and more content automation.</p>\n"
+}

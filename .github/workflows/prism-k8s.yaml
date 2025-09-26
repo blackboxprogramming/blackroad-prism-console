@@ -1,0 +1,79 @@
+name: Prism Kubernetes Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'k8s/**'
+      - '.github/workflows/prism-k8s.yaml'
+      - 'lucidia-llm/**'
+      - 'lucidia_math_lab/**'
+      - 'nginx/**'
+      - 'server_full.js'
+      - 'package.json'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build API image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/api:latest
+
+      - name: Build LLM image
+        uses: docker/build-push-action@v5
+        with:
+          context: lucidia-llm
+          push: true
+          tags: ghcr.io/${{ github.repository }}/llm:latest
+
+      - name: Build Math image
+        uses: docker/build-push-action@v5
+        with:
+          context: lucidia_math_lab
+          push: true
+          tags: ghcr.io/${{ github.repository }}/math:latest
+
+      - name: Build Nginx image
+        uses: docker/build-push-action@v5
+        with:
+          context: nginx
+          push: true
+          tags: ghcr.io/${{ github.repository }}/nginx:latest
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.29.0
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+
+      - name: Apply manifests
+        run: kubectl apply -f k8s/
+
+      - name: Rollout restart
+        run: |
+          kubectl rollout restart deployment/api -n prism
+          kubectl rollout restart deployment/llm -n prism
+          kubectl rollout restart deployment/math -n prism
+          kubectl rollout restart deployment/nginx -n prism

@@ -2,23 +2,117 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import argparse
+import logging
+import sys
 import subprocess
-from typing import List
+from dataclasses import dataclass
+from subprocess import CalledProcessError
+from typing import Dict, List
 
 
 @dataclass
 class CleanupBot:
-    """Delete local and remote branches after merges."""
+    """Delete local and remote branches after merges.
+
+    Attributes:
+        branches: Branch names to remove.
+        dry_run: If True, print commands instead of executing them.
+    """
 
     branches: List[str]
+    dry_run: bool = False
 
-    def cleanup(self) -> None:
-        """Remove the configured branches locally and remotely."""
+    @staticmethod
+    def merged_branches(base: str = "main") -> List[str]:
+        """Return names of branches merged into ``base``.
+
+        Args:
+            base: Branch to compare against.
+
+        Returns:
+            List of merged branch names excluding ``base`` and ``HEAD``.
+        """
+        result = subprocess.run(
+            ["git", "branch", "--merged", base],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        branches: List[str] = []
+        for line in result.stdout.splitlines():
+            name = line.strip().lstrip("*").strip()
+            if name and name not in {base, "HEAD"}:
+                branches.append(name)
+        return branches
+
+    @classmethod
+    def from_merged(cls, base: str = "main", dry_run: bool = False) -> "CleanupBot":
+        """Create a bot targeting branches merged into ``base``."""
+        return cls(branches=cls.merged_branches(base), dry_run=dry_run)
+
+    def _run(self, *cmd: str) -> None:
+        """Run a command unless in dry-run mode."""
+        if self.dry_run:
+            logging.info("DRY-RUN: %s", " ".join(cmd))
+            return
+        subprocess.run(cmd, check=True)
+
+    def delete_branch(self, branch: str) -> bool:
+        """Delete a branch locally and remotely.
+
+        Args:
+            branch: The branch name to remove.
+
+        Returns:
+            True if the branch was deleted locally and remotely, False otherwise.
+        """
+        try:
+            self._run("git", "branch", "-D", branch)
+            self._run("git", "push", "origin", "--delete", branch)
+            return True
+        except CalledProcessError:
+            return False
+
+    def cleanup(self) -> Dict[str, bool]:
+        """Remove the configured branches locally and remotely.
+
+        Returns:
+            Mapping of branch names to deletion success.
+        """
+        results: Dict[str, bool] = {}
         for branch in self.branches:
-            subprocess.run(["git", "branch", "-D", branch], check=True)
-            subprocess.run(["git", "push", "origin", "--delete", branch], check=True)
+            results[branch] = self.delete_branch(branch)
+        return results
+
+
+def main(argv: List[str] | None = None) -> int:
+    """Entry point for the CleanupBot CLI."""
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--base",
+        default="main",
+        help="Base branch to compare against",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show commands without executing them",
+    )
+    args = parser.parse_args(argv)
+
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
+
+    bot = CleanupBot.from_merged(base=args.base, dry_run=args.dry_run)
+    results = bot.cleanup()
+    for branch, deleted in results.items():
+        status = "deleted" if deleted else "failed"
+        logging.info("%s: %s", branch, status)
+
+    return 0 if all(results.values()) else 1
 
 
 if __name__ == "__main__":
-    print("CleanupBot ready to delete branches.")
+    sys.exit(main())
+

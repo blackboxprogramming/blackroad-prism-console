@@ -9,7 +9,10 @@ const OUT = path.join(process.cwd(), 'sites', 'blackroad', 'public', 'blog');
 if (!fs.existsSync(SRC)) {
   fs.rmSync(OUT, { recursive: true, force: true });
   fs.mkdirSync(OUT, { recursive: true });
-  fs.writeFileSync(path.join(OUT, 'index.json'), JSON.stringify({ posts: [] }, null, 2));
+  fs.writeFileSync(
+    path.join(OUT, 'index.json'),
+    JSON.stringify({ posts: [] }, null, 2)
+  );
   process.exit(0);
 }
 function walk(d) {
@@ -34,9 +37,24 @@ for (const fp of walk(SRC)) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '') || 'post';
   const html = marked.parse(content);
-  const item = { slug, title, date: data.date || '' };
+  const item = {
+    slug,
+    title,
+    date: data.date || '',
+    description: data.description || '',
+  };
   posts.push(item);
-  fs.writeFileSync(path.join(OUT, `${slug}.json`), JSON.stringify({ ...item, html }, null, 2));
+  fs.writeFileSync(
+    path.join(OUT, `${slug}.json`),
+    JSON.stringify({ ...item, html }, null, 2)
+  );
+  fs.writeFileSync(
+    path.join(OUT, `${slug}.html`),
+    `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title></head><body>${html}</body></html>`
+  );
 }
 posts.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-fs.writeFileSync(path.join(OUT, 'index.json'), JSON.stringify({ posts }, null, 2));
+fs.writeFileSync(
+  path.join(OUT, 'index.json'),
+  JSON.stringify({ posts }, null, 2)
+);

@@ -6,6 +6,7 @@ import os
 import sqlite3
 import time
 import uuid
+import urllib.request
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
@@ -16,13 +17,15 @@ from .puzzles import simulate_chsh
 # Block outbound network access except localhost
 import socket
 
+ALLOWED_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
 
 def _guard_network() -> None:
     real_create = socket.create_connection
 
     def guarded(address, *args, **kwargs):
         host, *_ = address
-        if host not in {"127.0.0.1", "localhost"}:
+        if host not in ALLOWED_HOSTS:
             raise RuntimeError("Network access disabled")
         return real_create(address, *args, **kwargs)
 
@@ -33,6 +36,7 @@ _guard_network()
 
 API_TOKEN = os.getenv("QUANTUM_API_TOKEN")
 DB_PATH = Path(__file__).with_name("sessions.db")
+BACKEND_URL = os.getenv("PRISM_BACKEND_URL", "http://127.0.0.1:4000")
 
 app = FastAPI(title="Quantum Lab", version="0.1", docs_url=None)
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", "dev-secret"))
@@ -80,4 +84,20 @@ async def chsh_simulate(
     summary = simulate_chsh(shots=shots, noise_p=noise_p, seed=seed)
     session_id = request.session.get("session_id", "unknown")
     _log_session(session_id, summary)
+    if summary.get("S_estimate", 0) > 2:
+        _report_contradiction(f"CHSH violation detected: S={summary['S_estimate']:.3f}")
     return summary
+
+
+def _report_contradiction(description: str) -> None:
+    """Post a contradiction to the Prism backend."""
+    try:
+        data = json.dumps({"module": "lucidia-math", "description": description}).encode()
+        req = urllib.request.Request(
+            f"{BACKEND_URL}/api/contradictions",
+            data=data,
+            headers={"Content-Type": "application/json"},
+        )
+        urllib.request.urlopen(req, timeout=2)
+    except Exception:  # noqa: BLE001
+        pass

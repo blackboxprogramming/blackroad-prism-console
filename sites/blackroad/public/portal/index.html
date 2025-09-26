@@ -31,7 +31,11 @@
       <h1>Portals</h1>
       <p class="muted">Jump into any portal. (Main app at <a href="/">/</a>.)</p>
       <div class="grid" id="grid"></div>
+      <h2 style="margin:40px 0 12px">Asset Creator</h2>
+      <p class="muted" style="margin:0 0 12px">Type a command to simulate assets.</p>
+      <div id="assetCreator"></div>
     </div>
+    <script src="asset-creator.js"></script>
     <script>
       const portals = [
         { name: "Roadbook",  desc: "Trip journals, maps, and itineraries.", href: "/portal/roadbook" },
@@ -41,6 +45,7 @@
         { name: "Roadcoin",  desc: "Wallet, staking, and token economy.", href: "/portal/roadcoin" },
         { name: "Roadchain", desc: "On-chain proofs, explorer, and indexer.", href: "/portal/roadchain" },
         { name: "Radius",    desc: "Local meetups and events nearby.", href: "/portal/radius" },
+        { name: "Bot",       desc: "Task states and stats dashboard.", href: "/portal/bot" },
       ];
       const el = document.getElementById('grid');
       el.innerHTML = portals.map(p => `
@@ -50,6 +55,7 @@
           <a href="${p.href}" aria-label="Open ${p.name}">Open →</a>
         </article>
       `).join('');
+      initAssetCreator(document.getElementById('assetCreator'));
     </script>
   </body>
 </html>

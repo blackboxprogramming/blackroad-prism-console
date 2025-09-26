@@ -3,16 +3,18 @@
 This server exposes simple tools to interact with a locally running
 `ollama` instance. Only models present in the allow-list are accepted.
 """
+
 from __future__ import annotations
 
 import os
 from typing import Any, Dict, List
 
-
 try:
     import requests
 except Exception:  # pragma: no cover - requests may be optional
     requests = None  # type: ignore
+
+session = requests.Session() if requests else None
 
 try:
     from mcp.server import Server as MCPServer
@@ -34,10 +36,10 @@ def _check_model(model: str) -> None:
 
 
 def _post(endpoint: str, payload: Dict[str, Any]) -> Dict[str, Any]:
-    if requests is None:
+    if session is None:
         raise RuntimeError("requests not installed")
     url = f"{OLLAMA_URL}/{endpoint}"
-    response = requests.post(url, json=payload, timeout=TIMEOUT)
+    response = session.post(url, json=payload, timeout=TIMEOUT)
     response.raise_for_status()
     return response.json()
 
@@ -64,6 +66,25 @@ if server:
         _check_model(model)
         data = _post("api/embed", {"model": model, "input": text})
         return data.get("embedding", [])
+
+
+def complete_code(model: str, prompt: str, language: str = "python") -> str:
+    """Return a code completion for ``prompt`` in ``language`` using ``model``."""
+    _check_model(model)
+    full_prompt = f"# language: {language}\n{prompt}"
+    data = _post(
+        "api/generate",
+        {
+            "model": model,
+            "prompt": full_prompt,
+            "options": {"num_predict": 256, "temperature": 0.0},
+        },
+    )
+    return data.get("response", "")
+
+
+if server:
+    complete_code = server.tool()(complete_code)
 
 
 def main() -> None:

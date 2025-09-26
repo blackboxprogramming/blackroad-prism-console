@@ -1,0 +1,10 @@
+[Unit]
+Description=Run network connectivity watchdog every minute
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+Unit=network-watch.service
+
+[Install]
+WantedBy=timers.target

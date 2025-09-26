@@ -22,6 +22,20 @@ def test_solve_algebraic_with_dummy():
 
     result = condor_engine.solve_algebraic(Dummy, a=1)
     assert result == {"x": 1}
+
+
+def test_solve_algebraic_requires_condor_for_real_models(monkeypatch):
+    class FakeCondorModel:
+        def solve(self):
+            return {"x": 1}
+
+    FakeCondorModel.__module__ = "condor.fake"
+
+    monkeypatch.setattr(condor_engine, "condor", None)
+    with pytest.raises(RuntimeError, match="Condor is not installed"):
+        condor_engine.solve_algebraic(FakeCondorModel)
+
+
 def test_validate_model_source_allows_basic_imports():
     src = """
 import math
@@ -51,4 +65,4 @@ class Example:
     cls = condor_engine.load_model_from_source(src, "Example")
     condor_engine.condor = object()  # type: ignore
     result = condor_engine.solve_algebraic(cls)
-    assert result == {'x': 1}
+    assert result == {"x": 1}

@@ -1,0 +1,10 @@
+flask==3.0.3
+flask-socketio==5.3.6
+gunicorn==21.2.0
+numpy
+sympy
+matplotlib
+networkx
+flask
+flask-socketio
+gunicorn

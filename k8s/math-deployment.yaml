@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: math
+  namespace: prism
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: math
+  template:
+    metadata:
+      labels:
+        app: math
+    spec:
+      containers:
+        - name: math
+          image: ghcr.io/blackroad-prism/lucidia-math:latest
+          ports:
+            - containerPort: 9000
+          envFrom:
+            - configMapRef:
+                name: prism-config
+            - secretRef:
+                name: prism-secrets
+          volumeMounts:
+            - name: math-output
+              mountPath: /output
+      volumes:
+        - name: math-output
+          persistentVolumeClaim:
+            claimName: math-output-pvc
