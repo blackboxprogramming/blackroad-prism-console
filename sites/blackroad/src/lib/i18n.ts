@@ -1,5 +1,6 @@
-export type Locale = 'en' | 'es'
-export const locales: Locale[] = ['en', 'es']
+export type Locale = 'en' | 'es';
+export const locales: Locale[] = ['en', 'es'];
+
 const dict = {
   en: {
     title: 'blackroad.io',
@@ -23,7 +24,7 @@ const dict = {
     footer: '© {year} blackroad',
     loading: 'Loading…',
     noPosts: 'No posts yet.',
-    noDocs: 'No docs yet.'
+    noDocs: 'No docs yet.',
   },
   es: {
     title: 'blackroad.io',
@@ -47,29 +48,38 @@ const dict = {
     footer: '© {year} blackroad',
     loading: 'Cargando…',
     noPosts: 'Sin artículos por ahora.',
-    noDocs: 'Sin documentos todavía.'
-  }
-} as const
+    noDocs: 'Sin documentos todavía.',
+  },
+} as const;
 
-let _locale: Locale = 'en'
-export function getLocale(): Locale { return _locale }
-export function setLocale(l: Locale) { _locale = l }
-export function t<K extends keyof typeof dict['en']>(key: K, vars?: Record<string, string | number>) {
-  const table = dict[_locale] ?? dict.en
-  const s = (table[key] ?? (dict.en as any)[key] ?? String(key)) as string
-  return vars ? Object.keys(vars).reduce((acc, k) => acc.replace(new RegExp(`\\{${k}\\}`,'g'), String(vars[k])), s) : s
+let _locale: Locale = 'en';
+export function getLocale(): Locale {
+  return _locale;
 }
+export function setLocale(l: Locale) {
+  _locale = l;
+}
+
+export function t<K extends keyof (typeof dict)['en']>(
+  key: K,
+  vars?: Record<string, string | number>
+) {
+  const table = dict[_locale] ?? dict.en;
+  const s = (table[key] ?? (dict.en as any)[key] ?? String(key)) as string;
+  return vars
+    ? Object.keys(vars).reduce(
+        (acc, k) => acc.replace(new RegExp(`\\{${k}\\}`, 'g'), String(vars[k])),
+        s
+      )
+    : s;
+}
+
 export function localeFromPath(pathname: string): Locale {
-  const m = pathname.split('/').filter(Boolean)[0]
-  return (m === 'es' ? 'es' : 'en')
+  const m = pathname.split('/').filter(Boolean)[0];
+  return m === 'es' ? 'es' : 'en';
 }
+
 export function withPrefix(path: string, l: Locale = _locale) {
-  const clean = path.startsWith('/') ? path : `/${path}`
-  return l === 'en' ? clean : `/${l}${clean === '/' ? '' : clean}`
-const dict = {
-  en: { title: 'blackroad.io', quickCommands: 'Quick Commands' },
-  es: { title: 'blackroad.io', quickCommands: 'Comandos Rápidos' },
-};
-export function t(key: keyof (typeof dict)['en'], lang: 'en' | 'es' = 'en') {
-  return (dict[lang] && (dict as any)[lang][key]) || dict.en[key] || String(key);
+  const clean = path.startsWith('/') ? path : `/${path}`;
+  return l === 'en' ? clean : `/${l}${clean === '/' ? '' : clean}`;
 }

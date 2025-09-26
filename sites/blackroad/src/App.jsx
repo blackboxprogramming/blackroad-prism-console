@@ -5,7 +5,7 @@ import Canvas from "./pages/Canvas.jsx";
 import Editor from "./pages/Editor.jsx";
 import Terminal from "./pages/Terminal.jsx";
 import RoadView from "./pages/RoadView.jsx";
-import BackRoad from "./pages/BackRoad.jsx";
+import Backroad from "./pages/Backroad.jsx";
 import Subscribe from "./pages/Subscribe.jsx";
 import Lucidia from "./pages/Lucidia.jsx";
 import InfinityMath from "./pages/InfinityMath.jsx";
@@ -59,7 +59,7 @@ function LegacyApp(){
           <NavLink className="nav-link" to="/editor">Editor</NavLink>
           <NavLink className="nav-link" to="/terminal">Terminal</NavLink>
           <NavLink className="nav-link" to="/roadview">RoadView</NavLink>
-          <NavLink className="nav-link" to="/backroad">BackRoad</NavLink>
+          <NavLink className="nav-link" to="/backroad">Backroad</NavLink>
           <NavLink className="nav-link" to="/agents">Agents</NavLink>
           <NavLink className="nav-link" to="/subscribe">Subscribe</NavLink>
           <NavLink className="nav-link" to="/lucidia">Lucidia</NavLink>
@@ -93,7 +93,7 @@ function LegacyApp(){
             <Route path="/editor" element={<Editor/>} />
             <Route path="/terminal" element={<Terminal/>} />
             <Route path="/roadview" element={<RoadView/>} />
-            <Route path="/backroad" element={<BackRoad/>} />
+            <Route path="/backroad" element={<Backroad/>} />
             <Route path="/agents" element={<Agents/>} />
             <Route path="/subscribe" element={<Subscribe/>} />
             <Route path="/lucidia" element={<Lucidia/>} />
@@ -103,7 +103,7 @@ function LegacyApp(){
             <Route path="editor" element={<Editor/>} />
             <Route path="terminal" element={<Terminal/>} />
             <Route path="roadview" element={<RoadView/>} />
-            <Route path="backroad" element={<BackRoad/>} />
+            <Route path="backroad" element={<Backroad/>} />
             <Route path="subscribe" element={<Subscribe/>} />
             <Route path="lucidia" element={<Lucidia/>} />
             <Route path="math" element={<InfinityMath/>} />

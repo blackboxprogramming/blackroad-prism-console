@@ -1,0 +1,7 @@
+{
+  "slug": "per-pr-screenshot-diffs",
+  "title": "Per-PR Screenshot Diffs",
+  "date": "2025-08-17",
+  "description": "Automated per-PR screenshot comparisons catch visual regressions before merging.",
+  "html": "<p>BlackRoad.io now generates per-PR screenshot diffs to spot UI changes early.\nWhen a pull request touches the site, a workflow captures images from the base\nbranch and the proposed changes, then reports a mismatch percentage and a diff\nimage back on the PR.</p>\n<p>Developers get instant visual feedback while ChatOps commands keep caches warm\nand snapshots fresh.</p>\n"
+}

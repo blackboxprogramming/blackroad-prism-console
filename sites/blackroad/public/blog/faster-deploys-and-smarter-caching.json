@@ -1,0 +1,7 @@
+{
+  "slug": "faster-deploys-and-smarter-caching",
+  "title": "Faster Deploys and Smarter Caching",
+  "date": "2025-08-16",
+  "description": "BlackRoad.io now deploys faster and keeps content fresh via daily cache warmers.",
+  "html": "<p>BlackRoad.io&#39;s infrastructure just got an upgrade. Deployment commands now kick off CDN cache warmers, ensuring that fresh content is served worldwide within minutes.</p>\n<ul>\n<li><code>/deploy blackroad pages</code> still ships builds to GitHub Pages.</li>\n<li>The new <code>/cache warm</code> command preloads critical routes and snapshots them for diffs.</li>\n</ul>\n<p>These automation tweaks help maintain rapid, reliable releases with minimal manual oversight.</p>\n"
+}

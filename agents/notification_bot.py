@@ -22,7 +22,13 @@ class NotificationBot:
         """Post ``message`` to the configured webhook."""
         if not self.webhook_url:
             raise ValueError("webhook_url not configured")
-        response = requests.post(self.webhook_url, json={"text": message}, timeout=10)
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        response = requests.post(
+            self.webhook_url, json={"text": message}, headers=headers, timeout=10
+        )
         response.raise_for_status()
 
 

@@ -27,7 +27,6 @@
 
 ### (b) Duplicate or Outdated Configs
 
-- `eslint.config.cjs` duplicates `.eslintrc.cjs`.
 - Multiple environment samples in repo root (`.env.example`, `.env.local.example`, `.env.docker.example`).
 - Duplicate `package.json` inside `srv/blackroad-api/`.
 

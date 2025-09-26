@@ -1,0 +1,7 @@
+{
+  "slug": "hello-world",
+  "title": "Hello World",
+  "date": "2025-08-18",
+  "description": "A simple hello world post.",
+  "html": "<p>Welcome to <strong>Hello World</strong> on BlackRoad.io.</p>\n<p>This post is a placeholder demonstrating how to add content to the site.</p>\n"
+}

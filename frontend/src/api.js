@@ -115,6 +115,8 @@ export async function runCodex(prompt){
 export async function fetchCodexHistory(){
   const { data } = await axios.get(`${API_BASE}/api/codex/history`)
   return data.runs
+}
+
 export async function fetchRoadbookChapters(){
   const { data } = await axios.get(`${API_BASE}/api/roadbook/chapters`)
   return data.chapters
@@ -128,9 +130,13 @@ export async function fetchRoadbookChapter(id){
 export async function searchRoadbook(term){
   const { data } = await axios.get(`${API_BASE}/api/roadbook/search`, { params: { q: term } })
   return data.results
+}
+
 export async function fetchRoadviewStreams(){
   const { data } = await axios.get(`${API_BASE}/api/roadview/list`)
   return data.streams
+}
+
 export async function fetchManifesto(){
   const { data } = await axios.get(`${API_BASE}/api/manifesto`)
   return data.content
@@ -144,6 +150,11 @@ export async function fetchAutohealEvents(){
 export async function postAutohealEscalation(note){
   const { data } = await axios.post(`${API_BASE}/api/autoheal/escalations`, { note })
   return data.event
+}
+
+export async function infer(x, y){
+  const { data } = await axios.post(`${API_BASE}/api/mini/infer`, { x, y })
+  return data
 }
 
 export { API_BASE }

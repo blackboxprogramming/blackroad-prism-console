@@ -1,9 +1,10 @@
 // FILE: app/chat/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
+import { saveSession, getCurrentSession } from '../../lib/sessionEngine';
 
 export default function ChatPage() {
   const { messages, sendMessage, addToolResult, status, error } = useChat({
@@ -21,11 +22,27 @@ export default function ChatPage() {
   });
 
   const [input, setInput] = useState('');
+  const [initialMessages, setInitialMessages] = useState<any[]>([]);
+
+  useEffect(() => {
+    const session = getCurrentSession();
+    if (session) {
+      setInitialMessages(session.chat || []);
+    }
+  }, []);
+
+  const allMessages = [...initialMessages, ...messages];
+
+  function handleSave() {
+    const name = prompt('Session name?');
+    if (!name) return;
+    saveSession(name, { chat: allMessages, files: [], assets: [] });
+  }
 
   return (
     <main className="p-6 max-w-3xl mx-auto space-y-4">
       <div className="space-y-3">
-        {messages.map(m => (
+        {allMessages.map((m: any) => (
           <div key={m.id} className="text-sm leading-relaxed">
             <b>{m.role}:</b>{' '}
             {m.parts.map((part, i) => {
@@ -51,6 +68,10 @@ export default function ChatPage() {
 
       {status === 'error' && <div className="text-red-600">{String(error)}</div>}
 
+      <div className="flex gap-2">
+        <button onClick={handleSave} className="border rounded px-3 py-2">Save Session</button>
+      </div>
+
       <form
         onSubmit={e => {
           e.preventDefault();
@@ -59,7 +80,6 @@ export default function ChatPage() {
             setInput('');
           }
         }}
-        onSubmit={e => { e.preventDefault(); if (input.trim()) { sendMessage({ text: input }); setInput(''); } }}
         className="flex gap-2"
       >
         <input

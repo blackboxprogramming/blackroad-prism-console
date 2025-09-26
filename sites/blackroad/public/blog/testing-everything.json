@@ -1,0 +1,7 @@
+{
+  "slug": "testing-everything",
+  "title": "Testing Everything",
+  "date": "2025-08-19",
+  "description": "Why consistent tests keep BlackRoad stable.",
+  "html": "<p>Automated tests ensure our systems remain robust as we build new features.</p>\n<p>Running linters catches small mistakes early, while full test suites protect against regressions.</p>\n<p>By making these checks routine, we keep the path ahead smooth for everyone.</p>\n"
+}

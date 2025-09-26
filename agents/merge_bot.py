@@ -22,7 +22,14 @@ class MergeBot:
     def merge_pull_request(self, pr_number: int, commit_message: str | None = None) -> dict:
         """Merge a pull request using the GitHub API."""
         url = f"https://api.github.com/repos/{self.repo}/pulls/{pr_number}/merge"
-        headers = {"Authorization": f"token {self.token}"} if self.token else {}
+        headers = {
+            "Authorization": f"token {self.token}",
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        } if self.token else {
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+        }
         payload: dict[str, str] = {}
         if commit_message:
             payload["commit_message"] = commit_message
