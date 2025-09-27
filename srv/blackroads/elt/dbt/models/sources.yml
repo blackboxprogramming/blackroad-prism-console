@@ -1,0 +1,11 @@
+version: 2
+sources:
+  - name: app
+    database: BR_RAW
+    schema: APP
+    tables:
+      - name: events
+        loaded_at_field: occurred_at
+        freshness:
+          warn_after: { count: 6, period: hour }
+          error_after: { count: 24, period: hour }
