@@ -11,3 +11,7 @@ Airtable Growth Calendar,Create base with views Editorial/Social/Launches; 6-wee
 Notion: Content pipeline,Create “Content” page with brief template + asset checklist; link to Airtable.,amundsonalexa@gmail.com,This Week,2025-10-04
 Social account wiring,Confirm access: blackroadinc, blackroad.io, lucidia_ai, blackroad_ai, blackroad_inc; store creds in 1Password.,amundsonalexa@gmail.com,This Week,2025-10-04
 Friday Demo #2,Demo: Okta SSO, repo guardrails, PRISM auth stub + CI, Growth calendar live.,amundsonalexa@gmail.com,Today,2025-10-03
+Enable WAFv2 on ALB,Apply wafv2-alb module with managed rules + rate limit.,amundsonalexa@gmail.com,Today,2025-10-05
+Add Route53 failover,Provision CF maintenance + dual A-alias records with health check.,amundsonalexa@gmail.com,Today,2025-10-05
+Test failover,Simulate unhealthy ALB target; verify CF page; restore health.,amundsonalexa@gmail.com,This Week,2025-10-06
+Tune WAF rules,Review logs; add allowlist/blocks if needed; set final rate.,amundsonalexa@gmail.com,This Week,2025-10-07
