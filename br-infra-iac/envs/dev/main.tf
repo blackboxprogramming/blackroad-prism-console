@@ -11,6 +11,21 @@ module "network" {
   tags     = local.tags
 }
 
+resource "aws_security_group" "app_egress" {
+  name        = "${local.name}-app-egress"
+  description = "Allow ECS tasks egress to services like RDS"
+  vpc_id      = module.network.vpc_id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = local.tags
+}
+
 module "ecs" {
   source = "../../modules/ecs-cluster"
   name   = local.name
@@ -28,7 +43,7 @@ module "rds" {
   name                      = local.name
   vpc_id                    = module.network.vpc_id
   subnet_ids                = module.network.private_subnet_ids
-  app_sg_ids                = [] # put ECS SG here when you add services
+  app_sg_ids                = [aws_security_group.app_egress.id]
   db_allowed_cidr_blocks    = var.db_allowed_cidr_blocks
   instance_class            = var.rds_instance_class
   multi_az                  = false
@@ -46,6 +61,13 @@ resource "aws_ssm_parameter" "api_secret" {
   name  = "/blackroad/dev/api/EXAMPLE_SECRET"
   type  = "SecureString"
   value = "change-me"
+  tags  = local.tags
+}
+
+resource "aws_ssm_parameter" "pg_url_dev" {
+  name  = "/blackroad/dev/pg/url"
+  type  = "SecureString"
+  value = "postgres://user:pass@rds-host:5432/app"
   tags  = local.tags
 }
 
@@ -69,6 +91,31 @@ module "api_service" {
   domain_name        = "api.blackroad.io"
   health_check_path  = "/health"
   tags               = local.tags
+}
+
+module "seed_events_cron" {
+  source               = "../../modules/ecs-scheduled-task"
+  name                 = "br-dev-seed-events"
+  cluster_arn          = module.ecs.cluster_arn
+  subnet_ids           = module.network.private_subnet_ids
+  security_group_ids   = [aws_security_group.app_egress.id]
+  image                = "${module.ecr.repo_urls["br-seed-events"]}:latest"
+  cpu                  = 256
+  memory               = 512
+  schedule_expression  = "cron(12 6 * * ? *)"
+  region               = var.region
+  env = {
+    DAYS              = "14"
+    USERS             = "500"
+    EVENTS            = "15000"
+    PURCHASE_RATE     = "0.04"
+    SIGNUP_RATE       = "0.15"
+    SESSIONS_PER_USER = "3"
+  }
+  secrets = {
+    PG_URL = aws_ssm_parameter.pg_url_dev.arn
+  }
+  tags = local.tags
 }
 
 output "api_service_name" { value = module.api_service.service_name }
