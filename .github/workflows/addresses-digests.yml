@@ -1,0 +1,84 @@
+name: Address Digests
+
+on:
+  workflow_dispatch:
+    inputs:
+      secrets:
+        description: Comma separated list of secret names (e.g. ROBINHOOD_ETHEREUM,COINBASE_BITCOIN)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  digests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Normalize secret list
+        id: prepare
+        shell: bash
+        env:
+          RAW_SECRETS: ${{ inputs.secrets }}
+        run: |
+          node <<'NODE'
+          const raw = process.env.RAW_SECRETS ?? '';
+          const names = raw
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean);
+          const unique = Array.from(new Set(names));
+          const fs = require('node:fs');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `json=${JSON.stringify(unique)}\n`);
+          NODE
+
+      - name: Inject requested secrets
+        if: steps.prepare.outputs.json != '[]'
+        uses: ./.github/actions/inject-secrets
+        with:
+          names: ${{ steps.prepare.outputs.json }}
+
+      - name: Print masked digests
+        shell: bash
+        env:
+          SECRET_JSON: ${{ steps.prepare.outputs.json }}
+        run: |
+          node <<'NODE'
+          const crypto = require('node:crypto');
+          const names = JSON.parse(process.env.SECRET_JSON || '[]');
+          if (!names.length) {
+            console.log('No secret names provided.');
+            process.exit(0);
+          }
+          const rows = names.map((name) => {
+            const value = process.env[name] ?? '';
+            const masked = value ? `****${value.slice(-6)}` : '(missing)';
+            const digest = value
+              ? crypto.createHash('sha256').update(value).digest('hex').slice(0, 8)
+              : '--------';
+            return {
+              Secret: name,
+              Length: value.length,
+              Masked: masked,
+              Digest8: digest
+            };
+          });
+          const headers = ['Secret', 'Length', 'Masked', 'Digest8'];
+          const widths = headers.map((header) =>
+            Math.max(header.length, ...rows.map((row) => String(row[header]).length))
+          );
+          const divider = widths.map((width) => '-'.repeat(width)).join('-+-');
+          const formatRow = (row) =>
+            headers.map((header, index) => String(row[header]).padEnd(widths[index])).join(' | ');
+          console.log(formatRow(headers.reduce((acc, header) => ({ ...acc, [header]: header }), {})));
+          console.log(divider);
+          rows.forEach((row) => console.log(formatRow(row)));
+          NODE
