@@ -1,26 +1,36 @@
 {
-  "name": "blackroad-prism-console",
+  "name": "BlackRoad DevX",
   "build": {
-    "dockerfile": "../Dockerfile",
-    "context": ".."
+    "dockerfile": "Dockerfile"
   },
-  "workspaceFolder": "/workspace",
   "features": {
-    "ghcr.io/devcontainers/features/git:1": {}
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "version": "1.6.6"
+    },
+    "ghcr.io/devcontainers/features/aws-ssm-session-manager:1": {}
   },
+  "postCreateCommand": "npm install -g commitlint @commitlint/config-conventional && pip install --user pre-commit",
   "customizations": {
     "vscode": {
       "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash"
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terraform.codelens.enabled": true,
+        "editor.formatOnSave": true
       },
       "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance",
+        "HashiCorp.terraform",
         "esbenp.prettier-vscode",
-        "dbaeumer.vscode-eslint"
+        "dbaeumer.vscode-eslint",
+        "ms-python.python"
       ]
     }
   },
-  "forwardPorts": [3000],
-  "postCreateCommand": "pip install -U pip pytest jsonschema && (npm ci || true)"
+  "remoteUser": "vscode",
+  "containerEnv": {
+    "AWS_REGION": "us-east-1"
+  }
 }

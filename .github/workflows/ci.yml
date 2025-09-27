@@ -2,6 +2,7 @@ name: ci
 on: [push, pull_request]
 jobs:
   build:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,6 +24,7 @@ jobs:
         run: bash scripts/hash_artifacts.sh || true
 
   build-test:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
