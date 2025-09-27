@@ -1,5 +1,5 @@
 .RECIPEPREFIX = >
-.PHONY: setup test lint demo validate dc-up dc-test dc-shell
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy
 
 setup:
 >python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff
@@ -25,6 +25,20 @@ demo:
 >brc mfg:yield --period 2025-09 && \
 >brc mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv && \
 >brc mfg:coq --period 2025-Q3
+
+build:
+>docker build -t blackroad/prism-console:dev -f Dockerfile .
+
+run:
+>docker compose up --build app
+
+deploy:
+>@test -n "$(PR)" || (echo "PR=<number> is required" >&2 && exit 1)
+>PR_NUMBER=$(PR) PROJECT_NAME=prism-console scripts/devx/deploy_preview.sh apply
+
+preview-destroy:
+>@test -n "$(PR)" || (echo "PR=<number> is required" >&2 && exit 1)
+>PR_NUMBER=$(PR) PROJECT_NAME=prism-console scripts/devx/deploy_preview.sh destroy
 
 dc-up:
 >docker compose up --build app
