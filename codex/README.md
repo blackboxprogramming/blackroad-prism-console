@@ -15,6 +15,8 @@ integrations.
 | 003 | The Workflow Circle    | Work runs in visible capture → adjust loops.    |
 | 004 | The Autonomy Manifest  | Data autonomy through consent, export, and wipe. |
 | 022 | The Security Spine     | Security backbone with layered zero-trust defenses. |
+| 028 | The Custodianship Code | Custodians steward Lucidia with shared accountability. |
+| 035 | The Joy Mandate        | Joy keeps Lucidia warm with optional daily sparks. |
 
 ## BlackRoad Pipeline
 
