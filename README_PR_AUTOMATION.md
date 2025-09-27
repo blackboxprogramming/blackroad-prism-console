@@ -151,7 +151,9 @@ OWNER=BlackRoad REPO=masterpack GH_TOKEN=*** \
 
 Track the Slack, Asana Auth Bot, and GitLab mirroring setup in
 [`docs/PR_BUNDLE_INTEGRATIONS.md`](docs/PR_BUNDLE_INTEGRATIONS.md). Update the integration status
-matrix in this file once each service is configured in the target environment.
+matrix in this file once each service is configured in the target environment. When you are ready to
+validate the live wiring, follow the runbook in
+[`docs/VALIDATION_SPRINT.md`](docs/VALIDATION_SPRINT.md) to exercise every workflow end to end.
 
 For the broader operations rollout—including the `blackroad.io` product surface, the
 `blackroadinc.us` operations hub, and the multi-system integration backlog—work from the
