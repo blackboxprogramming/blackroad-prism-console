@@ -518,9 +518,35 @@ def learn_assign(
     user: str = typer.Option(..., "--user"),
     path: str = typer.Option(..., "--path"),
     due: str = typer.Option(..., "--due"),
+    rationale: str = typer.Option(..., "--rationale"),
+    model_version: str = typer.Option(..., "--model-version"),
+    actor: str = typer.Option("lucidia", "--actor"),
+    model_type: str = typer.Option("", "--model-type"),
+    training_scope: str = typer.Option("", "--training-scope"),
+    model_updated_at: str = typer.Option("", "--model-updated"),
 ):
-    en_paths.assign(user, path, due)
+    en_paths.assign(
+        user,
+        path,
+        due,
+        rationale,
+        model_version,
+        actor=actor,
+        model_type=model_type or None,
+        training_scope=training_scope or None,
+        model_updated_at=model_updated_at or None,
+    )
     typer.echo("ok")
+
+
+@app.command("learn:assign:undo")
+def learn_assign_undo(
+    rationale: str = typer.Option(..., "--rationale"),
+    model_version: str = typer.Option(..., "--model-version"),
+    actor: str = typer.Option("lucidia", "--actor"),
+):
+    restored = en_paths.undo_last_assignment(actor, rationale, model_version)
+    typer.echo(json.dumps({"restored_assignments": len(restored)}))
 
 
 @app.command("learn:quiz:grade")

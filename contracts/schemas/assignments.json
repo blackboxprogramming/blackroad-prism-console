@@ -2,12 +2,23 @@
   "type": "array",
   "items": {
     "type": "object",
-    "required": ["user_id", "path_id", "due_date", "progress"],
+    "required": [
+      "user_id",
+      "path_id",
+      "due_date",
+      "progress",
+      "rationale",
+      "model_version"
+    ],
     "properties": {
       "user_id": { "type": "string" },
       "path_id": { "type": "string" },
       "due_date": { "type": "string" },
-      "progress": { "type": "object" }
+      "progress": { "type": "object" },
+      "rationale": { "type": "string", "minLength": 1 },
+      "model_version": { "type": "string", "minLength": 1 },
+      "assigned_by": { "type": "string" },
+      "created_at": { "type": "string" }
     }
   }
 }
