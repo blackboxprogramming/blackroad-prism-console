@@ -1,0 +1,22 @@
+[Unit]
+Description=Verus Miner (docker) throttled
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+ExecStart=/usr/bin/docker run --rm --name verusminer \
+  --cpus=0.25 --memory=256m --read-only --security-opt no-new-privileges:true \
+  -e POOL=POOL_HOST:PORT -e WALLET=YOUR_VRSC_ADDRESS -e PASSWORD=x -e THREADS=1 \
+  krypt0nn/verus-miner:latest
+ExecStop=/usr/bin/docker stop verusminer
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target
