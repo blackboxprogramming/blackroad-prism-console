@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  # --- Litecoin (LTC) learn-mode • CPU scrypt (utterly unprofitable, educational only) ---
+  # Real LTC mining requires Scrypt ASICs. This is a light CPU demo.
+  ltc-cpuminer:
+    image: registry.gitlab.com/foss/cpuminer-multi:latest
+    container_name: ltc-cpuminer
+    command: >
+      -a scrypt
+      -o stratum+tcp://POOL_HOST:PORT
+      -u YOUR_LTC_ADDRESS
+      -p x
+      -t 1
+    cpus: 0.25
+    mem_limit: 256m
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    # enable manually:
+    # docker compose -f miners/miners-compose.yml up -d ltc-cpuminer
+
+  # --- Generic cpuminer (multi-algo learn-mode) ---
+  cpuminer-multi:
+    image: registry.gitlab.com/foss/cpuminer-multi:latest
+    container_name: cpuminer-multi
+    environment:
+      - ALGO=verushash   # or yespower / scrypt / sha256d (pick an easy pool)
+      - POOL=POOL_HOST:PORT
+      - USER=YOUR_ADDRESS
+      - PASS=x
+      - THREADS=1
+    command: >
+      -a ${ALGO}
+      -o stratum+tcp://${POOL}
+      -u ${USER}
+      -p ${PASS}
+      -t ${THREADS}
+    cpus: 0.25
+    mem_limit: 256m
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    # enable manually:
+    # docker compose -f miners/miners-compose.yml up -d cpuminer-multi

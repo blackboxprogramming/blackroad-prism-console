@@ -2,6 +2,40 @@
 
 This guide documents the steps to confirm that repository files, GitHub Actions workflows, and the Raspberry Pi agent are configured to guard wallet addresses while running on Node.js 20.
 
+## Address secret naming (top-15 coverage)
+
+Use one secret per address. Stick to uppercase `SNAKE_CASE` names so the values stay organized across repositories and agents.
+
+```text
+# EVM / ERC-20 family (0x…): ETH, USDT, USDC, BNB (BSC), MATIC (Polygon), AVAX (C-chain), LINK, GRT, etc.
+ETH_ADDRESS
+USDT_ETH_ADDRESS
+USDC_ETH_ADDRESS
+BNB_BSC_ADDRESS
+MATIC_POLYGON_ADDRESS
+AVAX_C_ADDRESS
+LINK_ETH_ADDRESS
+
+# Bitcoin-family
+BTC_ADDRESS
+LTC_ADDRESS
+DOGE_ADDRESS
+BCH_ADDRESS
+
+# Solana / Ton
+SOL_ADDRESS
+TON_ADDRESS
+
+# Cosmos / Polkadot / XRP / TRX / ADA
+ATOM_ADDRESS
+DOT_ADDRESS
+XRP_ADDRESS
+TRX_ADDRESS
+ADA_ADDRESS
+```
+
+> Many existing secrets (for example, `ROBINHOOD_ETHEREUM`, `COINBASE_BITCOIN`, `VENMO_LITECOIN`) already map to specific custodians or wallets. Keep those in place; the generic names above are for future repositories and agents that need consistent naming.
+
 ## 1. Confirm required files are present
 
 In each repository (for example `blackroad-prism-console` or `lucidia`), verify that the following paths exist:
