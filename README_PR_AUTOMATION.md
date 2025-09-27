@@ -141,3 +141,17 @@ autopr.sh already invokes this if present. To use an external dump directory:
 OWNER=BlackRoad REPO=masterpack GH_TOKEN=*** \
   ./scripts/autopr.sh && ./scripts/sync_artifacts.sh --from ./generated
 ```
+
+---
+
+## 6) Integration checklist
+
+Track the Slack, Asana Auth Bot, and GitLab mirroring setup in
+[`docs/PR_BUNDLE_INTEGRATIONS.md`](docs/PR_BUNDLE_INTEGRATIONS.md). Update the integration status
+matrix in this file once each service is configured in the target environment.
+
+For the broader operations rollout—including the `blackroad.io` product surface, the
+`blackroadinc.us` operations hub, and the multi-system integration backlog—work from the
+[`docs/BLACKROAD_OPS_INTEGRATION_PLAN.md`](docs/BLACKROAD_OPS_INTEGRATION_PLAN.md) playbook. It
+describes how to generate batches of Codex prompts (10–20 at a time), assign owners across the tool
+stack, and record evidence in the shared ops hub.
