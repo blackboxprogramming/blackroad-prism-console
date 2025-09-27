@@ -9,12 +9,14 @@ integrations.
 
 ## Codex Entries
 
-| ID  | Title                  | Description                                     |
-| --- | ---------------------- | ----------------------------------------------- |
-| 001 | The First Principle    | Lucidia exists to protect and empower everyone. |
-| 003 | The Workflow Circle    | Work runs in visible capture → adjust loops.    |
-| 004 | The Autonomy Manifest  | Data autonomy through consent, export, and wipe. |
-| 022 | The Security Spine     | Security backbone with layered zero-trust defenses. |
+| ID  | Title                   | Description                                          |
+| --- | ----------------------- | ---------------------------------------------------- |
+| 001 | The First Principle     | Lucidia exists to protect and empower everyone.      |
+| 003 | The Workflow Circle     | Work runs in visible capture → adjust loops.         |
+| 004 | The Autonomy Manifest   | Data autonomy through consent, export, and wipe.     |
+| 022 | The Security Spine      | Security backbone with layered zero-trust defenses.  |
+| 028 | The Custodianship Code  | Stewardship keeps Lucidia tended, transparent, safe. |
+| 033 | The Wholeness Rule      | People remain whole; balance is built into Lucidia.  |
 
 ## BlackRoad Pipeline
 
