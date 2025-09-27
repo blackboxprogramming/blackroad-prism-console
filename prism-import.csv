@@ -1,0 +1,15 @@
+Issue Type,Summary,Description,Component,Labels,Story Points,Epic Name
+Epic,Auth & Roles,"OIDC stub + role model + audit",Platform,foundation,,
+Epic,First Data Source,"Ingest->normalize v0.1",API,foundation,,
+Epic,Dashboards MVP,"Shell + first tiles",Web,ui,,
+Epic,Platform & CI,"CI≤10m, logging, health",CI,ci,,
+Story,CI ≤10m (lint/test/build + cache),"Green builds under 10m",CI,ci,3,Platform & CI
+Task,Repo hygiene (CODEOWNERS/PR template/DoD),"Add files + enforce checks",Platform,process,2,Platform & CI
+Story,Auth stub (OIDC ready) + /health,"Login flow + health endpoint",Platform,auth,3,Auth & Roles
+Story,Structured logging + request IDs,"Traceability for requests",API,observability,2,Platform & CI
+Story,OpenAPI skeleton + swagger UI,"Docs at /docs",API,api;docs,3,Platform & CI
+Story,Data Source X: contract + sample schema,"Define input/output",API,data,3,First Data Source
+Story,Normalize DS-X → v0.1 model (tests),"Mapping + unit tests",API,data,5,First Data Source
+Story,Dashboard shell with mocked tiles,"UI frame + 2 tiles",Web,ui,3,Dashboards MVP
+Task,Snyk on PRs (block high),"Enable check + policy",Security,security,1,Platform & CI
+Task,First demo script (5 min),"Narrative + steps",Platform,demo,1,Platform & CI

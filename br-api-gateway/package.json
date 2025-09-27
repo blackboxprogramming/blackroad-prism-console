@@ -1,0 +1,22 @@
+{
+  "name": "br-api-gateway",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p .",
+    "start": "node dist/index.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "fastify": "^4.28.1",
+    "@fastify/swagger": "^8.14.0",
+    "@fastify/swagger-ui": "^1.10.2",
+    "pino": "^9.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "tsx": "^4.16.2",
+    "vitest": "^2.0.5",
+    "@types/node": "^20.11.30"
+  }
+}

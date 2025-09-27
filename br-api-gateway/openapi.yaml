@@ -1,0 +1,23 @@
+openapi: 3.0.3
+info: { title: BlackRoad API, version: 0.1.0 }
+servers:
+  - url: https://api.blackroad.io
+paths:
+  /health:
+    get:
+      summary: Liveness
+      responses: { "200": { description: OK } }
+  /v1/echo:
+    post:
+      summary: Echo body
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { msg: { type: string } }, required: [msg] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object, properties: { msg: { type: string } } }
