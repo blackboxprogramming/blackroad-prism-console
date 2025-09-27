@@ -1,0 +1,186 @@
+name: Inject Secrets
+
+description: Export selected GitHub Actions secrets as environment variables without printing their raw values.
+
+inputs:
+  names:
+    description: JSON array or comma separated list of secret names to expose as environment variables
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - id: parse
+      shell: bash
+      env:
+        RAW_NAMES: ${{ inputs.names }}
+      run: |
+        node <<'NODE'
+        const raw = process.env.RAW_NAMES ?? '[]';
+        let names = [];
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            names = parsed.map((item) => String(item).trim()).filter(Boolean);
+          }
+        } catch (error) {
+          // Ignore JSON parse failures and fall back to comma parsing.
+        }
+        if (!names.length) {
+          names = raw.split(',').map((item) => item.trim()).filter(Boolean);
+        }
+        const unique = Array.from(new Set(names));
+        const fs = require('node:fs');
+        fs.appendFileSync(process.env.GITHUB_OUTPUT, `list=${JSON.stringify(unique)}\n`);
+        fs.appendFileSync(process.env.GITHUB_OUTPUT, `csv=${unique.join(',')}\n`);
+        NODE
+
+    - name: Export ROBINHOOD_ETHEREUM
+      if: contains(steps.parse.outputs.csv, 'ROBINHOOD_ETHEREUM')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.ROBINHOOD_ETHEREUM }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'ROBINHOOD_ETHEREUM=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export ROBINHOOD_BITCOIN
+      if: contains(steps.parse.outputs.csv, 'ROBINHOOD_BITCOIN')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.ROBINHOOD_BITCOIN }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'ROBINHOOD_BITCOIN=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export ROBINHOOD_LITECOIN
+      if: contains(steps.parse.outputs.csv, 'ROBINHOOD_LITECOIN')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.ROBINHOOD_LITECOIN }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'ROBINHOOD_LITECOIN=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export COINBASE_BITCOIN
+      if: contains(steps.parse.outputs.csv, 'COINBASE_BITCOIN')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.COINBASE_BITCOIN }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'COINBASE_BITCOIN=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export COINBASE_LITECOIN
+      if: contains(steps.parse.outputs.csv, 'COINBASE_LITECOIN')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.COINBASE_LITECOIN }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'COINBASE_LITECOIN=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export COINBASE_ETHEREUM
+      if: contains(steps.parse.outputs.csv, 'COINBASE_ETHEREUM')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.COINBASE_ETHEREUM }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'COINBASE_ETHEREUM=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export COINBASE_NEAR
+      if: contains(steps.parse.outputs.csv, 'COINBASE_NEAR')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.COINBASE_NEAR }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'COINBASE_NEAR=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export COINBASE_GRT
+      if: contains(steps.parse.outputs.csv, 'COINBASE_GRT')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.COINBASE_GRT }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'COINBASE_GRT=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export COINBASE_MLN
+      if: contains(steps.parse.outputs.csv, 'COINBASE_MLN')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.COINBASE_MLN }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'COINBASE_MLN=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export COINBASE_VECHAIN
+      if: contains(steps.parse.outputs.csv, 'COINBASE_VECHAIN')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.COINBASE_VECHAIN }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'COINBASE_VECHAIN=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export COINBASE_POLYGON
+      if: contains(steps.parse.outputs.csv, 'COINBASE_POLYGON')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.COINBASE_POLYGON }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'COINBASE_POLYGON=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export VENMO_BITCOIN
+      if: contains(steps.parse.outputs.csv, 'VENMO_BITCOIN')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.VENMO_BITCOIN }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'VENMO_BITCOIN=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export VENMO_ETHEREUM
+      if: contains(steps.parse.outputs.csv, 'VENMO_ETHEREUM')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.VENMO_ETHEREUM }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'VENMO_ETHEREUM=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export VENMO_CHAINLINK
+      if: contains(steps.parse.outputs.csv, 'VENMO_CHAINLINK')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.VENMO_CHAINLINK }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'VENMO_CHAINLINK=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi
+
+    - name: Export VENMO_PAYPALUSD
+      if: contains(steps.parse.outputs.csv, 'VENMO_PAYPALUSD')
+      shell: bash
+      env:
+        SECRET_VALUE: ${{ secrets.VENMO_PAYPALUSD }}
+      run: |
+        if [ -n "$SECRET_VALUE" ]; then
+          printf 'VENMO_PAYPALUSD=%s\n' "$SECRET_VALUE" >> "$GITHUB_ENV"
+        fi

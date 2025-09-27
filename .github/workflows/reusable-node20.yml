@@ -1,0 +1,92 @@
+name: Reusable Node 20 Runner
+
+on:
+  workflow_call:
+    inputs:
+      run:
+        description: Command to execute after installing dependencies
+        required: true
+        type: string
+      secrets_list:
+        description: >-
+          JSON array of secret names to expose as environment variables (e.g. ["SECRET_ONE"])
+        required: false
+        default: "[]"
+        type: string
+permissions:
+  contents: read
+
+jobs:
+  node-task:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Detect package manager
+        id: detect
+        shell: bash
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            echo "manager=pnpm" >> "$GITHUB_OUTPUT"
+            echo "lockfile=pnpm-lock.yaml" >> "$GITHUB_OUTPUT"
+            echo "cache-path=$HOME/.pnpm-store" >> "$GITHUB_OUTPUT"
+          elif [ -f yarn.lock ]; then
+            echo "manager=yarn" >> "$GITHUB_OUTPUT"
+            echo "lockfile=yarn.lock" >> "$GITHUB_OUTPUT"
+            echo "cache-path=$HOME/.yarn/cache" >> "$GITHUB_OUTPUT"
+          elif [ -f package-lock.json ]; then
+            echo "manager=npm" >> "$GITHUB_OUTPUT"
+            echo "lockfile=package-lock.json" >> "$GITHUB_OUTPUT"
+            echo "cache-path=$HOME/.npm" >> "$GITHUB_OUTPUT"
+          else
+            echo "manager=npm" >> "$GITHUB_OUTPUT"
+            echo "lockfile=package.json" >> "$GITHUB_OUTPUT"
+            echo "cache-path=$HOME/.npm" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.detect.outputs.cache-path }}
+          key: ${{ runner.os }}-${{ steps.detect.outputs.manager }}-${{ hashFiles(steps.detect.outputs.lockfile) }}
+          restore-keys: |
+            ${{ runner.os }}-${{ steps.detect.outputs.manager }}-
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          case "${{ steps.detect.outputs.manager }}" in
+            pnpm)
+              corepack enable
+              pnpm install --frozen-lockfile
+              ;;
+            yarn)
+              corepack enable
+              yarn install --frozen-lockfile
+              ;;
+            npm)
+              npm ci || npm install
+              ;;
+            *)
+              echo "Unsupported package manager" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Inject requested secrets
+        if: inputs.secrets_list != '[]'
+        uses: ./.github/actions/inject-secrets
+        with:
+          names: ${{ inputs.secrets_list }}
+
+      - name: Run command
+        shell: bash
+        env:
+          NODE_ENV: test
+        run: ${{ inputs.run }}
