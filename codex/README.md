@@ -15,6 +15,8 @@ integrations.
 | 003 | The Workflow Circle    | Work runs in visible capture → adjust loops.    |
 | 004 | The Autonomy Manifest  | Data autonomy through consent, export, and wipe. |
 | 022 | The Security Spine     | Security backbone with layered zero-trust defenses. |
+| 028 | The Custodianship Code | Custodial stewardship over ownership and power. |
+| 034 | The Humility Clause    | Confidence with limits, always signaling uncertainty. |
 
 ## BlackRoad Pipeline
 
