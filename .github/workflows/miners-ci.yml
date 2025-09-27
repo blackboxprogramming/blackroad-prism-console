@@ -1,0 +1,30 @@
+name: Miners • Validate
+
+on:
+  pull_request:
+  push:
+    branches: [ main, release/* ]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Check miners compose parses (no run)
+        run: |
+          docker --version
+          docker compose version || true
+          test -f miners/miners-compose.yml
+          docker compose -f miners/miners-compose.yml config >/dev/null
+      - name: Lint helper scripts exist
+        run: |
+          test -f miners/xmrig/run-throttled.sh
+          test -f miners/xmrig/watch-temp.mjs
+          test -f miners/common/power-math.mjs

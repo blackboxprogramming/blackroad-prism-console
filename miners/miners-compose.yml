@@ -1,0 +1,74 @@
+services:
+  # --- Monero (xmrig) • CPU miner (learn-mode, throttled) ---
+  xmrig:
+    image: ghcr.io/xmrig/xmrig:latest
+    container_name: xmrig
+    command: >
+      -o POOL_HOST:PORT
+      -u YOUR_XMR_ADDRESS
+      --donate-level=0
+      --cpu-max-threads-hint=1
+    cpus: 0.25
+    mem_limit: 256m
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    # enable manually:
+    # docker compose -f miners/miners-compose.yml up -d xmrig
+
+  # --- Verus (VRSC) • CPU miner (learn-mode) ---
+  verusminer:
+    image: krypt0nn/verus-miner:latest
+    container_name: verusminer
+    environment:
+      - POOL=POOL_HOST:PORT
+      - WALLET=YOUR_VRSC_ADDRESS
+      - PASSWORD=x
+      - THREADS=1
+    cpus: 0.25
+    mem_limit: 256m
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    # enable:
+    # docker compose -f miners/miners-compose.yml up -d verusminer
+
+  # --- Litecoin (LTC) • scrypt CPU demo (educational only) ---
+  ltc-cpuminer:
+    image: registry.gitlab.com/foss/cpuminer-multi:latest
+    container_name: ltc-cpuminer
+    command: >
+      -a scrypt
+      -o stratum+tcp://POOL_HOST:PORT
+      -u YOUR_LTC_ADDRESS
+      -p x
+      -t 1
+    cpus: 0.25
+    mem_limit: 256m
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    # enable:
+    # docker compose -f miners/miners-compose.yml up -d ltc-cpuminer
+
+  # --- Chia farmer (ULTRA low energy; pre-plotted drives needed) ---
+  chia:
+    image: ghcr.io/chia-network/chia:latest
+    container_name: chia
+    environment:
+      - keys=none
+      - service=farm
+      - log_level=INFO
+      - TZ=UTC
+    volumes:
+      - ./chia:/root/.chia
+      - /mnt/plots:/plots:ro
+    cpus: 0.2
+    mem_limit: 512m
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    read_only: false
+    # enable:
+    # docker compose -f miners/miners-compose.yml up -d chia
