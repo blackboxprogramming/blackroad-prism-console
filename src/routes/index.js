@@ -18,6 +18,7 @@ router.use('/commits', require('./commits'));
 router.use('/metrics', require('./metrics'));
 router.use('/llm', require('./llm'));
 router.use('/lucidia', require('./lucidia'));
+router.use('/pi', require('./pi'));
 router.use('/roadbook', require('./roadbook'));
 router.use('/deploy', require('./deploy'));
 router.use('/json', require('./json'));

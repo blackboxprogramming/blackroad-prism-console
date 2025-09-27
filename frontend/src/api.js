@@ -157,4 +157,9 @@ export async function infer(x, y){
   return data
 }
 
+export async function fetchPiStatus(){
+  const { data } = await axios.get(`${API_BASE}/api/pi/status`)
+  return data
+}
+
 export { API_BASE }
