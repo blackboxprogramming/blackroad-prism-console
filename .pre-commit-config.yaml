@@ -32,3 +32,12 @@ repos:
       - id: eslint
         args: ['--fix']
         files: "\\.(js|jsx|ts|tsx)$"
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+        name: gitleaks (prevent secrets)
+        entry: gitleaks detect --source . --no-banner --redact --exit-code 1
+        language: golang
+        pass_filenames: false
+        stages: [commit, push]

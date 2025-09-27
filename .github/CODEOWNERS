@@ -1,8 +1,9 @@
-/infra/            @platform-team
-/flows/            @integration-team
-/monitors/         @sre-team
-/runbooks/         @platform-team
-/apps/api/       @platform-team
-/apps/web-public/ @platform-team
-/ops/            @sre-team
-/scripts/        @platform-team
+# CODEOWNERS ensures reviews from the right people.
+# Adjust teams/users as needed for BlackRoad.
+*       @blackboxprogramming/maintainers
+
+# Example: require core reviewers for security-sensitive areas
+docs/** @blackboxprogramming/maintainers
+.github/** @blackboxprogramming/maintainers
+miners/** @blackboxprogramming/maintainers
+lightning/** @blackboxprogramming/maintainers
