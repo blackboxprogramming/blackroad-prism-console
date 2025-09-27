@@ -30,3 +30,12 @@ PRISM v0.1 starts now. Sprint 0 focus:
 
 Friday demo: working auth stub + CI green + first endpoint.
 Cadillac cutover: api.blackroad.io now has ACM cert + ALB + ECS Fargate + autoscaling + SSM secrets + GitHub OIDC deploys. Merge to main in br-api-gateway → auto rollout with zero downtime.
+
+## #security — Monitoring stack go-live
+
+Monitoring stack added:
+- CloudWatch dashboard: ALB 5xx + WAF blocks
+- Alarms: >20 5xx in 5m, >50 blocked in 5m
+- Slack alerts via Chatbot to this channel
+
+Next: tune thresholds after baseline week.
