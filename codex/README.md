@@ -13,6 +13,7 @@ integrations.
 | --- | ---------------------- | ----------------------------------------------- |
 | 001 | The First Principle    | Lucidia exists to protect and empower everyone. |
 | 003 | The Workflow Circle    | Work runs in visible capture → adjust loops.    |
+| 004 | The Autonomy Manifest  | Data autonomy through consent, export, and wipe. |
 
 ## BlackRoad Pipeline
 
