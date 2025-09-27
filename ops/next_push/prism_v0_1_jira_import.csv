@@ -1,0 +1,11 @@
+Key,Summary,Type,Pts,Labels,Component
+PRISM-001,CI ≤10m (lint/test/build + cache),Story,3,ci;foundation,CI
+PRISM-002,Repo hygiene: CODEOWNERS, PR template, DoD,Task,2,process,Platform
+PRISM-003,Auth stub (OIDC ready) + /health,Story,3,auth,Platform
+PRISM-004,Structured logging + request IDs,Story,2,observability,Platform
+PRISM-005,OpenAPI skeleton + swagger UI,Story,3,api;docs,API
+PRISM-006,Data Source X: contract + sample schema,Story,3,data,API
+PRISM-007,Normalize DS-X → v0.1 model (tests),Story,5,data,API
+PRISM-008,Dashboard shell w/ mocked tiles,Story,3,ui,Web
+PRISM-009,Snyk on PRs; block high,Task,1,security,Security
+PRISM-010,First demo script (5 min),Task,1,demo,Platform

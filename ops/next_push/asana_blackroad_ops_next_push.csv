@@ -1,0 +1,13 @@
+Task Name,Description,Assignee Email,Section,Due Date
+Okta org + SSO (MFA mandatory),Create Okta tenant; apps: Slack/Asana/Jira/GitHub/Notion; enforce MFA.,amundsonalexa@gmail.com,Today,2025-10-03
+1Password vaults by team,Create Engineering/Ops/Finance/Marketing/Security vaults; set sharing policy.,amundsonalexa@gmail.com,Today,2025-10-03
+Snyk + Dependabot org-wide,Enable on br-platform-hub, br-products-site, blackroad-prism-console; set policy to block high.,amundsonalexa@gmail.com,This Week,2025-10-04
+GitHub branch protections,Require 1 review + passing CI on main across all repos; enable secret scanning.,amundsonalexa@gmail.com,Today,2025-10-03
+Notion: Security Baseline page,Create a page with controls map + links to SOPs; add Risk Register view.,amundsonalexa@gmail.com,This Week,2025-10-04
+DNS: status + api subdomains,Create status.blackroad.io and api.blackroad.io CNAMEs; verify providers.,amundsonalexa@gmail.com,This Week,2025-10-04
+PRISM: Sprint ceremony setup,Create Jira board + sprint schedule; link Friday demo to calendar.,amundsonalexa@gmail.com,Today,2025-10-03
+PRISM: Definition of Done Done,Add DoD to repo docs + PR template; share in #products-prism.,amundsonalexa@gmail.com,Today,2025-10-03
+Airtable Growth Calendar,Create base with views Editorial/Social/Launches; 6-week horizon.,amundsonalexa@gmail.com,This Week,2025-10-04
+Notion: Content pipeline,Create “Content” page with brief template + asset checklist; link to Airtable.,amundsonalexa@gmail.com,This Week,2025-10-04
+Social account wiring,Confirm access: blackroadinc, blackroad.io, lucidia_ai, blackroad_ai, blackroad_inc; store creds in 1Password.,amundsonalexa@gmail.com,This Week,2025-10-04
+Friday Demo #2,Demo: Okta SSO, repo guardrails, PRISM auth stub + CI, Growth calendar live.,amundsonalexa@gmail.com,Today,2025-10-03
