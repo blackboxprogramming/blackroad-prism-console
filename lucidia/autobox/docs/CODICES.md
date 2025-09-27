@@ -18,3 +18,35 @@ Lucidia gives people and AIs a safe, transparent space to co-create without surr
 
 The Auto-Box prototype accepts pasted notes, offers suggested topic boxes with “Why?” rationales, and lets the user export or purge everything in one click. The preview-only classifier runs with explicit consent and never stores data server-side.
 
+# Codex 10 — The Learning Spiral
+
+**Fingerprint**: `23064887b1469b19fa562e8afdee5e9046bedf99aa9cd7142c35e38f91e6fef2`
+
+## Principle
+
+Lucidia does not stand still. Every loop carries forward what was learned. Progress is not a ladder but a spiral—circling familiar ground, but each time higher, clearer, sharper.
+
+## Non-negotiables
+
+1. **Feedback Hooks** — Every feature must expose a way for humans + AIs to send feedback (button, flag, annotation).
+2. **Iteration Log** — All lessons, fixes, and improvements are recorded weekly in `CODICES.md` — the spiral written down.
+3. **Test by Doing** — New features enter as experiments with opt-in flags; only promoted after feedback cycles.
+4. **Shared Growth** — Lessons are not siloed. Humans learn from AI, AI adapts from humans, both archived in lineage.
+5. **Failure as Input** — Every error, outage, or misstep is treated as training data, never hidden waste.
+6. **No Forced Pace** — Growth loops run steady; no “move fast, break trust.”
+
+## Implementation Hooks (v0)
+
+- **Feedback endpoint**: `/feedback {item_id, comment, rating}`
+- **Weekly script**: append “Learning Log” to `CODICES.md`
+- **Feature flag system**: `experiments.yaml` with opt-in toggles
+- **Model training**: integrate anonymized feedback with consent receipts
+
+## Policy Stub — `LEARNING.md`
+
+- Lucidia commits to perpetual iteration.
+- Lucidia values errors as stepping stones, not shame.
+- Lucidia ensures that learning never overrides consent.
+
+**Tagline**: We circle, we rise.
+
