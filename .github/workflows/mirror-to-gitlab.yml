@@ -1,0 +1,32 @@
+name: Mirror to GitLab (SSH)
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up SSH for GitLab
+        if: ${{ secrets.GITLAB_SSH_PRIVATE_KEY && secrets.GITLAB_REPO_SSH }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.GITLAB_SSH_PRIVATE_KEY }}" > ~/.ssh/gitlab_key
+          chmod 600 ~/.ssh/gitlab_key
+          cat >> ~/.ssh/config <<EOF
+          Host gitlab-mirror
+            HostName $(echo "${{ secrets.GITLAB_REPO_SSH }}" | sed -E 's#git@(.*):.*#\1#')
+            User git
+            IdentityFile ~/.ssh/gitlab_key
+            StrictHostKeyChecking accept-new
+          EOF
+
+      - name: Push mirror
+        if: ${{ secrets.GITLAB_SSH_PRIVATE_KEY && secrets.GITLAB_REPO_SSH }}
+        run: |
+          git remote add gitlab "${{ secrets.GITLAB_REPO_SSH }}"
+          git push --mirror gitlab

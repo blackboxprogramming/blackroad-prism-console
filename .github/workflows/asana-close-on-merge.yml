@@ -1,0 +1,29 @@
+name: Asana: Close Task on Merge
+on:
+  pull_request:
+    types: [closed]
+jobs:
+  close:
+    if: ${{ github.event.pull_request.merged == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find and close Asana task (by PR URL in notes)
+        env:
+          ASANA_PAT: ${{ secrets.ASANA_PAT }}
+          ASANA_PROJECT_ID: ${{ secrets.ASANA_PROJECT_ID }}
+        run: |
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          TASK_ID=$(curl -s -G "https://app.asana.com/api/1.0/projects/${ASANA_PROJECT_ID}/tasks" \
+              -H "Authorization: Bearer ${ASANA_PAT}" \
+              --data-urlencode "opt_fields=gid,name,notes" | jq -r \
+              --arg pr "${PR_URL}" '.data[] | select(.notes|contains($pr)) | .gid' | head -n1)
+
+          if [ -n "$TASK_ID" ]; then
+            curl -s -X PUT "https://app.asana.com/api/1.0/tasks/${TASK_ID}" \
+              -H "Authorization: Bearer ${ASANA_PAT}" \
+              -H "Content-Type: application/json" \
+              -d '{"data": {"completed": true}}' >/dev/null
+            echo "Closed Asana task ${TASK_ID}"
+          else
+            echo "No matching Asana task found."
+          fi

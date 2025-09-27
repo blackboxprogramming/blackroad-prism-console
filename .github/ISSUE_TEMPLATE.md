@@ -1,7 +1,8 @@
-## Problem
-Describe bug or feature.
+## Description
+-
 
-## Solution
-Planned fix.
+## Acceptance Criteria
+- [ ]
 
-## Notes
+## Additional Context
+-

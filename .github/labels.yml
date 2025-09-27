@@ -19,3 +19,12 @@
 - name: status/help-wanted
   color: "5319e7"
   description: Needs attention
+- name: priority: high
+  color: "b60205"
+  description: Critical priority for triage
+- name: manual-approval
+  color: "ededed"
+  description: Authorized reviewer validated manually
+- name: severity:critical
+  color: "000000"
+  description: Requires immediate security response
