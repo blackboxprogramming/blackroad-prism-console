@@ -1,0 +1,20 @@
+{
+  "name": "br-seed-events",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/seed.ts",
+    "seed": "tsx src/seed.ts",
+    "schema": "psql \"$PG_URL\" -f src/schema.sql"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.0.0",
+    "dotenv": "^16.4.5",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.4",
+    "@types/node": "^20.12.12"
+  }
+}
