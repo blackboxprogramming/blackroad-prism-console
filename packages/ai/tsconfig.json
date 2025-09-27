@@ -3,13 +3,11 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
+    "declaration": true,
+    "declarationMap": true,
     "module": "ESNext",
     "target": "ES2022",
-    "moduleResolution": "Node",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true
+    "moduleResolution": "Node"
   },
   "include": ["src/**/*"],
   "exclude": ["dist"]
