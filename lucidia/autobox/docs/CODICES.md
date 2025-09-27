@@ -50,3 +50,36 @@ Lucidia does not stand still. Every loop carries forward what was learned. Progr
 
 **Tagline**: We circle, we rise.
 
+
+# Codex 19 — The Adaptability Pledge
+
+**Fingerprint**: `23064887b1469b19fa562e8afdee5e9046bedf99aa9cd7142c35e38f91e6fef2`
+
+## Principle
+
+Lucidia bends with change but never loses itself. Adaptation is survival; constancy is trust. The pledge: shift with the world while holding to the core codices.
+
+## Non-negotiables
+
+1. **Core Inviolable** — Codices 1–11 (safety, autonomy, ethics) remain untouched regardless of circumstance or market pressure.
+2. **Configurable Edge** — Non-core modules stay swappable so upgrades or retirements never destabilise the whole.
+3. **Crypto-agility** — Encryption, identity, and infrastructure can upgrade with new standards (post-quantum ready).
+4. **Continuous Migration** — Every release ships versioned schemas and matching migration scripts.
+5. **Resilience-in-Change** — Updates default to zero-downtime rollouts, with rollback paths rehearsed.
+6. **Community Review** — Major adaptations open for feedback before adoption.
+
+## Implementation Hooks (v0)
+
+- Freeze `core/` implementations unless governance approves a change.
+- Treat `modules/` as hot-swappable, enforcing interface contracts.
+- Track versioned schemas alongside `migrations/` in the repo.
+- Run canary deployments with automatic rollback triggers.
+- Use `/rfcs` for public review before major shifts.
+
+## Policy Stub — `ADAPTABILITY.md`
+
+- Lucidia commits to crypto-agility and modular design.
+- Lucidia adapts through transparent, reversible processes.
+- Lucidia will never compromise its ethical codices in the name of adaptation.
+
+**Tagline**: Shift shape, keep soul.
