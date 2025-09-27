@@ -1,0 +1,73 @@
+version: '3.8'
+
+# Low-power miner bundle. Every service is capped, read-only where possible, and
+# requires manual activation. Copy to the device as ~/miners-compose.yml and edit
+# the placeholders before running `docker compose -f miners-compose.yml up -d <service>`.
+services:
+  # --- Monero (XMRig) — CPU miner for education ---
+  xmrig:
+    image: ghcr.io/xmrig/xmrig:latest
+    container_name: xmrig
+    command: >-
+      -o POOL_HOST:PORT
+      -u YOUR_XMR_ADDRESS
+      --tls
+      --donate-level=0
+      --cpu-max-threads-hint=1
+    cpus: 0.25                # hard cap ≈25% of one core
+    mem_limit: 256m
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+    # Enable manually:
+    #   docker compose -f miners-compose.yml up -d xmrig
+
+  # --- Verus (VerusHash 2.2) — efficient CPU miner ---
+  verusminer:
+    image: krypt0nn/verus-miner:latest
+    container_name: verusminer
+    environment:
+      - POOL=POOL_HOST:PORT
+      - WALLET=YOUR_VRSC_ADDRESS
+      - PASSWORD=x
+      - THREADS=1
+    cpus: 0.25
+    mem_limit: 256m
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    # Enable manually:
+    #   docker compose -f miners-compose.yml up -d verusminer
+
+  # --- Chia farmer/harvester role (plots must already exist) ---
+  chia:
+    image: ghcr.io/chia-network/chia:latest
+    container_name: chia
+    environment:
+      - keys=none            # do not load private keys on this host
+      - service=farm         # farming only, no plotting
+      - TZ=UTC
+      - log_level=INFO
+    volumes:
+      - ./chia:/root/.chia   # config + logs persisted locally
+      - /mnt/plots:/plots:ro # mount pre-plotted drives read-only
+    ports: []                # no external ports exposed by default
+    cpus: 0.2
+    mem_limit: 512m
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    # Enable manually after plots are mounted:
+    #   docker compose -f miners-compose.yml up -d chia
+
+# Stop with: docker compose -f miners-compose.yml stop <service>
+# Remove with: docker compose -f miners-compose.yml down <service>
