@@ -1,10 +1,17 @@
 # Codex Automation
 
 This directory houses small utilities that help automate development
-workflows.  The new **BlackRoad pipeline** script provides a single entry
-point for pushing code through GitHub and into the BlackRoad.io
-deployment.  It currently focuses on scaffolding the pipeline with clear
-extension points for future integrations.
+workflows and record foundational Codex entries. The new **BlackRoad
+pipeline** script provides a single entry point for pushing code through
+GitHub and into the BlackRoad.io deployment.  It currently focuses on
+scaffolding the pipeline with clear extension points for future
+integrations.
+
+## Codex Entries
+
+| ID  | Title                  | Description                                     |
+| --- | ---------------------- | ----------------------------------------------- |
+| 001 | The First Principle    | Lucidia exists to protect and empower everyone. |
 
 ## BlackRoad Pipeline
 
