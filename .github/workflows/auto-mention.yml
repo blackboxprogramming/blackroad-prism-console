@@ -1,0 +1,88 @@
+name: Auto-mention reviewers
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  route-reviewers:
+    name: Route reviewers by path
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Detect changed files
+        id: changed
+        uses: tj-actions/changed-files@v45
+        with:
+          json: true
+
+      - name: Comment with reviewer mentions
+        if: ${{ steps.changed.outputs.all_changed_files != '[]' }}
+        uses: actions/github-script@v7
+        env:
+          CHANGED_FILES: ${{ steps.changed.outputs.all_changed_files }}
+        with:
+          script: |
+            const core = require('@actions/core');
+            const changedFiles = JSON.parse(process.env.CHANGED_FILES || '[]');
+
+            const routingTable = [
+              { pattern: /^frontend\//, mention: '@blackboxprogramming/frontend-team' },
+              { pattern: /^backend\//, mention: '@blackboxprogramming/backend-team' },
+              { pattern: /^api\//, mention: '@blackboxprogramming/api-team' },
+              { pattern: /^infra\//, mention: '@blackboxprogramming/infra-team' }
+            ];
+
+            const mentions = new Set();
+            for (const file of changedFiles) {
+              for (const route of routingTable) {
+                if (route.pattern.test(file)) {
+                  mentions.add(route.mention);
+                }
+              }
+            }
+
+            if (!mentions.size) {
+              core.info('No matching routes for changed files.');
+              return;
+            }
+
+            const mentionList = Array.from(mentions).join(' ');
+            const body = `<!-- auto-mention -->\nRouting to: ${mentionList}\n\n(Automated mention based on changed paths.)`;
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+
+            const existingComments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number }
+            );
+
+            const previous = existingComments.find(comment => comment.body?.includes('<!-- auto-mention -->'));
+
+            if (previous) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: previous.id,
+                body
+              });
+              core.info('Updated existing auto-mention comment.');
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body
+              });
+              core.info('Created new auto-mention comment.');
+            }
+
