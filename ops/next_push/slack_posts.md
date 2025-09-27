@@ -29,3 +29,4 @@ PRISM v0.1 starts now. Sprint 0 focus:
 - /health, logs, OpenAPI
 
 Friday demo: working auth stub + CI green + first endpoint.
+Cadillac cutover: api.blackroad.io now has ACM cert + ALB + ECS Fargate + autoscaling + SSM secrets + GitHub OIDC deploys. Merge to main in br-api-gateway → auto rollout with zero downtime.

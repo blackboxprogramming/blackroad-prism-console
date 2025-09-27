@@ -11,3 +11,5 @@ Airtable Growth Calendar,Create base with views Editorial/Social/Launches; 6-wee
 Notion: Content pipeline,Create “Content” page with brief template + asset checklist; link to Airtable.,amundsonalexa@gmail.com,This Week,2025-10-04
 Social account wiring,Confirm access: blackroadinc, blackroad.io, lucidia_ai, blackroad_ai, blackroad_inc; store creds in 1Password.,amundsonalexa@gmail.com,This Week,2025-10-04
 Friday Demo #2,Demo: Okta SSO, repo guardrails, PRISM auth stub + CI, Growth calendar live.,amundsonalexa@gmail.com,Today,2025-10-03
+Terraform: deploy api.blackroad.io service,Apply new module (ecs-service-alb) in dev and verify ALB HTTPS + health check.,amundsonalexa@gmail.com,Today,2025-10-04
+Pipeline: wire app repo vars,Add AWS_REGION/ECR_REPO/ECS_CLUSTER/ECS_SERVICE vars + AWS_ROLE_TO_ASSUME secret; test deploy.,amundsonalexa@gmail.com,Today,2025-10-04
