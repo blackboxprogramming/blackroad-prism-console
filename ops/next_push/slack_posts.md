@@ -29,3 +29,7 @@ PRISM v0.1 starts now. Sprint 0 focus:
 - /health, logs, OpenAPI
 
 Friday demo: working auth stub + CI green + first endpoint.
+
+## #products-prism — WAF + failover hardening
+
+Hardening pass shipped: WAFv2 (managed rules + per-IP rate-limit) on ALB + Route53 failover to CloudFront “maintenance” page for api.blackroad.io. If ALB health dips, traffic flips automatically; flip back is automatic when healthy. We’ll tune WAF after a day of real traffic.
