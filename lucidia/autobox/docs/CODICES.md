@@ -50,3 +50,35 @@ Lucidia does not stand still. Every loop carries forward what was learned. Progr
 
 **Tagline**: We circle, we rise.
 
+# Codex 21 — The Interface Promise
+
+**Fingerprint**: `23064887b1469b19fa562e8afdee5e9046bedf99aa9cd7142c35e38f91e6fef2`
+
+## Principle
+
+The interface is where trust lives or dies. Every Lucidia surface stays clear, honest, and kind — no tricks, no hidden levers.
+
+## Non-Negotiables
+
+1. **No Dark Patterns** — No deceptive defaults, forced consent, or endless nags.
+2. **Consistency** — The same action delivers the same result across web, mobile, CLI, or API.
+3. **Accessibility** — Keyboard navigation, screen reader support, and high-contrast modes are mandatory.
+4. **Explain-in-Place** — Buttons, toggles, and warnings carry contextual help; no buried manuals.
+5. **Respect Attention** — Notifications stay rate-limited and quiet by default.
+6. **AI Surfaces Clearly** — AI-generated or suggested content wears an explicit badge.
+
+## Implementation Hooks (v0)
+
+- **Design checklist**: Every PR includes accessibility and anti-dark-pattern review.
+- **Component library**: Enforce ARIA labels and keyboard navigation.
+- **Notification system**: Opt-in channels with rate limits.
+- **AI badge**: Automatically append to AI-sourced outputs.
+
+## Policy Stub — `INTERFACE.md`
+
+- Lucidia commits to honesty in its interface design.
+- Lucidia bans manipulative or coercive UI patterns.
+- Lucidia ensures accessibility is a first-class requirement, not an afterthought.
+
+**Tagline**: Clarity is the interface of care.
+
