@@ -1,0 +1,32 @@
+[Unit]
+Description=XMRig (learn-mode, throttled)
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/xmrig/build
+EnvironmentFile=-/etc/default/xmrig
+ExecStart=/usr/bin/nice -n 19 /home/pi/xmrig/build/xmrig \
+  -o ${XMRIG_POOL_HOST:?set in /etc/default/xmrig} \
+  -u ${XMRIG_ADDRESS:?set in /etc/default/xmrig} \
+  --cpu-max-threads-hint=${XMRIG_THREADS_HINT:-1} \
+  --donate-level=0 \
+  ${XMRIG_EXTRA_ARGS}
+Restart=always
+RestartSec=10
+CPUQuota=${XMRIG_CPU_QUOTA:-25%%}
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+CapabilityBoundingSet=
+LockPersonality=yes
+RestrictRealtime=yes
+SystemCallFilter=@system-service
+
+[Install]
+WantedBy=multi-user.target

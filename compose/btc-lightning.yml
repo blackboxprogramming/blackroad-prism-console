@@ -1,0 +1,66 @@
+version: "3.8"
+
+# Private Bitcoin Core + Core Lightning bundle for low-power hosts.
+# The services share Docker's internal network. No ports are published by default.
+services:
+  bitcoind:
+    image: ruimarinho/bitcoin-core:26.0
+    container_name: bitcoind
+    restart: unless-stopped
+    stop_grace_period: 1m
+    environment:
+      BITCOIN_RPCUSER: ${BITCOIN_RPCUSER:-bitcoin}
+      BITCOIN_RPCPASSWORD: ${BITCOIN_RPCPASSWORD:-please_change_me}
+    command:
+      - -server
+      - -daemon=0
+      - -txindex=0
+      - -prune=550
+      - -dbcache=300
+      - -rpcuser=${BITCOIN_RPCUSER:-bitcoin}
+      - -rpcpassword=${BITCOIN_RPCPASSWORD:-please_change_me}
+      - -rpcbind=0.0.0.0
+      - -rpcallowip=127.0.0.1/32
+      - -rpcallowip=172.0.0.0/8
+      - -zmqpubrawblock=tcp://0.0.0.0:28332
+      - -zmqpubrawtx=tcp://0.0.0.0:28333
+    volumes:
+      - bitcoin:/home/bitcoin/.bitcoin
+    healthcheck:
+      test: ["CMD", "bitcoin-cli", "-rpcconnect=127.0.0.1", "-rpcuser=${BITCOIN_RPCUSER:-bitcoin}", "-rpcpassword=${BITCOIN_RPCPASSWORD:-please_change_me}", "getblockchaininfo"]
+      interval: 1m
+      timeout: 30s
+      retries: 10
+      start_period: 5m
+
+  cln:
+    image: elementsproject/lightningd:v24.08
+    container_name: cln
+    restart: unless-stopped
+    depends_on:
+      bitcoind:
+        condition: service_healthy
+    command: >-
+      --network=bitcoin
+      --alias=BlackRoad-Pi
+      --bitcoin-rpcuser=${BITCOIN_RPCUSER:-bitcoin}
+      --bitcoin-rpcpassword=${BITCOIN_RPCPASSWORD:-please_change_me}
+      --bitcoin-rpcconnect=bitcoind
+      --bitcoin-rpcport=8332
+      --log-level=info
+      --disable-plugin=bcli
+      --rgb=off
+    volumes:
+      - lightning:/root/.lightning
+    environment:
+      LIGHTNINGD_NETWORK: bitcoin
+    healthcheck:
+      test: ["CMD", "lightning-cli", "--network=bitcoin", "getinfo"]
+      interval: 1m
+      timeout: 30s
+      retries: 10
+      start_period: 5m
+
+volumes:
+  bitcoin:
+  lightning:
