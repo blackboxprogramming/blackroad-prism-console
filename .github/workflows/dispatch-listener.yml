@@ -1,0 +1,10 @@
+name: Dispatch Listener
+on:
+  repository_dispatch:
+    types: [sync_airtable, rerun_ci]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Dispatch received: ${{ github.event.action }} :: ${{ github.event.client_payload }}"

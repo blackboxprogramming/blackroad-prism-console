@@ -1,0 +1,28 @@
+name: Notify Slack
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, closed]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+jobs:
+  slack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack
+        if: ${{ always() }}
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "text": "*${{ github.event_name }}* in `${{ github.repository }}` by ${{ github.actor }}",
+              "blocks": [
+                { "type": "section",
+                  "text": { "type": "mrkdwn", "text": "Ref: `${{ github.ref }}`\nAction: `${{ github.event.action || 'n/a' }}`" }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
