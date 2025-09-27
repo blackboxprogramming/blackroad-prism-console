@@ -1,0 +1,37 @@
+[Unit]
+Description=XMRig (throttled learn-mode)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/xmrig/build
+ExecStart=/usr/bin/nice -n 19 /home/pi/xmrig/build/xmrig \
+  -o POOL_HOST:PORT -u YOUR_XMR_ADDRESS --tls --donate-level=0 --cpu-max-threads-hint=1
+Restart=always
+RestartSec=10
+
+# Hard resource caps
+CPUQuota=25%
+MemoryMax=256M
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+
+# Sandboxing and hardening
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ProtectControlGroups=yes
+ProtectKernelLogs=yes
+ProtectKernelTunables=yes
+ProtectClock=yes
+ProtectKernelModules=yes
+LockPersonality=yes
+RestrictRealtime=yes
+SystemCallFilter=@system-service
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target
