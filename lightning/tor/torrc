@@ -1,0 +1,12 @@
+# Minimal Tor config for a CLN hidden service
+# Tor stores keys under /var/lib/tor/lightning/
+DataDirectory /var/lib/tor
+ClientOnly 1
+SocksPort 0
+Log notice stdout
+
+# Hidden service for CLN
+HiddenServiceDir /var/lib/tor/lightning/
+HiddenServiceVersion 3
+# expose 9735 to internal CLN service on same Docker network
+HiddenServicePort 9735 cln:9735
