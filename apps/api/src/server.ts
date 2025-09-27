@@ -1,191 +1,31 @@
-import express from 'express';
-import morgan from 'morgan';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import './lib/otel.js';
-import { canaryMiddleware } from './middleware/canary.js';
-import { regionMiddleware } from './middleware/region.js';
-import { cacheHeaders } from './middleware/cache_headers.js';
-import { localeMiddleware } from './middleware/locale.js';
-import reindex from './routes/search/reindex.js';
-import query from './routes/search/query.js';
-import notifySend from './routes/notify/send.js';
-import webpush from './routes/notify/webpush.js';
-import hooks from './routes/hooks.js';
-import metrics from './routes/metrics.js';
-import okta from './routes/okta.js';
-import adminAccess from './routes/admin/access_review.js';
-import adminLic from './routes/admin/licensing.js';
-import adminDev from './routes/admin/devices.js';
-import adminVend from './routes/admin/vendors.js';
-import adminPO from './routes/admin/procurement.js';
-import supCR from './routes/support/channels_routing.js';
-import supTK from './routes/support/tickets.js';
-import supSLA from './routes/support/sla.js';
-import supKB from './routes/support/kb.js';
-import supBOT from './routes/support/bot.js';
-import supCSAT from './routes/support/csat.js';
-import productIdeas from './routes/product/ideas.js';
-import productPrd from './routes/product/prd.js';
-import productRoadmap from './routes/product/roadmap.js';
-import productReleases from './routes/product/releases.js';
-import productFlags from './routes/product/flags.js';
-import productFeedback from './routes/product/feedback.js';
-import cpqCatalog from './routes/cpq/catalog.js';
-import cpqPricing from './routes/cpq/pricing.js';
-import cpqQuotes from './routes/cpq/quotes.js';
-import cpqApprovals from './routes/cpq/approvals.js';
-import cpqOrders from './routes/cpq/orders.js';
-import cpqSubs from './routes/cpq/subscriptions.js';
-import cpmDrivers from './routes/cpm/drivers.js';
-import cpmForecast from './routes/cpm/forecast.js';
-import cpmVariance from './routes/cpm/variance.js';
-import cpmPacks from './routes/cpm/packs.js';
-import soxRCM from './routes/sox/rcm.js';
-import soxNarr from './routes/sox/narratives.js';
-import soxTests from './routes/sox/tests.js';
-import soxDef from './routes/sox/deficiency.js';
-import soxSoD from './routes/sox/sod.js';
-import soxScope from './routes/sox/scope.js';
-import p2pV from './routes/p2p/vendors.js';
-import p2pI from './routes/p2p/items.js';
-import p2pReq from './routes/p2p/req.js';
-import p2pPO from './routes/p2p/po.js';
-import p2pRec from './routes/p2p/receipts.js';
-import p2pAP from './routes/p2p/ap.js';
-import p2pPol from './routes/p2p/policy.js';
-import expRep from './routes/expenses/reports.js';
-import expCard from './routes/expenses/cards.js';
-import prEmp from './routes/payroll/employees.js';
-import prSched from './routes/payroll/schedule.js';
-import prTime from './routes/payroll/time.js';
-import prRun from './routes/payroll/run.js';
-import prForms from './routes/payroll/forms.js';
-import p2pPay from './routes/p2p/payments.js';
-import foProv from './routes/finops/providers.js';
-import foCost from './routes/finops/cost.js';
-import foAlloc from './routes/finops/allocation.js';
-import foBud from './routes/finops/budgets.js';
-import foAnom from './routes/finops/anomaly.js';
-import foRecs from './routes/finops/recs.js';
-import foUnit from './routes/finops/unit.js';
-import cmdbCI from './routes/cmdb/ci.js';
-import cmdbBase from './routes/cmdb/baseline.js';
-import changeCRQ from './routes/change/crq.js';
-import changeCal from './routes/change/calendar.js';
-import relRel from './routes/release/rel.js';
-import patchV from './routes/patch/vuln.js';
-import patchP from './routes/patch/plan.js';
-import lic from './routes/cmdb/license.js';
-import iamIdp from './routes/iam/idp.js';
-import iamDir from './routes/iam/directory.js';
-import iamPol from './routes/iam/policies.js';
-import iamPdp from './routes/iam/pdp.js';
-import iamScim from './routes/iam/scim.js';
-import iamAccess from './routes/iam/access.js';
-import iamTokens from './routes/iam/tokens.js';
-import iamSecrets from './routes/iam/secrets.js';
-import iamDevices from './routes/iam/devices.js';
-import ds from './routes/aiops/datasets.js';
-import ft from './routes/aiops/features.js';
-import ex from './routes/aiops/experiments.js';
-import tr from './routes/aiops/training.js';
-import md from './routes/aiops/models.js';
-import mrm from './routes/aiops/mrm.js';
-import dep from './routes/aiops/deploy.js';
-import mon from './routes/aiops/monitor.js';
-import devApis from './routes/dev/apis.js';
-import devKeys from './routes/dev/keys_oauth.js';
-import devPlans from './routes/dev/plans.js';
-import devGW from './routes/dev/gateway.js';
-import devHooks from './routes/dev/webhooks.js';
-import devDocs from './routes/dev/docs.js';
-import devAnalytics from './routes/dev/analytics.js';
-import tprmV from './routes/tprm/vendors.js';
-import tprmQ from './routes/tprm/questionnaires.js';
-import tprmR from './routes/tprm/risk_issues.js';
-import tprmM from './routes/tprm/monitor_sla.js';
-import tprmMap from './routes/tprm/mapping.js';
-import tprmB from './routes/tprm/breach.js';
-import portalAnn from './routes/portal/announcements.js';
-import portalCh from './routes/portal/channels.js';
-import portalPrefs from './routes/portal/prefs_acks.js';
-import portalBan from './routes/portal/banners.js';
-import portalI18n from './routes/portal/i18n.js';
-import portalSearch from './routes/portal/search.js';
-import okrOK from './routes/okr/objectives_krs.js';
-import okrCK from './routes/okr/checkins.js';
-import ppmIN from './routes/ppm/initiatives.js';
-import ppmRM from './routes/ppm/roadmaps.js';
-import ppmCP from './routes/ppm/capacity.js';
-import ppmST from './routes/ppm/status_raid.js';
-import treBA from './routes/tre/banks_accounts.js';
-import treSR from './routes/tre/statements_recon.js';
-import trePF from './routes/tre/position_forecast.js';
-import trePY from './routes/tre/payments.js';
-import treSG from './routes/tre/signatories.js';
-import treFX from './routes/tre/fx.js';
-import treDB from './routes/tre/debt.js';
-import trePL from './routes/tre/pooling.js';
-import paSchema from './routes/pa/schema_keys.js';
-import paIngest from './routes/pa/ingest_identify.js';
-import paSessions from './routes/pa/sessions.js';
-import paFunnels from './routes/pa/funnels_cohorts.js';
-import paMetrics from './routes/pa/metrics_alerts.js';
-
-dotenv.config();
+import express from "express";
+import helmet from "helmet";
+import cors from "cors";
+import classifyRouter from "./routes/classify.js";
 
 const app = express();
-app.use(cors());
-app.use(morgan('dev'));
-app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));
-app.use(regionMiddleware());
-app.use(localeMiddleware());
 
-// raw body for email signature verification
-app.use((req:any,res,next)=>{ if (req.url.startsWith('/api/support/email/ingest')) { const b:Buffer[]=[]; req.on('data',(c)=>b.push(c)); req.on('end',()=>{ req.rawBody = Buffer.concat(b).toString(); next(); }); } else next(); });
+app.use(helmet());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
+app.use(express.json({ limit: "1mb" }));
 
-app.get('/api/health', cacheHeaders('health'), (_req,res)=> res.json({ ok:true, ts: Date.now() }));
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
 
-// Search
-app.post('/api/search/reindex', reindex);
-app.get('/api/search', cacheHeaders('search'), query);
+app.use("/", classifyRouter);
 
-// Notifications
-app.use('/api/notify', notifySend);
-app.use('/api/notify/webpush', webpush);
+const port = Number(process.env.PORT ?? 4000);
 
-app.use('/api/hooks', hooks);
-app.use('/api/metrics', metrics);
-app.use('/api/auth/okta', okta);
-app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
-app.use('/api/support', supCR, supTK, supSLA, supKB, supBOT, supCSAT);
-app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
-app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
-app.use('/api/cpm', cpmDrivers, cpmForecast, cpmVariance, cpmPacks);
-app.use('/api/sox', soxRCM, soxNarr, soxTests, soxDef, soxSoD, soxScope);
-app.use('/api/p2p', p2pV, p2pI, p2pReq, p2pPO, p2pRec, p2pAP, p2pPol, p2pPay);
-app.use('/api/expenses', expRep, expCard);
-app.use('/api/payroll', prEmp, prSched, prTime, prRun, prForms);
-app.use('/api/finops', foProv, foCost, foAlloc, foBud, foAnom, foRecs, foUnit);
-app.use('/api/cmdb', cmdbCI, cmdbBase, lic);
-app.use('/api/change', changeCRQ, changeCal);
-app.use('/api/release', relRel);
-app.use('/api/patch', patchV, patchP);
-app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamTokens, iamSecrets, iamDevices);
-app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
-app.use('/api/dev', devApis, devKeys, devPlans, devGW, devHooks, devDocs, devAnalytics);
-app.use('/api/tprm', tprmV, tprmQ, tprmR, tprmM, tprmMap, tprmB);
-app.use('/api/okr', okrOK, okrCK);
-app.use('/api/ppm', ppmIN, ppmRM, ppmCP, ppmST);
-app.use('/api/portal', portalAnn, portalCh, portalPrefs, portalBan, portalI18n, portalSearch);
-app.use('/api/tre', treBA, treSR, trePF, trePY, treSG, treFX, treDB, trePL);
-app.use('/api/pa', paSchema, paIngest, paSessions, paFunnels, paMetrics);
-
-const port = process.env.PORT || 4000;
-
-if (import.meta.url === `file://${process.argv[1]}`) {
-  app.listen(port, () => console.log(`API listening on ${port}`));
+if (process.env.NODE_ENV !== "test") {
+  app.listen(port, () => {
+    console.log(`Lucidia Auto-Box API listening on port ${port}`);
+  });
 }
 
 export default app;

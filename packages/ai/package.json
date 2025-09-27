@@ -1,0 +1,24 @@
+{
+  "name": "@lucidia/ai",
+  "version": "0.0.1",
+  "description": "Deterministic, seedable classifier and rationale generator for Lucidia Auto-Box.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@lucidia/core": "^0.0.1",
+    "seedrandom": "^3.0.5"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^5.4.5"
+  }
+}

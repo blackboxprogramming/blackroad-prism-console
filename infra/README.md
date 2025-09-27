@@ -1,17 +1,7 @@
-# Infrastructure Skeleton
+# Lucidia Auto-Box Infrastructure Notes
 
-This directory contains an initial skeleton for provisioning a self-hosted Lucidia stack on
-BlackRoad-controlled infrastructure. The layout uses Ansible playbooks to configure a
-highly-available k3s cluster backed by Longhorn for storage and MinIO for object
-hosting. All playbooks are currently placeholders awaiting implementation.
+This folder will store infrastructure-as-code definitions and secrets templates once the prototype evolves past local development. Early intentions:
 
-## Structure
-- `bootstrap.sh` – convenience script to run the full Ansible bootstrap.
-- `ansible/` – Ansible inventory, playbooks, and roles.
-  - `playbooks/` – entry points for each major component.
-  - `roles/` – component roles with placeholder tasks.
-
-Customize `ansible/inventory.ini` with hostnames or IPs for your environment before
-running the bootstrap script.
-
-_Last updated on 2025-09-11_
+- Maintain separate environments for local, staging, and production with explicit consent gating.
+- Provide feature flags for PQC cipher selection and auto-mode availability.
+- Document one-click purge workflows that revoke storage and key material simultaneously.
