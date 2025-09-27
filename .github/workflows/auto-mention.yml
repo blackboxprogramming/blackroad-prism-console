@@ -1,0 +1,122 @@
+name: Auto mention on PRs
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  mention:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load config
+        id: cfg
+        run: |
+          FILE=".github/mention-routes.yml"
+          if [ ! -f "$FILE" ]; then
+            echo "cfg=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "cfg<<EOF" >> $GITHUB_OUTPUT
+          cat "$FILE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Get changed files
+        id: changed
+        uses: tj-actions/changed-files@v45
+        with:
+          json: "true"
+
+      - name: Compute mentions from routes
+        id: calc
+        shell: bash
+        run: |
+          python - << 'PY'
+import json, os, sys, ast, fnmatch
+
+def parse_cfg(text: str):
+    data = {"routes": [], "always": []}
+    current = None
+    for raw in text.splitlines():
+        line = raw.split('#', 1)[0].rstrip()
+        if not line.strip():
+            continue
+        if line.startswith('routes:'):
+            current = None
+            continue
+        if line.startswith('always:'):
+            _, val = line.split(':', 1)
+            val = val.strip() or '[]'
+            try:
+                data['always'] = ast.literal_eval(val)
+            except Exception:
+                data['always'] = []
+            current = None
+            continue
+        if line.lstrip().startswith('- '):
+            line = line.strip()[2:]
+            entry = {}
+            if line:
+                key, val = line.split(':', 1)
+                entry[key.strip()] = ast.literal_eval(val.strip())
+            data['routes'].append(entry)
+            current = entry
+            continue
+        if current is not None:
+            key, val = line.strip().split(':', 1)
+            try:
+                current[key.strip()] = ast.literal_eval(val.strip())
+            except Exception:
+                current[key.strip()] = val.strip()
+    return data
+
+cfg_text = os.environ.get('CFG_TEXT', '')
+if not cfg_text:
+    print('MENTIONS=')
+    sys.exit(0)
+
+cfg = parse_cfg(cfg_text)
+routes = cfg.get('routes') or []
+always = cfg.get('always') or []
+changed = json.loads(os.environ['CHANGED_JSON'])
+files = set(changed.get('all_changed_files', []))
+
+hits = []
+for route in routes:
+    patterns = route.get('patterns') or []
+    mention = route.get('mention')
+    if not mention:
+        continue
+    if isinstance(patterns, str):
+        patterns = [patterns]
+    for path in files:
+        if any(fnmatch.fnmatch(path, pattern) for pattern in patterns):
+            hits.append(mention)
+            break
+
+mentions = sorted(set(always + hits))
+print('MENTIONS=' + ' '.join(mentions))
+PY
+        env:
+          CFG_TEXT: ${{ steps.cfg.outputs.cfg }}
+          CHANGED_JSON: ${{ steps.changed.outputs.all_changed_files }}
+
+      - name: Comment with mentions
+        if: ${{ steps.calc.outputs.MENTIONS != '' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const mentions = process.env.MENTIONS;
+            const body = `Routing to: ${mentions}\n\n(Automated based on changed paths.)`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body
+            })
+        env:
+          MENTIONS: ${{ steps.calc.outputs.MENTIONS }}

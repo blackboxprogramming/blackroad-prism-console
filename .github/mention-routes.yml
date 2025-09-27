@@ -1,0 +1,11 @@
+# Globs → who to @
+routes:
+  - patterns: ["frontend/**", "apps/web/**"]
+    mention: "@your-org/frontend-team"
+  - patterns: ["api/**", "services/**"]
+    mention: "@your-org/api-team"
+  - patterns: ["docs/**"]
+    mention: "@alexalouise"
+
+# Optional: always add these mentions on every PR
+always: []
