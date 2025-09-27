@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { chatOllama, type Msg } from "@/lib/providers/ollama";
 import { codexInfinityPrompt } from "@/lib/prompts/codex-infinity";
-import { searchFiles, readFile } from "@/lib/tools/files";
+import { dispatchTool } from "@/lib/tools/wrappers";
 
 type Mode = "machine" | "chit-chat";
 interface In {
@@ -32,18 +32,7 @@ export async function POST(req: NextRequest) {
 
     if (parsed1?.type === "tool") {
       const { name = "", args = {} } = parsed1;
-      let toolResult: unknown;
-
-      if (name === "files.search") {
-        const q = String(args.query || "");
-        toolResult = { ok: true, hits: searchFiles(q) };
-      } else if (name === "files.read") {
-        const p = String(args.path || "");
-        const text = readFile(p);
-        toolResult = text != null ? { ok: true, path: p, text } : { ok: false, error: "file not found" };
-      } else {
-        toolResult = { ok: false, error: `unknown tool: ${name}` };
-      }
+      const toolResult = await dispatchTool(name, args);
 
       const followup: Msg[] = [
         system,
