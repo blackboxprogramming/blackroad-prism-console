@@ -1,0 +1,17 @@
+pre-commit:
+  parallel: false
+  commands:
+    lint:
+      run: |
+        npm run lint --if-present
+        make lint
+    test:
+      run: |
+        npm test --if-present -- --watch=false
+        make test
+    secret-scan:
+      run: scripts/devx/secret_scan.sh
+pre-push:
+  commands:
+    full-test-suite:
+      run: make test
