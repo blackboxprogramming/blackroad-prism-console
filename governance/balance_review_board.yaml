@@ -1,0 +1,14 @@
+name: "Balance Review Board"
+mission: "Maintain equilibrium across speed, safety, creativity, and care."
+meeting_cadence: "weekly"
+issue_tagging:
+  description: "Tag inbound issues and roadmap items with pillar weightings (0-1)."
+  pillars:
+    - speed
+    - safety
+    - creativity
+    - care
+escalation_path: "Escalate unresolved tensions to Governance Codex #20."
+reporting:
+  - "Publish balance metrics to the /balance-report endpoint."
+  - "Summarize adjustments during Friday standup."
