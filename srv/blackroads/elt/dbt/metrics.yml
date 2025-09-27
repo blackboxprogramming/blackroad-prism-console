@@ -1,0 +1,21 @@
+version: 2
+metrics:
+  - name: dau
+    label: Daily Active Users
+    model: ref('stg_app__events')
+    type: count_distinct
+    sql: user_id
+    timestamp: occurred_at
+    time_grains: [day, week, month]
+
+  - name: purchases
+    label: Purchases
+    model: ref('stg_app__events')
+    type: count
+    sql: event_id
+    filters:
+      - field: event_name
+        operator: '='
+        value: 'PURCHASE'
+    timestamp: occurred_at
+    time_grains: [day, week, month]
