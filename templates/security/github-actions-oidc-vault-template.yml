@@ -1,0 +1,62 @@
+# GitHub Actions workflow template for retrieving short-lived secrets from HashiCorp Vault via OIDC
+#
+# Usage:
+# 1. Configure an OIDC trust relationship between your GitHub organization and Vault.
+# 2. Create a Vault role (example in docs/GITHUB_VAULT_OIDC_TEMPLATE.md) that issues short-lived tokens.
+# 3. Update the VAULT_ADDR, VAULT_NAMESPACE (if used), and secrets path to match your environment.
+# 4. Copy this file into .github/workflows/<workflow-name>.yml and adjust jobs/steps for your project.
+
+name: ci-build-with-vault
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'release/**'
+  pull_request:
+
+permissions:
+  id-token: write   # Required for GitHub OIDC tokens
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VAULT_ADDR: https://vault.example.com
+      VAULT_NAMESPACE: ''
+      VAULT_ROLE: github-oidc-blackroad-build
+      SECRET_PATH: kv/data/blackroad/prism-console/ci
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Vault with GitHub OIDC
+        uses: hashicorp/vault-action@v3
+        with:
+          url: ${{ env.VAULT_ADDR }}
+          namespace: ${{ env.VAULT_NAMESPACE }}
+          method: oidc
+          role: ${{ env.VAULT_ROLE }}
+          jwtGithubAudience: "vault"
+          secrets: |
+            ${SECRET_PATH} api_token | API_TOKEN ;
+            ${SECRET_PATH} signing_key | SIGNING_KEY --base64
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Run tests
+        env:
+          API_TOKEN: ${{ env.API_TOKEN }}
+          SIGNING_KEY: ${{ env.SIGNING_KEY }}
+        run: |
+          npm test
+
+      - name: Clean up ephemeral secrets
+        if: always()
+        run: |
+          unset API_TOKEN SIGNING_KEY
+
