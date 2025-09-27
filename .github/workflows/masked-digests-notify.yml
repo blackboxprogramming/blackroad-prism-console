@@ -1,0 +1,106 @@
+name: Addresses • Masked Digest Notifier
+
+on:
+  workflow_dispatch:
+    inputs:
+      secrets_csv:
+        description: "CSV of secret names (e.g. ROBINHOOD_ETHEREUM,COINBASE_BITCOIN)"
+        type: string
+        required: true
+      to_slack:
+        description: "Post to Slack (uses secret SLACK_WEBHOOK_URL)"
+        type: boolean
+        required: true
+        default: false
+      to_discord:
+        description: "Post to Discord (uses secret DISCORD_WEBHOOK_URL)"
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      # Build masked table without printing raw values
+      - name: Build masked digest table
+        id: table
+        env:
+          CSV: ${{ inputs.secrets_csv }}
+          # Inject each secret into env using built-in context
+          # We'll load values step-by-step and never echo them.
+        shell: bash
+        run: |
+          set -euo pipefail
+          CSV="$CSV"
+          IFS=',' read -ra NAMES <<< "$CSV"
+          # export env vars:
+          for n in "${NAMES[@]}"; do
+            key="$(echo "$n" | xargs)"
+            # write to temp file to avoid echoing in logs
+            {
+              echo "$key<<EOF"
+              echo "${{ secrets[key] }}"
+              echo "EOF"
+            } >> $GITHUB_ENV
+          done
+
+          node - <<'NODE'
+          const crypto = require('crypto');
+          const csv = process.env.CSV || '';
+          const names = csv.split(',').map(s=>s.trim()).filter(Boolean);
+          const rows = [];
+          rows.push(['NAME','LEN','MASKED','DIGEST8']);
+          for (const name of names) {
+            const v = process.env[name] || '';
+            const dg = crypto.createHash('sha256').update(v,'utf8').digest('hex').slice(0,8);
+            const masked = v ? '****' + v.slice(-6) : '';
+            rows.push([name, String(v.length), masked, dg]);
+          }
+          const w = i => Math.max(...rows.map(r => (r[i]||'').length));
+          const W = [0,1,2,3].map(w);
+          const line = r => r.map((c,i)=> (i===0? c.padEnd(W[i]) : c.padStart(W[i])) ).join('  ');
+          const out = [line(rows[0]), '-'.repeat(W.reduce((a,b)=>a+b,0)+6)]
+                      .concat(rows.slice(1).map(line)).join('\n');
+          // set outputs
+          const core = require('fs');
+          core.writeFileSync('masked_table.txt', out+'\n');
+          console.log(out); // safe: masked + digests only
+          NODE
+
+      - name: Upload summary artifact (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: masked-digests
+          path: masked_table.txt
+
+      - name: Post to Slack (optional)
+        if: ${{ inputs.to_slack }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        shell: bash
+        run: |
+          test -n "$SLACK_WEBHOOK_URL"
+          body=$(jq -Rs '{text: ("Masked address digests:\n```" + . + "```")}' < masked_table.txt)
+          curl -s -X POST -H 'content-type: application/json' \
+            --data "$body" "$SLACK_WEBHOOK_URL" >/dev/null
+
+      - name: Post to Discord (optional)
+        if: ${{ inputs.to_discord }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        shell: bash
+        run: |
+          test -n "$DISCORD_WEBHOOK_URL"
+          content="Masked address digests:\n\`\`\`\n$(cat masked_table.txt)\n\`\`\`"
+          curl -s -X POST -H 'content-type: application/json' \
+            --data "$(jq -n --arg content "$content" '{content:$content}')" \
+            "$DISCORD_WEBHOOK_URL" >/dev/null
