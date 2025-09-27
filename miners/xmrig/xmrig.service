@@ -1,0 +1,31 @@
+[Unit]
+Description=XMRig (learn-mode, throttled)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/miners/xmrig
+ExecStart=/usr/bin/bash /home/pi/miners/xmrig/run-throttled.sh
+Restart=always
+RestartSec=10
+
+# caps: roughly 25% of a core and 256 MB
+CPUQuota=25%
+MemoryMax=256M
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+
+# sandboxing
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+CapabilityBoundingSet=
+LockPersonality=yes
+RestrictRealtime=yes
+SystemCallFilter=@system-service
+
+[Install]
+WantedBy=multi-user.target
