@@ -14,6 +14,9 @@ What it does
 4.Opens a PR, applies labels, requests review, optionally enables auto-merge.
 5.Prints the PR link.
 
+For alias- and consent-focused wrapper configuration snippets that pair with the automation prompts, see
+[`docs/WRAPPER_ALIAS_CONFIG.md`](docs/WRAPPER_ALIAS_CONFIG.md).
+
 ---
 
 ## 3) Optional: GitLab variant (MR)
