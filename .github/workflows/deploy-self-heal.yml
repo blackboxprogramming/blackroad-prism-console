@@ -1,0 +1,59 @@
+name: Deploy & Self-Heal
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      HOST: ${{ secrets.BR_HOST }}             # e.g., codex-infinity
+      USER: ${{ secrets.BR_USER }}             # e.g., root
+      SSH_KEY: ${{ secrets.BR_SSH_KEY }}       # private key
+      # URLs to check after deploy
+      HEALTH_ENDPOINTS: |
+        https://blackroad.io/health
+        https://blackroad.io/api/health
+        http://127.0.0.1:4000/health         # internal (optional)
+        http://127.0.0.1:8000/health         # llm bridge (optional)
+      # How to rollback if remediation fails
+      ROLLBACK_STRATEGY: "git"                # or "docker"
+      ROLLBACK_REF: "prev-release"            # tag or commit to revert to
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ env.SSH_KEY }}
+
+      - name: Push code to server
+        run: |
+          rsync -az --delete \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            ./ ${{ env.USER }}@${{ env.HOST }}:/srv/blackroad-repo/
+
+      - name: Remote deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ env.USER }}@${{ env.HOST }} <<'EOF'
+          set -euo pipefail
+          cd /srv/blackroad-repo
+
+          # 1) record current ref for rollback
+          CURRENT_REF=$(git rev-parse --short=12 HEAD || echo "unknown")
+          echo "CURRENT_REF=$CURRENT_REF"
+
+          # 2) build & restart services (adapt to your stack)
+          bash scripts/deploy.sh
+
+          # 3) run health verification with auto-heal
+          sudo /usr/local/bin/self_heal.sh \
+            --endpoints "/etc/self-heal/endpoints.list" \
+            --restart-cmd "/usr/local/bin/remediate.sh" \
+            --rollback-cmd "/usr/local/bin/rollback.sh"
+
+          EOF
