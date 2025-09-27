@@ -1,0 +1,65 @@
+name: Vault Fetch (OIDC, masked)
+description: Fetches secrets from HashiCorp Vault using GitHub OIDC (short-lived)
+inputs:
+  url:
+    description: Base URL of Vault (e.g., https://vault.example.com)
+    required: true
+  role:
+    description: Vault JWT role
+    required: true
+  paths:
+    description: CSV list of KV paths to read (e.g., kv-blackroad/addresses)
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      env:
+        VAULT_URL: ${{ inputs.url }}
+        ROLE: ${{ inputs.role }}
+        PATHS: ${{ inputs.paths }}
+      run: |
+        set -euo pipefail
+
+        echo "Requesting OIDC token (GitHub)…"
+        # GitHub OIDC token is available in the runner:
+        # $ACTIONS_ID_TOKEN_REQUEST_URL and $ACTIONS_ID_TOKEN_REQUEST_TOKEN
+        TOKEN_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${GITHUB_SERVER_URL}"
+        OIDC_TOKEN=$(curl -s -H "User-Agent: actions/oidc-client" \
+          -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+          "${TOKEN_URL}" | jq -r '.value')
+
+        echo "Exchanging OIDC for Vault token (role=${ROLE})…"
+        VAULT_TOKEN=$(curl -s -X POST "${VAULT_URL}/v1/auth/jwt/login" \
+          -H "Content-Type: application/json" \
+          -d "{\"role\":\"${ROLE}\",\"jwt\":\"${OIDC_TOKEN}\"}" | jq -r '.auth.client_token')
+
+        if [ -z "${VAULT_TOKEN}" ] || [ "${VAULT_TOKEN}" = "null" ]; then
+          echo "Vault login failed" >&2
+          exit 1
+        fi
+
+        IFS=',' read -ra LIST <<< "${PATHS}"
+        for p in "${LIST[@]}"; do
+          P="$(echo "$p" | xargs)"
+          echo "::group::Vault read: ${P}"
+          JSON=$(curl -s -H "X-Vault-Token: ${VAULT_TOKEN}" "${VAULT_URL}/v1/${P}")
+          # Write masked outputs to $GITHUB_ENV (never echo secret plaintext)
+          # We only expose digests/lengths for logs; values exported to env are not printed.
+          KEYS=$(echo "$JSON" | jq -r '.data.data | keys[]' 2>/dev/null || echo "")
+          for k in $KEYS; do
+            val=$(echo "$JSON" | jq -r ".data.data[\"$k\"]")
+            # export env var (consumers can use process.env in following steps)
+            echo "$k<<EOF" >> $GITHUB_ENV
+            echo "$val" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+
+            # masked log: only len and sha256 digest8
+            dg=$(printf "%s" "$val" | sha256sum | awk '{print $1}' | cut -c1-8)
+            echo "exported $k  len=$(printf \"%s\" "$val" | wc -c)  digest8=$dg"
+          done
+          echo "::endgroup::"
+        done
+
+        # tighten: drop token variable from shell
+        unset VAULT_TOKEN OIDC_TOKEN

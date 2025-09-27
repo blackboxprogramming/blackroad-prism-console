@@ -1,0 +1,38 @@
+name: Vault OIDC Example (digests only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write  # REQUIRED for OIDC
+
+jobs:
+  fetch-and-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Fetch secrets from Vault (short-lived)
+        uses: ./.github/actions/vault-fetch
+        with:
+          url: ${{ vars.VAULT_URL }}          # set this non-sensitive var in repo/ORG "Variables"
+          role: blackroad
+          paths: kv-blackroad/addresses
+
+      - name: Show masked digests (no plaintext)
+        run: |
+          set -euo pipefail
+          for n in $(env | cut -d= -f1); do
+            case "$n" in
+              *SECRET*|*KEY*|*ADDR*|*ADDRESS*)
+                v="${!n}"
+                dg=$(printf "%s" "$v" | sha256sum | awk '{print $1}' | cut -c1-8)
+                echo "$n len=$(printf \"%s\" "$v" | wc -c) digest8=$dg masked=****${v: -6}"
+              ;;
+            esac
+          done
