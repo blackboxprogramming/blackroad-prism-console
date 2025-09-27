@@ -1,0 +1,14 @@
+Issue Type,Summary,Description,Component,Labels,Story Points,Epic Name
+Epic,Auth & Onboarding,"Magic link auth and 3-step checklist",Platform,"auth;onboarding",,
+Epic,First Data Source,"Integrate Source X; ingest + normalize",API,ingest,,
+Epic,Dashboard v0.1,"2 tiles (events, errors) + empty states",Web,ui,,
+Story,Magic link sign-in,"Email-based sign-in with token; store session; sign-out.",Platform,auth,3,Auth & Onboarding
+Story,Onboarding checklist,"3 steps; persists progress; CTA to connect source.",Web,onboarding,3,Auth & Onboarding
+Story,Connect Source X,"Token input → save → test connectivity → status.",API,ingest,5,First Data Source
+Story,Ingest job (pull) for X,"Nightly + manual; idempotent; metrics roll-ups.",API,"ingest;batch",5,First Data Source
+Story,Dashboard: Events 7d,"Line chart; hover; compare vs prev 7d.",Web,ui,3,Dashboard v0.1
+Story,Dashboard: Errors 7d,"Line chart; hover; compare vs prev 7d.",Web,ui,3,Dashboard v0.1
+Task,Audit log minimal,"Record sign-ins, source connect, config changes.",Platform,audit,2,Auth & Onboarding
+Task,Tracking plan wiring,"Emit client/server events to analytics.",Platform,telemetry,2,Dashboard v0.1
+Task,API docs in Swagger,"Update /v1 endpoints + examples.",API,docs,1,Dashboard v0.1
+Bug,Auth edge cases,"Expired token flow, wrong email, resend.",Platform,auth,2,Auth & Onboarding
