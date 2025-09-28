@@ -64,6 +64,29 @@ When you're ready to share changes:
    ```
 4. Open a Pull Request and review the CI results.
 
+## Mining progress & leaderboards
+
+Track miner activity, crown trophy holders, and celebrate "green wins" with the
+new leaderboard tooling bundled in this repo:
+
+1. Log each mined block in [`logs/blocks.csv`](logs/blocks.csv). Keep the header
+   row and append one line per block with the timestamp, block ID, miner name,
+   energy usage (kWh), and fees earned (USD).
+2. Refresh the leaderboard outputs by running:
+   ```bash
+   python3 scripts/build_leaderboards.py
+   ```
+   This generates `leaderboard.md` for humans and
+   `leaderboard_snapshot.json` for downstream tools.
+3. Tweak thresholds or rename trophies via
+   [`config/leaderboard_config.json`](config/leaderboard_config.json). The
+   script merges missing keys with sensible defaults, so only override what you
+   need.
+
+Every push that touches the CSV, config, or script automatically rebuilds the
+leaderboard through the `leaderboard-refresh` GitHub Action to keep things
+up-to-date.
+
 ## Developing with VS Code and Docker on macOS
 
 1. Start [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac/).
