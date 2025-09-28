@@ -38,11 +38,134 @@ jobs:
               if (!raw) {
                 return { routes: [], always: [] };
               }
+              const config = parseConfig(raw);
+              if (!config || typeof config !== 'object') {
+                throw new Error('Failed to parse .github/mention-routes.yml: invalid structure');
+              }
+              return config;
+            }
+
+            function parseConfig(raw) {
               try {
                 return JSON.parse(raw);
-              } catch (err) {
-                throw new Error(`Failed to parse .github/mention-routes.yml: ${err.message}`);
+              } catch (jsonError) {
+                return parseSimpleYAML(raw);
               }
+            }
+
+            function parseSimpleYAML(raw) {
+              const lines = raw.split(/\r?\n/);
+              const root = {};
+              const stack = [{ indent: -1, type: 'object', value: root }];
+
+              const pendingContext = key => ({
+                indent: key.indent,
+                type: 'pending',
+                container: key.container,
+                key: key.key,
+                value: null
+              });
+
+              function ensureContainer(context, indent, line) {
+                if (context.type !== 'pending') {
+                  return context;
+                }
+                const isArray = line.trim().startsWith('- ');
+                const nextValue = isArray ? [] : {};
+                context.container[context.key] = nextValue;
+                context.type = isArray ? 'array' : 'object';
+                context.value = nextValue;
+                return context;
+              }
+
+              function parseScalar(value) {
+                if (value === undefined || value === null) return null;
+                if (value === '') return null;
+                if (value === '[]') return [];
+                if (value === '{}') return {};
+                if (value === 'true') return true;
+                if (value === 'false') return false;
+                if (value === 'null') return null;
+                if (/^[+-]?\d+(\.\d+)?$/.test(value)) {
+                  return Number(value);
+                }
+                const first = value[0];
+                const last = value[value.length - 1];
+                if ((first === '"' && last === '"') || first === '[' || first === '{') {
+                  return JSON.parse(value);
+                }
+                return value;
+              }
+
+              for (const rawLine of lines) {
+                if (!rawLine.trim() || rawLine.trim().startsWith('#')) {
+                  continue;
+                }
+                const indent = rawLine.match(/^\s*/)[0].length;
+                while (stack.length > 1 && indent <= stack[stack.length - 1].indent) {
+                  stack.pop();
+                }
+                if (!stack.length) {
+                  throw new Error('Invalid YAML structure in .github/mention-routes.yml');
+                }
+                let parent = stack[stack.length - 1];
+                parent = ensureContainer(parent, indent, rawLine);
+                stack[stack.length - 1] = parent;
+
+                const line = rawLine.trim();
+                if (line.startsWith('- ')) {
+                  if (parent.type !== 'array') {
+                    throw new Error('YAML array item without array context');
+                  }
+                  const content = line.slice(2).trim();
+                  if (!content) {
+                    const obj = {};
+                    parent.value.push(obj);
+                    stack.push({ indent, type: 'object', value: obj });
+                    continue;
+                  }
+                  const colonIndex = content.indexOf(':');
+                  if (colonIndex === -1) {
+                    parent.value.push(parseScalar(content));
+                    continue;
+                  }
+                  const key = content.slice(0, colonIndex).trim();
+                  const valuePart = content.slice(colonIndex + 1).trim();
+                  const obj = {};
+                  if (valuePart) {
+                    obj[key] = parseScalar(valuePart);
+                  } else {
+                    obj[key] = null;
+                  }
+                  parent.value.push(obj);
+                  stack.push({ indent, type: 'object', value: obj });
+                  if (!valuePart) {
+                    stack.push(pendingContext({ indent, container: obj, key }));
+                  }
+                  continue;
+                }
+
+                const colonIndex = line.indexOf(':');
+                if (colonIndex === -1) {
+                  throw new Error('Invalid YAML line: ' + line);
+                }
+                const key = line.slice(0, colonIndex).trim();
+                const valuePart = line.slice(colonIndex + 1).trim();
+                const target = parent.type === 'array' ? parent.value[parent.value.length - 1] : parent.value;
+                if (parent.type === 'array' && (!target || typeof target !== 'object')) {
+                  throw new Error('Cannot assign property to non-object array item');
+                }
+                const container = parent.type === 'array' ? target : parent.value;
+                if (valuePart) {
+                  container[key] = parseScalar(valuePart);
+                } else {
+                  const pending = { indent, container, key };
+                  container[key] = null;
+                  stack.push(pendingContext(pending));
+                }
+              }
+
+              return root;
             }
 
             function matches(pattern, file) {
