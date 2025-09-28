@@ -1,0 +1,17 @@
+{
+  "routes": [
+    {
+      "patterns": ["blackroad/**", "apps/blackroad/**"],
+      "mention": "@blackboxprogramming/blackroad"
+    },
+    {
+      "patterns": ["prism/**", "apps/prism/**"],
+      "mention": "@blackboxprogramming/prism"
+    },
+    {
+      "patterns": ["infra/**", ".github/workflows/**"],
+      "mention": "@blackboxprogramming/platform"
+    }
+  ],
+  "always": []
+}
