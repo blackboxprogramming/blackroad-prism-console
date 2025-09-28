@@ -3,6 +3,12 @@ name: Auto mention teams
 on:
   pull_request_target:
     types: [opened, reopened, synchronize, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pull_number:
+        description: 'Pull request number to reroute'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -10,143 +16,394 @@ permissions:
 
 jobs:
   route:
-    if: github.event.pull_request.draft == false
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout default branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.repository.default_branch }}
-      - name: Calculate mentions
-        id: calc
+
+      - name: Resolve pull request context
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          pull_number: ${{ github.event.inputs.pull_number }}
+          script: |
+            const {owner, repo} = context.repo
+            let number = context.payload?.pull_request?.number
+            const provided = core.getInput('pull_number') || ''
+            if (!number && provided) {
+              number = Number(provided)
+            }
+            if (!number) {
+              throw new Error('A pull request number is required.')
+            }
+            const {data: pr} = await github.rest.pulls.get({owner, repo, pull_number: number})
+            core.setOutput('number', String(pr.number))
+            core.setOutput('login', pr.user?.login || '')
+            core.setOutput('draft', pr.draft ? 'true' : 'false')
+            core.setOutput('labels', JSON.stringify(pr.labels || []))
+
+      - name: Check for opt-out label
+        id: optout
+        uses: actions/github-script@v7
+        env:
+          PR_LABELS: ${{ steps.pr.outputs.labels }}
+          PR_DRAFT: ${{ steps.pr.outputs.draft }}
+        with:
+          result-encoding: string
+          script: |
+            const labels = JSON.parse(process.env.PR_LABELS || '[]')
+            const hasNoMentions = labels.some(label => (label?.name || '').toLowerCase() === 'no-mentions')
+            const skip = hasNoMentions || process.env.PR_DRAFT === 'true'
+            core.setOutput('skip', skip ? 'true' : 'false')
+
+      - name: Load mention routes config
+        if: steps.optout.outputs.skip != 'true'
+        id: cfg
         uses: actions/github-script@v7
         with:
           result-encoding: string
           script: |
-            const fs = require('fs');
-
-            function loadConfig() {
-              let raw;
-              try {
-                raw = fs.readFileSync('.github/mention-routes.yml', 'utf8').trim();
-              } catch (error) {
-                if (error && error.code === 'ENOENT') {
-                  return { routes: [], always: [] };
-                }
-                throw error;
+            const fs = require('fs')
+            try {
+              const raw = fs.readFileSync('.github/mention-routes.yml', 'utf8')
+              core.setOutput('cfg', raw)
+            } catch (error) {
+              if (error && error.code === 'ENOENT') {
+                core.setOutput('cfg', '')
+                return
               }
-              if (!raw) {
-                return { routes: [], always: [] };
-              }
-              try {
-                return JSON.parse(raw);
-              } catch (err) {
-                throw new Error(`Failed to parse .github/mention-routes.yml: ${err.message}`);
-              }
+              throw error
             }
 
-            function matches(pattern, file) {
-              if (pattern === '**') return true;
-              if (pattern.endsWith('/**')) {
-                const prefix = pattern.slice(0, -3);
-                return file.startsWith(prefix);
-              }
-              if (pattern.startsWith('**/')) {
-                const suffix = pattern.slice(3);
-                return file.endsWith(suffix);
-              }
-              if (pattern.includes('*')) {
-                const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-                const regex = new RegExp('^' + escaped.replace(/\*+/g, '.*') + '$');
-                return regex.test(file);
-              }
-              return file === pattern;
+      - name: Validate config
+        if: steps.optout.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const yaml = require('js-yaml')
+            const cfg = yaml.load(process.env.CFG || '') || {}
+            const routes = Array.isArray(cfg.routes) ? cfg.routes : []
+            const bad = routes.filter(r => !r?.mention || !Array.isArray(r.patterns) || r.patterns.length === 0)
+            if (bad.length) {
+              core.setFailed(`Invalid mention-routes entries: ${JSON.stringify(bad)}`)
             }
+        env:
+          CFG: ${{ steps.cfg.outputs.cfg }}
 
-            const config = loadConfig();
-            const routes = Array.isArray(config.routes) ? config.routes : [];
-            const always = Array.isArray(config.always)
-              ? config.always.map(value => String(value).trim()).filter(Boolean)
-              : [];
-            const { owner, repo } = context.repo;
-            const number = context.payload.pull_request.number;
-
+      - name: Collect changed files
+        if: steps.optout.outputs.skip != 'true'
+        id: changed
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        with:
+          result-encoding: string
+          script: |
+            const {owner, repo} = context.repo
+            const number = Number(process.env.PR_NUMBER)
+            if (!number) {
+              throw new Error('Missing pull request number.')
+            }
             const files = await github.paginate(github.rest.pulls.listFiles, {
               owner,
               repo,
               pull_number: number,
               per_page: 100
-            });
+            })
+            const filenames = files.map(file => file.filename)
+            core.setOutput('all_changed_files', JSON.stringify(filenames))
 
-            const filenames = files.map(file => file.filename);
-            const mentions = new Set(always);
-            const teamSlugs = new Set();
-
-            for (const route of routes) {
-              if (!route || !route.patterns || !route.mention) continue;
-              const patterns = (Array.isArray(route.patterns) ? route.patterns : [route.patterns])
-                .map(pattern => String(pattern).trim())
-                .filter(Boolean);
-              if (!patterns.length) continue;
-              const hit = filenames.some(file => patterns.some(pattern => matches(pattern, file)));
-              if (hit) {
-                const mentionValue = String(route.mention).trim();
-                if (mentionValue) {
-                  mentions.add(mentionValue);
-                }
-              }
-            }
-
-            const ordered = Array.from(mentions).filter(Boolean);
-            const mentionLine = ordered.join(' ');
-
-            for (const mention of ordered) {
-              if (mention.startsWith('@')) {
-                const parts = mention.slice(1).split('/');
-                if (parts.length === 2 && parts[1]) {
-                  teamSlugs.add(parts[1].trim());
-                }
-              }
-            }
-
-            core.setOutput('MENTIONS', mentionLine);
-            core.setOutput('TEAM_REVIEWERS', Array.from(teamSlugs).join(','));
-
-      - name: Add mention comment
-        if: ${{ steps.calc.outputs.MENTIONS != '' }}
+      - name: Compute mentions from paths
+        if: steps.optout.outputs.skip != 'true'
+        id: paths
         uses: actions/github-script@v7
-        env:
-          MENTIONS: ${{ steps.calc.outputs.MENTIONS }}
         with:
           script: |
-            const mentions = (process.env.MENTIONS || '').trim();
-            if (!mentions) return;
-            const { owner, repo } = context.repo;
-            const number = context.payload.pull_request.number;
-            await github.rest.issues.createComment({
-              owner,
-              repo,
-              issue_number: number,
-              body: `Routing ${mentions} based on changed files.`
-            });
+            const yaml = require('js-yaml')
+            const mm = require('minimatch')
+            const config = yaml.load(process.env.CFG || '') || {}
+            const files = JSON.parse(process.env.CHANGED || '[]')
+            const routes = Array.isArray(config.routes) ? config.routes : []
+            const always = Array.isArray(config.always)
+              ? config.always.map(value => String(value).trim()).filter(Boolean)
+              : []
+            const alwaysAssign = Array.isArray(config.always_assign)
+              ? config.always_assign.map(value => String(value).trim()).filter(Boolean)
+              : []
+            const mentions = new Set(always)
+            const assignees = new Set(alwaysAssign)
+            const teamSlugs = new Set()
 
-      - name: Request team reviewers
-        if: ${{ steps.calc.outputs.MENTIONS != '' && steps.calc.outputs.TEAM_REVIEWERS != '' }}
+            for (const route of routes) {
+              if (!route) continue
+              const mentionValue = String(route.mention || '').trim()
+              const patterns = Array.isArray(route.patterns) ? route.patterns : [route.patterns]
+              const normalizedPatterns = patterns
+                .map(pattern => String(pattern || '').trim())
+                .filter(Boolean)
+              if (!mentionValue || !normalizedPatterns.length) continue
+              const hit = files.some(file => normalizedPatterns.some(pattern => mm(file, pattern)))
+              if (!hit) continue
+              mentions.add(mentionValue)
+              const assigneeList = Array.isArray(route.assignees) ? route.assignees : []
+              for (const candidate of assigneeList) {
+                const login = String(candidate || '').replace(/^@/, '').trim()
+                if (login) assignees.add(login)
+              }
+              if (mentionValue.startsWith('@') && !mentionValue.includes('/')) {
+                assignees.add(mentionValue.slice(1))
+              }
+              if (mentionValue.startsWith('@')) {
+                const parts = mentionValue.slice(1).split('/')
+                if (parts.length === 2 && parts[1]) {
+                  teamSlugs.add(parts[1].trim())
+                }
+              }
+            }
+
+            for (const mention of mentions) {
+              if (mention.startsWith('@')) {
+                const parts = mention.slice(1).split('/')
+                if (parts.length === 2 && parts[1]) {
+                  teamSlugs.add(parts[1].trim())
+                }
+              }
+            }
+
+            core.setOutput('MENTIONS', Array.from(mentions).join(' '))
+            core.setOutput('TEAM_REVIEWERS', Array.from(teamSlugs).join(','))
+            core.setOutput('ASSIGNEES', Array.from(assignees).join(' '))
+        env:
+          CFG: ${{ steps.cfg.outputs.cfg }}
+          CHANGED: ${{ steps.changed.outputs.all_changed_files }}
+
+      - name: Merge mentions
+        if: steps.optout.outputs.skip != 'true'
+        id: merge
+        run: |
+          PATHS="$(echo "${{ steps.paths.outputs.MENTIONS }}" | xargs)"
+          ASSIGNEES="$(echo "${{ steps.paths.outputs.ASSIGNEES }}" | xargs)"
+          echo "ALL=$PATHS" >> $GITHUB_OUTPUT
+          echo "ASSIGNEES=$ASSIGNEES" >> $GITHUB_OUTPUT
+
+      - name: Load CODEOWNERS (optional)
+        if: steps.optout.outputs.skip != 'true'
+        id: owners
+        run: |
+          for f in .github/CODEOWNERS CODEOWNERS docs/CODEOWNERS; do
+            if [ -f "$f" ]; then echo "path=$f" >> $GITHUB_OUTPUT; break; fi
+          done
+
+      - name: Compute mentions from CODEOWNERS
+        if: steps.optout.outputs.skip != 'true' && steps.owners.outputs.path != ''
+        id: co
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs')
+            const path = process.env.CO_PATH
+            const txt = fs.readFileSync(path, 'utf8')
+            const rules = txt.split(/\r?\n/).filter(l => l && !l.startsWith('#'))
+            core.setOutput('rules', JSON.stringify(rules))
+        env:
+          CO_PATH: ${{ steps.owners.outputs.path }}
+
+      - name: Match changed files to CODEOWNERS
+        if: steps.optout.outputs.skip != 'true' && steps.co.outputs.rules != ''
+        id: co_mentions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const mm = require('minimatch')
+            const rules = JSON.parse(process.env.RULES)
+            const files = JSON.parse(process.env.CHANGED)
+            const hits = new Set()
+            for (const line of rules) {
+              const [pattern, ...owners] = line.trim().split(/\s+/)
+              if (!pattern || owners.length === 0) continue
+              if (files.some(f => mm(f, pattern))) owners.forEach(o => hits.add(o))
+            }
+            core.setOutput('mentions', Array.from(hits).join(' '))
+        env:
+          RULES: ${{ steps.co.outputs.rules }}
+          CHANGED: ${{ steps.changed.outputs.all_changed_files }}
+
+      - name: Merge CODEOWNERS mentions
+        if: steps.optout.outputs.skip != 'true'
+        id: merge_co
         uses: actions/github-script@v7
         env:
-          TEAM_REVIEWERS: ${{ steps.calc.outputs.TEAM_REVIEWERS }}
+          PATHS: ${{ steps.merge.outputs.ALL }}
+          PATHS_ASSIGNEES: ${{ steps.merge.outputs.ASSIGNEES }}
+          CO: ${{ steps.co_mentions.outputs.mentions }}
+        with:
+          script: |
+            const mentions = new Set()
+            const assignees = new Set()
+            const teamSlugs = new Set()
+
+            const appendMention = (value) => {
+              const mention = String(value || '').trim()
+              if (!mention) return
+              mentions.add(mention)
+              if (mention.startsWith('@')) {
+                const body = mention.slice(1)
+                if (body && !body.includes('/')) {
+                  assignees.add(body)
+                }
+                const parts = body.split('/')
+                if (parts.length === 2 && parts[1]) {
+                  teamSlugs.add(parts[1].trim())
+                }
+              }
+            }
+
+            const appendAssignee = (value) => {
+              const login = String(value || '').replace(/^@/, '').trim()
+              if (login) assignees.add(login)
+            }
+
+            String(process.env.PATHS || '')
+              .split(/\s+/)
+              .filter(Boolean)
+              .forEach(appendMention)
+
+            String(process.env.CO || '')
+              .split(/\s+/)
+              .filter(Boolean)
+              .forEach(appendMention)
+
+            String(process.env.PATHS_ASSIGNEES || '')
+              .split(/\s+/)
+              .filter(Boolean)
+              .forEach(appendAssignee)
+
+            core.setOutput('ALL', Array.from(mentions).join(' '))
+            core.setOutput('ASSIGNEES', Array.from(assignees).join(' '))
+            core.setOutput('TEAM_REVIEWERS', Array.from(teamSlugs).join(','))
+
+      - name: Cooldown guard
+        if: steps.optout.outputs.skip != 'true'
+        id: cd
+        uses: actions/github-script@v7
+        env:
+          ALL: ${{ steps.merge_co.outputs.ALL }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        with:
+          script: |
+            const teams = String(process.env.ALL)
+              .split(/\s+/)
+              .filter(Boolean)
+            if (!teams.length) {
+              core.setOutput('fresh', '')
+              return
+            }
+            const {owner, repo} = context.repo
+            const number = Number(process.env.PR_NUMBER)
+            const since = new Date(Date.now() - 24*60*60*1000).toISOString()
+
+            const {data: comments} = await github.rest.issues.listComments({owner, repo, issue_number: number, per_page: 100, since})
+            const recent = new Set()
+            for (const c of comments) {
+              if (c.user?.type !== 'Bot') continue
+              for (const t of teams) {
+                if (c.body?.includes(t)) recent.add(t)
+              }
+            }
+            const fresh = teams.filter(t => !recent.has(t))
+            core.setOutput('fresh', fresh.join(' '))
+
+      - name: Auto-assign
+        if: steps.optout.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        env:
+          ALL: ${{ steps.merge_co.outputs.ALL }}
+          EXTRA: ${{ steps.merge_co.outputs.ASSIGNEES }}
+          PR_LOGIN: ${{ steps.pr.outputs.login }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        with:
+          script: |
+            const {owner, repo} = context.repo
+            const number = Number(process.env.PR_NUMBER)
+            const login = (process.env.PR_LOGIN || '').trim()
+            const mentions = String(process.env.ALL || '')
+              .split(/\s+/)
+              .filter(Boolean)
+            const extra = String(process.env.EXTRA || '')
+              .split(/\s+/)
+              .filter(Boolean)
+            const assignees = new Set()
+            if (login) assignees.add(login)
+            for (const mention of mentions) {
+              if (mention.startsWith('@') && !mention.includes('/')) {
+                assignees.add(mention.slice(1))
+              }
+            }
+            for (const candidate of extra) {
+              const value = candidate.replace(/^@/, '').trim()
+              if (value) assignees.add(value)
+            }
+            const finalAssignees = Array.from(assignees).filter(Boolean)
+            if (!finalAssignees.length) return
+            try {
+              await github.rest.issues.addAssignees({owner, repo, issue_number: number, assignees: finalAssignees})
+            } catch (error) {
+            }
+
+      - name: Add mention comment
+        if: steps.optout.outputs.skip != 'true' && steps.cd.outputs.fresh != ''
+        uses: actions/github-script@v7
+        env:
+          ALL: ${{ steps.cd.outputs.fresh }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        with:
+          script: |
+            const mentions = (process.env.ALL || '').trim()
+            if (!mentions) return
+            const marker = '<!-- auto-mention -->'
+            const isRFR = context.payload.action === 'ready_for_review'
+            const lines = [marker, `Routing to: ${mentions}`]
+            const reason = isRFR ? 'Reason: moved from draft → ready.' : ''
+            if (reason) {
+              lines.push('', reason)
+            } else {
+              lines.push('')
+            }
+            lines.push('(Automated based on changed paths/keywords.)')
+            const body = lines.join('\n')
+
+            const {owner, repo} = context.repo
+            const number = Number(process.env.PR_NUMBER)
+            const {data: comments} = await github.rest.issues.listComments({owner, repo, issue_number: number, per_page: 100})
+            const existing = comments.find(comment => comment.body && comment.body.includes(marker))
+            if (existing) {
+              await github.rest.issues.updateComment({owner, repo, comment_id: existing.id, body})
+            } else {
+              await github.rest.issues.createComment({owner, repo, issue_number: number, body})
+            }
+
+      - name: Request team reviewers
+        if: steps.optout.outputs.skip != 'true' && steps.merge_co.outputs.TEAM_REVIEWERS != ''
+        uses: actions/github-script@v7
+        env:
+          TEAM_REVIEWERS: ${{ steps.merge_co.outputs.TEAM_REVIEWERS }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
         with:
           script: |
             const teams = (process.env.TEAM_REVIEWERS || '')
               .split(',')
               .map(t => t.trim())
-              .filter(Boolean);
-            if (!teams.length) return;
-            const { owner, repo } = context.repo;
-            const number = context.payload.pull_request.number;
+              .filter(Boolean)
+            if (!teams.length) return
+            const { owner, repo } = context.repo
+            const number = Number(process.env.PR_NUMBER)
             await github.rest.pulls.requestReviewers({
               owner,
               repo,
               pull_number: number,
               team_reviewers: teams
-            });
+            })
