@@ -1,0 +1,149 @@
+name: route-mentions
+description: Compute and upsert @mentions based on changed paths or keywords
+inputs:
+  routes_yaml_path:
+    description: Path to the mention routing configuration file.
+    required: false
+    default: ".github/mention-routes.yml"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Composite action online
+      shell: bash
+      run: echo "Composite action online"
+
+    - name: Collect changed files
+      id: files
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { owner, repo } = context.repo;
+          const number = context.payload.pull_request?.number;
+          if (!number) {
+            core.info('No pull request context; returning empty file list.');
+            core.setOutput('json', '[]');
+            return;
+          }
+          const files = await github.paginate(github.rest.pulls.listFiles, {
+            owner,
+            repo,
+            pull_number: number,
+            per_page: 100
+          });
+          const changed = files.map(file => file.filename);
+          core.setOutput('json', JSON.stringify(changed));
+
+    - id: compute
+      shell: bash
+      env:
+        ROUTES_YAML_PATH: ${{ inputs.routes_yaml_path }}
+        CHANGED_FILES_JSON: ${{ steps.files.outputs.json }}
+      run: |
+        python - <<'PY'
+        import json
+        import os
+        import fnmatch
+        import sys
+        from pathlib import Path
+
+        cfg_path = Path(os.environ.get("ROUTES_YAML_PATH", "").strip() or ".github/mention-routes.yml")
+        changed_json = os.environ.get("CHANGED_FILES_JSON") or "[]"
+
+        try:
+          files = [str(f) for f in json.loads(changed_json)]
+        except json.JSONDecodeError as exc:
+          raise SystemExit(f"Failed to parse changed file list: {exc}")
+
+        def load_routes(path: Path):
+          if not path.is_file():
+            return {"routes": [], "always": []}
+          raw = path.read_text(encoding="utf-8").strip()
+          if not raw:
+            return {"routes": [], "always": []}
+          try:
+            import yaml  # type: ignore
+          except ModuleNotFoundError:
+            import subprocess
+            subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "pyyaml"], check=True)
+            import yaml  # type: ignore
+          try:
+            data = yaml.safe_load(raw)
+          except Exception:
+            import json as _json
+            try:
+              data = _json.loads(raw)
+            except Exception as exc:
+              raise SystemExit(f"Failed to parse routing config at {path}: {exc}") from exc
+          return data or {}
+
+        data = load_routes(cfg_path)
+        routes = data.get("routes") or []
+        always = data.get("always") or []
+
+        hits = {str(item).strip() for item in always if str(item).strip()}
+
+        for route in routes:
+          if not isinstance(route, dict):
+            continue
+          mention = str(route.get("mention") or "").strip()
+          if not mention:
+            continue
+          patterns = route.get("patterns")
+          if isinstance(patterns, str):
+            patterns = [patterns]
+          patterns = [str(p).strip() for p in (patterns or []) if str(p).strip()]
+          if not patterns:
+            continue
+          for file in files:
+            if any(fnmatch.fnmatch(file, pattern) for pattern in patterns):
+              hits.add(mention)
+              break
+
+        mentions = " ".join(sorted(hits))
+        has_mentions = "true" if mentions else "false"
+
+        print(f"Found mentions: {mentions or 'none'}")
+        with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+          fh.write(f"mentions={mentions}\n")
+          fh.write(f"has_mentions={has_mentions}\n")
+        PY
+
+    - name: Upsert routing comment
+      if: ${{ steps.compute.outputs.has_mentions == 'true' }}
+      uses: actions/github-script@v7
+      env:
+        MENTIONS: ${{ steps.compute.outputs.mentions }}
+      with:
+        script: |
+          const mentions = (process.env.MENTIONS || '').trim();
+          if (!mentions) {
+            core.info('Mention list empty; skipping comment.');
+            return;
+          }
+          const { owner, repo } = context.repo;
+          const number = context.payload.pull_request.number;
+          const marker = '(Automated based on changed paths/keywords.)';
+          const body = `Routing to: ${mentions}\n\n${marker}`;
+          const { data: comments } = await github.rest.issues.listComments({
+            owner,
+            repo,
+            issue_number: number,
+            per_page: 100
+          });
+          const mine = comments.find(comment => comment.user?.type === 'Bot' && comment.body?.includes(marker));
+          if (!mine) {
+            await github.rest.issues.createComment({ owner, repo, issue_number: number, body });
+            return;
+          }
+          if (mine.body !== body) {
+            await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body });
+          }
+
+outputs:
+  mentions:
+    description: Space-delimited list of mentions that matched the routing rules.
+    value: ${{ steps.compute.outputs.mentions }}
+  has_mentions:
+    description: "true" when at least one mention matched, otherwise "false".
+    value: ${{ steps.compute.outputs.has_mentions }}

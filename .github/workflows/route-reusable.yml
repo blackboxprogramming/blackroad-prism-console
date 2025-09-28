@@ -1,0 +1,16 @@
+name: Reusable: Auto route mentions
+
+on:
+  workflow_call:
+    inputs:
+      routes_yaml_path:
+        description: Path to the mention routing configuration file.
+        required: false
+        type: string
+        default: ".github/mention-routes.yml"
+
+jobs:
+  run:
+    uses: ./.github/workflows/auto-mention.yml
+    with:
+      routes_yaml_path: ${{ inputs.routes_yaml_path }}

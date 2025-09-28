@@ -1,0 +1,19 @@
+name: Route mentions (via reusable)
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, ready_for_review, reopened, labeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  statuses: write
+  id-token: none
+
+jobs:
+  route:
+    uses: ./.github/workflows/route-reusable.yml
+    with:
+      routes_yaml_path: ".github/mention-routes.yml"
+    secrets: inherit
