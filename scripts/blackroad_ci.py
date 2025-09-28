@@ -31,6 +31,18 @@ def run(cmd: str) -> None:
         raise subprocess.CalledProcessError(result.returncode, cmd)
 
 
+# --------------------------- quality gates ---------------------------
+
+
+def run_tests() -> None:
+    """Execute the fast unit-test suites before mutating remote state."""
+    # ``npm test`` is invoked with ``-- --watch=false`` to avoid launching the
+    # interactive watcher in CI contexts.  ``pytest -q`` provides quick
+    # feedback without overwhelming logs.
+    run("npm test -- --watch=false")
+    run("pytest -q")
+
+
 # --------------------------- git operations ---------------------------
 
 
@@ -45,6 +57,16 @@ def push_latest() -> None:
 def rebase_branch() -> None:
     """Rebase the current branch on the remote."""
     run("git pull --rebase")
+
+
+def git_status() -> None:
+    """Display the short git status for quick inspection."""
+    run("git status -sb")
+
+
+def git_recent_log(limit: int = 5) -> None:
+    """Show the latest commits to assist with release notes and reviews."""
+    run(f"git log --oneline -{limit}")
 
 
 # --------------------------- connectors ---------------------------
@@ -103,6 +125,12 @@ def sync_connectors() -> None:
     slack.notify("Connector sync complete")
 
 
+def sync_linear() -> None:
+    """Run the Linear-only connector sync for roadmap hygiene."""
+    ln = LinearConnector(token=os.getenv("LINEAR_TOKEN"))
+    ln.sync()
+
+
 # --------------------------- deployment ---------------------------
 
 
@@ -120,14 +148,23 @@ def deploy_to_droplet() -> None:  # pragma: no cover - placeholder
 def handle_command(command: str) -> None:
     cmd = command.lower()
     if "push" in cmd:
+        run_tests()
         push_latest()
         deploy_to_droplet()
     elif "refresh" in cmd and "redeploy" in cmd:
+        run_tests()
         refresh_working_copy()
         deploy_to_droplet()
     elif "rebase" in cmd:
+        run_tests()
         rebase_branch()
         deploy_to_droplet()
+    elif "git" in cmd and "status" in cmd:
+        git_status()
+    elif "git" in cmd and "log" in cmd:
+        git_recent_log()
+    elif "linear" in cmd:
+        sync_linear()
     elif "sync" in cmd:
         sync_connectors()
         deploy_to_droplet()
