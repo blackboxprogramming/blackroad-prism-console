@@ -1,0 +1,12 @@
+routes:
+  - patterns: ["frontend/**", "apps/web/**"]
+    mention: "@your-org/frontend-team"
+  - patterns: ["api/**", "services/**"]
+    mention: "@your-org/api-team"
+  - patterns: ["infra/**", ".github/workflows/**"]
+    mention: "@your-org/platform-team"
+  - patterns: ["db/migrations/**"]
+    mention: "@your-org/data-team"
+  - patterns: ["docs/**"]
+    mention: "@your-handle"
+always: []
