@@ -190,6 +190,14 @@ jobs:
           aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$NAME"
           echo "PREVIEW_URL=https://${HOST}" >> $GITHUB_ENV
 
+      - name: Smoke: UI health page
+        if: github.event.action != 'closed'
+        run: |
+          set -euo pipefail
+          URL="${PREVIEW_URL}healthz/ui"
+          echo "Hitting $URL"
+          curl -sSfL "$URL" >/dev/null
+
       - name: Comment PR with URL
         if: github.event.action != 'closed'
         uses: marocchino/sticky-pull-request-comment@v2
