@@ -1,0 +1,26 @@
+{
+  "action": "opened",
+  "pull_request": {
+    "number": 123,
+    "draft": false,
+    "base": {
+      "ref": "main",
+      "sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "repo": {
+        "full_name": "blackroad/prism-console"
+      }
+    },
+    "head": {
+      "ref": "feature/test-routing",
+      "sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  },
+  "repository": {
+    "name": "blackroad-prism-console",
+    "full_name": "blackroad/blackroad-prism-console",
+    "owner": {
+      "login": "blackroad"
+    },
+    "default_branch": "main"
+  }
+}

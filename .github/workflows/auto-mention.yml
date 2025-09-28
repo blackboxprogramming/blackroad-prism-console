@@ -1,152 +1,64 @@
-name: Auto mention teams
+name: Auto route mentions
 
 on:
-  pull_request_target:
-    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_call:
+    inputs:
+      routes_yaml_path:
+        description: Path to the mention routing configuration file.
+        required: false
+        type: string
+        default: ".github/mention-routes.yml"
 
 permissions:
   contents: read
   pull-requests: write
+  issues: write
+  statuses: write
+  id-token: none
 
 jobs:
   route:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    outputs:
+      mentions: ${{ steps.route.outputs.mentions }}
+      has_mentions: ${{ steps.route.outputs.has_mentions }}
     steps:
-      - name: Checkout default branch
+      - name: Checkout base branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch }}
-      - name: Calculate mentions
-        id: calc
-        uses: actions/github-script@v7
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Route mentions
+        id: route
+        uses: ./.github/actions/route-mentions
         with:
-          result-encoding: string
-          script: |
-            const fs = require('fs');
+          routes_yaml_path: ${{ inputs.routes_yaml_path }}
 
-            function loadConfig() {
-              let raw;
-              try {
-                raw = fs.readFileSync('.github/mention-routes.yml', 'utf8').trim();
-              } catch (error) {
-                if (error && error.code === 'ENOENT') {
-                  return { routes: [], always: [] };
-                }
-                throw error;
-              }
-              if (!raw) {
-                return { routes: [], always: [] };
-              }
-              try {
-                return JSON.parse(raw);
-              } catch (err) {
-                throw new Error(`Failed to parse .github/mention-routes.yml: ${err.message}`);
-              }
-            }
-
-            function matches(pattern, file) {
-              if (pattern === '**') return true;
-              if (pattern.endsWith('/**')) {
-                const prefix = pattern.slice(0, -3);
-                return file.startsWith(prefix);
-              }
-              if (pattern.startsWith('**/')) {
-                const suffix = pattern.slice(3);
-                return file.endsWith(suffix);
-              }
-              if (pattern.includes('*')) {
-                const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-                const regex = new RegExp('^' + escaped.replace(/\*+/g, '.*') + '$');
-                return regex.test(file);
-              }
-              return file === pattern;
-            }
-
-            const config = loadConfig();
-            const routes = Array.isArray(config.routes) ? config.routes : [];
-            const always = Array.isArray(config.always)
-              ? config.always.map(value => String(value).trim()).filter(Boolean)
-              : [];
-            const { owner, repo } = context.repo;
-            const number = context.payload.pull_request.number;
-
-            const files = await github.paginate(github.rest.pulls.listFiles, {
-              owner,
-              repo,
-              pull_number: number,
-              per_page: 100
-            });
-
-            const filenames = files.map(file => file.filename);
-            const mentions = new Set(always);
-            const teamSlugs = new Set();
-
-            for (const route of routes) {
-              if (!route || !route.patterns || !route.mention) continue;
-              const patterns = (Array.isArray(route.patterns) ? route.patterns : [route.patterns])
-                .map(pattern => String(pattern).trim())
-                .filter(Boolean);
-              if (!patterns.length) continue;
-              const hit = filenames.some(file => patterns.some(pattern => matches(pattern, file)));
-              if (hit) {
-                const mentionValue = String(route.mention).trim();
-                if (mentionValue) {
-                  mentions.add(mentionValue);
-                }
-              }
-            }
-
-            const ordered = Array.from(mentions).filter(Boolean);
-            const mentionLine = ordered.join(' ');
-
-            for (const mention of ordered) {
-              if (mention.startsWith('@')) {
-                const parts = mention.slice(1).split('/');
-                if (parts.length === 2 && parts[1]) {
-                  teamSlugs.add(parts[1].trim());
-                }
-              }
-            }
-
-            core.setOutput('MENTIONS', mentionLine);
-            core.setOutput('TEAM_REVIEWERS', Array.from(teamSlugs).join(','));
-
-      - name: Add mention comment
-        if: ${{ steps.calc.outputs.MENTIONS != '' }}
+      - name: Routing status check
         uses: actions/github-script@v7
         env:
-          MENTIONS: ${{ steps.calc.outputs.MENTIONS }}
+          HAS_MENTIONS: ${{ steps.route.outputs.has_mentions }}
+          MENTIONS: ${{ steps.route.outputs.mentions }}
         with:
           script: |
-            const mentions = (process.env.MENTIONS || '').trim();
-            if (!mentions) return;
             const { owner, repo } = context.repo;
-            const number = context.payload.pull_request.number;
-            await github.rest.issues.createComment({
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.info('No pull request payload detected; skipping status.');
+              return;
+            }
+            const sha = pr.head.sha;
+            const hasMentions = process.env.HAS_MENTIONS === 'true';
+            const description = hasMentions
+              ? `Mentions posted: ${process.env.MENTIONS}`
+              : 'No mentions matched';
+            await github.rest.repos.createCommitStatus({
               owner,
               repo,
-              issue_number: number,
-              body: `Routing ${mentions} based on changed files.`
-            });
-
-      - name: Request team reviewers
-        if: ${{ steps.calc.outputs.MENTIONS != '' && steps.calc.outputs.TEAM_REVIEWERS != '' }}
-        uses: actions/github-script@v7
-        env:
-          TEAM_REVIEWERS: ${{ steps.calc.outputs.TEAM_REVIEWERS }}
-        with:
-          script: |
-            const teams = (process.env.TEAM_REVIEWERS || '')
-              .split(',')
-              .map(t => t.trim())
-              .filter(Boolean);
-            if (!teams.length) return;
-            const { owner, repo } = context.repo;
-            const number = context.payload.pull_request.number;
-            await github.rest.pulls.requestReviewers({
-              owner,
-              repo,
-              pull_number: number,
-              team_reviewers: teams
+              sha,
+              state: 'success',
+              context: 'routing',
+              description: description.slice(0, 140),
+              target_url: `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`
             });
