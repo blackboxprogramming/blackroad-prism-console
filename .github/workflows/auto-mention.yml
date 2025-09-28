@@ -13,12 +13,24 @@ jobs:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
+      - name: Skip if opted out
+        id: optout
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo
+            const number = context.payload.pull_request.number
+            const {data: pr} = await github.rest.pulls.get({owner, repo, pull_number: number})
+            const hasNoMentions = pr.labels?.some(l => l.name === "no-mentions")
+            return hasNoMentions ? core.setOutput("skip","true") : null
       - name: Checkout default branch
+        if: steps.optout.outputs.skip != 'true'
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.repository.default_branch }}
       - name: Calculate mentions
         id: calc
+        if: steps.optout.outputs.skip != 'true'
         uses: actions/github-script@v7
         with:
           result-encoding: string
@@ -112,29 +124,89 @@ jobs:
             core.setOutput('MENTIONS', mentionLine);
             core.setOutput('TEAM_REVIEWERS', Array.from(teamSlugs).join(','));
 
-      - name: Add mention comment
-        if: ${{ steps.calc.outputs.MENTIONS != '' }}
+      - name: Keyword-based mentions
+        id: kw
+        if: steps.optout.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo
+            const number = context.payload.pull_request.number
+            const {data: pr} = await github.rest.pulls.get({owner, repo, pull_number: number})
+            const hay = ((pr.title || "") + " " + (pr.body || "")).toLowerCase()
+
+            const table = [
+              {keywords:["blackroad","br"], mention:"@blackboxprogramming/blackroad"},
+              {keywords:["prism"],           mention:"@blackboxprogramming/prism"},
+              {keywords:["migrations","sql"],mention:"@blackboxprogramming/data"},
+            ]
+
+            const hits = new Set()
+            for (const row of table) {
+              if (row.keywords.some(k => hay.includes(k))) hits.add(row.mention)
+            }
+            core.setOutput("mentions", Array.from(hits).join(" "))
+
+      - name: Merge mentions
+        if: steps.optout.outputs.skip != 'true'
+        id: merge
+        env:
+          PATH_MENTIONS: ${{ steps.calc.outputs.MENTIONS }}
+          KEYWORD_MENTIONS: ${{ steps.kw.outputs.mentions }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          path_mentions = os.getenv("PATH_MENTIONS", "").split()
+          keyword_mentions = os.getenv("KEYWORD_MENTIONS", "").split()
+
+          seen = set()
+          ordered = []
+          for mention in path_mentions + keyword_mentions:
+              mention = mention.strip()
+              if not mention or mention in seen:
+                  continue
+              seen.add(mention)
+              ordered.append(mention)
+
+          all_mentions = " ".join(ordered)
+          team_slugs = sorted({m.split('/', 1)[1] for m in ordered if m.startswith('@') and '/' in m})
+
+          output = Path(os.environ["GITHUB_OUTPUT"])
+          with output.open("a", encoding="utf-8") as fh:
+              fh.write(f"ALL={all_mentions}\n")
+              fh.write(f"TEAM_REVIEWERS={','.join(team_slugs)}\n")
+          PY
+
+      - name: Create or update a single comment (only if changed)
+        if: steps.optout.outputs.skip != 'true' && steps.merge.outputs.ALL != ''
         uses: actions/github-script@v7
         env:
-          MENTIONS: ${{ steps.calc.outputs.MENTIONS }}
+          MENTIONS: ${{ steps.merge.outputs.ALL }}
         with:
           script: |
             const mentions = (process.env.MENTIONS || '').trim();
             if (!mentions) return;
-            const { owner, repo } = context.repo;
+            const {owner, repo} = context.repo;
             const number = context.payload.pull_request.number;
-            await github.rest.issues.createComment({
-              owner,
-              repo,
-              issue_number: number,
-              body: `Routing ${mentions} based on changed files.`
-            });
+            const marker = "(Automated based on changed paths.)";
+            const newBody = `Routing to: ${mentions}\n\n${marker}`;
+
+            const {data: comments} = await github.rest.issues.listComments({owner, repo, issue_number: number, per_page:100});
+            const mine = comments.find(c => c.user?.type==="Bot" && c.body?.includes(marker));
+
+            if (!mine) {
+              await github.rest.issues.createComment({owner, repo, issue_number: number, body: newBody});
+            } else if (mine.body !== newBody) {
+              await github.rest.issues.updateComment({owner, repo, comment_id: mine.id, body: newBody});
+            }
 
       - name: Request team reviewers
-        if: ${{ steps.calc.outputs.MENTIONS != '' && steps.calc.outputs.TEAM_REVIEWERS != '' }}
+        if: steps.optout.outputs.skip != 'true' && steps.merge.outputs.TEAM_REVIEWERS != ''
         uses: actions/github-script@v7
         env:
-          TEAM_REVIEWERS: ${{ steps.calc.outputs.TEAM_REVIEWERS }}
+          TEAM_REVIEWERS: ${{ steps.merge.outputs.TEAM_REVIEWERS }}
         with:
           script: |
             const teams = (process.env.TEAM_REVIEWERS || '')
