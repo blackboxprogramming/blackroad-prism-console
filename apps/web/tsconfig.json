@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@/*": ["./*"],
       "@lucidia/core": ["../../packages/core/src"],
       "@lucidia/core/*": ["../../packages/core/src/*"]
     },
