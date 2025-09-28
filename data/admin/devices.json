@@ -1,1 +1,47 @@
-[]
+[
+  {
+    "deviceId": "pi-01",
+    "owner": "ops",
+    "platform": "raspberry-pi-5",
+    "role": "pi_led_agent",
+    "attached": true,
+    "encrypted": true,
+    "compliant": true,
+    "operatorAccount": "operator",
+    "notes": "Primary Pi running LED + operator console",
+    "lastSeen": 1759012961427
+  },
+  {
+    "deviceId": "jetson-01",
+    "owner": "ml",
+    "platform": "jetson-orin",
+    "role": "llm_gpu",
+    "attached": true,
+    "encrypted": true,
+    "compliant": true,
+    "notes": "Jetson driving main display + inference",
+    "lastSeen": 1759012961427
+  },
+  {
+    "deviceId": "display-mini",
+    "owner": "ops",
+    "platform": "pi-spi-display",
+    "role": "status_panel",
+    "attached": true,
+    "encrypted": false,
+    "compliant": true,
+    "notes": "2.8\" SPI mini display wired to Pi",
+    "lastSeen": 1759012961427
+  },
+  {
+    "deviceId": "display-main",
+    "owner": "ops",
+    "platform": "jetson-hdmi",
+    "role": "primary_display",
+    "attached": true,
+    "encrypted": false,
+    "compliant": true,
+    "notes": "Main HDMI display driven by Jetson",
+    "lastSeen": 1759012961427
+  }
+]
