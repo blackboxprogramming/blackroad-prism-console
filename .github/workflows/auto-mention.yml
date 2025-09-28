@@ -1,0 +1,83 @@
+name: Auto mention on PRs
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  mention:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load mention routes
+        id: cfg
+        run: |
+          FILE=".github/mention-routes.yml"
+          if [ ! -f "$FILE" ]; then
+            echo "cfg=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "cfg<<EOF" >> $GITHUB_OUTPUT
+          cat "$FILE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Get changed files (JSON)
+        id: changed
+        uses: tj-actions/changed-files@v45
+        with:
+          json: "true"
+
+      - name: Install PyYAML
+        run: python3 -m pip install --quiet PyYAML
+
+      - name: Compute mentions from routes
+        id: calc
+        shell: bash
+        run: |
+          mentions=$(python - <<'PY'
+import json, os, fnmatch, yaml
+cfg_text = os.environ.get('CFG_TEXT', '')
+changed_text = os.environ.get('CHANGED_FILES', '[]')
+if not cfg_text:
+    raise SystemExit(0)
+
+cfg = yaml.safe_load(cfg_text) or {}
+routes = cfg.get('routes', []) or []
+always = cfg.get('always', []) or []
+files = json.loads(changed_text)
+
+hits = set(always)
+for route in routes:
+    pats = route.get('patterns', []) or []
+    who = route.get('mention')
+    if not who:
+        continue
+    if any(any(fnmatch.fnmatch(f, p) for p in pats) for f in files):
+        hits.add(who)
+
+print(" ".join(sorted(hits)))
+PY
+)
+          echo "MENTIONS=$mentions" >> $GITHUB_OUTPUT
+        env:
+          CFG_TEXT: ${{ steps.cfg.outputs.cfg }}
+          CHANGED_FILES: ${{ steps.changed.outputs.all_changed_files }}
+
+      - name: Comment with mentions
+        if: ${{ steps.calc.outputs.MENTIONS != '' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `Routing to: ${process.env.MENTIONS}\n\n(Automated based on changed paths.)`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body
+            })
+        env:
+          MENTIONS: ${{ steps.calc.outputs.MENTIONS }}
