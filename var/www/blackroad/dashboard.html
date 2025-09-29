@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>BlackRoad • Local Models</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #161b33, #0b0d19 65%);
+      color: #e5ecff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .wrap {
+      width: min(720px, 92vw);
+      margin: 40px auto;
+    }
+    .card {
+      background: rgba(8, 11, 26, 0.92);
+      border-radius: 16px;
+      border: 1px solid rgba(79, 140, 255, 0.2);
+      padding: 20px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    }
+    .card .title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      margin-bottom: 12px;
+    }
+    button,
+    select,
+    textarea {
+      font: inherit;
+      border-radius: 8px;
+      border: 1px solid rgba(128, 151, 255, 0.35);
+      background: rgba(12, 16, 34, 0.85);
+      color: inherit;
+      padding: 8px 10px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    button {
+      cursor: pointer;
+      border: none;
+      background: linear-gradient(120deg, #ff4fd8, #0096ff);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 10px 14px;
+      margin-right: 6px;
+    }
+    button:hover {
+      box-shadow: 0 0 12px rgba(0, 150, 255, 0.35);
+    }
+    select {
+      width: 100%;
+      margin-top: 8px;
+    }
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: rgba(0, 150, 255, 0.8);
+      box-shadow: 0 0 0 2px rgba(0, 150, 255, 0.25);
+    }
+    pre {
+      border: 1px solid rgba(0, 255, 128, 0.18);
+      background: #000;
+      color: #3dff8a;
+      font-family: "Fira Mono", "SFMono-Regular", ui-monospace, "Cascadia Code", monospace;
+      border-radius: 12px;
+      padding: 16px;
+      height: 240px;
+      overflow: auto;
+      margin-top: 12px;
+      white-space: pre-wrap;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="title">Local Models (Streaming)</div>
+      <div class="actions">
+        <button id="loadModels">Load Models</button>
+        <button id="runModel" disabled>Run (stream)</button>
+      </div>
+      <select id="modelSel"></select>
+      <textarea id="prompt" placeholder="Enter prompt..."></textarea>
+      <pre id="modelOut"></pre>
+    </div>
+  </div>
+
+  <script>
+  const modelSel = document.getElementById('modelSel');
+  const promptEl = document.getElementById('prompt');
+  const modelOut = document.getElementById('modelOut');
+  const runBtn = document.getElementById('runModel');
+  const loadBtn = document.getElementById('loadModels');
+
+  async function loadModels() {
+    runBtn.disabled = true;
+    runBtn.textContent = 'Run (stream)';
+    modelSel.innerHTML = '';
+    try {
+      const r = await fetch('/models');
+      if (!r.ok) throw new Error('failed to load models');
+      const j = await r.json();
+      (j.models || []).forEach(m => {
+        const o = document.createElement('option');
+        o.value = m.path;
+        o.textContent = m.name || m.path;
+        modelSel.appendChild(o);
+      });
+      if (modelSel.options.length === 0) {
+        const o = document.createElement('option');
+        o.value = '';
+        o.textContent = 'No models found';
+        modelSel.appendChild(o);
+      } else {
+        runBtn.disabled = false;
+      }
+    } catch (err) {
+      modelSel.innerHTML = '';
+      const o = document.createElement('option');
+      o.value = '';
+      o.textContent = '[error] ' + err.message;
+      modelSel.appendChild(o);
+    }
+  }
+
+  loadBtn.onclick = loadModels;
+
+  runBtn.onclick = () => {
+    const model = modelSel.value;
+    if (!model) {
+      modelOut.textContent = '[error] select a model first';
+      return;
+    }
+    const prompt = promptEl.value;
+    modelOut.textContent = '';
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${proto}://${location.host}/ws/model`);
+    ws.onopen = () => ws.send(JSON.stringify({ model, prompt, n: 128 }));
+    ws.onmessage = (ev) => {
+      if (ev.data === '[[BLACKROAD_MODEL_DONE]]') {
+        ws.close();
+        return;
+      }
+      modelOut.textContent += ev.data;
+      modelOut.scrollTop = modelOut.scrollHeight;
+    };
+    ws.onerror = (ev) => {
+      modelOut.textContent += `\n[error] websocket error`;
+    };
+    ws.onclose = () => {
+      runBtn.disabled = false;
+      runBtn.textContent = 'Run (stream)';
+    };
+    runBtn.disabled = true;
+    runBtn.textContent = 'Streaming…';
+  };
+  </script>
+</body>
+</html>
