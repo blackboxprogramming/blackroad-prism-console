@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JobApplicationQA",
+  "type": "object",
+  "properties": {
+    "candidate_name": {
+      "type": "string",
+      "title": "Full Legal Name",
+      "placeholder": "{{FULL_NAME}}"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "title": "Email",
+      "placeholder": "{{EMAIL}}"
+    },
+    "phone": {
+      "type": "string",
+      "title": "Phone",
+      "placeholder": "{{PHONE}}"
+    },
+    "location": {
+      "type": "string",
+      "title": "Current Location",
+      "placeholder": "{{CITY}}, {{STATE_OR_COUNTRY}}"
+    },
+    "work_authorization": {
+      "type": "string",
+      "title": "Work Authorization Status",
+      "enum": [
+        "Citizen",
+        "Permanent Resident",
+        "Visa Holder",
+        "Requires Sponsorship"
+      ],
+      "default": "Requires Sponsorship"
+    },
+    "sponsorship_required": {
+      "type": "boolean",
+      "title": "Requires Future Sponsorship",
+      "default": true
+    },
+    "salary_expectation": {
+      "type": "string",
+      "title": "Target Compensation",
+      "placeholder": "{{SALARY_REQUIREMENT}}"
+    },
+    "employment_type": {
+      "type": "string",
+      "title": "Employment Type",
+      "enum": [
+        "Full-time",
+        "Contract",
+        "Internship"
+      ],
+      "default": "Full-time"
+    },
+    "relocation": {
+      "type": "string",
+      "title": "Relocation Preference",
+      "enum": [
+        "Open to Relocate",
+        "Not Willing to Relocate",
+        "Case-by-case"
+      ],
+      "default": "Case-by-case"
+    },
+    "remote_preference": {
+      "type": "string",
+      "title": "Remote Work Preference",
+      "enum": [
+        "Remote",
+        "Hybrid",
+        "Onsite"
+      ],
+      "default": "Remote"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Earliest Start Date",
+      "placeholder": "{{EARLIEST_START}}"
+    },
+    "references_available": {
+      "type": "boolean",
+      "title": "References Available",
+      "default": true
+    },
+    "linkedin": {
+      "type": "string",
+      "format": "uri",
+      "title": "LinkedIn or Portfolio",
+      "placeholder": "{{LINKEDIN_OR_PORTFOLIO}}"
+    },
+    "veteran_status": {
+      "type": "string",
+      "title": "Self-Identify as Veteran",
+      "enum": [
+        "Prefer not to say",
+        "Not a veteran",
+        "Veteran"
+      ],
+      "default": "Prefer not to say"
+    },
+    "disability_status": {
+      "type": "string",
+      "title": "Self-Identify Disability",
+      "enum": [
+        "Prefer not to say",
+        "No",
+        "Yes"
+      ],
+      "default": "Prefer not to say"
+    },
+    "additional_notes": {
+      "type": "string",
+      "title": "Additional Context",
+      "placeholder": "{{ADDITIONAL_CONTEXT}}"
+    }
+  },
+  "required": [
+    "candidate_name",
+    "email",
+    "location",
+    "work_authorization",
+    "sponsorship_required",
+    "start_date"
+  ]
+}
