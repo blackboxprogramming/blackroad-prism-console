@@ -1,0 +1,15 @@
+[Unit]
+Description=BlackRoad Agent Daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/blackroad-agent
+Restart=always
+User=pi
+WorkingDirectory=/home/pi
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
