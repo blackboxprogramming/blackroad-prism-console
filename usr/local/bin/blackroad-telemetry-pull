@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+JETSON_USER="jetson"
+JETSON_HOST="jetson.local"
+
+ssh ${JETSON_USER}@${JETSON_HOST} blackroad-telemetry

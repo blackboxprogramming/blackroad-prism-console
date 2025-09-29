@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+JETSON_USER="jetson"
+JETSON_HOST="jetson.local"
+
+if [ $# -lt 1 ]; then
+  echo "Usage: blackroad-run <script.py|cmd>"
+  exit 1
+fi
+
+CMD="$*"
+echo "== Offloading to $JETSON_HOST =="
+ssh -t ${JETSON_USER}@${JETSON_HOST} "$CMD"

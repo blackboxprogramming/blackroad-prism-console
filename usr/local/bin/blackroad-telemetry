@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Pi will call this over SSH to grab Jetson stats
+echo "## Jetson Telemetry"
+echo "Uptime: $(uptime -p)"
+echo "Load: $(uptime | awk -F'load average:' '{print $2}')"
+command -v tegrastats >/dev/null && sudo tegrastats --interval 1000 --count 1 || echo "tegrastats not available"
