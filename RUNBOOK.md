@@ -72,8 +72,14 @@ Use the following steps to confirm the runtime controller is actually running wi
 
 1. **Verify environment/configuration flags**
    ```bash
-   printf 'DEV_MODE=%q\n' "$DEV_MODE"
+   printf 'APP_ENV=%q\n' "${APP_ENV:-}"
+   printf 'DEV_MODE=%q\n' "${DEV_MODE:-}"
+   printf 'DEVELOPER_MODE=%q\n' "${DEVELOPER_MODE:-}"
+   npm run guard:dev-mode -- --quiet --require-app-env
    systemctl show controller.service -p Environment | sed 's/^Environment=//'
+   grep -RIE --line-number --include='*.env' \
+     '(^|\s)(app_env)\s*=\s*(production|staging|development)\b' \
+     /etc /opt /srv /etc/default /etc/sysconfig 2>/dev/null | head
    grep -RIE --line-number --include='*.env' \
      '(^|\s)(dev(eloper)?_mode|debug)\s*=\s*(1|true)\b' \
      /etc /opt /srv /etc/default /etc/sysconfig 2>/dev/null | head
@@ -109,22 +115,33 @@ Use the following steps to confirm the runtime controller is actually running wi
    ss -tulpn | awk '/LISTEN/ && /controller|python|gunicorn|uvicorn/ {print}'
    journalctl -u controller.service -n 80 --no-pager | sed -n '1,40p'
    ```
+4. **Lock production guard rails**
+   ```bash
+   ! APP_ENV=production DEV_MODE=true node scripts/security/dev_mode_guard.js --quiet --require-app-env
+   systemctl cat controller.service | grep -E 'Environment(=|File=)' | grep -Ei 'app_env|dev'
+   grep -RIE --line-number --include='*.route' --include='*.conf' \
+     '/__(dev|debug|internal)/' /etc /opt /srv 2>/dev/null | head
+   ```
 
 If the controller is containerized, adapt the steps with the appropriate tooling:
 
 ```bash
 docker ps --format '{{.ID}}\t{{.Names}}\t{{.Ports}}' | grep -i controller
 docker exec -it <CID> printenv DEV_MODE
+docker exec -it <CID> printenv APP_ENV
 docker exec -it <CID> curl -fsS localhost:PORT/version
 kubectl get po -n <ns> -l app=controller
 kubectl logs deploy/controller -n <ns> --tail=100
 kubectl exec -n <ns> deploy/controller -- printenv DEV_MODE
+kubectl exec -n <ns> deploy/controller -- printenv APP_ENV
 kubectl port-forward -n <ns> deploy/controller 8080:PORT &
 curl -fsS localhost:8080/version
 ```
 
 **Success criteria**
 
+- `APP_ENV` is explicitly set and consistent across systemd/Docker/Kubernetes manifests.
+- Only a single developer-mode flag is defined and `npm run guard:dev-mode -- --require-app-env` passes.
 - `DEV_MODE` (or an equivalent flag) resolves to `1`/`true` in either the environment or configuration.
 - The Python probe prints `controller_ok …` with a directive, step percentage, and reason without triggering a traceback.
 - The `/version` endpoint or logs show developer/debug markers and verbose reasoning strings.

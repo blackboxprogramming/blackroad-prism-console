@@ -14,6 +14,7 @@
     "format": "prettier . --write",
     "format:check": "prettier package.json tests/api_health.test.js srv/lucidia-llm/test_app.py var/www/blackroad/.prettierrc.json .prettierrc.json RUNME.sh Makefile .github/workflows/ci.yml CLEANUP_PLAN.md CLEANUP_DECISIONS.md CLEANUP_RESULTS.md ROLLBACK.md CHANGELOG.md --check --ignore-unknown",
     "test": "npx jest",
+    "guard:dev-mode": "node scripts/security/dev_mode_guard.js",
     "typecheck": "echo 'no typecheck'",
     "health": "node scripts/health.js",
     "dev:site": "npm --prefix sites/blackroad run dev",
