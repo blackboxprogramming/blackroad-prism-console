@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BlackRoad · Prism Console</title>
+    <style>
+      :root {
+        --bg: #05050a;
+        --panel: #0f0f17;
+        --border: #1e1e2a;
+        --text: #e9e9f1;
+        --muted: #8d8ea5;
+        --accent: #ff4fd8;
+        --accent2: #0096ff;
+        --accent3: #fdba2d;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: radial-gradient(circle at top, rgba(255,79,216,0.18), transparent 55%),
+                    radial-gradient(circle at bottom, rgba(0,150,255,0.12), transparent 60%),
+                    var(--bg);
+        color: var(--text);
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        min-height: 100vh;
+      }
+      header {
+        padding: 2rem 1.5rem 1rem;
+        text-align: center;
+      }
+      header h1 {
+        margin: 0;
+        font-size: clamp(1.8rem, 3vw, 2.6rem);
+      }
+      header p {
+        margin: 0.35rem 0 0;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.1rem;
+        padding: 0 1.5rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1rem;
+        box-shadow: 0 18px 32px rgba(0, 0, 0, 0.35);
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .title {
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+      button {
+        background: linear-gradient(120deg, var(--accent), var(--accent2));
+        color: #fff;
+        border: 0;
+        border-radius: 12px;
+        padding: 0.55rem 0.9rem;
+        cursor: pointer;
+        font-weight: 600;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      button.secondary {
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+      pre {
+        margin: 0;
+        background: #050509;
+        border-radius: 12px;
+        padding: 0.75rem;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        color: #a5f2ff;
+        max-height: 240px;
+        overflow: auto;
+      }
+      textarea, select, input[type="text"], input[type="number"], input[type="file"] {
+        background: rgba(255, 255, 255, 0.02);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 0.55rem 0.7rem;
+        width: 100%;
+        font-family: inherit;
+        font-size: 0.95rem;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 0.4rem;
+      }
+      li {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.55rem 0.7rem;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: rgba(0, 150, 255, 0.14);
+        color: #a5e2ff;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>BlackRoad Prism Console</h1>
+      <p>Device snapshots, jobs, flashing, history, and local models in one pane.</p>
+    </header>
+    <main class="grid">
+      <div class="card">
+        <div class="title">Telemetry</div>
+        <button id="refreshTelemetry" class="secondary">Refresh</button>
+        <pre id="telemetryOut">Press refresh to load telemetry…</pre>
+      </div>
+
+      <div class="card" id="jobsCard">
+        <div class="title">Jobs</div>
+        <button id="loadJobs" class="secondary">Load Jobs</button>
+        <ul id="jobsList"></ul>
+      </div>
+
+      <div class="card">
+        <div class="title">Firmware Flasher</div>
+        <input type="file" id="firmwareFile" accept=".bin,.hex,.uf2" />
+        <button id="flash" class="secondary">Flash</button>
+        <pre id="flashOut">Select firmware to flash.</pre>
+      </div>
+
+      <div class="card">
+        <div class="title">History</div>
+        <button id="loadHistory" class="secondary">Load History</button>
+        <pre id="historyOut">History will appear here.</pre>
+      </div>
+
+      <div class="card">
+        <div class="title">Local Models</div>
+        <button id="loadModels">Load Models</button>
+        <select id="modelSel"></select>
+        <textarea id="prompt" style="width:100%;height:80px;margin-top:8px;" placeholder="Enter prompt..."></textarea>
+        <button id="runModel">Run</button>
+        <pre id="modelOut" style="background:#000;color:#0f0;padding:1em;height:220px;overflow:auto;border-radius:6px;"></pre>
+      </div>
+    </main>
+
+    <script>
+      const telemetryOut = document.getElementById('telemetryOut');
+      const jobsList = document.getElementById('jobsList');
+      const flashOut = document.getElementById('flashOut');
+      const historyOut = document.getElementById('historyOut');
+
+      async function safeFetch(url, opts) {
+        try {
+          const res = await fetch(url, opts);
+          if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+          return await res.json();
+        } catch (err) {
+          return { error: err.message };
+        }
+      }
+
+      document.getElementById('refreshTelemetry').onclick = async () => {
+        telemetryOut.textContent = 'Loading…';
+        const payload = await safeFetch('/telemetry/latest');
+        telemetryOut.textContent = payload.error ? payload.error : JSON.stringify(payload, null, 2);
+      };
+
+      document.getElementById('loadJobs').onclick = async () => {
+        jobsList.innerHTML = '';
+        const payload = await safeFetch('/jobs');
+        if (payload.error) {
+          const li = document.createElement('li');
+          li.textContent = payload.error;
+          jobsList.appendChild(li);
+          return;
+        }
+        (payload.jobs || []).forEach((job) => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span class="tag">${job.status || 'pending'}</span><div>${job.name || job.id}</div>`;
+          jobsList.appendChild(li);
+        });
+      };
+
+      document.getElementById('flash').onclick = async () => {
+        const file = document.getElementById('firmwareFile').files[0];
+        if (!file) {
+          flashOut.textContent = 'Select a firmware file (.bin/.hex/.uf2).';
+          return;
+        }
+        flashOut.textContent = 'Uploading…';
+        const body = new FormData();
+        body.append('firmware', file);
+        const res = await safeFetch('/flasher', { method: 'POST', body });
+        flashOut.textContent = res.error ? res.error : JSON.stringify(res, null, 2);
+      };
+
+      document.getElementById('loadHistory').onclick = async () => {
+        historyOut.textContent = 'Loading…';
+        const payload = await safeFetch('/history');
+        historyOut.textContent = payload.error ? payload.error : JSON.stringify(payload, null, 2);
+      };
+
+      const modelSel = document.getElementById('modelSel');
+      const promptEl = document.getElementById('prompt');
+      const modelOut = document.getElementById('modelOut');
+
+      document.getElementById('loadModels').onclick = async ()=>{
+        const r = await fetch('/models'); const j = await r.json();
+        modelSel.innerHTML = '';
+        (j.models||[]).forEach(m=>{
+          const o = document.createElement('option');
+          o.value = m.path; o.text = m.name; modelSel.appendChild(o);
+        });
+      };
+
+      document.getElementById('runModel').onclick = async ()=>{
+        const model = modelSel.value;
+        const prompt = promptEl.value;
+        modelOut.textContent = "Running…";
+        const r = await fetch('/models/run',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({model,prompt,n:128})
+        });
+        const j = await r.json();
+        modelOut.textContent = j.result || j.error || JSON.stringify(j,null,2);
+      };
+    </script>
+  </body>
+</html>
