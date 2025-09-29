@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { fetchDashboardSystem, fetchDashboardFeed } from '../api'
 import { fetchAllAgents } from '../agents'
 
@@ -15,6 +15,9 @@ export default function Dashboard(){
   const [metrics, setMetrics] = useState({ cpu:0, gpu:0, memory:0, network:0 })
   const [feed, setFeed] = useState([])
   const [agents, setAgents] = useState([])
+  const [transcription, setTranscription] = useState('')
+  const [transcribing, setTranscribing] = useState(false)
+  const fileInputRef = useRef(null)
 
   useEffect(()=>{
     (async ()=>{
@@ -26,6 +29,30 @@ export default function Dashboard(){
       setAgents(ag)
     })()
   }, [])
+
+  async function handleTranscribe(event){
+    event.preventDefault()
+    const file = fileInputRef.current?.files?.[0]
+    if(!file){
+      setTranscription('No file selected')
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('file', file)
+    setTranscribing(true)
+    setTranscription('Processing…')
+
+    try {
+      const response = await fetch('/transcribe', { method: 'POST', body: formData })
+      const json = await response.json()
+      setTranscription(json.text || JSON.stringify(json, null, 2))
+    } catch (error) {
+      setTranscription(`[error] ${error instanceof Error ? error.message : String(error)}`)
+    } finally {
+      setTranscribing(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -57,6 +84,29 @@ export default function Dashboard(){
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="card p-4 space-y-3">
+        <div className="title font-semibold">Whisper Transcription</div>
+        <form className="space-y-3" onSubmit={handleTranscribe}>
+          <input ref={fileInputRef} type="file" accept="audio/*" className="input w-full" />
+          <button className="btn" type="submit" disabled={transcribing}>
+            {transcribing ? 'Processing…' : 'Transcribe'}
+          </button>
+        </form>
+        <pre
+          aria-live="polite"
+          style={{
+            background: '#000',
+            color: '#0f0',
+            padding: '1em',
+            height: '220px',
+            overflow: 'auto',
+            borderRadius: '6px',
+          }}
+        >
+          {transcription}
+        </pre>
       </section>
     </div>
   )
