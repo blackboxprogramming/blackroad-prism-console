@@ -1,0 +1,13 @@
+{
+  "text": ":rotating_light: Mirroring blocked for non-public repository",
+  "attachments": [
+    {
+      "color": "#d0021b",
+      "fields": [
+        {"title": "Rule", "value": "MIRROR_CLASS_LIMIT", "short": true},
+        {"title": "Reason", "value": "classification_block", "short": true},
+        {"title": "Remediation", "value": "Request exception or reclassify after review.", "short": false}
+      ]
+    }
+  ]
+}

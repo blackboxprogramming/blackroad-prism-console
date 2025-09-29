@@ -1,0 +1,8 @@
+{
+  "window": "15m",
+  "ingest_lag": "2m30s",
+  "events": [
+    {"ts": "2024-04-11T15:45:00Z", "deny_reason": "consent_required"}
+  ],
+  "expected": {"decision": "allow", "reason": "", "notes": "lag-based suppression"}
+}
