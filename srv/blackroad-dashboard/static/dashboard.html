@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>BlackRoad Job Runner</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0b1220; color: #e2e8f0; margin: 0; padding: 1.5rem; }
+    form { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    input { flex: 1; padding: 0.5rem 0.75rem; border-radius: 0.5rem; border: 1px solid #1f2a44; background: #09122a; color: inherit; }
+    button { padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer; font-weight: 600; }
+    #runBtn { background: linear-gradient(135deg, #FF4FD8, #0096FF); color: #0b1220; }
+    #stopBtn { background: #1f2a44; color: inherit; }
+    #log { background: #020617; border: 1px solid #1f2a44; border-radius: 0.75rem; padding: 1rem; min-height: 320px; overflow-y: auto; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>BlackRoad Remote Jobs</h1>
+  <form id="runForm" onsubmit="return false;">
+    <input type="text" id="cmd" placeholder="Enter command (e.g. nvidia-smi)" />
+    <button id="runBtn">Run (stream)</button>
+    <button id="stopBtn" type="button">Stop</button>
+  </form>
+  <div id="log"></div>
+
+  <script>
+    const cmdEl = document.getElementById('cmd');
+    const logEl = document.getElementById('log');
+    const runBtn = document.getElementById('runBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    let ws = null;
+    let currentJobId = null;
+
+    function append(line) {
+      logEl.textContent += line + '\n';
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    runBtn.addEventListener('click', () => {
+      if (ws) { ws.close(); ws = null; }
+      logEl.textContent = '';
+      currentJobId = null;
+
+      const cmd = (cmdEl.value || '').trim() || 'nvidia-smi';
+      const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+      ws = new WebSocket(`${proto}://${location.host}/ws/run`);
+      ws.onopen = () => ws.send(cmd);
+      ws.onmessage = (ev) => {
+        const data = String(ev.data || '');
+        if (data.startsWith('[[BLACKROAD_JOB_ID:')) {
+          const match = data.match(/\[\[BLACKROAD_JOB_ID:(\d+)\]\]/);
+          if (match) currentJobId = match[1];
+        } else if (data === '[[BLACKROAD_DONE]]') {
+          append('--- done ---');
+          ws.close();
+          ws = null;
+        } else {
+          append(data);
+        }
+      };
+      ws.onerror = () => append('[error] websocket error');
+      ws.onclose = () => { ws = null; };
+    });
+
+    stopBtn.addEventListener('click', async () => {
+      if (!currentJobId) {
+        append('[no job to stop]');
+        return;
+      }
+      try {
+        await fetch(`/jobs/${currentJobId}/kill`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ signal: 'TERM' })
+        });
+        append('--- sent SIGTERM ---');
+      } catch (err) {
+        append(`[error] ${err}`);
+      }
+      setTimeout(async () => {
+        try {
+          await fetch(`/jobs/${currentJobId}/kill`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ signal: 'KILL' })
+          });
+          append('--- sent SIGKILL ---');
+        } catch (err) {
+          append(`[error] ${err}`);
+        }
+      }, 5000);
+    });
+  </script>
+</body>
+</html>
