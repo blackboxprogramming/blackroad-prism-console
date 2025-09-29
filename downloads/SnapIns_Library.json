@@ -1,0 +1,176 @@
+{
+  "metadata": {
+    "version": "2024-05-01",
+    "description": "Bullet bank for remote-first U.S. job applications with Minnesota preference."
+  },
+  "categories": [
+    {
+      "name": "sales_finance",
+      "label": "Sales & Finance",
+      "bullets": [
+        {
+          "id": "sf_pipeline_optics",
+          "text": "Activated a remote-first revenue desk spanning MN and nationwide advisors, converting Ameriprise-style consults into a $4.8M qualified pipeline in two quarters.",
+          "focus": ["pipeline", "remote", "ameriprise"]
+        },
+        {
+          "id": "sf_margin_growth",
+          "text": "Piloted AI-driven forecasting automations that trimmed close cycles by 32% while holding GAAP compliance, boosting contribution margin by 6.4% for hybrid-free teams.",
+          "focus": ["automation", "forecasting", "finance"]
+        },
+        {
+          "id": "sf_cross_sell",
+          "text": "Mapped cross-sell plays between MN retirement portfolios and national SMB accounts, lifting attach rate from 1.4x to 2.1x without increasing headcount.",
+          "focus": ["strategy", "sales", "retirement"]
+        }
+      ]
+    },
+    {
+      "name": "ameriprise",
+      "label": "Ameriprise Alignment",
+      "bullets": [
+        {
+          "id": "amp_client_loyalty",
+          "text": "Replicated Ameriprise client loyalty rituals inside a fintech CRM, raising net promoter results by 18 points across fully remote households.",
+          "focus": ["client experience", "loyalty", "crm"]
+        },
+        {
+          "id": "amp_reg_compliance",
+          "text": "Integrated Reg BI guardrails directly into playbooks, keeping 100% of remote MN advisors audit-ready while shortening onboarding from 45 to 21 days.",
+          "focus": ["compliance", "enablement", "remote onboarding"]
+        },
+        {
+          "id": "amp_fin_planning",
+          "text": "Coached planners on Ameriprise-style Goals-Based Advice using AI nudges that surface next-best actions and surface plan drift inside distributed pods.",
+          "focus": ["financial planning", "ai", "coaching"]
+        }
+      ]
+    },
+    {
+      "name": "ai_orchestration",
+      "label": "AI Orchestration",
+      "bullets": [
+        {
+          "id": "ai_routing",
+          "text": "Sequenced multi-model call routing that pairs GPT ops with deterministic calculators, lifting first-touch resolution by 21% in remote advisor care.",
+          "focus": ["ai", "orchestration", "support"]
+        },
+        {
+          "id": "ai_guardrails",
+          "text": "Launched an AI safety net with reversible automations, logging every inference for FINRA-ready audits and giving remote teams rapid rollback control.",
+          "focus": ["safety", "audit", "automation"]
+        },
+        {
+          "id": "ai_enablement",
+          "text": "Packaged weekly composer-style labs so MN analysts co-design prompts, delivering 40+ reusable workflows without any on-prem dependencies.",
+          "focus": ["enablement", "prompts", "remote"]
+        }
+      ]
+    },
+    {
+      "name": "automation",
+      "label": "Automation",
+      "bullets": [
+        {
+          "id": "auto_zapier_control",
+          "text": "Authored Zapier + Make blueprints that stitch ATS, CRM, and compliance trackers, eliminating 70 hours/month of swivel-chair updates for distributed teams.",
+          "focus": ["zapier", "make", "ops"]
+        },
+        {
+          "id": "auto_fin_reporting",
+          "text": "Automated Ameriprise-style finance close packets, syncing ledger, CRM, and DocuSign artifacts so executives preview status without calling hybrid standups.",
+          "focus": ["finance", "automation", "reporting"]
+        },
+        {
+          "id": "auto_onboarding",
+          "text": "Built zero-touch onboarding runs that trigger background checks, LMS paths, and payroll setup the moment remote offers are signed.",
+          "focus": ["onboarding", "automation", "remote"]
+        }
+      ]
+    },
+    {
+      "name": "support",
+      "label": "Client & Advisor Support",
+      "bullets": [
+        {
+          "id": "support_playbooks",
+          "text": "Codified tierless support playbooks so remote service pods resolve 83% of advisor tickets asynchronously before escalation.",
+          "focus": ["support", "playbooks", "remote"]
+        },
+        {
+          "id": "support_voice_of_client",
+          "text": "Turned raw call notes into sentiment dashboards, piping MN client wins back to marketing ops within 24 hours.",
+          "focus": ["analytics", "support", "marketing ops"]
+        },
+        {
+          "id": "support_kb_growth",
+          "text": "Expanded AI-searchable knowledge bases by 220 articles with clear Ameriprise compliance flags for distributed agents.",
+          "focus": ["knowledge base", "ai", "compliance"]
+        }
+      ]
+    },
+    {
+      "name": "marketing_ops",
+      "label": "Marketing Ops",
+      "bullets": [
+        {
+          "id": "mops_pipeline",
+          "text": "Linked campaign automation into Salesforce + Marketo loops, lifting MN-qualified inbound by 34% without live events.",
+          "focus": ["campaigns", "salesforce", "remote"]
+        },
+        {
+          "id": "mops_content_syndication",
+          "text": "Stood up AI-assisted content syndication that syndicates Ameriprise-thought leadership across remote advisor microsites in hours, not weeks.",
+          "focus": ["content", "ai", "syndication"]
+        },
+        {
+          "id": "mops_reporting",
+          "text": "Delivered CMO dashboards with spend-to-pipeline clarity, auto-refreshing from attribution data without any hybrid reporting cadence.",
+          "focus": ["analytics", "dashboards", "remote"]
+        }
+      ]
+    },
+    {
+      "name": "agent_ops",
+      "label": "Agent Operations",
+      "bullets": [
+        {
+          "id": "agent_staffing",
+          "text": "Forecasted agent load vs. licensing windows, enabling MN supervisors to shift coverage before queues spike.",
+          "focus": ["workforce", "forecast", "remote"]
+        },
+        {
+          "id": "agent_quality",
+          "text": "Spun up asynchronous quality reviews with AI-generated scorecards so leaders coach without hybrid ride-alongs.",
+          "focus": ["quality", "ai", "remote coaching"]
+        },
+        {
+          "id": "agent_tooling",
+          "text": "Unified advisor tech stack (CRM, VOIP, planning) with SSO guardrails to keep remote sessions secure and auditable.",
+          "focus": ["tooling", "security", "compliance"]
+        }
+      ]
+    },
+    {
+      "name": "real_estate",
+      "label": "Real Estate & Field Ops",
+      "bullets": [
+        {
+          "id": "re_virtual_showings",
+          "text": "Launched remote-first property tours using interactive calculators and Ameriprise-aligned finance flows for relocation clients.",
+          "focus": ["real estate", "remote", "finance"]
+        },
+        {
+          "id": "re_data_room",
+          "text": "Assembled compliance-ready data rooms that sync MLS, appraisal, and lending artifacts for distributed brokers in under an hour.",
+          "focus": ["data", "compliance", "speed"]
+        },
+        {
+          "id": "re_portfolio_ops",
+          "text": "Automated investor reporting with vacancy, rent roll, and capex metrics surfaced weekly without on-site visits.",
+          "focus": ["reporting", "automation", "investor relations"]
+        }
+      ]
+    }
+  ]
+}
