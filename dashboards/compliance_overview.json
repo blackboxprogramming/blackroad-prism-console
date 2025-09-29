@@ -1,0 +1,178 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "usage-db"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "targets": [
+        {
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawSql": "SELECT ts_bucket('1 hour', ts) AS bucket, outcome, SUM(count / sampling_rate) AS total\nFROM usage_events\nWHERE ts BETWEEN $__timeFrom() AND $__timeTo()\nGROUP BY bucket, outcome\nORDER BY bucket",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "count"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "usage_events",
+          "timeColumn": "ts"
+        }
+      ],
+      "title": "Usage Outcomes (stacked)",
+      "type": "timeseries",
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            }
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "usage-db"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT deny_reason, COUNT(*) AS total\nFROM audit_events\nWHERE outcome = 'deny'\n  AND ts BETWEEN $__timeFrom() AND $__timeTo()\nGROUP BY deny_reason\nORDER BY total DESC\nLIMIT 10",
+          "refId": "A"
+        }
+      ],
+      "title": "Deny Reasons (7d)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "usage-db"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT ts_bucket('1 day', ts) AS bucket,\n       SUM(CASE WHEN deny_reason IN ('missing_identity','consent_required') THEN 1 ELSE 0 END) AS escalations,\n       SUM(CASE WHEN outcome = 'allow' THEN 1 ELSE 0 END) AS allows\nFROM audit_events\nWHERE ts BETWEEN $__timeFrom() AND $__timeTo()\nGROUP BY bucket\nORDER BY bucket",
+          "refId": "A"
+        }
+      ],
+      "title": "Consent Friction Funnel",
+      "type": "timeseries",
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "usage-db"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 4,
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT tool,\n       AVG(latency_ms) FILTER (WHERE outcome = 'ok') AS p50_latency_ms,\n       SUM(count / sampling_rate) FILTER (WHERE outcome = 'error') AS errors,\n       SUM(count / sampling_rate) FILTER (WHERE outcome = 'warn') AS warns\nFROM usage_events\nWHERE ts BETWEEN $__timeFrom() AND $__timeTo()\nGROUP BY tool\nORDER BY errors DESC\nLIMIT 15",
+          "refId": "A"
+        }
+      ],
+      "title": "Tool Health Rollup",
+      "type": "table"
+    }
+  ],
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "compliance",
+    "usage"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "15s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h"
+    ]
+  },
+  "title": "Compliance Overview",
+  "uid": "compliance-overview",
+  "version": 1
+}
