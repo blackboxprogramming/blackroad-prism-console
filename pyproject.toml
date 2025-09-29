@@ -9,6 +9,7 @@ dependencies = ["typer"]
 
 [project.scripts]
 brc = "cli.console:main"
+blackroad-dashboard = "agent.dashboard:main"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
