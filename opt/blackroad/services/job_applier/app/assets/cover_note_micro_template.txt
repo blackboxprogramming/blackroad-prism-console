@@ -1,0 +1,10 @@
+Hi {{HIRING_MANAGER_NAME}},
+
+Thanks for opening the {{ROLE_TITLE}} role at {{COMPANY_NAME}}. I build products that stay shipped, and your focus on {{COMPANY_MISSION_FOCUS}} immediately clicked. In my last team I {{PROOF_1}}, and before that I {{PROOF_2}}—both shipped under tight deadlines with measurable adoption gains.
+
+If I joined, week one would go toward syncing with {{KEY_PARTNER_TEAMS}} and pulling the live metrics that matter most for {{ROLE_TITLE}}. By day 30 I want a shipped improvement to {{TARGET_METRIC}} with an experiment plan queued behind it. The attached resume shows the systems I lean on to get there, plus the stack I can plug into on day one.
+
+If the snapshot aligns with what you need, I would love to compare notes on how the team is pacing the next quarter.
+
+{{SIGN_OFF}},
+{{CANDIDATE_NAME}}
