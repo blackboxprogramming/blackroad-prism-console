@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>BlackRoad Agent Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.45);
+    }
+    .title {
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    button {
+      background: #38bdf8;
+      color: #0f172a;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover {
+      background: #0ea5e9;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    th {
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+    td button {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+    #scanLog {
+      margin-top: 12px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>BlackRoad Agent Control</h1>
+    <p>Active target: <strong id="activeTarget">{{ target.get('host', 'unset') }}</strong></p>
+
+    <div class="card">
+      <div class="title">Discover Devices</div>
+      <button id="scanBtn">Scan LAN</button>
+      <div id="scanLog"><small>Finds hosts on your subnet via ping + mDNS, then probes for SSH and Jetson.</small></div>
+      <table id="scanTable" style="width:100%; margin-top:8px;">
+        <thead><tr><th align="left">IP</th><th align="left">Name</th><th align="left">Kind</th><th align="left">SSH</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card" id="flasher">
+      <div class="title">Flasher</div>
+      <p>Firmware flashing controls coming soon.</p>
+    </div>
+  </div>
+
+  <script>
+  const scanBtn = document.getElementById('scanBtn');
+  const scanLog = document.getElementById('scanLog');
+  const scanBody = document.querySelector('#scanTable tbody');
+  const activeTargetEl = document.getElementById('activeTarget');
+
+  async function refreshTarget() {
+    try {
+      const resp = await fetch('/discover/target');
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (data.ok && data.jetson) {
+        activeTargetEl.textContent = `${data.jetson.host} (${data.jetson.user})`;
+      }
+    } catch (err) {
+      console.error('Failed to refresh target', err);
+    }
+  }
+
+  scanBtn.onclick = async () => {
+    scanLog.textContent = 'Scanning… (takes ~15–45s)';
+    scanBtn.disabled = true;
+    try {
+      const r = await fetch('/discover/scan'); const j = await r.json();
+      scanLog.textContent = `Network: ${j.network || 'unknown'} • Found: ${(j.hosts||[]).length}`;
+      scanBody.innerHTML = '';
+      (j.hosts||[]).forEach(h=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${h.ip}</td>
+          <td>${h.name || '-'}</td>
+          <td>${h.kind}</td>
+          <td>${h.ssh ? 'yes' : 'no'}</td>
+          <td><button data-ip="${h.ip}">Set as target</button></td>`;
+        tr.querySelector('button').onclick = async (ev)=>{
+          const ip = ev.target.dataset.ip;
+          const r = await fetch('/discover/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({host:ip,user:'jetson'})});
+          const t = await r.json();
+          alert(t.ok ? `Target set to ${ip}` : `Failed: ${t.error || 'unknown'}`);
+          if (t.ok) {
+            activeTargetEl.textContent = `${ip} (jetson)`;
+          }
+        };
+        scanBody.appendChild(tr);
+      });
+    } catch (err) {
+      console.error('Scan failed', err);
+      scanLog.textContent = 'Scan failed. Check server logs.';
+    } finally {
+      scanBtn.disabled = false;
+    }
+  };
+
+  refreshTarget();
+  </script>
+</body>
+</html>
