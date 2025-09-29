@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>BlackRoad Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+            background: #f7f7f7;
+        }
+        h1 {
+            color: #222;
+        }
+        section {
+            background: #fff;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        pre {
+            background: #111;
+            color: #0f0;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+        .columns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .columns section {
+            flex: 1 1 300px;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        button {
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            background: #0052cc;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #003d99;
+        }
+    </style>
+</head>
+<body>
+    <h1>BlackRoad Dashboard</h1>
+    <p>Target Jetson → <b>{{ target.host }}</b> (user: {{ target.user }})</p>
+
+    <div class="columns">
+        <section>
+            <h2>Pi Status</h2>
+            <p><strong>Hostname:</strong> {{ pi.hostname }}</p>
+            <p><strong>Uname:</strong> {{ pi.uname }}</p>
+            <p><strong>Uptime:</strong> {{ pi.uptime }}</p>
+            <p><strong>Disk:</strong></p>
+            <pre>{{ pi.disk }}</pre>
+        </section>
+        <section>
+            <h2>Jetson Status</h2>
+            <p><strong>Hostname:</strong> {{ jetson.hostname }}</p>
+            <p><strong>Uname:</strong> {{ jetson.uname }}</p>
+            <p><strong>Uptime:</strong> {{ jetson.uptime }}</p>
+            <p><strong>Disk:</strong></p>
+            <pre>{{ jetson.disk }}</pre>
+        </section>
+    </div>
+
+    <section>
+        <h2>Run Remote Command (POST)</h2>
+        <form method="post" action="/run">
+            <label for="command">Command</label>
+            <input id="command" name="command" type="text" placeholder="Enter command" required />
+            <button type="submit">Run via SSH</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>Run Remote Command (WebSocket Stream)</h2>
+        <label for="ws-command">Command</label>
+        <input id="ws-command" type="text" placeholder="Enter command to stream output" />
+        <button id="ws-run">Start</button>
+        <pre id="ws-output"></pre>
+    </section>
+
+    <script>
+        const runButton = document.getElementById("ws-run");
+        const output = document.getElementById("ws-output");
+        const commandInput = document.getElementById("ws-command");
+
+        runButton.addEventListener("click", () => {
+            const command = commandInput.value.trim();
+            if (!command) {
+                alert("Enter a command to run");
+                return;
+            }
+
+            output.textContent = "";
+            const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+            const ws = new WebSocket(`${protocol}://${window.location.host}/ws/run`);
+
+            ws.onopen = () => {
+                ws.send(command);
+            };
+
+            ws.onmessage = (event) => {
+                if (event.data === "[[BLACKROAD_DONE]]") {
+                    ws.close();
+                    return;
+                }
+                output.textContent += event.data + "\n";
+                output.scrollTop = output.scrollHeight;
+            };
+
+            ws.onerror = (event) => {
+                console.error("WebSocket error", event);
+            };
+
+            ws.onclose = () => {
+                console.log("WebSocket closed");
+            };
+        });
+    </script>
+</body>
+</html>
