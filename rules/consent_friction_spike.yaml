@@ -1,0 +1,39 @@
+rule_id: "CONSENT_FRICTION_SPIKE-b7dd0fb7-69aa-4d42-90d3-4b1a2df3a2f8"
+name: "Consent friction exceeds threshold"
+category: "observe"
+severity: "med"
+version: 1
+description: >
+  Alerts when the rolling 15m rate of consent-required denies crosses 15%.
+inputs_schema:
+  - name: deny_reason     # string
+  - name: ts              # timestamp
+output_type: "json"
+expr: |
+  rate(deny_reason == "consent_required", "15m") > 0.15
+on_match:
+  decision: "notify"
+  reason: "consent_required_spike"
+  details:
+    message: "Consent prompts are spiking; check UX or scope requests."
+notify:
+  channels: ["slack:#platform"]
+tests:
+  - name: "below_threshold"
+    guid: "d1e3a1fa-4a1b-4b69-9a2e-2a4b2f6e9a10"
+    series:
+      window: "15m"
+      events:
+        - repeat: 1, each: {deny_reason: "consent_required"}
+        - repeat: 9, each: {deny_reason: "insufficient_role"}
+    want: {decision: "allow", reason: ""}
+  - name: "above_threshold"
+    guid: "f6a2cc38-8d57-4a2f-9d7e-3e4f1a2b9c77"
+    series:
+      window: "15m"
+      events:
+        - repeat: 2, each: {deny_reason: "consent_required"}   # 20%
+        - repeat: 8
+    want: {decision: "notify", reason: "consent_required_spike"}
+comments:
+  - "Observe-only to avoid blocking; tie to UX backlog if persistent."

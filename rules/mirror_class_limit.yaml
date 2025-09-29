@@ -1,0 +1,42 @@
+rule_id: "MIRROR_CLASS_LIMIT-8b6caa3c-6c57-4e8a-9b0e-1c8b3a6e6d1e"  # GUID
+name: "Block mirror to restricted/secret repos"
+category: "enforce"        # apply|observe|enforce|deny-only|force-only|permit-all
+severity: "high"           # info|low|med|high|critical
+version: 1
+description: >
+  Prevents mirroring when a repository is classified as restricted or secret.
+inputs_schema:
+  - name: action              # string
+  - name: resource_class      # string: public|internal|restricted|secret
+  - name: resource_provider   # string
+output_type: "json"
+output_contract:             # self-documenting, keeps tool usage predictable
+  fields: ["decision","reason","rule_id","details"]
+expr: |
+  action == "mirror" && (resource_class == "restricted" || resource_class == "secret")
+
+on_match:
+  decision: "deny"           # deny|allow|notify
+  reason: "classification_block"
+  details:
+    message: "Mirroring blocked for non-public repository"
+    remediation: "Request exception or reclassify after review."
+notify:
+  channels: ["slack:#secops"]
+  ticketing: {open: true, project: "SEC"}
+tests:
+  - name: "deny_secret"
+    guid: "2a7f4e7c-1aa1-4f2c-a8f5-6b5a8d1f2e30"
+    input: {action: "mirror", resource_class: "secret", resource_provider: "github"}
+    want:
+      decision: "deny"
+      reason: "classification_block"
+  - name: "allow_internal"
+    guid: "0b48e7f6-3cfc-4fdd-bbb6-90a2d3b4e9a1"
+    input: {action: "mirror", resource_class: "internal", resource_provider: "gitlab"}
+    want:
+      decision: "allow"
+      reason: ""
+comments:
+  - "Blocking rule. Be cautious toggling category."
+  - "If you change classification vocabulary, update expr + tests."
