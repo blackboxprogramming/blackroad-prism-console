@@ -24,4 +24,26 @@ Expected curls:
 - `curl -sS https://blackroad.io/health` → JSON ok
 - `curl -sS https://blackroad.io/api/health` → JSON from blackroad-api
 
+## Quick symlink sanity check
+
+Broken vhost symlinks in `/etc/nginx/sites-enabled/` cause partial config loads and intermittent 502s.
+Run the bundled helper to verify every enabled site links back to `sites-available` before reloading nginx:
+
+```bash
+./scripts/checks.sh
+```
+
+Or manually:
+
+1. Inspect symlinks
+   ```bash
+   ls -l /etc/nginx/sites-enabled/
+   ```
+2. Remove or recreate any entries that do **not** point into `/etc/nginx/sites-available/`.
+3. Validate and reload
+   ```bash
+   sudo nginx -t
+   sudo systemctl reload nginx
+   ```
+
 _Last updated on 2025-09-11_
