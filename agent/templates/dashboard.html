@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BlackRoad Dashboard</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; background: #111; color: #eee; }
+    h1 { color: #0f0; }
+    .card { background: #222; padding: 1em; margin-bottom: 1em; border-radius: 8px; }
+    .title { font-weight: bold; margin-bottom: 0.5em; }
+    input[type=text] { width: 70%; padding: 0.5em; }
+    button { padding: 0.5em 1em; margin-left: 0.5em; }
+  </style>
+</head>
+<body>
+  <h1>BlackRoad Dashboard</h1>
+
+  <div class="card">
+    <div class="title">Pi</div>
+    <pre>{{ pi | tojson(indent=2) }}</pre>
+  </div>
+
+  <div class="card">
+    <div class="title">Jetson</div>
+    <pre>{{ jetson | tojson(indent=2) }}</pre>
+    <form action="/run" method="post">
+      <input type="text" name="command" placeholder="Enter command (e.g. nvidia-smi)" />
+      <button type="submit">Run on Jetson</button>
+    </form>
+  </div>
+</body>
+</html>
