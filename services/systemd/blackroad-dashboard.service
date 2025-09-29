@@ -1,0 +1,13 @@
+[Unit]
+Description=BlackRoad Web Dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/blackroad-dashboard
+Restart=always
+User=pi
+WorkingDirectory=/home/pi
+
+[Install]
+WantedBy=multi-user.target
