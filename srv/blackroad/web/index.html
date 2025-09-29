@@ -148,6 +148,15 @@ function Dashboard({route}) {
   const [mem,setMEM]=useState(Array.from({length:40},()=>Math.random()*70+20));
   const [gpu,setGPU]=useState(Array.from({length:40},()=>Math.random()*90));
   const [build,setBuild]=useState(63); const [timeline,setTimeline]=useState([]); const [commits,setCommits]=useState([]); const [tasks,setTasks]=useState([]);
+  const [flashDevices,setFlashDevices]=useState([]);
+  const [flashDevice,setFlashDevice]=useState('');
+  const [flashUrl,setFlashUrl]=useState('');
+  const [flashLog,setFlashLog]=useState('');
+  const [flashSafeHdmi,setFlashSafeHdmi]=useState(true);
+  const [flashEnableSsh,setFlashEnableSsh]=useState(true);
+  const [isFlashing,setIsFlashing]=useState(false);
+  const flashSocket=useRef(null);
+  const flashLogRef=useRef(null);
 
   useEffect(()=>{Promise.allSettled([apiGet('/api/timeline'),apiGet('/api/tasks'),apiGet('/api/commits'),apiGet('/api/state')]).then(([tl,ts,cs,st])=>{
     if(tl.value)setTimeline(tl.value); if(ts.value)setTasks(ts.value); if(cs.value)setCommits(cs.value);
@@ -155,8 +164,47 @@ function Dashboard({route}) {
   }); const proto=location.protocol==='https:'?'wss':'ws'; const ws=new WebSocket(`${proto}://${location.host}/ws`);
   ws.onmessage=e=>{try{const m=JSON.parse(e.data); if(m.type==='activity') setTimeline(t=>[m.item,...t].slice(0,80)); if(m.type==='metrics'){setCPU(x=>[...x.slice(1),m.cpu]); setMEM(x=>[...x.slice(1),m.mem]); setGPU(x=>[...x.slice(1),m.gpu]);} if(m.type==='build') setBuild(m.progress); if(m.type==='wallet') setWallet(m.balance.toFixed(2)); }catch(_){} };
   return ()=>ws.close();},[]);
+  useEffect(()=>()=>{if(flashSocket.current) flashSocket.current.close();},[]);
+  useEffect(()=>{if(flashLogRef.current) flashLogRef.current.scrollTop=flashLogRef.current.scrollHeight;},[flashLog]);
 
   const filteredTimeline=useMemo(()=>timeline.filter(x=>(x.title||'').toLowerCase().includes(filter.toLowerCase())||(x.desc||'').toLowerCase().includes(filter.toLowerCase())),[timeline,filter]);
+  const appendFlashLog=line=>setFlashLog(prev=>prev?prev+'\n'+String(line):String(line));
+  async function loadFlashDevices(){
+    try{
+      const res=await fetch('/flash/devices');
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok){
+        const detail=data.detail||data.error||'Failed to list devices';
+        appendFlashLog(`ERROR: ${detail}`);
+        setFlashDevices([]);
+        setFlashDevice('');
+        return;
+      }
+      const list=data.devices||[];
+      setFlashDevices(list);
+      if(!list.find(d=>d.device===flashDevice)){
+        setFlashDevice(list.length?list[0].device:'');
+      }
+      if(list.length===0){
+        appendFlashLog('No removable devices detected');
+      }
+    }catch(e){appendFlashLog(`ERROR: ${(e&&e.message)||e}`);}
+  }
+  const startFlash=()=>{
+    if(isFlashing) return;
+    const url=flashUrl.trim();
+    if(!url||!flashDevice){appendFlashLog('Select device and image URL');return;}
+    setFlashLog('');
+    const proto=location.protocol==='https:'?'wss':'ws';
+    const ws=new WebSocket(`${proto}://${location.host}/ws/flash`);
+    flashSocket.current=ws;
+    setIsFlashing(true);
+    ws.onopen=()=>ws.send(JSON.stringify({device:flashDevice,image_url=url,safe_hdmi:flashSafeHdmi,enable_ssh:flashEnableSsh}));
+    ws.onmessage=e=>appendFlashLog(e.data);
+    ws.onerror=()=>appendFlashLog('ERROR: WebSocket error');
+    ws.onclose=()=>{setIsFlashing(false); if(flashSocket.current===ws) flashSocket.current=null;};
+  };
+  const canFlash=Boolean(flashDevice && flashUrl.trim() && !isFlashing);
   const [code,setCode]=useState(`// Example code\nconsole.log('BlackRoad online');`);
   const runCode=()=>{const frame=document.getElementById('sandbox');const payload=`<!doctype html><html><body><script>const log=(...a)=>parent.postMessage({type:'log',data:a.join(' ')},'*');console.log=log;console.error=(...a)=>parent.postMessage({type:'log',data:'! '+a.join(' ')},'*');try{${code}}catch(e){console.error(e.message)}<\/script></body></html>`; frame.srcdoc=payload}
   const onCommand=async(cmd)=>{const [c,...rest]=cmd.split(/\s+/);switch(c){case 'help':return['commands: help, run, build, commit <msg>, git status, agents, stake <amt>, mint, revert, clear, whoami, logout'];case 'run':runCode();return['executing current editor code…'];case 'build':await apiPost('/api/build/start',{});return['build started…'];case 'commit':{const msg=rest.join(' ')||'Update from terminal';await apiPost('/api/commit',{msg});return[`committed: ${msg}`]}case 'git':if(rest[0]==='status')return['on branch main','nothing to commit'];break;case 'agents':return[`Phi:${agents.Phi?'on':'off'} GPT:${agents.GPT?'on':'off'} Mistral:${agents.Mistral?'on':'off'}`];case 'stake':{const amt=parseFloat(rest[0]||'0');if(!amt)return['usage: stake <amount>'];const r=await apiPost('/api/wallet/stake',{amount:amt});return[`staked ${amt.toFixed(2)} RC (bal ${r.balance.toFixed(2)})`]}case 'mint':{const r=await apiPost('/api/wallet/mint',{});return[`minted 0.05 RC (bal ${r.balance.toFixed(2)})`]}case 'revert':await apiPost('/api/revert',{});return['revert queued'];case 'clear':return['\u0007'];case 'whoami':return['root'];case 'logout':await apiPost('/api/logout',{});location.reload()}return[`unknown command: ${cmd}. type 'help'.`]}
@@ -237,6 +285,25 @@ function Dashboard({route}) {
         <Card>
           <div style={{fontWeight:700}}>Session Notes</div>
           <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Type notes…" style={{minHeight:120,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:10}}/>
+        </Card>
+        <Card>
+          <div style={{display:'grid',gap:8}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <div style={{fontWeight:700}}>Flasher</div>
+              <button className="btn small" onClick={()=>loadFlashDevices()} disabled={isFlashing}>List Devices</button>
+            </div>
+            <select value={flashDevice} onChange={e=>setFlashDevice(e.target.value)} disabled={!flashDevices.length} style={{background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'#fff',padding:'8px'}}>
+              <option value="">Select device…</option>
+              {flashDevices.map(d=>{const meta=[d.size,d.model].filter(Boolean).join(' ');return <option key={d.device} value={d.device}>{meta?`${d.device} ${meta}`:d.device}</option>;})}
+            </select>
+            <input value={flashUrl} onChange={e=>setFlashUrl(e.target.value)} placeholder="Image URL (xz)" style={{background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'#fff',padding:'8px'}}/>
+            <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+              <label style={{display:'inline-flex',alignItems:'center',gap:6,cursor:'pointer'}}><input type="checkbox" checked={flashSafeHdmi} onChange={()=>setFlashSafeHdmi(v=>!v)}/> <span>Safe HDMI</span></label>
+              <label style={{display:'inline-flex',alignItems:'center',gap:6,cursor:'pointer'}}><input type="checkbox" checked={flashEnableSsh} onChange={()=>setFlashEnableSsh(v=>!v)}/> <span>Enable SSH</span></label>
+            </div>
+            <button className={canFlash?'btn primary':'btn'} onClick={startFlash} disabled={!canFlash}>{isFlashing?'Flashing…':'Flash Drive'}</button>
+            <div ref={flashLogRef} style={{background:'#000',color:'#0f0',padding:'10px',borderRadius:10,height:150,overflow:'auto',fontFamily:'monospace',whiteSpace:'pre-wrap'}}>{flashLog||'Ready.'}</div>
+          </div>
         </Card>
       </Panel>
     </Body>
