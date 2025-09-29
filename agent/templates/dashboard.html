@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>BlackRoad Agent Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #0b1220;
+        color: #e2e8f0;
+        margin: 0;
+        padding: 20px;
+      }
+      .card {
+        background: #111a2f;
+        border-radius: 12px;
+        border: 1px solid #1f2a44;
+        padding: 20px;
+        max-width: 720px;
+        margin: 0 auto;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+      }
+      .title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+      button {
+        background: linear-gradient(135deg, #ff4fd8, #0096ff);
+        border: none;
+        border-radius: 8px;
+        color: #0b1220;
+        padding: 8px 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      select, input[type="file"], input[type="text"] {
+        background: #0d1628;
+        border: 1px solid #1f2a44;
+        border-radius: 8px;
+        color: #e2e8f0;
+        padding: 6px 10px;
+      }
+      pre {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="title">Whisper Transcription (Streaming)</div>
+
+      <div style="margin-bottom:8px;">
+        <input type="file" id="audioFile" accept="audio/*" />
+        <select id="whisperLang">
+          <option value="en" selected>English (en)</option>
+          <option value="auto">Auto</option>
+          <option value="es">Spanish (es)</option>
+          <!-- add more as needed -->
+        </select>
+        <input type="text" id="whisperModel" placeholder="/var/lib/blackroad/models/ggml-base.en.bin" style="width:50%;">
+        <button id="whisperGo">Transcribe (stream)</button>
+      </div>
+
+      <pre id="whisperLog" style="background:#000;color:#0f0;padding:1em;height:220px;overflow:auto;border-radius:6px;"></pre>
+    </div>
+
+    <script>
+    const audioFile = document.getElementById('audioFile');
+    const whisperLang = document.getElementById('whisperLang');
+    const whisperModel = document.getElementById('whisperModel');
+    const whisperGo = document.getElementById('whisperGo');
+    const whisperLog = document.getElementById('whisperLog');
+
+    whisperGo.onclick = async (e)=>{
+      e.preventDefault();
+      whisperLog.textContent = "";
+      const f = audioFile.files?.[0];
+      if(!f){ whisperLog.textContent = "Pick an audio file."; return; }
+
+      const fd = new FormData();
+      fd.append("file", f);
+      let token;
+      try {
+        const up = await fetch('/transcribe/upload', { method:'POST', body: fd });
+        if(!up.ok){ throw new Error('upload failed'); }
+        const body = await up.json();
+        token = body.token;
+      } catch (err) {
+        whisperLog.textContent = "Upload failed.";
+        return;
+      }
+
+      if(!token){ whisperLog.textContent = "Upload failed."; return; }
+
+      const lang = whisperLang.value || "en";
+      const model = whisperModel.value || "/var/lib/blackroad/models/ggml-base.en.bin";
+      const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+      const ws = new WebSocket(`${proto}://${location.host}/ws/transcribe/run`);
+      ws.onopen = ()=> ws.send(JSON.stringify({ token, lang, model }));
+      ws.onmessage = ev => {
+        if(ev.data === "[[BLACKROAD_WHISPER_DONE]]"){ ws.close(); return; }
+        whisperLog.textContent += ev.data + "\n";
+        whisperLog.scrollTop = whisperLog.scrollHeight;
+      };
+      ws.onerror = ()=> whisperLog.textContent += "[error]\n";
+    };
+    </script>
+  </body>
+</html>
