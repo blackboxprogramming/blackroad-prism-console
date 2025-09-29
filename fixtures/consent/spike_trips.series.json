@@ -1,0 +1,8 @@
+{
+  "window": "15m",
+  "series": [
+    { "deny_reason": "consent_required", "ticket": "INC-901" },
+    { "deny_reason": "consent_required", "ticket": "INC-902" },
+    {}, {}, {}, {}, {}, {}, {}, {}
+  ]
+}
