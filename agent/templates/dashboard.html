@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>BlackRoad Agent Dashboard</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #0f1115;
+        color: #f3f6ff;
+        margin: 0;
+        padding: 24px;
+      }
+      .title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 24px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+      }
+      input[type="text"] {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        color: #f3f6ff;
+        padding: 8px 10px;
+      }
+      button {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        border: none;
+        color: #fff;
+        padding: 8px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: transform 0.1s ease;
+      }
+      button:hover {
+        transform: translateY(-1px);
+      }
+      pre {
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 8px;
+        padding: 12px;
+        overflow-x: auto;
+        max-height: 320px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>BlackRoad Brainstem</h1>
+    <div class="card">
+      <div class="title">Settings</div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <label>Jetson host:</label><input id="host" type="text" placeholder="192.168.4.23" />
+        <label>User:</label><input id="user" type="text" value="jetson" style="width:120px" />
+        <button id="saveBtn">Save</button>
+        <button id="testBtn">Test Connection</button>
+        <button id="keyBtn">Install SSH Key</button>
+      </div>
+      <pre id="settingsLog"></pre>
+    </div>
+
+    <script>
+      async function loadSettings() {
+        const r = await fetch('/settings');
+        const j = await r.json();
+        document.getElementById('host').value = j.jetson.host;
+        document.getElementById('user').value = j.jetson.user;
+        document.getElementById('settingsLog').textContent = JSON.stringify(j.raw, null, 2);
+      }
+      document.addEventListener('DOMContentLoaded', () => {
+        loadSettings();
+        document.getElementById('saveBtn').onclick = async () => {
+          const host = document.getElementById('host').value.trim();
+          const user = document.getElementById('user').value.trim() || 'jetson';
+          const r = await fetch('/settings/jetson', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ host, user })
+          });
+          document.getElementById('settingsLog').textContent = await r.text();
+        };
+        document.getElementById('testBtn').onclick = async () => {
+          const r = await fetch('/connect/test');
+          document.getElementById('settingsLog').textContent = await r.text();
+        };
+        document.getElementById('keyBtn').onclick = async () => {
+          const r = await fetch('/connect/install-key', { method: 'POST' });
+          document.getElementById('settingsLog').textContent = await r.text();
+        };
+      });
+    </script>
+  </body>
+</html>
