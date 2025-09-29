@@ -1,0 +1,11 @@
+[Unit]
+Description=BlackRoad OS First Boot Setup
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/blackroad-firstboot.sh
+ExecStartPost=/bin/bash -c 'systemctl disable blackroad-firstboot.service; rm -f /etc/systemd/system/blackroad-firstboot.service'
+
+[Install]
+WantedBy=multi-user.target
