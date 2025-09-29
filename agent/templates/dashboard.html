@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>BlackRoad Device Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #0f172a; color: #e2e8f0; }
+    h1 { margin-bottom: 16px; }
+    .status { margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+    .status button { padding: 6px 12px; background: #22d3ee; border: none; border-radius: 4px; cursor: pointer; color: #0f172a; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+    .card { background: #1e293b; border-radius: 12px; padding: 16px; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.4); }
+    .title { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+    button { cursor: pointer; padding: 8px 12px; background: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: 600; }
+    button:hover { background: #0ea5e9; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border-bottom: 1px solid rgba(148, 163, 184, 0.2); padding: 6px 4px; }
+    th { text-transform: uppercase; font-size: 12px; color: #94a3b8; }
+    tbody tr:hover { background: rgba(148, 163, 184, 0.12); }
+    small { color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <h1>BlackRoad Device Dashboard</h1>
+  <div class="status">
+    <strong>Active Target:</strong>
+    <span id="targetInfo">
+      {% if target %}
+        {{ target.host }} ({{ target.user }})
+      {% else %}
+        None configured
+      {% endif %}
+    </span>
+    <button id="refreshTarget">Refresh</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="title">Discover Devices</div>
+      <button id="scanBtn">Scan LAN</button>
+      <div id="scanLog"><small>Finds hosts on your subnet via ping + mDNS, then probes for SSH and Jetson.</small></div>
+      <table id="scanTable" style="width:100%; margin-top:8px;">
+        <thead><tr><th align="left">IP</th><th align="left">Name</th><th align="left">Kind</th><th align="left">SSH</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card" id="flasherCard">
+      <div class="title">Flasher</div>
+      <p><small>Firmware flashing controls coming soon.</small></p>
+    </div>
+  </div>
+
+  <script>
+  const scanBtn = document.getElementById('scanBtn');
+  const scanLog = document.getElementById('scanLog');
+  const scanBody = document.querySelector('#scanTable tbody');
+  const targetInfo = document.getElementById('targetInfo');
+  const refreshBtn = document.getElementById('refreshTarget');
+
+  const initialTarget = {{ target | tojson | safe }};
+
+  function updateTargetDisplay(target) {
+    if (target && target.host) {
+      targetInfo.textContent = `${target.host} (${target.user || 'jetson'})`;
+    } else {
+      targetInfo.textContent = 'None configured';
+    }
+  }
+
+  async function refreshTarget() {
+    try {
+      const r = await fetch('/discover/target');
+      const j = await r.json();
+      if (j.ok && j.jetson) {
+        updateTargetDisplay(j.jetson);
+      } else {
+        updateTargetDisplay(null);
+      }
+    } catch (err) {
+      console.error('Failed to refresh target', err);
+    }
+  }
+
+  scanBtn.onclick = async () => {
+    scanLog.textContent = 'Scanning… (takes ~15–45s)';
+    const r = await fetch('/discover/scan'); const j = await r.json();
+    scanLog.textContent = `Network: ${j.network || 'unknown'} • Found: ${(j.hosts||[]).length}`;
+    scanBody.innerHTML = '';
+    (j.hosts||[]).forEach(h=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${h.ip}</td>
+        <td>${h.name || '-'}</td>
+        <td>${h.kind}</td>
+        <td>${h.ssh ? 'yes' : 'no'}</td>
+        <td><button data-ip="${h.ip}">Set as target</button></td>`;
+      tr.querySelector('button').onclick = async (ev)=>{
+        const ip = ev.target.dataset.ip;
+        const r = await fetch('/discover/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({host:ip,user:'jetson'})});
+        const t = await r.json();
+        if (t.ok) {
+          alert(`Target set to ${ip}`);
+          updateTargetDisplay(t.jetson);
+        } else {
+          alert(`Failed: ${t.error || 'unknown'}`);
+        }
+      };
+      scanBody.appendChild(tr);
+    });
+  };
+
+  refreshBtn.onclick = refreshTarget;
+  updateTargetDisplay(initialTarget);
+  </script>
+</body>
+</html>
