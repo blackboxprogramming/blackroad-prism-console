@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BlackRoad Dashboard</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; background: #111; color: #eee; }
+    h1 { color: #0f0; }
+    .card { background: #222; padding: 1em; margin-bottom: 1em; border-radius: 8px; }
+    .title { font-weight: bold; margin-bottom: 0.5em; }
+    input[type=text] { width: 70%; padding: 0.5em; }
+    button { padding: 0.5em 1em; margin-left: .5em; cursor: pointer; }
+    #log { background:#000; color:#0f0; padding:1em; height:280px; overflow:auto; border-radius:6px; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+  </style>
+</head>
+<body>
+  <h1>BlackRoad Dashboard</h1>
+
+  <div class="card">
+    <div class="title">Pi</div>
+    <pre>{{ pi | tojson(indent=2) }}</pre>
+  </div>
+
+  <div class="card">
+    <div class="title">Jetson</div>
+    <pre>{{ jetson | tojson(indent=2) }}</pre>
+
+    <form id="runForm" onsubmit="return false;">
+      <input type="text" id="cmd" placeholder="Enter command (e.g. nvidia-smi)" />
+      <button id="runBtn">Run (stream)</button>
+      <button id="stopBtn" type="button">Stop</button>
+    </form>
+
+    <div id="log"></div>
+  </div>
+
+<script>
+let ws = null;
+const logEl = document.getElementById('log');
+const cmdEl = document.getElementById('cmd');
+const runBtn = document.getElementById('runBtn');
+const stopBtn = document.getElementById('stopBtn');
+
+function append(line){
+  logEl.textContent += line + "\n";
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+runBtn.addEventListener('click', () => {
+  if (ws) { ws.close(); ws = null; }
+  logEl.textContent = "";
+  const cmd = cmdEl.value.trim() || "nvidia-smi";
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/ws/run`);
+  ws.onopen = () => ws.send(cmd);
+  ws.onmessage = (ev) => {
+    if (ev.data === "[[BLACKROAD_DONE]]") { ws.close(); ws = null; append("--- done ---"); }
+    else { append(ev.data); }
+  };
+  ws.onerror = () => append("[error]");
+  ws.onclose = () => { /* noop */ };
+});
+
+stopBtn.addEventListener('click', () => {
+  if (ws) { ws.close(); ws = null; append("--- stopped ---"); }
+});
+</script>
+</body>
+</html>
