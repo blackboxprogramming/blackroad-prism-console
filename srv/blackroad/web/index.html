@@ -113,7 +113,140 @@ function CanvasPage(){const ref=useRef(null);const[draw,setDraw]=useState(false)
 function EditorPage({onRun,onCommit,code,setCode}){return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',justify-content:'space-between'}}><strong>Editor</strong><div style={{display:'flex',gap:8}}><button class="btn small" onClick={onRun}>Run</button><button class="btn small" onClick={onCommit}>Commit</button></div></div><div onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>setCode(String(r.result));r.readAsText(f)}}><CodeEditor value={code} onChange={setCode}/></div></div>)}
 function TerminalPage({onCommand}){return <Terminal onCommand={onCommand}/>}
 function RoadViewPage({timeline,filteredTimeline,filter,setFilter,modal,setModal,itemAction,build,cpu,mem,gpu}){return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',alignItems:'center',gap:8}}><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Search timeline…" style={{flex:1,background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'var(--text)',padding:'8px 10px'}}/></div><div style={{display:'grid',gap:10}}>{filteredTimeline.map(item=><ActivityItem key={item.id} item={{...item,onAction:itemAction}} onOpen={setModal}/>)}</div><div style={{display:'grid',gap:10}}><div style={{fontWeight:700}}>Build</div><div style={{height:10,background:'#0b1324',border:'1px solid var(--border)',borderRadius:10,overflow:'hidden'}}><div style={{height:'100%',width:build+'%',background:'linear-gradient(90deg,var(--accent),var(--accent-2))',transition:'width .6s'}}></div></div><div style={{display:'grid',gap:6}}><div style={{display:'flex',justifyContent:'space-between'}}><span>CPU</span><span>{Math.round(cpu.at(-1))}%</span></div><Sparkline data={cpu} color={theme.colors.accent2}/><div style={{display:'flex',justifyContent:'space-between'}}><span>Memory</span><span>{Math.round(mem.at(-1))}%</span></div><Sparkline data={mem} color={theme.colors.accent}/><div style={{display:'flex',justifyContent:'space-between'}}><span>GPU</span><span>{Math.round(gpu.at(-1))}%</span></div><Sparkline data={gpu} color={theme.colors.accent3}/></div></div>)}
-function BackRoadPage({agents,setAgents,streamOn,setStreamOn,wallet,setWallet,notes,setNotes}){return(<div style={{display:'grid',gap:10}}><div style={{fontWeight:700}}>Agent Stack</div><div style={{display:'flex',gap:8}}>{Object.keys(agents).map(k=>(<label key={k} class="chip" style={{cursor:'pointer'}}><input type="checkbox" checked={agents[k]} onChange={()=>setAgents(a=>({...a,[k]:!a[k]}))}/> {k}</label>))}</div><label style={{display:'inline-flex',alignItems:'center',gap:8}}><input type="checkbox" checked={streamOn} onChange={()=>setStreamOn(s=>!s)}/><span>Stream</span></label><div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><div><div style={{fontWeight:700}}>Wallet</div><div class="chip">{wallet} RC</div></div><div style={{display:'flex',gap:8}}><button class="btn small" onClick={()=>setWallet(w=>(parseFloat(w)+0.1).toFixed(2))}>Stake</button><button class="btn small" onClick={()=>setWallet(w=>(Math.max(0,parseFloat(w)-0.1)).toFixed(2))}>Unstake</button></div></div><div style={{fontWeight:700}}>Session Notes</div><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Type notes…" style={{minHeight:140,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:10}}/></div>)}
+function BackRoadPage({agents,setAgents,streamOn,setStreamOn,wallet,setWallet,notes,setNotes}){
+  const audioRef = useRef(null);
+  const wsRef = useRef(null);
+  const [whisperLog,setWhisperLog] = useState('');
+  const [whisperSession,setWhisperSession] = useState('');
+  const [whisperBusy,setWhisperBusy] = useState(false);
+
+  const closeWs = () => {
+    if(wsRef.current){
+      try{ wsRef.current.close(); }catch(_){/* noop */}
+      wsRef.current = null;
+    }
+  };
+
+  useEffect(()=>{
+    return ()=>closeWs();
+  },[]);
+
+  const appendLog = line => setWhisperLog(prev => prev ? `${prev}\n${line}` : line);
+
+  function startStream(path, token){
+    closeWs();
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${proto}://${location.host}${path}`);
+    wsRef.current = ws;
+    ws.onopen = () => {
+      const payload = { token, lang:'en', model:'base', beam:5 };
+      ws.send(JSON.stringify(payload));
+    };
+    ws.onmessage = ev => {
+      const data = typeof ev.data === 'string' ? ev.data : '';
+      if(!data) return;
+      if(data.startsWith('[[BLACKROAD_SESSION:')){
+        const id = data.replace('[[BLACKROAD_SESSION:','').replace(']]','');
+        setWhisperSession(id);
+        return;
+      }
+      if(data === '[[BLACKROAD_WHISPER_DONE]]'){
+        appendLog('[done]');
+        setWhisperBusy(false);
+        ws.close();
+        return;
+      }
+      appendLog(data);
+    };
+    ws.onerror = () => {
+      appendLog('[error] stream error');
+      setWhisperBusy(false);
+    };
+    ws.onclose = () => {
+      wsRef.current = null;
+      setWhisperBusy(false);
+    };
+  }
+
+  async function uploadAndStream(mode){
+    const file = audioRef.current?.files?.[0];
+    if(!file){
+      setWhisperLog('Pick an audio file.');
+      setWhisperSession('');
+      return;
+    }
+    setWhisperLog('Uploading audio…');
+    setWhisperSession('');
+    setWhisperBusy(true);
+    try{
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/transcribe/upload',{method:'POST',body:fd});
+      if(!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      if(!data?.token) throw new Error('Upload failed');
+      appendLog(mode==='gpu' ? 'Starting Jetson stream…' : 'Starting local stream…');
+      startStream(mode==='gpu'?'/ws/transcribe/run_gpu':'/ws/transcribe/run', data.token);
+    }catch(err){
+      setWhisperBusy(false);
+      appendLog(`[error] ${err?.message || err}`);
+    }
+  }
+
+  async function downloadTranscript(){
+    if(!whisperSession) return;
+    try{
+      const res = await fetch(`/transcripts/${encodeURIComponent(whisperSession)}`);
+      if(!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      if(!data?.text) throw new Error(data?.error || 'Transcript empty');
+      const blob = new Blob([data.text],{type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${whisperSession}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }catch(err){
+      appendLog(`[error] transcript download failed: ${err?.message || err}`);
+    }
+  }
+
+  return(
+    <div style={{display:'grid',gap:10}}>
+      <div style={{fontWeight:700}}>Agent Stack</div>
+      <div style={{display:'flex',gap:8}}>{Object.keys(agents).map(k=>(<label key={k} class="chip" style={{cursor:'pointer'}}><input type="checkbox" checked={agents[k]} onChange={()=>setAgents(a=>({...a,[k]:!a[k]}))}/> {k}</label>))}</div>
+      <label style={{display:'inline-flex',alignItems:'center',gap:8}}><input type="checkbox" checked={streamOn} onChange={()=>setStreamOn(s=>!s)}/><span>Stream</span></label>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div>
+          <div style={{fontWeight:700}}>Wallet</div>
+          <div class="chip">{wallet} RC</div>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <button class="btn small" onClick={()=>setWallet(w=>(parseFloat(w)+0.1).toFixed(2))}>Stake</button>
+          <button class="btn small" onClick={()=>setWallet(w=>(Math.max(0,parseFloat(w)-0.1)).toFixed(2))}>Unstake</button>
+        </div>
+      </div>
+      <div style={{fontWeight:700}}>Session Notes</div>
+      <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Type notes…" style={{minHeight:140,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:10}}/>
+      <div style={{marginTop:6,padding:12,border:'1px solid var(--border)',borderRadius:12,background:'#0b1324',display:'grid',gap:10}}>
+        <div style={{fontWeight:700}}>Whisper (Streaming)</div>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+          <input type="file" accept="audio/*" ref={audioRef} disabled={whisperBusy}/>
+          <button class="btn small" disabled={whisperBusy} onClick={()=>uploadAndStream('cpu')}>Transcribe (stream)</button>
+          <button class="btn small" disabled={whisperBusy} onClick={()=>uploadAndStream('gpu')}>Transcribe on Jetson (GPU)</button>
+        </div>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+          <button class="btn small" disabled={!whisperSession} onClick={downloadTranscript}>Download transcript</button>
+          {whisperSession && <div class="chip">Session: {whisperSession}</div>}
+        </div>
+        <pre style={{minHeight:140,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#e2e8f0',padding:10,whiteSpace:'pre-wrap'}}>{whisperLog || 'Pick an audio file and start a run.'}</pre>
+      </div>
+    </div>
+  )
+}
 function CrudPage({kind,title,fields}){const[list,setList]=useState([]);const[loading,setLoading]=useState(true);const[modalOpen,setModalOpen]=useState(false);const[item,setItem]=useState({});const[query,setQuery]=useState('');async function load(){try{const d=await apiGet(`/api/${kind}`);setList(d)}catch{setList([])}finally{setLoading(false)}}useEffect(()=>{load()},[kind]);function edit(x){setItem(x||{});setModalOpen(true)}async function save(){const body={...item};if(item.id){await apiPut(`/api/${kind}/${item.id}`,body)}else{await apiPost(`/api/${kind}`,body)}setModalOpen(false);load()}async function del(id){if(!confirm('Delete?'))return;await apiDel(`/api/${kind}/${id}`);load()}const cols=fields.map(f=>f.name);const filtered=list.filter(r=>JSON.stringify(r).toLowerCase().includes(query.toLowerCase()));return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',justify-content:'space-between',alignItems:'center'}}><strong>{title}</strong><div style={{display:'flex',gap:8}}><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search…" style={{background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'#fff',padding:'8px 10px'}}/><button class="btn small" onClick={()=>edit({})}>New</button></div></div><div style={{overflow:'auto',border:'1px solid var(--border)',borderRadius:12}}><table style={{width:'100%',borderCollapse:'collapse'}}><thead><tr>{cols.map(c=><th key={c} style={{textAlign:'left',padding:'10px 12px',borderBottom:'1px solid var(--border)',color:'var(--muted)'}}>{c}</th>)}<th style={{padding:'10px 12px',borderBottom:'1px solid var(--border)'}}></th></tr></thead><tbody>{loading?<tr><td colSpan={cols.length+1} style={{padding:12}}>Loading…</td></tr>:filtered.map(row=>(<tr key={row.id}><>{cols.map(c=><td key={c} style={{padding:'10px 12px',borderBottom:'1px solid var(--border)'}}>{String(row[c]??'')}</td>)}</><td style={{padding:'10px 12px',borderBottom:'1px solid var(--border)'}}><button class="btn small" onClick={()=>edit(row)}>Edit</button> <button class="btn small" onClick={()=>del(row.id)}>Delete</button></td></tr>))}</tbody></table></div><Modal open={modalOpen} onClose={()=>setModalOpen(false)} title={item.id?'Edit':'New'}><div style={{display:'grid',gap:8}}>{fields.map(f=>(<div key={f.name} style={{display:'grid',gap:6}}><label style={{color:'var(--muted)'}}>{f.name}</label><input value={item[f.name]||''} onChange={e=>setItem({...item,[f.name]:e.target.value})} placeholder={f.placeholder||''} style={{background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'#fff',padding:'8px 10px'}}/></div>))}<div style={{display:'flex',gap:8,justifyContent:'flex-end',marginTop:6}}><button class="btn" onClick={()=>setModalOpen(false)}>Cancel</button><button class="btn primary" onClick={save}>Save</button></div></div></Modal></div>)}
 function S3Uploader(){
   const [file,setFile]=useState(null);
