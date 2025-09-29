@@ -1,24 +1,33 @@
 import { useEffect, useState } from "react";
 import Window from "../desktop/Window.jsx";
+import ApiAgent from "../desktop/apps/ApiAgent.jsx";
+import LlmAgent from "../desktop/apps/LlmAgent.jsx";
+import MathAgent from "../desktop/apps/MathAgent.jsx";
+import EchoAgent from "../desktop/apps/EchoAgent.jsx";
+import GuardianAgent from "../desktop/apps/GuardianAgent.jsx";
+import ExplorerAgent from "../desktop/apps/ExplorerAgent.jsx";
+import createId from "../desktop/createId.js";
 
 const APPS = {
-  api: { title: "API Agent", icon: "API" },
-  llm: { title: "LLM Agent", icon: "LLM" },
-  math: { title: "Math Agent", icon: "MATH" },
-  echo: { title: "Echo Agent", icon: "ECHO" },
-  guardian: { title: "Guardian Agent", icon: "GUARD" },
-  explorer: { title: "Prism Explorer", icon: "FS" },
+  api: { title: "API Agent", icon: "API", component: ApiAgent, size: { width: 420, height: 360 } },
+  llm: { title: "LLM Agent", icon: "LLM", component: LlmAgent, size: { width: 460, height: 440 } },
+  math: { title: "Math Agent", icon: "MATH", component: MathAgent, size: { width: 520, height: 480 } },
+  echo: { title: "Echo Agent", icon: "ECHO", component: EchoAgent, size: { width: 360, height: 320 } },
+  guardian: { title: "Guardian Agent", icon: "GUARD", component: GuardianAgent, size: { width: 380, height: 340 } },
+  explorer: { title: "Prism Explorer", icon: "FS", component: ExplorerAgent, size: { width: 460, height: 360 } },
 };
 
 function defaultWin(key) {
+  const layout = APPS[key];
+  const size = layout?.size || {};
   return {
-    id: crypto.randomUUID(),
+    id: createId(),
     app: key,
-    title: APPS[key].title,
+    title: layout?.title || key,
     x: 80,
     y: 80,
-    w: 400,
-    h: 300,
+    w: size.width || 400,
+    h: size.height || 320,
     minimized: false,
     maximized: false,
   };
@@ -111,21 +120,9 @@ export default function Desktop() {
 }
 
 function renderApp(key) {
-  switch (key) {
-    case "api":
-      return <pre className="p-2">/prism/logs/api tail</pre>;
-    case "llm":
-      return <div className="p-2">LLM chat placeholder</div>;
-    case "math":
-      return <div className="p-2">Graph canvas placeholder</div>;
-    case "echo":
-      return <div className="p-2">Echo agent window</div>;
-    case "guardian":
-      return <div className="p-2">Contradictions list</div>;
-    case "explorer":
-      return <div className="p-2">/prism file explorer</div>;
-    default:
-      return null;
-  }
+  const entry = APPS[key];
+  if (!entry || !entry.component) return null;
+  const Component = entry.component;
+  return <Component />;
 }
 
