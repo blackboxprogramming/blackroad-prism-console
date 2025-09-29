@@ -8,6 +8,8 @@ authors = [{ name = "Blackroad", email = "eng@blackroadinc.us" }]
 dependencies = ["typer"]
 
 [project.scripts]
+blackroad = "cli.blackroad:cli"
+blackroad-agent = "agent.daemon:main"
 brc = "cli.console:main"
 
 [tool.pytest.ini_options]
