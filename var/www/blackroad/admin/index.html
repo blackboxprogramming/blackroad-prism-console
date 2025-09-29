@@ -25,18 +25,74 @@ button { background:var(--accent); color:#fff; border:none; padding:0.5rem 1rem;
     <input id="rollbackId" placeholder="Release ID" />
     <button onclick="rollback()">Rollback</button>
   </div>
+  <form id="runForm" onsubmit="return false;" style="margin-top:1rem;">
+    <input type="text" id="cmd" placeholder="Enter command (e.g. nvidia-smi)" style="width:280px;" />
+    <button id="runBtn">Run (stream)</button>
+    <button id="stopBtn" type="button">Stop</button>
+  </form>
   <table id="jobs"></table>
   <pre id="log"></pre>
 </div>
 <script>
 let token='';
+let ws=null;
+let currentJobId=null;
+const cmdEl=document.getElementById('cmd');
+const logEl=document.getElementById('log');
+const runBtn=document.getElementById('runBtn');
+const stopBtn=document.getElementById('stopBtn');
+
+function append(line){ logEl.textContent+=line+'\n'; logEl.scrollTop=logEl.scrollHeight; }
+
 async function login(){ token=document.getElementById('token').value; document.getElementById('login').style.display='none'; document.getElementById('app').style.display='block'; load(); }
 async function load(){ const h=await fetch('/api/health').then(r=>r.json()); document.getElementById('health').innerText='API OK: '+h.ok; refreshJobs(); }
-async function refreshJobs(){ const j=await fetch('/api/jobs').then(r=>r.json()); const tbl=document.getElementById('jobs'); tbl.innerHTML='<tr><th>ID</th><th>Type</th><th>Status</th></tr>'; j.forEach(job=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${job.id}</td><td>${job.type}</td><td>${job.status}</td>`; tr.onclick=()=>watch(job.id); tbl.appendChild(tr); }); }
-function watch(id){ const log=document.getElementById('log'); log.textContent=''; const es=new EventSource(`/api/jobs/${id}/log`); es.onmessage=e=>{log.textContent+=e.data+'\n'; log.scrollTop=log.scrollHeight;}; es.addEventListener('end',()=>es.close()); }
+async function refreshJobs(){ const tbl=document.getElementById('jobs'); try { const j=await fetch('/api/jobs').then(r=>r.json()); tbl.innerHTML='<tr><th>ID</th><th>Type</th><th>Status</th></tr>'; j.forEach(job=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${job.id}</td><td>${job.type}</td><td>${job.status}</td>`; tr.onclick=()=>watch(job.id); tbl.appendChild(tr); }); } catch(e){ tbl.innerHTML='<tr><td>jobs unavailable</td></tr>'; }}
+function watch(id){ logEl.textContent=''; const es=new EventSource(`/api/jobs/${id}/log`); es.onmessage=e=>{logEl.textContent+=e.data+'\n'; logEl.scrollTop=logEl.scrollHeight;}; es.addEventListener('end',()=>es.close()); currentJobId=id; }
 async function dryRun(){ await fetch('/api/deploy/plan',{method:'POST',headers:{'X-Internal-Token':token}}).then(r=>r.json()).then(alert); }
 async function deploy(){ await fetch('/api/deploy/execute',{method:'POST',headers:{'Content-Type':'application/json','X-Internal-Token':token},body:JSON.stringify({})}).then(r=>r.json()).then(()=>refreshJobs()); }
 async function rollback(){ const id=document.getElementById('rollbackId').value; await fetch('/api/rollback/'+id,{method:'POST',headers:{'X-Internal-Token':token}}).then(r=>r.json()).then(()=>refreshJobs()); }
+
+runBtn.addEventListener('click',()=>{
+  if(ws){ ws.close(); ws=null; }
+  logEl.textContent='';
+  currentJobId=null;
+  const cmd=(cmdEl.value||'').trim()||'nvidia-smi';
+  const proto=location.protocol==='https:'?'wss':'ws';
+  ws=new WebSocket(`${proto}://${location.host}/ws/run`);
+  ws.onopen=()=>ws.send(cmd);
+  ws.onmessage=(ev)=>{
+    const data=String(ev.data||'');
+    if(data.startsWith('[[BLACKROAD_JOB_ID:')){
+      const match=data.match(/\[\[BLACKROAD_JOB_ID:(\d+)\]\]/);
+      if(match){ currentJobId=match[1]; append(`--- job ${currentJobId} ---`); }
+    }else if(data.startsWith('[[BLACKROAD_PID:')){
+      const match=data.match(/\[\[BLACKROAD_PID:(\d+)\]\]/);
+      append(match?`pid: ${match[1]}`:data);
+    }else if(data.startsWith('[[BLACKROAD_LOG:')){
+      const match=data.match(/\[\[BLACKROAD_LOG:(.+)\]\]/);
+      append(match?`log file: ${match[1]}`:data);
+    }else if(data==='[[BLACKROAD_DONE]]'){
+      append('--- done ---');
+      ws.close();
+      ws=null;
+      refreshJobs();
+    }else{
+      append(data);
+    }
+  };
+  ws.onerror=()=>append('[error]');
+  ws.onclose=()=>{ ws=null; };
+});
+
+stopBtn.addEventListener('click',async()=>{
+  if(!currentJobId){ append('[no job to stop]'); return; }
+  await fetch(`/jobs/${currentJobId}/kill`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({signal:'TERM'})});
+  append('--- sent SIGTERM ---');
+  setTimeout(async()=>{
+    await fetch(`/jobs/${currentJobId}/kill`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({signal:'KILL'})});
+    append('--- sent SIGKILL ---');
+  },5000);
+});
 </script>
 </body>
 </html>
