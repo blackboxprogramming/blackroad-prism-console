@@ -1,0 +1,25 @@
+id: MULTI_PROVIDER_SINGLE_ROLE
+mode: enforce
+severity: medium
+block_on_error: true
+metadata:
+  product: Mirror Guard
+  description: Block low-privilege users from fanning out mirrors across providers.
+  block_message: "Blocked by policy MULTI_PROVIDER_SINGLE_ROLE. Reason: low-role user touched multiple providers in 5m window."
+expr: action in ["mirror", "pr.create"] && user_role in ["viewer", "contributor"] && distinct_over("resource_provider", "5m") >= 2
+tests:
+  - name: viewer_multi_provider_blocks
+    fixture: multi/multi_provider_window.series.json
+    want: true
+  - name: contributor_single_provider_allows
+    window: "5m"
+    series:
+      - { action: "mirror", resource_provider: "github", user_role: "contributor" }
+      - { action: "mirror", resource_provider: "github", user_role: "contributor" }
+    want: false
+  - name: admin_multi_provider_allows
+    window: "5m"
+    series:
+      - { action: "mirror", resource_provider: "github", user_role: "admin" }
+      - { action: "mirror", resource_provider: "gitlab", user_role: "admin" }
+    want: false

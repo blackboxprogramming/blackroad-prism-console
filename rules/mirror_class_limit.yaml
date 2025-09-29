@@ -1,0 +1,22 @@
+id: MIRROR_CLASS_LIMIT
+mode: enforce
+severity: high
+block_on_error: true
+metadata:
+  runbook: docs/runbooks/mirror_class_limit.md
+  summary: Block mirrors on restricted or secret repositories.
+  block_message: "Blocked by policy MIRROR_CLASS_LIMIT. Reason: repo classified '{resource_class}'. See runbook for exception steps."
+expr: action == "mirror" && (resource_class == "restricted" || resource_class == "secret")
+tests:
+  - name: deny_secret
+    input: { action: "mirror", resource_class: "secret", repo: "api/core" }
+    want: true
+  - name: deny_restricted
+    input: { action: "mirror", resource_class: "restricted", repo: "ml/labs" }
+    want: true
+  - name: allow_internal
+    input: { action: "mirror", resource_class: "internal" }
+    want: false
+  - name: allow_other_action
+    input: { action: "deploy", resource_class: "secret" }
+    want: false

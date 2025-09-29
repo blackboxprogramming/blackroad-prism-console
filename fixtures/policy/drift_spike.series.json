@@ -1,0 +1,19 @@
+{
+  "window": "30m",
+  "series": [
+    { "outcome": "deny", "policy_version": "2024.03.01" },
+    { "outcome": "deny", "policy_version": "2024.03.01" },
+    { "outcome": "deny", "policy_version": "2024.03.01" },
+    { "outcome": "deny", "policy_version": "2024.03.01" },
+    { "outcome": "deny", "policy_version": "2024.03.01" },
+    { "outcome": "deny", "policy_version": "2024.03.01" },
+    { "outcome": "allow" },
+    { "outcome": "allow" },
+    { "outcome": "allow" },
+    { "outcome": "allow" }
+  ],
+  "metadata": {
+    "last_policy_change": "2024-03-01T11:40:00Z",
+    "diff_url": "https://prism/ruleset/changeset/784"
+  }
+}

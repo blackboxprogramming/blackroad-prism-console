@@ -1,0 +1,8 @@
+{
+  "window": "15m",
+  "series": [
+    { "deny_reason": "consent_required" },
+    { "deny_reason": "insufficient_role" },
+    {}, {}, {}, {}, {}, {}, {}, {}
+  ]
+}

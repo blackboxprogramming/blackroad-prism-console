@@ -1,0 +1,38 @@
+id: POLICY_DRIFT_REGRESSION
+mode: observe
+severity: medium
+metadata:
+  product: Mirror Guard
+  description: Compare deny rate to baseline after recent policy change.
+expr: rate(outcome == "deny", "30m") > baseline_rate("deny") * 2 && last_policy_change_within("1h") == True
+tests:
+  - name: baseline_ok
+    window: "30m"
+    baseline: { deny: 0.25 }
+    metadata:
+      last_policy_change: "2024-03-01T06:00:00Z"
+    now: "2024-03-01T10:00:00Z"
+    series:
+      - { outcome: "deny" }
+      - { outcome: "allow" }
+      - repeat: 8
+    want: false
+  - name: spike_after_change
+    fixture: policy/drift_spike.series.json
+    baseline: { deny: 0.25 }
+    want: true
+    metadata:
+      last_policy_change: "2024-03-01T11:40:00Z"
+      diff_url: "https://prism/ruleset/changeset/784"
+    now: "2024-03-01T12:00:00Z"
+  - name: spike_without_change
+    window: "30m"
+    baseline: { deny: 0.25 }
+    metadata:
+      last_policy_change: "2024-02-20T09:00:00Z"
+    now: "2024-03-01T12:00:00Z"
+    series:
+      - repeat: 6
+        each: { outcome: "deny" }
+      - repeat: 4
+    want: false

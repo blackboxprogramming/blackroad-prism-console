@@ -1,0 +1,27 @@
+id: CONSENT_FRICTION_SPIKE
+mode: observe
+severity: medium
+metadata:
+  description: Detect consent-required deny spikes to reduce operator load.
+expr: rate(deny_reason == "consent_required", "15m") > 0.15
+tests:
+  - name: low_rate_ok
+    window: "15m"
+    series:
+      - { deny_reason: "consent_required" }
+      - { deny_reason: "insufficient_role" }
+      - repeat: 8
+    want: false
+  - name: spike_trips
+    window: "15m"
+    series:
+      - repeat: 2
+        each: { deny_reason: "consent_required" }
+      - repeat: 8
+    want: true
+  - name: missing_field_no_panic
+    window: "15m"
+    series:
+      - { outcome: "deny" }
+      - repeat: 9
+    want: false
