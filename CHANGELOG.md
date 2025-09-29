@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.7.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.6.0...v1.7.0) (2025-09-29)
+
+
+### Features
+
+* add interactive agent desktop apps ([#1710](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1710)) ([631168d](https://github.com/blackboxprogramming/blackroad-prism-console/commit/631168db6b7cb0ddb48565ff540017d3b9b9103c))
+* add iterative auto fixes to PR autopilot ([#1649](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1649)) ([052c5ea](https://github.com/blackboxprogramming/blackroad-prism-console/commit/052c5eaa900f2bda7f4fde3cc9594f1059667586))
+* add iterative auto fixes to PR autopilot ([#1650](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1650)) ([cc71e75](https://github.com/blackboxprogramming/blackroad-prism-console/commit/cc71e75e881d140320d7bd42cc005b960f1d0f48))
+* add mining leaderboard starter kit ([#1678](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1678)) ([2f004af](https://github.com/blackboxprogramming/blackroad-prism-console/commit/2f004af34487182854eebf49a2a19ce05e5d4f1f))
+* **devx:** add preview env automation and tooling ([#1595](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1595)) ([d713948](https://github.com/blackboxprogramming/blackroad-prism-console/commit/d713948eef45931d9e3834ce733dd8f1ddb945cc))
+* **devx:** add preview env automation and tooling ([#1596](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1596)) ([73d462b](https://github.com/blackboxprogramming/blackroad-prism-console/commit/73d462b86038ddbe1c8577c3bb54dd954d64d82c))
+* expose stubbed connector tools ([#1556](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1556)) ([c659023](https://github.com/blackboxprogramming/blackroad-prism-console/commit/c65902379b2a4fadaccf97622ad0d403dc91178b))
+* **security:** add Tor sidecar for CLN, gitleaks pre-commit+CI, CODEOWNERS, branch protection docs ([#1643](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1643)) ([d7f22eb](https://github.com/blackboxprogramming/blackroad-prism-console/commit/d7f22eb34826ba901aad3a2f86587f03a6069f68))
+* seed Lucidia Auto-Box preview ([#1560](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1560)) ([aae02d2](https://github.com/blackboxprogramming/blackroad-prism-console/commit/aae02d2f125325c049b6f51012e0182a0dd7948f))
+* seed lucidia auto-box scaffold ([#1564](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1564)) ([f6608f1](https://github.com/blackboxprogramming/blackroad-prism-console/commit/f6608f1288b0688ed10b2da278f370cdadc96f3d))
+
 ## [1.6.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.5.0...v1.6.0) (2025-09-23)
 
 
