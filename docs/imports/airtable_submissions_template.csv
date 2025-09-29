@@ -1,0 +1,2 @@
+job_id,status,resume_pdf_url,cover_note_url,qna_json,date_applied,follow_up_date,notes
+AI Agent Orchestration Lead,Drafted,https://drive.google.com/resume.pdf,https://drive.google.com/cover-note.pdf,"{\"questions\": [], \"answers\": []}",,
