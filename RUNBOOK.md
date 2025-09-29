@@ -62,6 +62,64 @@ To rotate tokens, regenerate the PAT used for `gh` and update repository secrets
 - Run `ops/health/check.sh`.
 - Inspect `docker compose ps`.
 
+## Nginx Runtime Checks
+
+Use the following steps to create real log activity, reload Nginx safely, and
+validate response compression when investigating runtime behaviour.
+
+1. **Validate configuration and reload the service**
+   ```bash
+   sudo nginx -t && sudo systemctl reload nginx
+   journalctl -u nginx -n 50 --no-pager
+   ```
+   For Docker deployments:
+   ```bash
+   docker compose exec nginx nginx -t && docker compose exec nginx nginx -s reload
+   docker compose logs -n 50 nginx
+   ```
+2. **Verify `Content-Encoding` headers from the running service**
+   ```bash
+   curl -sI --http2 -H 'Accept-Encoding: br,gzip' https://YOUR.DOMAIN \
+     | awk 'BEGIN{IGNORECASE=1}/^Content-Encoding:/{print}'
+   ```
+   Sample multiple paths to confirm the negotiated encoding:
+   ```bash
+   for p in / /index.html /assets/app.js /assets/app.css; do
+     curl -sI -H 'Accept-Encoding: br,gzip' "https://YOUR.DOMAIN$p" |
+       awk -v p="$p" 'BEGIN{IGNORECASE=1}/^Content-Encoding:/{print p,$2}'
+   done | sort | uniq -c
+   ```
+3. **Count gzip/brotli usage from access logs**
+   Add the `Content-Encoding` field to your access log format once:
+   ```nginx
+   log_format main_ce '$remote_addr - $remote_user [$time_local] "$request" '
+                     '$status $body_bytes_sent "$http_referer" "$http_user_agent" '
+                     '$sent_http_content_encoding';
+   access_log /var/log/nginx/access.log main_ce;
+   ```
+   Reload, generate traffic, then tally encodings:
+   ```bash
+   awk '{
+     enc=$NF; if(enc=="gzip")gz++; else if(enc=="br")br++; else if(enc=="-")none++;
+   } END {printf "br=%d gzip=%d none=%d\n", br, gz, none}' /var/log/nginx/access.log
+   ```
+   For Docker logs emitted to stdout:
+   ```bash
+   docker compose logs nginx | awk '{
+     enc=$NF; if(enc=="gzip")gz++; else if(enc=="br")br++; else if(enc=="-")none++;
+   } END {printf "br=%d gzip=%d none=%d\n", br, gz, none}'
+   ```
+4. **List active listeners and compare with configuration**
+   ```bash
+   ss -ltnp | awk '$1=="LISTEN" && $NF ~ /nginx/{print $4}' | sort -u
+   sudo nginx -T | awk '/^\s*listen\b/{print $2}' | sed 's/;//' | sort -u
+   ```
+5. **Perform a quick TLS sanity check**
+   ```bash
+   openssl s_client -connect YOUR.DOMAIN:443 -servername YOUR.DOMAIN -brief </dev/null | sed -n '1,25p'
+   sudo certbot renew --dry-run
+   ```
+
 ## DNS and Tor
 - Deploy NSD with `infra/dns/deploy.sh` on ns1/ns2.
 - Tor service uses `/infra/tor/torrc`; start with `tor -f torrc`.
