@@ -36,6 +36,7 @@ function MicTranscriptionCard(){
   const chunksRef = useRef([])
   const wsRef = useRef(null)
   const logViewRef = useRef(null)
+  const isRecordingRef = useRef(false)
   const [log, setLog] = useState('Ready.')
 
   const appendLog = useCallback((line) => {
@@ -54,6 +55,7 @@ function MicTranscriptionCard(){
         mediaRecorderRef.current.stop()
       }
       mediaRecorderRef.current = null
+      isRecordingRef.current = false
       if(wsRef.current){
         wsRef.current.close()
         wsRef.current = null
@@ -61,9 +63,8 @@ function MicTranscriptionCard(){
     }
   }, [])
 
-  const processRecording = useCallback(async () => {
-    const chunks = chunksRef.current
-    if(!chunks.length){
+  const processRecording = useCallback(async (chunks) => {
+    if(!chunks?.length){
       appendLog('No audio captured.')
       return
     }
@@ -116,8 +117,6 @@ function MicTranscriptionCard(){
       }
     } catch (err) {
       setLog(`Error: ${err?.message || err}`)
-    } finally {
-      chunksRef.current = []
     }
   }, [appendLog])
 
@@ -132,11 +131,12 @@ function MicTranscriptionCard(){
       return
     }
 
-    if(mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording'){
+    if(isRecordingRef.current || (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording')){
       appendLog('Already recording…')
       return
     }
 
+    isRecordingRef.current = true
     chunksRef.current = []
 
     try {
@@ -153,12 +153,23 @@ function MicTranscriptionCard(){
       recorder.onstop = () => {
         stream.getTracks().forEach(track => track.stop())
         mediaRecorderRef.current = null
-        processRecording()
+        const recordedChunks = chunksRef.current.slice()
+        chunksRef.current = []
+        isRecordingRef.current = false
+        processRecording(recordedChunks)
+      }
+
+      recorder.onerror = (event) => {
+        stream.getTracks().forEach(track => track.stop())
+        mediaRecorderRef.current = null
+        isRecordingRef.current = false
+        setLog(`Recorder error: ${event?.error?.message || event?.name || 'Unknown error'}`)
       }
 
       recorder.start()
       setLog('Recording…')
     } catch (err) {
+      isRecordingRef.current = false
       setLog(`Mic access failed: ${err?.message || err}`)
     }
   }
