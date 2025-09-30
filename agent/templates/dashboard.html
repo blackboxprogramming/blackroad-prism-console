@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>BlackRoad Voice Console</title>
+    <style>
+      body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#0b0f1a; color:#e8f0ff; margin:0; padding:24px; }
+      .card { background:#111a2c; border:1px solid #1f2b44; border-radius:12px; padding:16px; margin-bottom:16px; box-shadow:0 12px 30px rgba(0,0,0,.35); }
+      .title { font-weight:700; margin-bottom:10px; letter-spacing:.04em; text-transform:uppercase; color:#7dd3fc; }
+      button { cursor:pointer; border-radius:8px; border:1px solid #243652; background:#1a2740; color:#f8fafc; padding:6px 12px; }
+      button:hover { background:#223251; }
+      select, input[type="file"] { background:#0d1528; color:#e8f0ff; border:1px solid #23314a; border-radius:8px; padding:6px; }
+      pre { margin:0; }
+    </style>
+  </head>
+  <body>
+    <!-- Existing Whisper / Models UI would render above -->
+
+    <div class="card">
+      <div class="title">Voice Chat (Local)</div>
+
+      <!-- Step A: record or pick audio -->
+      <div style="margin-bottom:8px;">
+        <input type="file" id="vcFile" accept="audio/*" />
+        <button id="vcRec">Record</button>
+        <button id="vcStop">Stop</button>
+      </div>
+
+      <!-- Step B: transcribe (GPU) -->
+      <div style="margin-bottom:8px;">
+        <button id="vcTranscribe">Transcribe on Jetson (GPU)</button>
+      </div>
+
+      <!-- Step C: LLM reply (stream) -->
+      <div style="margin-bottom:8px;">
+        <select id="vcModel" style="width:60%"></select>
+        <button id="vcReply">Get Reply (stream)</button>
+        <button id="vcSpeak">Speak Reply</button>
+      </div>
+
+      <!-- Output panes -->
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div>
+          <div class="title" style="margin-bottom:4px;">Transcript</div>
+          <pre id="vcTranscript" style="background:#000;color:#0f0;padding:1em;height:160px;overflow:auto;border-radius:6px;"></pre>
+        </div>
+        <div>
+          <div class="title" style="margin-bottom:4px;">LLM Reply</div>
+          <pre id="vcLLM" style="background:#000;color:#0f0;padding:1em;height:160px;overflow:auto;border-radius:6px;"></pre>
+          <audio id="vcAudio" controls style="width:100%; margin-top:6px;"></audio>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let vcMedia, vcRecorder, vcChunks=[], vcToken=null, vcReplyText="";
+      const vcFile = document.getElementById('vcFile');
+      const vcRec = document.getElementById('vcRec');
+      const vcStop = document.getElementById('vcStop');
+      const vcTranscribe = document.getElementById('vcTranscribe');
+      const vcModel = document.getElementById('vcModel');
+      const vcReply = document.getElementById('vcReply');
+      const vcSpeak = document.getElementById('vcSpeak');
+      const vcTranscript = document.getElementById('vcTranscript');
+      const vcLLM = document.getElementById('vcLLM');
+      const vcAudio = document.getElementById('vcAudio');
+
+      async function loadVCModels(){
+        try {
+          const r = await fetch('/models');
+          const j = await r.json();
+          vcModel.innerHTML = '';
+          (j.models||[]).forEach(m=>{
+            const o=document.createElement('option');
+            o.value=m.path || m;
+            o.text=m.name || m;
+            vcModel.appendChild(o);
+          });
+        } catch (err) {
+          console.warn('failed to load models', err);
+        }
+      }
+      document.addEventListener('DOMContentLoaded', loadVCModels);
+
+      vcRec.onclick = async ()=>{
+        vcChunks=[]; vcTranscript.textContent=""; vcLLM.textContent=""; vcReplyText=""; vcAudio.src="";
+        vcMedia = await navigator.mediaDevices.getUserMedia({audio:true});
+        vcRecorder = new MediaRecorder(vcMedia, {mimeType:'audio/webm'});
+        vcRecorder.ondataavailable = e => { if(e.data.size>0) vcChunks.push(e.data); };
+        vcRecorder.start();
+      };
+      vcStop.onclick = ()=>{
+        if(vcRecorder && vcRecorder.state==="recording"){
+          vcRecorder.stop();
+          vcMedia.getTracks().forEach(t=>t.stop());
+        }
+      };
+
+      async function uploadForToken(blob){
+        const fd = new FormData();
+        fd.append('file', blob, 'voice.webm');
+        const up = await fetch('/transcribe/upload',{method:'POST', body:fd});
+        const j = await up.json();
+        return j.token;
+      }
+
+      vcTranscribe.onclick = async ()=>{
+        vcTranscript.textContent = "";
+        let blob = null;
+        if(vcChunks.length){ blob = new Blob(vcChunks, {type:'audio/webm'}); }
+        else if(vcFile.files?.[0]) { blob = vcFile.files[0]; }
+        else { vcTranscript.textContent="No audio (record or choose a file)."; return; }
+
+        vcToken = await uploadForToken(blob);
+        const proto = location.protocol==='https:'?'wss':'ws';
+        const ws = new WebSocket(`${proto}://${location.host}/ws/transcribe/run_gpu`);
+        ws.onopen = ()=> ws.send(JSON.stringify({ token: vcToken, lang: 'en', model: 'base' }));
+        ws.onmessage = ev=>{
+          if(ev.data==='[[BLACKROAD_WHISPER_DONE]]'){ ws.close(); return; }
+          vcTranscript.textContent += ev.data + '\n';
+          vcTranscript.scrollTop = vcTranscript.scrollHeight;
+        };
+      };
+
+      vcReply.onclick = ()=>{
+        vcLLM.textContent = ""; vcReplyText="";
+        const model = vcModel.value;
+        const prompt = "User said:\n" + (vcTranscript.textContent.trim()||"(no transcript)") + "\n\nReply clearly and concisely:";
+        const proto = location.protocol==='https:'?'wss':'ws';
+        const ws = new WebSocket(`${proto}://${location.host}/ws/model`);
+        ws.onopen = ()=> ws.send(JSON.stringify({ model, prompt, n:256 }));
+        ws.onmessage = ev=>{
+          if(ev.data==='[[BLACKROAD_MODEL_DONE]]'){ ws.close(); return; }
+          vcLLM.textContent += ev.data;
+          vcReplyText += ev.data;
+          vcLLM.scrollTop = vcLLM.scrollHeight;
+        };
+      };
+
+      vcSpeak.onclick = async ()=>{
+        if(!vcReplyText.trim()){ vcLLM.textContent += "\n[no reply text]"; return; }
+        const r = await fetch('/tts/say', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ text: vcReplyText })
+        });
+        if(!r.ok){ vcLLM.textContent += "\n[TTS error]"; return; }
+        const blob = await r.blob();
+        vcAudio.src = URL.createObjectURL(blob);
+        vcAudio.play();
+      };
+    </script>
+  </body>
+</html>

@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import time
 from datetime import datetime
 from pathlib import Path
@@ -13,6 +14,7 @@ from flask import (
     jsonify,
     make_response,
     request,
+    send_file,
     send_from_directory,
     stream_with_context,
 )
@@ -22,6 +24,20 @@ load_dotenv()
 
 APP_ROOT = Path(__file__).resolve().parent
 PROMPTS_DIR = APP_ROOT / "prompts"
+
+PROJECT_ROOT = APP_ROOT.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.append(str(PROJECT_ROOT))
+
+try:  # Local helper modules (optional during unit tests)
+    from agent import tts  # type: ignore
+except Exception:  # pragma: no cover - optional dependency
+    tts = None  # type: ignore
+
+try:  # noqa: SIM105 - separate handling keeps errors explicit
+    from agent import models  # type: ignore
+except Exception:  # pragma: no cover - optional dependency
+    models = None  # type: ignore
 
 # ---- Config ----
 LLM_BACKEND = os.getenv("LLM_BACKEND", "ollama").lower()  # "ollama" | "llamacpp"
@@ -189,6 +205,64 @@ def api_datasets_upload():
     s3 = boto3.client("s3")
     s3.upload_fileobj(file.stream, bucket, key)
     return jsonify({"ok": True, "key": key})
+
+
+@app.post("/tts/say")
+def tts_say():
+    """Render text to speech using local engines."""
+
+    if tts is None:
+        return jsonify({"error": "TTS module unavailable"}), 500
+
+    payload = request.get_json(silent=True) or {}
+    text = (payload.get("text") or "").strip()
+    voice = payload.get("voice")
+    if not text:
+        return jsonify({"error": "text required"}), 400
+
+    try:
+        wav_path = tts.say_to_wav(text, voice=voice)
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"error": str(exc)}), 500
+
+    return send_file(wav_path, mimetype="audio/wav", download_name="blackroad_tts.wav")
+
+
+@app.post("/voice/reply")
+def voice_reply():
+    """Generate an LLM reply and synthesize it to audio."""
+
+    if models is None or not hasattr(models, "run_llama"):
+        return jsonify({"error": "llama runner unavailable"}), 500
+    if tts is None:
+        return jsonify({"error": "TTS module unavailable"}), 500
+
+    payload = request.get_json(silent=True) or {}
+    model_path = payload.get("model")
+    prompt = (payload.get("prompt") or "").strip()
+    try:
+        n_predict = int(payload.get("n", 128))
+    except (TypeError, ValueError):
+        n_predict = 128
+
+    if not model_path or not prompt:
+        return jsonify({"error": "model and prompt required"}), 400
+
+    try:
+        result = models.run_llama(model_path, prompt, n_predict=n_predict)
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"error": str(exc)}), 500
+
+    text = result.get("result") if isinstance(result, dict) else None
+    if not text:
+        return jsonify({"error": "llama runner returned no text"}), 500
+
+    try:
+        wav_path = tts.say_to_wav(text)
+    except Exception as exc:  # noqa: BLE001
+        return jsonify({"error": str(exc)}), 500
+
+    return send_file(wav_path, mimetype="audio/wav", download_name="blackroad_reply.wav")
 
 
 @app.get("/api/llm/stream")
