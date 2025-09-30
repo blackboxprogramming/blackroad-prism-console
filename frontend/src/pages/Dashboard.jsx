@@ -4,6 +4,7 @@ import Timeline from '../components/Timeline.jsx'
 import Tasks from '../components/Tasks.jsx'
 import Commits from '../components/Commits.jsx'
 import AgentStack from '../components/AgentStack.jsx'
+import WhisperCard from '../components/WhisperCard.jsx'
 
 export default function Dashboard({ tab, setTab, timeline, tasks, commits, onAction, stream, setStream, system, wallet, contradictions, notes, setNotes }){
   return (
@@ -25,6 +26,7 @@ export default function Dashboard({ tab, setTab, timeline, tasks, commits, onAct
       </section>
       <section className="col-span-4 flex flex-col gap-4">
         <AgentStack stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={setNotes} />
+        <WhisperCard />
       </section>
     </>
   )
