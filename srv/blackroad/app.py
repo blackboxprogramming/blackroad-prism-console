@@ -211,6 +211,10 @@ def api_datasets_upload():
 def tts_say():
     """Render text to speech using local engines."""
 
+    err = _auth_guard()
+    if err:
+        return err
+
     if tts is None:
         return jsonify({"error": "TTS module unavailable"}), 500
 
@@ -231,6 +235,10 @@ def tts_say():
 @app.post("/voice/reply")
 def voice_reply():
     """Generate an LLM reply and synthesize it to audio."""
+
+    err = _auth_guard()
+    if err:
+        return err
 
     if models is None or not hasattr(models, "run_llama"):
         return jsonify({"error": "llama runner unavailable"}), 500
