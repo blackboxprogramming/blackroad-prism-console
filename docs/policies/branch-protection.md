@@ -22,3 +22,16 @@ Org-level:
 - Enforce **2FA** for all members.
 - Use SSO/SCIM if available.
 - Rotate team permissions quarterly.
+
+## When status checks fail
+
+- **Do not close and reopen PRs** just to retrigger automation. Leave the PR
+  open, investigate the failing job, and push a fix.
+- **Skip the @codex spam.** Posting repeated "please merge" comments in Linear
+  or on the PR does not bypass branch protection. Resolve the underlying CI
+  failure first.
+- **Reproduce locally.** Run the same commands that failed in CI (`npm run
+  build`, `npm run lint`, `npm run typecheck`, `node scripts/health-check.js`,
+  etc.) until they pass.
+- **Communicate status changes.** Once the fix is ready and checks are green,
+  update Linear or Slack with the resolution and request a review if needed.
