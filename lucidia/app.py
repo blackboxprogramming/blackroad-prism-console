@@ -15,6 +15,14 @@ from flask import Flask, jsonify, render_template, request
 app = Flask(__name__)
 
 
+_WORKSPACE_ENV = os.environ.get("LUCIDIA_WORKSPACE")
+WORKSPACE_ROOT = (
+    Path(_WORKSPACE_ENV).resolve()
+    if _WORKSPACE_ENV
+    else Path(__file__).resolve().parent.parent
+)
+
+
 # --- safety helpers -------------------------------------------------------
 
 # Limit the builtins available to executed user code.  Only a few
@@ -26,6 +34,21 @@ SAFE_BUILTINS = {"print": print, "abs": abs, "round": round, "pow": pow}
 
 class CodeValidationError(ValueError):
     """Raised when submitted code contains unsafe operations."""
+
+
+def _path_contains_symlink(path: Path, root: Path) -> bool:
+    """Check whether ``path`` traverses any symbolic links beneath ``root``."""
+
+    try:
+        relative = path.relative_to(root)
+    except ValueError:
+        return True
+    current = root
+    for part in relative.parts:
+        current = current / part
+        if current.is_symlink():
+            return True
+    return False
 
 
 def _validate(code: str) -> None:
@@ -132,20 +155,38 @@ def install_package():
 def git_clean():
     """Reset and remove untracked files from a git repository."""
     data = request.get_json(silent=True) or {}
-    repo_path = Path(data.get("path", "."))
-    if not repo_path.is_dir():
+    raw_path = data.get("path")
+    repo_path = Path(raw_path) if raw_path else WORKSPACE_ROOT
+    if not repo_path.is_absolute():
+        repo_path = WORKSPACE_ROOT / repo_path
+    try:
+        resolved_repo = repo_path.resolve(strict=True)
+    except (OSError, RuntimeError):  # noqa: PERF203 - need broad resolution errors
         return jsonify({"error": "invalid path"}), 400
-    if not (repo_path / ".git").exists():
+
+    try:
+        resolved_repo.relative_to(WORKSPACE_ROOT)
+    except ValueError:
+        return jsonify({"error": "path not allowed"}), 400
+
+    if _path_contains_symlink(resolved_repo, WORKSPACE_ROOT):
+        return jsonify({"error": "path not allowed"}), 400
+
+    if not resolved_repo.is_dir():
+        return jsonify({"error": "invalid path"}), 400
+
+    git_dir = resolved_repo / ".git"
+    if not git_dir.is_dir():
         return jsonify({"error": "not a git repo"}), 400
     reset = subprocess.run(
         ["git", "reset", "--hard"],
-        cwd=repo_path,
+        cwd=resolved_repo,
         capture_output=True,
         text=True,
     )
     clean = subprocess.run(
         ["git", "clean", "-ffdx"],
-        cwd=repo_path,
+        cwd=resolved_repo,
         capture_output=True,
         text=True,
     )
