@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BlackRoad Dashboard</title>
+    <style>
+      body { font-family: sans-serif; margin: 0; background: #0f172a; color: #e2e8f0; }
+      header { padding: 1.5rem 2rem; background: #111827; border-bottom: 1px solid #1f2937; }
+      main { padding: 2rem; display: grid; gap: 1.5rem; }
+      .card { background: #1f2937; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.15); }
+      .title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; }
+      input[type="password"], input[type="text"] { padding: 0.6rem 0.75rem; border-radius: 0.6rem; border: 1px solid #334155; background: #0f172a; color: inherit; }
+      button { margin-left: 0.75rem; padding: 0.55rem 1.2rem; border-radius: 0.6rem; border: none; background: #2563eb; color: white; font-weight: 600; cursor: pointer; }
+      button:hover { background: #1d4ed8; }
+      small { display: block; margin-top: 0.5rem; color: #94a3b8; }
+      pre { background: #0f172a; padding: 1rem; border-radius: 0.75rem; overflow: auto; border: 1px solid #334155; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>BlackRoad Control Plane</h1>
+    </header>
+    <main>
+      <div class="card">
+        <div class="title">Security</div>
+        <input id="brToken" type="password" placeholder="Set or paste BlackRoad token" style="width:60%;" />
+        <button id="saveToken">Save Token</button>
+        <small id="tokHelp">Token applies immediately; keep it safe.</small>
+      </div>
+      <div class="card">
+        <div class="title">Configuration Snapshot</div>
+        <pre id="cfgDump">{}</pre>
+      </div>
+    </main>
+    <script>
+      let BR_TOKEN = localStorage.getItem('BLACKROAD_TOKEN') || "";
+
+      const tokenInput = document.getElementById('brToken');
+      if (BR_TOKEN) {
+        tokenInput.value = BR_TOKEN;
+      }
+
+      function authHeaders(h = {}) {
+        const headers = { ...h };
+        if (BR_TOKEN) {
+          headers['Authorization'] = 'Bearer ' + BR_TOKEN;
+        }
+        return headers;
+      }
+
+      function authedFetch(url, opts = {}) {
+        const options = { ...opts };
+        options.headers = authHeaders(options.headers || {});
+        return fetch(url, options);
+      }
+
+      function wsUrl(path) {
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+        const qp = BR_TOKEN ? `?token=${encodeURIComponent(BR_TOKEN)}` : '';
+        return `${proto}://${location.host}${path}${qp}`;
+      }
+
+      async function refreshConfig() {
+        try {
+          const response = await authedFetch('/settings');
+          if (!response.ok) throw new Error('Request failed');
+          const data = await response.json();
+          document.getElementById('cfgDump').textContent = JSON.stringify(data, null, 2);
+        } catch (err) {
+          document.getElementById('cfgDump').textContent = 'Unable to fetch settings. ' + err.message;
+        }
+      }
+
+      document.getElementById('saveToken').onclick = async () => {
+        const t = (tokenInput.value || '').trim();
+        const res = await authedFetch('/settings/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: t })
+        });
+        if (res.ok) {
+          BR_TOKEN = t;
+          localStorage.setItem('BLACKROAD_TOKEN', BR_TOKEN);
+          alert('Token saved.');
+          await refreshConfig();
+        } else {
+          alert('Failed to save token.');
+        }
+      };
+
+      const API = {
+        loadSettings: () => authedFetch('/settings'),
+        updateJetson: (payload) => authedFetch('/settings/jetson', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload || {})
+        }),
+        testConnection: (payload) => authedFetch('/connect/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload || {})
+        }),
+        installKey: (payload) => authedFetch('/connect/install-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload || {})
+        }),
+        listFlashDevices: () => authedFetch('/flash/devices'),
+        listFlashImages: () => authedFetch('/flash/images'),
+        flashSocket: () => new WebSocket(wsUrl('/ws/flash')),
+        listJobs: () => authedFetch('/jobs'),
+        getJob: (id) => authedFetch(`/jobs/${encodeURIComponent(id)}`),
+        downloadJob: (id) => authedFetch(`/jobs/${encodeURIComponent(id)}/download`),
+        killJob: (id) => authedFetch(`/jobs/${encodeURIComponent(id)}/kill`, { method: 'POST' }),
+        listModels: () => authedFetch('/models'),
+        runModel: (payload) => authedFetch('/models/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload || {})
+        }),
+        modelSocket: () => new WebSocket(wsUrl('/ws/model')),
+        uploadTranscribe: (formData) => authedFetch('/transcribe/upload', {
+          method: 'POST',
+          body: formData
+        }),
+        transcribeSocket: () => new WebSocket(wsUrl('/ws/transcribe/run')),
+        transcribeGpuSocket: () => new WebSocket(wsUrl('/ws/transcribe/run_gpu')),
+        flashRunSocket: () => new WebSocket(wsUrl('/ws/run'))
+      };
+
+      window.BlackRoadAPI = API;
+      refreshConfig();
+    </script>
+  </body>
+</html>
