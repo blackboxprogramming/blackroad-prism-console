@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import ClassVar, List
+from typing import ClassVar
 
 
 @dataclass
@@ -33,11 +33,11 @@ class AutoNovelAgent:
             raise ValueError("Weapons are not allowed in generated games.")
         print(f"Creating a {engine_lower.capitalize()} game without weapons...")
 
-    def list_supported_engines(self) -> List[str]:
+    def list_supported_engines(self) -> list[str]:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
-    def write_novel(self, title: str, chapters: int = 3) -> List[str]:
+    def write_novel(self, title: str, chapters: int = 3) -> list[str]:
         """Create a simple outline for a novel.
 
         Args:
