@@ -22,11 +22,15 @@ def import_module(module_path):
     """Try to import a Python file as a module."""
     name = module_path.stem
     spec = importlib.util.spec_from_file_location(name, module_path)
+    if spec is None or spec.loader is None:
+        return False, "unable to load module spec"
     module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
     try:
         spec.loader.exec_module(module)
         return True, ""
     except Exception as exc:  # pragma: no cover - used for debugging
+        sys.modules.pop(name, None)
         return False, str(exc)
 
 def test_agents():
