@@ -44,7 +44,7 @@ class AutoNovelAgent:
         Returns:
             A short story featuring the theme.
         """
-        clean_theme = theme.strip()
+        clean_theme = " ".join(theme.split())
         if not clean_theme:
             raise ValueError("Theme must be provided.")
         return (
