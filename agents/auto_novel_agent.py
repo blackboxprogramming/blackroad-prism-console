@@ -1,7 +1,7 @@
 """Simple auto novel agent example with game creation abilities."""
 
 from dataclasses import dataclass
-from typing import ClassVar, List
+from typing import ClassVar
 
 
 @dataclass
@@ -31,27 +31,31 @@ class AutoNovelAgent:
             raise ValueError("Weapons are not allowed in generated games.")
         print(f"Creating a {engine_lower.capitalize()} game without weapons...")
 
-    def list_supported_engines(self) -> List[str]:
-        """Return a list of supported game engines."""
-        return sorted(self.SUPPORTED_ENGINES)
+    @classmethod
+    def list_supported_engines(cls) -> list[str]:
+        """Return a sorted list of supported game engines."""
+        return sorted(cls.SUPPORTED_ENGINES)
 
-    def add_supported_engine(self, engine: str) -> None:
-        """Add a new supported engine.
+    @classmethod
+    def add_supported_engine(cls, engine: str) -> None:
+        """Add a new supported engine shared across all agent instances.
 
         Args:
             engine: Name of the engine to add.
 
         Raises:
-            ValueError: If the engine is already supported.
+            ValueError: If the engine name is empty or already supported.
         """
-        engine_lower = engine.lower()
-        if engine_lower in self.SUPPORTED_ENGINES:
+        engine_normalized = engine.strip().lower()
+        if not engine_normalized:
+            raise ValueError("Engine name must be a non-empty string.")
+        if engine_normalized in cls.SUPPORTED_ENGINES:
             raise ValueError("Engine already supported.")
-        self.SUPPORTED_ENGINES.add(engine_lower)
+        cls.SUPPORTED_ENGINES.add(engine_normalized)
 
 
 if __name__ == "__main__":
+    AutoNovelAgent.add_supported_engine("godot")
     agent = AutoNovelAgent()
     agent.deploy()
-    agent.add_supported_engine("godot")
     agent.create_game("godot")
