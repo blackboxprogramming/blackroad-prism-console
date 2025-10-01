@@ -13,6 +13,18 @@ set -euo pipefail
 # project-specific commands and authentication hooks.
 
 BRANCH="${BRANCH:-main}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEPLOY_HELPER="${SCRIPT_DIR}/improved_blackroad_deploy.py"
+
+run_deploy_helper() {
+  if [[ ! -f "$DEPLOY_HELPER" ]]; then
+    return 1
+  fi
+  if ! command -v python3 >/dev/null 2>&1; then
+    return 1
+  fi
+  python3 "$DEPLOY_HELPER" "$@"
+}
 
 # Commit and push changes to GitHub, then trigger downstream syncs.
 push_latest() {
@@ -20,8 +32,8 @@ push_latest() {
   git commit -m "${COMMIT_MSG:-chore: codex sync}" || true
   git push origin "${BRANCH}"
   # Trigger CI/CD pipeline and connector webhooks
-  deploy
   sync_connectors
+  deploy
 }
 
 # Pull from GitHub and deploy to droplet.
@@ -40,14 +52,24 @@ rebase_branch() {
 
 # Placeholder for external connector synchronization.
 sync_connectors() {
+  if run_deploy_helper sync; then
+    return 0
+  fi
   echo "Syncing Salesforce, Airtable, Slack, and Linear..."
+  echo "(codex-sync helper: improved_blackroad_deploy.py not found; placeholder executed)"
   # TODO: implement OAuth flows and webhook listeners
+  return 0
 }
 
 # Placeholder deployment to droplet.
 deploy() {
+  if run_deploy_helper deploy; then
+    return 0
+  fi
   echo "Deploying to droplet..."
+  echo "(codex-sync helper: improved_blackroad_deploy.py not found; placeholder executed)"
   # TODO: ssh into droplet, run migrations, restart services
+  return 0
 }
 
 case "${1:-}" in
