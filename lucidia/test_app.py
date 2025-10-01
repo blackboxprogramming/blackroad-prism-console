@@ -1,6 +1,14 @@
+import importlib
+import os
 import subprocess
+import tempfile
+from pathlib import Path
 
-from lucidia.app import app
+os.environ.setdefault("LUCIDIA_WORKSPACE", str(Path(__file__).resolve().parent))
+
+app_module = importlib.import_module("lucidia.app")
+app = app_module.app
+WORKSPACE_ROOT = app_module.WORKSPACE_ROOT
 
 
 def test_index():
@@ -45,25 +53,43 @@ def test_install_package_invalid():
     assert resp.status_code == 400
 
 
-def test_git_clean(tmp_path):
+def test_git_clean():
+    with tempfile.TemporaryDirectory(dir=WORKSPACE_ROOT) as repo_dir:
+        repo = Path(repo_dir)
+        subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
+        (repo / "tracked.txt").write_text("tracked")
+        subprocess.run(["git", "add", "tracked.txt"], cwd=repo, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], cwd=repo, check=True, capture_output=True)
+        (repo / "untracked.txt").write_text("temp")
+        client = app.test_client()
+        resp = client.post("/git/clean", json={"path": str(repo)})
+        assert resp.status_code == 200
+        assert not (repo / "untracked.txt").exists()
+
+
+def test_git_clean_invalid_repo():
+    with tempfile.TemporaryDirectory(dir=WORKSPACE_ROOT) as empty_dir:
+        empty_path = Path(empty_dir)
+        client = app.test_client()
+        resp = client.post("/git/clean", json={"path": str(empty_path)})
+        assert resp.status_code == 400
+
+
+def test_git_clean_rejects_outside_workspace(tmp_path, monkeypatch):
     repo = tmp_path / "repo"
     repo.mkdir()
     subprocess.run(["git", "init"], cwd=repo, check=True, capture_output=True)
     (repo / "tracked.txt").write_text("tracked")
     subprocess.run(["git", "add", "tracked.txt"], cwd=repo, check=True, capture_output=True)
     subprocess.run(["git", "commit", "-m", "init"], cwd=repo, check=True, capture_output=True)
-    (repo / "untracked.txt").write_text("temp")
+
+    def _fail_run(*args, **kwargs):  # pragma: no cover - should not run
+        raise AssertionError("subprocess.run should not be called for disallowed paths")
+
+    monkeypatch.setattr(app_module.subprocess, "run", _fail_run)
+
     client = app.test_client()
     resp = client.post("/git/clean", json={"path": str(repo)})
-    assert resp.status_code == 200
-    assert not (repo / "untracked.txt").exists()
-
-
-def test_git_clean_invalid_repo(tmp_path):
-    empty_dir = tmp_path / "empty"
-    empty_dir.mkdir()
-    client = app.test_client()
-    resp = client.post("/git/clean", json={"path": str(empty_dir)})
     assert resp.status_code == 400
 
 
