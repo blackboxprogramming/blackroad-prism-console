@@ -1,4 +1,4 @@
-<!-- FILE: srv/blackroad-api/server_full.js -->
+// FILE: srv/blackroad-api/server_full.js
 /* BlackRoad API — Express + SQLite + Socket.IO + LLM bridge
    Runs behind Nginx on port 4000 with cookie-session auth.
    Env (optional):
@@ -39,9 +39,11 @@ const PORT = parseInt(process.env.PORT || '4000', 10);
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
 const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
 const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
-const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
+const ALLOW_SHELL =
+  String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
-const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
+const BILLING_DISABLE =
+  String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
 const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
 const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
 const BRANCH_MAIN = process.env.BRANCH_MAIN || 'main';
@@ -49,7 +51,9 @@ const BRANCH_STAGING = process.env.BRANCH_STAGING || 'staging';
 const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
 const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
-const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim()) : [];
+const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
+  ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
+  : [];
 
 ['SESSION_SECRET', 'INTERNAL_TOKEN'].forEach((name) => {
   if (!process.env[name]) {
@@ -127,7 +131,14 @@ let jobSeq = 0;
 
 function addJob(type, payload, runner) {
   const id = String(++jobSeq);
-  const job = { id, type, payload, status: 'queued', created: Date.now(), logs: [] };
+  const job = {
+    id,
+    type,
+    payload,
+    status: 'queued',
+    created: Date.now(),
+    logs: [],
+  };
   jobs.set(id, job);
   process.nextTick(async () => {
     job.status = 'running';
@@ -168,7 +179,13 @@ app.use((req, res, next) => {
   req.id = id;
   const start = Date.now();
   res.on('finish', () => {
-    logger.info({ id, method: req.method, path: req.originalUrl, status: res.statusCode, duration: Date.now() - start });
+    logger.info({
+      id,
+      method: req.method,
+      path: req.originalUrl,
+      status: res.statusCode,
+      duration: Date.now() - start,
+    });
   });
   next();
 });
@@ -195,7 +212,6 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true, version: '1.0.0', uptime: process.uptime() });
 });
 
-
 // --- Health
 app.head('/api/health', (_, res) => res.status(200).end());
 app.get('/api/health', async (_req, res) => {
@@ -208,7 +224,7 @@ app.get('/api/health', async (_req, res) => {
     ok: true,
     version: '1.0.0',
     uptime: process.uptime(),
-    services: { api: true, llm }
+    services: { api: true, llm },
   });
 });
 
@@ -230,7 +246,10 @@ app.post(
     }
     const { username, password } = req.body || {};
     // dev defaults: root / Codex2025 (can be replaced with real auth)
-    if ((username === 'root' && password === 'Codex2025') || process.env.BYPASS_LOGIN === 'true') {
+    if (
+      (username === 'root' && password === 'Codex2025') ||
+      process.env.BYPASS_LOGIN === 'true'
+    ) {
       req.session.user = { username, role: 'dev' };
       return res.json({ ok: true, user: req.session.user });
     }
@@ -252,7 +271,7 @@ app.get('/api/billing/plans', (req, res) => {
       monthly,
       annual,
       features,
-    }))
+    })),
   );
 });
 
@@ -276,7 +295,7 @@ app.post('/api/billing/webhook', (req, res) => {
     event = stripeClient.webhooks.constructEvent(
       JSON.stringify(req.body),
       sig,
-      STRIPE_WEBHOOK_SECRET
+      STRIPE_WEBHOOK_SECRET,
     );
   } catch (e) {
     logger.error('stripe_webhook_verify_failed', e);
@@ -293,18 +312,21 @@ db.pragma('synchronous = NORMAL');
 
 const TABLES = ['projects', 'agents', 'datasets', 'models', 'integrations'];
 for (const t of TABLES) {
-  db.prepare(`
+  db.prepare(
+    `
     CREATE TABLE IF NOT EXISTS ${t} (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       updated_at TEXT NOT NULL DEFAULT (datetime('now')),
       meta JSON
     )
-  `).run();
+  `,
+  ).run();
 }
 
 // Subscription tables
-db.prepare(`
+db.prepare(
+  `
   CREATE TABLE IF NOT EXISTS subscribers (
     id TEXT PRIMARY KEY,
     email TEXT UNIQUE,
@@ -313,8 +335,10 @@ db.prepare(`
     created_at TEXT,
     source TEXT
   )
-`).run();
-db.prepare(`
+`,
+).run();
+db.prepare(
+  `
   CREATE TABLE IF NOT EXISTS subscriptions (
     id TEXT PRIMARY KEY,
     subscriber_id TEXT,
@@ -326,8 +350,10 @@ db.prepare(`
     created_at TEXT,
     updated_at TEXT
   )
-`).run();
-db.prepare(`
+`,
+).run();
+db.prepare(
+  `
   CREATE TABLE IF NOT EXISTS payments (
     id TEXT PRIMARY KEY,
     subscription_id TEXT,
@@ -338,8 +364,10 @@ db.prepare(`
     raw JSON,
     created_at TEXT
   )
-`).run();
-db.prepare(`
+`,
+).run();
+db.prepare(
+  `
   CREATE TABLE IF NOT EXISTS logs_connectors (
     id TEXT PRIMARY KEY,
     subscriber_id TEXT,
@@ -349,10 +377,12 @@ db.prepare(`
     detail TEXT,
     created_at TEXT
   )
-`).run();
+`,
+).run();
 
 // Billing tables (minimal subset)
-db.prepare(`
+db.prepare(
+  `
   CREATE TABLE IF NOT EXISTS plans (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -361,18 +391,45 @@ db.prepare(`
     features TEXT NOT NULL,
     is_active INTEGER NOT NULL DEFAULT 1
   )
-`).run();
+`,
+).run();
 
 // Seed default plans if table empty
 const planCount = db.prepare('SELECT COUNT(*) as c FROM plans').get().c;
 if (planCount === 0) {
   const defaultPlans = [
-    { id: 'free', name: 'Free', monthly: 0, yearly: 0, features: ['Basic access'] },
-    { id: 'builder', name: 'Builder', monthly: 1500, yearly: 15000, features: ['Builder tools', 'Email support'] },
-    { id: 'pro', name: 'Pro', monthly: 4000, yearly: 40000, features: ['All builder features', 'Priority support'] },
-    { id: 'enterprise', name: 'Enterprise', monthly: 0, yearly: 0, features: ['Custom pricing', 'Dedicated support'] },
+    {
+      id: 'free',
+      name: 'Free',
+      monthly: 0,
+      yearly: 0,
+      features: ['Basic access'],
+    },
+    {
+      id: 'builder',
+      name: 'Builder',
+      monthly: 1500,
+      yearly: 15000,
+      features: ['Builder tools', 'Email support'],
+    },
+    {
+      id: 'pro',
+      name: 'Pro',
+      monthly: 4000,
+      yearly: 40000,
+      features: ['All builder features', 'Priority support'],
+    },
+    {
+      id: 'enterprise',
+      name: 'Enterprise',
+      monthly: 0,
+      yearly: 0,
+      features: ['Custom pricing', 'Dedicated support'],
+    },
   ];
-  const stmt = db.prepare('INSERT INTO plans (id, name, monthly_price_cents, yearly_price_cents, features, is_active) VALUES (?, ?, ?, ?, ?, 1)');
+  const stmt = db.prepare(
+    'INSERT INTO plans (id, name, monthly_price_cents, yearly_price_cents, features, is_active) VALUES (?, ?, ?, ?, ?, 1)',
+  );
   for (const p of defaultPlans) {
     stmt.run(p.id, p.name, p.monthly, p.yearly, JSON.stringify(p.features));
   }
@@ -380,29 +437,41 @@ if (planCount === 0) {
 
 // Helpers
 function listRows(t) {
-  return db.prepare(`SELECT id, name, updated_at, meta FROM ${t} ORDER BY datetime(updated_at) DESC`).all();
+  return db
+    .prepare(
+      `SELECT id, name, updated_at, meta FROM ${t} ORDER BY datetime(updated_at) DESC`,
+    )
+    .all();
 }
 function createRow(t, name, meta = null) {
-  const stmt = db.prepare(`INSERT INTO ${t} (name, updated_at, meta) VALUES (?, datetime('now'), ?)`);
+  const stmt = db.prepare(
+    `INSERT INTO ${t} (name, updated_at, meta) VALUES (?, datetime('now'), ?)`,
+  );
   const info = stmt.run(name, meta ? JSON.stringify(meta) : null);
   return info.lastInsertRowid;
 }
 function updateRow(t, id, name, meta = null) {
-  const stmt = db.prepare(`UPDATE ${t} SET name = COALESCE(?, name), meta = COALESCE(?, meta), updated_at = datetime('now') WHERE id = ?`);
+  const stmt = db.prepare(
+    `UPDATE ${t} SET name = COALESCE(?, name), meta = COALESCE(?, meta), updated_at = datetime('now') WHERE id = ?`,
+  );
   stmt.run(name ?? null, meta ? JSON.stringify(meta) : null, id);
 }
 function deleteRow(t, id) {
   db.prepare(`DELETE FROM ${t} WHERE id = ?`).run(id);
 }
-function validKind(kind) { return TABLES.includes(kind); }
-
+function validKind(kind) {
+  return TABLES.includes(kind);
+}
 
 // --- CRUD routes (guard with auth once you’re ready)
 app.get('/api/:kind', requireAuth, (req, res) => {
   const { kind } = req.params;
   if (!validKind(kind)) return res.status(404).json({ error: 'unknown_kind' });
-  try { res.json(listRows(kind)); }
-  catch (e) { res.status(500).json({ error: 'db_list_failed', detail: String(e) }); }
+  try {
+    res.json(listRows(kind));
+  } catch (e) {
+    res.status(500).json({ error: 'db_list_failed', detail: String(e) });
+  }
 });
 app.post('/api/:kind', requireAuth, (req, res) => {
   const { kind } = req.params;
@@ -412,7 +481,9 @@ app.post('/api/:kind', requireAuth, (req, res) => {
   try {
     const id = createRow(kind, name, meta);
     res.json({ ok: true, id });
-  } catch (e) { res.status(500).json({ error: 'db_create_failed', detail: String(e) }); }
+  } catch (e) {
+    res.status(500).json({ error: 'db_create_failed', detail: String(e) });
+  }
 });
 app.post('/api/:kind/:id', requireAuth, (req, res) => {
   const { kind, id } = req.params;
@@ -421,13 +492,19 @@ app.post('/api/:kind/:id', requireAuth, (req, res) => {
   try {
     updateRow(kind, Number(id), name, meta);
     res.json({ ok: true });
-  } catch (e) { res.status(500).json({ error: 'db_update_failed', detail: String(e) }); }
+  } catch (e) {
+    res.status(500).json({ error: 'db_update_failed', detail: String(e) });
+  }
 });
 app.delete('/api/:kind/:id', requireAuth, (req, res) => {
   const { kind, id } = req.params;
   if (!validKind(kind)) return res.status(404).json({ error: 'unknown_kind' });
-  try { deleteRow(kind, Number(id)); res.json({ ok: true }); }
-  catch (e) { res.status(500).json({ error: 'db_delete_failed', detail: String(e) }); }
+  try {
+    deleteRow(kind, Number(id));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db_delete_failed', detail: String(e) });
+  }
 });
 
 // --- Subscribe & connectors
@@ -435,10 +512,18 @@ const VALID_PLANS = ['free', 'builder', 'guardian'];
 const VALID_CYCLES = ['monthly', 'annual'];
 
 app.get('/api/connectors/status', (req, res) => {
-  const stripe = !!(process.env.STRIPE_PUBLIC_KEY && process.env.STRIPE_SECRET && process.env.STRIPE_WEBHOOK_SECRET);
+  const stripe = !!(
+    process.env.STRIPE_PUBLIC_KEY &&
+    process.env.STRIPE_SECRET &&
+    process.env.STRIPE_WEBHOOK_SECRET
+  );
   const mail = !!process.env.MAIL_PROVIDER;
-  const sheets = !!(process.env.GSHEETS_SA_JSON || process.env.SHEETS_CONNECTOR_TOKEN);
-  const calendar = !!(process.env.GOOGLE_CALENDAR_CREDENTIALS || process.env.ICS_URL);
+  const sheets = !!(
+    process.env.GSHEETS_SA_JSON || process.env.SHEETS_CONNECTOR_TOKEN
+  );
+  const calendar = !!(
+    process.env.GOOGLE_CALENDAR_CREDENTIALS || process.env.ICS_URL
+  );
   const discord = !!process.env.DISCORD_INVITE;
   const webhooks = stripe; // placeholder
   res.json({ stripe, mail, sheets, calendar, discord, webhooks });
@@ -446,7 +531,13 @@ app.get('/api/connectors/status', (req, res) => {
 
 // Basic health endpoint exposing provider mode
 app.get('/api/subscribe/health', (_req, res) => {
-  const mode = process.env.SUBSCRIBE_MODE || (process.env.STRIPE_SECRET ? 'stripe' : process.env.GUMROAD_TOKEN ? 'gumroad' : 'local');
+  const mode =
+    process.env.SUBSCRIBE_MODE ||
+    (process.env.STRIPE_SECRET
+      ? 'stripe'
+      : process.env.GUMROAD_TOKEN
+        ? 'gumroad'
+        : 'local');
   let providerReady = false;
   if (mode === 'stripe') providerReady = !!process.env.STRIPE_SECRET;
   else if (mode === 'gumroad') providerReady = !!process.env.GUMROAD_TOKEN;
@@ -474,28 +565,42 @@ app.post('/api/subscribe/invoice-intent', (req, res) => {
   let sub = db.prepare('SELECT id FROM subscribers WHERE email = ?').get(email);
   let subscriberId = sub ? sub.id : randomUUID();
   if (!sub) {
-    db.prepare('INSERT INTO subscribers (id, email, name, company, created_at, source) VALUES (?, ?, ?, ?, datetime("now"), ?)')
-      .run(subscriberId, email, name || null, company || null, 'invoice');
+    db.prepare(
+      'INSERT INTO subscribers (id, email, name, company, created_at, source) VALUES (?, ?, ?, ?, datetime("now"), ?)',
+    ).run(subscriberId, email, name || null, company || null, 'invoice');
   }
   const subscriptionId = randomUUID();
-  db.prepare('INSERT INTO subscriptions (id, subscriber_id, plan, cycle, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, datetime("now"), datetime("now"))')
-    .run(subscriptionId, subscriberId, plan, cycle, 'pending_invoice');
+  db.prepare(
+    'INSERT INTO subscriptions (id, subscriber_id, plan, cycle, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, datetime("now"), datetime("now"))',
+  ).run(subscriptionId, subscriberId, plan, cycle, 'pending_invoice');
   res.json({ ok: true, next: '/subscribe/thanks' });
 });
 
 app.get('/api/subscribe/status', (req, res) => {
   const { email } = req.query || {};
   if (!email) return res.status(400).json({ error: 'email_required' });
-  const row = db.prepare('SELECT s.plan, s.cycle, s.status FROM subscribers sub JOIN subscriptions s ON sub.id = s.subscriber_id WHERE sub.email = ? ORDER BY datetime(s.created_at) DESC LIMIT 1').get(email);
+  const row = db
+    .prepare(
+      'SELECT s.plan, s.cycle, s.status FROM subscribers sub JOIN subscriptions s ON sub.id = s.subscriber_id WHERE sub.email = ? ORDER BY datetime(s.created_at) DESC LIMIT 1',
+    )
+    .get(email);
   res.json(row || { status: 'none' });
 });
 
 // --- Billing: plans
 app.get('/api/subscribe/plans', requireAuth, (_req, res) => {
   try {
-    const rows = db.prepare('SELECT id, name, monthly_price_cents, yearly_price_cents, features, is_active FROM plans WHERE is_active = 1').all();
+    const rows = db
+      .prepare(
+        'SELECT id, name, monthly_price_cents, yearly_price_cents, features, is_active FROM plans WHERE is_active = 1',
+      )
+      .all();
     for (const r of rows) {
-      try { r.features = JSON.parse(r.features); } catch { r.features = []; }
+      try {
+        r.features = JSON.parse(r.features);
+      } catch {
+        r.features = [];
+      }
     }
     res.json(rows);
   } catch (e) {
@@ -509,7 +614,7 @@ app.post('/api/llm/chat', requireAuth, async (req, res) => {
   try {
     const upstream = await fetch(LLM_URL, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req.body || {}),
     });
 
@@ -533,8 +638,14 @@ app.post('/api/llm/chat', requireAuth, async (req, res) => {
     const txt = await upstream.text().catch(() => '');
     // try to unwrap {text: "..."}
     let out = txt;
-    try { const j = JSON.parse(txt); if (j && typeof j.text === 'string') out = j.text; } catch {}
-    res.status(upstream.ok ? 200 : upstream.status).type('text/plain').send(out || '(no content)');
+    try {
+      const j = JSON.parse(txt);
+      if (j && typeof j.text === 'string') out = j.text;
+    } catch {}
+    res
+      .status(upstream.ok ? 200 : upstream.status)
+      .type('text/plain')
+      .send(out || '(no content)');
   } catch (e) {
     res.status(502).type('text/plain').send('(llm upstream error)');
   }
@@ -543,10 +654,13 @@ app.post('/api/llm/chat', requireAuth, async (req, res) => {
 // --- Optional shell exec (disabled by default)
 app.post('/api/exec', requireAuth, (req, res) => {
   if (!ALLOW_SHELL) return res.status(403).json({ error: 'exec_disabled' });
-  const cmd = (req.body && req.body.cmd || '').trim();
+  const cmd = ((req.body && req.body.cmd) || '').trim();
   if (!cmd) return res.status(400).json({ error: 'cmd_required' });
   exec(cmd, { timeout: 20000 }, (err, stdout, stderr) => {
-    if (err) return res.status(500).json({ error: 'exec_failed', detail: String(err), stderr });
+    if (err)
+      return res
+        .status(500)
+        .json({ error: 'exec_failed', detail: String(err), stderr });
     res.json({ out: stdout, stderr });
   });
 });
@@ -562,7 +676,8 @@ app.post('/api/webhooks/github', async (req, res) => {
   if (event === 'ping') return res.json({ ok: true });
   if (event === 'push') {
     const branch = req.body.ref?.replace('refs/heads/', '');
-    if (!verify.branchAllowed(branch, [BRANCH_MAIN, BRANCH_STAGING])) return res.status(202).end();
+    if (!verify.branchAllowed(branch, [BRANCH_MAIN, BRANCH_STAGING]))
+      return res.status(202).end();
     const sha = req.body.after;
     const job = addJob('deploy', { branch, sha }, async (id, payload) => {
       logLine(id, 'git fetch');
@@ -577,19 +692,23 @@ app.post('/api/webhooks/github', async (req, res) => {
     return res.json({ ok: true, jobId: job.id });
   }
   if (event === 'pull_request') {
-    const job = addJob('ci', {}, async (id) => logLine(id, 'ci not implemented'));
+    const job = addJob('ci', {}, async (id) =>
+      logLine(id, 'ci not implemented'),
+    );
     return res.json({ ok: true, jobId: job.id });
   }
   res.json({ ok: true });
 });
 
 app.post('/api/deploy/plan', (req, res) => {
-  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN))
+    return res.status(401).end();
   res.json({ ok: true, steps: ['build', 'switch'] });
 });
 
 app.post('/api/deploy/execute', (req, res) => {
-  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN))
+    return res.status(401).end();
   const { branch = BRANCH_MAIN, sha } = req.body || {};
   const job = addJob('deploy_manual', { branch, sha }, async (id, payload) => {
     await git.fetch();
@@ -602,7 +721,8 @@ app.post('/api/deploy/execute', (req, res) => {
 });
 
 app.post('/api/git/sync', (req, res) => {
-  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN))
+    return res.status(401).end();
   const { branch = BRANCH_MAIN } = req.body || {};
   addJob('git_sync', { branch }, async (id, payload) => {
     await git.fetch();
@@ -633,7 +753,8 @@ app.get('/api/jobs/:id/log', (req, res) => {
 });
 
 app.post('/api/rollback/:releaseId', (req, res) => {
-  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN))
+    return res.status(401).end();
   const releaseId = req.params.releaseId;
   const job = addJob('rollback', { releaseId }, async (id, payload) => {
     await deploy.stageAndSwitch({ branch: 'rollback', sha: payload.releaseId });
@@ -642,39 +763,73 @@ app.post('/api/rollback/:releaseId', (req, res) => {
 });
 
 app.get('/api/connectors/status', async (_req, res) => {
-  const status = { slack: false, airtable: false, linear: false, salesforce: false };
-  try { if (process.env.SLACK_WEBHOOK_URL) { await notify.slack('status check'); status.slack = true; } } catch {}
-  try { if (process.env.AIRTABLE_API_KEY) status.airtable = true; } catch {}
-  try { if (process.env.LINEAR_API_KEY) status.linear = true; } catch {}
-  try { if (process.env.SF_USERNAME) status.salesforce = true; } catch {}
+  const status = {
+    slack: false,
+    airtable: false,
+    linear: false,
+    salesforce: false,
+  };
+  try {
+    if (process.env.SLACK_WEBHOOK_URL) {
+      await notify.slack('status check');
+      status.slack = true;
+    }
+  } catch {}
+  try {
+    if (process.env.AIRTABLE_API_KEY) status.airtable = true;
+  } catch {}
+  try {
+    if (process.env.LINEAR_API_KEY) status.linear = true;
+  } catch {}
+  try {
+    if (process.env.SF_USERNAME) status.salesforce = true;
+  } catch {}
   res.json(status);
 });
 
 // --- Actions (stubs)
 app.post('/api/actions/mint', requireAuth, (req, res) => {
   // TODO: integrate wallet; for now echo a stub tx id
-  res.json({ ok: true, minted: Number(req.body?.amount || 1), tx: 'rc_' + Math.random().toString(36).slice(2, 10) });
+  res.json({
+    ok: true,
+    minted: Number(req.body?.amount || 1),
+    tx: 'rc_' + Math.random().toString(36).slice(2, 10),
+  });
 });
 
 // --- Socket.IO presence (metrics)
 io.on('connection', (socket) => {
   socket.emit('hello', { ok: true, t: Date.now() });
 });
-setInterval(() => {
-  const total = os.totalmem(), free = os.freemem();
+const metricsInterval = setInterval(() => {
+  const total = os.totalmem(),
+    free = os.freemem();
   const payload = {
     t: Date.now(),
     load: os.loadavg()[0],
-    mem: { total, free, used: total - free, pct: (1 - free / total) },
+    mem: { total, free, used: total - free, pct: 1 - free / total },
     cpuCount: os.cpus()?.length || 1,
     host: os.hostname(),
   };
   io.emit('metrics', payload);
 }, 2000);
 
+server.on('close', () => {
+  clearInterval(metricsInterval);
+  io.close();
+  db.close();
+  for (const transport of logger.transports || []) {
+    if (typeof transport.close === 'function') {
+      transport.close();
+    }
+  }
+});
+
 // --- Start
 server.listen(PORT, () => {
-  console.log(`[blackroad-api] listening on ${PORT} (db: ${DB_PATH}, llm: ${LLM_URL}, shell: ${ALLOW_SHELL})`);
+  console.log(
+    `[blackroad-api] listening on ${PORT} (db: ${DB_PATH}, llm: ${LLM_URL}, shell: ${ALLOW_SHELL})`,
+  );
 });
 
 // --- Safety

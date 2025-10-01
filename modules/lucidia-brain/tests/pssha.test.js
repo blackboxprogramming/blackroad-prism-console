@@ -1,4 +1,4 @@
-<!-- FILE: /srv/blackroad-api/modules/lucidia-brain/tests/pssha.test.js -->
+// FILE: /srv/blackroad-api/modules/lucidia-brain/tests/pssha.test.js
 require.extensions['.ts'] = require.extensions['.js'];
 const { computeDailyCode, verify } = require('../pssha');
 

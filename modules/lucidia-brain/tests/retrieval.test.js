@@ -1,4 +1,4 @@
-<!-- FILE: /srv/blackroad-api/modules/lucidia-brain/tests/retrieval.test.js -->
+// FILE: /srv/blackroad-api/modules/lucidia-brain/tests/retrieval.test.js
 require.extensions['.ts'] = require.extensions['.js'];
 const { indexMessage, search } = require('../retrieval');
 const { addMessage, createSession } = require('../memory');

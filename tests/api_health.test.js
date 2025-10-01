@@ -1,7 +1,27 @@
-<!-- FILE: tests/api_health.test.js -->
+// FILE: tests/api_health.test.js
+
+jest.mock('better-sqlite3', () => {
+  const mockRun = jest.fn(() => ({ lastInsertRowid: 1 }));
+  return jest.fn(() => ({
+    pragma: jest.fn(),
+    prepare: jest.fn((sql) => {
+      const stmt = {
+        run: mockRun,
+        get: jest.fn(() => undefined),
+        all: jest.fn(() => []),
+      };
+      if (/COUNT\(\*\)/i.test(sql)) {
+        stmt.get = jest.fn(() => ({ c: 0 }));
+      }
+      return stmt;
+    }),
+    close: jest.fn(),
+  }));
+});
 process.env.SESSION_SECRET = 'test-secret';
 process.env.INTERNAL_TOKEN = 'x';
 process.env.ALLOW_ORIGINS = 'https://example.com';
+global.fetch = jest.fn(() => Promise.resolve({ ok: true }));
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
 
