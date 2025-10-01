@@ -43,3 +43,10 @@ def test_generate_story_returns_text():
     story = agent.generate_story("mystical", "A coder")
     assert "mystical" in story
     assert story.startswith("A coder set out on a mystical journey")
+
+
+def test_generate_story_strips_whitespace():
+    agent = AutoNovelAgent()
+    story = agent.generate_story("  mystical  ", "A coder")
+    assert "  mystical" not in story
+    assert story.startswith("A coder set out on a mystical journey")

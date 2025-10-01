@@ -76,10 +76,11 @@ class AutoNovelAgent:
         Raises:
             ValueError: If ``theme`` is empty or only whitespace.
         """
-        if not theme.strip():
+        normalized_theme = theme.strip()
+        if not normalized_theme:
             raise ValueError("Theme must be a non-empty string.")
         return (
-            f"{protagonist} set out on a {theme} journey, discovering "
+            f"{protagonist} set out on a {normalized_theme} journey, discovering "
             f"wonders along the way."
         )
 
