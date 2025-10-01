@@ -50,8 +50,12 @@ class AutoNovelAgent:
             engine: Name of the engine to allow.
 
         Raises:
+            TypeError: If ``engine`` is not a string.
             ValueError: If ``engine`` is empty or only whitespace.
         """
+        if not isinstance(engine, str):
+            raise TypeError("Engine name must be provided as a string.")
+
         engine_clean = engine.strip()
         if not engine_clean:
             raise ValueError("Engine name must be a non-empty string.")
