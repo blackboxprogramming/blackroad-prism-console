@@ -38,14 +38,15 @@ Org-level:
 
 ## When status checks fail
 
-- **Do not close and reopen PRs** just to retrigger automation. Leave the PR
-  open, investigate the failing job, and push a fix.
-- **Skip the @codex spam.** Posting repeated "please merge" comments in Linear
-  or on the PR does not bypass branch protection. Resolve the underlying CI
-  failure first.
-- **Reproduce locally.** Run the same commands that failed in CI (`npm run
-  build`, `npm run lint`, `npm run typecheck`, `node scripts/health-check.js`,
-  etc.) until they pass.
+- **Leave the pull request open while you investigate.** Avoid the close →
+  reopen loop just to retrigger automation; branch protection expects the same
+  PR to go green.
+- **Skip the @codex spam.** Pinging @codex (or anyone else) does not bypass
+  required checks or branch protection. Focus on fixing the failing job first.
+- **Reproduce locally before re-running CI.** Run the exact commands that
+  failed in CI (`npm run build`, `npm run lint`, `npm run typecheck`, `node
+  scripts/health-check.js`, etc.) and confirm they pass locally before asking
+  for a rerun.
 - **Communicate status changes.** Once the fix is ready and checks are green,
   update Linear or Slack with the resolution and request a review if needed.
 
