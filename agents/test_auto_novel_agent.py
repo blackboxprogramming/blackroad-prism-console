@@ -18,7 +18,9 @@ def test_create_game_validation() -> None:
 
     agent = AutoNovelAgent()
     agent.create_game("unity")
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="Unsupported engine 'godot'. Choose one of: unity, unreal."
+    ):
         agent.create_game("godot")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Weapons are not allowed"):
         agent.create_game("unity", include_weapons=True)
