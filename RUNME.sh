@@ -1,5 +1,5 @@
-<!-- FILE: RUNME.sh -->
 #!/usr/bin/env bash
+# FILE: RUNME.sh
 set -e
 cd "$(dirname "$0")"
 if [ ! -f srv/blackroad-api/.env ]; then
