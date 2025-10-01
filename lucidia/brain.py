@@ -34,6 +34,11 @@ class LucidiaBrain:
         name:
             Optional unique identifier for the step. If omitted the
             function's ``__name__`` attribute is used.
+
+        Raises
+        ------
+        ValueError
+            If a step with the same ``name`` is already registered.
         """
 
         if name is None:
