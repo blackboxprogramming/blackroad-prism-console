@@ -5,6 +5,7 @@ Exposes Roadie and Guardian functions via simple endpoints.
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 import threading
 from collections.abc import Callable, Generator
@@ -16,6 +17,8 @@ from fastapi.responses import JSONResponse
 from agent import jobs, store
 from agents.guardian import Guardian
 from agents.roadie import Roadie
+
+logger = logging.getLogger(__name__)
 
 INTERNAL_TOKEN = os.environ.get("INTERNAL_TOKEN", "change-me")
 
@@ -88,6 +91,7 @@ def _start_log_tailer(
 async def ws_run(websocket: WebSocket):
     token = websocket.headers.get("x-internal-token")
     if token != INTERNAL_TOKEN:
+        logger.warning("Rejected /ws/run connection with invalid token")
         await websocket.close(code=4401, reason="unauthorized")
         return
 
@@ -103,6 +107,7 @@ async def ws_run(websocket: WebSocket):
         await websocket.send_text(f"[[BLACKROAD_JOB_ID:{jid}]]")
 
         meta = jobs.start_remote_logged(jid=jid, command=cmd)
+        logger.info("Started remote job %s with pid %s", jid, meta.get("pid"))
         store.mark_running(
             jid,
             pid=meta.get("pid"),
@@ -130,9 +135,11 @@ async def ws_run(websocket: WebSocket):
     except WebSocketDisconnect:
         if jid is not None:
             store.finish(jid, "disconnected")
+            logger.info("WebSocket disconnected for job %s", jid)
     except Exception as exc:  # noqa: BLE001 - propagate error to client
         if jid is not None:
             store.finish(jid, f"error: {exc}")
+            logger.exception("Job %s errored", jid, exc_info=True)
         await websocket.send_text(f"[error] {exc}")
     finally:
         if tail_stop is not None:
