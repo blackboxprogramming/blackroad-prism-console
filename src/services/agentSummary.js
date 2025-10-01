@@ -21,7 +21,7 @@ async function getService(id, base) {
     ]);
     return {
       status: health.status ?? (health.ok ? 'OK' : 'FAIL'),
-      uptime: health.uptime || '-',
+      uptime: health.uptime ?? '-',
       errors: logs.count ?? (Array.isArray(logs.logs) ? logs.logs.length : 0),
       contradictions: health.contradictions || 0
     };
