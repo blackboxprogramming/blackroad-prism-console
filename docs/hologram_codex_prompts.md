@@ -1,6 +1,23 @@
 # Hologram Codex Prompts
 
-This document collects ready-to-use prompts for generating hologram rendering scripts with OpenAI Codex.
+This document collects ready-to-use prompts for generating hologram rendering scripts with OpenAI Codex. If you want something
+you can run immediately without Codex, use the maintained demo script at `scripts/waveshare_hologram_demo.py`.
+
+## Built-In Demo Script
+
+1. Install the dependencies on your Raspberry Pi or Linux workstation:
+   ```bash
+   sudo apt-get update
+   sudo apt-get install python3-pygame python3-opengl
+   python3 -m pip install --upgrade pygame PyOpenGL
+   ```
+2. Copy this repository (or at least `scripts/waveshare_hologram_demo.py`) onto the device that drives the WaveShare cube.
+3. Run the demo from a terminal that is attached to the HDMI output going into the cube:
+   ```bash
+   python3 scripts/waveshare_hologram_demo.py --width 1080 --height 1080 --depth 7
+   ```
+   Adjust the width/height so that the window is square and fills the WaveShare panel. The ESC or **Q** key stops the loop.
+4. Once the animation looks right, optionally create a `systemd` service or desktop autostart entry so the hologram plays on boot.
 
 ## Simple Rotating Cube
 
