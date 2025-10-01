@@ -7,7 +7,6 @@ publicssh.sh
 **/node_modules/
 dist/
 .cache/
-.env
 # Ignore environment files for the health sidecar service
 services/health-sidecar/.env
 
