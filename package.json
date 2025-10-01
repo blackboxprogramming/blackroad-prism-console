@@ -12,7 +12,7 @@
     "prepare": "husky",
     "lint": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
     "format": "prettier -w .",
-    "test:jest": "cross-env NODE_ENV=test jest --runInBand",
+    "test:jest": "node scripts/run-jest.cjs --runInBand",
     "test-db": "node tests/test_db.js",
     "test-auth": "node tests/test_auth.js",
     "test-projects-tasks": "node tests/test_projects_tasks.js",
