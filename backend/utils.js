@@ -5,7 +5,7 @@ function signToken(payload) {
 function verifyToken(token) {
   try {
     return JSON.parse(Buffer.from(token, 'base64').toString());
-  } catch (e) {
+  } catch {
     return null;
   }
 }

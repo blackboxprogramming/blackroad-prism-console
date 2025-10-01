@@ -79,7 +79,7 @@ function isInstalled(pkg, dir) {
   try {
     require.resolve(pkg, { paths: [dir] });
     return true;
-  } catch (_) {
+  } catch {
     return false;
   }
 }
@@ -89,10 +89,6 @@ function readPkgJson(dir) {
   if (!fs.existsSync(p)) return null;
   try { return JSON.parse(fs.readFileSync(p, 'utf8')); }
   catch { return null; }
-}
-
-function union(a, b) {
-  const s = new Set(a); for (const x of b) s.add(x); return Array.from(s);
 }
 
 console.log(`dep-scan: scanning ${targetDir}`);

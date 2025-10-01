@@ -11,7 +11,7 @@ router.get('/system', requireAuth, async (req, res) => {
   try {
     const m = await metricsService.sample();
     res.json({ ok: true, metrics: m });
-  } catch (e) {
+  } catch {
     res.status(500).json({ ok: false, error: 'metrics_failed' });
   }
 });

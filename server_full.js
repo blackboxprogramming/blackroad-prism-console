@@ -150,7 +150,7 @@ const DEFAULT_PLANS = [
   }
 ];
 
-function createCheckoutSession({ user, plan }) {
+function createCheckoutSession({ user: _user, plan: _plan }) {
   const paymentId = uuidv4();
   return {
     provider: SUB_PROVIDER,
@@ -377,7 +377,7 @@ const io = setupSockets(server);
 // LUCIDIA
 (function setupLucidia() {
   // --- LLM Provider
-  const SUB_LLM_PROVIDER = process.env.SUB_LLM_PROVIDER || 'mock';
+  const _subLlmProvider = process.env.SUB_LLM_PROVIDER || 'mock';
   const llmProvider = {
     async chat({ messages }) {
       // Simple mock provider that echoes the last user message.

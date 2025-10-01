@@ -1,4 +1,48 @@
 // ESLint flat config exported via CommonJS to avoid ESM loader issues
+const sharedGlobals = {
+  Buffer: "readonly",
+  console: "readonly",
+  process: "readonly",
+  require: "readonly",
+  module: "readonly",
+  exports: "readonly",
+  __dirname: "readonly",
+  __filename: "readonly",
+  setTimeout: "readonly",
+  clearTimeout: "readonly",
+  setInterval: "readonly",
+  clearInterval: "readonly",
+  setImmediate: "readonly",
+  clearImmediate: "readonly",
+  global: "readonly",
+  fetch: "readonly",
+  URL: "readonly",
+  URLSearchParams: "readonly",
+  Headers: "readonly",
+  Request: "readonly",
+  Response: "readonly"
+};
+
+const browserGlobals = {
+  window: "readonly",
+  document: "readonly",
+  navigator: "readonly",
+  localStorage: "readonly",
+  sessionStorage: "readonly",
+  FormData: "readonly"
+};
+
+const testGlobals = {
+  describe: "readonly",
+  it: "readonly",
+  test: "readonly",
+  expect: "readonly",
+  beforeEach: "readonly",
+  afterEach: "readonly",
+  beforeAll: "readonly",
+  afterAll: "readonly"
+};
+
 module.exports = [
   {
     ignores: [
@@ -26,10 +70,22 @@ module.exports = [
       sourceType: "module",
       parserOptions: {
         ecmaFeatures: { jsx: true }
+      },
+      globals: {
+        ...sharedGlobals,
+        ...browserGlobals,
+        ...testGlobals
       }
     },
     rules: {
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_"
+        }
+      ],
       "no-undef": "warn"
     }
   }
