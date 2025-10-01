@@ -22,6 +22,14 @@ def test_add_engine_invalid():
         agent.add_engine("engine-1")
 
 
+def test_add_engine_is_instance_scoped():
+    first_agent = AutoNovelAgent()
+    first_agent.add_engine("RenPy")
+
+    second_agent = AutoNovelAgent()
+    assert "renpy" not in second_agent.list_supported_engines()
+
+
 def test_create_game_unknown_engine():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):

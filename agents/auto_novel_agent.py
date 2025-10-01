@@ -1,6 +1,6 @@
 """Simple auto novel agent example with game creation abilities."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import ClassVar
 
 
@@ -9,7 +9,15 @@ class AutoNovelAgent:
     """A toy agent that can deploy itself and create simple games."""
 
     name: str = "AutoNovelAgent"
-    SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal"}
+    _DEFAULT_ENGINES: ClassVar[tuple[str, ...]] = ("unity", "unreal")
+    _supported_engines: set[str] = field(
+        default_factory=lambda: set(AutoNovelAgent._DEFAULT_ENGINES)
+    )
+
+    @property
+    def SUPPORTED_ENGINES(self) -> set[str]:
+        """Return the set of engines supported by this agent instance."""
+        return self._supported_engines
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
@@ -24,8 +32,8 @@ class AutoNovelAgent:
                 allowed.
         """
         engine_lower = engine.lower()
-        if engine_lower not in self.SUPPORTED_ENGINES:
-            supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
+        if engine_lower not in self._supported_engines:
+            supported = ", ".join(sorted(self._supported_engines))
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
@@ -43,13 +51,13 @@ class AutoNovelAgent:
         normalized = engine.strip().lower()
         if not normalized.isalpha():
             raise ValueError("Engine name must contain only letters.")
-        if normalized in self.SUPPORTED_ENGINES:
+        if normalized in self._supported_engines:
             raise ValueError("Engine already supported.")
-        self.SUPPORTED_ENGINES.add(normalized)
+        self._supported_engines.add(normalized)
 
     def list_supported_engines(self) -> list[str]:
         """Return a list of supported game engines."""
-        return sorted(self.SUPPORTED_ENGINES)
+        return sorted(self._supported_engines)
 
 
 if __name__ == "__main__":
