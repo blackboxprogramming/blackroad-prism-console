@@ -11,6 +11,12 @@ class JobResponse(BaseModel):
     status: str | None = None
 
 
+class HealthResponse(BaseModel):
+    """Response model for service health."""
+
+    ok: bool
+
+
 @app.post("/api/jobs/amplicon", response_model=JobResponse)
 async def submit_job(runsheet: UploadFile = File(...)) -> JobResponse:
     """Placeholder endpoint accepting a runsheet CSV.
@@ -25,12 +31,13 @@ async def get_job(job_id: str) -> JobResponse:
     return JobResponse(job_id=job_id, status="pending")
 
 
-@app.get("/health")
-async def health() -> dict[str, bool]:
+@app.get("/health", response_model=HealthResponse)
+async def health() -> HealthResponse:
     """Simple health check."""
-    return {"ok": True}
+    return HealthResponse(ok=True)
 
 
 @app.get("/")
-async def root():
-    return {"ok": True}
+async def root() -> HealthResponse:
+    """Default root endpoint mirroring health response."""
+    return HealthResponse(ok=True)
