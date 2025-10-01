@@ -36,6 +36,10 @@ def run(cmd: str, cwd: str | None = None) -> bool:
     return proc.returncode == 0
 
 
+def _default_working_copy() -> Path:
+    return Path(os.getenv("WORKING_COPY_PATH", "/opt/blackroad/working_copy"))
+
+
 @dataclass
 class PipelineContext:
     """Configuration for a pipeline run."""
@@ -43,7 +47,7 @@ class PipelineContext:
     repo: Path = Path(".")
     branch: str = "main"
     droplet_host: str = os.getenv("BLACKROAD_DROPLET", "droplet")
-    working_copy: Path = Path(os.getenv("WORKING_COPY_PATH", "/opt/blackroad/working_copy"))
+    working_copy: Path = field(default_factory=_default_working_copy)
     connectors: List[str] = field(
         default_factory=lambda: ["salesforce", "airtable", "slack", "linear"]
     )
@@ -121,10 +125,19 @@ def main(argv: List[str]) -> int:
         "--droplet-host",
         default=os.getenv("BLACKROAD_DROPLET", "droplet"),
     )
+    parser.add_argument(
+        "--working-copy",
+        type=Path,
+        help="Path to the Working Copy checkout (defaults to $WORKING_COPY_PATH or /opt/blackroad/working_copy)",
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
-    ctx = PipelineContext(branch=args.branch, droplet_host=args.droplet_host)
+    ctx = PipelineContext(
+        branch=args.branch,
+        droplet_host=args.droplet_host,
+        working_copy=args.working_copy or _default_working_copy(),
+    )
     ok = handle_command(ctx, args.command)
     return 0 if ok else 1
 
