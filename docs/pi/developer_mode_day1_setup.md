@@ -263,4 +263,69 @@ hostname -I
 - Set up regular snapshots or backups of SSD using `rsync` or `restic`.
 - Document any GPIO pin usage for future expansions.
 
-This script delivers a ready-to-develop Raspberry Pi tower with monitoring, automation, and containerized tooling in approximately 10 minutes post-boot.
+## 10. Jetson Offload & Telemetry Bridge
+
+### Raspberry Pi: job offload helper
+
+```bash
+sudo tee /usr/local/bin/blackroad-run >/dev/null <<'RUN'
+#!/usr/bin/env bash
+set -euo pipefail
+
+JETSON_USER="jetson"
+JETSON_HOST="jetson.local"
+
+if [ $# -lt 1 ]; then
+  echo "Usage: blackroad-run <script.py|cmd>"
+  exit 1
+fi
+
+CMD="$*"
+echo "== Offloading to $JETSON_HOST =="
+ssh -t ${JETSON_USER}@${JETSON_HOST} "$CMD"
+RUN
+sudo chmod +x /usr/local/bin/blackroad-run
+```
+
+### Jetson: telemetry endpoint
+
+```bash
+ssh jetson@jetson.local
+
+sudo tee /usr/local/bin/blackroad-telemetry >/dev/null <<'JET'
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "## Jetson Telemetry"
+echo "Uptime: $(uptime -p)"
+echo "Load: $(uptime | awk -F'load average:' '{print $2}')"
+command -v tegrastats >/dev/null && sudo tegrastats --interval 1000 --count 1 || echo "tegrastats not available"
+JET
+sudo chmod +x /usr/local/bin/blackroad-telemetry
+exit
+```
+
+### Raspberry Pi: telemetry pull helper
+
+```bash
+sudo tee /usr/local/bin/blackroad-telemetry-pull >/dev/null <<'PULL'
+#!/usr/bin/env bash
+set -euo pipefail
+
+JETSON_USER="jetson"
+JETSON_HOST="jetson.local"
+
+ssh ${JETSON_USER}@${JETSON_HOST} blackroad-telemetry
+PULL
+sudo chmod +x /usr/local/bin/blackroad-telemetry-pull
+```
+
+### Usage (run on the Pi)
+
+```bash
+blackroad-run nvidia-smi
+blackroad-run python3 ~/models/train.py
+blackroad-telemetry-pull
+```
+
+This script delivers a ready-to-develop Raspberry Pi tower with monitoring, automation, Jetson offload helpers, and containerized tooling in approximately 10 minutes post-boot.
