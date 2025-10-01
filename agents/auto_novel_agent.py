@@ -40,13 +40,24 @@ class AutoNovelAgent:
 
         Args:
             title: Title of the novel.
-            chapters: Number of chapters to generate.
+            chapters: Number of chapters to generate. Must be a positive integer.
 
         Returns:
             A list of chapter headings forming a basic outline.
+
+        Raises:
+            ValueError: If ``chapters`` is less than 1.
+            ValueError: If ``title`` is empty or only whitespace.
         """
+        if chapters < 1:
+            raise ValueError("Number of chapters must be at least 1.")
+
+        title_clean = title.strip()
+        if not title_clean:
+            raise ValueError("Title must be a non-empty string.")
+
         outline = [f"Chapter {i}:" for i in range(1, chapters + 1)]
-        return [f"{heading} {title}" for heading in outline]
+        return [f"{heading} {title_clean}" for heading in outline]
 
 
 if __name__ == "__main__":
