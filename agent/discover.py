@@ -12,13 +12,23 @@ def _run(cmd):
 
 
 def _subnet():
+    """Return a bounded IPv4 network for scanning.
+
+    The interface's configured subnet might be very large (e.g. /8 corp
+    networks or /16 docker bridges). We cap scans to the interface's /24 to
+    avoid issuing tens of thousands of sequential probes.
+    """
+
     # grab first IPv4 interface that's UP and not loopback
     lines = _run("ip -br -4 addr").splitlines()
     for ln in lines:
         parts = ln.split()
         if len(parts) >= 3 and parts[0] != "lo":
-            cidr = parts[2]        # e.g. 192.168.4.12/24
-            return ipaddress.ip_interface(cidr).network
+            cidr = parts[2]  # e.g. 192.168.4.12/24
+            iface = ipaddress.ip_interface(cidr)
+            if iface.network.prefixlen >= 24:
+                return iface.network
+            return ipaddress.ip_network(f"{iface.ip}/24", strict=False)
     return None
 
 

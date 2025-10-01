@@ -111,16 +111,31 @@
     try {
       const r = await fetch('/discover/scan'); const j = await r.json();
       scanLog.textContent = `Network: ${j.network || 'unknown'} • Found: ${(j.hosts||[]).length}`;
-      scanBody.innerHTML = '';
+      scanBody.textContent = '';
       (j.hosts||[]).forEach(h=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${h.ip}</td>
-          <td>${h.name || '-'}</td>
-          <td>${h.kind}</td>
-          <td>${h.ssh ? 'yes' : 'no'}</td>
-          <td><button data-ip="${h.ip}">Set as target</button></td>`;
-        tr.querySelector('button').onclick = async (ev)=>{
+
+        const ipTd = document.createElement('td');
+        ipTd.textContent = h.ip;
+        tr.appendChild(ipTd);
+
+        const nameTd = document.createElement('td');
+        nameTd.textContent = h.name || '-';
+        tr.appendChild(nameTd);
+
+        const kindTd = document.createElement('td');
+        kindTd.textContent = h.kind;
+        tr.appendChild(kindTd);
+
+        const sshTd = document.createElement('td');
+        sshTd.textContent = h.ssh ? 'yes' : 'no';
+        tr.appendChild(sshTd);
+
+        const actionTd = document.createElement('td');
+        const btn = document.createElement('button');
+        btn.dataset.ip = h.ip;
+        btn.textContent = 'Set as target';
+        btn.onclick = async (ev)=>{
           const ip = ev.target.dataset.ip;
           const r = await fetch('/discover/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({host:ip,user:'jetson'})});
           const t = await r.json();
@@ -129,6 +144,9 @@
             activeTargetEl.textContent = `${ip} (jetson)`;
           }
         };
+        actionTd.appendChild(btn);
+        tr.appendChild(actionTd);
+
         scanBody.appendChild(tr);
       });
     } catch (err) {
