@@ -6,9 +6,9 @@ from agents.auto_novel_agent import AutoNovelAgent
 @pytest.fixture(autouse=True)
 def reset_engines():
     """Ensure tests do not leak engine changes to each other."""
-    AutoNovelAgent.SUPPORTED_ENGINES = {"unity", "unreal"}
+    AutoNovelAgent.reset_supported_engines()
     yield
-    AutoNovelAgent.SUPPORTED_ENGINES = {"unity", "unreal"}
+    AutoNovelAgent.reset_supported_engines()
 
 
 def test_add_supported_engine_enables_creation():

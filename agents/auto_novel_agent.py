@@ -1,7 +1,7 @@
 """Simple auto novel agent example with game creation abilities."""
 
 from dataclasses import dataclass
-from typing import ClassVar, List
+from typing import ClassVar, FrozenSet, List
 
 
 @dataclass
@@ -9,7 +9,8 @@ class AutoNovelAgent:
     """A toy agent that can deploy itself and create simple games."""
 
     name: str = "AutoNovelAgent"
-    SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal"}
+    _DEFAULT_SUPPORTED_ENGINES: ClassVar[FrozenSet[str]] = frozenset({"unity", "unreal"})
+    SUPPORTED_ENGINES: ClassVar[set[str]] = set(_DEFAULT_SUPPORTED_ENGINES)
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
@@ -50,6 +51,12 @@ class AutoNovelAgent:
             engine: Name of the engine to allow.
         """
         self.SUPPORTED_ENGINES.add(engine.lower())
+
+    @classmethod
+    def reset_supported_engines(cls) -> None:
+        """Restore the supported engines to their default set."""
+
+        cls.SUPPORTED_ENGINES = set(cls._DEFAULT_SUPPORTED_ENGINES)
 
     def remove_supported_engine(self, engine: str) -> None:
         """Remove a game engine if it is currently supported.
