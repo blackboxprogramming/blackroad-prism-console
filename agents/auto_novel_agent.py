@@ -23,7 +23,9 @@ class AutoNovelAgent:
             include_weapons: If True, raise a ``ValueError`` because weapons are not
                 allowed.
         """
-        engine_lower = engine.lower()
+        engine_lower = engine.strip().lower()
+        if not engine_lower:
+            raise ValueError("Engine name must be a non-empty string.")
         if engine_lower not in self.SUPPORTED_ENGINES:
             supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
@@ -38,7 +40,10 @@ class AutoNovelAgent:
             engine: Name of the engine to allow. The value is stored in
                 lowercase for case-insensitive matching.
         """
-        self.SUPPORTED_ENGINES.add(engine.lower())
+        engine_lower = engine.strip().lower()
+        if not engine_lower:
+            raise ValueError("Engine name must be a non-empty string.")
+        self.SUPPORTED_ENGINES.add(engine_lower)
 
     def list_supported_engines(self) -> List[str]:
         """Return a list of supported game engines."""
