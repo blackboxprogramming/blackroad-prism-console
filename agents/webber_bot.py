@@ -94,15 +94,21 @@ class WebberBot:
         """Process ``files`` based on their extension."""
         for file_path in files:
             try:
+                processed = False
                 if file_path.endswith(".html"):
                     self.format_html(file_path)
+                    processed = True
                 elif file_path.endswith(".css"):
                     self.format_css(file_path)
+                    processed = True
                 elif file_path.endswith(".js"):
                     self.format_js(file_path)
+                    processed = True
                 elif file_path.endswith(".json"):
-                    self.validate_json(file_path)
-                self.notify(f"Processed {file_path} successfully")
+                    processed = self.validate_json(file_path)
+
+                if processed:
+                    self.notify(f"Processed {file_path} successfully")
             except Exception as exc:  # pylint: disable=broad-except
                 self.notify(f"Error processing {file_path}: {exc}")
 
