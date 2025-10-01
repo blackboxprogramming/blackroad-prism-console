@@ -48,3 +48,9 @@ def test_generate_poem_rejects_unsupported_form():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
         agent.generate_poem("serenity", form="limerick")
+
+
+def test_generate_poem_requires_theme():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError, match="Theme must be a non-empty string"):
+        agent.generate_poem("   ")
