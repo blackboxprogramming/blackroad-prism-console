@@ -3,4 +3,5 @@ module.exports = {
   verbose: true,
   roots: ["<rootDir>/tests"],
   testMatch: ["<rootDir>/tests/test_integration.js"],
+  setupFiles: ["<rootDir>/tests/jest.setup.js"],
 };
