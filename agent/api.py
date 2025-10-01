@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import pathlib
+import threading
 from typing import Any
 
 from fastapi import File, Request, UploadFile, WebSocket, WebSocketDisconnect
@@ -70,10 +72,40 @@ async def ws_transcribe(ws: WebSocket) -> None:
             await ws.send_text("[error] audio not found")
             return
 
-        for line in transcribe.run_whisper_stream(str(candidate), model_path=model, lang=lang):
-            await ws.send_text(line)
+        queue: asyncio.Queue[tuple[str, str | None]] = asyncio.Queue()
+        loop = asyncio.get_running_loop()
 
-        await ws.send_text("[[BLACKROAD_WHISPER_DONE]]")
+        def pump_stream() -> None:
+            try:
+                for line in transcribe.run_whisper_stream(
+                    str(candidate), model_path=model, lang=lang
+                ):
+                    loop.call_soon_threadsafe(queue.put_nowait, ("data", line))
+            except Exception as exc:  # pragma: no cover - defensive
+                loop.call_soon_threadsafe(queue.put_nowait, ("error", str(exc)))
+            finally:
+                loop.call_soon_threadsafe(queue.put_nowait, ("done", None))
+
+        thread = threading.Thread(target=pump_stream, name="whisper-stream", daemon=True)
+        thread.start()
+
+        try:
+            while True:
+                kind, payload = await queue.get()
+
+                try:
+                    if kind == "data" and payload is not None:
+                        await ws.send_text(payload)
+                    elif kind == "error" and payload is not None:
+                        await ws.send_text(f"[error] {payload}")
+                    elif kind == "done":
+                        await ws.send_text("[[BLACKROAD_WHISPER_DONE]]")
+                        break
+                except WebSocketDisconnect:
+                    break
+        finally:
+            if thread.is_alive():
+                await asyncio.to_thread(thread.join)
     finally:
         try:
             await ws.close()
