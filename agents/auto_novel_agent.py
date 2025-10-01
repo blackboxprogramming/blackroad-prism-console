@@ -32,8 +32,14 @@ class AutoNovelAgent:
             engine: Game engine to use.
             include_weapons: If True, raise a ``ValueError`` because weapons are not
                 allowed.
+
+        Raises:
+            ValueError: If ``engine`` is empty or ``include_weapons`` is ``True``.
         """
-        engine_lower = engine.lower()
+        engine_clean = engine.strip()
+        if not engine_clean:
+            raise ValueError("Engine name must be a non-empty string.")
+        engine_lower = engine_clean.lower()
         if not self.supports_engine(engine_lower):
             supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")

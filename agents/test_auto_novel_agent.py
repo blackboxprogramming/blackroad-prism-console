@@ -26,6 +26,12 @@ def test_add_supported_engine_rejects_empty_string():
         agent.add_supported_engine("   ")
 
 
+def test_create_game_rejects_empty_string():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError):
+        agent.create_game("   ")
+
+
 def test_create_game_disallows_weapons():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError, match="Weapons are not allowed"):
