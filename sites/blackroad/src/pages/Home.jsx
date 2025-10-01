@@ -29,6 +29,11 @@ export default function Home(){
             <li><Link to={withPrefix('/portal', lang)}>{t('coCodingPortal')}</Link></li>
             <li><Link to={withPrefix('/status', lang)}>{t('status')}</Link> &nbsp; • &nbsp;<Link to={withPrefix('/snapshot', lang)}>{t('snapshot')}</Link></li>
             <li><Link to={withPrefix('/docs', lang)}>{t('docs')}</Link></li>
+            <li>
+              <Link to={withPrefix('/quantum-consciousness', lang)}>
+                {t('quantumConsciousness')}
+              </Link>
+            </li>
           </ul>
         </div>
       </section>

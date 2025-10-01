@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 function Card({ title, metaphor, color, delay }) {
   const [show, setShow] = useState(false);
@@ -20,28 +20,61 @@ function Card({ title, metaphor, color, delay }) {
 }
 
 export default function QuantumConsciousness() {
-  const [log, setLog] = useState("");
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const topics = ["reasoning", "memory", "symbolic"];
-      const lines = [];
-      for (const t of topics) {
-        try {
-          const r = await fetch(`/api/quantum/${t}`);
-          const j = await r.json();
-          lines.push(`${t.toUpperCase()}: ${j.summary}`);
-        } catch {
-          lines.push(`${t.toUpperCase()}: error`);
-        }
-      }
-      if (alive) setLog(lines.join("\n"));
-    })();
-    return () => {
-      alive = false;
-    };
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  const fetchNotes = useCallback(async (signal) => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/quantum", {
+        cache: "no-store",
+        signal,
+      });
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+      const data = await res.json();
+      if (!Array.isArray(data.topics)) throw new Error("Invalid payload");
+      if (signal?.aborted) return;
+      setNotes(data.topics);
+      setLastUpdated(new Date());
+    } catch (err) {
+      if (signal?.aborted) return;
+      console.error("quantum-console", err);
+      setError("Unable to reach the quantum research console.");
+      setNotes([]);
+    } finally {
+      if (signal?.aborted) return;
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchNotes(controller.signal);
+    return () => {
+      controller.abort();
+    };
+  }, [fetchNotes]);
+
+  const log = useMemo(() => {
+    if (error) return `⚠️ ${error}`;
+    if (!notes.length) return "No research notes available yet.";
+    return notes
+      .map((entry) => `${String(entry.topic).toUpperCase()}: ${entry.summary}`)
+      .join("\n");
+  }, [error, notes]);
+
   const ts = new Date().toISOString();
+  const lastSynced = useMemo(() => {
+    if (!lastUpdated) return "—";
+    try {
+      return lastUpdated.toLocaleTimeString();
+    } catch {
+      return lastUpdated.toISOString();
+    }
+  }, [lastUpdated]);
   return (
     <div className="min-h-screen flex flex-col items-center p-8 space-y-8">
       <header className="text-center">
@@ -76,9 +109,29 @@ export default function QuantumConsciousness() {
           delay={300}
         />
       </section>
-      <section className="w-full max-w-5xl">
-        <div className="bg-black text-green-400 font-mono p-4 rounded-md h-48 overflow-auto">
-          <pre>{log || "Loading research notes..."}</pre>
+      <section className="w-full max-w-5xl space-y-3">
+        <div className="flex justify-between items-center text-sm opacity-70">
+          <span>Research console</span>
+          <span>Last sync: {lastSynced}</span>
+        </div>
+        <div className="bg-black text-green-400 font-mono p-4 rounded-md h-56 overflow-auto">
+          <pre>
+            {loading ? "Loading research notes..." : log}
+          </pre>
+        </div>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={fetchNotes}
+            disabled={loading}
+            className={`px-4 py-2 rounded-md border border-white/20 transition ${
+              loading
+                ? "opacity-60 cursor-not-allowed"
+                : "hover:bg-white/10"
+            }`}
+          >
+            {loading ? "Syncing" : "Refresh"}
+          </button>
         </div>
       </section>
       <footer className="text-xs opacity-60">Deployed via Codex • {ts}</footer>

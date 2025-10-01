@@ -77,6 +77,9 @@ function LegacyApp(){
             </span>{" "}
             Infinity Math
           </NavLink>
+          <NavLink className="nav-link" to="/quantum-consciousness">
+            Quantum Consciousness
+          </NavLink>
         </nav>
         <div className="mt-6 text-xs text-neutral-400"><StatusPill/></div>
       </aside>

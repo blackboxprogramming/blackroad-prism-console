@@ -43,4 +43,26 @@ describe('API security and health', () => {
     expect(res.body.planName).toBe('Free');
     expect(res.body.entitlements.can.math.pro).toBe(false);
   });
+
+  it('exposes seeded quantum research summaries', async () => {
+    const list = await request(app).get('/api/quantum');
+    expect(list.status).toBe(200);
+    expect(Array.isArray(list.body.topics)).toBe(true);
+    expect(list.body.topics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ topic: 'reasoning' }),
+        expect.objectContaining({ topic: 'memory' }),
+        expect.objectContaining({ topic: 'symbolic' }),
+      ]),
+    );
+
+    const detail = await request(app).get('/api/quantum/reasoning');
+    expect(detail.status).toBe(200);
+    expect(detail.body).toEqual(
+      expect.objectContaining({
+        topic: 'reasoning',
+      }),
+    );
+    expect(detail.body.summary).toMatch(/Quantum/i);
+  });
 });

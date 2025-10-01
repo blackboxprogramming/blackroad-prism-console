@@ -429,7 +429,7 @@ db.prepare(`
     summary TEXT NOT NULL
   )
 `).run();
-const qSeed = [
+const quantumSeed = [
   {
     topic: 'reasoning',
     summary:
@@ -446,11 +446,11 @@ const qSeed = [
       'Interference in quantum-symbolic AI could amplify useful symbol chains while damping noise.',
   },
 ];
-for (const row of qSeed) {
-  db.prepare('INSERT OR IGNORE INTO quantum_ai (topic, summary) VALUES (?, ?)').run(
-    row.topic,
-    row.summary,
-  );
+const upsertQuantum = db.prepare(
+  'INSERT OR IGNORE INTO quantum_ai (topic, summary) VALUES (?, ?)',
+);
+for (const row of quantumSeed) {
+  upsertQuantum.run(row.topic, row.summary);
 }
 
 // Helpers
@@ -726,6 +726,12 @@ app.get('/api/connectors/status', async (_req, res) => {
 });
 
 // --- Quantum AI summaries
+app.get('/api/quantum', (_req, res) => {
+  const topics = db
+    .prepare('SELECT topic, summary FROM quantum_ai ORDER BY topic ASC')
+    .all();
+  res.json({ topics });
+});
 app.get('/api/quantum/:topic', (req, res) => {
   const { topic } = req.params;
   const row = db.prepare('SELECT summary FROM quantum_ai WHERE topic = ?').get(topic);
