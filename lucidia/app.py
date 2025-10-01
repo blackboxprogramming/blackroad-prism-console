@@ -3,6 +3,7 @@
 import io
 import os
 import subprocess
+import sys
 from contextlib import redirect_stdout
 from pathlib import Path
 
@@ -38,10 +39,11 @@ def install_package():
     """Install a Python package via ``pip`` within the environment."""
     data = request.get_json(silent=True) or {}
     package = data.get("package")
-    if not package:
+    if not isinstance(package, str) or not package.strip():
         return jsonify({"error": "missing package"}), 400
+    package = package.strip()
     proc = subprocess.run(
-        ["pip", "install", package],
+        [sys.executable, "-m", "pip", "install", package],
         capture_output=True,
         text=True,
     )
@@ -55,8 +57,14 @@ def install_package():
 def git_clean():
     """Reset and remove untracked files from a git repository."""
     data = request.get_json(silent=True) or {}
-    repo_path = Path(data.get("path", "."))
+    raw_path = data.get("path", ".")
+    try:
+        repo_path = Path(raw_path).expanduser().resolve()
+    except (TypeError, RuntimeError):
+        return jsonify({"error": "invalid path"}), 400
     if not repo_path.is_dir():
+        return jsonify({"error": "invalid path"}), 400
+    if not (repo_path / ".git").is_dir():
         return jsonify({"error": "invalid path"}), 400
     reset = subprocess.run(
         ["git", "reset", "--hard"],
