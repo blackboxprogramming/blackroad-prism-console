@@ -1,4 +1,3 @@
-<!-- FILE: .prettierignore -->
 node_modules/
 dist/
 build/
