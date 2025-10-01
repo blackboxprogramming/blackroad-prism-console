@@ -19,7 +19,7 @@ _trash/
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
-blackroad_deploy.log
+blackroad_deploy.log*
 
 # OS
 .DS_Store
