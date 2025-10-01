@@ -59,3 +59,19 @@ def test_skip_validate(monkeypatch):
 
     pipeline.main(["--skip-validate", "push"])
     assert called is False
+
+
+def test_dry_run_skips_validate(monkeypatch):
+    called = False
+
+    def fake_validate() -> dict[str, str]:  # pragma: no cover - patched
+        nonlocal called
+        called = True
+        return {}
+
+    monkeypatch.setattr(pipeline, "validate_services", fake_validate)
+    monkeypatch.setattr(pipeline, "push_latest", lambda dry_run: None)
+    monkeypatch.setattr(pipeline, "redeploy_droplet", lambda dry_run: None)
+
+    pipeline.main(["--dry-run", "push"])
+    assert called is False

@@ -293,7 +293,7 @@ def main(argv: list[str] | None = None) -> int:
         parser.print_help()
         return exit_code
 
-    if not args.skip_validate:
+    if not args.skip_validate and not args.dry_run:
         summary = validate_services()
         if any(v != "OK" for k, v in summary.items() if k != "timestamp"):
             exit_code = 1
