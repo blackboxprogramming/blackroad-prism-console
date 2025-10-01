@@ -676,6 +676,12 @@ const metricsInterval = setInterval(() => {
   io.emit('metrics', payload);
 }, 2000);
 
+function shutdown(done) {
+  clearInterval(metricsInterval);
+  io.close();
+  return server.close(done);
+}
+
 // --- Start
 server.listen(PORT, () => {
   console.log(`[blackroad-api] listening on ${PORT} (db: ${DB_PATH}, llm: ${LLM_URL}, shell: ${ALLOW_SHELL})`);
@@ -685,4 +691,4 @@ server.listen(PORT, () => {
 process.on('unhandledRejection', (e) => console.error('UNHANDLED', e));
 process.on('uncaughtException', (e) => console.error('UNCAUGHT', e));
 
-module.exports = { app, server, io, metricsInterval };
+module.exports = { app, server, io, metricsInterval, shutdown };
