@@ -27,6 +27,12 @@ def test_remove_supported_engine():
     assert not agent.supports_engine("godot")
 
 
+def test_remove_supported_engine_raises_for_unknown_engine():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError, match="Engine 'godot' is not supported"):
+        agent.remove_supported_engine("godot")
+
+
 def test_create_game_disallows_weapons():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError, match="Weapons are not allowed"):

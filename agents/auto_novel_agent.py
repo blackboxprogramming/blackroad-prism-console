@@ -36,12 +36,21 @@ class AutoNovelAgent:
         self.SUPPORTED_ENGINES.add(engine.lower())
 
     def remove_supported_engine(self, engine: str) -> None:
-        """Remove an engine from the supported list if present.
+        """Remove an engine from the supported list.
 
         Args:
             engine: Name of the engine to remove.
+
+        Raises:
+            ValueError: If the provided engine is not currently supported.
         """
-        self.SUPPORTED_ENGINES.discard(engine.lower())
+        engine_lower = engine.lower()
+        if engine_lower not in self.SUPPORTED_ENGINES:
+            supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
+            raise ValueError(
+                f"Engine '{engine}' is not supported. Choose one of: {supported}."
+            )
+        self.SUPPORTED_ENGINES.remove(engine_lower)
 
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
         """Create a basic game using a supported engine without weapons.
