@@ -18,17 +18,17 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
-import traceback
-from datetime import datetime
-from pathlib import Path
-from typing import Callable
-import urllib.request
 import logging
 import os
+import shlex
 import subprocess
 import time
-from typing import Any, Dict
+import traceback
+import webbrowser
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+from urllib import error, request
 
 import requests
 from dotenv import load_dotenv
@@ -37,20 +37,12 @@ ERROR_LOG = Path("pipeline_errors.log")
 BACKUP_ROOT = Path("/var/backups/blackroad")
 LATEST_BACKUP = BACKUP_ROOT / "latest"
 DROPLET_BACKUP = BACKUP_ROOT / "droplet"
-import logging
-import os
-import subprocess
-import webbrowser
-from urllib import error, request
 
 LOGGER = logging.getLogger(__name__)
 _FILE_HANDLER = logging.FileHandler("pipeline.log")
 _FILE_HANDLER.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
 LOGGER.addHandler(_FILE_HANDLER)
 LOGGER.setLevel(logging.INFO)
-from datetime import datetime
-from pathlib import Path
-from urllib import request
 
 LOG_FILE = Path(__file__).resolve().parent.parent / "pipeline_validation.log"
 
@@ -65,8 +57,8 @@ def run(cmd: str, *, dry_run: bool = False) -> None:
 
 def notify_webhook(webhook: str, payload: dict[str, object]) -> None:
     data = json.dumps(payload).encode()
-    req = urllib.request.Request(webhook, data=data, headers={"Content-Type": "application/json"})
-    urllib.request.urlopen(req, timeout=5)
+    req = request.Request(webhook, data=data, headers={"Content-Type": "application/json"})
+    request.urlopen(req, timeout=5)
 
 
 def log_error(stage: str, exc: Exception, rollback: bool, webhook: str | None) -> None:
@@ -102,12 +94,11 @@ def refresh_working_copy(*, repo_path: str = ".", dry_run: bool = False) -> None
     sync_to_working_copy(repo_path, dry_run=dry_run)
 
 
-def sync_to_working_copy(repo_path: str, *, dry_run: bool = False) -> None:
+def sync_to_working_copy(repo_path: str, *, dry_run: bool = False) -> bool:
     """Ensure the repo is up to date in the Working Copy app.
 
-    The function checks for a ``working-copy`` remote, pushes to it and
-    triggers a pull inside the iOS application.  On Linux this URL scheme is
-    not executed but left as documentation for iOS automation.
+    Returns ``True`` when the sync steps run, ``False`` when the Working Copy
+    remote is not configured or the initial git call fails.
     """
 
     LOGGER.info("sync_to_working_copy repo_path=%s", repo_path)
@@ -120,25 +111,33 @@ def sync_to_working_copy(repo_path: str, *, dry_run: bool = False) -> None:
         )
     except subprocess.CalledProcessError as exc:  # pragma: no cover - defensive
         LOGGER.error("git remote failed: %s", exc)
-        return
+        return False
 
-    if "working-copy" not in result.stdout:
+    remotes = {line.strip() for line in result.stdout.splitlines()}
+    if "working-copy" not in remotes:
         LOGGER.info("No Working Copy remote configured; skipping sync")
-        return
-    run(f"git -C {repo_path} push working-copy HEAD", dry_run=dry_run)
+        return False
+
+    run(f"git -C {shlex.quote(repo_path)} push working-copy HEAD", dry_run=dry_run)
 
     repo_name = os.path.basename(os.path.abspath(repo_path))
     url = f"working-copy://x-callback-url/pull?repo={repo_name}"
+    browser_success = True
     if dry_run:
         LOGGER.info("DRY RUN: would open %s", url)
     else:  # pragma: no cover - requires iOS environment
         try:
-            webbrowser.open(url)
-            LOGGER.info("Triggered Working Copy pull via URL scheme")
+            if not webbrowser.open(url):
+                LOGGER.warning("Working Copy URL was not handled: %s", url)
+                browser_success = False
+            else:
+                LOGGER.info("Triggered Working Copy pull via URL scheme")
         except Exception as exc:  # pragma: no cover - logging only
             LOGGER.warning("Failed to open Working Copy URL: %s", exc)
+            browser_success = False
 
-    trigger_working_copy_pull(repo_name, dry_run=dry_run)
+    automation_ok = trigger_working_copy_pull(repo_name, dry_run=dry_run)
+    return browser_success and automation_ok
 
 
 def redeploy_droplet(*, dry_run: bool = False) -> None:
@@ -194,7 +193,7 @@ def validate_services() -> dict[str, str]:
     summary["timestamp"] = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
     print(json.dumps(summary))
     return summary
-def call_connectors(action: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+def call_connectors(action: str, payload: dict[str, Any]) -> dict[str, Any]:
     """Call BlackRoad's connectors API with retry and logging."""
     load_dotenv()
     token = os.getenv("CONNECTOR_KEY")
@@ -228,7 +227,7 @@ def call_connectors(action: str, payload: Dict[str, Any]) -> Dict[str, Any]:
     raise RuntimeError("connector call failed after retries")
 
 
-def sync_connectors(action: str, payload: Dict[str, Any]) -> None:
+def sync_connectors(action: str, payload: dict[str, Any]) -> None:
     """Sync external connectors via Prism API."""
     call_connectors(action, payload)
 
