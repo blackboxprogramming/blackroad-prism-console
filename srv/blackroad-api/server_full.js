@@ -199,7 +199,25 @@ app.use(
     credentials: true,
   }),
 );
-app.use(rateLimit({ windowMs: 60_000, max: 100 }));
+app.use(
+  rateLimit({
+    windowMs: 60_000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+  }),
+);
+const loginLimiter = rateLimit({
+  windowMs: 5 * 60_000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  handler: (req, res) => {
+    logger.warn({ event: 'login_rate_limited', ip: req.ip });
+    res.status(429).json({ error: 'too_many_attempts' });
+  },
+});
 app.use((req, res, next) => {
   const id = randomUUID();
   req.id = id;
@@ -259,6 +277,7 @@ app.get('/api/session', (req, res) => {
 });
 app.post(
   '/api/login',
+  loginLimiter,
   [body('username').isString(), body('password').isString()],
   (req, res) => {
     const errors = validationResult(req);
@@ -724,4 +743,4 @@ server.listen(PORT, () => {
 process.on('unhandledRejection', (e) => console.error('UNHANDLED', e));
 process.on('uncaughtException', (e) => console.error('UNCAUGHT', e));
 
-module.exports = { app, server };
+module.exports = { app, server, loginLimiter };
