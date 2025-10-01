@@ -10,6 +10,40 @@ from dataclasses import dataclass
 from subprocess import CalledProcessError
 from typing import Dict, List
 
+from logging import Logger
+
+
+@dataclass
+class CleanupSummary:
+    """Summary of cleanup results for a batch of branches."""
+
+    results: Dict[str, bool]
+
+    @property
+    def deleted(self) -> int:
+        """Number of branches successfully deleted."""
+
+        return sum(1 for deleted in self.results.values() if deleted)
+
+    @property
+    def failed(self) -> int:
+        """Number of branches that failed to delete."""
+
+        return sum(1 for deleted in self.results.values() if not deleted)
+
+    def is_empty(self) -> bool:
+        """Return ``True`` when there are no branches in the summary."""
+
+        return not self.results
+
+    def log_details(self, logger: Logger) -> None:
+        """Log per-branch results and overall summary using ``logger``."""
+
+        for branch, deleted in self.results.items():
+            status = "deleted" if deleted else "failed"
+            logger.info("%s: %s", branch, status)
+        logger.info("Summary: %d deleted, %d failed", self.deleted, self.failed)
+
 
 @dataclass
 class CleanupBot:
@@ -76,16 +110,16 @@ class CleanupBot:
         except CalledProcessError:
             return False
 
-    def cleanup(self) -> Dict[str, bool]:
+    def cleanup(self) -> CleanupSummary:
         """Remove the configured branches locally and remotely.
 
         Returns:
-            Mapping of branch names to deletion success.
+            Summary containing per-branch deletion status.
         """
         results: Dict[str, bool] = {}
         for branch in self.branches:
             results[branch] = self.delete_branch(branch)
-        return results
+        return CleanupSummary(results)
 
 
 def main(argv: List[str] | None = None) -> int:
@@ -107,21 +141,15 @@ def main(argv: List[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
 
     bot = CleanupBot.from_merged(base=args.base, dry_run=args.dry_run)
-    results = bot.cleanup()
+    summary = bot.cleanup()
 
-    if not results:
+    if summary.is_empty():
         logging.info("No merged branches to clean up.")
         return 0
 
-    for branch, deleted in results.items():
-        status = "deleted" if deleted else "failed"
-        logging.info("%s: %s", branch, status)
+    summary.log_details(logging.getLogger(__name__))
 
-    successes = sum(1 for deleted in results.values() if deleted)
-    failures = len(results) - successes
-    logging.info("Summary: %d deleted, %d failed", successes, failures)
-
-    return 0 if failures == 0 else 1
+    return 0 if summary.failed == 0 else 1
 
 
 if __name__ == "__main__":
