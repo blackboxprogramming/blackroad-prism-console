@@ -1,23 +1,28 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { isAdminLikeRole } from '../lib/access.js'
 
-export default function Atlas() {
+export default function Atlas({ sessionRole } = {}) {
   const navigate = useNavigate()
 
   useEffect(() => {
+    if (isAdminLikeRole(sessionRole)) {
+      return
+    }
     ;(async () => {
       try {
         const res = await fetch('/api/session', { cache: 'no-store' })
+        if (!res.ok) throw new Error('session_lookup_failed')
         const data = await res.json()
         const role = data?.user?.role
-        if (!role || !['admin', 'dev'].includes(role)) {
+        if (!isAdminLikeRole(role)) {
           navigate('/', { replace: true })
         }
       } catch {
         navigate('/', { replace: true })
       }
     })()
-  }, [navigate])
+  }, [navigate, sessionRole])
 
   return (
     <div className="card">
