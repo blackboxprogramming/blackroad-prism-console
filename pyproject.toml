@@ -5,7 +5,12 @@ requires-python = ">=3.10"
 description = "Offline PLM & Manufacturing Ops (Phase 37) — deterministic, file-backed."
 readme = "README.md"
 authors = [{ name = "Blackroad", email = "eng@blackroadinc.us" }]
-dependencies = ["typer"]
+dependencies = [
+    "typer",
+    "fastapi",
+    "pydantic",
+    "uvicorn",
+]
 
 [project.scripts]
 brc = "cli.console:main"

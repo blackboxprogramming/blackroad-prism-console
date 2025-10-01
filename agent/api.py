@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
 from agent import telemetry, jobs
@@ -16,16 +16,27 @@ class JobRequest(BaseModel):
 @app.get("/status")
 def status():
     """Return telemetry for Pi and Jetson."""
-    pi = telemetry.collect_local()
-    jetson = telemetry.collect_remote(JETSON_HOST, user=JETSON_USER)
+    try:
+        pi = telemetry.collect_local()
+    except telemetry.TelemetryError as exc:
+        pi = {"status": "error", "detail": str(exc)}
+
+    try:
+        jetson = telemetry.collect_remote(JETSON_HOST, user=JETSON_USER)
+    except telemetry.TelemetryError as exc:
+        jetson = {"status": "error", "detail": str(exc)}
+
     return {"pi": pi, "jetson": jetson}
 
 
 @app.post("/run")
 def run_job(req: JobRequest):
     """Run a command on the Jetson."""
-    jobs.run_remote(JETSON_HOST, req.command, user=JETSON_USER)
-    return {"status": "ok", "command": req.command}
+    try:
+        result = jobs.run_remote(JETSON_HOST, req.command, user=JETSON_USER)
+    except jobs.JobError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return result
 
 
 def main():
