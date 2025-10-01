@@ -8,6 +8,9 @@ This configuration builds the React frontend and Node.js API into separate conta
 docker-compose up -d --build
 ```
 
+The API container stores its SQLite database under `/srv/blackroad-api/data/blackroad.db`. The path can be overridden by
+setting the `BLACKROAD_DB_PATH` environment variable.
+
 ## View Logs
 
 ```bash
@@ -17,7 +20,7 @@ docker-compose logs -f
 ## Inspect the SQLite Database
 
 ```bash
-docker-compose exec blackroad-api sqlite3 /srv/blackroad-api/blackroad.db
+docker-compose exec blackroad-api sqlite3 /srv/blackroad-api/data/blackroad.db
 ```
 
 ## Health Checks

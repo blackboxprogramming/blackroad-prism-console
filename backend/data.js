@@ -9,7 +9,7 @@ const migrate = require('./migrate');
 const DB_FILE =
   process.env.NODE_ENV === 'test'
     ? '/tmp/blackroad_test.db'
-    : '/srv/blackroad-api/blackroad.db';
+    : process.env.BLACKROAD_DB_PATH || '/srv/blackroad-api/data/blackroad.db';
 
 // Ensure database and schema are ready
 migrate();
