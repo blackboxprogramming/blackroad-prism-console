@@ -11,6 +11,52 @@ from subprocess import CalledProcessError
 from typing import Dict, List
 
 
+@dataclass(frozen=True)
+class CleanupSummary:
+    """Structured view of branch deletion results."""
+
+    results: Dict[str, bool]
+
+    def __post_init__(self) -> None:
+        # Ensure an immutable snapshot even if the original dict is mutated later.
+        object.__setattr__(self, "results", dict(self.results))
+
+    @property
+    def deleted(self) -> List[str]:
+        """Return branches successfully deleted locally and remotely."""
+
+        return [branch for branch, succeeded in self.results.items() if succeeded]
+
+    @property
+    def failed(self) -> List[str]:
+        """Return branches that failed to delete."""
+
+        return [branch for branch, succeeded in self.results.items() if not succeeded]
+
+    @property
+    def deleted_count(self) -> int:
+        """Number of branches removed."""
+
+        return len(self.deleted)
+
+    @property
+    def failed_count(self) -> int:
+        """Number of branches that could not be removed."""
+
+        return len(self.failed)
+
+    @property
+    def total(self) -> int:
+        """Total branches processed."""
+
+        return len(self.results)
+
+    def exit_code(self) -> int:
+        """Return exit code reflecting whether any deletions failed."""
+
+        return 0 if self.failed_count == 0 else 1
+
+
 @dataclass
 class CleanupBot:
     """Delete local and remote branches after merges.
@@ -113,15 +159,22 @@ def main(argv: List[str] | None = None) -> int:
         logging.info("No merged branches to clean up.")
         return 0
 
-    for branch, deleted in results.items():
-        status = "deleted" if deleted else "failed"
-        logging.info("%s: %s", branch, status)
+    summary = CleanupSummary(results)
 
-    successes = sum(1 for deleted in results.values() if deleted)
-    failures = len(results) - successes
-    logging.info("Summary: %d deleted, %d failed", successes, failures)
+    for branch in summary.deleted:
+        logging.info("%s: deleted", branch)
 
-    return 0 if failures == 0 else 1
+    for branch in summary.failed:
+        logging.warning("%s: failed", branch)
+
+    logging.info(
+        "Summary: %d deleted, %d failed (total: %d)",
+        summary.deleted_count,
+        summary.failed_count,
+        summary.total,
+    )
+
+    return summary.exit_code()
 
 
 if __name__ == "__main__":
