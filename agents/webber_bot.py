@@ -33,9 +33,18 @@ class WebberBot:
                 capture_output=True,
                 text=True,
             )
+        except FileNotFoundError as exc:
+            raise RuntimeError(
+                "Prettier executable not found. Ensure Prettier is installed and on PATH."
+            ) from exc
         except subprocess.CalledProcessError as exc:
-            stderr = exc.stderr.strip() if exc.stderr else str(exc)
-            raise RuntimeError(f"Prettier failed for {file_path}: {stderr}") from exc
+            stderr = (exc.stderr or "").strip()
+            stdout = (exc.stdout or "").strip()
+            details = "\n".join(part for part in (stdout, stderr) if part)
+            message = f"Prettier failed for {file_path}"
+            if details:
+                message = f"{message}:\n{details}"
+            raise RuntimeError(message) from exc
 
     def format_html(self, file_path: str) -> None:
         """Format an HTML file using Prettier."""
