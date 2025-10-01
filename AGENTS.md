@@ -10,3 +10,8 @@
 - **Consistency**: adhere to project style guides and existing patterns; suggest alignment where drift occurs.
 - **Constructive feedback**: celebrate strengths, note issues with empathy, and propose concrete improvements or questions.
 
+## Active Agents
+
+- **BuildBlackRoadSiteAgent**: builds the BlackRoad.io site.
+- **WebsiteBot**: deploys the site.
+- **CleanupBot**: removes branches merged into the base branch.
