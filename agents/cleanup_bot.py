@@ -1,87 +1,65 @@
-"""Utility for deleting specified Git branches.
-
-Provides a simple command-line interface and structured logging to
-remove branches both locally and on the remote.
-"""
+"""Simple helper for deleting Git branches locally and remotely."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import subprocess
 from subprocess import CalledProcessError
-from typing import Dict, List
-import argparse
-import logging
-
-logger = logging.getLogger(__name__)
+from typing import Dict, Iterable, List
 
 
 @dataclass
 class CleanupBot:
     """Delete local and remote Git branches.
 
-    Attributes:
-        branches: Names of branches to delete.
-        dry_run: If ``True``, commands are printed instead of executed.
+    Parameters
+    ----------
+    branches:
+        Iterable of branch names to delete.
+    dry_run:
+        When ``True``, commands are printed instead of executed.
     """
 
-    branches: List[str]
+    branches: Iterable[str]
     dry_run: bool = False
+    _normalized_branches: List[str] = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self._normalized_branches = list(self.branches)
 
     def _run(self, *cmd: str) -> None:
-        """Run ``cmd`` unless in dry-run mode.
-
-        Args:
-            *cmd: Pieces of the command to execute.
-        """
-        command_str = " ".join(cmd)
+        """Run a git command unless in dry-run mode."""
+        command = " ".join(cmd)
         if self.dry_run:
-            logger.info("DRY-RUN: %s", command_str)
+            print(f"DRY-RUN: {command}")
             return
-        logger.debug("RUN: %s", command_str)
-        subprocess.run(cmd, check=True)
+        subprocess.check_call(cmd)
 
     def delete_branch(self, branch: str) -> bool:
-        """Delete ``branch`` locally and remotely.
+        """Delete ``branch`` locally and on ``origin``.
 
-        Returns:
-            ``True`` if both deletions succeed, ``False`` otherwise.
+        Returns ``True`` when both deletions succeed and ``False`` if an
+        error occurs.
         """
+
         try:
             self._run("git", "branch", "-D", branch)
             self._run("git", "push", "origin", "--delete", branch)
-            return True
         except CalledProcessError:
-            logger.exception("Failed to delete branch %s", branch)
+            print(f"Failed to delete branch: {branch}")
             return False
+        return True
 
     def cleanup(self) -> Dict[str, bool]:
-        """Remove all configured branches.
+        """Delete all configured branches."""
 
-        Returns:
-            Mapping of branch names to deletion success.
-        """
         results: Dict[str, bool] = {}
-        for branch in self.branches:
+        for branch in self._normalized_branches:
             results[branch] = self.delete_branch(branch)
         return results
 
 
-def main() -> None:
-    """Command-line interface for CleanupBot."""
-    parser = argparse.ArgumentParser(description="Delete local and remote Git branches.")
-    parser.add_argument("branches", nargs="+", help="Branches to delete")
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Show commands without executing"
-    )
-    args = parser.parse_args()
+def cleanup(branches: Iterable[str], dry_run: bool = False) -> Dict[str, bool]:
+    """Convenience wrapper around :class:`CleanupBot`."""
 
-    bot = CleanupBot(branches=args.branches, dry_run=args.dry_run)
-    for branch, success in bot.cleanup().items():
-        status = "deleted" if success else "failed"
-        logger.info("%s: %s", branch, status)
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    main()
+    return CleanupBot(branches=branches, dry_run=dry_run).cleanup()
