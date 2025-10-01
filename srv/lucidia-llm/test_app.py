@@ -1,17 +1,24 @@
 # <!-- FILE: srv/lucidia-llm/test_app.py -->
-import sys
+from importlib import util
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from fastapi.testclient import TestClient
-import sys
-from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(ROOT))
+APP_MODULE_PATH = ROOT / "app.py"
 
-from app import app
+
+def _load_app():
+    spec = util.spec_from_file_location("lucidia_llm_app", APP_MODULE_PATH)
+    if spec is None or spec.loader is None:  # pragma: no cover - safety check
+        raise ImportError(f"Unable to load FastAPI app from {APP_MODULE_PATH}")
+
+    module = util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.app
+
+
+app = _load_app()
 
 
 def test_health():
