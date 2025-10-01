@@ -17,9 +17,10 @@ Thanks for taking the time to contribute to BlackRoad Prism Console!
   ```bash
   pre-commit run --files <files>
   ```
-- Run the test suite:
+- Run the automated test suites:
   ```bash
   npm test
+  npm run test:smoke
   ```
 - Follow the [Code of Conduct](CODE_OF_CONDUCT.md) in all interactions.
 
@@ -43,6 +44,7 @@ Thank you for your interest in contributing to this project!
    ```sh
    pre-commit run --files CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md
    npm test
+   npm run test:smoke
    ```
 
 ## Pull requests
