@@ -2,6 +2,15 @@ import pytest
 from agents.auto_novel_agent import AutoNovelAgent
 
 
+@pytest.fixture(autouse=True)
+def reset_supported_engines():
+    """Restore ``SUPPORTED_ENGINES`` after each test."""
+
+    original = AutoNovelAgent.SUPPORTED_ENGINES.copy()
+    yield
+    AutoNovelAgent.SUPPORTED_ENGINES = original.copy()
+
+
 def test_add_supported_engine_enables_creation():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
