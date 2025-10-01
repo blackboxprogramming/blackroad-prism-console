@@ -44,7 +44,10 @@ class AutoNovelAgent:
             engine: Name of the engine to add. Comparison is case-insensitive.
 
         """
-        self.supported_engines.add(engine.lower())
+        normalized_engine = engine.strip().lower()
+        if not normalized_engine:
+            raise ValueError("Engine name cannot be empty.")
+        self.supported_engines.add(normalized_engine)
 
 
 if __name__ == "__main__":
