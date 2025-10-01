@@ -45,11 +45,10 @@ notify() {
 rsh() { ssh $SSH_OPTS "$DROPLET_SSH" "$@"; }
 
 remote_bash() {
-  # Run a bash -lc command on droplet (ensures login semantics for PATH)
-  local cmd
-  # Escape single quotes so payload can be safely wrapped for the remote shell
-  cmd=$(printf '%s' "$1" | sed "s/'/'\"'\"'/g")
-  rsh "bash -lc '$cmd'"
+  # Run a bash command on the droplet using a login shell while avoiding
+  # complicated quote-escaping. We stream the payload over STDIN so single
+  # quotes inside the script do not conflict with the SSH wrapper.
+  printf '%s\n' "$1" | rsh bash --login -s
 }
 
 require_cmd() {
