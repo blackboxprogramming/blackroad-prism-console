@@ -1,7 +1,7 @@
 """Simple auto novel agent example with game creation abilities."""
 
 from dataclasses import dataclass
-from typing import ClassVar, List
+from typing import ClassVar
 
 
 @dataclass
@@ -16,25 +16,30 @@ class AutoNovelAgent:
         print(f"{self.name} deployed and ready to generate novels!")
 
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
-        """Create a basic game using a supported engine.
+        """Create a basic game when given a supported engine name.
 
         Args:
-            engine: Game engine to use. Comparison is case-insensitive.
-            include_weapons: Whether to include weapons. ``True`` raises a
-                ``ValueError`` because weapons are not allowed.
+            engine: Requested engine name. Accepts ``Unity`` or ``Unreal`` in a
+                case-insensitive manner.
+            include_weapons: Whether weapons should be included in the game.
+                ``True`` triggers a ``ValueError`` because weapons are not
+                allowed.
 
         Raises:
-            ValueError: If the engine is unsupported or weapons are included.
+            ValueError: If the engine is not Unity/Unreal or weapons are
+                requested.
         """
         engine_lower = engine.lower()
         if engine_lower not in self.SUPPORTED_ENGINES:
             supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
-            raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
+            raise ValueError(
+                f"Unsupported engine '{engine}'. Choose one of: {supported}."
+            )
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
         print(f"Creating a {engine_lower.capitalize()} game without weapons...")
 
-    def list_supported_engines(self) -> List[str]:
+    def list_supported_engines(self) -> list[str]:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
