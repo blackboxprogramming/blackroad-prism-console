@@ -32,15 +32,15 @@ describe('API security and health', () => {
     expect(res.status).toBe(400);
   });
 
-  it('provides math health info', async () => {
+  it('reports math engine unavailable when not configured', async () => {
     const res = await request(app).get('/api/math/health');
-    expect(res.status).toBe(200);
-    expect(res.body.ok).toBe(true);
+    expect(res.status).toBe(503);
+    expect(res.body).toEqual({ ok: false, error: 'engine_unavailable' });
   });
 
-  it('evaluates a simple expression', async () => {
+  it('blocks math evaluation when engine is unavailable', async () => {
     const res = await request(app).post('/api/math/eval').send({ expr: '2+2' });
-    expect(res.status).toBe(200);
-    expect(res.body.result).toBe(4);
+    expect(res.status).toBe(503);
+    expect(res.body).toEqual({ error: 'engine_unavailable' });
   });
 });
