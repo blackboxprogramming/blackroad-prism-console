@@ -28,8 +28,19 @@ def test_create_game_disallows_weapons():
 
 def test_create_game_rejects_unsupported_engine():
     agent = AutoNovelAgent()
-    with pytest.raises(ValueError, match="Unsupported engine 'cryengine'"):
+    with pytest.raises(ValueError) as excinfo:
         agent.create_game("cryengine")
+
+    message = str(excinfo.value)
+    assert "Unsupported engine 'cryengine'" in message
+    assert "Supported engines:" in message
+    assert "add_supported_engine" in message
+
+
+def test_create_game_requires_engine_name():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError, match="Engine name must be a non-empty string."):
+        agent.create_game("   ")
 
 
 def test_generate_story_requires_theme():

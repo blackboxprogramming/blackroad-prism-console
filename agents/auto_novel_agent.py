@@ -29,14 +29,23 @@ class AutoNovelAgent:
         """Create a basic game using a supported engine without weapons.
 
         Args:
-            engine: Game engine to use.
+            engine: Game engine to use. Must be a non-empty string.
             include_weapons: If True, raise a ``ValueError`` because weapons are not
                 allowed.
         """
-        engine_lower = engine.lower()
-        if not self.supports_engine(engine_lower):
+        if not engine or not engine.strip():
+            raise ValueError("Engine name must be a non-empty string.")
+
+        engine_clean = engine.strip()
+        if not self.supports_engine(engine_clean):
             supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
-            raise ValueError(f"Unsupported engine '{engine_lower}'. Choose one of: {supported}.")
+            raise ValueError(
+                "Unsupported engine "
+                f"'{engine_clean}'. Supported engines: {supported}. "
+                "Use ``add_supported_engine`` to register new engines."
+            )
+
+        engine_lower = engine_clean.lower()
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
         print(f"Creating a {engine_lower.capitalize()} game without weapons...")
