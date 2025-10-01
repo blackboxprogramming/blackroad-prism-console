@@ -18,3 +18,13 @@ def test_remove_supported_engine_disables_creation():
     agent.remove_supported_engine("Godot")
     with pytest.raises(ValueError):
         agent.create_game("godot")
+
+
+def test_supported_engines_are_isolated_per_instance():
+    first = AutoNovelAgent()
+    second = AutoNovelAgent()
+
+    first.add_supported_engine("godot")
+
+    assert "godot" in first.list_supported_engines()
+    assert "godot" not in second.list_supported_engines()

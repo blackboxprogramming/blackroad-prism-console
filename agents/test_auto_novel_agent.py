@@ -46,3 +46,13 @@ def test_remove_supported_engine_errors_on_missing():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
         agent.remove_supported_engine("godot")
+
+
+def test_supported_engines_are_instance_specific():
+    agent_one = AutoNovelAgent()
+    agent_two = AutoNovelAgent()
+
+    agent_one.add_supported_engine("godot")
+
+    assert agent_one.supports_engine("godot")
+    assert not agent_two.supports_engine("godot")

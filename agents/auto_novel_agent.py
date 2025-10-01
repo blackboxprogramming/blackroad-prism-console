@@ -1,7 +1,10 @@
 """Simple auto novel agent example with game creation abilities."""
 
-from dataclasses import dataclass
-from typing import ClassVar, List
+from dataclasses import dataclass, field
+from typing import Final, List
+
+
+DEFAULT_SUPPORTED_ENGINES: Final[tuple[str, ...]] = ("unity", "unreal")
 
 
 @dataclass
@@ -9,7 +12,9 @@ class AutoNovelAgent:
     """A toy agent that can deploy itself and create simple games."""
 
     name: str = "AutoNovelAgent"
-    SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal"}
+    supported_engines: set[str] = field(
+        default_factory=lambda: set(DEFAULT_SUPPORTED_ENGINES)
+    )
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
@@ -23,7 +28,7 @@ class AutoNovelAgent:
         Args:
             engine: Name of the engine to verify.
         """
-        return engine.lower() in self.SUPPORTED_ENGINES
+        return engine.lower() in self.supported_engines
 
     def add_supported_engine(self, engine: str) -> None:
         """Add a new engine to the supported list.
@@ -33,7 +38,7 @@ class AutoNovelAgent:
         Args:
             engine: Name of the engine to add.
         """
-        self.SUPPORTED_ENGINES.add(engine.lower())
+        self.supported_engines.add(engine.lower())
 
     def remove_supported_engine(self, engine: str) -> None:
         """Remove an engine from the supported list.
@@ -47,9 +52,9 @@ class AutoNovelAgent:
             ValueError: If the engine is not currently supported.
         """
         normalized = engine.lower()
-        if normalized not in self.SUPPORTED_ENGINES:
+        if normalized not in self.supported_engines:
             raise ValueError(f"{engine} is not a supported engine.")
-        self.SUPPORTED_ENGINES.remove(normalized)
+        self.supported_engines.remove(normalized)
 
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
         """Create a basic game using a supported engine without weapons.
@@ -61,7 +66,7 @@ class AutoNovelAgent:
         """
         engine_lower = engine.lower()
         if not self.supports_engine(engine_lower):
-            supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
+            supported = ", ".join(sorted(self.supported_engines))
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
@@ -69,7 +74,7 @@ class AutoNovelAgent:
 
     def list_supported_engines(self) -> List[str]:
         """Return a list of supported game engines."""
-        return sorted(self.SUPPORTED_ENGINES)
+        return sorted(self.supported_engines)
 
     def generate_story(self, theme: str, protagonist: str = "An adventurer") -> str:
         """Generate a short themed story.
