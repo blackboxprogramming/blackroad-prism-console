@@ -216,6 +216,30 @@ header{
 .hero{
   padding: var(--s-7) 0;
 }
+.hero h2{
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-5);
+  font-size: clamp(16px, 2.4vw, 20px);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #F8FAFC;
+  background: rgba(15,26,48,0.78);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(6,182,212,0.25);
+  margin-bottom: var(--s-4);
+}
+.hero h2::before{
+  content: "";
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--grad);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.15), 0 0 18px rgba(37,99,235,0.35);
+}
 .hero h1{
   font-size: clamp(28px, 5vw, 48px);
   margin-bottom: var(--s-4);
