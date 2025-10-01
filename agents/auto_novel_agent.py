@@ -3,7 +3,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import ClassVar
+
+
+@dataclass(frozen=True, slots=True)
+class GameRecord:
+    """Record describing a game created by :class:`AutoNovelAgent`."""
+
+    engine: str
+    created_at: datetime
+    message: str
 
 
 @dataclass
@@ -12,7 +22,7 @@ class AutoNovelAgent:
 
     name: str = "AutoNovelAgent"
     SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal"}
-    games: list[str] = field(default_factory=list)
+    games: list[GameRecord] = field(default_factory=list)
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
@@ -37,24 +47,27 @@ class AutoNovelAgent:
             raise ValueError("Weapons are not allowed in generated games.")
         message = f"Creating a {engine_lower.capitalize()} game without weapons..."
         print(message)
-        self.games.append(engine_lower)
+        self.games.append(
+            GameRecord(
+                engine=engine_lower,
+                created_at=datetime.utcnow(),
+                message=message,
+            )
+        )
         return message
 
     def list_supported_engines(self) -> list[str]:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
-    def list_created_games(self) -> list[str]:
-        """Return a list of engines used for created games.
-
-        Returns:
-            A copy of the internal list tracking created games.
-        """
-        return self.games.copy()
+    def list_created_games(self) -> list[GameRecord]:
+        """Return a copy of the games created by the agent."""
+        return list(self.games)
 
 
 if __name__ == "__main__":
     agent = AutoNovelAgent()
     agent.deploy()
     agent.create_game("unity")
-    print(agent.list_created_games())
+    for record in agent.list_created_games():
+        print(record)
