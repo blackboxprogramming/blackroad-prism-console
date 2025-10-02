@@ -10,6 +10,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
       - run: npm ci --prefix apps/api
-      - run: node apps/api/src/jobs/webhook_worker.ts
+      - run: npm exec --prefix apps/api tsx src/jobs/webhook_worker.ts
         env:
           WEBHOOK_SIGNING_SECRET: ${{ secrets.WEBHOOK_SIGNING_SECRET }}

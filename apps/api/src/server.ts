@@ -6,6 +6,7 @@ import './lib/otel.js';
 import { canaryMiddleware } from './middleware/canary.js';
 import { apiKeyAuth } from './middleware/api_key.js';
 import { rateLimit } from './middleware/rate_limit.js';
+import { cookieParser, requireSession } from './middleware/session.js';
 import adminKeys from './routes/admin/keys.js';
 import adminWebhooks from './routes/admin/webhooks.js';
 import deliver from './routes/webhooks/deliver.js';
@@ -17,6 +18,7 @@ const app = express();
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(cookieParser());
 app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
@@ -31,9 +33,9 @@ app.use('/api/auth/okta', okta);
 // Public
 app.use('/api/public/ping', ping);
 
-// Admin (require existing session middleware from earlier prompts)
-app.use('/api/admin/keys', adminKeys);
-app.use('/api/admin/webhooks', adminWebhooks);
+const adminGuard = requireSession();
+app.use('/api/admin/keys', adminGuard, adminKeys);
+app.use('/api/admin/webhooks', adminGuard, adminWebhooks);
 
 // Partner (API key + limit)
 app.use('/api/partner', apiKeyAuth(), rateLimit(), deliver);
