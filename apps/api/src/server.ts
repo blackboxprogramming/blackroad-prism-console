@@ -23,6 +23,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(morgan('dev'));
+app.use(express.json());
 app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));
 app.use(regionMiddleware());
 app.use(localeMiddleware());
@@ -39,6 +40,7 @@ app.use('/api/notify/webpush', webpush);
 
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
+app.use('/api/auth/okta', okta);
 app.use('/api/privacy', privacyConsent, privacyPrefs, privacyDsar);
 
 const port = process.env.PORT || 4000;

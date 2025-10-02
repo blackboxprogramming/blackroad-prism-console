@@ -1,7 +1,7 @@
-import fs from 'fs';
+const fs = require('fs');
 
 function yyyymm(){ const d=new Date(); return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`; }
-function count(file:string){ if (!fs.existsSync(file)) return 0; return fs.readFileSync(file,'utf-8').trim().split('\n').filter(Boolean).length; }
+function count(file){ if (!fs.existsSync(file)) return 0; const data = fs.readFileSync(file,'utf-8').trim(); if (!data) return 0; return data.split('\n').filter(Boolean).length; }
 
 const report = `# Privacy Report ${yyyymm()}
 
