@@ -1,4 +1,4 @@
-# Prompt Pack — Wave 5 (Developer Mode, Pre-Filled for BlackRoad)
+# Prompt Pack - Wave 5 (Developer Mode, Pre-Filled for BlackRoad)
 channels:
   - '#announcements'
   - '#releases'
@@ -11,11 +11,11 @@ channels:
   - '#support-war-room'
 
 projects:
-  - 'Implementation – MasterPack'
-  - 'GRC – Evidence Calendar'
+  - 'Implementation - MasterPack'
+  - 'GRC - Evidence Calendar'
   - 'Release Train'
   - 'Customer Onboarding'
-  - 'OKRs – Company 2025'
+  - 'OKRs - Company 2025'
 
 service_account_placeholders:
   - 'SERVICE_ACCOUNT_ID_1'
