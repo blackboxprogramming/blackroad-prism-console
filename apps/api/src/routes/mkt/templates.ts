@@ -6,7 +6,8 @@ const FILE='data/mkt/templates.json';
 r.post('/templates/upsert', (req,res)=>{
   const { key, channel, a, b, split } = req.body||{};
   const obj = fs.existsSync(FILE)? JSON.parse(fs.readFileSync(FILE,'utf-8')) : {};
-  obj[key] = { channel, a, b: b||null, split: Number(split ?? process.env.MKT_DEFAULT_SPLIT || 50) };
+  const resolvedSplit = Number(split ?? (process.env.MKT_DEFAULT_SPLIT ?? 50));
+  obj[key] = { channel, a, b: b||null, split: resolvedSplit };
   fs.mkdirSync('data/mkt',{recursive:true}); fs.writeFileSync(FILE, JSON.stringify(obj,null,2));
   res.json({ ok:true });
 });
