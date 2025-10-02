@@ -46,6 +46,8 @@ app.use('/api/auth/okta', okta);
 // raw body for e-sign verification
 app.use((req:any,res,next)=>{ if (req.url.startsWith('/api/clm/esign')) { const b:Buffer[]=[]; req.on('data',(c)=>b.push(c)); req.on('end',()=>{ req.rawBody = Buffer.concat(b).toString(); next(); }); } else next(); });
 
+app.use(express.json());
+
 app.use('/api/clm', clmTemplates, clmContracts, clmApprovals, clmEsign, clmOblig);
 
 const port = process.env.PORT || 4000;
