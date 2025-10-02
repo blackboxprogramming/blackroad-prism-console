@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import List
@@ -17,9 +18,8 @@ def import_tasks(csv_path: str | Path) -> List[Task]:
         reader = csv.DictReader(f)
         for row in reader:
             context = json.loads(row.get("context_json") or "{}")
-            depends_on = [d.strip() for d in (row.get("depends_on_csv") or "").split(";") if d.strip()]
-            if not depends_on:
-                depends_on = [d.strip() for d in (row.get("depends_on_csv") or "").split(",") if d.strip()]
+            depends_raw = row.get("depends_on_csv") or ""
+            depends_on = [d.strip() for d in re.split(r"[;,]", depends_raw) if d.strip()]
             sched = row.get("scheduled_for_iso")
             scheduled = datetime.fromisoformat(sched) if sched else None
             tasks.append(
