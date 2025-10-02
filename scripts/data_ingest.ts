@@ -1,5 +1,4 @@
 import fs from 'fs';
-import fetch from 'node-fetch';
 
 async function main(){
   const out = 'data/feature_store/features/user_profile_v1.jsonl';

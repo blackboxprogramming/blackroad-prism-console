@@ -10,6 +10,8 @@ import { assignExperiment } from './middleware/experiment.js';
 dotenv.config();
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(morgan('dev'));
 app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));

@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 const variants = ['A','B'];
 (async ()=>{
   const metrics = { A: { conv: 0.12 }, B: { conv: 0.14 } }; // placeholder
