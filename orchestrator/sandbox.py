@@ -1,5 +1,5 @@
 import multiprocessing
-from typing import Callable, Any
+from typing import Any, Callable
 
 from sdk import plugin_api
 from metrics import record
@@ -18,7 +18,7 @@ def run_in_sandbox(callable: Callable[[], Any], timeout_s: int = 5, mem_mb: int 
         except Exception as e:  # pragma: no cover - forwarded
             q.put(e)
 
-    q: multiprocessing.Queue = multiprocessing.Queue()
+    q: multiprocessing.Queue[Any] = multiprocessing.Queue()
     proc = multiprocessing.Process(target=_target, args=(q,))
     proc.start()
     proc.join(timeout_s)
