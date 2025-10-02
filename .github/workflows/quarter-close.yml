@@ -12,8 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - run: npm ci --prefix apps/api
-      - run: node scripts/quarter_close.ts "${{ github.event.inputs.quarter }}"
+      - run: npm ci
+      - run: node scripts/quarter_close.js "${{ github.event.inputs.quarter }}"
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

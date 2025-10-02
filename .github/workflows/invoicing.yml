@@ -9,8 +9,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - run: npm ci --prefix apps/api
-      - run: node scripts/generate_invoice.ts
+      - run: npm ci
+      - run: node scripts/generate_invoice.js
         env:
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           BILLING_FROM_ENTITY: ${{ vars.BILLING_FROM_ENTITY }}

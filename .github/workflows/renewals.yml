@@ -9,8 +9,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - run: npm ci --prefix apps/api
-      - run: node scripts/renewal_forecast.ts
+      - run: npm ci
+      - run: node scripts/renewal_forecast.js
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           CRM_WAREHOUSE_URL: ${{ secrets.CRM_WAREHOUSE_URL }}

@@ -9,8 +9,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - run: npm ci --prefix apps/api
-      - run: node scripts/dunning_cycle.ts
+      - run: npm ci
+      - run: node scripts/dunning_cycle.js
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           DUNNING_EMAIL_WEBHOOK: ${{ secrets.DUNNING_EMAIL_WEBHOOK }}
