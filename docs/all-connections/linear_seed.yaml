@@ -1,4 +1,4 @@
-# Linear seed configuration for MasterPack orchestrator
+# Linear seed configuration for "ALL CONNECTIONS" orchestrator
 labels:
   - Automation
   - Audit
@@ -20,8 +20,8 @@ workflows:
       - Done
     default_state: Backlog
 projects:
-  - code: MP
-    name: MasterPack Automations
+  - code: AC
+    name: ALL CONNECTIONS Automations
     description: Tracking for "ALL CONNECTIONS" orchestrator work
     lead: codex
     labels:

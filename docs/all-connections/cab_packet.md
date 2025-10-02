@@ -1,7 +1,7 @@
 # Change Advisory Board Packet – "ALL CONNECTIONS" Orchestrator
 
 ## Summary
-- Deploy linear-first orchestration across MasterPack connections.
+- Deploy linear-first orchestration across ALL CONNECTIONS surfaces.
 - Implements full connection registry, bot registry and flow set.
 - Ensures 95%+ automation coverage and 99.9% flow uptime.
 
