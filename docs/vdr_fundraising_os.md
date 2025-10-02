@@ -50,7 +50,7 @@
 ### Legal/Corporate
 - **How-to:** Compile charter, bylaws, amendments, board and stockholder consents.
 - **Template:** Board consent template: “This is general information, not legal advice; consult qualified counsel.”
-- **Compliance Anchors:** Delaware §141(f) action by written consent [NEEDS VERIFICATION].
+- **Compliance Anchors:** Delaware General Corporation Law §141(f) (board actions by written consent without a meeting).
 - **Implementation Notes:** GC reviews; PDFs with bookmarks; watermark.
 - **QA Checklist:** Ensure all amendments included; signatures present.
 
@@ -64,7 +64,7 @@
 ### IP
 - **How-to:** List patents/trademarks, collect assignments, verify PIIA coverage.
 - **Template:** PIIA agreement disclaimer: “This is general information, not legal advice; consult qualified counsel.”
-- **Compliance Anchors:** Assignment recording rules [NEEDS VERIFICATION].
+- **Compliance Anchors:** USPTO assignment recording requirements (37 C.F.R. §§ 3.11–3.26).
 - **Implementation Notes:** GC stores executed PDFs; watermark; no download.
 - **QA Checklist:** All contributors have assignments; docket numbers verified.
 
@@ -90,12 +90,12 @@
 - **QA Checklist:** ARR figures match finance; references approved.
 
 ## 5. Fundraising Compliance Box
-- **Reg D 506(c):** General solicitation permitted only with accredited investor verification [oai_citation:0‡SEC].
-- **Reg D 506(b):** No general solicitation; up to 35 sophisticated non-accredited investors with enhanced disclosures [oai_citation:1‡SEC].
-- **Form D:** File within 15 days of first sale; no fee [oai_citation:2‡SEC].
-- **Rule 701:** Equity comp exemption with disclosure obligations at thresholds [oai_citation:3‡SEC].
-- **409A:** Fair market value for options; refresh valuation every 12 months or upon material event [oai_citation:4‡IRS].
-- **Blue Sky:** Coordinate state filings as required [NEEDS VERIFICATION].
+- **Reg D 506(c):** General solicitation permitted only with accredited investor verification ([SEC Rule 506(c)](https://www.ecfr.gov/current/title-17/chapter-II/part-230/subject-group-ECFR7214b0781255f4a/section-230.506)).
+- **Reg D 506(b):** No general solicitation; up to 35 sophisticated non-accredited investors with enhanced disclosures ([SEC Rule 506(b)](https://www.ecfr.gov/current/title-17/chapter-II/part-230/section-230.506)).
+- **Form D:** File within 15 days of first sale; no fee ([SEC Form D filing guidance](https://www.sec.gov/smallbusiness/exemptofferings/formd)).
+- **Rule 701:** Equity compensation exemption with disclosure obligations at thresholds ([SEC Rule 701](https://www.ecfr.gov/current/title-17/chapter-II/part-230/section-230.701)).
+- **409A:** Fair market value for options; refresh valuation every 12 months or upon material event ([IRS Section 409A](https://www.irs.gov/pub/irs-drop/n-05-1.pdf)).
+- **Blue Sky:** Coordinate state securities filings as required ([NASAA guidance on state "blue sky" laws](https://www.nasaa.org/industry-resources/corporate-finance/)).
 
 ## 6. Access Control & Security
 ```json
@@ -118,7 +118,7 @@
 }
 
 - Enforce SSO and MFA; watermark all documents; maintain audit logs.
-- For broker-dealers, ensure SEC 17a-4 compliant storage (WORM or audit-trail alternative) [oai_citation:8‡SEC].
+- For broker-dealers, ensure SEC 17a-4 compliant storage (WORM or audit-trail alternative) ([SEC Rule 17a-4](https://www.ecfr.gov/current/title-17/chapter-II/part-240/section-240.17a-4)).
 
 ## 7. Investor Q&A Workflow
 1. Intake via secure form or email to GC/CFO.
