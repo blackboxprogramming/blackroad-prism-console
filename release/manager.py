@@ -20,8 +20,13 @@ def stage(from_env: str, to_env: str) -> None:
 
 def promote(to_env: str) -> None:
     target = ENVS / to_env
-    if CURRENT.is_symlink() or CURRENT.exists():
+    if CURRENT.is_symlink():
         CURRENT.unlink()
+    elif CURRENT.exists():
+        if CURRENT.is_dir():
+            shutil.rmtree(CURRENT)
+        else:
+            CURRENT.unlink()
     CURRENT.symlink_to(target)
 
 
