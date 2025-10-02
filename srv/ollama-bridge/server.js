@@ -5,6 +5,16 @@ const crypto = require('crypto');
 
 const PORT = process.env.PORT || 4010;
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
+
+function readTimeoutEnv(name, fallback) {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  const parsed = parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+const HEALTH_TIMEOUT_MS = readTimeoutEnv('HEALTH_TIMEOUT_MS', 5000);
+const READY_TIMEOUT_MS = readTimeoutEnv('READY_TIMEOUT_MS', 5000);
 const LOG_DIR = '/var/log/blackroad';
 const LOG_FILE = path.join(LOG_DIR, 'ollama-bridge.log');
 const PERSONA_LOG = path.join(LOG_DIR, 'persona.log');
@@ -209,7 +219,7 @@ async function fetchJSON(url, opts = {}, timeout) {
 
 app.get('/api/llm/health', async (req, res) => {
   try {
-    const { r, up } = await fetchJSON(`${OLLAMA_URL}/api/version`, {}, 5000);
+    const { r, up } = await fetchJSON(`${OLLAMA_URL}/api/version`, {}, HEALTH_TIMEOUT_MS);
     res.locals.up_ms = up;
     if (!r.ok) throw new Error('upstream');
     const data = await r.json();
@@ -305,7 +315,7 @@ app.post('/api/llm/persona', (req, res) => {
 async function readyCheck() {
   const reasons = [];
   try {
-    const { r } = await fetchJSON(`${OLLAMA_URL}/api/version`, {}, 5000);
+    const { r } = await fetchJSON(`${OLLAMA_URL}/api/version`, {}, READY_TIMEOUT_MS);
     if (!r.ok) reasons.push('ollama_unreachable');
   } catch {
     reasons.push('ollama_unreachable');
@@ -313,7 +323,7 @@ async function readyCheck() {
   const model = resolveModel();
   if (model) {
     try {
-      const { r } = await fetchJSON(`${OLLAMA_URL}/api/tags`, {}, 5000);
+      const { r } = await fetchJSON(`${OLLAMA_URL}/api/tags`, {}, READY_TIMEOUT_MS);
       const data = await r.json();
       if (!data.models?.some(m => m.name === model)) reasons.push('model_missing');
     } catch {
@@ -331,7 +341,7 @@ async function readyCheck() {
   }
   if (Date.now() - lastHealth > 30000) {
     try {
-      const { r } = await fetchJSON(`${OLLAMA_URL}/api/version`, {}, 5000);
+      const { r } = await fetchJSON(`${OLLAMA_URL}/api/version`, {}, READY_TIMEOUT_MS);
       if (r.ok) lastHealth = Date.now();
       else reasons.push('health_stale');
     } catch {
