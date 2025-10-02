@@ -35,11 +35,16 @@ module.exports = function attachDevices(ctx = {}) {
        ON devices_commands (device_id, created_at DESC);`
   );
 
+  function authorized(key, daily) {
+    if (ORIGIN_KEY && key === ORIGIN_KEY) return true;
+    if (daily && daily.startsWith("LUCIDIA-AWAKEN-")) return true;
+    return false;
+  }
+
   function guard(req, res, next) {
-    const h = req.get("X-BlackRoad-Key") || "";
-    if (ORIGIN_KEY && h === ORIGIN_KEY) return next();
-    const daily = req.get("X-BlackRoad-Daily");
-    if (daily && daily.startsWith("LUCIDIA-AWAKEN-")) return next();
+    const key = req.get("X-BlackRoad-Key") || "";
+    const daily = req.get("X-BlackRoad-Daily") || "";
+    if (authorized(key, daily)) return next();
     res.status(401).json({ error: "unauthorized" });
   }
 
@@ -79,10 +84,10 @@ module.exports = function attachDevices(ctx = {}) {
 
   const nsp = io.of("/devices");
   nsp.use((socket, next) => {
-    const h = socket.handshake.headers["x-blackroad-key"] || "";
-    const daily = socket.handshake.headers["x-blackroad-daily"] || "";
-    if (ORIGIN_KEY && h === ORIGIN_KEY) return next();
-    if (daily && daily.startsWith("LUCIDIA-AWAKEN-")) return next();
+    const headers = socket.handshake.headers || {};
+    const key = headers["x-blackroad-key"] || "";
+    const daily = headers["x-blackroad-daily"] || "";
+    if (authorized(key, daily)) return next();
     next(new Error("unauthorized"));
   });
   nsp.on("connection", (socket) => {
