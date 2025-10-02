@@ -48,6 +48,7 @@ async function fetchJson(url, options = {}, service) {
   if (service === 'github') {
     headers.Authorization = `Bearer ${GITHUB_TOKEN}`;
     headers.Accept = 'application/vnd.github+json';
+    headers['User-Agent'] = 'jira-github-integration-test-script';
   }
 
   const max = 3;
@@ -103,7 +104,7 @@ async function step(name, fn) {
   let issueKey, browseUrl, ghNumber, ghUrl;
 
   try {
-    const me = await step('Jira auth', async () => {
+    await step('Jira auth', async () => {
       const data = await fetchJson(`${JIRA_BASE_URL}/rest/api/3/myself`, {}, 'jira');
       console.log(`PASS Jira auth: accountId ${data.accountId} displayName ${data.displayName}`);
       return data;
@@ -204,6 +205,7 @@ async function step(name, fn) {
     console.log('PASS All steps completed');
   } catch (err) {
     console.error('Integration test failed');
+    if (err && err.stack) console.error(err.stack);
     process.exit(1);
   }
 })();
