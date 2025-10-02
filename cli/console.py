@@ -23,9 +23,13 @@ def bot_list() -> None:
 
 
 @app.command("bot:run")
-def bot_run(bot: str, goal: str) -> None:
+def bot_run(bot: str, goal: str, inputs: str = typer.Option("{}", help="JSON object for bot inputs")) -> None:
     bots = get_default_bots()
-    result = bots[bot].run("forecast", {"pipeline": [1, 2, 3]})
+    try:
+        parsed_inputs = json.loads(inputs) if inputs else {}
+    except json.JSONDecodeError as exc:
+        raise typer.BadParameter(f"Invalid JSON for inputs: {exc}") from exc
+    result = bots[bot].run(goal, parsed_inputs)
     typer.echo(json.dumps(result))
 
 
