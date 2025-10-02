@@ -14,9 +14,14 @@ r.post('/issue', async (req:any, res) => {
 });
 
 r.post('/revoke', async (req:any, res) => {
+  if (!req.org?.id) return res.status(400).json({ error:'org_required' });
   const { id } = req.body || {};
-  const k = await prisma.apiKey.update({ where:{ id: String(id||'') }, data:{ revokedAt: new Date() }});
-  auditAppend(k.orgId, 'org.key_revoke', { by: req.session?.uid, id });
+  const keyId = String(id || '');
+  if (!keyId) return res.status(400).json({ error:'id_required' });
+  const key = await prisma.apiKey.findFirst({ where:{ id: keyId, orgId: req.org.id } });
+  if (!key) return res.status(404).json({ error:'not_found' });
+  await prisma.apiKey.update({ where:{ id: key.id }, data:{ revokedAt: new Date() }});
+  auditAppend(req.org.id, 'org.key_revoke', { by: req.session?.uid, id: key.id });
   res.json({ ok:true });
 });
 
