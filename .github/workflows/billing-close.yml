@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - run: node scripts/usage_rollup.ts > /tmp/usage.json
+      - run: node scripts/usage_rollup.mjs > /tmp/usage.json
       - name: Compute overages & Stripe invoice items
         run: |
           node -e '

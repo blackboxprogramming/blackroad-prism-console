@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 function currentFile(){
   const month = new Date().toISOString().slice(0,7).replace('-','');
@@ -7,7 +7,7 @@ function currentFile(){
 }
 
 const f = currentFile();
-const out: Record<string,{total:number; routes:Record<string,number>}> = {};
+const out = {};
 if (fs.existsSync(f)) {
   const rows = fs.readFileSync(f,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l));
   for (const r of rows) {

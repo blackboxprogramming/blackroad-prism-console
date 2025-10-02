@@ -1,0 +1,60 @@
+{
+  "plans": {
+    "STARTER": {
+      "monthly_price_usd": 19,
+      "base_quota": {
+        "requests_per_min": 120,
+        "requests_per_month": 100000
+      },
+      "overage": {
+        "enabled": true,
+        "unit": "1k_requests",
+        "price_usd": 1.5
+      },
+      "features": [
+        "reco_basic",
+        "webhooks_basic"
+      ],
+      "trial_days": 14
+    },
+    "PRO": {
+      "monthly_price_usd": 99,
+      "base_quota": {
+        "requests_per_min": 600,
+        "requests_per_month": 1000000
+      },
+      "overage": {
+        "enabled": true,
+        "unit": "1k_requests",
+        "price_usd": 1
+      },
+      "features": [
+        "reco_advanced",
+        "webhooks_retry",
+        "experiments"
+      ],
+      "trial_days": 14,
+      "coupons": [
+        {
+          "code": "LAUNCH25",
+          "percent_off": 25,
+          "duration_months": 3
+        }
+      ]
+    },
+    "INFINITY": {
+      "monthly_price_usd": 499,
+      "base_quota": {
+        "requests_per_min": 3000,
+        "requests_per_month": 10000000
+      },
+      "overage": {
+        "enabled": false
+      },
+      "features": [
+        "all"
+      ]
+    }
+  }
+}
+

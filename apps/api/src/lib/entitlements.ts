@@ -1,13 +1,21 @@
-import fs from 'fs';
-type Plan = { features?: string[]; base_quota?: any };
+import fs from 'node:fs';
+
+type Plan = { features?: string[]; base_quota?: Record<string, unknown> };
 type Catalog = { plans: Record<string, Plan> };
-let catalog: Catalog = { plans: {} };
+
+const catalogUrl = new URL('../../../../pricing/catalog.json', import.meta.url);
+let cachedCatalog: Catalog | null = null;
+
 export function loadCatalog(): Catalog {
-  if (fs.existsSync('pricing/catalog.yaml')) {
-    const yaml = require('yaml');
-    catalog = yaml.parse(fs.readFileSync('pricing/catalog.yaml','utf-8'));
+  if (!cachedCatalog) {
+    if (!fs.existsSync(catalogUrl)) {
+      cachedCatalog = { plans: {} };
+    } else {
+      const raw = fs.readFileSync(catalogUrl, 'utf-8');
+      cachedCatalog = JSON.parse(raw) as Catalog;
+    }
   }
-  return catalog;
+  return cachedCatalog;
 }
 export function featuresFor(plan='STARTER'): string[] {
   const cat = loadCatalog(); return cat.plans?.[plan]?.features || [];
