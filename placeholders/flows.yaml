@@ -1,0 +1,53 @@
+# Placeholder for flow definitions
+# Document orchestration flows per environment. Each flow should capture
+# triggers, steps, observers, and rollback guidance.
+staging:
+  flows:
+    - name: "deploy-web-staging"           # TODO: replace with flow identifier
+      description: "Coordinates staged deployment rollouts."
+      triggers:
+        manual: true
+        schedules:
+          - cron: "0 * * * *"              # hourly check
+        sources:
+          - type: "slack_command"
+            value: "/deploy staging"
+      steps:
+        - name: "build-artifacts"
+          action: "github.workflow:build"
+          notes: "TBD"
+        - name: "deploy"
+          action: "scripts/deploy-staging.sh"
+          rollback: "scripts/rollback-staging.sh"
+      observers:
+        - channel: "#deploys"
+          type: "slack"
+      runbooks:
+        - "docs/runbooks/deploy-staging.md"
+production:
+  flows:
+    - name: "deploy-web-prod"
+      description: "Promote latest artifact to production."
+      prerequisites:
+        - "Staging deploy successful"
+        - "CAB approval recorded"
+      triggers:
+        manual: true
+        approvals_required:
+          - role: "sre-lead"
+          - role: "product-owner"
+      steps:
+        - name: "preflight"
+          action: "scripts/preflight.sh"
+        - name: "deploy"
+          action: "scripts/deploy-prod.sh"
+        - name: "verify"
+          action: "scripts/verify-prod.sh"
+      rollback_plan:
+        summary: "TBD"
+        command: "scripts/rollback-prod.sh"
+      communications:
+        - medium: "slack"
+          target: "#status"
+        - medium: "statuspage"
+          target: "https://status.example.com"

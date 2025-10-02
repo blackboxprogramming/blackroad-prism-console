@@ -1,0 +1,35 @@
+# Placeholder for Linear seed configuration
+# Map the teams, labels, workflows, and projects needed to bootstrap Linear.
+teams:
+  - key: "AUT"
+    name: "Automation"
+    description: "Owns orchestration bots and deploy flows."
+    leads:
+      - "owner@example.com"
+    default_assignee: "owner@example.com"
+    slack_channel: "#automation"
+labels:
+  - name: "automation"
+    description: "Work related to orchestration platform."
+    color: "#6E5ED2"
+  - name: "incident"
+    description: "Track incident follow-ups triggered by automation."
+    color: "#D24B6E"
+workflows:
+  - name: "Automation Deployment"
+    states:
+      - name: "Triage"
+        type: "triage"
+      - name: "In Progress"
+        type: "in_progress"
+      - name: "Review"
+        type: "review"
+      - name: "Done"
+        type: "completed"
+    default_state: "Triage"
+projects:
+  - key: "AOPS"
+    name: "Automation Orchestration"
+    description: "Umbrella project tracking deploy and incident automation."
+    lead: "owner@example.com"
+    slack_channel: "#automation"
