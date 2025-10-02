@@ -9,4 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - run: node scripts/cpq/quote_expire.ts
+      - name: Install TypeScript runner
+        run: npm install --global ts-node typescript
+      - name: Expire stale quotes
+        run: ts-node scripts/cpq/quote_expire.ts
