@@ -34,8 +34,10 @@ find_free_port(){
 }
 
 update_nginx_port(){
-  local label=$1
-  local port=$2
+  local label
+  label=$1
+  local port
+  port=$2
   sed -i "s/127\.0\.0\.1:[0-9]\+/127.0.0.1:${port}/" /etc/nginx/sites-enabled/blackroad.conf
   nginx -t && systemctl reload nginx && log "Rebound $label to port $port"
 }
@@ -63,8 +65,10 @@ perform_backup(){
 }
 
 rotate_keep(){
-  local dir=$1
-  local keep=$2
+  local dir
+  dir=$1
+  local keep
+  keep=$2
   # shellcheck disable=SC2012
   ls -1t "$dir" | tail -n +$((keep+1)) | xargs -r -I{} rm "$dir/{}"
 }
@@ -100,16 +104,19 @@ update_repo(){
 update_failure_state(){
   local now
   now=$(date +%s)
-  local count=0
-  local last=0
+  local failure_count=0
+  local last_failure_time=0
   if [ -f "$STATE_FILE" ]; then
-    read -r count last <"$STATE_FILE"
+    if IFS=' ' read -r stored_count stored_last <"$STATE_FILE"; then
+      failure_count=$stored_count
+      last_failure_time=$stored_last
+    fi
   fi
-  if (( now - last > 600 )); then count=0; fi
-  count=$((count+1))
-  echo "$count $now" >"$STATE_FILE"
-  if (( count >= 3 )); then
-    log "Escalation: $count failures in 10 minutes"
+  if (( now - last_failure_time > 600 )); then failure_count=0; fi
+  failure_count=$((failure_count+1))
+  echo "$failure_count $now" >"$STATE_FILE"
+  if (( failure_count >= 3 )); then
+    log "Escalation: $failure_count failures in 10 minutes"
     log "See rollback test workflow: https://github.com/blackroad-io/prism-console/actions/workflows/rollback-tests.yml"
     trigger_rollback
   fi
