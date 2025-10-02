@@ -26,6 +26,6 @@ def write_bytes(path: Path, data: bytes) -> None:
 
 def read_bytes(path: Path) -> bytes:
     data = path.read_bytes()
-    if _needs_encrypt(path) and data.startswith(crypto.HEADER):
+    if data.startswith(crypto.HEADER):
         data = crypto.decrypt_bytes(data)
     return data
