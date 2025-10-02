@@ -114,6 +114,7 @@ async function step(name, fn) {
     return await fn();
   } catch (e) {
     console.error(`FAIL ${name}: ${e.message}`);
+    if (e && e.stack) console.error(e.stack);
     throw e;
   }
 }
@@ -279,6 +280,8 @@ async function step(name, fn) {
     console.log('PASS All steps completed');
   } catch (err) {
     console.error('Integration test failed');
+    if (err && err.stack) console.error(err.stack);
+    else if (err) console.error(err);
     process.exit(1);
   }
 })();
