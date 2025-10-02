@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
       - run: npm ci --prefix apps/api
-      - run: node apps/api/src/jobs/agent_worker.ts
+      - run: npx tsx apps/api/src/jobs/agent_worker.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

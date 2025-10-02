@@ -19,6 +19,6 @@ jobs:
         with: { node-version: '20' }
       - run: npm ci --prefix apps/api
       - name: Run PR autopilot
-        run: node scripts/agents/pr_autopilot.ts "${{ github.event.issue.number || inputs.pr || '' }}"
+        run: npx tsx scripts/agents/pr_autopilot.ts "${{ github.event.issue.number || inputs.pr || '' }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}

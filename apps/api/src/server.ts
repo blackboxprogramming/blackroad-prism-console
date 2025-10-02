@@ -10,6 +10,21 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(morgan('dev'));
+// Capture the raw Slack payload before body parsers consume the stream so signature checks work.
+app.use((req: any, _res, next) => {
+  if (req.url.startsWith('/api/agents/slack')) {
+    const chunks: Buffer[] = [];
+    req.on('data', (chunk: Buffer) => chunks.push(chunk));
+    req.on('end', () => {
+      req.rawBody = Buffer.concat(chunks).toString();
+      next();
+    });
+  } else {
+    next();
+  }
+});
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
@@ -23,8 +38,6 @@ import agentsDiscord from './routes/agents/discord.js';
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
-// raw body for Slack signature
-app.use((req:any,res,next)=>{ if (req.url.startsWith('/api/agents/slack')) { const b:Buffer[]=[]; req.on('data',(c)=>b.push(c)); req.on('end',()=>{ req.rawBody = Buffer.concat(b).toString(); next(); }); } else next(); });
 app.use('/api/agents/command', agentsCommand);
 app.use('/api/agents/slack', agentsSlack);
 app.use('/api/agents/discord', agentsDiscord);
