@@ -55,7 +55,16 @@ def bot_run(
     if settings.DRY_RUN:
         typer.echo("DRY-RUN: no artifacts written")
     else:
-        storage.write(str(ARTIFACTS / task_id / "task.json"), task.model_dump(mode="json"))
+        scrubbed_task = Task(
+            id=task.id,
+            goal=task.goal,
+            context=redaction.scrub(task.context) if task.context else None,
+            created_at=task.created_at,
+        )
+        storage.write(
+            str(ARTIFACTS / task_id / "task.json"),
+            scrubbed_task.model_dump(mode="json"),
+        )
         storage.write(
             str(ARTIFACTS / task_id / "response.json"), response.model_dump(mode="json")
         )
