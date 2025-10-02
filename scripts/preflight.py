@@ -1,7 +1,7 @@
 import sys
 import os
 from pathlib import Path
-import json
+import yaml
 
 REQUIRED_FOLDERS = ["config", "logs", "docs"]
 
@@ -67,8 +67,8 @@ def _check_configs() -> bool:
         p = Path(name)
         if p.exists():
             try:
-                json.loads(p.read_text())
-            except Exception:
+                yaml.safe_load(p.read_text())
+            except yaml.YAMLError:
                 print(f"Invalid config: {name}")
                 ok = False
     return ok

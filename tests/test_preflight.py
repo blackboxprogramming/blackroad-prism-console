@@ -27,3 +27,12 @@ def test_preflight_ok(tmp_path):
     (tmp_path / "config/ear_key.json").write_text("{}")
     result = run_preflight(tmp_path)
     assert result.returncode == 0
+
+
+def test_invalid_yaml_config(tmp_path):
+    for d in ("config", "logs", "docs"):
+        (tmp_path / d).mkdir()
+    (tmp_path / "config/ear_key.json").write_text("{}")
+    (tmp_path / "config/settings.yml").write_text(": bad yaml")
+    result = run_preflight(tmp_path)
+    assert result.returncode != 0
