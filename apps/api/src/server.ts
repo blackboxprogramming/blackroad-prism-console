@@ -23,6 +23,21 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(morgan('dev'));
+app.use(express.json());
+
+const urlencodedParser = express.urlencoded({ extended: true });
+app.use((req: any, res, next) => {
+  if (req.originalUrl.startsWith('/api/agents/slack')) {
+    return express.urlencoded({
+      extended: true,
+      verify: (slackReq: any, _res, buf) => {
+        slackReq.rawBody = buf.toString();
+      },
+    })(req, res, next);
+  }
+  return urlencodedParser(req, res, next);
+});
+
 app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));
 app.use(regionMiddleware());
 app.use(localeMiddleware());
@@ -40,8 +55,6 @@ app.use('/api/notify/webpush', webpush);
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
-// raw body for Slack signature
-app.use((req:any,res,next)=>{ if (req.url.startsWith('/api/agents/slack')) { const b:Buffer[]=[]; req.on('data',(c)=>b.push(c)); req.on('end',()=>{ req.rawBody = Buffer.concat(b).toString(); next(); }); } else next(); });
 
 app.use('/api/agents/command', agentsCommand);
 app.use('/api/agents/slack', agentsSlack);
