@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.8.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.7.0...v1.8.0) (2025-10-02)
+
+
+### Features
+
+* add admin-delete for contradictions ([#601](https://github.com/blackboxprogramming/blackroad-prism-console/issues/601)) ([0798c79](https://github.com/blackboxprogramming/blackroad-prism-console/commit/0798c799fb7ec0a4470d6e981e7c4ca908f12b98))
+* add Rohonc Codex dataset parser ([#608](https://github.com/blackboxprogramming/blackroad-prism-console/issues/608)) ([1e5d513](https://github.com/blackboxprogramming/blackroad-prism-console/commit/1e5d5137f8ad719e81c41fe1726442255d153dea))
+* scaffold blackroad agent skeleton ([#1764](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1764)) ([58d3d22](https://github.com/blackboxprogramming/blackroad-prism-console/commit/58d3d22525484adcd13bd77174b4c3cae598e2eb))
+
 ## [1.7.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.6.0...v1.7.0) (2025-09-29)
 
 
