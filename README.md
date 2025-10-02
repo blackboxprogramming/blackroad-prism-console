@@ -78,7 +78,7 @@ curl -X POST http://localhost:4000/api/subscribe/checkout \
   -H "Content-Type: application/json" \
   -d '{"planId":"pro","interval":"month"}'
 curl -H "Cookie: brsid=..." http://localhost:4000/api/subscribe/portal
-# simple health check
+# simple health check (always available, even if SUBSCRIPTIONS_ENABLED=false)
 curl http://localhost:4000/api/subscribe/health
 # Webhooks are received at /api/stripe/webhook and must include the Stripe signature header.
 ```

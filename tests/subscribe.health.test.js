@@ -22,6 +22,8 @@ function loadRouter(subEnabled) {
   for (const k of Object.keys(handlers)) delete handlers[k];
 
   const originalLoad = Module._load;
+  const previousSubValue = process.env.SUBSCRIPTIONS_ENABLED;
+
   Module._load = function (request, parent, isMain) {
     if (request === 'express') return mockExpress;
     if (request === '../db' || request.includes('db.js')) return {};
@@ -31,10 +33,20 @@ function loadRouter(subEnabled) {
   };
 
   if (subEnabled !== undefined) process.env.SUBSCRIPTIONS_ENABLED = subEnabled;
-  delete require.cache[require.resolve('../src/routes/subscribe.js')];
-  require('../src/routes/subscribe.js');
-  Module._load = originalLoad;
-  if (subEnabled !== undefined) delete process.env.SUBSCRIPTIONS_ENABLED;
+
+  try {
+    delete require.cache[require.resolve('../src/routes/subscribe.js')];
+    require('../src/routes/subscribe.js');
+  } finally {
+    Module._load = originalLoad;
+    if (subEnabled !== undefined) {
+      if (previousSubValue === undefined) {
+        delete process.env.SUBSCRIPTIONS_ENABLED;
+      } else {
+        process.env.SUBSCRIPTIONS_ENABLED = previousSubValue;
+      }
+    }
+  }
 }
 
 function callHealth() {
