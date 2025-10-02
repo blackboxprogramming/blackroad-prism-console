@@ -10,5 +10,5 @@
 - [ ] API /api/health returns 200
 - [ ] Updated docs/tests as needed
 
-> Comment `@codex fix comments` to trigger bot autofix.
+> Comment `@codex fix comments` (or `@cadillac`, `@lucidia`, `@bbpteam`, `@blackboxprogramming`) to trigger bot autofix.
 

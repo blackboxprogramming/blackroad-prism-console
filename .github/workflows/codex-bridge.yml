@@ -3,7 +3,17 @@ on: { issue_comment: { types: [created] } }
 permissions: { contents: write, pull-requests: write, issues: write }
 jobs:
   apply:
-    if: startsWith(github.event.comment.body, '/codex ') || startsWith(github.event.comment.body, '@codex ')
+    if: |
+      startsWith(github.event.comment.body, '/codex ')
+      || startsWith(github.event.comment.body, '@codex')
+      || startsWith(github.event.comment.body, '@cadillac')
+      || startsWith(github.event.comment.body, '@Cadillac')
+      || startsWith(github.event.comment.body, '@lucidia')
+      || startsWith(github.event.comment.body, '@Lucidia')
+      || startsWith(github.event.comment.body, '@bbpteam')
+      || startsWith(github.event.comment.body, '@BBPTeam')
+      || startsWith(github.event.comment.body, '@blackboxprogramming')
+      || startsWith(github.event.comment.body, '@Blackboxprogramming')
     runs-on: ubuntu-latest
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}

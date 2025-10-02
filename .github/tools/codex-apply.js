@@ -3,15 +3,36 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const MAX = 200 * 1024;
+const mentionAliases = [
+  '@codex',
+  '@cadillac',
+  '@lucidia',
+  '@bbpteam',
+  '@blackboxprogramming',
+];
+const escapeForRegex = (value) =>
+  value.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
+const aliasPattern = mentionAliases
+  .map((alias) => escapeForRegex(alias))
+  .join('|');
+const leadingAliasPattern = new RegExp(
+  `^(?:${aliasPattern})(?:\\s+(?:${aliasPattern}))*`,
+  'i'
+);
+const fixCommentsPattern = new RegExp(
+  `^(?:${aliasPattern})(?:\\s+(?:${aliasPattern}))*\\s+fix comments`,
+  'i'
+);
+
 let body = (process.env.CODEX_BODY || '').replace(/\r/g, '');
-if (body.startsWith('@codex')) {
-  if (/^@codex\s+fix comments/i.test(body)) {
+if (leadingAliasPattern.test(body)) {
+  if (fixCommentsPattern.test(body)) {
     body = body.replace(
-      /^@codex\s+fix comments/i,
+      fixCommentsPattern,
       '/codex apply .github/prompts/codex-fix-comments.md'
     );
   } else {
-    body = body.replace(/^@codex/, '/codex');
+    body = body.replace(leadingAliasPattern, '/codex');
   }
 }
 const perm = process.env.CODEX_PERMISSION || '';
