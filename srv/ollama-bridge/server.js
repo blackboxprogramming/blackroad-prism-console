@@ -70,6 +70,8 @@ function authMiddleware(req, res, next) {
   return res.status(401).json({ error: 'unauthorized' });
 }
 
+const TRUSTED_CSRF_HOSTS = new Set(['blackroad.io', 'www.blackroad.io']);
+
 function csrfMiddleware(req, res, next) {
   const ip = req.ip.replace('::ffff:', '');
   if (req.method !== 'POST') return next();
@@ -77,7 +79,7 @@ function csrfMiddleware(req, res, next) {
   const origin = req.get('Origin') || req.get('Referer') || '';
   try {
     const u = new URL(origin);
-    if (u.host !== 'blackroad.io' && u.host !== 'www.blackroad.io') {
+    if (!TRUSTED_CSRF_HOSTS.has(u.hostname)) {
       return res.status(403).json({ error: 'forbidden' });
     }
   } catch {
