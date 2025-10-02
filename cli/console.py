@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import typer
 
 from bots import BOT_REGISTRY
@@ -9,7 +11,11 @@ app = typer.Typer(add_completion=False)
 
 
 def _get_orchestrator() -> Orchestrator:
-    orch = Orchestrator()
+    app_dir = Path(typer.get_app_dir("prism-console"))
+    app_dir.mkdir(parents=True, exist_ok=True)
+    memory_path = app_dir / "memory.jsonl"
+    state_path = app_dir / "orchestrator_state.json"
+    orch = Orchestrator(memory_path=memory_path, state_path=state_path)
     for domain, BotCls in BOT_REGISTRY.items():
         orch.register_bot(domain, BotCls())
     return orch

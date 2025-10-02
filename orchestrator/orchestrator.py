@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import uuid
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -11,11 +12,17 @@ from .protocols import Response, Task
 class Orchestrator:
     """Routes tasks to registered bots and logs all actions."""
 
-    def __init__(self, memory_path: str | Path = "memory.jsonl") -> None:
+    def __init__(
+        self,
+        memory_path: str | Path = "memory.jsonl",
+        state_path: str | Path | None = None,
+    ) -> None:
         self.bots: Dict[str, Any] = {}
         self.tasks: Dict[str, Task] = {}
         self.responses: Dict[str, Response] = {}
         self.memory_path = Path(memory_path)
+        self.state_path = Path(state_path) if state_path else self.memory_path.with_suffix(".state.json")
+        self._load_state()
 
     # Bot management -------------------------------------------------
     def register_bot(self, domain: str, bot: Any) -> None:
@@ -28,6 +35,7 @@ class Orchestrator:
             raise ValueError("Network calls are disallowed by guardrails")
         self.tasks[task.id] = task
         self._log({"event": "task_created", "task": task.__dict__})
+        self._persist_state()
         return task
 
     def route(self, task_id: str) -> Response:
@@ -39,6 +47,7 @@ class Orchestrator:
             response = bot.run(task)
         self.responses[task.id] = response
         self._log({"event": "task_routed", "task_id": task.id, "response": response.__dict__})
+        self._persist_state()
         return response
 
     def list_tasks(self) -> List[Task]:
@@ -49,5 +58,29 @@ class Orchestrator:
 
     # Internal logging -----------------------------------------------
     def _log(self, record: Dict[str, Any]) -> None:
+        self.memory_path.parent.mkdir(parents=True, exist_ok=True)
         with self.memory_path.open("a") as fh:
             fh.write(json.dumps(record) + "\n")
+
+    def _load_state(self) -> None:
+        if not self.state_path.exists():
+            return
+
+        data = json.loads(self.state_path.read_text())
+        tasks = data.get("tasks", {})
+        responses = data.get("responses", {})
+
+        for task_id, payload in tasks.items():
+            self.tasks[task_id] = Task(**payload)
+
+        for task_id, payload in responses.items():
+            self.responses[task_id] = Response(**payload)
+
+    def _persist_state(self) -> None:
+        state = {
+            "tasks": {task_id: asdict(task) for task_id, task in self.tasks.items()},
+            "responses": {task_id: asdict(response) for task_id, response in self.responses.items()},
+        }
+
+        self.state_path.parent.mkdir(parents=True, exist_ok=True)
+        self.state_path.write_text(json.dumps(state, indent=2, sort_keys=True, default=str))
