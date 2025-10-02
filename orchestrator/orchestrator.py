@@ -24,13 +24,19 @@ class Orchestrator:
     def route(self, task: Task, bot_name: str) -> BotResponse:
         bot = self.bots[bot_name]
         response = bot.run(task)
+        response_payload = response.model_dump()
         self._log(
-            {"type": "response", "task_id": task.id, "bot": bot_name, "response": response.dict()}
+            {
+                "type": "response",
+                "task_id": task.id,
+                "bot": bot_name,
+                "response": response_payload,
+            }
         )
         artifact_dir = self.artifacts_dir / task.id
         artifact_dir.mkdir(parents=True, exist_ok=True)
         with open(artifact_dir / "response.json", "w") as fh:
-            json.dump(response.dict(), fh, indent=2)
+            json.dump(response_payload, fh, indent=2)
         self.red_team(response)
         return response
 
