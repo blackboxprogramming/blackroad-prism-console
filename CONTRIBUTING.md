@@ -20,6 +20,7 @@ Thanks for taking the time to contribute to BlackRoad Prism Console!
 - Run the test suite:
   ```bash
   npm test
+  npm run test:jest
   ```
 - Follow the [Code of Conduct](CODE_OF_CONDUCT.md) in all interactions.
 
@@ -40,10 +41,11 @@ Thank you for your interest in contributing to this project!
    pip install -r requirements-dev.txt
    ```
 2. Run tests and linters:
-   ```sh
-   pre-commit run --files CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md
-   npm test
-   ```
+  ```sh
+  pre-commit run --files CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md
+  npm test
+  npm run test:jest
+  ```
 
 ## Pull requests
 
