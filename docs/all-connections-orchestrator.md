@@ -260,6 +260,28 @@ flows:
 | LinkedIn | ✅ | social_to_crm |
 | YouTube | ✅ | social_to_crm |
 
+### Coverage Gap Follow-ups
+
+| Gap | Owner | Linear Issue | Due | Notes |
+| --- | --- | --- | --- | --- |
+| GitLab | Platform Ops | Coverage Gap – GitLab | 2025-09-30 | Mirror repos into GitHub + Jenkins and federate SSO. |
+| ClickUp | BizOps | Coverage Gap – ClickUp | 2025-09-30 | Stand up ClickUp ↔ Linear sync with audit logging. |
+| Monday | BizOps | Coverage Gap – Monday | 2025-10-04 | Build webhook bridge and attach CAB evidence bundle. |
+| Trello | BizOps | Coverage Gap – Trello | 2025-10-04 | Route Trello cards into Linear with acceptance/test templates. |
+| Smartsheet | RevOps | Coverage Gap – Smartsheet | 2025-10-07 | Enable Smartsheet connector + Splunk evidence pointers. |
+| Dropbox | Security | Coverage Gap – Dropbox | 2025-10-07 | Enforce Okta SSO and evidence export into ACO data lake. |
+| Airtable | RevOps | Coverage Gap – Airtable | 2025-10-09 | Provision Airtable API bot + nightly sync flow. |
+| Adobe CC | Design | Coverage Gap – Adobe CC | 2025-10-09 | Enable Adobe SSO and route assets into Notion evidence hub. |
+| Affinity | GTM | Coverage Gap – Affinity | 2025-10-11 | Automate Affinity deal updates into Salesforce + Slack. |
+| Canva | Design | Coverage Gap – Canva | 2025-10-11 | Connect Canva exports into Asana review queue. |
+| JupyterHub | Data Platform | Coverage Gap – JupyterHub | 2025-10-14 | Wire SSO + notebook artifact archival. |
+| Kaggle | Data Platform | Coverage Gap – Kaggle | 2025-10-14 | Mirror Kaggle runs into Vertex AI metrics with evidence. |
+| Hugging Face | AI | Coverage Gap – Hugging Face | 2025-10-16 | Configure model registry sync + audit logging. |
+| PayPal | FinOps | Coverage Gap – PayPal | 2025-10-16 | Add settlement webhook into revenue pipeline. |
+| Gusto | People Ops | Coverage Gap – Gusto | 2025-10-18 | Provision SCIM + payroll alerts via Slack. |
+| BambooHR | People Ops | Coverage Gap – BambooHR | 2025-10-18 | Mirror HR events into Workday/Okta flow. |
+| Deel | People Ops | Coverage Gap – Deel | 2025-10-21 | Create contractor onboarding flow with WORM evidence. |
+
 ---
 
 ## CAB Packet & Ring Plan

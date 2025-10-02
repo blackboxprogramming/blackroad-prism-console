@@ -215,7 +215,7 @@ Examples:
 ⸻
 
 5) ACCEPTANCE GATES
-    •    Coverage: Iterate registry; assert each tool has IdP SSO + ≥1 flow touch. If missing → create Linear issue Coverage Gap – <tool> with owner, due date, plan.
+    •    Coverage: Iterate registry; assert each tool has IdP SSO + ≥1 flow touch. If missing → create Linear issue Coverage Gap – <tool> with owner, due date, plan, and evidence links.
     •    SLOs: P95≤60s, uptime≥99.9%; marts fresh by D+0 06:00 UTC.
     •    Evidence: For each change, write /evidence/<ts>_<artifact>/ with plan.txt, diff.json, monitors.json, samples/, hash.sig, pointers.csv; index pointer in Splunk.
 
@@ -227,6 +227,30 @@ Examples:
     3.    Flow YAML for all flows (staging + prod profiles).
     4.    Coverage report table for every tool.
     5.    CAB packet + ring plan (canary→pilot→broad).
+
+⸻
+
+Coverage Gap Workplan (include in output #4):
+
+| Gap | Owner | Linear Issue | Due | Notes |
+| --- | --- | --- | --- | --- |
+| GitLab | Platform Ops | Coverage Gap – GitLab | 2025-09-30 | Mirror repos into GitHub + Jenkins and federate SSO. |
+| ClickUp | BizOps | Coverage Gap – ClickUp | 2025-09-30 | Stand up ClickUp ↔ Linear sync with audit logging. |
+| Monday | BizOps | Coverage Gap – Monday | 2025-10-04 | Build webhook bridge and attach CAB evidence bundle. |
+| Trello | BizOps | Coverage Gap – Trello | 2025-10-04 | Route Trello cards into Linear with acceptance/test templates. |
+| Smartsheet | RevOps | Coverage Gap – Smartsheet | 2025-10-07 | Enable Smartsheet connector + Splunk evidence pointers. |
+| Dropbox | Security | Coverage Gap – Dropbox | 2025-10-07 | Enforce Okta SSO and evidence export into ACO data lake. |
+| Airtable | RevOps | Coverage Gap – Airtable | 2025-10-09 | Provision Airtable API bot + nightly sync flow. |
+| Adobe CC | Design | Coverage Gap – Adobe CC | 2025-10-09 | Enable Adobe SSO and route assets into Notion evidence hub. |
+| Affinity | GTM | Coverage Gap – Affinity | 2025-10-11 | Automate Affinity deal updates into Salesforce + Slack. |
+| Canva | Design | Coverage Gap – Canva | 2025-10-11 | Connect Canva exports into Asana review queue. |
+| JupyterHub | Data Platform | Coverage Gap – JupyterHub | 2025-10-14 | Wire SSO + notebook artifact archival. |
+| Kaggle | Data Platform | Coverage Gap – Kaggle | 2025-10-14 | Mirror Kaggle runs into Vertex AI metrics with evidence. |
+| Hugging Face | AI | Coverage Gap – Hugging Face | 2025-10-16 | Configure model registry sync + audit logging. |
+| PayPal | FinOps | Coverage Gap – PayPal | 2025-10-16 | Add settlement webhook into revenue pipeline. |
+| Gusto | People Ops | Coverage Gap – Gusto | 2025-10-18 | Provision SCIM + payroll alerts via Slack. |
+| BambooHR | People Ops | Coverage Gap – BambooHR | 2025-10-18 | Mirror HR events into Workday/Okta flow. |
+| Deel | People Ops | Coverage Gap – Deel | 2025-10-21 | Create contractor onboarding flow with WORM evidence. |
 
 ⸻
 
