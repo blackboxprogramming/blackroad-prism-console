@@ -74,14 +74,40 @@ def run_pipeline(action: str) -> None:
         deploy_droplet()
     elif "rebase" in a:
         print("-> rebasing local branch against remote")
-        subprocess.run(["git", "fetch"], check=False)
         try:
             branch = subprocess.check_output([
                 "git", "branch", "--show-current"
             ], text=True).strip() or "main"
         except subprocess.CalledProcessError:
             branch = "main"
-        subprocess.run(["git", "rebase", f"origin/{branch}"], check=False)
+
+        try:
+            upstream = subprocess.check_output([
+                "git",
+                "rev-parse",
+                "--abbrev-ref",
+                "--symbolic-full-name",
+                f"{branch}@{{upstream}}",
+            ], text=True).strip()
+        except subprocess.CalledProcessError:
+            upstream = ""
+
+        if upstream:
+            remote, _, _ = upstream.partition("/")
+            remote = remote or "origin"
+            target = upstream
+            print(f"-> detected upstream {upstream}; fetching {remote}")
+            subprocess.run(["git", "fetch", remote], check=False)
+        else:
+            target = "origin/main"
+            print("-> no upstream configured; falling back to origin/main")
+            subprocess.run(["git", "fetch", "origin"], check=False)
+
+        rebase_result = subprocess.run(["git", "rebase", target], check=False)
+        if rebase_result.returncode != 0:
+            print("-> rebase failed; aborting deployment")
+            return
+
         deploy_droplet()
     elif "sync" in a and "salesforce" in a:
         sync_connectors()
