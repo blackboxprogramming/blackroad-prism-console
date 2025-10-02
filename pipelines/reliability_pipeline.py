@@ -31,7 +31,15 @@ def run(inputs: Dict | None = None) -> Dict:
 
     if settings.STRICT_DQ:
         mv = checks.check_missing_values(incidents + changes)
-        sc = checks.check_schema(summary, {"incidents": int, "changes": int, "burn_rate": float, "risk_flag": bool})
+        sc = checks.check_schema(
+            [summary],
+            {
+                "incidents": int,
+                "changes": int,
+                "burn_rate": float,
+                "risk_flag": bool,
+            },
+        )
         if mv or sc:
             raise ValueError("DQ failure")
 
