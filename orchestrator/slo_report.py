@@ -16,7 +16,7 @@ def _gather_summaries() -> List[Dict]:
         if prev.exists():
             data["previous"] = json.loads(storage.read(str(prev)))
         summaries.append(data)
-    return summaries
+    return sorted(summaries, key=lambda item: item["name"])
 
 
 def build_report() -> Dict[str, List[Dict]]:

@@ -30,11 +30,15 @@ def _quantile(sorted_vals: List[int], q: float) -> int:
 
 
 def list_scenarios() -> List[str]:
-    return [p.stem for p in SCENARIOS.glob("*.yml")]
+    """Return scenario names sorted for stable CLI output."""
+
+    return sorted(p.stem for p in SCENARIOS.glob("*.yml"))
 
 
 def show_scenario(name: str) -> Dict:
     path = SCENARIOS / f"{name}.yml"
+    if not path.exists():
+        raise ValueError(f"Unknown scenario: {name}")
     return yaml.safe_load(path.read_text())
 
 

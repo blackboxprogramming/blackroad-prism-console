@@ -16,6 +16,9 @@ python -m cli.console slo:report
 
 Use `--perf` on any command to print a timing footer.
 
+`bench:run` and `bench:all` emit JSON summaries so results can be piped into
+other tooling.
+
 ## Cache Impact
 
 `bench:run` accepts `--cache` to compare cache modes. `run_cache_experiment` writes a `cache_savings.md` file summarising speedups.

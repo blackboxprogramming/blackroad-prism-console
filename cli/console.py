@@ -101,7 +101,7 @@ def bench_show(
 @app.command("bench:run")
 def bench_run(
     name: str = typer.Option(..., "--name"),
-    iter: int = typer.Option(20, "--iter"),
+    iterations: int = typer.Option(20, "--iter", "--iterations"),
     warmup: int = typer.Option(5, "--warmup"),
     cache: str = typer.Option("na", "--cache"),
     export_csv: Optional[Path] = typer.Option(None, "--export-csv"),
@@ -110,22 +110,26 @@ def bench_run(
 ):
     ctx = perf_timer("bench_run") if perf else nullcontext({})
     with ctx as p:
-        res = bench_runner.run_bench(name, iterations=iter, warmup=warmup, cache=cache)
+        res = bench_runner.run_bench(
+            name, iterations=iterations, warmup=warmup, cache=cache
+        )
         if export_csv:
             src = Path(res["env"]).with_name("timings.csv")
             storage.write(str(export_csv), Path(src).read_text())
+        typer.echo(json.dumps(res, indent=2))
     _footer(perf, p, cache=cache)
 
 
 @app.command("bench:all")
 def bench_all(
-    iter: int = typer.Option(20, "--iter"),
+    iterations: int = typer.Option(20, "--iter", "--iterations"),
     warmup: int = typer.Option(5, "--warmup"),
     perf: bool = typer.Option(False, "--perf", is_flag=True),
 ):
     ctx = perf_timer("bench_all") if perf else nullcontext({})
     with ctx as p:
-        bench_runner.run_all(iterations=iter, warmup=warmup)
+        results = bench_runner.run_all(iterations=iterations, warmup=warmup)
+        typer.echo(json.dumps(results, indent=2))
     _footer(perf, p)
 
 
