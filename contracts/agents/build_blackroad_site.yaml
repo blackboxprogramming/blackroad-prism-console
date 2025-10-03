@@ -1,0 +1,21 @@
+name: build_blackroad_site
+version: 1.0.0
+inputs: []
+outputs:
+  - id: build_exit_code
+    type: integer
+    constraints:
+      allowed: [0, 1]
+    description: Zero on success, non-zero on failure.
+side_effects:
+  - type: process
+    resource: npm
+    ops: [run_build]
+  - type: filesystem
+    resource: sites/blackroad/.next
+    ops: [write]
+failure_modes:
+  - id: NPM_UNAVAILABLE
+    retryable: false
+  - id: BUILD_FAILED
+    retryable: true
