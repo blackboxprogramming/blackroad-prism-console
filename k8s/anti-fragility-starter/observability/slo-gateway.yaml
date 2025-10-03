@@ -1,0 +1,42 @@
+apiVersion: openslo/v1alpha
+kind: ServiceLevelObjective
+metadata:
+  name: demo-api-latency
+  labels:
+    app.kubernetes.io/name: demo-api
+    slo.openslo.com/criticality: tier-1
+spec:
+  service: demo-api
+  description: 99% of requests for the demo API should complete within 300ms over 30 days.
+  indicator:
+    metadata:
+      displayName: Demo API latency under 300ms
+    ratioMetric:
+      counter: false
+      good:
+        metricSource: prometheus
+        query: sum(rate(http_request_duration_seconds_bucket{service="demo-api",le="0.3"}[5m]))
+      total:
+        metricSource: prometheus
+        query: sum(rate(http_request_duration_seconds_count{service="demo-api"}[5m]))
+  budgetingMethod: Occurrences
+  timeWindow:
+    rolling:
+      count: 30
+      unit: Day
+  objectives:
+    - displayName: 30-day latency
+      target: 0.99
+  alertPolicies:
+    - name: latency-burn
+      annotations:
+        runbook: https://runbooks.internal.example.com/demo-api-latency
+        owner: platform-sre
+        pagerduty_service: demo-api
+      conditions:
+        - condition: burn-rate-fast
+          threshold: 14
+          lookback: 5m
+        - condition: burn-rate-slow
+          threshold: 2
+          lookback: 1h
