@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: anti-fragile-demo
+  labels:
+    app.kubernetes.io/part-of: anti-fragility-stack
+    platform.blackroad.io/guardrails: enabled
