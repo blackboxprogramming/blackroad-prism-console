@@ -1,0 +1,39 @@
+treasury_cash_cycle:
+  title: Treasury-BOT Cash Management Cycle
+  purpose: Manage cash flow and liquidity
+  scope: Finance
+  procedure:
+    - id: collect
+      action: collect_transactions
+    - id: reconcile
+      action: reconcile_balances
+    - id: report
+      action: generate_reports
+  quality_control:
+    - review: gaap_compliance_check
+
+tax_filing_workflow:
+  title: Tax-BOT Filing Workflow
+  purpose: File taxes with regulatory agencies
+  scope: Finance
+  procedure:
+    - id: gather
+      action: gather_documents
+    - id: compute
+      action: compute_liabilities
+    - id: submit
+      action: submit_returns
+  quality_control:
+    - review: audit_trail_generation
+
+audit_trail:
+  title: Audit Trail Generation
+  purpose: Provide immutable records for audits
+  scope: Finance and Compliance
+  procedure:
+    - id: capture
+      action: capture_events
+    - id: sign
+      action: sign_records
+  quality_control:
+    - review: retention_policy_check
