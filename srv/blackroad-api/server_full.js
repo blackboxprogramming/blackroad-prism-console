@@ -227,10 +227,13 @@ app.use(
 app.get('/', (_, res) => {
   res.sendFile(path.join(WEB_ROOT, 'index.html'));
 });
-app.head('/health', (_req, res) => res.status(200).end());
-app.get('/health', (_req, res) => {
+function sendHealth(_req, res) {
   res.json({ ok: true, version: '1.0.0', uptime: process.uptime() });
-});
+}
+app.head('/health', (_req, res) => res.status(200).end());
+app.get('/health', sendHealth);
+app.head('/healthz', (_req, res) => res.status(200).end());
+app.get('/healthz', sendHealth);
 
 // --- Health
 app.head('/api/health', (_, res) => res.status(200).end());

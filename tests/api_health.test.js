@@ -15,6 +15,12 @@ describe('API security and health', () => {
     expect(res.body.ok).toBe(true);
   });
 
+  it('responds to /healthz', async () => {
+    const res = await request(app).get('/healthz');
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+  });
+
   it('responds to /api/health with security headers', async () => {
     const res = await request(app)
       .get('/api/health')
