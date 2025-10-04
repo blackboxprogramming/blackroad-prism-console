@@ -1,0 +1,23 @@
+{
+  "feature_flags": {
+    "global_enabled": true,
+    "require_step_up": true
+  },
+  "break_glass": {
+    "enabled": true,
+    "alg": "HS256",
+    "hmac_secret_env": "AUTOPAL_BREAK_GLASS_SECRET",
+    "ttl_seconds": 600,
+    "allowlist_endpoints": [
+      "POST /secrets/materialize",
+      "POST /fossil/override",
+      "POST /approvals/{rid}/approve"
+    ],
+    "allowed_subjects": ["ops-oncall", "sre-lead"]
+  },
+  "audit": {
+    "enabled": true,
+    "sink": "stdout",
+    "redact_values": true
+  }
+}
