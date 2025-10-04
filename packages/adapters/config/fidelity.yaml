@@ -1,0 +1,30 @@
+name: Fidelity Traditional Custodian
+mappings:
+  - type: positions
+    columns:
+      instrumentId: CUSIP
+      quantity: Quantity
+      marketValue: MarketValue
+      price: Price
+    defaults:
+      source: CUSTODIAN
+  - type: cash
+    columns:
+      currency: Currency
+      balance: Balance
+    defaults:
+      source: CUSTODIAN
+  - type: transactions
+    columns:
+      externalId: TradeID
+      instrumentId: CUSIP
+      tradeDate: TradeDate
+      settleDate: SettleDate
+      type: Type
+      quantity: Quantity
+      price: Price
+      grossAmount: Gross
+      netAmount: Net
+      currency: Currency
+    defaults:
+      source: CUSTODIAN

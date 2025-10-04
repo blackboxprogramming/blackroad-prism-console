@@ -1,0 +1,25 @@
+name: Coinbase Exchange CSV
+mappings:
+  - type: positions
+    columns:
+      instrumentId: Asset
+      quantity: Balance
+      marketValue: USDValue
+      price: PriceUSD
+    defaults:
+      source: EXCHANGE
+  - type: transactions
+    columns:
+      externalId: TradeID
+      instrumentId: Asset
+      tradeDate: Timestamp
+      type: Side
+      quantity: Quantity
+      price: Price
+      grossAmount: Total
+      netAmount: Total
+      currency: QuoteCurrency
+      fee: Fee
+      chain: Chain
+    defaults:
+      source: EXCHANGE

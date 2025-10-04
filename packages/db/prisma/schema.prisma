@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id           String    @id @default(cuid())
+  ownerId      String
+  custodian    String
+  accountNo    String
+  type         String
+  baseCurrency String
+  openedAt     DateTime?
+  closedAt     DateTime?
+  meta         Json
+  positions    PositionLot[]
+  snapshots    PositionSnapshot[]
+  cash         CashLedger[]
+  transactions Transaction[]
+  breaks       ReconBreak[]
+  documents    Document[]
+}
+
+model Instrument {
+  id          String             @id @default(cuid())
+  symbol      String?
+  cusip       String?
+  isin        String?
+  ticker      String?
+  kind        String
+  cryptoChain String?
+  decimals    Int?
+  meta        Json
+  lots        PositionLot[]
+  snapshots   PositionSnapshot[]
+  transactions Transaction[]
+  corporateActions CorporateAction[]
+  prices      Price[]
+}
+
+model PositionLot {
+  id           String   @id @default(cuid())
+  accountId    String
+  instrumentId String
+  openDate     DateTime
+  quantity     Decimal
+  costBasis    Decimal
+  method       String
+  closed       Boolean  @default(false)
+  closedDate   DateTime?
+  account      Account  @relation(fields: [accountId], references: [id])
+  instrument   Instrument @relation(fields: [instrumentId], references: [id])
+}
+
+model PositionSnapshot {
+  id           String   @id @default(cuid())
+  accountId    String
+  instrumentId String
+  asOf         DateTime
+  quantity     Decimal
+  marketValue  Decimal
+  price        Decimal
+  source       String
+  account      Account  @relation(fields: [accountId], references: [id])
+  instrument   Instrument @relation(fields: [instrumentId], references: [id])
+  @@unique([accountId, instrumentId, asOf, source])
+}
+
+model CashLedger {
+  id        String   @id @default(cuid())
+  accountId String
+  asOf      DateTime
+  currency  String
+  balance   Decimal
+  source    String
+  account   Account  @relation(fields: [accountId], references: [id])
+  @@unique([accountId, currency, asOf, source])
+}
+
+model Transaction {
+  id           String   @id @default(cuid())
+  accountId    String
+  instrumentId String?
+  tradeDate    DateTime
+  settleDate   DateTime?
+  type         String
+  quantity     Decimal?
+  price        Decimal?
+  grossAmount  Decimal
+  netAmount    Decimal
+  currency     String
+  externalId   String?
+  source       String
+  meta         Json
+  account      Account   @relation(fields: [accountId], references: [id])
+  instrument   Instrument? @relation(fields: [instrumentId], references: [id])
+  @@unique([accountId, externalId])
+}
+
+model CorporateAction {
+  id           String   @id @default(cuid())
+  instrumentId String
+  exDate       DateTime
+  payDate      DateTime?
+  type         String
+  factor       Decimal?
+  details      Json
+  instrument   Instrument @relation(fields: [instrumentId], references: [id])
+}
+
+model ReconBreak {
+  id        String   @id @default(cuid())
+  accountId String
+  asOf      DateTime
+  scope     String
+  key       String
+  internal  Decimal?
+  external  Decimal?
+  status    String
+  severity  Int
+  notes     String?
+  createdAt DateTime @default(now())
+  resolvedAt DateTime?
+  account   Account  @relation(fields: [accountId], references: [id])
+  wormBlocks WormBlock[]
+  @@index([accountId, scope, status])
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  accountId String?
+  kind      String
+  path      String
+  sha256    String
+  meta      Json
+  createdAt DateTime @default(now())
+  account   Account? @relation(fields: [accountId], references: [id])
+  wormBlocks WormBlock[]
+}
+
+model WormBlock {
+  id       String  @id @default(cuid())
+  idx      Int     @unique
+  ts       DateTime @default(now())
+  payload  Json
+  prevHash String
+  hash     String
+  document Document? @relation(fields: [documentId], references: [id])
+  documentId String?
+  break     ReconBreak? @relation(fields: [reconBreakId], references: [id])
+  reconBreakId String?
+}
+
+model Price {
+  id           String   @id @default(cuid())
+  instrumentId String
+  asOf         DateTime
+  currency     String
+  price        Decimal
+  source       String
+  instrument   Instrument @relation(fields: [instrumentId], references: [id])
+  @@unique([instrumentId, asOf, source, currency])
+}

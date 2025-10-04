@@ -23,7 +23,8 @@
     "frontend:dev": "npm --prefix sites/blackroad run dev",
     "frontend:build": "npm --prefix sites/blackroad run build",
     "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true",
-    "demo": "brc plm:items:load --dir fixtures/plm/items && brc plm:bom:load --dir fixtures/plm/boms && brc mfg:wc:load --file fixtures/mfg/work_centers.csv && brc mfg:routing:load --dir fixtures/mfg/routings && brc mfg:routing:capcheck --item PROD-100 --rev B --qty 1000 && brc mfg:wi:render --item PROD-100 --rev B && brc mfg:spc:analyze --op OP-200 --window 50 && brc mfg:yield --period 2025-09 && brc mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv && brc mfg:coq --period 2025-Q3"
+    "demo": "brc plm:items:load --dir fixtures/plm/items && brc plm:bom:load --dir fixtures/plm/boms && brc mfg:wc:load --file fixtures/mfg/work_centers.csv && brc mfg:routing:load --dir fixtures/mfg/routings && brc mfg:routing:capcheck --item PROD-100 --rev B --qty 1000 && brc mfg:wi:render --item PROD-100 --rev B && brc mfg:spc:analyze --op OP-200 --window 50 && brc mfg:yield --period 2025-09 && brc mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv && brc mfg:coq --period 2025-Q3",
+    "custodysync:test": "pnpm -r --filter @blackroad/core test && pnpm -r --filter @blackroad/adapters test"
   },
   "engines": {
     "node": ">=20"
@@ -54,7 +55,8 @@
     "eslint": "^9.12.0",
     "prettier": "^3.3.3",
     "husky": "^9.0.10",
-    "lint-staged": "^16.1.5"
+    "lint-staged": "^16.1.5",
+    "vitest": "^1.6.0"
   },
   "lint-staged": {
     "*.{js,jsx,mjs,cjs,ts,tsx}": [
