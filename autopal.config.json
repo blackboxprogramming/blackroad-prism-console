@@ -1,0 +1,27 @@
+{
+  "auth": {
+    "oidc": {
+      "issuer": "https://issuer.example.com/",
+      "jwks_url": "https://issuer.example.com/.well-known/jwks.json",
+      "clock_skew_seconds": 300,
+      "audience_allowlist": [
+        "gha:org/repo@refs/heads/main",
+        "gha:org/repo@refs/tags/v*"
+      ]
+    }
+  },
+  "rate_limits": {
+    "global_per_minute": 600,
+    "per_caller_per_minute": 60,
+    "endpoints": {
+      "POST /secrets/materialize": { "per_minute": 10, "burst": 3 },
+      "POST /fossil/override":     { "per_minute": 6,  "burst": 2 }
+    }
+  },
+  "dual_control": {
+    "provider": "webhook",
+    "callback_url": "https://approvals.example.com/callback",
+    "ttl_seconds": 900,
+    "require_distinct_approvers": true
+  }
+}
