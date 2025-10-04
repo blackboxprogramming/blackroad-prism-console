@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PORTAL="$ROOT/bin/portal"
+BUILD_FROM_REQUEST="$ROOT/bin/portal-build-from-request"
+
+if [ ! -x "$PORTAL" ]; then
+  echo "Missing required tool: $PORTAL" >&2
+  exit 1
+fi
+
+if [ ! -x "$BUILD_FROM_REQUEST" ]; then
+  echo "Missing required tool: $BUILD_FROM_REQUEST" >&2
+  exit 1
+fi
+
+echo "== test: gating broadcast by threshold =="
+mkdir -p "$ROOT/configs" "$ROOT/configs/approvals"
+REQ="$ROOT/configs/test.request.json"
+cat > "$REQ" <<'REQ'
+{
+  "utc": "2025-10-04T00:00:00Z",
+  "action": "CREATE_PSBT",
+  "label": "t001",
+  "chain": "bitcoin",
+  "policy": {"version":"1","threshold":2,"members":[
+    {"id":"A","pubkey":"PGP:A"},
+    {"id":"B","pubkey":"PGP:B"},
+    {"id":"C","pubkey":"PGP:C"}
+  ]},
+  "payload": {
+    "outputs": [{"address":"bc1qexample...","amount_btc":"0.00010000"}],
+    "fee_rate_sat_vb": 2,
+    "coin_control": {"include_utxos":[], "exclude_utxos":[]}
+  }
+}
+REQ
+
+# Register request
+"$PORTAL" policy:request "$REQ" >/dev/null
+
+# Attempt to build from request without signatures -> should refuse
+set +e
+"$BUILD_FROM_REQUEST" "$REQ" >/tmp/portal-test.out 2>/tmp/portal-test.err
+RC=$?
+if [ $RC -eq 0 ]; then
+  echo "FAIL: built outputs without approvals"
+  exit 2
+fi
+set -e
+echo "PASS: refused without approvals"
+
+# Mock collected signatures (no verification here; portal only counts files)
+mkdir -p "$ROOT/configs/approvals/t001"
+echo "sigA" > "$ROOT/configs/approvals/t001/A.sig"
+echo "sigB" > "$ROOT/configs/approvals/t001/B.sig"
+
+# Now build outputs
+"$BUILD_FROM_REQUEST" "$REQ" | tee /tmp/portal-test.out
+
+LABEL="t001"
+OUTS="$ROOT/configs/$LABEL.outputs.json"
+"$PORTAL" psbt:new "$LABEL" "$OUTS" 2 >/tmp/portal-psbt.out
+test -s "$ROOT/psbts/$LABEL.psbt" || { echo "FAIL: missing PSBT"; exit 3; }
+echo "PASS: PSBT created under approvals policy"
+
+# Verify that broadcast still requires explicit env confirm
+set +e
+"$PORTAL" psbt:broadcast "$ROOT/psbts/$LABEL.signed.psbt" >/tmp/portal-bc.out 2>/tmp/portal-bc.err
+grep -q "Refuse: set CONFIRM_BROADCAST=1" /tmp/portal-bc.err && echo "PASS: broadcast blocked without confirm" || { echo "FAIL: broadcast not blocked"; exit 4; }
+
