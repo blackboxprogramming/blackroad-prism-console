@@ -1,22 +1,24 @@
-id: MIRROR_CLASS_LIMIT
-mode: enforce
-severity: high
-block_on_error: true
-metadata:
-  runbook: docs/runbooks/mirror_class_limit.md
-  summary: Block mirrors on restricted or secret repositories.
-  block_message: "Blocked by policy MIRROR_CLASS_LIMIT. Reason: repo classified '{resource_class}'. See runbook for exception steps."
-expr: action == "mirror" && (resource_class == "restricted" || resource_class == "secret")
-tests:
-  - name: deny_secret
-    input: { action: "mirror", resource_class: "secret", repo: "api/core" }
-    want: true
-  - name: deny_restricted
-    input: { action: "mirror", resource_class: "restricted", repo: "ml/labs" }
-    want: true
-  - name: allow_internal
-    input: { action: "mirror", resource_class: "internal" }
-    want: false
-  - name: allow_other_action
-    input: { action: "deploy", resource_class: "secret" }
-    want: false
+rule_id: "MIRROR_CLASS_LIMIT"
+name: "Mirror requests restricted to non-secret repos"
+category: "enforce"
+severity: "high"
+version: 1
+description: >
+  Block mirror jobs that target restricted or secret repositories to prevent
+  inadvertent data exfiltration.
+expr: |
+  action == "mirror" && (resource_class == "restricted" || resource_class == "secret")
+metrics_selector:
+  prom: ""
+  ch: ""
+on_match:
+  decision: "deny"
+  reason: "mirror_class_limit"
+  details:
+    message: "Blocked by policy MIRROR_CLASS_LIMIT."
+    remediation: "Request a temporary exemption from SecOps."
+notify:
+  channels: ["slack:#security-ops"]
+docs_url: "https://your.docs/policies/mirror_class_limit"
+owners: ["secops@company.com", "@oncall-security"]
+canary: false
