@@ -77,3 +77,6 @@ id_rsa
 *.pem
 *.key
 ssh-*
+
+br-release-notes/dist/
+br-release-notes/node_modules/
