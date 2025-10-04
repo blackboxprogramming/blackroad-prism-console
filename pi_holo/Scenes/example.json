@@ -1,0 +1,30 @@
+{
+  "display": {
+    "source_size": 540,
+    "fps": 30,
+    "background": [0, 0, 0],
+    "title": "Pi-Holo"
+  },
+  "default_scene": "text",
+  "scenes": {
+    "text": {
+      "type": "text",
+      "text": "Hello Prism",
+      "font_size": 72,
+      "text_color": [0, 200, 255],
+      "background": [0, 0, 0]
+    },
+    "clock": {
+      "type": "clock",
+      "font_size": 64,
+      "text_color": [255, 255, 255],
+      "background": [0, 0, 0],
+      "format": "%H:%M:%S"
+    },
+    "camera": {
+      "type": "camera",
+      "background": [0, 0, 0],
+      "mirror": true
+    }
+  }
+}
