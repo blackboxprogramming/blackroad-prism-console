@@ -1,14 +1,24 @@
+## User impact (1–2 sentences)
+-
 
-## What
-- Summary
+## Type
+- [ ] feat
+- [ ] fix
+- [ ] chore
+- [ ] docs
+- [ ] refactor
 
-## Why
-- Business / reliability impact
+## Area (pick one)
+- [ ] API
+- [ ] UI
+- [ ] Ingest
+- [ ] Infra
+- [ ] Data/dbt
 
-## Checks
-- [ ] CI green
-- [ ] API /api/health returns 200
-- [ ] Updated docs/tests as needed
+## Release note (short, public-facing)
+- <!-- Keep to one bullet; plain English. Used verbatim in release notes -->
 
-> Comment `@codex fix comments` to trigger bot autofix.
-
+## Checklist
+- [ ] Tests pass (CI ≤ 10 min)
+- [ ] Docs/CHANGELOG updated if user-visible
+- [ ] Feature flag default checked

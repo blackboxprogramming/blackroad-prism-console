@@ -1,0 +1,77 @@
+name: release-publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      base:
+        description: 'Base ref (last tag)'
+        required: true
+      head:
+        description: 'Head ref (this tag or main)'
+        required: true
+      version:
+        description: 'Version (e.g., 0.2.0)'
+        required: true
+      kind:
+        description: 'Template kind (api|ui|ingest|infra|dbt)'
+        required: true
+        default: 'ui'
+  release:
+    types: [published]
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Checkout status site (incidents)
+        uses: actions/checkout@v4
+        with:
+          repository: blackboxprogramming/br-status-site
+          path: br-status-site
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install composer dependencies
+        run: |
+          cd br-release-notes
+          npm install
+          npm run build
+      - id: compose
+        name: Compose release notes
+        run: node br-release-notes/dist/index.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          BASE_REF: ${{ github.event.inputs.base || github.event.release.target_commitish }}
+          HEAD_REF: ${{ github.event.inputs.head || github.sha }}
+          NEXT_VERSION: ${{ github.event.inputs.version || github.event.release.tag_name }}
+          RELEASE_KIND: ${{ github.event.inputs.kind || 'ui' }}
+          INCIDENTS_DIR: br-status-site/content/issues
+          WINDOW_FROM: ${{ github.event.release.created_at || '' }}
+          WINDOW_TO: ${{ github.event.release.published_at || '' }}
+          COMPARE_URL: https://github.com/${{ github.repository }}/compare/${{ github.event.inputs.base || github.event.release.target_commitish }}...${{ github.event.inputs.head || github.sha }}
+      - name: Update GitHub Release body
+        if: github.event_name == 'release'
+        run: |
+          gh release edit "${{ github.event.release.tag_name }}" --notes "$(cat <<'BODY'
+${{ steps.compose.outputs.body }}
+BODY
+)"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Post to Slack
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "channel": "${{ vars.SLACK_RELEASES_CHANNEL || '#announcements' }}",
+              "text": "*${{ github.event.repository.name }}* released *${{ github.event.release.tag_name || github.event.inputs.version }}*\n${{ steps.compose.outputs.body }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
