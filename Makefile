@@ -1,11 +1,14 @@
 .RECIPEPREFIX = >
-.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy orchestrate
 
 setup:
 >python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff
 
 test:
->. .venv/bin/activate && pytest
+>python3 -m universal_sim.testing
+
+orchestrate:
+>python3 cli.py
 
 lint:
 >. .venv/bin/activate && ruff .

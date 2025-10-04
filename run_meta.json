@@ -1,0 +1,27 @@
+{
+  "run_id": "c41306b9-6171-4d83-a0f4-6d9bd60141ea",
+  "generated_at": "2025-10-04T21:00:43.115617+00:00",
+  "artifacts": {
+    "json": "40_compare/outputs/summary_metrics.json",
+    "csv": "40_compare/outputs/summary_cases.csv",
+    "variants": "40_compare/outputs/summary_variants.csv",
+    "report": "90_reports/run_report.md",
+    "run_meta": "run_meta.json"
+  },
+  "metrics": {
+    "solid": {
+      "label": "solid",
+      "mae": 0.675,
+      "rmse": 0.7228,
+      "max_error": 1.0,
+      "pass_fraction": 0.5
+    },
+    "fluid": {
+      "label": "fluid",
+      "mae": 0.55,
+      "rmse": 0.6442,
+      "max_error": 1.1,
+      "pass_fraction": 0.75
+    }
+  }
+}
