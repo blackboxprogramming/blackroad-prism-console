@@ -1,7 +1,12 @@
 id: MIRROR_CLASS_LIMIT
+name: Mirror classification guardrail
 mode: enforce
 severity: high
 block_on_error: true
+owners:
+  - "@oncall-security"
+  - "security@company.com"
+docs_url: https://your.docs/policies/mirror_class_limit
 metadata:
   runbook: docs/runbooks/mirror_class_limit.md
   summary: Block mirrors on restricted or secret repositories.

@@ -1,7 +1,12 @@
 id: MULTI_PROVIDER_SINGLE_ROLE
+name: Multi-provider fan-out limiter
 mode: enforce
 severity: medium
 block_on_error: true
+owners:
+  - "@secops-automation"
+  - "automation@company.com"
+docs_url: https://your.docs/policies/multi_provider_single_role
 metadata:
   product: Mirror Guard
   description: Block low-privilege users from fanning out mirrors across providers.

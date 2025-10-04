@@ -49,6 +49,9 @@ class Rule:
         severity = payload.get("severity", "low")
         block_on_error = bool(payload.get("block_on_error", False))
         metadata = dict(payload.get("metadata", {}))
+        for key in ("name", "owners", "docs_url"):
+            if key in payload and key not in metadata:
+                metadata[key] = payload[key]
         return cls(rule_id, expr, mode=mode, severity=severity, block_on_error=block_on_error, metadata=metadata)
 
     def evaluate(self, event: Mapping[str, Any], ctx: EvaluationContext) -> RuleEvaluationResult:
@@ -58,10 +61,28 @@ class Rule:
             outcome = bool(self._evaluator.evaluate(event, ctx))
         except Exception as exc:
             details = ctx.to_details()
-            details.setdefault("rule", {"id": self.id, "mode": self.mode.value, "severity": self.severity})
+            rule_details = details.setdefault(
+                "rule", {"id": self.id, "mode": self.mode.value, "severity": self.severity}
+            )
+            if isinstance(self.metadata, dict):
+                if "name" in self.metadata:
+                    rule_details.setdefault("name", self.metadata["name"])
+                if "owners" in self.metadata:
+                    rule_details.setdefault("owners", self.metadata["owners"])
+                if "docs_url" in self.metadata:
+                    rule_details.setdefault("docs_url", self.metadata["docs_url"])
             return RuleEvaluationResult(False, details, error=exc)
         details = ctx.to_details()
-        details.setdefault("rule", {"id": self.id, "mode": self.mode.value, "severity": self.severity})
+        rule_details = details.setdefault(
+            "rule", {"id": self.id, "mode": self.mode.value, "severity": self.severity}
+        )
+        if isinstance(self.metadata, dict):
+            if "name" in self.metadata:
+                rule_details.setdefault("name", self.metadata["name"])
+            if "owners" in self.metadata:
+                rule_details.setdefault("owners", self.metadata["owners"])
+            if "docs_url" in self.metadata:
+                rule_details.setdefault("docs_url", self.metadata["docs_url"])
         return RuleEvaluationResult(outcome, details)
 
 

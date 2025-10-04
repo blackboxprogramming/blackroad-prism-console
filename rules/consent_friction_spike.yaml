@@ -1,6 +1,11 @@
 id: CONSENT_FRICTION_SPIKE
+name: Consent friction spike monitor
 mode: observe
 severity: medium
+owners:
+  - "@trust-safety"
+  - "ts@company.com"
+docs_url: https://your.docs/policies/consent_friction_spike
 metadata:
   description: Detect consent-required deny spikes to reduce operator load.
 expr: rate(deny_reason == "consent_required", "15m") > 0.15
