@@ -1,0 +1,223 @@
+⸻
+
+type: codex-prompt
+id: phase-2
+slug: phase-2
+title: "Phase 2 — Pi Bring-Up & First Light"
+summary: "Bench bring-up card and Codex prompt set for spinning up the hologram stack from blank SD cards."
+owner: "blackroad"
+tags: ["codex","pi","mqtt","hologram","sim"]
+model_hint: "Codex"
+temperature: 0
+updated: "2025-09-13"
+version: "1.0.0"
+canonical_repo: "blackboxprogramming/blackroad-prism-console"
+copy_filename: "codex_phase_02.txt"
+
+Here’s Phase 2 — Pi Bring-Up & First Light. Paste this into Codex.
+
+⸻
+
+Codex Prompt — Phase 2 (bench bring-up: Pi images, services, MQTT wiring, sanity checks)
+
+Move from blank SD cards to first-light renders in one sitting. Capture the bench card, systemd services, Codex prompt blocks, and helper scripts so a tech can flash and boot every Pi, wire MQTT, and validate the stack without referring elsewhere.
+
+## Bring-up card (print this)
+
+1. **Flash images**
+   - Use Raspberry Pi Imager per board.
+   - Profiles: `pi-holo` (Pi 5, Desktop), `pi-ops` (Pi 5, Lite), `pi-sim` (Pi Zero W, Lite), `pi-400` (Desktop).
+   - In the gear ⚙️ panel set hostname, user, SSH, locale; add Wi-Fi only for the Zero W.
+
+2. **First boot order**
+   1. **Pi-Ops → broker**
+      ```bash
+      sudo apt update
+      sudo apt install -y mosquitto mosquitto-clients
+      sudo systemctl enable --now mosquitto
+      mosquitto_sub -h localhost -t '#' -v   # leave running in one terminal
+      ```
+   2. **Pi-Holo → renderer deps**
+      ```bash
+      sudo apt update
+      sudo apt install -y python3-pip python3-pygame
+      pip install --break-system-packages paho-mqtt pillow
+      ```
+   3. **Pi-Sim → tiny UI deps (text/pygame)**
+      ```bash
+      sudo apt update
+      sudo apt install -y python3-pip python3-pygame
+      pip install --break-system-packages paho-mqtt
+      ```
+   4. **Pi-400 → admin chores**: `ssh-copy-id`, shell aliases, etc.
+   5. **Mac → agent env**
+      ```bash
+      python3 -m venv ~/agent-venv
+      source ~/agent-venv/bin/activate
+      pip install paho-mqtt pillow opencv-python fastapi uvicorn
+      ```
+
+3. **Shares & assets** (Pi-Ops)
+   ```bash
+   sudo mkdir -p /srv/assets
+   sudo chown -R pi:pi /srv/assets
+   sudo apt install -y samba
+   sudo tee -a /etc/samba/smb.conf >/dev/null <<'EOF_SMB'
+   [assets]
+      path = /srv/assets
+      browsable = yes
+      read only = no
+      guest ok = yes
+   EOF_SMB
+   sudo systemctl restart smbd
+   ```
+   - Drag files from Mac → `//pi-ops.local/assets` after the share comes up.
+
+4. **Odd displays**
+   - **Pi-Holo** (`/boot/firmware/config.txt`):
+     ```ini
+     hdmi_force_hotplug=1
+     hdmi_group=2
+     hdmi_mode=87
+     hdmi_cvt=720 720 60 1 0 0 0
+     ```
+   - **Pi-Ops** (`/boot/firmware/config.txt`):
+     ```ini
+     hdmi_force_hotplug=1
+     hdmi_group=2
+     hdmi_mode=87
+     hdmi_cvt=1600 600 60 1 0 0 0
+     ```
+   - Reboot after editing to lock the timings.
+
+## Services (make it stick)
+
+- **Pi-Holo service** (`/home/pi/holo_render.py`)
+  ```python
+  import json, pygame, paho.mqtt.client as mqtt
+  from PIL import Image
+  pygame.init(); screen = pygame.display.set_mode((720,720))
+  def draw_quad(path):
+      img = Image.open(path).convert('RGB').resize((360,360))
+      surf = pygame.image.fromstring(img.tobytes(), img.size, 'RGB')
+      screen.blit(surf,(0,0)); screen.blit(surf,(360,0))
+      screen.blit(surf,(0,360)); screen.blit(surf,(360,360))
+      pygame.display.flip()
+  def on_msg(c,u,m):
+      p=json.loads(m.payload)
+      mode=p.get("mode","");
+      if mode=="quad_image": draw_quad(p["path"])
+      elif mode=="text":
+          screen.fill((0,0,0));
+          f=pygame.font.Font(None, p.get("params",{}).get("size",36))
+          y=20
+          for line in p["text"].split("\n"):
+              screen.blit(f.render(line, True,(255,255,255)), (20,y)); y+=48
+          pygame.display.flip()
+      elif mode=="clear":
+          screen.fill((0,0,0))
+          pygame.display.flip()
+  c=mqtt.Client("pi-holo"); c.connect("pi-ops.local",1883,60)
+  c.subscribe("holo/cmd"); c.on_message=on_msg; c.loop_forever()
+  ```
+  ```ini
+  [Unit] Description=Hologram Renderer After=network-online.target
+  [Service] ExecStart=/usr/bin/python3 /home/pi/holo_render.py
+  Restart=always User=pi
+  [Install] WantedBy=multi-user.target
+  ```
+
+- **Pi-Sim service** (`/home/pi/sim_panel.py`)
+  ```python
+  import json, pygame, paho.mqtt.client as mqtt
+  pygame.init(); screen = pygame.display.set_mode((1024,600))
+  font = pygame.font.Font(None, 36)
+  def on_msg(c,u,m):
+      p=json.loads(m.payload)
+      screen.fill((0,0,0))
+      if p.get("view") in {"text","panel"}:
+          y=20
+          for line in p.get("text","" ).split("\n"):
+              screen.blit(font.render(line,True,(255,255,255)),(20,y)); y+=42
+      elif p.get("view")=="graph":
+          vals=p.get("values",[])[:80]
+          if vals:
+              w,h=screen.get_size(); step=w/max(1,len(vals)-1)
+              vmax=max(vals) if vals else 0
+              pts=[(i*step, h-10 - (v/vmax)*(h-40) if vmax>0 else h-10) for i,v in enumerate(vals)]
+              for i in range(1,len(pts)): pygame.draw.line(screen,(255,255,255),pts[i-1],pts[i],2)
+      elif p.get("view")=="clear":
+          pass
+      pygame.display.flip()
+  c=mqtt.Client("pi-sim"); c.connect("pi-ops.local",1883,60)
+  c.subscribe("sim/output"); c.on_message=on_msg; c.loop_forever()
+  ```
+  ```ini
+  [Unit] Description=Sim Panel After=network-online.target
+  [Service] ExecStart=/usr/bin/python3 /home/pi/sim_panel.py
+  Restart=always User=pi
+  [Install] WantedBy=multi-user.target
+  ```
+
+- **Pi-Ops heartbeat collector** (optional)
+  ```bash
+  pip install --break-system-packages paho-mqtt
+  cat > ~/hb_log.py <<'PY'
+  import json, time, paho.mqtt.client as m
+  def on_msg(c,u,msg):
+      print(time.strftime('%F %T'), msg.topic, msg.payload.decode())
+  c=m.Client("ops-hb"); c.on_message=on_msg
+  c.connect("localhost",1883,60); c.subscribe("system/heartbeat/#"); c.loop_forever()
+  PY
+  ```
+  - Run inside tmux or wrap in a systemd unit mirroring the pattern above.
+
+- **Mac agent first light**
+  ```python
+  import json, time, paho.mqtt.client as mqtt
+  mq = mqtt.Client("mac-agent"); mq.connect("pi-ops.local",1883,60)
+  def emit(topic, payload): mq.publish(topic, json.dumps(payload), qos=1)
+  emit("system/heartbeat/mac", {"ts": time.time(), "role":"agent"})
+  emit("sim/output", {"view":"panel","text":"Stack online\nvia Mac agent","ttl_s":60})
+  emit("holo/cmd", {"mode":"text","text":"HELLO","duration_ms":5000,"params":{"size":64}})
+  ```
+
+## Codex prompt blocks
+
+Give the agent these prompt snippets so it can react contextually:
+
+- **A) Asset-aware render** — prefer to render `/srv/assets/logo.png` for 8 s, otherwise emit a single `ask` with `scp ./logo.png pi@pi-ops.local:/srv/assets/`.
+- **B) Rolling status every 30 s** — plan to keep the sim panel updated with CPU% and temperature topics (planner emits the kick-off command).
+- **C) Holo text + effect combo** — send a two-line title for 5 s, then trigger a `pulse` effect for 4 s.
+- **D) Safe fallback** — emit `mode:"clear"` style payloads to blank both displays.
+
+## Quality-of-life helpers
+
+- **Aliases** (`~/.bashrc` on Pi-400)
+  ```bash
+  alias ph='ssh pi@pi-holo.local'
+  alias po='ssh pi@pi-ops.local'
+  alias ps='ssh pi@pi-sim.local'
+  alias mm='mosquitto_sub -h pi-ops.local -t "#" -v'
+  ```
+- **Rsync push from Mac** (`Makefile` target)
+  ```make
+  push-assets:
+	rsync -av ./assets/ pi@pi-ops.local:/srv/assets/
+  ```
+- **Agent guardrails** (system prompt)
+  ```text
+  - Output only JSON with "emit" or "ask".
+  - Paths must be under /srv/assets.
+  - Include duration/ttl where applicable.
+  - Keep payloads < 8KB; no base64 binaries.
+  ```
+
+## Sanity test (5 minutes)
+
+1. On Pi-Ops run `mosquitto_sub -h pi-ops.local -t "#" -v` to watch traffic.
+2. On the Mac run `mac_agent.py`; confirm the sim shows “Stack online” and the holo shows “HELLO”.
+3. Drag `logo.png` into the assets share, run the Asset-aware render block, and verify the quad render.
+4. Power-cycle Pi-Holo; holo service should restart automatically and respond to the next command.
+
+Deliver all files, services, and prompts so the bench card lets anyone go from zeroed SD cards to operational hologram + sim displays.
