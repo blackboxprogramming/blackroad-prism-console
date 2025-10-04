@@ -12,6 +12,18 @@
     "lastSeen": 1759012961427
   },
   {
+    "deviceId": "alice-pi",
+    "owner": "alice",
+    "platform": "raspberry-pi-4",
+    "role": "pi_led_agent",
+    "attached": true,
+    "encrypted": true,
+    "compliant": true,
+    "operatorAccount": "alice",
+    "notes": "Alice's dedicated Pi for LED prototyping",
+    "lastSeen": 1759012961427
+  },
+  {
     "deviceId": "jetson-01",
     "owner": "ml",
     "platform": "jetson-orin",
