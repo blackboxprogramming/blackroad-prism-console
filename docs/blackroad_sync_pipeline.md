@@ -22,6 +22,7 @@ Each action logs to `blackroad_sync.log` and optionally posts to Slack via
 | `DROPLET_PATH` | Directory on droplet containing the repo |
 | `SLACK_WEBHOOK_URL` | Incoming webhook for status updates (optional) |
 | `WORKING_COPY_PATH` | Path to iOS Working Copy repository (optional) |
+| `WORKING_COPY_DEVICES` | Comma-separated list of Working Copy mirrors (`host:path` or local paths) |
 | `GIT_REMOTE` | Git remote name (default `origin`) |
 
 ## Examples

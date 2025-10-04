@@ -10,6 +10,12 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 run() { ( set -x; "$@" ); }
 log() { echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] $*"; }
+trim() {
+  local s="$1"
+  s="${s#${s%%[![:space:]]*}}"
+  s="${s%${s##*[![:space:]]}}"
+  printf '%s' "$s"
+}
 
 push_latest() {
   log "Pushing local commits to GitHub..."
@@ -23,10 +29,64 @@ sync_connectors() {
 
 refresh_working_copy() {
   log "Refreshing working copy..."
-  if [[ -n "${WORKING_COPY_HOST:-}" ]]; then
-    run ssh "$WORKING_COPY_HOST" "cd ${WORKING_COPY_PATH:-/var/mobile/blackroad} && git pull --rebase"
+  local entries=()
+  if [[ -n "${WORKING_COPY_DEVICES:-}" ]]; then
+    IFS=',' read -r -a entries <<<"${WORKING_COPY_DEVICES}"
+  elif [[ -n "${WORKING_COPY_HOST:-}" ]]; then
+    entries=("${WORKING_COPY_HOST}:${WORKING_COPY_PATH:-/var/mobile/blackroad}")
+  elif [[ -n "${WORKING_COPY_PATH:-}" ]]; then
+    entries=("local:${WORKING_COPY_PATH}")
   else
-    log "WORKING_COPY_HOST not set; skipping working copy refresh"
+    log "No working copy targets configured; skipping working copy refresh"
+    return
+  fi
+
+  declare -A seen_targets=()
+  local processed=0
+  for raw in "${entries[@]}"; do
+    local entry
+    entry=$(trim "$raw")
+    [[ -n "$entry" ]] || continue
+    local host path key
+    if [[ "$entry" == *":"* && "$entry" != /* ]]; then
+      host="${entry%%:*}"
+      path="${entry#*:}"
+      [[ -n "$path" ]] || path="${WORKING_COPY_PATH:-/var/mobile/blackroad}"
+    else
+      host=""
+      path="$entry"
+    fi
+    if [[ "${host,,}" == "local" ]]; then
+      host=""
+    fi
+    if [[ -z "$path" ]]; then
+      path="${WORKING_COPY_PATH:-/var/mobile/blackroad}"
+    fi
+    key="${host}|${path}"
+    if [[ -n "${seen_targets[$key]:-}" ]]; then
+      continue
+    fi
+    seen_targets[$key]=1
+    processed=1
+    if [[ -z "$host" ]]; then
+      if [[ "$path" == ~* ]]; then
+        path="${HOME}${path:1}"
+      fi
+      log "Refreshing local Working Copy at $path"
+      run mkdir -p "$path"
+      run git -C "$path" pull --rebase
+    else
+      local remote_path
+      remote_path="$path"
+      local remote_cmd
+      remote_cmd="cd $(printf '%q' "$remote_path") && git pull --rebase"
+      log "Refreshing Working Copy on $host:$remote_path"
+      run ssh "$host" "$remote_cmd"
+    fi
+  done
+
+  if [[ $processed -eq 0 ]]; then
+    log "No valid working copy targets resolved; skipping working copy refresh"
   fi
 }
 
