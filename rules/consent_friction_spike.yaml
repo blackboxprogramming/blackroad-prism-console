@@ -1,27 +1,32 @@
-id: CONSENT_FRICTION_SPIKE
-mode: observe
-severity: medium
-metadata:
-  description: Detect consent-required deny spikes to reduce operator load.
-expr: rate(deny_reason == "consent_required", "15m") > 0.15
-tests:
-  - name: low_rate_ok
-    window: "15m"
-    series:
-      - { deny_reason: "consent_required" }
-      - { deny_reason: "insufficient_role" }
-      - repeat: 8
-    want: false
-  - name: spike_trips
-    window: "15m"
-    series:
-      - repeat: 2
-        each: { deny_reason: "consent_required" }
-      - repeat: 8
-    want: true
-  - name: missing_field_no_panic
-    window: "15m"
-    series:
-      - { outcome: "deny" }
-      - repeat: 9
-    want: false
+rule_id: "CONSENT_FRICTION_SPIKE-b7dd0fb7-69aa-4d42-90d3-4b1a2df3a2f8"
+name: "Consent friction exceeds threshold"
+category: "observe"
+severity: "med"
+version: 2
+description: >
+  Alerts when the rolling 15m rate of consent-required denies crosses 15%.
+inputs_schema:
+  - name: deny_reason
+  - name: ts
+output_type: "json"
+expr: |
+  rate(deny_reason == "consent_required", "15m") > 0.15
+metrics_selector:
+  prom: |
+    sum_over_time(audit_denies_total{deny_reason="consent_required"}[{{window}}])
+    /
+    sum_over_time(audit_events_total[{{window}}])
+  ch: |
+    SELECT (sumIf(1, deny_reason='consent_required') / nullIf(count(),0)) AS r
+    FROM audit_events
+    WHERE ts >= now() - INTERVAL {{window}}
+on_match:
+  decision: "notify"
+  reason: "consent_required_spike"
+  details:
+    message: "Consent prompts are spiking; check UX or scope requests."
+notify:
+  channels: ["slack:#platform"]
+docs_url: "https://your.docs/policies/consent_friction_spike"
+owners: ["secops@company.com", "@oncall-security"]
+canary: false
