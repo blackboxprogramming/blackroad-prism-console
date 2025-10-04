@@ -1,0 +1,39 @@
+id: sd-securities-iar
+stateCode: SD
+track: securities
+licenseType: "Securities:IAR"
+version: 1
+sourceUrls:
+  - "https://dlr.sd.gov/securities/"
+rules:
+  graceWindowDays: 0
+  reinstatementWindowDays: 180
+  requiresExamRetakeIfBeyondDays: 730
+  ce:
+    requiredHours: 12
+    ethicsHours: 0
+    carryover: false
+  backgroundCheck:
+    fingerprints: false
+  sponsorRequired: false
+  formSet: ["U4", "ADV"]
+  fees: {}
+  appointmentsResetOnReinstatement: false
+  docsNeeded: ["PhotoID", "CECert"]
+  transitions:
+    - from: "Expired"
+      to: "Active"
+      conditions:
+        - "Within 6 months"
+        - "CE complete"
+      tasks:
+        - "FILE_U4"
+        - "UPLOAD_CE_CERTS"
+        - "PAY_REINSTATEMENT_FEE"
+    - from: "Lapsed"
+      to: "Requalify"
+      conditions:
+        - ">6 months"
+      tasks:
+        - "SCHEDULE_SERIES65_EXAM"
+        - "NEW_APPLICATION"

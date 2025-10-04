@@ -1,24 +1,20 @@
 {
-  "name": "@blackroad/core",
+  "name": "@blackroad/integrations",
   "version": "0.1.0",
-  "description": "Core domain models and planners for BlackRoad licensing orchestration",
+  "description": "Integration stubs for CRD, NIPR, and state portals",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": ["dist", "src"],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "vitest",
     "lint": "eslint src --ext .ts"
   },
   "engines": {
     "node": ">=20"
   },
-  "dependencies": {
-    "yaml": "^2.3.4"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "typescript": "^5.5.4",
-    "vitest": "^1.6.0"
+    "typescript": "^5.5.4"
   }
 }

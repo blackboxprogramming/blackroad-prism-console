@@ -1,0 +1,35 @@
+id: wi-securities-bd-rep
+stateCode: WI
+track: securities
+licenseType: "BrokerDealer:Representative"
+version: 1
+sourceUrls:
+  - "https://www.wdfi.org/fi/securities/"
+rules:
+  graceWindowDays: 0
+  reinstatementWindowDays: 180
+  requiresExamRetakeIfBeyondDays: 730
+  ce: null
+  backgroundCheck:
+    fingerprints: true
+  sponsorRequired: true
+  formSet: ["U4"]
+  fees: {}
+  appointmentsResetOnReinstatement: false
+  docsNeeded: ["PhotoID"]
+  transitions:
+    - from: "Expired"
+      to: "Active"
+      conditions:
+        - "Within 6 months"
+        - "Sponsor affirmed"
+      tasks:
+        - "FILE_U4"
+        - "PAY_STATE_FEES"
+    - from: "Lapsed"
+      to: "Requalify"
+      conditions:
+        - ">6 months"
+      tasks:
+        - "SCHEDULE_SERIES65_EXAM"
+        - "NEW_APPLICATION"

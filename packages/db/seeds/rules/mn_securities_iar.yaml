@@ -1,0 +1,39 @@
+id: mn-securities-iar
+stateCode: MN
+track: securities
+licenseType: "Securities:IAR"
+version: 1
+sourceUrls:
+  - "https://mn.gov/commerce/securities/"
+rules:
+  graceWindowDays: 0
+  reinstatementWindowDays: 120
+  requiresExamRetakeIfBeyondDays: 730
+  ce:
+    requiredHours: 12
+    ethicsHours: 0
+    carryover: false
+  backgroundCheck:
+    fingerprints: false
+  sponsorRequired: false
+  formSet: ["U4", "ADV"]
+  fees: {}
+  appointmentsResetOnReinstatement: false
+  docsNeeded: ["PhotoID", "CECert"]
+  transitions:
+    - from: "Expired"
+      to: "Active"
+      conditions:
+        - "Within 4 months of expiration"
+        - "CE completed"
+      tasks:
+        - "FILE_U4"
+        - "UPLOAD_CE_CERTS"
+        - "PAY_REINSTATEMENT_FEE"
+    - from: "Lapsed"
+      to: "Requalify"
+      conditions:
+        - ">4 months since expiration"
+      tasks:
+        - "SCHEDULE_SERIES65_EXAM"
+        - "NEW_APPLICATION"

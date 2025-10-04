@@ -1,0 +1,39 @@
+id: wi-real-estate-salesperson
+stateCode: WI
+track: real_estate
+licenseType: "RealEstate:Salesperson"
+version: 1
+sourceUrls:
+  - "https://dsps.wi.gov/pages/Professions/RealEstateSalesperson/Default.aspx"
+rules:
+  graceWindowDays: 0
+  reinstatementWindowDays: 365
+  requiresExamRetakeIfBeyondDays: 730
+  ce:
+    requiredHours: 18
+    ethicsHours: 3
+    carryover: false
+  backgroundCheck:
+    fingerprints: true
+  sponsorRequired: false
+  formSet: ["RealEstateApp"]
+  fees: {}
+  appointmentsResetOnReinstatement: false
+  docsNeeded: ["PhotoID", "CECert"]
+  transitions:
+    - from: "Expired"
+      to: "Active"
+      conditions:
+        - "Within 12 months"
+        - "CE complete"
+      tasks:
+        - "REAL_ESTATE_REINSTATE"
+        - "UPLOAD_CE_CERTS"
+        - "PAY_REINSTATEMENT_FEE"
+    - from: "Lapsed"
+      to: "Requalify"
+      conditions:
+        - ">12 months"
+      tasks:
+        - "SCHEDULE_REAL_ESTATE_EXAM"
+        - "NEW_APPLICATION"

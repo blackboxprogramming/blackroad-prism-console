@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Person {
+  id             String          @id @default(cuid())
+  legalName      String
+  crdNumber      String?
+  homeState      String
+  aka            String[]        @default([])
+  tracks         TrackType[]     @default([])
+  targetStates   String[]        @default([])
+  disclosures    String[]        @default([])
+  designations   String[]        @default([])
+  priorEmployers Json?
+  licenseTracks  LicenseTrack[]
+  tasks          Task[]
+}
+
+enum TrackType {
+  securities
+  insurance
+  real_estate
+}
+
+enum LicenseStatus {
+  Active
+  Expired
+  Lapsed
+  Barred
+  Unknown
+}
+
+enum TaskStatus {
+  Open
+  Done
+  Blocked
+  "N/A"
+}
+
+model LicenseTrack {
+  id               String         @id @default(cuid())
+  person           Person         @relation(fields: [personId], references: [id])
+  personId         String
+  track            TrackType
+  stateCode        String
+  licenseType      String
+  status           LicenseStatus
+  number           String?
+  lastRenewal      DateTime?
+  expiration       DateTime?
+  ceHoursEarned    Int?
+  ceHoursRequired  Int?
+  notes            String?
+  metadata         Json?
+  rulebooks        Rulebook[]
+  tasks            Task[]
+}
+
+enum TransitionTo {
+  Active
+  Requalify
+}
+
+enum FilingArtifactKind {
+  Form
+  ProofCE
+  Fee
+  Fingerprint
+  Background
+  Appointment
+  Bond
+  Affidavit
+  ExamPass
+}
+
+model Rulebook {
+  id          String      @id @default(cuid())
+  stateCode   String
+  track       TrackType
+  licenseType String
+  version     Int
+  sourceUrls  String[]    @default([])
+  rules       Json
+  license     LicenseTrack? @relation(fields: [licenseTrackId], references: [id])
+  licenseTrackId String?
+}
+
+model Task {
+  id          String        @id @default(cuid())
+  person      Person        @relation(fields: [personId], references: [id])
+  personId    String
+  track       TrackType
+  stateCode   String
+  licenseType String
+  title       String
+  due         DateTime?
+  blocking    Boolean       @default(false)
+  payload     Json?
+  status      TaskStatus    @default(Open)
+  template    String
+  artifacts   FilingArtifact[]
+}
+
+model FilingArtifact {
+  id        String              @id @default(cuid())
+  task      Task                @relation(fields: [taskId], references: [id])
+  taskId    String
+  kind      FilingArtifactKind
+  path      String
+  checksum  String
+}
