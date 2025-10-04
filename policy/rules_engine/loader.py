@@ -15,7 +15,7 @@ from .rule import Rule
 @dataclass
 class RuleTestCase:
     name: str
-    want: bool
+    want: Any
     input: Optional[Dict[str, Any]] = None
     series: Optional[List[Dict[str, Any]]] = None
     window: Optional[str] = None
@@ -25,6 +25,7 @@ class RuleTestCase:
     fixture: Optional[str] = None
     expect_details: Optional[Dict[str, Any]] = None
     expect_error: Optional[str] = None
+    guid: Optional[str] = None
 
 
 def _expand_series(series: List[Any]) -> List[Dict[str, Any]]:
@@ -58,7 +59,7 @@ def load_rule_file(path: str | Path) -> tuple[Rule, List[RuleTestCase]]:
     for entry in payload.get("tests", []):
         tc = RuleTestCase(
             name=entry["name"],
-            want=bool(entry.get("want")),
+            want=entry.get("want"),
             input=dict(entry.get("input", {})),
             window=entry.get("window"),
             baseline=dict(entry.get("baseline", {})),
@@ -67,9 +68,19 @@ def load_rule_file(path: str | Path) -> tuple[Rule, List[RuleTestCase]]:
             fixture=entry.get("fixture"),
             expect_details=entry.get("expect_details"),
             expect_error=entry.get("expect_error"),
+            guid=entry.get("guid"),
         )
         if "series" in entry:
-            tc.series = _expand_series(entry["series"])
+            series_entry = entry["series"]
+            if isinstance(series_entry, Mapping):
+                events = series_entry.get("events", [])
+                if isinstance(events, list):
+                    tc.series = _expand_series(events)
+                window = series_entry.get("window")
+                if window:
+                    tc.window = str(window)
+            else:
+                tc.series = _expand_series(series_entry)
         tests.append(tc)
     return rule, tests
 

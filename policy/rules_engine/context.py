@@ -170,6 +170,38 @@ class EvaluationContext:
         )
         return result
 
+    def consent_abandonment_ratio(
+        self,
+        window: str,
+        include_series: Optional[Sequence[Mapping[str, Any]]] = None,
+    ) -> float:
+        events = include_series or self.series
+        started = 0
+        resolved = 0
+        for event in events:
+            if not isinstance(event, Mapping):
+                continue
+            if str(event.get("deny_reason")) == "consent_required":
+                started += 1
+            if str(event.get("outcome")) == "allow":
+                resolved += 1
+        ratio = 0.0
+        if started > 0:
+            abandon = started - resolved
+            if abandon < 0:
+                abandon = 0
+            ratio = abandon / float(started)
+        self.record(
+            "consent_abandonment_ratio",
+            {
+                "window": window,
+                "value": ratio,
+                "started": started,
+                "resolved": resolved,
+            },
+        )
+        return ratio
+
     # -- context assembly ---------------------------------------------
     def with_series(self, series: Sequence[Mapping[str, Any]]) -> "EvaluationContext":
         clone = EvaluationContext(

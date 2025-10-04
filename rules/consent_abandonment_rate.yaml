@@ -1,0 +1,77 @@
+rule_id: "CONSENT_ABANDONMENT_RATE-5a4f3a2a-6f9e-4d3e-a0b7-48c2c11e70de"
+name: "Consent abandonment exceeds threshold"
+category: "observe"
+severity: "med"
+version: 1
+description: >
+  Alerts when the fraction of consent escalations that are not resolved
+  (no allow within 24h) exceeds 25% on a rolling 7-day window.
+inputs_schema:
+  - name: ts
+  - name: deny_reason
+  - name: outcome
+output_type: "json"
+expr: |
+  rate(consent_abandonment(), "168h") > 0.25
+metrics_selector:
+  prom: |
+    (
+      increase(consent_escalations_started_total[{{window}}])
+      -
+      increase(consent_escalations_resolved_total[{{window}}])
+    )
+    /
+    clamp_min(increase(consent_escalations_started_total[{{window}}]), 1)
+  ch: |
+    WITH started AS (
+      SELECT correlation_id, min(ts) AS started_at
+      FROM audit_events
+      WHERE ts >= now() - INTERVAL {{window}} AND outcome='deny' AND deny_reason='consent_required'
+      GROUP BY correlation_id
+    ),
+    resolved AS (
+      SELECT a.correlation_id
+      FROM audit_events a
+      INNER JOIN started s USING (correlation_id)
+      WHERE a.outcome='allow' AND a.ts BETWEEN s.started_at AND s.started_at + INTERVAL 24 HOUR
+      GROUP BY a.correlation_id
+    )
+    SELECT
+      (count() - countIf(correlation_id IN resolved)) / nullIf(count(), 0)
+    FROM started
+on_match:
+  decision: "notify"
+  reason: "consent_abandonment_spike"
+  details:
+    message: "Consent abandonment ratio is high; users may be stuck."
+    remediation: "Review scopes UX, reduce escalations, or add just-in-time guidance."
+notify:
+  channels: ["slack:#platform"]
+owners: ["@platform-eng", "@secops"]
+docs_url: "https://your.docs/policies/consent_abandonment_rate"
+docs_chart:
+  endpoint: "/metrics/consent_abandonment_rate"
+  title: "Consent Abandonment (7d)"
+tests:
+  - name: "healthy_rate"
+    guid: "0c3d6d5a-6e7f-4e6a-8f7a-8fb0d3f04e23"
+    series:
+      window: "168h"
+      events:
+        - repeat: 8
+          each: { deny_reason: "consent_required" }
+        - repeat: 7
+          each: { outcome: "allow" }
+    want: { decision: "allow", reason: "" }
+  - name: "spike"
+    guid: "e6f4b0d2-3e59-4f3e-98c1-35e1c8f4f2a1"
+    series:
+      window: "168h"
+      events:
+        - repeat: 8
+          each: { deny_reason: "consent_required" }
+        - repeat: 4
+          each: { outcome: "allow" }
+    want: { decision: "notify", reason: "consent_abandonment_spike" }
+comments:
+  - "Keep observe; consider enforce only to throttle upstream prompts, not users."
