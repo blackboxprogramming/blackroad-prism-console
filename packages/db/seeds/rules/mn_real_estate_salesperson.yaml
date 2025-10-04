@@ -1,0 +1,39 @@
+id: mn-real-estate-salesperson
+stateCode: MN
+track: real_estate
+licenseType: "RealEstate:Salesperson"
+version: 1
+sourceUrls:
+  - "https://mn.gov/commerce/real-estate/"
+rules:
+  graceWindowDays: 0
+  reinstatementWindowDays: 365
+  requiresExamRetakeIfBeyondDays: 365
+  ce:
+    requiredHours: 30
+    ethicsHours: 1
+    carryover: false
+  backgroundCheck:
+    fingerprints: true
+  sponsorRequired: false
+  formSet: ["RealEstateApp"]
+  fees: {}
+  appointmentsResetOnReinstatement: false
+  docsNeeded: ["PhotoID", "CECert"]
+  transitions:
+    - from: "Expired"
+      to: "Active"
+      conditions:
+        - "Within 12 months"
+        - "CE complete"
+      tasks:
+        - "REAL_ESTATE_REINSTATE"
+        - "UPLOAD_CE_CERTS"
+        - "PAY_REINSTATEMENT_FEE"
+    - from: "Lapsed"
+      to: "Requalify"
+      conditions:
+        - ">12 months"
+      tasks:
+        - "SCHEDULE_REAL_ESTATE_EXAM"
+        - "NEW_APPLICATION"

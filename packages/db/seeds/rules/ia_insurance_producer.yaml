@@ -1,0 +1,39 @@
+id: ia-insurance-producer-life
+stateCode: IA
+track: insurance
+licenseType: "Producer:Life/Health"
+version: 1
+sourceUrls:
+  - "https://iid.iowa.gov/insurance-producers"
+rules:
+  graceWindowDays: 0
+  reinstatementWindowDays: 365
+  requiresExamRetakeIfBeyondDays: 365
+  ce:
+    requiredHours: 36
+    ethicsHours: 3
+    carryover: false
+  backgroundCheck: null
+  sponsorRequired: false
+  formSet: ["NIPR"]
+  fees: {}
+  appointmentsResetOnReinstatement: true
+  docsNeeded: ["PhotoID", "CECert"]
+  transitions:
+    - from: "Expired"
+      to: "Active"
+      conditions:
+        - "Within 12 months"
+        - "CE complete"
+      tasks:
+        - "INSURANCE_REINSTATE_VIA_SIRCON"
+        - "UPLOAD_CE_CERTS"
+        - "PAY_REINSTATEMENT_FEE"
+    - from: "Lapsed"
+      to: "Requalify"
+      conditions:
+        - ">12 months"
+      tasks:
+        - "PRELICENSING_COURSE"
+        - "SCHEDULE_INSURANCE_EXAM"
+        - "NEW_APPLICATION"

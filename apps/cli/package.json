@@ -1,0 +1,26 @@
+{
+  "name": "blackroad-lic",
+  "version": "0.1.0",
+  "description": "CLI for BlackRoad multi-state licensing orchestration",
+  "type": "module",
+  "bin": {
+    "blackroad-lic": "dist/index.js"
+  },
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint src --ext .ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@blackroad/core": "^0.1.0",
+    "@blackroad/db": "^0.1.0",
+    "@blackroad/integrations": "^0.1.0",
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

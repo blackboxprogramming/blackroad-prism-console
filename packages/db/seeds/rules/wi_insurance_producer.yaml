@@ -1,0 +1,39 @@
+id: wi-insurance-producer-life
+stateCode: WI
+track: insurance
+licenseType: "Producer:Life/Health"
+version: 1
+sourceUrls:
+  - "https://oci.wi.gov/Pages/Agents/AgentLicensing.aspx"
+rules:
+  graceWindowDays: 0
+  reinstatementWindowDays: 365
+  requiresExamRetakeIfBeyondDays: 365
+  ce:
+    requiredHours: 24
+    ethicsHours: 3
+    carryover: false
+  backgroundCheck: null
+  sponsorRequired: false
+  formSet: ["NIPR"]
+  fees: {}
+  appointmentsResetOnReinstatement: true
+  docsNeeded: ["PhotoID", "CECert"]
+  transitions:
+    - from: "Expired"
+      to: "Active"
+      conditions:
+        - "Within 12 months of expiration"
+        - "CE complete"
+      tasks:
+        - "INSURANCE_REINSTATE_VIA_SIRCON"
+        - "UPLOAD_CE_CERTS"
+        - "PAY_REINSTATEMENT_FEE"
+    - from: "Lapsed"
+      to: "Requalify"
+      conditions:
+        - ">12 months since expiration"
+      tasks:
+        - "PRELICENSING_COURSE"
+        - "SCHEDULE_INSURANCE_EXAM"
+        - "NEW_APPLICATION"

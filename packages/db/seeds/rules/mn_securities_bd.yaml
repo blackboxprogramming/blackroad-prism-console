@@ -1,0 +1,35 @@
+id: mn-securities-bd-rep
+stateCode: MN
+track: securities
+licenseType: "BrokerDealer:Representative"
+version: 1
+sourceUrls:
+  - "https://mn.gov/commerce/securities/"
+rules:
+  graceWindowDays: 0
+  reinstatementWindowDays: 120
+  requiresExamRetakeIfBeyondDays: 730
+  ce: null
+  backgroundCheck:
+    fingerprints: true
+  sponsorRequired: true
+  formSet: ["U4"]
+  fees: {}
+  appointmentsResetOnReinstatement: false
+  docsNeeded: ["PhotoID"]
+  transitions:
+    - from: "Expired"
+      to: "Active"
+      conditions:
+        - "Within 4 months of expiration"
+        - "Sponsor affirmed"
+      tasks:
+        - "FILE_U4"
+        - "PAY_STATE_FEES"
+    - from: "Lapsed"
+      to: "Requalify"
+      conditions:
+        - ">4 months since expiration"
+      tasks:
+        - "SCHEDULE_SERIES65_EXAM"
+        - "NEW_APPLICATION"
