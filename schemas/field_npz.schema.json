@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Field NPZ metadata",
+  "type": "object",
+  "required": ["name", "shape", "dtype"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Identifier for the stored tensor or field."
+    },
+    "shape": {
+      "type": "array",
+      "items": {"type": "integer", "minimum": 0}
+    },
+    "dtype": {
+      "type": "string",
+      "description": "NumPy dtype string representation."
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}
