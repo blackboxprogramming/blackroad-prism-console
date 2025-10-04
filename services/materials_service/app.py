@@ -1,23 +1,73 @@
-"""
-Experimental Materialite service.
+"""Experimental Materialite service with observability hooks."""
 
-Expose simple job endpoints for grain coarsening and small-strain FFT.
-All functionality is gated behind FEATURE_MATERIALS feature flag.
-"""
-
-import os
-import uuid
 import asyncio
+import os
+import time
+import uuid
+from collections import deque
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Deque, Dict, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from opentelemetry import trace
 from pydantic import BaseModel, Field, validator
+
+from services.materials_service.telemetry import configure_telemetry
 
 FEATURE_FLAG = os.getenv("FEATURE_MATERIALS") == "true"
 RUNS_DIR = Path("/work")  # scratch volume mounted read-only elsewhere
+RATE_WINDOW_SECONDS = int(os.getenv("MATERIALS_RATE_WINDOW_SECONDS", "60"))
+AUDIT_LOG_SIZE = int(os.getenv("MATERIALS_AUDIT_LOG_SIZE", "256"))
+START_TIME = time.time()
 
 app = FastAPI(title="Lucidia Materials Service", version="0.1", docs_url=None)
+configure_telemetry(app)
+
+tracer = trace.get_tracer(__name__)
+request_events: Deque[float] = deque()
+audit_log: Deque[Dict[str, Any]] = deque(maxlen=max(1, AUDIT_LOG_SIZE))
+
+
+def _format_trace_id(trace_id: int) -> Optional[str]:
+    if not trace_id:
+        return None
+    return f"{trace_id:032x}"
+
+
+def current_trace_id() -> Optional[str]:
+    span = trace.get_current_span()
+    if not span:
+        return None
+    return _format_trace_id(span.get_span_context().trace_id)
+
+
+def record_audit(action: str, job_id: str, **metadata: Any) -> None:
+    entry = {
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "action": action,
+        "job_id": job_id,
+        "trace_id": current_trace_id(),
+    }
+    if metadata:
+        entry["metadata"] = metadata
+    audit_log.append(entry)
+
+
+@app.middleware("http")
+async def enrich_response(request: Request, call_next):
+    response = await call_next(request)
+    now = time.time()
+    request_events.append(now)
+    cutoff = now - RATE_WINDOW_SECONDS
+    while request_events and request_events[0] < cutoff:
+        request_events.popleft()
+
+    trace_id = current_trace_id()
+    if trace_id:
+        response.headers["x-trace-id"] = trace_id
+        request.state.trace_id = trace_id
+    return response
 
 
 # -----------------------------------------------------------------------------
@@ -65,18 +115,24 @@ async def worker():
         job_dir = RUNS_DIR / job_id
         job_dir.mkdir(parents=True, exist_ok=True)
 
-        try:
-            if kind == "coarsening":
-                await run_grain_coarsening(params, job_dir)
-            elif kind == "fft":
-                await run_small_strain_fft(params, job_dir)
-            jobs[job_id].status = "succeeded"
-            jobs[job_id].artifacts = {p.name: str(p) for p in job_dir.iterdir()}
-        except Exception as exc:  # noqa: BLE001
-            jobs[job_id].status = "failed"
-            jobs[job_id].detail = str(exc)
-        finally:
-            queue.task_done()
+        with tracer.start_as_current_span(
+            f"job.{kind}", attributes={"job.id": job_id, "job.kind": kind}
+        ):
+            record_audit("job.started", job_id, kind=kind)
+            try:
+                if kind == "coarsening":
+                    await run_grain_coarsening(params, job_dir)
+                elif kind == "fft":
+                    await run_small_strain_fft(params, job_dir)
+                jobs[job_id].status = "succeeded"
+                jobs[job_id].artifacts = {p.name: str(p) for p in job_dir.iterdir()}
+                record_audit("job.succeeded", job_id, kind=kind)
+            except Exception as exc:  # noqa: BLE001
+                jobs[job_id].status = "failed"
+                jobs[job_id].detail = str(exc)
+                record_audit("job.failed", job_id, kind=kind, error=str(exc))
+            finally:
+                queue.task_done()
 
 
 create_worker_task()
@@ -89,7 +145,43 @@ create_worker_task()
 async def healthz():
     if not FEATURE_FLAG:
         raise HTTPException(404, "Materials feature disabled")
-    return {"status": "ok"}
+    now = time.time()
+    exporter = "otlp" if os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT") else "console"
+    return {
+        "status": "ok",
+        "service": "lucidia-materials",
+        "build": {
+            "sha": os.getenv("BUILD_SHA", "dev"),
+            "timestamp": os.getenv("BUILD_TIMESTAMP"),
+        },
+        "uptime_s": round(now - START_TIME, 2),
+        "queue": {
+            "depth": queue.qsize(),
+            "jobs": len(jobs),
+        },
+        "rate_limit": {
+            "window_seconds": RATE_WINDOW_SECONDS,
+            "recent_requests": len(request_events),
+        },
+        "telemetry": {
+            "exporter": exporter,
+            "provider": type(trace.get_tracer_provider()).__name__,
+        },
+        "audit": {
+            "recent_records": len(audit_log),
+            "capacity": audit_log.maxlen,
+        },
+    }
+
+
+@app.get("/audit/logs")
+async def get_audit_logs(limit: int = 50):
+    if not FEATURE_FLAG:
+        raise HTTPException(404, "Materials feature disabled")
+    limit = max(1, min(limit, len(audit_log))) if audit_log else 0
+    if limit == 0:
+        return []
+    return list(audit_log)[-limit:]
 
 
 @app.post("/jobs/grain-coarsening", response_model=JobStatus)
@@ -97,6 +189,7 @@ async def create_grain_job(params: GrainCoarseningParams):
     job_id = uuid.uuid4().hex
     jobs[job_id] = JobStatus(id=job_id, status="pending")
     await queue.put((job_id, "coarsening", params))
+    record_audit("job.enqueued", job_id, kind="coarsening")
     return jobs[job_id]
 
 
@@ -105,6 +198,7 @@ async def create_fft_job(params: SmallStrainFFTParams):
     job_id = uuid.uuid4().hex
     jobs[job_id] = JobStatus(id=job_id, status="pending")
     await queue.put((job_id, "fft", params))
+    record_audit("job.enqueued", job_id, kind="fft")
     return jobs[job_id]
 
 
