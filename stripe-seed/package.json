@@ -1,0 +1,11 @@
+{
+  "name": "stripe-seed",
+  "private": true,
+  "type": "module",
+  "scripts": { "seed": "tsx seed.ts" },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "stripe": "^16.2.0",
+    "tsx": "^4.16.2"
+  }
+}
