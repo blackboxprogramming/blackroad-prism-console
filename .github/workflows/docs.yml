@@ -1,26 +1,33 @@
-name: dbt-docs
-
+name: build-docs
 on:
   push:
-    branches: [main]
-
+    branches: ["main"]
+    paths:
+      - "rules/**"
+      - "compliance/cmd/ruledocs/**"
+      - "compliance/harness/**"
 jobs:
-  build-publish:
+  docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-go@v5
         with:
-          python-version: '3.11'
-      - run: pip install dbt-snowflake
-      - run: dbt deps
-      - run: dbt docs generate --profiles-dir .
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-      - name: Publish
-        uses: peaceiris/actions-gh-pages@v3
+          go-version: "1.22"
+      - run: make docs
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: target
+          path: docs
+  deploy:
+    needs: docs
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

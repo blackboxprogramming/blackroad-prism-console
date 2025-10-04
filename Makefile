@@ -1,5 +1,5 @@
 .RECIPEPREFIX = >
-.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy docs
 
 setup:
 >python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff
@@ -48,3 +48,6 @@ dc-test:
 
 dc-shell:
 >docker compose run --rm app bash
+
+docs:
+>cd compliance && go run ./cmd/ruledocs ../rules ../docs/rules

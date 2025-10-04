@@ -1,25 +1,72 @@
-id: MULTI_PROVIDER_SINGLE_ROLE
-mode: enforce
-severity: medium
-block_on_error: true
-metadata:
-  product: Mirror Guard
-  description: Block low-privilege users from fanning out mirrors across providers.
-  block_message: "Blocked by policy MULTI_PROVIDER_SINGLE_ROLE. Reason: low-role user touched multiple providers in 5m window."
-expr: action in ["mirror", "pr.create"] && user_role in ["viewer", "contributor"] && distinct_over("resource_provider", "5m") >= 2
+rule_id: "MULTI_PROVIDER_SINGLE_ROLE-2f7a2f54-2c2e-4a66-9c8d-0d3b94f88c2b"
+name: "Block high-impact actions across multiple providers on low role"
+category: "enforce"
+canary: true
+severity: "med"
+version: 1
+description: >
+  If a user with a low role (viewer/contributor) attempts high-impact actions
+  (mirror, pr.create) across ≥2 providers within 5 minutes, flag and (post-canary) block.
+inputs_schema:
+  - name: user_id
+  - name: user_role
+  - name: action
+  - name: resource_provider
+  - name: ts
+output_type: "json"
+expr: |
+  (action == "mirror" || action == "pr.create") &&
+  (user_role == "viewer" || user_role == "contributor") &&
+  distinct_over("resource_provider", "5m") >= 2
+metrics_selector:
+  prom: |
+    (
+      sum(count_over_time(audit_actions_total{action=~"mirror|pr.create",user_role=~"viewer|contributor"}[{{window}}])
+          by (user_id, resource_provider) > 0)
+      by (user_id)
+    ) >= 2
+  ch: |
+    SELECT user_id
+    FROM audit_events
+    WHERE ts >= now() - INTERVAL {{window}}
+      AND action IN ('mirror','pr.create')
+      AND user_role IN ('viewer','contributor')
+    GROUP BY user_id
+    HAVING uniqExact(resource_provider) >= 2
+on_match:
+  decision: "deny"
+  reason: "multi_provider_single_role"
+  details:
+    message: "High-impact actions across providers by low role."
+    remediation: "Escalate role or restrict to a single provider for this task."
+notify:
+  channels: ["slack:#secops"]
+owners: ["@oncall-security", "security@company.com"]
+docs_url: "https://your.docs/policies/multi_provider_single_role"
 tests:
-  - name: viewer_multi_provider_blocks
-    fixture: multi/multi_provider_window.series.json
-    want: true
-  - name: contributor_single_provider_allows
-    window: "5m"
+  - name: "two_providers_low_role"
+    guid: "c8b2f1b6-2082-4d2d-a6a9-0e1dc6a3a0c7"
     series:
-      - { action: "mirror", resource_provider: "github", user_role: "contributor" }
-      - { action: "mirror", resource_provider: "github", user_role: "contributor" }
-    want: false
-  - name: admin_multi_provider_allows
-    window: "5m"
+      window: "5m"
+      events:
+        - {user_id: 101, user_role: "viewer", action: "mirror", resource_provider: "github"}
+        - {user_id: 101, user_role: "viewer", action: "mirror", resource_provider: "gitlab"}
+    want: {decision: "deny", reason: "multi_provider_single_role"}
+  - name: "same_provider_ok"
+    guid: "b2bfae85-7a1e-4a8d-8c0a-2b2f9a1c1d33"
     series:
-      - { action: "mirror", resource_provider: "github", user_role: "admin" }
-      - { action: "mirror", resource_provider: "gitlab", user_role: "admin" }
-    want: false
+      window: "5m"
+      events:
+        - {user_id: 202, user_role: "viewer", action: "mirror", resource_provider: "github"}
+        - {user_id: 202, user_role: "viewer", action: "pr.create", resource_provider: "github"}
+    want: {decision: "allow", reason: ""}
+  - name: "higher_role_ok"
+    guid: "2b6c8b44-3d7b-4b12-9b63-55c6ad1c2ea1"
+    series:
+      window: "5m"
+      events:
+        - {user_id: 303, user_role: "maintainer", action: "mirror", resource_provider: "github"}
+        - {user_id: 303, user_role: "maintainer", action: "mirror", resource_provider: "gitlab"}
+    want: {decision: "allow", reason: ""}
+comments:
+  - "Keep canary=true for a week to measure noise; then flip."
