@@ -26,7 +26,7 @@ import Subscribe from './Subscribe.jsx'
 import io from 'socket.io-client'
 import { Routes, Route, NavLink } from 'react-router-dom'
 import { API_BASE, setToken, login, me, fetchTimeline, fetchTasks, fetchCommits, fetchAgents, fetchWallet, fetchContradictions, getNotes, setNotes, action } from './api'
-import { Activity, Brain, Database, LayoutGrid, Settings, ShieldCheck, SquareDashedMousePointer, HeartPulse, Sparkles } from 'lucide-react'
+import { Activity, Brain, Database, LayoutGrid, Settings, ShieldCheck, SquareDashedMousePointer, HeartPulse, Sparkles, Music3 } from 'lucide-react'
 import Login from './components/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import RoadView from './pages/RoadView.jsx'
@@ -34,6 +34,7 @@ import Orchestrator from './Orchestrator.jsx'
 import Manifesto from './components/Manifesto.jsx'
 import AutoHeal from './pages/AutoHeal.jsx'
 import Git from './pages/Git.jsx'
+import MusicStudio from './pages/MusicStudio.jsx'
 
 export default function App(){
   const [user, setUser] = useState(null)
@@ -146,6 +147,7 @@ export default function App(){
               <NavItem to="/roadview" icon={<LayoutGrid size={18} />} text="RoadView" />
               <NavItem to="/autoheal" icon={<HeartPulse size={18} />} text="Auto-Heal" />
               <NavItem to="/novelty" icon={<Sparkles size={18} />} text="Novelty Dashboard" />
+              <NavItem to="/music" icon={<Music3 size={18} />} text="Music Studio" />
               <NavItem icon={<Rocket size={18} />} text="Orchestrator" to="/orchestrator" />
               <NavItem icon={<Rocket size={18} />} text="Manifesto" href="/manifesto" />
             </nav>
@@ -222,6 +224,7 @@ export default function App(){
               <Route path="/roadview" element={<RoadView agents={agents} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
               <Route path="/autoheal" element={<AutoHeal />} />
               <Route path="/git" element={<Git />} />
+              <Route path="/music" element={<MusicStudio />} />
             </Routes>
           </main>
         </>
