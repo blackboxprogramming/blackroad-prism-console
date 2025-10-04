@@ -1,0 +1,220 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id          String   @id @default(cuid())
+  type        ClientType
+  status      ClientStatus @default(Prospect)
+  riskBand    ClientRiskBand?
+  suitability Json
+  createdAt   DateTime @default(now())
+  persons     Person[]
+  businesses  Business[]
+  accountApps AccountApp[]
+  documents   Document[]
+  screenings  Screening[]
+  wallets     Wallet[]
+  gates       Gate[]
+}
+
+enum ClientType {
+  INDIVIDUAL
+  TRUST
+  BUSINESS
+}
+
+enum ClientStatus {
+  Prospect
+  KYC_PENDING
+  DocsPending
+  ReadyToOpen
+  Active
+  Rejected
+}
+
+enum ClientRiskBand {
+  LOW
+  MODERATE
+  HIGH
+  SPECULATIVE
+}
+
+model Person {
+  id           String   @id @default(cuid())
+  clientId     String
+  role         PersonRole
+  name         String
+  dob          DateTime?
+  ssnLast4     String?
+  tin          String?
+  phones       String[]
+  emails       String[]
+  addresses    Json
+  kyc          Json
+  pep          Boolean?
+  sanctionsHit Boolean?
+  client       Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+enum PersonRole {
+  PRIMARY
+  JOINT
+  BENEFICIAL_OWNER
+  CONTROL_PERSON
+  TRUSTEE
+  GRANTOR
+  AUTH_TRADER
+}
+
+model Business {
+  id                String   @id @default(cuid())
+  clientId          String
+  legalName         String
+  formationCountry  String
+  formationState    String?
+  ein               String?
+  naics             String?
+  controlPersons    String[]
+  beneficialOwners  String[]
+  kyb               Json
+  client            Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model AccountApp {
+  id                String   @id @default(cuid())
+  clientId          String
+  channel           AccountChannel
+  accountType       String
+  optionsLevel      Int?
+  margin            Boolean?
+  objectives        String[]
+  timeHorizon       String
+  liquidityNeeds    String
+  riskTolerance     AccountRiskTolerance
+  disclosuresAccepted String[]
+  eSignEnvelopeId   String?
+  status            AccountAppStatus @default(Draft)
+  meta              Json
+  client            Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  documents         Document[]
+}
+
+enum AccountChannel {
+  RIA
+  BD
+  INSURANCE
+  CRYPTO
+}
+
+enum AccountRiskTolerance {
+  Low
+  Moderate
+  High
+  Speculative
+}
+
+enum AccountAppStatus {
+  Draft
+  NeedsReview
+  ReadyToSubmit
+  Submitted
+  Opened
+  Rejected
+}
+
+model Document {
+  id           String   @id @default(cuid())
+  clientId     String?
+  accountAppId String?
+  kind         String
+  path         String
+  sha256       String
+  meta         Json
+  createdAt    DateTime @default(now())
+  client       Client?     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  accountApp   AccountApp? @relation(fields: [accountAppId], references: [id], onDelete: Cascade)
+}
+
+model Screening {
+  id          String   @id @default(cuid())
+  clientId    String
+  subjectType ScreeningSubjectType
+  subjectId   String
+  provider    String
+  result      Json
+  score       Int
+  status      ScreeningStatus
+  createdAt   DateTime @default(now())
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+enum ScreeningSubjectType {
+  PERSON
+  BUSINESS
+  WALLET
+}
+
+enum ScreeningStatus {
+  CLEAR
+  REVIEW
+  HIT
+}
+
+model Wallet {
+  id             String   @id @default(cuid())
+  clientId       String
+  chain          WalletChain
+  address        String
+  label          String?
+  riskScore      Int?
+  lastScreenedAt DateTime?
+  status         WalletStatus @default(UNVERIFIED)
+  client         Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+enum WalletChain {
+  BTC
+  ETH
+  SOL
+  OTHER
+}
+
+enum WalletStatus {
+  UNVERIFIED
+  VERIFIED
+  RESTRICTED
+}
+
+model WormBlock {
+  id       String   @id @default(cuid())
+  idx      Int      @unique
+  ts       DateTime @default(now())
+  payload  Json
+  prevHash String
+  hash     String
+}
+
+model Gate {
+  id        String   @id @default(cuid())
+  clientId  String
+  action    GateAction
+  allowed   Boolean
+  reason    String?
+  createdAt DateTime @default(now())
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+enum GateAction {
+  advise
+  open_account
+  trade
+  enable_options
+  enable_margin
+  enable_crypto
+}

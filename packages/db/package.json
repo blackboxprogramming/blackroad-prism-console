@@ -1,24 +1,27 @@
 {
-  "name": "@blackroad/api",
+  "name": "@blackroad/db",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "prisma"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js"
+    "clean": "rimraf dist",
+    "generate": "prisma generate",
+    "lint": "eslint --ext .ts src"
   },
   "dependencies": {
-    "@blackroad/core": "workspace:*",
-    "fastify": "^4.27.2",
-    "fastify-type-provider-zod": "^2.0.0",
-    "zod": "^3.23.8"
+    "@prisma/client": "^5.16.1"
   },
   "devDependencies": {
     "@types/node": "^20.14.11",
-    "tsx": "^4.15.7",
+    "prisma": "^5.16.1",
+    "rimraf": "^5.0.7",
     "typescript": "^5.4.5"
   }
 }

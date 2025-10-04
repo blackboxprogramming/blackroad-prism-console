@@ -1,80 +1,99 @@
-export interface Identity {
-  id: string;
-  publicKey: string;
-  settings: Record<string, unknown>;
-}
+import type {
+  AccountApp,
+  AccountAppStatus,
+  AccountChannel,
+  AccountRiskTolerance,
+  Business,
+  Client,
+  ClientRiskBand,
+  ClientStatus,
+  ClientType,
+  Document,
+  Gate,
+  GateAction,
+  Person,
+  PersonRole,
+  Screening,
+  ScreeningStatus,
+  ScreeningSubjectType,
+  Wallet,
+  WalletStatus,
+} from "@blackroad/db";
 
-export interface Box {
-  id: string;
-  ownerId: string;
-  title: string;
-  description?: string;
-  createdAt: string;
-}
+export type {
+  AccountApp,
+  AccountAppStatus,
+  AccountChannel,
+  AccountRiskTolerance,
+  Business,
+  Client,
+  ClientRiskBand,
+  ClientStatus,
+  ClientType,
+  Document,
+  Gate,
+  GateAction,
+  Person,
+  PersonRole,
+  Screening,
+  ScreeningStatus,
+  ScreeningSubjectType,
+  Wallet,
+  WalletStatus,
+};
 
-export interface Item {
-  id: string;
-  ownerId: string;
-  rawText: string;
-  createdAt: string;
-}
-
-export interface Assignment {
-  id: string;
-  itemId: string;
-  boxId: string;
+export interface SuitabilitySummary {
   score: number;
-  rationale: string;
-  createdAt: string;
+  band: ClientRiskBand;
+  cryptoRiskBand?: "LOW" | "MODERATE" | "HIGH" | "SPECULATIVE";
+  notes: string[];
+  questionnaire: Record<string, unknown>;
 }
 
-export interface ConsentReceipt {
-  id: string;
-  ownerId: string;
-  purpose: string;
-  scope: string;
-  createdAt: string;
-  expiresAt?: string;
+export interface StartOnboardingInput {
+  type: ClientType;
+  channel: AccountChannel;
+  accountType: string;
 }
 
-export interface AuditLogEntry {
-  id: string;
-  ownerId: string;
-  actor: string;
-  action: string;
-  rationale?: string;
-  createdAt: string;
-  ip?: string;
-  device?: string;
+export interface StartOnboardingResult {
+  client: Client;
+  accountApp: AccountApp;
+  checklist: string[];
 }
 
-export interface ClassificationSuggestion {
-  title: string;
-  score: number;
-  rationale: string;
-  tags: string[];
+export interface CreatePersonInput {
+  clientId: string;
+  role: PersonRole;
+  name: string;
+  emails?: string[];
+  phones?: string[];
 }
 
-export interface ClassifiedBoxSuggestion extends ClassificationSuggestion {
-  boxId?: string;
+export interface CreateBusinessInput {
+  clientId: string;
+  legalName: string;
+  formationCountry: string;
 }
 
-export interface ClassificationResponse {
-  suggestions: ClassifiedBoxSuggestion[];
-  seed: number;
+export interface SuitabilityInput {
+  clientId: string;
+  riskTolerance: AccountRiskTolerance;
+  objectives: string[];
+  timeHorizon: string;
+  liquidityNeeds: string;
+  experienceYears: number;
+  crypto?: boolean;
+  walletIds?: string[];
+  questionnaire: Record<string, unknown>;
 }
 
-export interface KeyEnvelope {
-  ownerId: string;
-  keyId: string;
-  encryptedKey: string;
-  algorithm: string;
-  createdAt: string;
-  metadata?: Record<string, unknown>;
+export interface DocGenerationInput {
+  accountAppId: string;
+  sets: string[];
 }
 
-export interface CryptoConfig {
-  kekAlgorithm: string;
-  dataKeyAlgorithm: string;
-  pqcEnabled: boolean;
+export interface GateEvaluationResult {
+  allowed: boolean;
+  reason?: string;
 }
