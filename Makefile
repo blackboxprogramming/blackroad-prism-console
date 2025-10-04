@@ -1,5 +1,5 @@
 .RECIPEPREFIX = >
-.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy mpm-core sweep
 
 setup:
 >python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff
@@ -48,3 +48,9 @@ dc-test:
 
 dc-shell:
 >docker compose run --rm app bash
+
+mpm-core:
+>python bench/20_bench_solid/taichi_mpm_core.py
+
+sweep:
+>python bench/40_compare/sweep_convergence.py
