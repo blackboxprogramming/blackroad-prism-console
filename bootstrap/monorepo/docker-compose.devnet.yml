@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    command: >-
+      anvil --host 0.0.0.0 --chain-id 31337 --accounts 10 --balance 1000000000000000000000 --steps-tracing
+    ports:
+      - "8545:8545"
+    healthcheck:
+      test: ["CMD", "cast", "block-number", "--rpc-url", "http://127.0.0.1:8545"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  roadweb:
+    image: node:20-bullseye
+    working_dir: /app
+    command: >-
+      sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_ANVIL_RPC: http://anvil:8545
+    volumes:
+      - ./apps/roadweb:/app
+    depends_on:
+      anvil:
+        condition: service_healthy
