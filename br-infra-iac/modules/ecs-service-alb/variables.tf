@@ -88,3 +88,9 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
+
+variable "canary_weight" {
+  type        = number
+  description = "Percentage of traffic routed to the canary target group (0-100)."
+  default     = 0
+}

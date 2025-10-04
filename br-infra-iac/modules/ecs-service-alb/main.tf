@@ -84,6 +84,25 @@ resource "aws_lb_target_group" "tg" {
   tags = var.tags
 }
 
+resource "aws_lb_target_group" "tg_canary" {
+  name        = "${var.name}-tg-canary"
+  vpc_id      = var.vpc_id
+  port        = var.container_port
+  protocol    = "HTTP"
+  target_type = "ip"
+
+  health_check {
+    path                = var.health_check_path
+    matcher             = "200"
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    interval            = 15
+    timeout             = 5
+  }
+
+  tags = var.tags
+}
+
 data "aws_route53_zone" "zone" {
   name         = var.hosted_zone_name
   private_zone = false
@@ -146,8 +165,22 @@ resource "aws_lb_listener" "https" {
   certificate_arn   = aws_acm_certificate_validation.cert.certificate_arn
 
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.tg.arn
+    type = "forward"
+
+    forward {
+      dynamic "target_group" {
+        for_each = local.forward_target_groups
+
+        content {
+          arn    = target_group.value.arn
+          weight = target_group.value.weight
+        }
+      }
+
+      stickiness {
+        enabled = false
+      }
+    }
   }
 }
 
@@ -176,6 +209,23 @@ locals {
   secret_arn_values  = values(var.secret_arns)
   cluster_name_parts = split("/", var.cluster_arn)
   cluster_name       = local.cluster_name_parts[length(local.cluster_name_parts) - 1]
+  canary_weight      = max(0, min(100, var.canary_weight))
+  primary_weight     = 100 - local.canary_weight
+  forward_target_groups = local.canary_weight > 0 ? [
+    {
+      arn    = aws_lb_target_group.tg.arn
+      weight = local.primary_weight
+    },
+    {
+      arn    = aws_lb_target_group.tg_canary.arn
+      weight = local.canary_weight
+    }
+  ] : [
+    {
+      arn    = aws_lb_target_group.tg.arn
+      weight = 100
+    }
+  ]
 }
 
 data "aws_iam_policy_document" "task_assume" {

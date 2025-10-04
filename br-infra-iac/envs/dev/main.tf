@@ -120,3 +120,7 @@ module "seed_events_cron" {
 
 output "api_service_name" { value = module.api_service.service_name }
 output "api_url"          { value = module.api_service.https_url }
+output "api_tg_blue_arn"  { value = module.api_service.tg_blue_arn }
+output "api_tg_green_arn" { value = module.api_service.tg_green_arn }
+output "api_https_listener_arn" { value = module.api_service.https_listener_arn }
+output "api_alb_arn_suffix"     { value = module.api_service.alb_arn_suffix }
