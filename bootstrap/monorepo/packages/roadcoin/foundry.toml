@@ -1,0 +1,16 @@
+[profile.default]
+src = "contracts"
+out = "out"
+test = "forge/test"
+libraries = ["lib"]
+evmodin = false
+optimizer = true
+optimizer_runs = 200
+solc = "0.8.25"
+fs_permissions = [{ access = "read", path = "./" }]
+
+[fuzz]
+runs = 128
+
+[invariant]
+fail_on_revert = true

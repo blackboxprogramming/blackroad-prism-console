@@ -1,0 +1,40 @@
+{
+  "name": "@roadchain/roadcoin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build": "hardhat compile",
+    "clean": "hardhat clean && forge clean",
+    "lint": "prettier --check \"contracts/**/*.sol\" \"test/**/*.ts\" && solhint \"contracts/**/*.sol\"",
+    "lint:fix": "prettier --write \"contracts/**/*.sol\" \"test/**/*.ts\" && solhint --fix \"contracts/**/*.sol\"",
+    "format": "npm run lint:fix",
+    "test": "hardhat test",
+    "test:foundry": "forge test",
+    "coverage": "hardhat coverage",
+    "slither": "slither . --config-file slither.config.json",
+    "deploy:anvil": "forge script script/DeployRoadCoin.s.sol --rpc-url ${ANVIL_RPC_URL:-http://127.0.0.1:8545} --broadcast --private-key ${PRIVATE_KEY:-0x59c6995e998f97a5a0044966f09453840e3fcf24e8356b5b1eaa5c32e5d6d9f5}"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.4",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@types/chai": "^4.3.12",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.12.7",
+    "chai": "^4.4.1",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.10.0",
+    "hardhat": "^2.22.2",
+    "hardhat-gas-reporter": "^1.0.10",
+    "prettier": "^3.2.5",
+    "prettier-plugin-solidity": "^1.3.1",
+    "solhint": "^4.5.4",
+    "solidity-coverage": "^0.8.8",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
