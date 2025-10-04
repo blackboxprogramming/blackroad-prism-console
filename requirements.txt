@@ -10,6 +10,7 @@ pydantic
 pyarrow==16.1.0
 pre-commit==4.3.0
 psutil
+PyJWT
 PyYAML==6.0.2
 python-dotenv
 qiskit-aer==0.17.1
