@@ -43,12 +43,32 @@ class Rule:
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "Rule":
-        rule_id = payload["id"]
+        rule_id = payload.get("id") or payload.get("rule_id")
+        if not rule_id:
+            raise KeyError("rule id is required")
         expr = payload["expr"]
-        mode = RuleMode(payload.get("mode", RuleMode.OBSERVE.value))
+        mode_value = payload.get("mode") or payload.get("category") or RuleMode.OBSERVE.value
+        mode = RuleMode(mode_value)
         severity = payload.get("severity", "low")
         block_on_error = bool(payload.get("block_on_error", False))
         metadata = dict(payload.get("metadata", {}))
+        passthrough_keys = (
+            "name",
+            "description",
+            "inputs_schema",
+            "output_type",
+            "metrics_selector",
+            "on_match",
+            "notify",
+            "owners",
+            "docs_url",
+            "docs_chart",
+            "comments",
+            "category",
+        )
+        for key in passthrough_keys:
+            if key in payload and key not in metadata:
+                metadata[key] = payload[key]
         return cls(rule_id, expr, mode=mode, severity=severity, block_on_error=block_on_error, metadata=metadata)
 
     def evaluate(self, event: Mapping[str, Any], ctx: EvaluationContext) -> RuleEvaluationResult:
@@ -155,6 +175,7 @@ class RuleRuntime:
                 message_override=message_override,
             )
         if not result.triggered:
+            details.setdefault("decision", "allow")
             return RuleRuntimeResult(rule.id, False, False, None, None, details)
         violation_id, created = self.upsert_violation(rule, event, details)
         code = "policy_violation" if rule.mode is RuleMode.ENFORCE else None
@@ -167,6 +188,19 @@ class RuleRuntime:
                     message_override = template.format(**event)
                 except Exception:
                     message_override = template
+        if isinstance(rule.metadata, dict):
+            on_match = rule.metadata.get("on_match")
+            if isinstance(on_match, Mapping):
+                decision = on_match.get("decision")
+                reason = on_match.get("reason")
+                details.setdefault("decision", decision or ("block" if blocked else "notify"))
+                if reason:
+                    details.setdefault("reason", reason)
+                extra_details = on_match.get("details")
+                if isinstance(extra_details, Mapping):
+                    details.setdefault("on_match_details", extra_details)
+        if "decision" not in details:
+            details["decision"] = "block" if blocked else "notify"
         return RuleRuntimeResult(
             rule.id,
             True,

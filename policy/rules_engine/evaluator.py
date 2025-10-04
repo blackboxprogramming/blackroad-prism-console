@@ -178,6 +178,9 @@ class ExpressionEvaluator:
                 predicate_node = node.args[0]
                 window = self._eval_node(node.args[1], event, ctx) if len(node.args) > 1 else ""
                 series = ctx.series
+                if isinstance(predicate_node, ast.Call) and isinstance(predicate_node.func, ast.Name):
+                    if predicate_node.func.id == "consent_abandonment":
+                        return ctx.consent_abandonment_ratio(str(window), series)
                 predicate = lambda item: bool(self._eval_node(predicate_node, item, ctx))
                 return ctx.rate(predicate, window, series)
             if func_name == "distinct_over":
