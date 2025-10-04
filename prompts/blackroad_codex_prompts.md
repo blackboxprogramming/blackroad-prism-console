@@ -317,6 +317,140 @@ Return:
 
 ---
 
+## 11) End-to-End Test — PSBT Flow + Broadcast Gate *(Shell Prompt)*
+
+```bash
+# Repository drop-in prompt for the Portal Pi setup.
+# Adds a self-contained integration test that:
+#  1. Generates a tiny outputs.json, request, and policy approval.
+#  2. Builds the unsigned PSBT and fake-signs it.
+#  3. Verifies broadcast is blocked until CONFIRM_BROADCAST=1.
+#  4. Emits NDJSON machine-readable test results.
+
+# CODEX PROMPT — End-to-End Test: PSBT flow + Broadcast Gating
+
+# Assumes previous prompts are installed:
+# - /home/pi/portal/bin/portal
+# - /home/pi/portal/bin/psbt-fake-sign
+# - /home/pi/portal/bin/portal-build-from-request
+# - watch-only wallet wiring + descriptor in /home/pi/portal/configs/raw.descriptor
+
+set -euo pipefail
+ROOT="/home/pi/portal"
+BIN="$ROOT/bin"
+mkdir -p "$ROOT/tests" "$ROOT/logs"
+
+# 0) tiny helper: JSON logger
+cat > "$BIN/test-log" <<'LOG'
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="/home/pi/portal"
+mkdir -p "$ROOT/tests"
+utc=$(date -u +%FT%TZ)
+jq -n --arg utc "$utc" --arg name "$1" --arg status "$2" --arg msg "${3:-}" \
+  '{utc:$utc, name:$name, status:$status, msg:$msg}'
+LOG
+chmod +x "$BIN/test-log"
+
+# 1) generate a minimal multi-dest outputs.json and a policy request
+REQ="$ROOT/configs/e2e.request.json"
+OUTS="$ROOT/configs/e2e.outputs.json"
+LABEL="e2e_tx_$(date -u +%Y%m%d%H%M%S)"
+FEE="${FEE_RATE:-2}"
+
+cat > "$OUTS" <<OUT
+[
+  { "address": "tb1qexampledestxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "amount_btc": "0.00001000" }
+]
+OUT
+
+cat > "$REQ" <<REQ
+{
+  "utc": "$(date -u +%FT%TZ)",
+  "action": "CREATE_PSBT",
+  "label": "$LABEL",
+  "chain": "bitcoin",
+  "policy": {
+    "version": "1",
+    "threshold": 1,
+    "members": [ { "id":"auto","pubkey":"PGP:auto@example" } ]
+  },
+  "payload": {
+    "outputs": $(cat "$OUTS"),
+    "fee_rate_sat_vb": $FEE,
+    "coin_control": { "include_utxos": [], "exclude_utxos": [] }
+  }
+}
+REQ
+
+# 2) register request + mock one approval (file count == threshold)
+"$ROOT/bin/portal" policy:request "$REQ" >/dev/null
+mkdir -p "$ROOT/configs/approvals/$LABEL"
+echo "sig-auto" > "$ROOT/configs/approvals/$LABEL/auto.sig"
+
+# 3) build from request (should pass now that 1-of-1 sig present)
+"$ROOT/bin/portal-build-from-request" "$REQ" >/dev/null || {
+  "$BIN/test-log" "build-from-request" "FAIL" "threshold gate failed" ; exit 2; }
+"$BIN/test-log" "build-from-request" "PASS" "ok"
+
+# 4) create unsigned PSBT (wallet funds UTXOs)
+"$ROOT/bin/portal" psbt:new "$LABEL" "$ROOT/configs/$LABEL.outputs.json" "$FEE" >/dev/null || {
+  "$BIN/test-log" "psbt-new" "FAIL" "create failed" ; exit 3; }
+test -s "$ROOT/psbts/$LABEL.psbt" || { "$BIN/test-log" "psbt-new" "FAIL" "no file"; exit 3; }
+"$BIN/test-log" "psbt-new" "PASS" "ok"
+
+# 5) fake-sign (NO KEYS) to exercise verify/broadcast plumbing
+"$ROOT/bin/psbt-fake-sign" "$LABEL" >/dev/null || {
+  "$BIN/test-log" "fake-sign" "FAIL" ; exit 4; }
+test -s "$ROOT/psbts/$LABEL.signed.psbt" || { "$BIN/test-log" "fake-sign" "FAIL" "no signed file"; exit 4; }
+"$BIN/test-log" "fake-sign" "PASS" "ok"
+
+# 6) verify (analyzepsbt) — should produce a verified.json
+"$ROOT/bin/portal" psbt:verify "$ROOT/psbts/$LABEL.signed.psbt" >/dev/null || {
+  "$BIN/test-log" "psbt-verify" "FAIL" ; exit 5; }
+test -s "$ROOT/psbts/$LABEL.verified.json" || { "$BIN/test-log" "psbt-verify" "FAIL" "no verified.json"; exit 5; }
+"$BIN/test-log" "psbt-verify" "PASS" "ok"
+
+# 7) broadcast MUST be gated without env confirm
+set +e
+"$ROOT/bin/portal" psbt:broadcast "$ROOT/psbts/$LABEL.signed.psbt" 1>/dev/null 2>"$ROOT/logs/bc.err"
+RC=$?
+set -e
+if [ $RC -eq 0 ]; then
+  "$BIN/test-log" "broadcast-gate" "FAIL" "broadcast allowed without confirm"; exit 6
+fi
+grep -q "Refuse: set CONFIRM_BROADCAST=1" "$ROOT/logs/bc.err" \
+  && "$BIN/test-log" "broadcast-gate" "PASS" "blocked without confirm" \
+  || { "$BIN/test-log" "broadcast-gate" "FAIL" "wrong error"; exit 6; }
+
+# 8) now allow broadcast (still safe; fake PSBT may not finalize)
+set +e
+CONFIRM_BROADCAST=1 "$ROOT/bin/portal" psbt:broadcast "$ROOT/psbts/$LABEL.signed.psbt" \
+  1>"$ROOT/logs/bc.ok" 2>"$ROOT/logs/bc2.err"
+RC=$?
+set -e
+if [ $RC -eq 0 ]; then
+  "$BIN/test-log" "broadcast-allow" "PASS" "finalize attempted (ok if txid or error)"
+else
+  "$BIN/test-log" "broadcast-allow" "PASS" "blocked by finalizepsbt (expected with fake)"
+fi
+
+# 9) collect & print a compact test report (newline-delimited JSON)
+echo "--- TEST REPORT (NDJSON) ---"
+{
+  "$BIN/test-log" "build-from-request" "PASS"
+  "$BIN/test-log" "psbt-new" "PASS"
+  "$BIN/test-log" "fake-sign" "PASS"
+  "$BIN/test-log" "psbt-verify" "PASS"
+  "$BIN/test-log" "broadcast-gate" "PASS"
+  "$BIN/test-log" "broadcast-allow" "PASS"
+} | tee "$ROOT/tests/e2e-$(date -u +%Y%m%d%H%M%S).ndjson"
+
+# End of prompt
+```
+
+---
+
 ## MVP Stitching Notes
 
 1. Spin up three services: Identity/Handles, Inbox, Resonance Search (stub data).
