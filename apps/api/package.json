@@ -14,9 +14,12 @@
   "dependencies": {
     "@lucidia/ai": "^0.0.1",
     "@lucidia/core": "^0.0.1",
+    "@aws-sdk/client-ecs": "^3.635.0",
+    "@aws-sdk/client-ssm": "^3.635.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "helmet": "^7.1.0"
+    "helmet": "^7.1.0",
+    "pg": "^8.11.3"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",

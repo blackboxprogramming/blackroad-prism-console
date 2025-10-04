@@ -2,6 +2,8 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import classifyRouter from "./routes/classify.js";
+import metricsRouter from "./routes/metrics.js";
+import sourcesRouter from "./routes/sources.js";
 
 const app = express();
 
@@ -19,6 +21,8 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/", classifyRouter);
+app.use("/v1/metrics", metricsRouter);
+app.use("/v1/sources", sourcesRouter);
 
 const port = Number(process.env.PORT ?? 4000);
 
