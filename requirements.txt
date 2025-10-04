@@ -1,6 +1,8 @@
 anthropic
 boto3
 fastapi
+PyJWT[crypto]
+cryptography
 matplotlib==3.9.4
 mpmath
 notion-client
@@ -15,6 +17,7 @@ python-dotenv
 qiskit-aer==0.17.1
 qiskit-machine-learning==0.7.2
 requests==2.32.4
+redis
 streamlit==1.48.1
 torch
 uvicorn
