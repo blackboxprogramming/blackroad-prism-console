@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+CONFIG_DIR="$ROOT/configs"
+PROOF_DIR="$ROOT/proofs"
+
+mkdir -p "$CONFIG_DIR" "$PROOF_DIR"
+
+DEFAULT_INPUT="$CONFIG_DIR/doctor.raw.xpub"
+RAW_ARG="${1:-}"
+RAW_CONTENT=""
+
+if [ -n "$RAW_ARG" ] && [ -f "$RAW_ARG" ]; then
+  RAW_CONTENT="$(tr -d '\r' < "$RAW_ARG" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+elif [ -n "$RAW_ARG" ]; then
+  RAW_CONTENT="$RAW_ARG"
+elif [ -f "$DEFAULT_INPUT" ]; then
+  RAW_CONTENT="$(tr -d '\r' < "$DEFAULT_INPUT" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+fi
+
+RAW_CONTENT="$(printf '%s' "$RAW_CONTENT" | sed -e 's/[[:space:]]\+/ /g' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+
+if [ -z "$RAW_CONTENT" ]; then
+  echo "no descriptor or xpub supplied" >&2
+  exit 1
+fi
+
+FPR_FILE="$CONFIG_DIR/fpr.txt"
+if [ -s "$FPR_FILE" ]; then
+  FPR="$(tr -d '\r\n' < "$FPR_FILE")"
+else
+  FPR="00000000"
+fi
+
+is_descriptor=0
+if [[ "$RAW_CONTENT" =~ ^(pkh|wpkh|sh\(wpkh|tr)\(.*\)$ ]]; then
+  is_descriptor=1
+fi
+
+families=("pkh" "sh(wpkh" "wpkh" "tr")
+branches=("0/*" "1/*")
+range_steps=(1000 5000 10000 20000)
+
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "$1 is required" >&2
+    exit 1
+  fi
+}
+
+require_cmd jq
+require_cmd bitcoin-cli
+
+make_descriptor() {
+  local family="$1"
+  local branch="$2"
+  if [ $is_descriptor -eq 1 ]; then
+    printf '%s' "$RAW_CONTENT"
+    return
+  fi
+
+  case "$family" in
+    "pkh")
+      printf 'pkh([%s/44h/0h/0h]%s/%s)' "$FPR" "$RAW_CONTENT" "$branch"
+      ;;
+    "sh(wpkh")
+      printf 'sh(wpkh([%s/49h/0h/0h]%s/%s))' "$FPR" "$RAW_CONTENT" "$branch"
+      ;;
+    "wpkh")
+      printf 'wpkh([%s/84h/0h/0h]%s/%s)' "$FPR" "$RAW_CONTENT" "$branch"
+      ;;
+    "tr")
+      printf 'tr([%s/86h/0h/0h]%s/%s)' "$FPR" "$RAW_CONTENT" "$branch"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+merge='[]'
+declare -a scanned_descs=()
+
+add_descriptor() {
+  local desc="$1"
+  for existing in "${scanned_descs[@]}"; do
+    if [ "$existing" = "$desc" ]; then
+      return
+    fi
+  done
+  scanned_descs+=("$desc")
+}
+
+for family in "${families[@]}"; do
+  for branch in "${branches[@]}"; do
+    descriptor_candidate="$(make_descriptor "$family" "$branch")" || continue
+    normalized_desc="$(bitcoin-cli getdescriptorinfo "$descriptor_candidate" | jq -r '.descriptor')"
+    add_descriptor "$normalized_desc"
+    previous_amount=""
+    for step in "${range_steps[@]}"; do
+      scan_input="$(jq -n --arg desc "$normalized_desc" --argjson range "$step" '[{desc: $desc, range: $range}]')"
+      result="$(bitcoin-cli scantxoutset start "$scan_input")"
+      success="$(printf '%s' "$result" | jq -r '.success // false')"
+      if [ "$success" != "true" ]; then
+        continue
+      fi
+      amount="$(printf '%s' "$result" | jq -r '.total_amount // "0"')"
+      unspents="$(printf '%s' "$result" | jq -c '.unspents // []')"
+      merge="$(jq -c --argjson existing "$merge" --argjson extra "$unspents" -n '$existing + $extra')"
+      if [ -n "$previous_amount" ] && [ "$amount" = "$previous_amount" ]; then
+        break
+      fi
+      previous_amount="$amount"
+    done
+  done
+done
+
+python_result="$(printf '%s' "$merge" | python3 - <<'PY'
+import json
+import sys
+from decimal import Decimal, ROUND_HALF_UP, getcontext
+
+getcontext().prec = 60
+try:
+    unspents = json.load(sys.stdin)
+except json.JSONDecodeError:
+    unspents = []
+
+seen = set()
+dedup = []
+total_sats = 0
+
+for entry in unspents:
+    txid = entry.get("txid")
+    vout = entry.get("vout")
+    amount = entry.get("amount")
+    if txid is None or vout is None or amount is None:
+        continue
+    key = f"{txid}:{int(vout)}"
+    if key in seen:
+        continue
+    seen.add(key)
+    dedup.append(entry)
+    total_sats += int((Decimal(str(amount)) * Decimal(100_000_000)).to_integral_value())
+
+btc_total = (Decimal(total_sats) / Decimal(100_000_000)).quantize(Decimal('0.00000001'), rounding=ROUND_HALF_UP)
+
+print(json.dumps({
+    "unspents": dedup,
+    "btc": format(btc_total, 'f'),
+    "sats": total_sats
+}))
+PY
+)"
+
+if [ -z "$python_result" ]; then
+  echo "no unspents discovered" >&2
+  exit 2
+fi
+
+desc_json='[]'
+if [ ${#scanned_descs[@]} -gt 0 ]; then
+  desc_json="$(printf '%s\n' "${scanned_descs[@]}" | jq -R . | jq -s '.')"
+fi
+
+range_json="$(printf '%s\n' "${range_steps[@]}" | jq -R . | jq -s 'map(tonumber)')"
+
+timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+file_suffix="$(date -u +%Y%m%d%H%M%S)"
+output_path="$PROOF_DIR/doctor-$file_suffix.json"
+
+final_json="$(jq -n \
+  --arg generated_at "$timestamp" \
+  --argjson descriptors "$desc_json" \
+  --argjson range_steps "$range_json" \
+  --argjson base "$python_result" \
+  '$base + {generated_at: $generated_at, descriptors: $descriptors, range_steps: $range_steps}')"
+
+echo "$final_json" > "$output_path"
+
+total_btc="$(printf '%s' "$python_result" | jq -r '.btc')"
+total_sats="$(printf '%s' "$python_result" | jq -r '.sats')"
+
+printf 'DOCTOR TOTAL: %s BTC (%s sats)\n' "${total_btc:-0}" "${total_sats:-0}"
+printf 'PROOF: %s\n' "$output_path"
+
+echo "$final_json"
