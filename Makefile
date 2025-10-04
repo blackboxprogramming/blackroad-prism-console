@@ -1,5 +1,5 @@
 .RECIPEPREFIX = >
-.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy dummy genesis pysph mpm check view diag
 
 setup:
 >python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff
@@ -12,6 +12,27 @@ lint:
 
 validate:
 >. .venv/bin/activate && python scripts/validate_contracts.py
+
+dummy:
+>python 10_genesis/dummy_scene.py --mode dummy
+
+genesis:
+>python 10_genesis/dummy_scene.py --mode genesis
+
+pysph:
+>python 30_bench_fluid/pysph_tank.py
+
+mpm:
+>python 20_bench_solid/taichi_mpm_soft_bodies.py
+
+check:
+>python -m sim_pipeline.report check
+
+view:
+>python -m sim_pipeline.report view
+
+diag:
+>python -m sim_pipeline.report diag
 
 demo:
 >brc plm:items:load --dir fixtures/plm/items && \
