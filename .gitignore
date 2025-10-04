@@ -29,6 +29,7 @@ Thumbs.db
 
 # Artifacts
 artifacts/
+universal_sim/artifacts/
 coverage/
 
 # Project-specific

@@ -1,5 +1,5 @@
 .RECIPEPREFIX = >
-.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy orchestrate check report pysph-real mpm-real
 
 setup:
 >python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff
@@ -48,3 +48,18 @@ dc-test:
 
 dc-shell:
 >docker compose run --rm app bash
+
+orchestrate:
+>python3 cli.py orchestrate
+
+check:
+>python3 cli.py check
+
+report:
+>python3 cli.py report
+
+pysph-real:
+>python3 universal_sim/30_bench_fluid/pysph_real_tank.py
+
+mpm-real:
+>python3 universal_sim/20_bench_solid/taichi_mpm_real_soft.py
