@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "feature_flags": {
+    "global_enabled": true
+  },
+  "maintenance_mode": {
+    "allowlist_endpoints": ["GET /health/live", "GET /health/ready"],
+    "status_code": 503,
+    "retry_after_seconds": 60
+  },
+  "step_up": {
+    "rules": [
+      {
+        "match": { "endpoint": "POST /secrets/materialize" },
+        "required": true,
+        "mechanisms": ["mfa-approval"]
+      },
+      {
+        "match": { "endpoint": "POST /fossil/override" },
+        "required": true,
+        "mechanisms": ["dual-control"]
+      }
+    ]
+  },
+  "endpoints": {}
+}
