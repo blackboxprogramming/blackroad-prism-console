@@ -11,7 +11,11 @@ export default function Tile({
   series: Pt[];
   rangeLabel?: string;
 }) {
-  const total = (series ?? []).reduce((a, p) => a + (p?.v ?? 0), 0);
+  const totalRaw = (series ?? []).reduce((a, p) => a + (p?.v ?? 0), 0);
+  const formatter = new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: 2,
+  });
+  const total = Number.isFinite(totalRaw) ? formatter.format(totalRaw) : '0';
   return (
     <div style={{ padding: 16, border: '1px solid #eee', borderRadius: 12 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>

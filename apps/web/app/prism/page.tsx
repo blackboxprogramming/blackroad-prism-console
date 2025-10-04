@@ -12,9 +12,12 @@ async function fetchSeries(path: string) {
 
 export default async function PrismDashboard() {
   // “from=-P7D” is ISO-8601 relative (handle this in your API or swap to explicit dates)
-  const [events, errors] = await Promise.all([
+  const [events, errors, charges, activeSubs, mrr] = await Promise.all([
     fetchSeries('/v1/metrics/events?from=-P7D'),
     fetchSeries('/v1/metrics/errors?from=-P7D'),
+    fetchSeries('/v1/metrics/stripe/charges?from=-P7D'),
+    fetchSeries('/v1/metrics/stripe/active_subs'),
+    fetchSeries('/v1/metrics/stripe/mrr'),
   ]);
 
   return (
@@ -23,6 +26,9 @@ export default async function PrismDashboard() {
       <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
         <Tile title="Events (7d)" series={events} />
         <Tile title="Errors (7d)" series={errors} />
+        <Tile title="Stripe: New Charges (7d, $)" series={charges} rangeLabel="7d" />
+        <Tile title="Stripe: Active Subs (now)" series={activeSubs} rangeLabel="now" />
+        <Tile title="Stripe: MRR (now, $)" series={mrr} rangeLabel="now" />
       </div>
     </main>
   );
