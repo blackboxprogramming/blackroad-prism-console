@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stg_source_x__events
+    description: "Staged Source X events from the raw landing table."
+    columns:
+      - name: event_id
+        tests:
+          - not_null
+          - unique
+      - name: source_id
+        tests:
+          - not_null
+      - name: occurred_at
+        tests:
+          - not_null
+      - name: event_kind
+        tests:
+          - not_null
+
+  - name: fct_source_x_events_daily
+    description: "Daily rollup of Source X events by kind."
+    columns:
+      - name: day
+        tests:
+          - not_null
+      - name: event_kind
+        tests:
+          - not_null
+      - name: events
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"

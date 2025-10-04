@@ -42,6 +42,8 @@ benchmarks/
 secrets/*
 datasets/
 models/
+!br-dbt/models/
+!br-dbt/models/**
 checkpoints/
 outputs/
 rag/index/*.faiss
