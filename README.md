@@ -9,6 +9,10 @@ connector access. Push it into your working copy, then run one script on the ser
 your API, install missing npm packages, set up env defaults, and (optionally) boot a local
 LLM stub on port **8000** if none is running.
 
+> **Heads-up from the maintainer:** I'm still getting everything set up and I'm honestly not a
+> strong coder yet. Thank you for your patience if anything here is rough around the edges —
+> I'm doing my best and truly sorry for any bumps along the way.
+
 **What’s included**
 
 - `ops/install.sh` — one-shot setup for `/srv/blackroad-api` (or detected API path)
