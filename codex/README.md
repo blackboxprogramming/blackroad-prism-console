@@ -35,3 +35,15 @@ or webhook logic can be added by filling in the TODO sections inside the
 script.
 
 _Last updated on 2025-09-11_
+
+## Auditing Historic Entries
+
+Use the Codex audit helper to generate a quick report of every entry and
+spot duplicated fingerprints left over from early experiments:
+
+```bash
+python3 codex/tools/codex_entries_audit.py
+```
+
+Pass `--format json` if you need machine-readable output for downstream
+automation or dashboards.
