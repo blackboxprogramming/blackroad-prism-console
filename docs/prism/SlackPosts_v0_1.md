@@ -19,3 +19,17 @@ Friday demo: PRISM v0.1 slice
 - Minimal audit trail & tracking
 Timeboxed to 10 min — bring one question: “What’s the next tile that makes this indispensable?”
 ```
+
+## #products-prism — GitHub connector live
+```
+GitHub connector is live end-to-end:
+- PAT connect + repo list
+- Ingest worker (watermark + rate limits)
+- Metrics API for opened/closed/open bugs
+- Tiles wired; visible on dashboard + /healthz/ui
+```
+
+## #security — GitHub PAT handling
+```
+PATs never hit the DB; SSM SecureString only. Rotate by overwriting the SSM param.
+```

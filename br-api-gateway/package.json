@@ -11,6 +11,8 @@
     "fastify": "^4.28.1",
     "@fastify/swagger": "^8.14.0",
     "@fastify/swagger-ui": "^1.10.2",
+    "date-fns": "^3.6.0",
+    "pg": "^8.11.3",
     "pino": "^9.4.0"
   },
   "devDependencies": {
