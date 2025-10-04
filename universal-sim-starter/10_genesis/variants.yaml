@@ -1,0 +1,41 @@
+# Variants describe concrete simulation runs for the universal simulation starter pipeline.
+# Each entry is intentionally lightweight so the pipeline can run without heavyweight
+# dependencies. If PySPH or Taichi-MPM are unavailable the pipeline will fall back to
+# deterministic surrogate metrics so downstream stages can still execute.
+
+variants:
+  - name: pysph_dam_break_baseline
+    engine: pysph
+    description: Baseline PySPH dam break reference configuration.
+    parameters:
+      resolution: 0.02
+      integrator: wcsph
+      smoothing_length: 0.045
+      steps: 60
+
+  - name: pysph_dam_break_high_res
+    engine: pysph
+    description: Higher resolution PySPH dam break to stress test stability.
+    parameters:
+      resolution: 0.015
+      integrator: wcsph
+      smoothing_length: 0.035
+      steps: 80
+
+  - name: taichi_mpm_water_drop
+    engine: taichi_mpm
+    description: Taichi-MPM water drop scenario evaluating elastic splash response.
+    parameters:
+      grid_resolution: 64
+      particle_density: 1200
+      time_step: 0.0012
+      steps: 75
+
+  - name: taichi_mpm_sand_shear
+    engine: taichi_mpm
+    description: Taichi-MPM sand shear under controlled strain for comparison to PySPH.
+    parameters:
+      grid_resolution: 48
+      particle_density: 1600
+      time_step: 0.0009
+      steps: 90
