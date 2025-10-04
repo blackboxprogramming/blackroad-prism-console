@@ -1,0 +1,179 @@
+name: Autopal Express CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+  pull_request:
+
+concurrency:
+  group: ci-autopal-express-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  EXPRESS_START_COMMAND: npm run start
+  EXPRESS_BUILD_COMMAND: npm run build --if-present
+  EXPRESS_HEALTH_URL: http://127.0.0.1:3000/health
+  EXPRESS_STEP_UP_URL: http://127.0.0.1:3000/step-up/health
+
+jobs:
+  test:
+    name: Node tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run unit tests
+        run: |
+          if npm run | grep -q " test"; then
+            npm test --if-present
+          else
+            echo "No npm test script defined; skipping"
+          fi
+
+  smoke:
+    name: Smoke tests
+    runs-on: ubuntu-latest
+    needs: test
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Build application
+        run: |
+          if [ -n "$EXPRESS_BUILD_COMMAND" ]; then
+            eval "$EXPRESS_BUILD_COMMAND"
+          else
+            echo "No build command provided; skipping build"
+          fi
+
+      - name: Start server
+        run: |
+          set -eo pipefail
+          if [ -z "$EXPRESS_START_COMMAND" ]; then
+            echo "EXPRESS_START_COMMAND is empty" >&2
+            exit 1
+          fi
+          eval "$EXPRESS_START_COMMAND" > server.log 2>&1 &
+          echo $! > server.pid
+          npx wait-on --timeout 90000 "${EXPRESS_HEALTH_URL:-http://127.0.0.1:3000/health}"
+
+      - name: Health smoke
+        run: |
+          if [ -n "$EXPRESS_HEALTH_URL" ]; then
+            curl -fsS "$EXPRESS_HEALTH_URL"
+          else
+            echo "EXPRESS_HEALTH_URL not set; skipping"
+          fi
+
+      - name: Step-up smoke
+        run: |
+          if [ -n "$EXPRESS_STEP_UP_URL" ]; then
+            curl -fsS "$EXPRESS_STEP_UP_URL"
+          else
+            echo "EXPRESS_STEP_UP_URL not set; skipping"
+          fi
+
+      - name: Capture logs on failure
+        if: failure()
+        run: |
+          if [ -f server.pid ]; then
+            pid=$(cat server.pid)
+            echo "Server pid: $pid"
+            ps -p "$pid" || true
+          fi
+          if [ -f server.log ]; then
+            echo '--- server.log ---'
+            tail -n 200 server.log || true
+          fi
+
+      - name: Stop server
+        if: always()
+        run: |
+          if [ -f server.pid ]; then
+            pid=$(cat server.pid)
+            kill "$pid" || true
+            wait "$pid" 2>/dev/null || true
+            rm -f server.pid
+          fi
+          rm -f server.log 2>/dev/null || true
+
+  publish:
+    name: Publish image
+    runs-on: ubuntu-latest
+    needs:
+      - test
+      - smoke
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
