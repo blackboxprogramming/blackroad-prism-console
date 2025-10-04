@@ -1,0 +1,17 @@
+{
+  "global_enabled": true,
+  "dual_control_timeout_seconds": 900,
+  "endpoints": {
+    "/secrets/materialize": {
+      "required_audience": [
+        "gha:org/repo@refs/heads/main"
+      ],
+      "step_up_required": true,
+      "dual_control_required": true,
+      "rate_limit": {
+        "limit": 5,
+        "window_seconds": 60
+      }
+    }
+  }
+}
