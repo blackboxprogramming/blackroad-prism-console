@@ -43,5 +43,16 @@
     "compliant": true,
     "notes": "Main HDMI display driven by Jetson",
     "lastSeen": 1759012961427
+  },
+  {
+    "deviceId": "pi-ops",
+    "owner": "ops",
+    "platform": "raspberry-pi-4",
+    "role": "bridge_host",
+    "attached": true,
+    "encrypted": true,
+    "compliant": true,
+    "notes": "Ops Pi running broker, dashboard, and lucidia bridge",
+    "lastSeen": 1759012961427
   }
 ]
