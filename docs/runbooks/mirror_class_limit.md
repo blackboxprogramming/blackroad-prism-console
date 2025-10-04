@@ -21,3 +21,32 @@ Blocks mirror actions that target repositories classified as `restricted` or `se
 ## Related Dashboards
 
 - `dashboards/grafana-rule-board.json` — Mirror Guard panel.
+
+## Active exceptions (this rule)
+
+<div id="mirror-class-exceptions">Loading…</div>
+<script>
+(async function () {
+  const el = document.getElementById('mirror-class-exceptions');
+  if (!el) return;
+  try {
+    const res = await fetch('/exceptions/active?rule_id=MIRROR_CLASS_LIMIT');
+    if (!res.ok) throw new Error(res.statusText || String(res.status));
+    const data = await res.json();
+    if (!data.items || data.items.length === 0) {
+      el.textContent = '(none)';
+      return;
+    }
+    const rows = data.items.map((item) => {
+      const subject = `${item.subject_type}:${item.subject_id}`;
+      const until = item.valid_until ? new Date(item.valid_until).toISOString() : 'open';
+      const requestedBy = item.requested_by || '?';
+      return `<li>#${item.id} — <code>${subject}</code> — by <strong>${requestedBy}</strong> — until <em>${until}</em></li>`;
+    });
+    el.innerHTML = `<ul>${rows.join('')}</ul>`;
+  } catch (err) {
+    console.error('exceptions load failed', err);
+    el.textContent = '(error loading exceptions)';
+  }
+})();
+</script>
