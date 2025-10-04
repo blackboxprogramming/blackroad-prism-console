@@ -1,0 +1,15 @@
+scene_name: silicone_drop
+seed: 42
+resolution:
+  spatial: 0.01
+  temporal: 0.002
+export:
+  format: npz
+  output_dir: ../artifacts/genesis
+assets:
+  solid_material: silicone_soft
+  fluid_material: water
+  domain:
+    width: 1.0
+    depth: 1.0
+    height: 1.0
