@@ -1,0 +1,7 @@
+[Unit]
+Description=BlackRoad health and heal agent
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /srv/blackroad/health/health_check.sh
+User=root
