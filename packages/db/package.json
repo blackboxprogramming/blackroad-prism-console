@@ -1,5 +1,5 @@
 {
-  "name": "@blackroad/compliance-core",
+  "name": "@blackroad/compliance-db",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,21 +10,20 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./policies": {
-      "import": "./dist/policies/index.js",
-      "types": "./dist/policies/index.d.ts"
+    "./in-memory": {
+      "import": "./dist/in-memory.js",
+      "types": "./dist/in-memory.d.ts"
     }
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "vitest run"
+    "generate": "prisma generate"
   },
   "dependencies": {
-    "zod": "^3.23.8",
-    "@blackroad/compliance-db": "workspace:*",
-    "@blackroad/compliance-archival": "workspace:*"
+    "@prisma/client": "^5.19.1"
   },
   "devDependencies": {
+    "prisma": "^5.19.1",
     "typescript": "~5.5.4"
   }
 }
