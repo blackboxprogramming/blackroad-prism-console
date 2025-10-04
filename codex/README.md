@@ -16,6 +16,7 @@ integrations.
 | 004 | The Autonomy Manifest  | Data autonomy through consent, export, and wipe. |
 | 022 | The Security Spine     | Security backbone with layered zero-trust defenses. |
 | 043 | The Equity Oath        | Fairness, access, and inclusion are systemic.   |
+| 051 | The Transparency of Creation | Every artifact traces its origin and intent. |
 
 ## BlackRoad Pipeline
 
