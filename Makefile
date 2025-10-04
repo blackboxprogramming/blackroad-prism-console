@@ -1,5 +1,5 @@
 .RECIPEPREFIX = >
-.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy notify
 
 setup:
 >python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff
@@ -12,6 +12,9 @@ lint:
 
 validate:
 >. .venv/bin/activate && python scripts/validate_contracts.py
+
+notify:
+>cd compliance && SLACK_WEBHOOK_URL="$(SLACK_WEBHOOK_URL)" go run ./cmd/harness test:mirror
 
 demo:
 >brc plm:items:load --dir fixtures/plm/items && \
