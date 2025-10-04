@@ -20,11 +20,52 @@ paths:
   /v1/sources:
     get:
       summary: List data sources
-      responses: { "200": { description: OK, content: { application/json: { schema: { type: array, items: { type: object, properties: { id: {type: string}, type: {type: string}, status: {type: string} } } } } } } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string }
+                    type: { type: string }
+                    status: { type: string }
     post:
-      summary: Create/connect data source X
-      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { type: {type: string}, token: {type: string} }, required: [type, token] } } } }
-      responses: { "201": { description: Created } }
+      summary: Connect Linear via API key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kind: { type: string, enum: [linear_key] }
+                token: { type: string }
+                teams:
+                  type: array
+                  items: { type: string }
+              required: [kind, token, teams]
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  kind: { type: string }
+                  status: { type: string }
+                  teams: { type: array, items: { type: string } }
+                  viewer:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      name: { type: string }
+                  tokenParameter: { type: string }
   /v1/metrics/events:
     get:
       summary: Events timeseries
@@ -42,3 +83,31 @@ paths:
         - in: query; name: to;   schema: { type: string, format: date-time }
       responses:
         "200": { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Timeseries' } } } }
+  /v1/metrics/linear/issues_created:
+    get:
+      summary: Linear issues created by day
+      parameters:
+        - in: query; name: from; schema: { type: string }
+        - in: query; name: to;   schema: { type: string }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Timeseries' } } } }
+        "400": { description: Bad Request, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }
+  /v1/metrics/linear/issues_completed:
+    get:
+      summary: Linear issues completed by day
+      parameters:
+        - in: query; name: from; schema: { type: string }
+        - in: query; name: to;   schema: { type: string }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Timeseries' } } } }
+        "400": { description: Bad Request, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }
+  /v1/metrics/linear/burndown:
+    get:
+      summary: Linear burndown for a cycle
+      parameters:
+        - in: query; name: team; schema: { type: string }
+        - in: query; name: cycleStart; schema: { type: string }
+        - in: query; name: cycleEnd; schema: { type: string }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Timeseries' } } } }
+        "400": { description: Bad Request, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }
