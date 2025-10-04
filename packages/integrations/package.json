@@ -1,24 +1,21 @@
 {
-  "name": "@blackroad/api",
+  "name": "@blackroad/integrations",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": ["dist"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js"
+    "clean": "rimraf dist"
   },
   "dependencies": {
-    "@blackroad/core": "workspace:*",
-    "fastify": "^4.27.2",
-    "fastify-type-provider-zod": "^2.0.0",
-    "zod": "^3.23.8"
+    "nanoid": "^5.0.7"
   },
   "devDependencies": {
     "@types/node": "^20.14.11",
-    "tsx": "^4.15.7",
+    "rimraf": "^5.0.7",
     "typescript": "^5.4.5"
   }
 }
