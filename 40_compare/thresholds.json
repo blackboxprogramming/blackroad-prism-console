@@ -1,0 +1,26 @@
+{
+  "solid_volume": {
+    "displacement": {
+      "mae": 0.15,
+      "max_abs": 0.5,
+      "rmse": 0.2
+    },
+    "stress": {
+      "mae": 0.05,
+      "max_abs": 0.2,
+      "rmse": 0.08
+    }
+  },
+  "fluid_volume": {
+    "density": {
+      "mae": 0.02,
+      "max_abs": 0.05,
+      "rmse": 0.03
+    },
+    "velocity": {
+      "mae": 0.05,
+      "max_abs": 0.15,
+      "rmse": 0.07
+    }
+  }
+}
