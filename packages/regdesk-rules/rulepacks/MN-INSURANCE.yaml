@@ -1,0 +1,35 @@
+key: MN-INSURANCE
+version: 1
+sourceUrls:
+  - https://www.commerce.state.mn.us/insurance
+rules:
+  - key: MN-INS-RENEWAL
+    track: INSURANCE
+    stateCode: MN
+    schedule:
+      freq: ANNUAL
+      offsetFrom: LICENSE_EXPIRY
+      offsetDays: -60
+    filing:
+      type: STATE_PORTAL
+      formKeys: ["MN-PRODUCER-RENEWAL"]
+      feePolicy: FLAT
+      artifactsRequired: ["PDF", "RECEIPT"]
+    gates:
+      blockActions: [sell_insurance]
+      graceDays: 0
+  - key: MN-INS-CE
+    track: INSURANCE
+    stateCode: MN
+    schedule:
+      freq: ANNUAL
+      dueMonth: 12
+      dueDay: 15
+    delivery:
+      docKind: OTHER
+      trigger: ANNUAL
+      methodsAllowed: [PORTAL]
+      proofRequired: [EVIDENCE]
+    gates:
+      blockActions: [sell_insurance]
+      graceDays: 0

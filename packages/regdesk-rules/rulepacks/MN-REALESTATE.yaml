@@ -1,0 +1,35 @@
+key: MN-REALESTATE
+version: 1
+sourceUrls:
+  - https://www.mn.gov/commerce/relicense
+rules:
+  - key: MN-RELICENSE-RENEWAL
+    track: REALESTATE
+    stateCode: MN
+    schedule:
+      freq: ANNUAL
+      dueMonth: 6
+      dueDay: 15
+    filing:
+      type: STATE_PORTAL
+      formKeys: ["MN-REAL-RENEWAL"]
+      feePolicy: FLAT
+      artifactsRequired: ["PDF", "RECEIPT"]
+    gates:
+      blockActions: [market, open_account]
+      graceDays: 0
+  - key: MN-REALESTATE-CE
+    track: REALESTATE
+    stateCode: MN
+    schedule:
+      freq: ANNUAL
+      dueMonth: 6
+      dueDay: 1
+    delivery:
+      docKind: OTHER
+      trigger: ANNUAL
+      methodsAllowed: [PORTAL]
+      proofRequired: [EVIDENCE]
+    gates:
+      blockActions: [market]
+      graceDays: 0
