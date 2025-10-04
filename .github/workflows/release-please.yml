@@ -1,7 +1,7 @@
-name: Release Please
+name: release
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 permissions:
   contents: write
   pull-requests: write
@@ -9,7 +9,8 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/release-please-action@a017ec70c7f1401744d60197f7577a0c51c8c1cf
+      - uses: googleapis/release-please-action@v4
         with:
-          release-type: simple
-          package-name: blackroad-quantum
+          release-type: node
+          config-file: .github/release-please-config.json
+          manifest-file: .github/.release-please-manifest.json

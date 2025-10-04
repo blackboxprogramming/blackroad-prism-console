@@ -1,0 +1,26 @@
+name: release-to-slack
+on:
+  release:
+    types: [published]
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Format message
+        id: fmt
+        run: |
+          NAME="${{ github.event.repository.name }}"
+          TAG="${{ github.event.release.tag_name }}"
+          URL="${{ github.event.release.html_url }}"
+          BODY="${{ github.event.release.body }}"
+          # keep first 12 lines of notes to avoid walls in Slack
+          SHORT=$(echo "$BODY" | head -n 12)
+          echo "text=*${NAME}* released *${TAG}*\n${SHORT}\n\n<${URL}|Full notes>" >> msg.txt
+      - name: Post to Slack
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            { "channel": "${{ vars.SLACK_RELEASES_CHANNEL || '#announcements' }}",
+              "text": "$(cat msg.txt)" }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

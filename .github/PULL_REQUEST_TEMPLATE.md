@@ -1,14 +1,17 @@
+## Summary
+-
 
-## What
-- Summary
+## Type
+- [ ] feat
+- [ ] fix
+- [ ] chore
+- [ ] docs
+- [ ] refactor
 
-## Why
-- Business / reliability impact
+## Screens / Evidence
+-
 
-## Checks
-- [ ] CI green
-- [ ] API /api/health returns 200
-- [ ] Updated docs/tests as needed
-
-> Comment `@codex fix comments` to trigger bot autofix.
-
+## Checklist
+- [ ] Tests pass (CI ≤ 10 min)
+- [ ] Docs/CHANGELOG updated (if user-visible)
+- [ ] Linked issues
