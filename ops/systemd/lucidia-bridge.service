@@ -1,0 +1,21 @@
+[Unit]
+Description=Lucidia edge bridge (Pi-Ops)
+After=network-online.target mosquitto.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/lucidia
+ExecStart=/opt/lucidia/bin/lucidia-sim-bridge
+Environment=SIM_WRITE_ENABLED=false
+Restart=on-failure
+RestartSec=5s
+StandardOutput=append:/var/log/lucidia/bridge.log
+StandardError=append:/var/log/lucidia/bridge.log
+RuntimeDirectory=lucidia_bridge
+RuntimeDirectoryMode=0755
+
+[Install]
+WantedBy=multi-user.target
