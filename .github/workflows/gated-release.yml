@@ -1,0 +1,45 @@
+name: gated-release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      approved: ${{ steps.gate.outputs.approved }}
+      all_passed: ${{ steps.gate.outputs.all_passed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-west-2
+
+      - name: Go/No-Go gate
+        id: gate
+        uses: ./.github/actions/go-no-go
+        with:
+          slack_channel: '#releases'
+          app_url: 'https://app.blackroad.io/healthz/ui'
+          waf_alarm_arns: 'arn:aws:cloudwatch:us-west-2:123456789012:alarm:br-dev-api-alb-5xx,arn:aws:cloudwatch:us-west-2:123456789012:alarm:br-dev-waf-blocks'
+          budget_name: 'blackroad-monthly'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+  release:
+    needs: gate
+    if: needs.gate.outputs.approved == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          echo "Release job unlocked. Replace this step with build/deploy logic."
