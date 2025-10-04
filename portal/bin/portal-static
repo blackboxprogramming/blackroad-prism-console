@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="/home/pi/portal"
+PORT_ARG="${1:-127.0.0.1:8088}"
+FILE="$ROOT/reports/health.html"
+[ -s "$FILE" ] || { echo "missing $FILE; run portal-health first" >&2; exit 2; }
+if [[ "$PORT_ARG" == *:* ]]; then
+  addr="${PORT_ARG%:*}"
+  port="${PORT_ARG#*:}"
+else
+  addr="127.0.0.1"
+  port="$PORT_ARG"
+fi
+cd "$ROOT/reports"
+exec python3 - <<PY
+import http.server
+import socketserver
+
+class HealthHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        self.path = "/health.html"
+        return super().do_GET()
+
+addr = "${addr}"
+port = int("${port}")
+with socketserver.TCPServer((addr, port), HealthHandler) as httpd:
+    print(f"serving health at http://{addr}:{port}/")
+    httpd.serve_forever()
+PY

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="/home/pi/portal"
+HS="/var/lib/tor/portal-health/hostname"
+[ -s "$HS" ] || { echo "Tor hidden service not ready. Check 'systemctl status tor'." >&2; exit 2; }
+ONION="$(sudo cat "$HS")"
+echo "Onion address: http://$ONION/"
+echo "Starting local static server on 127.0.0.1:8088..."
+exec "$ROOT/bin/portal-static" 127.0.0.1:8088
