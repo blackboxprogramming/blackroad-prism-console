@@ -1,31 +1,56 @@
-import express from "express";
-import helmet from "helmet";
-import cors from "cors";
-import classifyRouter from "./routes/classify.js";
+import Fastify from "fastify";
+import fastifyJwt from "@fastify/jwt";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
+import { createInMemoryDb } from "@blackroad/compliance-db";
+import { registerReviewRoutes } from "./routes/reviews.js";
 
-const app = express();
+const buildServer = () => {
+  const fastify = Fastify({ logger: true });
 
-app.use(helmet());
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-  })
-);
-app.use(express.json({ limit: "1mb" }));
-
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok" });
-});
-
-app.use("/", classifyRouter);
-
-const port = Number(process.env.PORT ?? 4000);
-
-if (process.env.NODE_ENV !== "test") {
-  app.listen(port, () => {
-    console.log(`Lucidia Auto-Box API listening on port ${port}`);
+  fastify.register(swagger, {
+    openapi: {
+      info: {
+        title: "Compliance OS API",
+        version: "0.1.0",
+      },
+    },
   });
-}
+  fastify.register(swaggerUi, { routePrefix: "/docs" });
 
-export default app;
+  fastify.register(fastifyJwt, {
+    secret: process.env.JWT_SECRET ?? "development-secret",
+  });
+
+  fastify.decorate("authenticate", async (request: any, reply: any) => {
+    try {
+      await request.jwtVerify();
+    } catch (err) {
+      reply.send(err);
+    }
+  });
+
+  const db = createInMemoryDb();
+
+  registerReviewRoutes(fastify, db);
+
+  fastify.get("/health", async () => ({ status: "ok" }));
+
+  return fastify;
+};
+
+export const start = async () => {
+  const fastify = buildServer();
+  const host = process.env.HOST ?? "0.0.0.0";
+  const port = Number(process.env.PORT ?? 3333);
+  try {
+    await fastify.listen({ host, port });
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
+};
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  start();
+}

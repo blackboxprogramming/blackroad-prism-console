@@ -1,80 +1,34 @@
-export interface Identity {
-  id: string;
-  publicKey: string;
-  settings: Record<string, unknown>;
+export type Subject = "communication" | "client" | "employee" | "trade" | "vendor";
+
+export interface EvalContext {
+  state?: string;
+  track?: string;
+  date?: string;
 }
 
-export interface Box {
-  id: string;
-  ownerId: string;
+export interface EvalInput<T = unknown> {
+  subject: Subject;
+  data: T;
+  context: EvalContext;
+}
+
+export interface EvalResult {
+  pass: boolean;
+  riskScore: number;
+  breaches: string[];
+  requiredDisclosures?: string[];
+  requiredEvidence?: string[];
+  gateRecommendation?: "block" | "allow" | "review";
+}
+
+export interface PolicyEvaluator<T = unknown> {
+  key: string;
   title: string;
-  description?: string;
-  createdAt: string;
+  version: number;
+  evaluate(input: EvalInput<T>): EvalResult;
 }
 
-export interface Item {
-  id: string;
-  ownerId: string;
-  rawText: string;
-  createdAt: string;
-}
-
-export interface Assignment {
-  id: string;
-  itemId: string;
-  boxId: string;
-  score: number;
-  rationale: string;
-  createdAt: string;
-}
-
-export interface ConsentReceipt {
-  id: string;
-  ownerId: string;
-  purpose: string;
-  scope: string;
-  createdAt: string;
-  expiresAt?: string;
-}
-
-export interface AuditLogEntry {
-  id: string;
-  ownerId: string;
-  actor: string;
-  action: string;
-  rationale?: string;
-  createdAt: string;
-  ip?: string;
-  device?: string;
-}
-
-export interface ClassificationSuggestion {
-  title: string;
-  score: number;
-  rationale: string;
-  tags: string[];
-}
-
-export interface ClassifiedBoxSuggestion extends ClassificationSuggestion {
-  boxId?: string;
-}
-
-export interface ClassificationResponse {
-  suggestions: ClassifiedBoxSuggestion[];
-  seed: number;
-}
-
-export interface KeyEnvelope {
-  ownerId: string;
-  keyId: string;
-  encryptedKey: string;
-  algorithm: string;
-  createdAt: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface CryptoConfig {
-  kekAlgorithm: string;
-  dataKeyAlgorithm: string;
-  pqcEnabled: boolean;
+export interface AttestationRequirement {
+  policyKey: string;
+  period: "Annual" | "Initial" | "AdHoc";
 }

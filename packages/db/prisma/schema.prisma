@@ -1,0 +1,103 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  role      String
+  createdAt DateTime @default(now())
+}
+
+model Policy {
+  id           String   @id @default(cuid())
+  key          String   @unique
+  title        String
+  version      Int
+  status       String
+  body         Json
+  controls     String[]
+  effectiveAt  DateTime
+  supersedesId String?
+  createdAt    DateTime @default(now())
+  attestations Attestation[]
+}
+
+model Attestation {
+  id        String   @id @default(cuid())
+  userId    String
+  policyId  String
+  period    String
+  answers   Json
+  signedAt  DateTime
+  user      User     @relation(fields: [userId], references: [id])
+  policy    Policy   @relation(fields: [policyId], references: [id])
+}
+
+model Evidence {
+  id        String   @id @default(cuid())
+  kind      String
+  path      String
+  sha256    String
+  meta      Json
+  createdAt DateTime @default(now())
+  artifacts ReviewArtifact[]
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  type       String
+  input      Json
+  outcome    String
+  riskScore  Int
+  breaches   String[]
+  notes      String?
+  reviewerId String?
+  createdAt  DateTime @default(now())
+  artifacts  ReviewArtifact[]
+}
+
+model ReviewArtifact {
+  id         String   @id @default(cuid())
+  reviewId   String
+  evidenceId String
+  role       String
+  review     Review   @relation(fields: [reviewId], references: [id])
+  evidence   Evidence @relation(fields: [evidenceId], references: [id])
+}
+
+model CalendarItem {
+  id        String   @id @default(cuid())
+  key       String
+  summary   String
+  due       DateTime
+  track     String
+  stateCode String?
+  status    String
+  blockers  String[]
+  createdAt DateTime @default(now())
+}
+
+model Gate {
+  id        String   @id @default(cuid())
+  action    String
+  context   Json
+  allowed   Boolean
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model WormBlock {
+  id       String   @id @default(cuid())
+  idx      Int      @unique
+  ts       DateTime @default(now())
+  payload  Json
+  prevHash String
+  hash     String
+}
