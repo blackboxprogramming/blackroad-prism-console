@@ -38,3 +38,15 @@ status.blackroad.io is live 🎉
 - Health checks wired to API
 - Incidents flow via repo PRs or Asana
 - Customers + team can see uptime and history in one place
+
+## #products-prism — Linear connector (v1)
+
+Linear connector (v1) added:
+- Connect with API key, pick teams
+- Ingest issues + metadata via GraphQL
+- Tiles: Created 7d, Completed 7d, simple Burndown
+Webhook optional for near-real-time.
+
+## #security — Linear token handling
+
+Linear API keys stored only in SSM SecureString. No plaintext in DB or logs.
