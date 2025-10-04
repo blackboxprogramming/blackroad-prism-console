@@ -1,0 +1,11 @@
+{
+  "instrumentId": "USDC-ETH",
+  "exDate": "2025-08-15",
+  "type": "TOKEN_MIGRATION",
+  "factor": 1,
+  "details": {
+    "from": "USDC",
+    "to": "USDC.e",
+    "chain": "ETH"
+  }
+}
