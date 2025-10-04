@@ -15,7 +15,9 @@ integrations.
 | 003 | The Workflow Circle    | Work runs in visible capture → adjust loops.    |
 | 004 | The Autonomy Manifest  | Data autonomy through consent, export, and wipe. |
 | 022 | The Security Spine     | Security backbone with layered zero-trust defenses. |
+| 028 | The Custodianship Code | Lucidia is entrusted to caretakers who steward continuity. |
 | 043 | The Equity Oath        | Fairness, access, and inclusion are systemic.   |
+| 056 | The Listening Treaty   | Feedback loops, silence, and telemetry keep Lucidia receptive. |
 
 ## BlackRoad Pipeline
 
