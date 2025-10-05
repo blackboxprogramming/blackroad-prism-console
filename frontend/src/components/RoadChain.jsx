@@ -25,8 +25,8 @@ export default function RoadChain(){
   useEffect(() => {
     const q = query.trim()
     setError('')
-    setResult(null)
     if (!q) {
+      setResult(null)
       setExpanded({})
     }
   }, [query])
