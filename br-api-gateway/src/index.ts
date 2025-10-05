@@ -1,12 +1,16 @@
-import Fastify from 'fastify';
-import swagger from '@fastify/swagger';
-import swaggerUI from '@fastify/swagger-ui';
+import type { FastifyInstance } from 'fastify';
 import { randomUUID } from 'node:crypto';
 import { context, trace } from '@opentelemetry/api';
 
 import { sdk } from '../otel.js';
 
 await sdk.start();
+
+const [{ default: Fastify }, { default: swagger }, { default: swaggerUI }] = await Promise.all([
+  import('fastify'),
+  import('@fastify/swagger'),
+  import('@fastify/swagger-ui')
+]);
 
 type SpanContextAccessor = () => { traceId: string; spanId: string } | undefined;
 
@@ -63,27 +67,29 @@ app.listen({ port, host: '0.0.0.0' }).catch((e) => {
 
 let isShuttingDown = false;
 
-const shutdown = async () => {
+const shutdown = async (instance: FastifyInstance) => {
   if (isShuttingDown) return;
   isShuttingDown = true;
 
   try {
     await sdk.shutdown();
   } catch (error) {
-    app.log.error({ err: error }, 'failed to shutdown OpenTelemetry sdk');
+    instance.log.error({ err: error }, 'failed to shutdown OpenTelemetry sdk');
   }
 };
 
 process.once('SIGTERM', async () => {
-  await shutdown();
+  await app.close();
+  await shutdown(app);
   process.exit(0);
 });
 
 process.once('SIGINT', async () => {
-  await shutdown();
+  await app.close();
+  await shutdown(app);
   process.exit(0);
 });
 
 app.addHook('onClose', async () => {
-  await shutdown();
+  await shutdown(app);
 });
