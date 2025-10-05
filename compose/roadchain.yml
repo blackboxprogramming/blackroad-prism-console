@@ -1,0 +1,63 @@
+version: "3.9"
+
+name: roadchain
+services:
+  node:
+    image: ghcr.io/roadchain/node:latest   # replace with your node image
+    container_name: roadchain-node
+    restart: unless-stopped
+    command: ["--network=testnet", "--http", "--http-port=8545", "--ws", "--ws-port=8546"]
+    ports:
+      - "8545:8545"   # HTTP RPC
+      - "8546:8546"   # WebSocket
+      - "30303:30303/tcp"
+      - "30303:30303/udp"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - node_data:/var/lib/roadchain
+    healthcheck:
+      test: ["CMD", "sh", "-c", "nc -z localhost 8545"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  wallet:
+    image: ghcr.io/roadchain/wallet:latest # replace with your wallet svc image
+    container_name: roadchain-wallet
+    restart: unless-stopped
+    depends_on:
+      node:
+        condition: service_healthy
+    environment:
+      - RPC_HTTP_URL=http://node:8545
+      - NETWORK=testnet
+      # - WALLET_MNEMONIC=change-me   # prefer secrets in .env or Docker secrets
+    ports:
+      - "8081:8080"   # wallet API exposed to host
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  dashboard:
+    image: ghcr.io/roadchain/dashboard:latest  # replace with your UI image
+    container_name: roadchain-dashboard
+    restart: unless-stopped
+    depends_on:
+      wallet:
+        condition: service_healthy
+    environment:
+      - WALLET_API_URL=http://wallet:8080
+      - RPC_HTTP_URL=http://node:8545
+    ports:
+      - "3000:3000"   # web UI
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  node_data:
