@@ -1,0 +1,13 @@
+# Raspberry Pi display configuration template for 720x720 square panels
+# Copy these directives into /boot/config.txt and reboot to apply.
+
+hdmi_force_hotplug=1
+hdmi_group=2
+hdmi_mode=87
+hdmi_cvt=720 720 60 1 0 0 0
+framebuffer_width=720
+framebuffer_height=720
+max_framebuffer_width=720
+max_framebuffer_height=720
+# Optional: rotate display if mounted in portrait orientation
+# display_rotate=1

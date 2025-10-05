@@ -1,0 +1,13 @@
+# Raspberry Pi display configuration template for 1024x600 IPS panels
+# Copy these directives into /boot/config.txt and reboot to apply.
+
+hdmi_force_hotplug=1
+hdmi_group=2
+hdmi_mode=87
+hdmi_cvt=1024 600 60 1 0 0 0
+framebuffer_width=1024
+framebuffer_height=600
+max_framebuffer_width=1024
+max_framebuffer_height=600
+# Optional rotation
+# display_rotate=1
