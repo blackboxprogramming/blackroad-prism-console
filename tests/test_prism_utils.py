@@ -15,7 +15,7 @@ def test_parse_numeric_prefix_invalid():
     assert parse_numeric_prefix("1a") == 1.0
 
 
-@pytest.mark.parametrize("exc", [RecursionError, MemoryError])
+@pytest.mark.parametrize("exc", [RecursionError, MemoryError, RuntimeError])
 def test_parse_numeric_prefix_other_errors(monkeypatch, exc):
     def bad_eval(_):
         raise exc()
