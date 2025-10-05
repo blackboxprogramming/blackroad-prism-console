@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'br-ingest-source-x/**'
+  pull_request:
+    paths:
+      - 'br-ingest-source-x/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: |
+          cd br-ingest-source-x
+          npm install
+      - name: Build
+        run: |
+          cd br-ingest-source-x
+          npm run build

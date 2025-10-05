@@ -19,3 +19,19 @@ Friday demo: PRISM v0.1 slice
 - Minimal audit trail & tracking
 Timeboxed to 10 min — bring one question: “What’s the next tile that makes this indispensable?”
 ```
+
+## #products-prism — Source connector lands
+```
+Source connector lands:
+- Connect flow (token) validates against Source X and stores secret in SSM
+- API kicks off first ingest via ECS RunTask
+- Sources page shows status + last sync
+- dbt staging + fact models for rollups
+
+We’ll demo connect→data→dashboard in one motion Friday.
+```
+
+## #security — Token handling
+```
+Tokens are never stored in DB; only SSM SecureString refs are. Rotate by overwriting the same param; revoke at provider any time.
+```
