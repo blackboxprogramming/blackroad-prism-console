@@ -1,0 +1,33 @@
+[
+  {
+    "name": "otel-collector",
+    "image": "otel/opentelemetry-collector:0.103.0",
+    "essential": true,
+    "portMappings": [
+      { "containerPort": 4318, "protocol": "tcp" }
+    ],
+    "environment": [],
+    "secrets": [
+      { "name": "GRAFANA_CLOUD_AUTH", "valueFrom": "<ssm-arn-of-basic-auth>" }
+    ],
+    "mountPoints": [],
+    "command": ["--config=/etc/otel/config.yaml"],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/blackroad/otel-collector",
+        "awslogs-region": "us-west-2",
+        "awslogs-stream-prefix": "otel"
+      }
+    },
+    "linuxParameters": { "initProcessEnabled": true }
+  },
+  {
+    "name": "br-api-gateway",
+    "environment": [
+      { "name": "OTEL_SERVICE_NAME", "value": "br-api-gateway" },
+      { "name": "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "value": "http://127.0.0.1:4318/v1/traces" },
+      { "name": "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", "value": "http://127.0.0.1:4318/v1/metrics" }
+    ]
+  }
+]

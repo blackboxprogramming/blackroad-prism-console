@@ -14,7 +14,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@lucidia/core": "^0.0.1",
+    "@lucidia/core": "workspace:^",
     "seedrandom": "^3.0.5"
   },
   "devDependencies": {

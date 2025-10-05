@@ -10,7 +10,11 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@lucidia/core": "^0.0.1",
+    "@lucidia/core": "workspace:^",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.52.1",
+    "@opentelemetry/sdk-trace-base": "^1.25.1",
+    "@opentelemetry/sdk-trace-web": "^1.25.1",
     "next": "14.2.5",
     "react": "18.3.1",
     "react-dom": "18.3.1",

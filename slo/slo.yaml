@@ -1,14 +1,32 @@
-service: blackroad-api
+service: br-api-gateway
 objectives:
   - name: availability
     target: 99.9
     window: 30d
-    indicator: promql: 1 - (sum(rate(http_requests_errors_total[5m])) / sum(rate(http_requests_total[5m])))
+    indicator:
+      description: "1 - (ALB 5XX / request count)"
+      source: cloudwatch
+      expression: "1 - (SUM(AWS/ApplicationELB.HTTPCode_Target_5XX_Count) / SUM(AWS/ApplicationELB.RequestCount))"
   - name: latency_p95
     target: 99
-    window: 30d
-    indicator: promql: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))
+    window: 7d
+    indicator:
+      description: "p95 request latency < 1s"
+      source: otel
+      expression: "histogram_quantile(0.95, sum by (le) (rate(http_server_duration_bucket{service=\"br-api-gateway\"}[5m])))"
 alerts:
-  - name: error_budget_burn_fast
-    condition: "burn_rate > 2 for 1h"
-    action: dispatch:auto_remediate
+  - name: availability_fast_burn
+    description: "5% error budget consumed within 1 hour"
+    window: 1h
+    condition: "burn_rate >= 14.4"
+    channels: [pagerduty, slack-oncall]
+  - name: availability_slow_burn
+    description: "20% error budget consumed within 6 hours"
+    window: 6h
+    condition: "burn_rate >= 6"
+    channels: [slack-reliability]
+  - name: latency_fast_burn
+    description: "p95 latency >= 1s for 1 hour"
+    window: 1h
+    condition: "latency_p95 >= 1"
+    channels: [slack-reliability]
