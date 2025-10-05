@@ -38,3 +38,17 @@ status.blackroad.io is live 🎉
 - Health checks wired to API
 - Incidents flow via repo PRs or Asana
 - Customers + team can see uptime and history in one place
+
+## #products-prism — GitHub connector lands
+
+GitHub connector lands (issues):
+- Connect with PAT (read-only) + pick repos
+- Ingest issues & labels; dbt models for daily openings + open bug count
+- 2 new tiles wire to API
+
+Webhook optional for near-real-time freshness.
+
+## #security — GitHub secrets handling
+
+GitHub PATs stored only as SSM SecureString refs; no plaintext DB storage.
+Upgrade path to GitHub App is prepped; rotates tokens automatically.
