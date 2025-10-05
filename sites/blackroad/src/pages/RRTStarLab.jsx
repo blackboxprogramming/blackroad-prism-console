@@ -3,26 +3,30 @@ import ActiveReflection from "./ActiveReflection.jsx";
 
 function dist(a,b){ const dx=a.x-b.x, dy=a.y-b.y; return Math.hypot(dx,dy); }
 function segIntersectsRect(a,b, R){ // axis-aligned rectangle R={x,y,w,h}
-  // Liang-Barsky style clipping (simplified)
+  // Liang-Barsky clipping with explicit parameter range checks
   let t0=0, t1=1;
   const dx=b.x-a.x, dy=b.y-a.y;
   const p=[-dx, dx, -dy, dy];
   const q=[a.x-R.x, R.x+R.w-a.x, a.y-R.y, R.y+R.h-a.y];
   for(let i=0;i<4;i++){
-    if(p[i]===0){
-      if(q[i]<0) return false;
+    const pi=p[i], qi=q[i];
+    if(pi===0){
+      if(qi<0) return false; // parallel and outside
+      continue;
+    }
+    const r=qi/pi;
+    if(pi<0){
+      if(r>t1) return false;
+      if(r>t0) t0=r;
     } else {
-      const r=q[i]/p[i];
-      if(p[i]<0){
-        if(r>t1) return false;
-        if(r>t0) t0=r;
-      } else {
-        if(r<t0) return false;
-        if(r<t1) t1=r;
-      }
+      if(r<t0) return false;
+      if(r<t1) t1=r;
     }
   }
-  return t0<=t1 && t1>=0 && t0<=1;
+  if(t0>t1) return false;
+  const entersWithinSegment = (t0>=0 && t0<=1) || (t1>=0 && t1<=1);
+  const segmentSpansRectangle = t0<0 && t1>1;
+  return entersWithinSegment || segmentSpansRectangle;
 }
 function collision(a,b, obstacles){ for(const R of obstacles){ if(segIntersectsRect(a,b,R)) return true; } return false; }
 
