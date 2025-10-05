@@ -1,0 +1,31 @@
+name: cleanup_git_branches
+version: 1.0.0
+inputs:
+  - id: base_branch
+    type: string
+    required: false
+    description: Git branch used as the merge base for discovery.
+  - id: branches
+    type: array[string]
+    required: false
+    description: Explicit branches to delete. If omitted the agent will discover merged branches.
+  - id: dry_run
+    type: boolean
+    required: false
+    default: false
+    description: When true, no destructive git commands are executed.
+outputs:
+  - id: cleanup_report
+    type: object
+    description: Mapping of branch names to deletion success booleans.
+side_effects:
+  - type: process
+    resource: git
+    ops: [branch_delete, push_delete]
+failure_modes:
+  - id: DISCOVERY_FAILED
+    retryable: false
+  - id: DELETE_FAILED
+    retryable: true
+observability:
+  idempotency_key: branch_name
