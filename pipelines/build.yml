@@ -7,10 +7,22 @@ pipeline:
     image: python:3.11-slim
     commands:
       - echo test
+  audit_log:
+    image: python:3.11-slim
+    commands:
+      - pip install --no-cache-dir pyyaml
+      - mkdir -p audit-artifacts
+      - python audits/engine.py --report-dir audit-artifacts/reports --jsonl audit-artifacts/audit-log.jsonl --maintenance-log audits/fixtures/maintenance_events.jsonl
+  audit_validator:
+    image: python:3.11-slim
+    commands:
+      - python audits/validator.py --audit-log audit-artifacts/audit-log.jsonl --max-maintenance-blocks 2
   build:
     image: docker:24
     commands:
       - echo build image
+      - mkdir -p artifacts/image
+      - echo "${IMAGE_DIGEST:-sha256:$(date +%s)}" > artifacts/image/digest.txt
   sign:
     image: alpine:3.19
     commands:
@@ -19,3 +31,24 @@ pipeline:
     image: docker:24
     commands:
       - echo push to registry
+  audit_sign:
+    image: alpine:3.19
+    commands:
+      - apk add --no-cache minisign
+      - : "${MINISIGN_SECRET_KEY?MINISIGN_SECRET_KEY environment variable must be set}"
+      - : "${MINISIGN_PUBLIC_KEY?MINISIGN_PUBLIC_KEY environment variable must be set}"
+      - mkdir -p audit-artifacts
+      - printf '%s\n' "$MINISIGN_SECRET_KEY" > minisign.key
+      - printf '%s\n' "$MINISIGN_PUBLIC_KEY" > audit-artifacts/minisign.pub
+      - minisign -Sm audit-artifacts/audit-log.jsonl -s minisign.key -x audit-artifacts/audit-log.jsonl.minisig
+      - rm minisign.key
+  audit_artifacts:
+    image: alpine:3.19
+    commands:
+      - mkdir -p artifacts/audit
+      - cp audit-artifacts/audit-log.jsonl artifacts/audit/
+      - cp audit-artifacts/audit-log.jsonl.minisig artifacts/audit/
+      - cp audit-artifacts/minisign.pub artifacts/audit/
+      - cp artifacts/image/digest.txt artifacts/audit/image-digest.txt
+      - tar -czf artifacts/audit/github-audit-bundle.tgz -C artifacts/audit .
+      - echo "::notice::upload-artifact name=audit-logs::artifacts/audit/github-audit-bundle.tgz"
