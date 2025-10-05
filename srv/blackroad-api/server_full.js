@@ -29,6 +29,7 @@ const Stripe = require('stripe');
 const verify = require('./lib/verify');
 const notify = require('./lib/notify');
 const logger = require('./lib/log');
+const maintenanceGuard = require('./modules/maintenanceGuard');
 const attachLlmRoutes = require('./routes/admin_llm');
 const gitRouter = require('./routes/git');
 const providersRouter = require('./routes/providers');
@@ -223,9 +224,25 @@ app.use(
   })
 );
 
+app.use(maintenanceGuard({ logger }));
+
 // --- Homepage
 app.get('/', (_, res) => {
   res.sendFile(path.join(WEB_ROOT, 'index.html'));
+});
+app.head('/health/live', (_req, res) => {
+  res.setHeader('Cache-Control', 'max-age=10');
+  res.status(200).end();
+});
+app.get('/health/live', (_req, res) => {
+  res.setHeader('Cache-Control', 'max-age=10');
+  res.json({ status: 'ok', ts: new Date().toISOString() });
+});
+app.head('/health/ready', (_req, res) => {
+  res.status(200).end();
+});
+app.get('/health/ready', (_req, res) => {
+  res.json({ status: 'ok', ts: new Date().toISOString() });
 });
 app.head('/health', (_req, res) => res.status(200).end());
 app.get('/health', (_req, res) => {
