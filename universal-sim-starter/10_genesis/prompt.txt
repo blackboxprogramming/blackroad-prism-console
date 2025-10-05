@@ -1,0 +1,2 @@
+Generate a deformable silicone cube dropping into a shallow water tank with a rigid floor and side walls.
+Capture material properties, gravity, initial velocities, and boundary constraints suitable for downstream MPM and SPH solvers.
