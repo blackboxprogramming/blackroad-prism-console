@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.8.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.7.0...v1.8.0) (2025-10-05)
+
+
+### Features
+
+* add admin-delete for contradictions ([#601](https://github.com/blackboxprogramming/blackroad-prism-console/issues/601)) ([0798c79](https://github.com/blackboxprogramming/blackroad-prism-console/commit/0798c799fb7ec0a4470d6e981e7c4ca908f12b98))
+* add codex infinity prompt pack ([#1883](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1883)) ([4bb25dd](https://github.com/blackboxprogramming/blackroad-prism-console/commit/4bb25ddc4cd70f1130ec71f91fcfbc7892b5b2d6))
+* add ecs canary deployment support ([#1949](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1949)) ([95bd550](https://github.com/blackboxprogramming/blackroad-prism-console/commit/95bd550196e05075f7994828c394dd4f59db8f77))
+* add next frontend dependencies ([#1991](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1991)) ([99bf0f4](https://github.com/blackboxprogramming/blackroad-prism-console/commit/99bf0f4a4c663d35775a314ca5a3f5ecb421477f))
+* add Rohonc Codex dataset parser ([#608](https://github.com/blackboxprogramming/blackroad-prism-console/issues/608)) ([1e5d513](https://github.com/blackboxprogramming/blackroad-prism-console/commit/1e5d5137f8ad719e81c41fe1726442255d153dea))
+* auto-enable merges after codex fixes ([#1947](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1947)) ([d07832a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/d07832afde5208580f5a417f70332fe66e27a3db))
+* refresh all working copy devices ([#1841](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1841)) ([e954ef2](https://github.com/blackboxprogramming/blackroad-prism-console/commit/e954ef295410759b755ff70c4cc870d152839eb5))
+* scaffold blackroad agent skeleton ([#1764](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1764)) ([58d3d22](https://github.com/blackboxprogramming/blackroad-prism-console/commit/58d3d22525484adcd13bd77174b4c3cae598e2eb))
+* scaffold FeeForge billing platform ([#1971](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1971)) ([5fffe4a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/5fffe4a2baad7b1388dcf0f22209be413b6b9f6e))
+* scaffold regdesk compliance automation ([#1958](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1958)) ([8a6f57a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/8a6f57a3b3d19cb615279b5ef64db9e490fe9143))
+* support additional fix comments aliases ([#1826](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1826)) ([1981ac5](https://github.com/blackboxprogramming/blackroad-prism-console/commit/1981ac538823830c2d633dcc5168212b115212c9))
+
 ## [1.7.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.6.0...v1.7.0) (2025-09-29)
 
 
