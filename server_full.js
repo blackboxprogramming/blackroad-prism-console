@@ -14,7 +14,14 @@ const rateLimit = require('express-rate-limit');
 
 // Allow requiring .ts files as plain JS for lucidia brain modules
 require.extensions['.ts'] = require.extensions['.js'];
-const { PORT, NODE_ENV, ALLOWED_ORIGIN, LOG_DIR, SESSION_SECRET } = require('./src/config');
+const {
+  PORT,
+  NODE_ENV,
+  ALLOWED_ORIGIN,
+  LOG_DIR,
+  SESSION_SECRET,
+  ROADVIEW_STORAGE
+} = require('./src/config');
 const subscribe = require('./src/routes/subscribe');
 
 // Ensure log dir exists
@@ -77,10 +84,6 @@ app.use(limiter);
 const db = require('./src/db');
 
 // ROADVIEW
-const ROADVIEW_STORAGE = path.resolve(
-  process.env.ROADVIEW_STORAGE ||
-    path.join(__dirname, 'srv', 'blackroad-api', 'storage', 'roadview')
-);
 const ROADVIEW_PROJECTS_DIR = path.join(ROADVIEW_STORAGE, 'projects');
 try {
   fs.mkdirSync(ROADVIEW_PROJECTS_DIR, { recursive: true });

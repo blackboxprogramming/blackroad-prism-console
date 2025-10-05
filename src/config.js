@@ -1,7 +1,18 @@
 // FILE: /srv/blackroad-api/src/config.js
 'use strict';
 
+const path = require('path');
+
 require('dotenv').config();
+
+const defaultRoadviewStorage = path.resolve(
+  __dirname,
+  '..',
+  'srv',
+  'blackroad-api',
+  'storage',
+  'roadview'
+);
 
 const cfg = {
   NODE_ENV: process.env.NODE_ENV || 'development',
@@ -18,7 +29,10 @@ const cfg = {
   LUCIDIA_LLM_URL: process.env.LUCIDIA_LLM_URL || 'http://127.0.0.1:8000',
   DEPLOY_WEBHOOK_SECRET: process.env.DEPLOY_WEBHOOK_SECRET || null,
   ALLOW_DEPLOY_RUN: /^true$/i.test(process.env.ALLOW_DEPLOY_RUN || 'false'),
-  LOG_DIR: process.env.LOG_DIR || null
+  LOG_DIR: process.env.LOG_DIR || null,
+  ROADVIEW_STORAGE: path.resolve(
+    process.env.ROADVIEW_STORAGE || defaultRoadviewStorage
+  )
 };
 
 module.exports = cfg;
