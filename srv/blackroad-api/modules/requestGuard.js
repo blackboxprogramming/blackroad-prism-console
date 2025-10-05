@@ -5,12 +5,41 @@ module.exports = function requestGuard(app){
   let ORIGIN_KEY = ''; try { ORIGIN_KEY = fs.readFileSync(keyPath,'utf8').trim(); } catch {}
   const SKIP = ['/api/normalize', '/slack/command', '/slack/interact'];
   const skip = (p) => SKIP.some(s => p === s || p.startsWith(s + '/'));
-  app.use((req,res,next)=>{
+  app.use((req, res, next) => {
     if (skip(req.path)) return next();
-    // parse JSON (small, safe)
-    if (req.method !== 'GET' && (req.headers['content-type']||'').includes('application/json')) {
-      let b=''; req.on('data',d=>b+=d); req.on('end',()=>{ try{ req.body = JSON.parse(b||'{}'); }catch{ req.body={}; } ; next(); });
-    } else next();
+    // parse JSON (small, safe) while preserving the raw payload for webhook validation
+    const contentType = req.headers['content-type'] || '';
+    const shouldParse =
+      req.method !== 'GET' && contentType.includes('application/json');
+    if (!shouldParse) return next();
+
+    const chunks = [];
+    let finished = false;
+    const finalize = (err) => {
+      if (finished) return;
+      finished = true;
+      if (err) return next(err);
+      next();
+    };
+
+    req.on('data', (chunk) => {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    });
+    req.on('error', (err) => finalize(err));
+    req.on('end', () => {
+      const raw = Buffer.concat(chunks).toString('utf8');
+      req.rawBody = raw;
+      if (!raw) {
+        req.body = {};
+        return finalize();
+      }
+      try {
+        req.body = JSON.parse(raw);
+      } catch {
+        req.body = {};
+      }
+      finalize();
+    });
   });
   app.use((req,res,next)=>{
     if (skip(req.path)) return next();

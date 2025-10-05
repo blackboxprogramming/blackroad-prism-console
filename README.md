@@ -145,6 +145,8 @@ curl -X POST http://localhost:4000/api/subscribe/checkout \
   -d '{"planId":"pro","interval":"month"}'
 curl -H "Cookie: brsid=..." http://localhost:4000/api/subscribe/portal
 # Webhooks are received at /api/stripe/webhook and must include the Stripe signature header.
+# The middleware stack must expose the raw JSON payload (e.g., `express.raw({ type: 'application/json' })`)
+# ahead of the route so Stripe signature verification can read `req.rawBody`.
 ```
 
 ## Unified Sync Pipeline
