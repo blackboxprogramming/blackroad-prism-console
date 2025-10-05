@@ -9,7 +9,7 @@ module.exports = function attachPartnerRelay({ app }) {
 
   const ORIGIN_KEY_PATH = process.env.ORIGIN_KEY_PATH || '/srv/secrets/origin.key';
   const ALLOW_SUBJECTS = (process.env.PARTNER_SUBJECTS || 'Claude-Partner').split(',').map(s=>s.trim()).filter(Boolean);
-  const ALLOW_DEVICES  = (process.env.PARTNER_DEVICES  || 'pi-01,jetson-01,display-mini,display-main').split(',').map(s=>s.trim()).filter(Boolean);
+  const ALLOW_DEVICES  = (process.env.PARTNER_DEVICES  || 'pi-01,alice-pi,jetson-01,display-mini,display-main').split(',').map(s=>s.trim()).filter(Boolean);
   const LOG_DIR = '/var/log/blackroad';
   const LOG_FILE = path.join(LOG_DIR, 'partner-relay.log');
 
