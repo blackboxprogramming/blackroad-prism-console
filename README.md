@@ -157,10 +157,15 @@ Example:
 ```
 
 The script also understands:
-
 - "Refresh working copy and redeploy"
 - "Rebase branch and update site"
 - "Sync Salesforce -> Airtable -> Droplet"
+
+---
+
+## Visual Hardware Guides
+
+- [Pepper's Ghost Cube Calibration](docs/guides/peppers-ghost-calibration.md) — 5-minute tune-up checklist for crisp, centered holographic projections.
 
 It pulls from GitHub, triggers connector webhooks, updates a Working Copy checkout, and
 executes a remote refresh command on the droplet.
