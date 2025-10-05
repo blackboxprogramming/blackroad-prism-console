@@ -42,9 +42,11 @@ function solvePoisson(f){
   const URe=Array.from({length:N},()=>Array(M).fill(0));
   const UIm=Array.from({length:N},()=>Array(M).fill(0));
   for(let k=0;k<N;k++){
+    const kx = k<=N/2 ? k : k-N; // wrap negative frequencies
     for(let l=0;l<M;l++){
-      const lambda = -4*Math.PI*Math.PI*( (k*k)/(N*N) + (l*l)/(M*M) ); // periodic Laplacian eigenvalue
-      if(k===0 && l===0){ URe[k][l]=0; UIm[k][l]=0; } // remove mean (compatibility)
+      const ky = l<=M/2 ? l : l-M;
+      const lambda = -(kx*kx + ky*ky); // periodic Laplacian eigenvalue in physical coords
+      if(lambda===0){ URe[k][l]=0; UIm[k][l]=0; } // remove mean (compatibility)
       else {
         URe[k][l] = Re[k][l]/lambda;
         UIm[k][l] = Im[k][l]/lambda;
