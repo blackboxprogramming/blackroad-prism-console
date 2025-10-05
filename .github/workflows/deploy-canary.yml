@@ -1,0 +1,241 @@
+name: deploy-canary
+
+on:
+  workflow_dispatch:
+    inputs:
+      percent:
+        description: 'Canary % (1, 5, 10, 50, 100)'
+        default: '1'
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPO: ${{ vars.ECR_REPO }}
+  CLUSTER: ${{ vars.ECS_CLUSTER }}
+  SERVICE: ${{ vars.ECS_SERVICE }}
+  TG_BLUE: ${{ vars.TG_BLUE_ARN }}
+  TG_GREEN: ${{ vars.TG_GREEN_ARN }}
+  LISTENER_ARN: ${{ vars.HTTPS_LISTENER_ARN }}
+  APP_URL: ${{ vars.APP_URL }}
+  ALB_METRIC_LB: ${{ vars.ALB_ARN_SUFFIX }}
+  WAF_WEBACL_ARN: ${{ vars.WAF_WEBACL_ARN }}
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test -- --ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push image
+        id: image
+        run: |
+          set -euo pipefail
+          IMAGE="$ECR_REPO:${{ github.sha }}"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: build-push
+    runs-on: ubuntu-latest
+    env:
+      CANARY_PERCENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.percent || '1' }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Clone current task definition
+        id: td
+        run: |
+          set -euo pipefail
+          CURRENT_TD=$(aws ecs describe-services \
+            --cluster "$CLUSTER" \
+            --services "$SERVICE" \
+            --query 'services[0].taskDefinition' \
+            --output text)
+          FAMILY=$(echo "$CURRENT_TD" | awk -F'/' '{print $2}' | cut -d: -f1)
+          aws ecs describe-task-definition \
+            --task-definition "$CURRENT_TD" \
+            --query 'taskDefinition' > td.raw.json
+          jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt)' td.raw.json > td.base.json
+          jq --arg IMG "${{ needs.build-push.outputs.image }}" '.containerDefinitions[0].image = $IMG' td.base.json > td.new.json
+          echo "family=$FAMILY" >> "$GITHUB_OUTPUT"
+
+      - name: Register new task definition
+        id: register
+        run: |
+          set -euo pipefail
+          NEW_TD=$(aws ecs register-task-definition \
+            --cli-input-json file://td.new.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          echo "new_td=$NEW_TD" >> "$GITHUB_OUTPUT"
+
+      - name: Update service with new task definition
+        run: |
+          set -euo pipefail
+          aws ecs update-service \
+            --cluster "$CLUSTER" \
+            --service "$SERVICE" \
+            --task-definition "${{ steps.register.outputs.new_td }}"
+
+      - name: Set canary weight on listener
+        run: |
+          set -euo pipefail
+          PCT=${CANARY_PERCENT}
+          if [[ "$PCT" -lt 0 || "$PCT" -gt 100 ]]; then
+            echo "Invalid canary percent: $PCT" >&2
+            exit 1
+          fi
+          PRIMARY=$(( 100 - PCT ))
+          aws elbv2 modify-listener \
+            --listener-arn "$LISTENER_ARN" \
+            --default-actions "Type=forward,ForwardConfig={TargetGroups=[{TargetGroupArn=\"$TG_BLUE\",Weight=$PRIMARY},{TargetGroupArn=\"$TG_GREEN\",Weight=$PCT}],TargetGroupStickinessConfig={Enabled=false}}"
+
+      - name: Soak test canary
+        run: |
+          set -euo pipefail
+          URL="$APP_URL"
+          echo "Soaking $URL for 5 minutes..."
+          end=$(( $(date +%s) + 300 ))
+          while (( $(date +%s) < end )); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$URL" || true)
+            if [[ "$code" != "200" ]]; then
+              echo "UI health failed with status $code"
+              exit 1
+            fi
+            sleep 5
+          done
+
+      - name: Verify ALB metrics vs baseline
+        id: verify
+        run: |
+          set -euo pipefail
+          NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          AGO15=$(date -u -d '15 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
+          AGO75=$(date -u -d '75 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
+          AGO60=$(date -u -d '60 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
+
+          fivexx_now=$(aws cloudwatch get-metric-statistics \
+            --namespace AWS/ApplicationELB \
+            --metric-name HTTPCode_ELB_5XX_Count \
+            --dimensions Name=LoadBalancer,Value=$ALB_METRIC_LB \
+            --start-time $AGO15 --end-time $NOW \
+            --period 300 --statistics Sum \
+            --query 'Datapoints[].Sum' --output text | awk '{s+=$1} END{print s+0}')
+
+          p95_now=$(aws cloudwatch get-metric-statistics \
+            --namespace AWS/ApplicationELB \
+            --metric-name TargetResponseTime \
+            --dimensions Name=LoadBalancer,Value=$ALB_METRIC_LB \
+            --start-time $AGO15 --end-time $NOW \
+            --period 300 --statistics p95 \
+            --query 'Datapoints[].p95' --output text | tr '\t' '\n' | sort -n | tail -1)
+          p95_now=${p95_now:-0}
+
+          fivexx_base=$(aws cloudwatch get-metric-statistics \
+            --namespace AWS/ApplicationELB \
+            --metric-name HTTPCode_ELB_5XX_Count \
+            --dimensions Name=LoadBalancer,Value=$ALB_METRIC_LB \
+            --start-time $AGO75 --end-time $AGO15 \
+            --period 300 --statistics Sum \
+            --query 'Datapoints[].Sum' --output text | awk '{s+=$1} END{print s+0}')
+
+          p95_base=$(aws cloudwatch get-metric-statistics \
+            --namespace AWS/ApplicationELB \
+            --metric-name TargetResponseTime \
+            --dimensions Name=LoadBalancer,Value=$ALB_METRIC_LB \
+            --start-time $AGO75 --end-time $AGO15 \
+            --period 300 --statistics p95 \
+            --query 'Datapoints[].p95' --output text | tr '\t' '\n' | sort -n | tail -1)
+          p95_base=${p95_base:-0}
+
+          fivexx_allowed=$(awk -v b="${fivexx_base:-0}" 'BEGIN{print (b*1.5)+5}')
+          p95_allowed=$(awk -v b="${p95_base:-0.5}" 'BEGIN{print (b*1.25)+0.1}')
+
+          echo "5xx now=$fivexx_now base=$fivexx_base allowed=$fivexx_allowed"
+          echo "p95 now=$p95_now base=$p95_base allowed=$p95_allowed"
+
+          pass=true
+          awk -v n="$fivexx_now" -v a="$fivexx_allowed" 'BEGIN{exit (n<=a)?0:1}' || pass=false
+          awk -v n="$p95_now" -v a="$p95_allowed" 'BEGIN{exit (n<=a)?0:1}' || pass=false
+
+          echo "pass=$pass" >> "$GITHUB_OUTPUT"
+          if [[ "$pass" != "true" ]]; then
+            exit 1
+          fi
+
+  promote-or-rollback:
+    needs: release
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Promote to 100% on success
+        if: needs.release.result == 'success'
+        run: |
+          set -euo pipefail
+          aws elbv2 modify-listener \
+            --listener-arn "$LISTENER_ARN" \
+            --default-actions "Type=forward,ForwardConfig={TargetGroups=[{TargetGroupArn=\"$TG_BLUE\",Weight=0},{TargetGroupArn=\"$TG_GREEN\",Weight=100}],TargetGroupStickinessConfig={Enabled=false}}"
+
+      - name: Rollback on failure
+        if: needs.release.result != 'success'
+        run: |
+          set -euo pipefail
+          echo "Rolling back canary" >&2
+          aws elbv2 modify-listener \
+            --listener-arn "$LISTENER_ARN" \
+            --default-actions "Type=forward,ForwardConfig={TargetGroups=[{TargetGroupArn=\"$TG_BLUE\",Weight=100},{TargetGroupArn=\"$TG_GREEN\",Weight=0}],TargetGroupStickinessConfig={Enabled=false}}"
+          PREV_TD=$(aws ecs list-task-definitions \
+            --family-prefix "$SERVICE" \
+            --status ACTIVE \
+            --sort DESC \
+            --query 'taskDefinitionArns[1]' \
+            --output text)
+          if [[ -n "$PREV_TD" && "$PREV_TD" != "None" ]]; then
+            aws ecs update-service \
+              --cluster "$CLUSTER" \
+              --service "$SERVICE" \
+              --task-definition "$PREV_TD"
+          fi
+          exit 1
