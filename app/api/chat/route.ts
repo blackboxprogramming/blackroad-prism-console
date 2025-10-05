@@ -8,6 +8,9 @@ interface In {
   messages: { role: "user" | "assistant"; content: string }[];
   mode?: Mode;
   prompt?: string;
+  board?: string;
+  task?: string;
+  catalog?: boolean;
 }
 
 export const runtime = "nodejs";
@@ -15,7 +18,7 @@ export const runtime = "nodejs";
 export async function POST(req: NextRequest) {
   try {
     const body: In = await req.json();
-    let { messages, mode: modeIn, prompt } = body;
+    let { messages, mode: modeIn, prompt, board, task, catalog } = body;
     if (!messages && typeof prompt === "string") {
       messages = [{ role: "user", content: prompt }];
     }
@@ -23,7 +26,18 @@ export async function POST(req: NextRequest) {
     const last = messages?.at(-1)?.content ?? "";
     if (/chit\s*chat\s*cadillac/i.test(last)) mode = "chit-chat";
 
-    const system: Msg = { role: "system", content: codexInfinityPrompt(mode) };
+    const boardOpt = typeof board === "string" ? board.trim() : "";
+    const taskOpt = typeof task === "string" ? task.trim() : "";
+    const includeCatalog = Boolean(catalog);
+
+    const system: Msg = {
+      role: "system",
+      content: codexInfinityPrompt(mode, {
+        board: boardOpt || undefined,
+        task: taskOpt || undefined,
+        includeCatalog
+      })
+    };
     const convo: Msg[] = [system, ...messages];
 
     // Pass 1
