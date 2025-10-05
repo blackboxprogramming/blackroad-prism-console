@@ -81,10 +81,16 @@ class EnergyLogger:
 
     def __init__(self, output_path: Path) -> None:
         self.output_path = output_path
-        self._file = output_path.open("w", newline="")
+        self._file = output_path.open("w", newline="", encoding="utf-8")
         self._writer = csv.writer(self._file, lineterminator="\n")
         self._writer.writerow(self.HEADERS)
         self._dissipated = 0.0
+
+    def __enter__(self) -> "EnergyLogger":
+        return self
+
+    def __exit__(self, exc_type, exc, exc_tb) -> None:
+        self.close()
 
     def log(
         self,
@@ -112,6 +118,7 @@ class EnergyLogger:
                 move_proxy,
             )
         )
+        self._file.flush()
 
     def add_dissipation(self, value: float) -> None:
         self._dissipated += value
@@ -176,14 +183,13 @@ def run_simulation(config: SimulationConfig) -> None:
     output_logs.mkdir(parents=True, exist_ok=True)
     log_path = output_logs / "energy.csv"
 
-    logger = EnergyLogger(log_path)
-    try:
+    with EnergyLogger(log_path) as logger:
         dt = config.step_config.initial
         state = SimulationState(position=1.0, velocity=0.0, time=0.0)
         logger.log(
             step=0,
             time_value=state.time,
-            dt=dt,
+            dt=0.0,
             position=state.position,
             velocity=state.velocity,
             kinetic=0.0,
@@ -193,8 +199,6 @@ def run_simulation(config: SimulationConfig) -> None:
         for step_index in range(1, config.max_steps + 1):
             state = integrate_step(step_index, state, dt, config, logger)
             dt = adaptive_dt(dt, state, config)
-    finally:
-        logger.close()
 
     print(f"Wrote energy log to {log_path}")
 
