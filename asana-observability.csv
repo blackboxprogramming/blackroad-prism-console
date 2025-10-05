@@ -1,0 +1,7 @@
+Task Name,Description,Assignee Email,Section,Due Date
+OTel in API,Add otel.ts + envs; emit traces/metrics to collector.,amundsonalexa@gmail.com,Today,2025-10-25
+OTel Collector sidecar,Add collector to ECS task; export to Grafana Cloud or AWS X-Ray.,amundsonalexa@gmail.com,Today,2025-10-25
+Next.js tracing (optional),Add instrumentation.ts + web vitals beacon.,amundsonalexa@gmail.com,This Week,2025-10-26
+SLOs + burn alerts,Define availability/latency SLOs; create fast/slow burn alarms → Slack/PagerDuty.,amundsonalexa@gmail.com,This Week,2025-10-26
+Synthetics canary,Provision CloudWatch Synthetics for /healthz/ui (5-min) + alarm.,amundsonalexa@gmail.com,This Week,2025-10-26
+Dashboards + runbook,Create Grafana “API Golden Signals” + Notion runbook with links.,amundsonalexa@gmail.com,This Week,2025-10-26

@@ -12,8 +12,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@lucidia/ai": "^0.0.1",
-    "@lucidia/core": "^0.0.1",
+    "@lucidia/ai": "workspace:^",
+    "@lucidia/core": "workspace:^",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "helmet": "^7.1.0"
