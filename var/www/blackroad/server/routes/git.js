@@ -1,69 +1,53 @@
-const { spawn } = require('node:child_process');
-const fs = require('node:fs/promises');
-const path = require('node:path');
+const express = require('express');
+const service = require('./git-service');
 
-// Apply unified diff patches to the repository while ensuring paths stay within
-// the repo root. Each diff header is rewritten to reference the provided file
-// path, preventing arbitrary file writes.
-const repoRoot = process.cwd();
+const router = express.Router();
 
-// Replace diff header paths with the sanitized file path.
-function sanitizeDiff(diff, filePath) {
-  const lines = diff.split('\n');
-  let i = lines.findIndex((l) => l.startsWith('--- '));
-  if (i !== -1) lines[i] = `--- ${filePath}`;
-  i = lines.findIndex((l) => l.startsWith('+++ '));
-  if (i !== -1) lines[i] = `+++ ${filePath}`;
-  return lines.join('\n');
+async function handleRequest(res, action, { errorStatus = 500, includeOkFlag = false } = {}) {
+  try {
+    const payload = await action();
+    res.json(payload);
+  } catch (err) {
+    const statusCode = err.statusCode || errorStatus;
+    const body = { error: err.message };
+    if (includeOkFlag) body.ok = false;
+    res.status(statusCode).json(body);
+  }
 }
 
-// Apply a single patch object with shape { path, diff }.
-async function applyPatch(patch) {
-  const { path: filePath, diff } = patch || {};
-  if (typeof filePath !== 'string' || typeof diff !== 'string') {
-    throw new Error('invalid patch format');
-  }
-  const absPath = path.resolve(repoRoot, filePath);
-  if (!absPath.startsWith(repoRoot + path.sep)) {
-    throw new Error('invalid path');
-  }
-  await fs.mkdir(path.dirname(absPath), { recursive: true });
-  const sanitized = sanitizeDiff(diff, filePath);
-  await new Promise((resolve, reject) => {
-    const child = spawn('patch', ['-p0', '--silent'], {
-      cwd: repoRoot,
-      stdio: ['pipe', 'ignore', 'pipe'],
-    });
-    let err = '';
-    child.stderr.on('data', (d) => (err += d));
-    child.on('close', (code) => {
-      if (code === 0) resolve();
-      else reject(new Error(err.trim() || `patch exited ${code}`));
-    });
-    child.stdin.end(sanitized);
-  });
-  return 'ok';
+router.get('/health', async (req, res) => {
+  await handleRequest(res, () => service.gitHealth(), { errorStatus: 500, includeOkFlag: true });
+});
+
+router.get('/status', async (req, res) => {
+  await handleRequest(res, () => service.gitStatus());
+});
+
+router.get('/changes', async (req, res) => {
+  await handleRequest(res, () => service.gitChanges());
+});
+
+router.post('/stage', async (req, res) => {
+  await handleRequest(res, () => service.gitStage(req.body?.files), { errorStatus: 400 });
+});
+
+router.post('/unstage', async (req, res) => {
+  await handleRequest(res, () => service.gitUnstage(req.body?.files), { errorStatus: 400 });
+});
+
+router.post('/commit', async (req, res) => {
+  await handleRequest(res, () => service.gitCommit(req.body), { errorStatus: 400 });
+});
+
+router.get('/history', async (req, res) => {
+  await handleRequest(res, () => service.gitHistory({ limit: req.query?.limit }));
+});
+
+async function applyPatchesHandler(req, res) {
+  await handleRequest(res, () => service.applyPatches(req.body?.patches), { errorStatus: 400 });
 }
 
-// Express-style handler: apply an array of patches and report individual
-// results without failing the entire request.
-async function applyPatches(req, res) {
-  const { patches } = req.body || {};
-  if (!Array.isArray(patches)) {
-    return res.status(400).json({ error: 'patches[] required' });
-  }
-  const applied = {};
-  for (const p of patches) {
-    try {
-      applied[p.path] = await applyPatch(p);
-    } catch (err) {
-      applied[p.path] = String(err.message || err);
-    }
-  }
-  res.json({ applied });
-}
+router.post('/apply', applyPatchesHandler);
 
-module.exports = {
-  applyPatches,
-};
-
+module.exports = router;
+module.exports.applyPatches = applyPatchesHandler;

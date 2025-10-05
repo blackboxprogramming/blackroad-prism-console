@@ -3,8 +3,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import git from '../var/www/blackroad/server/routes/git.js';
-const { applyPatches } = git;
+import gitServiceModule from '../var/www/blackroad/server/routes/git-service.js';
+const gitService = gitServiceModule.default || gitServiceModule;
 
 const tempFile = 'tmp-applyPatches.txt';
 const abs = path.join(process.cwd(), tempFile);
@@ -19,15 +19,8 @@ const diff = [
   ''
 ].join('\n');
 
-const req = { body: { patches: [{ path: tempFile, diff }] } };
-const res = {
-  statusCode: 200,
-  status(c) { this.statusCode = c; return this; },
-  json(obj) { this.body = obj; }
-};
-
-await applyPatches(req, res);
-assert.equal(res.body.applied[tempFile], 'ok');
+const result = await gitService.applyPatches([{ path: tempFile, diff }]);
+assert.equal(result.applied[tempFile], 'ok');
 const content = await fs.readFile(abs, 'utf8');
 assert.equal(content, 'new\n');
 await fs.unlink(abs);

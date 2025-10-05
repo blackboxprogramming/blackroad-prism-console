@@ -30,3 +30,14 @@ export async function gitCommit(payload) {
   const { data } = await axios.post(`${API_BASE}/api/git/commit`, payload);
   return data;
 }
+
+export async function gitHistory(params = {}) {
+  const search = new URLSearchParams();
+  if (params.limit) {
+    search.set('limit', String(params.limit));
+  }
+  const query = search.toString();
+  const url = `${API_BASE}/api/git/history${query ? `?${query}` : ''}`;
+  const { data } = await axios.get(url);
+  return data;
+}
