@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AutoPal Config",
+  "type": "object",
+  "required": [
+    "version",
+    "feature_flags",
+    "maintenance_mode",
+    "step_up",
+    "endpoints"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "feature_flags": {
+      "type": "object",
+      "required": ["global_enabled"],
+      "properties": {
+        "global_enabled": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "maintenance_mode": {
+      "type": "object",
+      "properties": {
+        "allowlist_endpoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status_code": {
+          "type": "integer"
+        },
+        "retry_after_seconds": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": true
+    },
+    "step_up": {
+      "type": "object",
+      "properties": {
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "endpoints": {
+      "type": "object"
+    }
+  }
+}
