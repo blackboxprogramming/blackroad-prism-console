@@ -1,0 +1,33 @@
+key: BD-CE
+version: 1
+sourceUrls:
+  - https://www.finra.org/registration-exams-ce/classic-crd
+rules:
+  - key: BD-CE-REG-ELEMENT
+    track: BD
+    schedule:
+      freq: ANNUAL
+      offsetFrom: ANNIVERSARY
+      offsetDays: 120
+    filing:
+      type: CRD
+      formKeys: ["BD-CE-ATTEST"]
+      feePolicy: NONE
+      artifactsRequired: ["ATTESTATION"]
+    gates:
+      blockActions: [trade_bd]
+      graceDays: 0
+  - key: BD-BRANCH-ATTEST
+    track: BD
+    schedule:
+      freq: ANNUAL
+      dueMonth: 12
+      dueDay: 1
+    filing:
+      type: CRD
+      formKeys: ["BD-BRANCH-ATTEST"]
+      feePolicy: NONE
+      artifactsRequired: ["ATTESTATION"]
+    gates:
+      blockActions: [market, trade_bd]
+      graceDays: 30
