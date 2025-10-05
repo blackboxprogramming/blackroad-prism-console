@@ -1,6 +1,7 @@
 import subprocess
+import sys
 
-from lucidia.app import app
+from lucidia.app import ALLOWLISTED_PACKAGES, app
 
 
 def test_index():
@@ -31,18 +32,54 @@ def test_run_code_rejects_import():
     assert resp.status_code == 400
 
 
-def test_install_package():
+def test_install_package_allowlisted(monkeypatch):
     client = app.test_client()
-    resp = client.post("/install", json={"package": "itsdangerous==2.2.0"})
+
+    called = {}
+
+    def fake_run(cmd, capture_output, text, env):
+        called["cmd"] = cmd
+        called["env"] = env
+
+        class Result:
+            returncode = 0
+            stdout = "installed"
+            stderr = ""
+
+        return Result()
+
+    monkeypatch.setattr("lucidia.app.subprocess.run", fake_run)
+
+    resp = client.post("/install", json={"package": "itsdangerous"})
     data = resp.get_json()
+
     assert resp.status_code == 200
     assert data["code"] == 0
+    assert called["cmd"] == [
+        sys.executable,
+        "-m",
+        "pip",
+        "install",
+        "--disable-pip-version-check",
+        "--no-deps",
+        "--no-build-isolation",
+        ALLOWLISTED_PACKAGES["itsdangerous"],
+    ]
+    assert called["env"].get("PIP_NO_INPUT") == "1"
 
 
 def test_install_package_invalid():
     client = app.test_client()
     resp = client.post("/install", json={"package": "bad pkg"})
     assert resp.status_code == 400
+
+
+def test_install_package_rejected():
+    client = app.test_client()
+    resp = client.post("/install", json={"package": "numpy"})
+    data = resp.get_json()
+    assert resp.status_code == 403
+    assert data["error"] == "package not allowed"
 
 
 def test_git_clean(tmp_path):

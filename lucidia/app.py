@@ -6,6 +6,7 @@ import math
 import os
 import re
 import subprocess
+import sys
 from contextlib import redirect_stdout
 from pathlib import Path
 
@@ -22,6 +23,18 @@ app = Flask(__name__)
 # ``NameError``.  Using a constant dictionary both documents the policy and
 # allows the validation step below to reference the allowed names.
 SAFE_BUILTINS = {"print": print, "abs": abs, "round": round, "pow": pow}
+
+
+# Only allow installing a curated set of packages.  Keys are normalized user
+# inputs, values are the canonical pinned specifiers that will be passed to
+# ``pip``.
+ALLOWLISTED_PACKAGES = {
+    "itsdangerous": "itsdangerous==2.2.0",
+}
+_ALLOWLIST_LOOKUP = {
+    **{name: spec for name, spec in ALLOWLISTED_PACKAGES.items()},
+    **{spec.lower(): spec for spec in ALLOWLISTED_PACKAGES.values()},
+}
 
 
 class CodeValidationError(ValueError):
@@ -109,7 +122,7 @@ def evaluate_math():
 
 @app.post("/install")
 def install_package():
-    """Install a Python package via ``pip`` within the environment."""
+    """Install an allowlisted Python package via ``pip`` within the environment."""
     data = request.get_json(silent=True) or {}
     package = data.get("package")
     if not package:
@@ -117,10 +130,26 @@ def install_package():
 
     if not re.fullmatch(r"[A-Za-z0-9_.-]+(?:==[A-Za-z0-9_.-]+)?", package):
         return jsonify({"error": "invalid package spec"}), 400
+    normalized = package.strip().lower()
+    spec = _ALLOWLIST_LOOKUP.get(normalized)
+    if spec is None:
+        return jsonify({"error": "package not allowed"}), 403
+
+    pip_env = os.environ | {"PIP_NO_INPUT": "1"}
     proc = subprocess.run(
-        ["pip", "install", package],
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--disable-pip-version-check",
+            "--no-deps",
+            "--no-build-isolation",
+            spec,
+        ],
         capture_output=True,
         text=True,
+        env=pip_env,
     )
     return (
         jsonify({"code": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr}),
