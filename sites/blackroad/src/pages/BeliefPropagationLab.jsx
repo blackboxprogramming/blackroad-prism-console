@@ -70,17 +70,17 @@ function runBP({alpha, betas, iters}){
   for(let t=0;t<iters;t++){
     // update in chain order (sum-product)
     // A->B
-    msg["A->B"] = normalize(sumProd(prior[0], msg["B->A"], pair));
+    msg["A->B"] = normalize(sumProd(prior[0], [], pair));
     // B->A
-    msg["B->A"] = normalize(sumProd(prior[1], msg["C->B"], pair));
+    msg["B->A"] = normalize(sumProd(prior[1], [msg["C->B"]], pair));
     // B->C
-    msg["B->C"] = normalize(sumProdTwo(prior[1], msg["A->B"], msg["C->B"], pair));
+    msg["B->C"] = normalize(sumProd(prior[1], [msg["A->B"]], pair));
     // C->B
-    msg["C->B"] = normalize(sumProdTwo(prior[2], msg["B->C"], msg["D->C"], pair));
+    msg["C->B"] = normalize(sumProd(prior[2], [msg["D->C"]], pair));
     // C->D
-    msg["C->D"] = normalize(sumProd(prior[2], msg["B->C"], pair));
+    msg["C->D"] = normalize(sumProd(prior[2], [msg["B->C"]], pair));
     // D->C
-    msg["D->C"] = normalize(sumProd(prior[3], msg["C->D"], pair));
+    msg["D->C"] = normalize(sumProd(prior[3], [], pair));
 
     // snapshot marginals
     shots.push({
@@ -96,27 +96,13 @@ function runBP({alpha, betas, iters}){
   return {m, shots};
 }
 
-function sumProd(phi_i, msg_from_neighbor, psi){
-  // message i->j (binary): m_j(y) = sum_x φ_i(x) ψ(x,y) ∏_{k∈N(i)\{j}} m_{k->i}(x)
+function sumProd(phi_i, incomingMsgs, psi){
   const res=[0,0];
   for(let y=0;y<2;y++){
     let acc=0;
     for(let x=0;x<2;x++){
       const psi_xy = psi[x][y];
-      const prod = phi_i[x] * msg_from_neighbor[x];
-      acc += prod * psi_xy;
-    }
-    res[y]=acc;
-  }
-  return res;
-}
-function sumProdTwo(phi_i, msg1, msg2, psi){
-  const res=[0,0];
-  for(let y=0;y<2;y++){
-    let acc=0;
-    for(let x=0;x<2;x++){
-      const psi_xy = psi[x][y];
-      const prod = phi_i[x] * msg1[x] * msg2[x];
+      const prod = incomingMsgs.reduce((p,msg)=>p*msg[x], phi_i[x]);
       acc += prod * psi_xy;
     }
     res[y]=acc;
