@@ -26,3 +26,9 @@
 
 ## Last Status Report
 <!-- Agents append latest status, error, or notifications here -->
+
+### 2025-10-04
+- Shipped governance and upgrade wiring end-to-end, including handlers, proposal examples, and CLI hooks.
+- Landed the RoadStudio pipeline MVP with deterministic renders and a golden-frame regression check.
+- Established observability baselines (OTel collectors, Prometheus/Grafana integration, exemplar stubs).
+- Next focus: auto-captioning, public API + SDKs, and tokenomics simulation unless strategic priorities shift.
