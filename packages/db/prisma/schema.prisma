@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model FeeSchedule {
+  id        String   @id @default(cuid())
+  name      String
+  status    String
+  spec      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model BillingGroup {
+  id           String   @id @default(cuid())
+  label        String
+  householdIds String[]
+  policyKey    String?
+}
+
+model AccountFeePlan {
+  id                     String   @id @default(cuid())
+  accountId              String
+  feeScheduleId          String
+  billingGroupId         String?
+  startDate              DateTime
+  endDate                DateTime?
+  billFrequency          String
+  billMode               String
+  billCurrency           String
+  custodyDeductionAllowed Boolean
+  performanceFeeAllowed  Boolean
+  createdAt              DateTime @default(now())
+}
+
+model FeeAccrual {
+  id         String   @id @default(cuid())
+  accountId  String
+  asOf       DateTime
+  baseAUM    Decimal  @db.Decimal(38, 6)
+  rateBps    Int
+  amount     Decimal  @db.Decimal(38, 6)
+  components Json
+  source     String
+}
+
+model Invoice {
+  id                String   @id @default(cuid())
+  billingPeriodStart DateTime
+  billingPeriodEnd   DateTime
+  billingGroupId    String?
+  accountId         String?
+  status            String
+  currency          String
+  amount            Decimal  @db.Decimal(38, 6)
+  lines             Json
+  createdAt         DateTime @default(now())
+  issuedAt          DateTime?
+  paidAt            DateTime?
+  evidencePath      String?
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  method      String
+  amount      Decimal  @db.Decimal(38, 6)
+  currency    String
+  externalRef String?
+  postedAt    DateTime
+  status      String
+  meta        Json
+}
+
+model FeeException {
+  id        String   @id @default(cuid())
+  accountId String?
+  invoiceId String?
+  code      String
+  severity  Int
+  details   Json
+  status    String
+  createdAt DateTime @default(now())
+  resolvedAt DateTime?
+}
+
+model ErrorLedger {
+  id          String   @id @default(cuid())
+  scope       String
+  refId       String?
+  description String
+  correction  Json?
+  createdAt   DateTime @default(now())
+}
+
+model WormBlock {
+  id      String   @id @default(cuid())
+  idx     Int      @unique
+  ts      DateTime @default(now())
+  payload Json
+  prevHash String
+  hash    String
+}
+
