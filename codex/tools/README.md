@@ -11,6 +11,7 @@ python3 codex/tools/codex_build.py push-latest
 python3 codex/tools/codex_build.py refresh
 python3 codex/tools/codex_build.py rebase main
 python3 codex/tools/codex_build.py sync-connectors
+python3 codex/tools/codex_entries_audit.py            # Inspect Codex entries
 ```
 
 The script currently contains placeholders for connectors, Working Copy,
