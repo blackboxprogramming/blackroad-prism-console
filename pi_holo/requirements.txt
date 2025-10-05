@@ -1,0 +1,4 @@
+pygame==2.5.2
+paho-mqtt==1.6.1
+opencv-python==4.9.0.80
+numpy==1.26.4

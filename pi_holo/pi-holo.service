@@ -1,0 +1,16 @@
+[Unit]
+Description=Pi-Holo Pepper's Ghost Renderer
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/pi_holo
+Environment=DISPLAY_MODE=fullscreen
+ExecStart=/home/pi/pi_holo/run.sh
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
