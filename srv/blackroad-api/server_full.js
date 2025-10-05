@@ -592,22 +592,53 @@ app.delete('/api/:kind/:id', requireAuth, (req, res) => {
 const VALID_PLANS = ['free', 'builder', 'guardian'];
 const VALID_CYCLES = ['monthly', 'annual'];
 
-app.get('/api/connectors/status', (req, res) => {
-  const stripe = !!(
-    process.env.STRIPE_PUBLIC_KEY &&
-    process.env.STRIPE_SECRET &&
-    process.env.STRIPE_WEBHOOK_SECRET
-  );
-  const mail = !!process.env.MAIL_PROVIDER;
-  const sheets = !!(
-    process.env.GSHEETS_SA_JSON || process.env.SHEETS_CONNECTOR_TOKEN
-  );
-  const calendar = !!(
-    process.env.GOOGLE_CALENDAR_CREDENTIALS || process.env.ICS_URL
-  );
-  const discord = !!process.env.DISCORD_INVITE;
-  const webhooks = stripe; // placeholder
-  res.json({ stripe, mail, sheets, calendar, discord, webhooks });
+app.get('/api/connectors/status', async (_req, res) => {
+  const config = {
+    stripe: !!(
+      process.env.STRIPE_PUBLIC_KEY &&
+      process.env.STRIPE_SECRET &&
+      process.env.STRIPE_WEBHOOK_SECRET
+    ),
+    mail: !!process.env.MAIL_PROVIDER,
+    sheets: !!(
+      process.env.GSHEETS_SA_JSON || process.env.SHEETS_CONNECTOR_TOKEN
+    ),
+    calendar: !!(
+      process.env.GOOGLE_CALENDAR_CREDENTIALS || process.env.ICS_URL
+    ),
+    discord: !!process.env.DISCORD_INVITE,
+    webhooks: false,
+  };
+
+  const live = {
+    slack: false,
+    airtable: false,
+    linear: false,
+    salesforce: false,
+  };
+
+  try {
+    if (process.env.SLACK_WEBHOOK_URL) {
+      await notify.slack('status check');
+      live.slack = true;
+    }
+  } catch {}
+
+  try {
+    if (process.env.AIRTABLE_API_KEY) live.airtable = true;
+  } catch {}
+
+  try {
+    if (process.env.LINEAR_API_KEY) live.linear = true;
+  } catch {}
+
+  try {
+    if (process.env.SF_USERNAME) live.salesforce = true;
+  } catch {}
+
+  config.webhooks = config.stripe;
+
+  res.json({ config, live });
 });
 
 // Basic health endpoint exposing provider mode
@@ -748,30 +779,6 @@ app.post('/api/exec', requireAuth, (req, res) => {
   });
 });
 
-app.get('/api/connectors/status', async (_req, res) => {
-  const status = {
-    slack: false,
-    airtable: false,
-    linear: false,
-    salesforce: false,
-  };
-  try {
-    if (process.env.SLACK_WEBHOOK_URL) {
-      await notify.slack('status check');
-      status.slack = true;
-    }
-  } catch {}
-  try {
-    if (process.env.AIRTABLE_API_KEY) status.airtable = true;
-  } catch {}
-  try {
-    if (process.env.LINEAR_API_KEY) status.linear = true;
-  } catch {}
-  try {
-    if (process.env.SF_USERNAME) status.salesforce = true;
-  } catch {}
-  res.json(status);
-});
 
 // --- Quantum AI summaries
 app.get('/api/quantum/:topic', (req, res) => {
