@@ -32,3 +32,25 @@ The research makes the strategy clear: users need a single environment where sea
 ## Path to market
 
 Education is the sharpest entry wedge because the pain is immediate and families already pay for help. Delivering verifiably better homework support, conceptual explanations, and creative tools establishes trust, then expands into professional learning, content creation, and broader knowledge work. Retention flows from context continuity, integrated workflows, and a privacy stance incumbents cannot copy without upending their business models. The opportunity exceeds $600 billion annually across the overlapping markets we studied—what is missing is the unified architecture to unlock it.
+
+## BlackRoad's execution plan to close the gap
+
+To translate the thesis into reality, we are structuring delivery across four parallel workstreams with explicit milestones and success metrics:
+
+1. **Trusted learning core (Q4 2025 alpha)**
+   - Ship the cross-session AI tutor with persistent learner graphs, verified source retrieval, and concept visualizations for priority middle- and high-school math/science standards.
+   - Measure success through: >30% reduction in reported homework frustration, weekly active learners retaining sessions for 4+ weeks, and tutor accuracy audits <1% hallucination rate on curriculum-aligned question banks.
+
+2. **Creator velocity toolkit (Q1 2026 beta)**
+   - Integrate narrative-to-video generation, multimodal storyboard editing, and anonymized voice/face synthesis directly within the learning canvas so teachers, parents, and students can publish explainer content in under an hour.
+   - Track median production time (target: <60 minutes from prompt to publish), repeat creator rate (>50% of creators ship 3+ projects), and audience engagement lift on curriculum assets (+25% watch-through vs baseline).
+
+3. **Experimentation sandbox (rolling releases 2026)**
+   - Launch modular simulation blocks—mechanics, electromagnetism, chemistry kinetics—connected to the tutor’s concept graph, enabling students to test hypotheses and visualize outcomes before committing to physical builds.
+   - Evaluate via sandbox session volume (>5 simulations per active learner per week), concept mastery improvements (+15% assessment delta vs control classrooms), and educator satisfaction (NPS >40 across pilot districts).
+
+4. **Privacy and trust infrastructure (continuous)**
+   - Deliver transparent data ownership dashboards, local-first storage options, and verifiable content provenance using lightweight ledger entries so families control what is remembered and shared.
+   - Monitor opt-in rates (>80% of users engage with privacy controls), zero critical security incidents, and annual third-party compliance audits with clean reports.
+
+Cross-functional program management ties these workstreams together with quarterly roadmap reviews, shared design systems, and unified telemetry. Success means a learner can move from “I don’t understand this concept” to “I’ve mastered it and can teach it to others” without ever leaving BlackRoad.
