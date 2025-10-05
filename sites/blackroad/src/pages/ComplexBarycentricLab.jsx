@@ -11,8 +11,16 @@ function area2(a,b,c){ // signed double area
 export default function ComplexBarycentricLab(){
   const [A,setA]=useState([80,260]), [B,setB]=useState([520,260]), [C,setC]=useState([300,80]);
   const [w,setW]=useState([0.33,0.33,0.34]); // barycentric weights
-  const [drag,setDrag]=useState(null);
   const cnv=useRef(null);
+  const dragRef=useRef(null);
+  const downRef=useRef(false);
+  const ARef=useRef(A);
+  const BRef=useRef(B);
+  const CRef=useRef(C);
+
+  useEffect(()=>{ ARef.current=A; },[A]);
+  useEffect(()=>{ BRef.current=B; },[B]);
+  useEffect(()=>{ CRef.current=C; },[C]);
 
   const P = useMemo(()=> {
     const s=w[0]+w[1]+w[2] || 1e-9;
@@ -27,48 +35,57 @@ export default function ComplexBarycentricLab(){
     const c=cnv.current; if(!c) return;
     const ctx=c.getContext("2d",{alpha:false});
     const W=640,H=360; c.width=W; c.height=H;
-    const draw=()=>{
-      ctx.clearRect(0,0,W,H);
-      // triangle
-      ctx.beginPath(); ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]); ctx.lineTo(C[0],C[1]); ctx.closePath(); ctx.stroke();
-      // point
-      ctx.beginPath(); ctx.arc(P[0],P[1],4,0,Math.PI*2); ctx.stroke();
-      // vertices
-      for(const p of [A,B,C]){ ctx.beginPath(); ctx.arc(p[0],p[1],5,0,Math.PI*2); ctx.stroke(); }
-      // medians-ish: show weights text
-      ctx.font="12px monospace";
-      ctx.fillText(`w = [${w.map(x=>x.toFixed(3)).join(", ")}], sum=${(w[0]+w[1]+w[2]).toFixed(3)}`, 12,16);
-    };
-    draw();
+    ctx.clearRect(0,0,W,H);
+    // triangle
+    ctx.beginPath(); ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]); ctx.lineTo(C[0],C[1]); ctx.closePath(); ctx.stroke();
+    // point
+    ctx.beginPath(); ctx.arc(P[0],P[1],4,0,Math.PI*2); ctx.stroke();
+    // vertices
+    for(const p of [A,B,C]){ ctx.beginPath(); ctx.arc(p[0],p[1],5,0,Math.PI*2); ctx.stroke(); }
+    // medians-ish: show weights text
+    ctx.font="12px monospace";
+    ctx.fillText(`w = [${w.map(x=>x.toFixed(3)).join(", ")}], sum=${(w[0]+w[1]+w[2]).toFixed(3)}`, 12,16);
+  },[A,B,C,P,w]);
 
-    // mouse: drag vertices or click to solve barycentric
-    let down=false;
+  useEffect(()=>{
+    const c=cnv.current; if(!c) return;
     const onDown=e=>{
-      down=true;
+      downRef.current=true;
       const r=c.getBoundingClientRect();
       const x=e.clientX-r.left, y=e.clientY-r.top;
-      const hit = hitWhich([x,y], [A,B,C], 9);
-      if(hit>=0) setDrag(hit);
-      else {
-        // solve barycentric for clicked point
-        const S=area2(A,B,C) || 1e-9;
-        const w0=area2([x,y],B,C)/S, w1=area2(A,[x,y],C)/S, w2=area2(A,B,[x,y])/S;
+      const hit = hitWhich([x,y], [ARef.current, BRef.current, CRef.current], 9);
+      if(hit>=0){
+        dragRef.current=hit;
+      }else{
+        const Acur=ARef.current, Bcur=BRef.current, Ccur=CRef.current;
+        const S=area2(Acur,Bcur,Ccur) || 1e-9;
+        const w0=area2([x,y],Bcur,Ccur)/S, w1=area2(Acur,[x,y],Ccur)/S, w2=area2(Acur,Bcur,[x,y])/S;
         setW([w0,w1,w2]);
       }
     };
     const onMove=e=>{
-      if(down && drag!==null){
-        const r=c.getBoundingClientRect();
-        const x=e.clientX-r.left, y=e.clientY-r.top;
-        if(drag===0) setA([x,y]); else if(drag===1) setB([x,y]); else setC([x,y]);
-      }
+      if(!downRef.current || dragRef.current===null) return;
+      const r=c.getBoundingClientRect();
+      const x=e.clientX-r.left, y=e.clientY-r.top;
+      if(dragRef.current===0) setA([x,y]);
+      else if(dragRef.current===1) setB([x,y]);
+      else setC([x,y]);
     };
-    const onUp=()=>{ down=false; setDrag(null); };
+    const onUp=()=>{
+      downRef.current=false;
+      dragRef.current=null;
+    };
     c.addEventListener("mousedown",onDown);
     window.addEventListener("mousemove",onMove);
     window.addEventListener("mouseup",onUp);
-    return ()=>{ c.removeEventListener("mousedown",onDown); window.removeEventListener("mousemove",onMove); window.removeEventListener("mouseup",onUp); };
-  },[A,B,C,P,w,drag]);
+    return ()=>{
+      downRef.current=false;
+      dragRef.current=null;
+      c.removeEventListener("mousedown",onDown);
+      window.removeEventListener("mousemove",onMove);
+      window.removeEventListener("mouseup",onUp);
+    };
+  },[]);
 
   return (
     <div className="p-4 space-y-3">
