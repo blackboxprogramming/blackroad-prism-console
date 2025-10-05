@@ -11,8 +11,9 @@ def parse_numeric_prefix(text: str) -> float:
     The prefix may include negatives or decimals. The function uses
     :func:`ast.literal_eval` for safety instead of ``eval`` and evaluates the
     substring before the first comma. Only ``ValueError`` and ``SyntaxError``
-    are suppressed—covering empty strings, whitespace, non-numeric tokens, or
-    malformed expressions—and the default ``1.0`` is returned in those cases.
+    are suppressed. This covers empty strings, whitespace, non-numeric tokens,
+    or malformed expressions, and the default ``1.0`` is returned in those
+    cases.
     """
     try:
         value = ast.literal_eval(text.split(",", maxsplit=1)[0].strip())
