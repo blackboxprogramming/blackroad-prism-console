@@ -1,0 +1,29 @@
+{
+  "utc": "2025-10-04T18:00:00Z",
+  "action": "CREATE_PSBT",
+  "label": "wd1001",
+  "chain": "bitcoin",
+  "policy": {
+    "version": "1",
+    "threshold": 2,
+    "members": [
+      {"id": "opA", "pubkey": "PGP:opA@example"},
+      {"id": "opB", "pubkey": "PGP:opB@example"},
+      {"id": "opC", "pubkey": "PGP:opC@example"}
+    ]
+  },
+  "payload": {
+    "outputs": [
+      {"address": "bc1qexampledest1...", "amount_btc": "0.01000000"},
+      {"address": "bc1qexampledest2...", "amount_btc": "0.02000000"}
+    ],
+    "fee_rate_sat_vb": 3,
+    "coin_control": {
+      "include_utxos": [],
+      "exclude_utxos": [
+        "aaaaaaaa...:0",
+        "bbbbbbbb...:1"
+      ]
+    }
+  }
+}
