@@ -187,6 +187,153 @@ function deleteContradiction(id) {
   return getDb().prepare('DELETE FROM contradictions WHERE id = ?').run(id);
 }
 
+function mapException(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    rule_id: row.rule_id,
+    org_id: row.org_id,
+    subject_type: row.subject_type,
+    subject_id: row.subject_id,
+    requested_by: row.requested_by,
+    reason: row.reason,
+    status: row.status,
+    valid_from: row.valid_from,
+    valid_until: row.valid_until,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
+function recordExceptionEvent(exceptionId, actor, action, note, at) {
+  const db = getDb();
+  db.prepare(
+    'INSERT INTO exception_events (exception_id, at, actor, action, note) VALUES (?, ?, ?, ?, ?)',
+  ).run(exceptionId, at || new Date().toISOString(), actor, action, note || null);
+}
+
+function createException(entry) {
+  const {
+    ruleId,
+    orgId,
+    subjectType,
+    subjectId,
+    requestedBy,
+    reason,
+    validFrom = null,
+    validUntil = null,
+  } = entry;
+  const db = getDb();
+  const info = db
+    .prepare(
+      `INSERT INTO exceptions (rule_id, org_id, subject_type, subject_id, requested_by, reason, status, valid_from, valid_until)
+       VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?)`
+    )
+    .run(ruleId, orgId, subjectType, subjectId, requestedBy, reason, validFrom, validUntil);
+  const id = info.lastInsertRowid;
+  recordExceptionEvent(id, requestedBy, 'request', reason);
+  return getException(id);
+}
+
+function getException(id) {
+  const row = getDb().prepare('SELECT * FROM exceptions WHERE id = ?').get(id);
+  return mapException(row);
+}
+
+function listExceptions(filters = {}) {
+  const clauses = [];
+  const params = [];
+  if (filters.ruleId) {
+    clauses.push('rule_id = ?');
+    params.push(filters.ruleId);
+  }
+  if (filters.subjectType) {
+    clauses.push('subject_type = ?');
+    params.push(filters.subjectType);
+  }
+  if (filters.subjectId) {
+    clauses.push('subject_id = ?');
+    params.push(filters.subjectId);
+  }
+  if (filters.status) {
+    clauses.push('status = ?');
+    params.push(filters.status);
+  }
+  const where = clauses.length ? ` WHERE ${clauses.join(' AND ')}` : '';
+  const rows = getDb()
+    .prepare(`SELECT * FROM exceptions${where} ORDER BY created_at DESC`)
+    .all(...params);
+  return rows.map(mapException).filter(Boolean);
+}
+
+function approveException(id, options) {
+  const exception = getException(id);
+  if (!exception) return null;
+  const actor = options.actor;
+  const note = options.note || null;
+  const validFrom = options.valid_from || options.validFrom || new Date().toISOString();
+  const validUntil = options.valid_until || options.validUntil || null;
+  const now = new Date().toISOString();
+  getDb()
+    .prepare(
+      `UPDATE exceptions
+       SET status='approved', valid_from = ?, valid_until = ?, updated_at = ?
+       WHERE id = ?`
+    )
+    .run(validFrom, validUntil, now, id);
+  recordExceptionEvent(id, actor, 'approve', note, now);
+  return getException(id);
+}
+
+function denyException(id, options) {
+  const exception = getException(id);
+  if (!exception) return null;
+  const actor = options.actor;
+  const note = options.note || null;
+  const now = new Date().toISOString();
+  getDb()
+    .prepare(`UPDATE exceptions SET status='denied', updated_at = ? WHERE id = ?`)
+    .run(now, id);
+  recordExceptionEvent(id, actor, 'deny', note, now);
+  return getException(id);
+}
+
+function revokeException(id, options) {
+  const exception = getException(id);
+  if (!exception) return null;
+  const actor = options.actor;
+  const note = options.note || null;
+  const now = new Date().toISOString();
+  getDb()
+    .prepare(`UPDATE exceptions SET status='revoked', updated_at = ? WHERE id = ?`)
+    .run(now, id);
+  recordExceptionEvent(id, actor, 'revoke', note, now);
+  return getException(id);
+}
+
+function expireApprovedExceptions(now = new Date()) {
+  const db = getDb();
+  const cutoff = new Date(now).toISOString();
+  const ids = db
+    .prepare(
+      `SELECT id FROM exceptions
+       WHERE status='approved' AND valid_until IS NOT NULL AND datetime(valid_until) < datetime(?)`
+    )
+    .all(cutoff)
+    .map((row) => row.id);
+  if (!ids.length) return 0;
+  const update = db.prepare(`UPDATE exceptions SET status='expired', updated_at = ? WHERE id = ?`);
+  const insert = db.prepare(
+    `INSERT INTO exception_events (exception_id, at, actor, action, note) VALUES (?, ?, ?, 'expire', NULL)`
+  );
+  const tx = db.transaction((exceptionId) => {
+    update.run(cutoff, exceptionId);
+    insert.run(exceptionId, cutoff, 0);
+  });
+  ids.forEach((id) => tx(id));
+  return ids.length;
+}
+
 module.exports = {
   getDb,
   closeDb,
@@ -206,5 +353,12 @@ module.exports = {
   addContradiction,
   getContradictions,
   deleteContradiction,
+  createException,
+  getException,
+  listExceptions,
+  approveException,
+  denyException,
+  revokeException,
+  expireApprovedExceptions,
 };
 
