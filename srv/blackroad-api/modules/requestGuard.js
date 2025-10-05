@@ -3,7 +3,7 @@ const fs = require('fs');
 module.exports = function requestGuard(app){
   const keyPath = process.env.ORIGIN_KEY_PATH || '/srv/secrets/origin.key';
   let ORIGIN_KEY = ''; try { ORIGIN_KEY = fs.readFileSync(keyPath,'utf8').trim(); } catch {}
-  const SKIP = ['/api/normalize'];
+  const SKIP = ['/api/normalize', '/slack/command', '/slack/interact'];
   const skip = (p) => SKIP.some(s => p === s || p.startsWith(s + '/'));
   app.use((req,res,next)=>{
     if (skip(req.path)) return next();

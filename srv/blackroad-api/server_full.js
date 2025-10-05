@@ -33,6 +33,7 @@ const maintenanceGuard = require('./modules/maintenanceGuard');
 const attachLlmRoutes = require('./routes/admin_llm');
 const gitRouter = require('./routes/git');
 const providersRouter = require('./routes/providers');
+const attachSlackExceptions = require('./modules/slack_exceptions');
 
 // --- Config
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -351,6 +352,8 @@ app.post('/api/billing/webhook', (req, res) => {
 const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 db.pragma('synchronous = NORMAL');
+
+attachSlackExceptions({ app, db });
 
 const TABLES = ['projects', 'agents', 'datasets', 'models', 'integrations'];
 for (const t of TABLES) {
