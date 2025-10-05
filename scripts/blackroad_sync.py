@@ -10,10 +10,12 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import shlex
 import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import List
 
 LOG = logging.getLogger(__name__)
 
@@ -48,6 +50,61 @@ class PipelineContext:
     )
 
 
+@dataclass(frozen=True)
+class WorkingCopyTarget:
+    """Represents a Working Copy mirror to refresh."""
+
+    host: str | None
+    path: Path
+
+
+def _parse_working_copy_devices(ctx: PipelineContext) -> List[WorkingCopyTarget]:
+    """Return Working Copy mirrors derived from environment configuration."""
+
+    devices = os.getenv("WORKING_COPY_DEVICES", "")
+    default_path = os.getenv("WORKING_COPY_PATH", str(ctx.working_copy))
+    targets: list[WorkingCopyTarget] = []
+
+    if devices:
+        for raw_entry in devices.split(","):
+            entry = raw_entry.strip()
+            if not entry:
+                continue
+            host: str | None = None
+            path_text: str
+            if ":" in entry and not entry.startswith("/"):
+                host_part, path_part = entry.split(":", 1)
+                host = host_part.strip() or None
+                path_text = path_part.strip() or default_path
+            else:
+                path_text = entry
+            if host and host.lower() == "local":
+                host = None
+            targets.append(
+                WorkingCopyTarget(host, Path(path_text).expanduser())
+            )
+
+    if not targets:
+        host_env = os.getenv("WORKING_COPY_HOST")
+        if host_env:
+            path_env = os.getenv("WORKING_COPY_PATH", default_path)
+            targets.append(
+                WorkingCopyTarget(host_env.strip(), Path(path_env).expanduser())
+            )
+        else:
+            targets.append(WorkingCopyTarget(None, ctx.working_copy.expanduser()))
+
+    deduped: list[WorkingCopyTarget] = []
+    seen: set[tuple[str, Path]] = set()
+    for target in targets:
+        key = ((target.host or "").lower(), target.path)
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(target)
+    return deduped
+
+
 def commit_and_push(ctx: PipelineContext) -> bool:
     """Commit local changes and push to GitHub."""
     return (
@@ -73,18 +130,35 @@ def refresh_working_copy(ctx: PipelineContext) -> bool:
 
     If ``WORKING_COPY_CMD`` is set in the environment, that command is executed
     to allow custom integration with the Working Copy app (for example via
-    x-callback-url).  Otherwise the function falls back to running ``git pull``
-    in the configured ``WORKING_COPY_PATH``.
+    x-callback-url).  Otherwise the function refreshes every configured mirror
+    derived from ``WORKING_COPY_DEVICES``/``WORKING_COPY_HOST``/``WORKING_COPY_PATH``.
     """
     cmd = os.getenv("WORKING_COPY_CMD")
     if cmd:
         LOG.info("Refreshing Working Copy via command: %s", cmd)
         return run(cmd)
 
-    wc = ctx.working_copy
-    wc.mkdir(parents=True, exist_ok=True)
-    LOG.info("Refreshing Working Copy mirror at %s", wc)
-    return run("git pull --rebase", cwd=str(wc))
+    targets = _parse_working_copy_devices(ctx)
+    success = True
+    if not targets:
+        LOG.info("No working copy targets configured; skipping Working Copy refresh")
+        return True
+
+    for target in targets:
+        if target.host:
+            remote_path = shlex.quote(str(target.path))
+            remote_cmd = shlex.quote(
+                f"cd {remote_path} && git pull --rebase"
+            )
+            LOG.info(
+                "Refreshing Working Copy on %s:%s", target.host, target.path
+            )
+            success &= run(f"ssh {target.host} {remote_cmd}")
+        else:
+            target.path.mkdir(parents=True, exist_ok=True)
+            LOG.info("Refreshing Working Copy mirror at %s", target.path)
+            success &= run("git pull --rebase", cwd=str(target.path))
+    return success
 
 
 def deploy_to_droplet(ctx: PipelineContext) -> bool:
