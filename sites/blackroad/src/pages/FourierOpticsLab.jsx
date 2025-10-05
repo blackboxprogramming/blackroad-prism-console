@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import ActiveReflection from "./ActiveReflection.jsx";
+import { dft2 } from "../lib/fourier.js";
 
 export default function FourierOpticsLab(){
   const [N,setN]=useState(64);
@@ -8,16 +9,75 @@ export default function FourierOpticsLab(){
   const cnvA=useRef(null), cnvF=useRef(null);
   const [F,setF]=useState(null);
   const workerRef=useRef();
-
-  useEffect(()=>{
-    workerRef.current=new Worker(new URL("../workers/fourierWorker.js", import.meta.url));
-    workerRef.current.onmessage=e=>setF(e.data);
-    return()=>workerRef.current.terminate();
-  },[]);
+  const requestIdRef=useRef(0);
+  const lastHandledRef=useRef(0);
+  const [useFallback,setUseFallback]=useState(false);
+  const [workerReady,setWorkerReady]=useState(false);
 
   const A = useMemo(()=>makeAperture(N, ap, param),[N,ap,param]);
 
-  useEffect(()=>{ if(workerRef.current) workerRef.current.postMessage({A}); },[A]);
+  useEffect(()=>{
+    if(typeof Worker === "undefined"){
+      setUseFallback(true);
+      return undefined;
+    }
+    let active=true;
+    const worker=new Worker(new URL("../workers/fourierWorker.js", import.meta.url),{type:"module"});
+    workerRef.current=worker;
+    setWorkerReady(true);
+    const onMessage=e=>{
+      if(!active) return;
+      const {id,F:next}=e.data||{};
+      if(typeof id!=="number") return;
+      if(id>=lastHandledRef.current){
+        lastHandledRef.current=id;
+        setF(next);
+      }
+    };
+    const onError=err=>{
+      if(!active) return;
+      console.error("Fourier worker failed; falling back to main thread", err);
+      worker.removeEventListener("message",onMessage);
+      worker.removeEventListener("error",onError);
+      worker.terminate();
+      workerRef.current=undefined;
+      setWorkerReady(false);
+      active=false;
+      setUseFallback(true);
+    };
+    worker.addEventListener("message",onMessage);
+    worker.addEventListener("error",onError);
+    return()=>{
+      active=false;
+      worker.removeEventListener("message",onMessage);
+      worker.removeEventListener("error",onError);
+      worker.terminate();
+      workerRef.current=undefined;
+    };
+  },[]);
+
+  useEffect(()=>{
+    if(useFallback){
+      const id=++requestIdRef.current;
+      const next=dft2(A);
+      lastHandledRef.current=id;
+      setF(next);
+      return;
+    }
+    if(!workerReady) return;
+    const worker=workerRef.current;
+    if(!worker) return;
+    const id=++requestIdRef.current;
+    try{
+      worker.postMessage({id,A});
+    }catch(err){
+      console.error("Posting to Fourier worker failed; switching to fallback", err);
+      try{ worker.terminate(); }catch{}
+      workerRef.current=undefined;
+      setWorkerReady(false);
+      setUseFallback(true);
+    }
+  },[A,useFallback,workerReady]);
   useEffect(()=>{ drawField(cnvA.current, A, false); },[A]);
   useEffect(()=>{ if(F) drawField(cnvF.current, F, true); },[F]);
 
