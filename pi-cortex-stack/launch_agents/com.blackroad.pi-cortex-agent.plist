@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.blackroad.pi-cortex-agent</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-lc</string>
+        <string>source ~/agent-venv/bin/activate && cd ~/pi-cortex-stack && python mac_agent.py run</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PI_CORTEX_MQTT_HOST</key>
+        <string>localhost</string>
+        <key>PI_CORTEX_MQTT_PORT</key>
+        <string>1883</string>
+    </dict>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>$HOME/Library/Logs/pi-cortex-agent.log</string>
+    <key>StandardErrorPath</key>
+    <string>$HOME/Library/Logs/pi-cortex-agent.err</string>
+</dict>
+</plist>
