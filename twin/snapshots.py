@@ -87,9 +87,9 @@ def restore_checkpoint(name: str) -> None:
         raise FileNotFoundError(name)
     data = json.loads(storage.read(str(manifest_path)))
     for entry in data.get("manifest", []):
-        rel = Path(entry["file"]).parts[0]
-        src_path = src / entry["file"]
-        dest_path = ROOT / rel
+        src_rel = Path(entry["file"])
+        src_path = src / src_rel
+        dest_path = ROOT / src_rel
         os.makedirs(dest_path.parent, exist_ok=True)
         if src_path.is_dir():
             shutil.copytree(src_path, dest_path, dirs_exist_ok=True)
