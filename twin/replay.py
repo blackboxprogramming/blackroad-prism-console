@@ -32,6 +32,35 @@ def _in_range(ts: str, start: datetime, end: datetime) -> bool:
     return start <= dt <= end
 
 
+def _normalize_record(record: Dict) -> Dict:
+    """Convert orchestrator memory records into a uniform structure."""
+
+    timestamp = record.get("timestamp") or record.get("ts") or ""
+
+    output = record.get("output")
+    if output is None:
+        output = record.get("response")
+
+    expected = record.get("expected")
+
+    record_hash = record.get("hash")
+    if record_hash is None and expected is not None:
+        record_hash = sha256(json.dumps(expected, sort_keys=True).encode()).hexdigest()
+
+    identifier = record.get("id")
+    if identifier is None:
+        task = record.get("task") or {}
+        identifier = task.get("id") or task.get("task_id")
+
+    return {
+        "timestamp": timestamp,
+        "output": output,
+        "expected": expected,
+        "hash": record_hash,
+        "id": identifier,
+    }
+
+
 def replay(
     range_from: str, range_to: str, filter: Optional[Dict] = None, mode: str = "verify"
 ) -> ReplayReport:
@@ -45,28 +74,36 @@ def replay(
     processed = 0
     deltas: List[Dict] = []
     for line in memory_path.read_text().splitlines():
-        rec = _parse(line)
-        if not _in_range(rec.get("timestamp", ""), start, end):
+        raw = _parse(line)
+        normalized = _normalize_record(raw)
+        if not _in_range(normalized.get("timestamp", ""), start, end):
             continue
         skip = False
         for k, v in filter.items():
-            if rec.get(k) != v:
+            if raw.get(k) != v:
                 skip = True
                 break
         if skip:
             continue
+        output = normalized.get("output")
+        if output is None:
+            continue
         processed += 1
         if mode == "verify":
-            expected = rec.get("hash")
-            actual = sha256(json.dumps(rec.get("output")).encode()).hexdigest()
-            if expected != actual:
-                mismatches += 1
+            expected_hash = normalized.get("hash")
+            if expected_hash:
+                actual = sha256(json.dumps(output, sort_keys=True).encode()).hexdigest()
+                if expected_hash != actual:
+                    mismatches += 1
         elif mode == "diff":
-            expected = rec.get("expected", {})
-            output = rec.get("output", {})
-            delta = {k: output.get(k) for k in output if output.get(k) != expected.get(k)}
+            expected = normalized.get("expected") or {}
+            delta = {
+                key: output.get(key)
+                for key in output
+                if output.get(key) != expected.get(key)
+            }
             if delta:
-                deltas.append({"id": rec.get("id"), "delta": delta})
+                deltas.append({"id": normalized.get("id"), "delta": delta})
     (out_dir / "summary.md").write_text(
         f"processed: {processed}\nmode: {mode}\npolicy_packs: {','.join(get_active_packs())}",
         encoding="utf-8",
