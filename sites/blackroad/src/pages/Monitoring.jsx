@@ -26,14 +26,21 @@ export default function Monitoring() {
   const seen = useRef(new Set());
 
   const updateContradictions = useCallback((list) => {
+    const previous = seen.current;
+    const next = new Set();
     const fresh = [];
-    const mapped = list.map((c) => {
-      const key = c.id || c.timestamp;
-      const isNew = !seen.current.has(key);
+    const mapped = list.map((c, index) => {
+      const stableKey =
+        c?.id ??
+        c?.timestamp ??
+        [c?.module ?? "unknown", c?.description ?? "", index].join("|");
+      const key = String(stableKey);
+      next.add(key);
+      const isNew = !previous.has(key);
       if (isNew) fresh.push(c);
-      seen.current.add(key);
       return { ...c, key, isNew };
     });
+    seen.current = next;
     if (fresh.length) {
       setToast(`⚠️ ${fresh.length} new contradiction${fresh.length > 1 ? "s" : ""}`);
     }
