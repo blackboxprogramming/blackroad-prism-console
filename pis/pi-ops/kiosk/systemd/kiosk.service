@@ -1,0 +1,20 @@
+[Unit]
+Description=Pi-Ops Grafana kiosk
+After=network-online.target systemd-user-sessions.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Environment=HOME=/home/pi
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/pi/.Xauthority
+Environment=GRAFANA_URL=http://MAC_OR_IP_PLACEHOLDER:3000/d/pi-ops-ultra/ops?orgId=1&kiosk&refresh=5s
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+ExecStart=/usr/bin/startx /usr/local/bin/pi_ops_kiosk_session.sh -- :0 -nocursor
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target
