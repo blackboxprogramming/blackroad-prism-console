@@ -68,11 +68,30 @@ function PhasePlot({traj, field}){
   const W=640,H=360,pad=14;
   const X=th=> pad + (th+Math.PI)/(2*Math.PI)*(W-2*pad);
   const Y=p => H-pad - (p+2.5)/5*(H-2*pad);
+  const strokeColor = "var(--phaseplot-stroke, currentColor)";
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
       <rect x="0" y="0" width={W} height={H} fill="none"/>
-      {field.map((seg,i)=>(<polyline key={i} points={seg.map(([th,p])=>`${X(th)},${Y(p)}`).join(' ')} fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.35"/>))}
-      <polyline points={traj.map(([th,p])=>`${X(th)},${Y(p)}`).join(' ')} fill="none" stroke="currentColor" strokeWidth="2"/>
+      {field.map((seg,i)=>(
+        <polyline
+          key={i}
+          points={seg.map(([th,p])=>`${X(th)},${Y(p)}`).join(' ')}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth="0.5"
+          opacity="0.35"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+      ))}
+      <polyline
+        points={traj.map(([th,p])=>`${X(th)},${Y(p)}`).join(' ')}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="2"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
       <text x={pad} y={14} fontSize="10">Phase space (θ, p)</text>
     </svg>
   );

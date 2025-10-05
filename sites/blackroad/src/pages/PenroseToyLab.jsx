@@ -89,12 +89,24 @@ function Tiling({tiles, scale0}){
   const X=x=> W/2 + S*(x - (minX+maxX)/2);
   const Y=y=> H/2 - S*(y - (minY+maxY)/2);
 
+  const strokeColor = "var(--penrose-stroke, currentColor)";
+
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
       <rect x="0" y="0" width={W} height={H} fill="none"/>
       {polys.map((poly,i)=>{
         const pts = poly.map(([x,y])=> `${X(x)},${Y(y)}`).join(' ');
-        return <polyline key={i} points={pts} fill="none" stroke="currentColor" strokeWidth="1.5"/>;
+        return (
+          <polyline
+            key={i}
+            points={pts}
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+        );
       })}
     </svg>
   );
