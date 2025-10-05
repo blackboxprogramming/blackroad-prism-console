@@ -7,25 +7,57 @@
     "ghcr.io/devcontainers/features/node:1": {
       "version": "20"
     },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
     "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/devcontainers/features/terraform:1": {
       "version": "1.6.6"
     },
-    "ghcr.io/devcontainers/features/aws-ssm-session-manager:1": {}
+    "ghcr.io/devcontainers/features/aws-ssm-session-manager:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "postCreateCommand": "npm install -g commitlint @commitlint/config-conventional && pip install --user pre-commit",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "forwardPorts": [3000, 8000, 4000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Website",
+      "onAutoForward": "notify"
+    },
+    "8000": {
+      "label": "LLM API",
+      "onAutoForward": "silent"
+    },
+    "4000": {
+      "label": "Backend API",
+      "onAutoForward": "silent"
+    }
+  },
   "customizations": {
     "vscode": {
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
         "terraform.codelens.enabled": true,
-        "editor.formatOnSave": true
+        "editor.formatOnSave": true,
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": false,
+        "python.formatting.provider": "black",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.python"
+        }
       },
       "extensions": [
         "HashiCorp.terraform",
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
-        "ms-python.python"
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "eamodio.gitlens",
+        "ms-vscode.makefile-tools"
       ]
     }
   },

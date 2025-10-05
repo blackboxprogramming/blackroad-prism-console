@@ -50,6 +50,19 @@ bash tools/verify-runtime.sh
   - Ensure your SQLite file exists (defaults to `blackroad.db` inside the API dir if `DB_PATH` is not set)
   - Check if `127.0.0.1:8000` is serving `/health`. If not, it prints a one-liner to launch the stub.
 
+## Quick start with GitHub Codespaces
+
+The fastest way to get started is with GitHub Codespaces - a cloud-based development environment:
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/blackboxprogramming/blackroad-prism-console)
+
+Click the badge above or:
+1. Click the **Code** button on GitHub
+2. Select the **Codespaces** tab
+3. Click **Create codespace on main**
+
+Your environment will be ready in minutes with all dependencies pre-installed. See [.devcontainer/README.md](.devcontainer/README.md) for more details.
+
 ## Git workflow
 
 When you're ready to share changes:
