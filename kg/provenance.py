@@ -58,9 +58,9 @@ def rebuild_from_memory(memory_path: str = "orchestrator/memory.jsonl") -> Knowl
     for line in storage.read(str(path)).splitlines():
         record = json.loads(line)
         task = record.get("task", {})
-        capture_event({"type": "task", "id": task.get("id"), "goal": task.get("goal")})
+        kg = capture_event({"type": "task", "id": task.get("id"), "goal": task.get("goal")})
         art_id = _next_artifact_id()
-        capture_event(
+        kg = capture_event(
             {
                 "type": "artifact",
                 "id": art_id,
@@ -69,4 +69,5 @@ def rebuild_from_memory(memory_path: str = "orchestrator/memory.jsonl") -> Knowl
                 "path": f"artifacts/{task.get('id')}/response.json",
             }
         )
+    kg.load()
     return kg
