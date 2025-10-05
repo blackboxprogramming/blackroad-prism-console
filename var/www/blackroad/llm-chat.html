@@ -71,11 +71,12 @@ async function send(){
   addMessage('user',text);
   const stream=document.getElementById('streamToggle').checked;
   const body={messages:[{role:'user',content:text}]};
+  const jsonBody={...body,stream:false};
   if(stream){
     const streamBody={...body,stream:true};
     try{
       const res=await fetch('/api/llm/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(streamBody)});
-      if(!res.ok) return fallback(body,text);
+      if(!res.ok) return fallback(jsonBody,text);
       const reader=res.body.getReader();
       const decoder=new TextDecoder();
       let buf='';
@@ -97,15 +98,16 @@ async function send(){
         }
         buf=parts[parts.length-1];
       }
-    }catch(e){return fallback(body,text);}
-  }else{await fallback(body,text);}
+    }catch(e){return fallback(jsonBody,text);}
+  }else{await fallback(jsonBody,text);}
 }
 async function fallback(body,original){
   try{
+    const payload=body&&body.stream===false?body:{...body,stream:false};
     const r=await fetch('/api/llm/chat',{
       method:'POST',
       headers:{'content-type':'application/json'},
-      body:JSON.stringify({...body,stream:false})
+      body:JSON.stringify(payload)
     });
     const j=await r.json();
     addMessage('assistant',j.choices[0].message.content);
