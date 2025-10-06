@@ -5,35 +5,47 @@ log() {
   echo "[postCreate] $1"
 }
 
+run_step() {
+  local message="$1"
+  local logfile="$2"
+  shift 2
+
+  log "$message"
+  if ! "$@" >"$logfile" 2>&1; then
+    cat "$logfile"
+    exit 1
+  fi
+}
+
 log "Ensuring corepack and pnpm availability"
 if command -v corepack >/dev/null 2>&1; then
-  corepack enable pnpm >/dev/null 2>&1 || log "corepack enable pnpm exited with status $?"
+  corepack enable pnpm >/tmp/postcreate-corepack.log 2>&1 || \
+    log "corepack enable pnpm exited with status $?"
 fi
 
-log "Installing global npm tooling"
-npm install --global @commitlint/cli @commitlint/config-conventional \
-  >/tmp/postcreate-npm.log 2>&1 || (cat /tmp/postcreate-npm.log && exit 1)
+run_step "Installing global npm tooling" /tmp/postcreate-npm.log \
+  npm install --location=global --no-audit --no-fund \
+    @commitlint/cli @commitlint/config-conventional
 
-log "Installing Python tooling"
-python3 -m pip install --user --upgrade pip >/tmp/postcreate-pip.log 2>&1 \
-  || (cat /tmp/postcreate-pip.log && exit 1)
-python3 -m pip install --user pre-commit >/tmp/postcreate-precommit.log 2>&1 \
-  || (cat /tmp/postcreate-precommit.log && exit 1)
+run_step "Upgrading pip" /tmp/postcreate-pip.log \
+  python3 -m pip install --user --upgrade pip
+
+run_step "Installing Python pre-commit tooling" /tmp/postcreate-precommit.log \
+  python3 -m pip install --user pre-commit
 
 if [ -f requirements-dev.txt ]; then
-  log "Installing Python dev requirements"
-  python3 -m pip install --user -r requirements-dev.txt >/tmp/postcreate-reqdev.log 2>&1 \
-    || (cat /tmp/postcreate-reqdev.log && exit 1)
+  run_step "Installing Python dev requirements" /tmp/postcreate-reqdev.log \
+    python3 -m pip install --user -r requirements-dev.txt
 fi
 
 if [ -f package-lock.json ]; then
-  log "Installing Node.js dependencies via npm ci"
-  npm ci >/tmp/postcreate-npmci.log 2>&1 || (cat /tmp/postcreate-npmci.log && exit 1)
+  run_step "Installing Node.js dependencies via npm ci" /tmp/postcreate-npmci.log \
+    npm ci --no-audit --no-fund
 fi
 
 if [ -f pnpm-lock.yaml ] && command -v pnpm >/dev/null 2>&1; then
-  log "Bootstrapping pnpm workspace"
-  pnpm install >/tmp/postcreate-pnpm.log 2>&1 || (cat /tmp/postcreate-pnpm.log && exit 1)
+  run_step "Bootstrapping pnpm workspace" /tmp/postcreate-pnpm.log \
+    pnpm install --frozen-lockfile
 fi
 
 if command -v git >/dev/null 2>&1; then
