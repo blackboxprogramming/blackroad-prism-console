@@ -14,7 +14,7 @@ match the expectations of the on-call and local developer environments.
 When a codespace is created, `.devcontainer/scripts/postCreate.sh` runs automatically and:
 
 1. Enables Corepack and exposes `pnpm` in case you prefer it over npm.
-2. Installs global `commitlint` tooling as well as Python `pre-commit` hooks.
+2. Installs global `@commitlint/cli` tooling as well as Python `pre-commit` hooks.
 3. Syncs the Python developer dependencies from `requirements-dev.txt`.
 4. Runs `npm ci` and `pnpm install` (if available) so the workspace has all JS packages ready to go.
 5. Marks the repository as a safe Git directory inside the container.

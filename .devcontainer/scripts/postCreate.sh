@@ -11,8 +11,8 @@ if command -v corepack >/dev/null 2>&1; then
 fi
 
 log "Installing global npm tooling"
-npm install -g commitlint @commitlint/config-conventional >/tmp/postcreate-npm.log 2>&1 \
-  || (cat /tmp/postcreate-npm.log && exit 1)
+npm install --global @commitlint/cli @commitlint/config-conventional \
+  >/tmp/postcreate-npm.log 2>&1 || (cat /tmp/postcreate-npm.log && exit 1)
 
 log "Installing Python tooling"
 python3 -m pip install --user --upgrade pip >/tmp/postcreate-pip.log 2>&1 \
@@ -34,6 +34,14 @@ fi
 if [ -f pnpm-lock.yaml ] && command -v pnpm >/dev/null 2>&1; then
   log "Bootstrapping pnpm workspace"
   pnpm install >/tmp/postcreate-pnpm.log 2>&1 || (cat /tmp/postcreate-pnpm.log && exit 1)
+fi
+
+if command -v git >/dev/null 2>&1; then
+  current_dir="$(pwd)"
+  if ! git config --global --get-all safe.directory 2>/dev/null | grep -Fxq "$current_dir"; then
+    log "Marking $current_dir as a safe Git directory"
+    git config --global --add safe.directory "$current_dir"
+  fi
 fi
 
 log "Post-create steps complete"
