@@ -9,10 +9,11 @@ from typing import Dict
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 
 from .config import AppConfig
-from .dependencies import enforce_security, get_config, get_dual_control_registry, load_initial_config
+from .dependencies import enforce_security, get_config, get_dual_control_registry, get_environment_registry, load_initial_config
 from .dual_control import DualControlError, DualControlRegistry
+from .environment_control import EnvironmentControlError, EnvironmentRegistry
 from .rate_limiter import InMemoryRateLimiter
-from .schemas import ApprovalConfirm, ApprovalRequest, ApprovalResponse, MaterializeResponse
+from .schemas import ApprovalConfirm, ApprovalRequest, ApprovalResponse, EnvironmentRequest, EnvironmentResponse, MaterializeResponse
 
 APP_TITLE = "Autopal Console"
 APP_VERSION = "0.1.0"
@@ -46,6 +47,7 @@ async def startup_event() -> None:
     app.state.config = config
     app.state.rate_limiter = InMemoryRateLimiter()
     app.state.dual_control = DualControlRegistry(config.dual_control_timeout_seconds)
+    app.state.environment_registry = EnvironmentRegistry(config.dual_control_timeout_seconds)
 
 
 @app.get("/health/live")
@@ -77,6 +79,7 @@ async def reload_config(request: Request) -> Dict[str, str]:
     config = load_initial_config(config_path)
     request.app.state.config = config
     request.app.state.dual_control = DualControlRegistry(config.dual_control_timeout_seconds)
+    request.app.state.environment_registry = EnvironmentRegistry(config.dual_control_timeout_seconds)
     return {"status": "reloaded"}
 
 
@@ -172,3 +175,91 @@ async def materialize_secret(request: Request) -> MaterializeResponse:
 
     secret_handle = f"secret::{approval_record.approval_id}"
     return MaterializeResponse(status="ok", approval_id=approval_record.approval_id, secret_handle=secret_handle)
+
+
+@app.post(
+    "/environments/request",
+    status_code=status.HTTP_201_CREATED,
+    response_model=EnvironmentResponse,
+    dependencies=[Depends(enforce_security("/environments/request"))],
+)
+async def request_environment_access(
+    payload: EnvironmentRequest,
+    registry: EnvironmentRegistry = Depends(get_environment_registry),
+) -> EnvironmentResponse:
+    """Request access to a remote environment."""
+
+    record = await registry.request(
+        environment_name=payload.environment_name,
+        requested_by=payload.requested_by,
+        purpose=payload.purpose,
+        duration_minutes=payload.duration_minutes,
+        metadata=payload.metadata,
+    )
+    return EnvironmentResponse(
+        request_id=record.request_id,
+        environment_name=record.environment_name,
+        requested_by=record.requested_by,
+        purpose=record.purpose,
+        duration_minutes=record.duration_minutes,
+        approved_by=record.approved_by,
+        granted_at=record.granted_at,
+        expires_at=record.expires_at,
+    )
+
+
+@app.post(
+    "/environments/{request_id}/approve",
+    response_model=EnvironmentResponse,
+    dependencies=[Depends(enforce_security("/environments/approve"))],
+)
+async def approve_environment_request(
+    request_id: str,
+    payload: ApprovalConfirm,
+    registry: EnvironmentRegistry = Depends(get_environment_registry),
+) -> EnvironmentResponse:
+    """Approve an environment access request."""
+
+    try:
+        record = await registry.approve(request_id, approved_by=payload.approved_by)
+    except EnvironmentControlError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return EnvironmentResponse(
+        request_id=record.request_id,
+        environment_name=record.environment_name,
+        requested_by=record.requested_by,
+        purpose=record.purpose,
+        duration_minutes=record.duration_minutes,
+        approved_by=record.approved_by,
+        granted_at=record.granted_at,
+        expires_at=record.expires_at,
+    )
+
+
+@app.get(
+    "/environments/{request_id}",
+    response_model=EnvironmentResponse,
+    dependencies=[Depends(enforce_security("/environments/status"))],
+)
+async def get_environment_request(
+    request_id: str,
+    registry: EnvironmentRegistry = Depends(get_environment_registry),
+) -> EnvironmentResponse:
+    """Get the status of an environment access request."""
+
+    try:
+        record = await registry.get(request_id)
+    except EnvironmentControlError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    return EnvironmentResponse(
+        request_id=record.request_id,
+        environment_name=record.environment_name,
+        requested_by=record.requested_by,
+        purpose=record.purpose,
+        duration_minutes=record.duration_minutes,
+        approved_by=record.approved_by,
+        granted_at=record.granted_at,
+        expires_at=record.expires_at,
+    )

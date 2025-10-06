@@ -9,6 +9,7 @@ from fastapi import Depends, Header, HTTPException, Request
 
 from .config import AppConfig, ConfigError, load_config
 from .dual_control import DualControlError, DualControlRegistry
+from .environment_control import EnvironmentRegistry
 from .rate_limiter import InMemoryRateLimiter, RateLimitExceeded
 
 
@@ -24,6 +25,12 @@ def get_dual_control_registry(request: Request) -> DualControlRegistry:
     return request.app.state.dual_control
 
 
+def get_environment_registry(request: Request) -> EnvironmentRegistry:
+    """Return the environment registry from the application state."""
+
+    return request.app.state.environment_registry
+
+
 def enforce_security(path: str):
     """Return a dependency callable that enforces security for ``path``."""
 
@@ -31,7 +38,7 @@ def enforce_security(path: str):
         request: Request,
         audience: Optional[str] = Header(default=None, alias="X-Audience"),
         step_up: Optional[str] = Header(default=None, alias="X-Step-Up-Approved"),
-        approval_id: Optional[str] = Header(default=None, alias="X-Approval-Id"),
+        x_approval_id: Optional[str] = Header(default=None, alias="X-Approval-Id"),
         authorization: Optional[str] = Header(default=None, alias="Authorization"),
         config: AppConfig = Depends(get_config),
         dual_control: DualControlRegistry = Depends(get_dual_control_registry),
@@ -54,10 +61,10 @@ def enforce_security(path: str):
                 raise HTTPException(status_code=403, detail="Invalid step-up header value")
 
         if policy.dual_control_required:
-            if approval_id is None:
+            if x_approval_id is None:
                 raise HTTPException(status_code=403, detail="Dual-control approval required")
             try:
-                approval_record = await dual_control.consume(approval_id, context=path)
+                approval_record = await dual_control.consume(x_approval_id, context=path)
             except DualControlError as exc:
                 raise HTTPException(status_code=403, detail=str(exc)) from exc
             else:
