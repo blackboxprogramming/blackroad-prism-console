@@ -80,3 +80,7 @@ id_rsa
 *.pem
 *.key
 ssh-*
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

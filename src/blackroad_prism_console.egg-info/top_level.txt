@@ -1,0 +1,9 @@
+autopal
+components
+config
+design
+json
+routes
+services
+tests
+utils

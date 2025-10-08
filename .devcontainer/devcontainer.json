@@ -13,8 +13,7 @@
     "ghcr.io/devcontainers/features/aws-cli:1": {},
     "ghcr.io/devcontainers/features/terraform:1": {
       "version": "1.6.6"
-    },
-    "ghcr.io/devcontainers/features/aws-ssm-session-manager:1": {}
+    }
   },
   "postCreateCommand": "/bin/bash .devcontainer/scripts/postCreate.sh",
   "forwardPorts": [
