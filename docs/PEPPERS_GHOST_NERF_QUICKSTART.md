@@ -70,7 +70,10 @@ instant_ngp:
 ```
 Invoke with:
 ```bash
-ns-train instant-ngp --data ./datasets/<scene_name> --load-config configs/jetson_instant_ngp.yaml
+ns-train instant-ngp \
+  --data ./datasets/<scene_name> \
+  --config-path configs \
+  --config-name jetson_instant_ngp
 ```
 
 ## Gaussian Splatting Option
