@@ -206,8 +206,7 @@ class RandomizedSmoothingCertifier:
         num_samples: int = 20000,
         alpha: float = 0.001,
     ) -> dict[str, float | int]:
-        del alpha  # Unused for minimal dependency setup (placeholder for future exact bounds)
-        # Monte Carlo estimate of class probabilities with Agresti–Coull bounds
+        # Monte Carlo estimate of class probabilities with Wilson bounds tuned by alpha
         y: List[int] = []
         for _ in range(num_samples):
             noise = self.rng.normal(scale=self.sigma, size=x.shape)
@@ -216,13 +215,24 @@ class RandomizedSmoothingCertifier:
         y_arr = np.array(y)
         counts = np.bincount(y_arr, minlength=int(y_arr.max() + 1))
         A = int(np.argmax(counts))
-        nA = counts[A]
-        n = y_arr.size
-        pA_hat = (nA + 2) / (n + 4)
+        nA = int(counts[A])
+        n = int(y_arr.size)
 
-        counts[A] = -1
-        B = int(np.argmax(counts)) if counts.size > 1 else -1
-        pB_hat = max(0.0, (counts[B] + 2) / (n + 4)) if B >= 0 else 0.0
+        alpha = float(alpha)
+        if not (0.0 < alpha < 1.0):
+            alpha = min(max(alpha, 1e-12), 1 - 1e-12)
+
+        alpha_lower = max(min(alpha / 2.0, 1 - 1e-12), 1e-12)
+        alpha_upper = alpha_lower
+
+        counts_noA = counts.copy()
+        counts_noA[A] = 0
+        if counts_noA.size <= 1 or int(counts_noA.max()) == 0:
+            B = -1
+            nB = 0
+        else:
+            B = int(np.argmax(counts_noA))
+            nB = int(counts[B])
 
         def phi_inv(p: float) -> float:
             p = min(max(p, 1e-12), 1 - 1e-12)
@@ -230,12 +240,42 @@ class RandomizedSmoothingCertifier:
                 return float(_scipy_norm.ppf(p))
             return math.sqrt(2.0) * math.erfinv(2 * p - 1)
 
-        R = self.sigma * (phi_inv(pA_hat) - phi_inv(pB_hat))
+        def wilson_lower(count: int, total: int, alpha_one_sided: float) -> float:
+            if total == 0:
+                return 0.0
+            z = phi_inv(1.0 - alpha_one_sided)
+            p_hat = count / total
+            denom = 1.0 + (z * z) / total
+            center = p_hat + (z * z) / (2.0 * total)
+            margin = z * math.sqrt((p_hat * (1.0 - p_hat) + (z * z) / (4.0 * total)) / total)
+            bound = (center - margin) / denom
+            return float(min(max(bound, 0.0), 1.0))
+
+        def wilson_upper(count: int, total: int, alpha_one_sided: float) -> float:
+            if total == 0:
+                return 1.0
+            z = phi_inv(1.0 - alpha_one_sided)
+            p_hat = count / total
+            denom = 1.0 + (z * z) / total
+            center = p_hat + (z * z) / (2.0 * total)
+            margin = z * math.sqrt((p_hat * (1.0 - p_hat) + (z * z) / (4.0 * total)) / total)
+            bound = (center + margin) / denom
+            return float(min(max(bound, 0.0), 1.0))
+
+        pA_emp = nA / n if n > 0 else 0.0
+        pB_emp = nB / n if n > 0 else 0.0
+        pA_lower = wilson_lower(nA, n, alpha_lower)
+        pB_upper = wilson_upper(nB, n, alpha_upper) if B >= 0 else 0.0
+
+        R = self.sigma * (phi_inv(pA_lower) - phi_inv(pB_upper))
         return {
             "pred": A,
             "radius_L2": float(max(0.0, R)),
-            "pA_hat": float(pA_hat),
-            "pB_hat": float(pB_hat),
+            "pA_hat": float(pA_emp),
+            "pB_hat": float(pB_emp),
+            "pA_lower": float(pA_lower),
+            "pB_upper": float(pB_upper),
+            "alpha": float(alpha),
         }
 
 
