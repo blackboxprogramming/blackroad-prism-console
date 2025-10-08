@@ -27,7 +27,7 @@ except ModuleNotFoundError:  # pragma: no cover - fallback when ulid package mis
         encoded = []
         for i in range(0, len(data), 5):
             chunk = int.from_bytes(data[i : i + 5].ljust(5, b"\x00"), "big")
-            for shift in range(25, -1, -5):
+            for shift in range(35, -5, -5):
                 encoded.append(crockford32[(chunk >> shift) & 0x1F])
         return "".join(encoded)[:26]
 
