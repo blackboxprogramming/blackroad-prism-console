@@ -105,7 +105,7 @@ def main() -> None:
     baseline_loss, _ = loss_and_grad(theta, Xte, yte, reg=args.ridge)
 
     limit = min(64, len(yte))
-    influences, proxy, grads = influence_scores(
+    influences_before, proxy_before, grads = influence_scores(
         theta,
         Xtr,
         ytr,
@@ -113,9 +113,12 @@ def main() -> None:
         yte[:limit],
         reg=args.ridge,
     )
-    abs_influence = np.abs(influences)
+    abs_influence_before = np.abs(influences_before)
+    current_influences = influences_before
+    current_proxy = proxy_before
+    current_abs_influence = abs_influence_before
     fast_k = max(1, int(args.fast_frac * len(ytr)))
-    fast_candidates = np.argsort(-np.abs(proxy))[:fast_k]
+    fast_candidates = np.argsort(-np.abs(proxy_before))[:fast_k]
 
     prov_flag_array = (
         prov_flags(prov, tstamp, require_sig=args.prov_sig, time_sigma=args.prov_sigma)
@@ -123,17 +126,22 @@ def main() -> None:
         else np.zeros(len(ytr), dtype=int)
     )
 
-    risk = abs_influence * (1.0 + prov_flag_array)
+    risk = current_abs_influence * (1.0 + prov_flag_array)
     quarantine_n = max(1, int(args.quar_pct / 100.0 * len(ytr)))
     quarantine_indices = np.argsort(-risk)[:quarantine_n]
 
     output = {
         "baseline_test_loss": float(baseline_loss),
-        "max_abs_influence": float(abs_influence.max()),
-        "median_abs_influence": float(np.median(abs_influence)),
+        "test_loss": float(baseline_loss),
+        "max_abs_influence_before": float(abs_influence_before.max()),
+        "max_abs_influence_after": float(abs_influence_before.max()),
+        "median_abs_influence_before": float(np.median(abs_influence_before)),
+        "median_abs_influence_after": float(np.median(abs_influence_before)),
+        "max_abs_influence": float(abs_influence_before.max()),
+        "median_abs_influence": float(np.median(abs_influence_before)),
         "flags_count": int((prov_flag_array > 0).sum()),
         "quarantined_count": int(len(quarantine_indices)),
-        "top_indices": [int(i) for i in np.argsort(-abs_influence)[:10]],
+        "top_indices": [int(i) for i in np.argsort(-current_abs_influence)[:10]],
         "quarantine_indices": [int(i) for i in quarantine_indices],
         "fast_filter_indices": [int(i) for i in fast_candidates],
         "model_hash": hash_arr(theta),
@@ -157,7 +165,26 @@ def main() -> None:
         np.save("models/theta_retrained.npy", theta_retrained)
         retrained_loss, _ = loss_and_grad(theta_retrained, Xte, yte, reg=args.ridge)
         output["test_loss_retrained"] = float(retrained_loss)
+        output["test_loss"] = float(retrained_loss)
         output["model_hash_after"] = hash_arr(theta_retrained)
+
+        influences_after, proxy_after, _ = influence_scores(
+            theta_retrained,
+            Xtr,
+            ytr,
+            Xte[:limit],
+            yte[:limit],
+            reg=args.ridge,
+        )
+        current_influences = influences_after
+        current_proxy = proxy_after
+        current_abs_influence = np.abs(influences_after)
+
+        output["max_abs_influence_after"] = float(current_abs_influence.max())
+        output["median_abs_influence_after"] = float(np.median(current_abs_influence))
+        output["max_abs_influence"] = output["max_abs_influence_after"]
+        output["median_abs_influence"] = output["median_abs_influence_after"]
+        output["top_indices"] = [int(i) for i in np.argsort(-current_abs_influence)[:10]]
 
     if args.action == "forensics":
         bundle = {
@@ -166,8 +193,8 @@ def main() -> None:
             "top_flags": [
                 {
                     "idx": int(idx),
-                    "influence": float(influences[idx]),
-                    "proxy": float(proxy[idx]),
+                    "influence": float(current_influences[idx]),
+                    "proxy": float(current_proxy[idx]),
                     "prov_flag": int(prov_flag_array[idx]),
                 }
                 for idx in output["quarantine_indices"][:20]
