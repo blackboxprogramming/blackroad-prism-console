@@ -63,6 +63,7 @@ jobs:
       - uses: actions/checkout@v4
         if: steps.intent.outputs.perform_tests == 'true'
         with:
+          repository: ${{ steps.pr.outputs.head_repo }}
           ref: ${{ steps.pr.outputs.head_sha }}
           fetch-depth: 0
       - uses: actions/setup-node@v4
