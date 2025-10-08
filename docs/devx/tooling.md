@@ -15,8 +15,9 @@
 ## Dev containers
 
 - `.devcontainer` builds from Ubuntu 22.04 with Node 20, AWS CLI, Terraform 1.6, and the SSM Session Manager plugin.
-- Installs commitlint globally and Python pre-commit dependencies in the container.
+- Installs `@commitlint/cli` globally and Python pre-commit dependencies in the container.
 - VS Code recommendations include Terraform, ESLint, Prettier, and Python extensions.
+- See [`codespaces.md`](./codespaces.md) for the Codespaces-specific bootstrap steps and forwarded ports.
 
 ## Makefile contract
 

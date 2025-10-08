@@ -1,0 +1,2 @@
+[console_scripts]
+brc = cli.console:main
