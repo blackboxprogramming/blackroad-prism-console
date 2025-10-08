@@ -7,7 +7,18 @@ class MockEventSource {
   listeners: Record<string, Function[]> = {};
   constructor(url: string) { MockEventSource.last = this; }
   addEventListener(type: string, cb: any) { (this.listeners[type] ||= []).push(cb); }
-  emit(type: string, data: any) { (this.listeners[type] || []).forEach((cb) => cb({ data: JSON.stringify(data) })); }
+  emit(type: string, data: any) {
+    const envelope = {
+      id: 'evt',
+      kind: type,
+      data,
+      index: 0,
+      ts: new Date().toISOString(),
+      prevHash: 'GENESIS',
+      hash: 'hash',
+    };
+    (this.listeners[type] || []).forEach((cb) => cb({ data: JSON.stringify(envelope) }));
+  }
   close() {}
 }
 (globalThis as any).EventSource = MockEventSource as any;
