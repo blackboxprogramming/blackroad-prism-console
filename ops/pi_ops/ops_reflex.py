@@ -34,6 +34,7 @@ CMD_TOPIC = "ops/reflex/cmd"       # accepts JSON commands to tweak thresholds l
 last_alert_by_node = collections.defaultdict(lambda: 0.0)
 last_global_alert = 0.0
 hot_nodes = set()
+pending_high_alerts: Dict[str, float] = {}
 latest: Dict[str, Dict[str, Any]] = {}
 
 
@@ -51,14 +52,18 @@ def publish(mq: mqtt.Client, topic: str, payload: Any) -> None:
 
 def alert(
     mq: mqtt.Client, kind: str, msg: str, meta: Optional[Dict[str, Any]] = None
-) -> None:
-    """Send an alert event and update the spam guards."""
+) -> bool:
+    """Send an alert event and update the spam guards.
+
+    Returns ``True`` when an alert was emitted and ``False`` when suppressed
+    by the global spam guard.
+    """
 
     global last_global_alert
 
     t = now()
     if t - last_global_alert < GLOBAL_SPAM_GUARD_S:
-        return
+        return False
 
     last_global_alert = t
     payload = {"ts": t, "kind": kind, "msg": msg, "meta": meta or {}}
@@ -71,6 +76,8 @@ def alert(
         {"mode": "text", "text": msg, "duration_ms": 4000, "params": {"size": 48}},
     )
     publish(mq, "sim/output", {"view": "panel", "text": msg, "ttl_s": 10})
+
+    return True
 
 
 def summarize_and_publish(mq: mqtt.Client) -> None:
@@ -118,20 +125,40 @@ def on_message(mq: mqtt.Client, _userdata: Any, msg: MQTTMessage) -> None:
 
         if temp is not None:
             # Enter hot
-            if temp >= TEMP_WARN_C and node not in hot_nodes:
-                # per-node cooldown
-                if t - last_alert_by_node[node] >= COOLDOWN_S:
-                    hot_nodes.add(node)
-                    last_alert_by_node[node] = t
-                    alert(
-                        mq,
-                        "temp_high",
-                        f"⚠️ {node}: {temp:.1f}°C ≥ {TEMP_WARN_C:.1f}°C",
-                        {"node": node, "temp_c": temp},
-                    )
+            if temp >= TEMP_WARN_C:
+                if node not in hot_nodes:
+                    # per-node cooldown
+                    if t - last_alert_by_node[node] >= COOLDOWN_S:
+                        hot_nodes.add(node)
+                        emitted = alert(
+                            mq,
+                            "temp_high",
+                            f"⚠️ {node}: {temp:.1f}°C ≥ {TEMP_WARN_C:.1f}°C",
+                            {"node": node, "temp_c": temp},
+                        )
+                        if emitted:
+                            last_alert_by_node[node] = t
+                            pending_high_alerts.pop(node, None)
+                        else:
+                            pending_high_alerts[node] = t
+                elif node in pending_high_alerts:
+                    last_attempt = pending_high_alerts[node]
+                    if t - last_attempt >= GLOBAL_SPAM_GUARD_S:
+                        emitted = alert(
+                            mq,
+                            "temp_high",
+                            f"⚠️ {node}: {temp:.1f}°C ≥ {TEMP_WARN_C:.1f}°C",
+                            {"node": node, "temp_c": temp},
+                        )
+                        if emitted:
+                            last_alert_by_node[node] = t
+                            pending_high_alerts.pop(node, None)
+                        else:
+                            pending_high_alerts[node] = t
             # Exit hot
             elif temp <= TEMP_CLEAR_C and node in hot_nodes:
                 hot_nodes.discard(node)
+                pending_high_alerts.pop(node, None)
                 alert(
                     mq,
                     "temp_ok",
