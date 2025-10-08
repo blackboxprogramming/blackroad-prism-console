@@ -166,6 +166,16 @@ export async function postAutohealEscalation(note){
   return data.event
 }
 
+export async function fetchSecuritySpotlights(){
+  const { data } = await axios.get(`${API_BASE}/api/security/spotlights`)
+  return data.spotlights
+}
+
+export async function updateSecuritySpotlight(panel, payload){
+  const { data } = await axios.post(`${API_BASE}/api/security/spotlights/${panel}`, payload)
+  return data
+}
+
 export async function infer(x, y){
   const { data } = await axios.post(`${API_BASE}/api/mini/infer`, { x, y })
   return data
