@@ -1,0 +1,29 @@
+name: Ensure WORK_UID is set
+
+on:
+  workflow_call:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+
+jobs:
+  verify-work-uid:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assert WORK_UID is present
+        run: |
+          if [[ -z "${WORK_UID:-}" ]]; then
+            echo "WORK_UID environment variable must be provided for traceability." >&2
+            exit 1
+          fi
+          if [[ ${#WORK_UID} -ne 26 ]]; then
+            echo "WORK_UID must be a 26-character ULID." >&2
+            exit 1
+          fi
+          if [[ ! $WORK_UID =~ ^[0-9A-HJKMNP-TV-Z]{26}$ ]]; then
+            echo "WORK_UID must match the Crockford base32 alphabet used by ULIDs." >&2
+            exit 1
+          fi
