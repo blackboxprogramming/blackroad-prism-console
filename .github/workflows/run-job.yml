@@ -1,0 +1,42 @@
+name: Run Job
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: Task to execute
+        required: true
+        default: tests
+
+jobs:
+  tests:
+    if: ${{ github.event.inputs.task == 'tests' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; else pip install pytest; fi
+      - name: Install Node dependencies
+        run: npm ci --omit=optional || npm install
+      - name: Run npm tests
+        run: npm test -- --watch=false
+      - name: Run pytest
+        run: pytest -q
+
+  unsupported:
+    if: ${{ github.event.inputs.task != 'tests' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Unsupported task: ${{ github.event.inputs.task }}"
+          exit 1
