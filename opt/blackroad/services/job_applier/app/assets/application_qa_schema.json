@@ -1,0 +1,153 @@
+{
+  "version": "2024-07-06",
+  "description": "Canonical answers for repetitive application questions across Greenhouse, Lever, and Workday.",
+  "fields": [
+    {
+      "key": "work_authorization",
+      "question": "Are you legally authorized to work in the United States?",
+      "value": "{{WORK_AUTHORIZATION}}",
+      "expected_response": "Yes/No",
+      "systems": ["Greenhouse", "Lever", "Workday"],
+      "notes": "Match company eligibility requirements; align with immigration counsel guidance."
+    },
+    {
+      "key": "requires_sponsorship",
+      "question": "Will you now or in the future require visa sponsorship?",
+      "value": "{{SPONSORSHIP_REQUIRED}}",
+      "expected_response": "Yes/No",
+      "systems": ["Greenhouse", "Lever", "Workday"],
+      "notes": "Stay consistent with counsel-approved statement."
+    },
+    {
+      "key": "preferred_name",
+      "question": "Preferred name",
+      "value": "{{PREFERRED_NAME}}",
+      "expected_response": "Free text",
+      "systems": ["Greenhouse", "Lever"],
+      "notes": "Keep in sync with resume header and email signature."
+    },
+    {
+      "key": "pronouns",
+      "question": "Pronouns",
+      "value": "{{PRONOUNS}}",
+      "expected_response": "Free text",
+      "systems": ["Greenhouse", "Lever"],
+      "notes": "Optional; remove if company does not request."
+    },
+    {
+      "key": "location",
+      "question": "Current location",
+      "value": "{{CANDIDATE_LOCATION}}",
+      "expected_response": "City, State or Country",
+      "systems": ["Greenhouse", "Lever", "Workday"],
+      "notes": "Use hiring-friendly format (e.g. City, ST)."
+    },
+    {
+      "key": "open_to_relocation",
+      "question": "Are you willing to relocate?",
+      "value": "{{OPEN_TO_RELOCATION}}",
+      "expected_response": "Yes/No/Conditional",
+      "systems": ["Greenhouse", "Workday"],
+      "notes": "If conditional, mention hub preferences in additional info."
+    },
+    {
+      "key": "remote_preference",
+      "question": "What is your remote work preference?",
+      "value": "{{REMOTE_PREFERENCE}}",
+      "expected_response": "Remote/Hybrid/Onsite",
+      "systems": ["Lever", "Workday"],
+      "notes": "Match JD expectation; provide detail in additional context when hybrid."
+    },
+    {
+      "key": "salary_expectation",
+      "question": "What are your salary expectations?",
+      "value": {
+        "currency": "USD",
+        "range": {
+          "minimum": "{{SALARY_MIN}}",
+          "maximum": "{{SALARY_MAX}}"
+        },
+        "comp_structure": "{{COMP_STRUCTURE}}"
+      },
+      "expected_response": "Numeric range or exact figure",
+      "systems": ["Greenhouse", "Lever", "Workday"],
+      "notes": "Quote base salary range; include OTE context when role is sales/GT."
+    },
+    {
+      "key": "available_start",
+      "question": "When can you start?",
+      "value": "{{AVAILABLE_START_DATE}}",
+      "expected_response": "Date or notice period",
+      "systems": ["Greenhouse", "Lever", "Workday"],
+      "notes": "If notice period applies, specify number of weeks."
+    },
+    {
+      "key": "notice_period",
+      "question": "If employed, what is your notice period?",
+      "value": "{{NOTICE_PERIOD}}",
+      "expected_response": "Number of weeks",
+      "systems": ["Greenhouse", "Lever"],
+      "notes": "Example: '2 weeks' or 'Immediately available'."
+    },
+    {
+      "key": "referral",
+      "question": "Were you referred by someone at the company?",
+      "value": "{{REFERRAL_NAME}}",
+      "expected_response": "Name or 'No'",
+      "systems": ["Greenhouse", "Lever", "Workday"],
+      "notes": "Ensure referral contact has agreed to be listed."
+    },
+    {
+      "key": "eeo_voluntary",
+      "question": "Equal Employment Opportunity voluntary survey",
+      "value": "{{EEO_RESPONSE}}",
+      "expected_response": "Standard EEO options",
+      "systems": ["Greenhouse", "Workday"],
+      "notes": "Optional; populate only when candidate approves disclosure."
+    },
+    {
+      "key": "diversity_survey",
+      "question": "Self-identification / diversity survey",
+      "value": "{{DIVERSITY_RESPONSE}}",
+      "expected_response": "Standard survey options",
+      "systems": ["Greenhouse", "Lever", "Workday"],
+      "notes": "Optional; align with candidate consent policies."
+    },
+    {
+      "key": "disability_status",
+      "question": "Voluntary self-identification of disability",
+      "value": "{{DISABILITY_RESPONSE}}",
+      "expected_response": "Yes/No/Decline",
+      "systems": ["Workday"],
+      "notes": "Use government-provided language if company supplies form."
+    },
+    {
+      "key": "veteran_status",
+      "question": "Protected veteran status",
+      "value": "{{VETERAN_RESPONSE}}",
+      "expected_response": "Yes/No/Decline",
+      "systems": ["Workday"],
+      "notes": "Match Department of Labor definitions."
+    },
+    {
+      "key": "portfolio_links",
+      "question": "Portfolio or additional links",
+      "value": [
+        "{{LINKEDIN_URL}}",
+        "{{PORTFOLIO_URL}}",
+        "{{GITHUB_URL}}"
+      ],
+      "expected_response": "List of URLs",
+      "systems": ["Greenhouse", "Lever", "Workday"],
+      "notes": "Include only maintained destinations; remove placeholders when empty."
+    },
+    {
+      "key": "additional_information",
+      "question": "Anything else you'd like us to know?",
+      "value": "{{ADDITIONAL_CONTEXT}}",
+      "expected_response": "Short paragraph",
+      "systems": ["Greenhouse", "Lever", "Workday"],
+      "notes": "Use to reinforce role-specific proof or clarify work preferences."
+    }
+  ]
+}
