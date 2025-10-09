@@ -61,12 +61,9 @@ if "chat_history" not in st.session_state:
 # Initialize terminal output log
 if "terminal_log" not in st.session_state:
     st.session_state.terminal_log = []
-    st.session_state.terminal_log.append(
-        f"[{datetime.now().strftime('%H:%M:%S')}] System initialized"
-    )
-    st.session_state.terminal_log.append(
-        f"[{datetime.now().strftime('%H:%M:%S')}] BlackRoad Prism Console ready"
-    )
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    st.session_state.terminal_log.append(f"[{timestamp}] System initialized")
+    st.session_state.terminal_log.append(f"[{timestamp}] BlackRoad Prism Console ready")
 
 
 def log_to_terminal(message: str) -> None:
@@ -80,16 +77,6 @@ def log_to_terminal(message: str) -> None:
 st.markdown(
     "#### Speak or type an idea, formula, or question. The AI will respond and project a hologram:"
 )
-
-# Terminal Output Section
-st.markdown("---")
-st.markdown("### 💻 Terminal Output")
-terminal_container = st.container()
-with terminal_container:
-    terminal_text = "\n".join(st.session_state.terminal_log)
-    st.code(terminal_text, language="bash")
-
-st.markdown("---")
 
 audio_file = st.file_uploader("Upload your voice (mp3 or wav)", type=["mp3", "wav"])
 if audio_file is not None:
@@ -134,6 +121,12 @@ if user_input:
         st.image(buf)
         plt.close(fig)
         log_to_terminal("Hologram projection complete")
+
+# Terminal Output Section
+st.markdown("---")
+st.markdown("### 💻 Terminal Output")
+terminal_text = "\n".join(st.session_state.terminal_log)
+st.code(terminal_text, language="bash")
 
 st.markdown("---")
 st.markdown("**BlackRoad Prism Console** | Live UI Simulation")
