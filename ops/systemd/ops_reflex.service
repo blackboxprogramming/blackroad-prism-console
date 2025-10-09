@@ -1,0 +1,17 @@
+[Unit]
+Description=Pi-Ops Reflex (heartbeat → alerts)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Environment=MQTT_HOST=localhost
+Environment=TEMP_WARN_C=70
+Environment=TEMP_CLEAR_C=65
+Environment=COOLDOWN_S=15
+Environment=GLOBAL_SPAM_GUARD_S=5
+ExecStart=/usr/bin/python3 /home/pi/ops_reflex.py
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
