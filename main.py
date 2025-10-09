@@ -3,6 +3,7 @@
 import io
 import os
 import tempfile
+from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -57,13 +58,44 @@ if "chat_history" not in st.session_state:
         }
     ]
 
+# Initialize terminal output log
+if "terminal_log" not in st.session_state:
+    st.session_state.terminal_log = []
+    st.session_state.terminal_log.append(
+        f"[{datetime.now().strftime('%H:%M:%S')}] System initialized"
+    )
+    st.session_state.terminal_log.append(
+        f"[{datetime.now().strftime('%H:%M:%S')}] BlackRoad Prism Console ready"
+    )
+
+
+def log_to_terminal(message: str) -> None:
+    """Add a timestamped message to the terminal log."""
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    st.session_state.terminal_log.append(f"[{timestamp}] {message}")
+    # Keep only the last 50 messages
+    if len(st.session_state.terminal_log) > 50:
+        st.session_state.terminal_log = st.session_state.terminal_log[-50:]
+
 st.markdown(
     "#### Speak or type an idea, formula, or question. The AI will respond and project a hologram:"
 )
 
+# Terminal Output Section
+st.markdown("---")
+st.markdown("### 💻 Terminal Output")
+terminal_container = st.container()
+with terminal_container:
+    terminal_text = "\n".join(st.session_state.terminal_log)
+    st.code(terminal_text, language="bash")
+
+st.markdown("---")
+
 audio_file = st.file_uploader("Upload your voice (mp3 or wav)", type=["mp3", "wav"])
 if audio_file is not None:
+    log_to_terminal(f"Audio file uploaded: {audio_file.name}")
     user_input = transcribe_audio(audio_file)
+    log_to_terminal(f"Transcription complete: {len(user_input)} characters")
     st.markdown(f"**You said:** {user_input}")
 else:
     user_input = st.text_input("Or type here")
@@ -71,17 +103,22 @@ else:
 if user_input:
     if not client:
         st.error("OpenAI API key not set.")
+        log_to_terminal("ERROR: OpenAI API key not configured")
     else:
+        log_to_terminal(f"User input: {user_input[:50]}...")
         st.session_state.chat_history.append({"role": "user", "content": user_input})
+        log_to_terminal("Sending request to GPT-4o-mini...")
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=st.session_state.chat_history,
         )
         assistant_reply = response.choices[0].message.content
+        log_to_terminal(f"Received response: {len(assistant_reply)} characters")
         st.session_state.chat_history.append({"role": "assistant", "content": assistant_reply})
         st.markdown(f"**Venture Console AI:** {assistant_reply}")
 
         magnitude = parse_numeric_prefix(user_input)
+        log_to_terminal(f"Generating hologram with magnitude: {magnitude}")
         fig = plt.figure(figsize=(6, 4))
         ax = fig.add_subplot(111, projection="3d")
         x = np.linspace(-5, 5, 100)
@@ -96,6 +133,7 @@ if user_input:
         buf.seek(0)
         st.image(buf)
         plt.close(fig)
+        log_to_terminal("Hologram projection complete")
 
 st.markdown("---")
 st.markdown("**BlackRoad Prism Console** | Live UI Simulation")
