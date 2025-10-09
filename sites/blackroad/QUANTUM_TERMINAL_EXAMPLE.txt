@@ -1,0 +1,27 @@
+TERMINAL OUTPUT EXAMPLE
+=======================
+
+$ quantum
+🌌 Quantum math visualization started (animations below)
+Press Ctrl+C or type 'clear' to stop
+╔═══════════════════════════════════════════════════════════════╗
+║           QUANTUM MATH VISUALIZATION                         ║
+╚═══════════════════════════════════════════════════════════════╝
+
+iħ ∂ψ/∂t = Ĥ ψ   (Time-dependent Schrödinger)   phase=0.87 o
+Ĥ ψ = E ψ        (Time-independent Schrödinger)   phase=0.54 O
+H = p²/2m + V(x)   phase=0.12 @
+⟨x|p⟩ = (1/√(2πħ)) e^(i p x / ħ)   phase=-0.32 *
+[x,p] = iħ   phase=-0.67 ◉
+|ψ⟩ = Σₙ cₙ |φₙ⟩   phase=-0.89 .
+Path integral: ∫ D[x(t)] e^(i S[x]/ħ)   phase=-0.98 o
+Dirac: (iγᵘ ∂ᵤ - m)ψ = 0   phase=-0.76 O
+
+·◼◼◼·····◼◼◼·····◼◼◼·····◼◼◼·····◼◼◼·····
+
+Note: The phase values and animation markers change continuously,
+creating a dynamic visualization effect. The wave pattern at the
+bottom also animates, showing the propagation of a quantum wave.
+
+$ clear
+[Terminal cleared, animation stopped]
