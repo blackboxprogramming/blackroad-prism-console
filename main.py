@@ -92,7 +92,7 @@ if user_input:
         st.error("OpenAI API key not set.")
         log_to_terminal("ERROR: OpenAI API key not configured")
     else:
-        log_to_terminal(f"User input: {user_input[:50]}...")
+        log_to_terminal(f"User input: {user_input[:50]}{'...' if len(user_input) > 50 else ''}")
         st.session_state.chat_history.append({"role": "user", "content": user_input})
         log_to_terminal("Sending request to GPT-4o-mini...")
         response = client.chat.completions.create(
