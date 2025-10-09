@@ -24,6 +24,14 @@
         "editor.formatOnSave": true,
         "python.analysis.typeCheckingMode": "basic"
       }
+    },
+    "codespaces": {
+      "secrets": {
+        "required": [
+          "OPENAI_API_KEY",
+          "GH_TOKEN"
+        ]
+      }
     }
   },
   "postCreateCommand": "python -m pip install -U pip && (pip install -r requirements.txt || true) && (npm i || true)",
