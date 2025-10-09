@@ -9,4 +9,3 @@
 - **Security & performance**: watch for injection risks, data leaks, and unnecessary complexity or resource use.
 - **Consistency**: adhere to project style guides and existing patterns; suggest alignment where drift occurs.
 - **Constructive feedback**: celebrate strengths, note issues with empathy, and propose concrete improvements or questions.
-
