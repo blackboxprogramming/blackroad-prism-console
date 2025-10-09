@@ -1,0 +1,44 @@
+{
+  "name": "Alexa Louise",
+  "locations_ok": [
+    "Remote (U.S.)",
+    "Remote (Minnesota)"
+  ],
+  "links": {
+    "site": "https://blackroad.io",
+    "site_alt": "https://blackroadinc.us",
+    "linkedin": "https://www.linkedin.com/in/<handle>",
+    "portfolio": "https://blackroad.io/#proof"
+  },
+  "proof": {
+    "finance_sales": [
+      "$23M annuity sales",
+      "33.3% MoM advisor case growth",
+      "200+ advisor trainings"
+    ],
+    "ameriprise": [
+      "$18.4M AUM surfaced",
+      "$3.1M at-risk reduced",
+      "#1 in qualified appointments"
+    ],
+    "real_estate": [
+      "1,000+ live leads",
+      "80% conversion",
+      "20+ transactions"
+    ],
+    "ai_ops": [
+      "BlackRoad agent workflows",
+      "Lucidia empathetic agent",
+      "Salesforce automations",
+      "Python/Flask/JS glue"
+    ]
+  },
+  "licenses": [
+    "SIE",
+    "7",
+    "63",
+    "65",
+    "Life & Health",
+    "MN Real Estate"
+  ]
+}
