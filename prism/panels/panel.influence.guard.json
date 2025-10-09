@@ -1,0 +1,54 @@
+{
+  "id": "panel.influence.guard",
+  "title": "Influence Guard — Detect ▸ Quarantine ▸ Rebuild",
+  "intent": "safety.ml",
+  "inputs": {
+    "train_path": "data/train.npz",
+    "test_path": "data/test.npz",
+    "model_path": "models/theta.npy"
+  },
+  "controls": {
+    "fast_filter_top_frac": { "type": "slider", "min": 0.001, "max": 0.2, "step": 0.001, "value": 0.02 },
+    "cg_tol": { "type": "slider", "min": 1e-9, "max": 1e-3, "step": 1e-9, "value": 1e-6 },
+    "cg_maxiter": { "type": "int", "value": 300, "min": 50, "max": 5000 },
+    "ridge": { "type": "slider", "min": 0.0, "max": 1e-1, "step": 1e-4, "value": 1e-3 },
+    "quarantine_percent": { "type": "slider", "min": 0.01, "max": 5.0, "step": 0.01, "value": 0.5 },
+    "prov_require_signature": { "type": "toggle", "value": true },
+    "prov_time_sigma_limit": { "type": "slider", "min": 1.0, "max": 6.0, "step": 0.5, "value": 3.0 },
+    "retrain_mode": { "type": "select", "options": ["trim", "cvar", "reweight"], "value": "trim" }
+  },
+  "actions": [
+    { "label": "Scan Influence", "id": "scan" },
+    { "label": "Quarantine Set", "id": "quarantine" },
+    { "label": "Retrain & Compare", "id": "retrain" },
+    { "label": "Publish Forensics", "id": "forensics" }
+  ],
+  "telemetry": [
+    { "key": "test_loss", "label": "Test Loss" },
+    { "key": "max_abs_influence", "label": "Max |Influence|" },
+    { "key": "median_abs_influence", "label": "Median |Influence|" },
+    { "key": "flags_count", "label": "Flagged Samples" },
+    { "key": "quarantined_count", "label": "Quarantined" }
+  ],
+  "invariants": [
+    { "rule": "test_loss <= 1.05 * baseline_test_loss", "on_violation": "halt_redeploy" },
+    { "rule": "max_abs_influence_after < 0.1 * max_abs_influence_before", "on_violation": "require_cvar_mode" }
+  ],
+  "wiring": {
+    "bin": "python controller_influence.py",
+    "args_template": [
+      "--train", "{{inputs.train_path}}",
+      "--test", "{{inputs.test_path}}",
+      "--model", "{{inputs.model_path}}",
+      "--fast-frac", "{{controls.fast_filter_top_frac}}",
+      "--cg-tol", "{{controls.cg_tol}}",
+      "--cg-iters", "{{controls.cg_maxiter}}",
+      "--ridge", "{{controls.ridge}}",
+      "--quar-pct", "{{controls.quarantine_percent}}",
+      "--prov-sig", "{{controls.prov_require_signature}}",
+      "--prov-sigma", "{{controls.prov_time_sigma_limit}}",
+      "--mode", "{{controls.retrain_mode}}",
+      "--action", "{{action.id}}"
+    ]
+  }
+}
