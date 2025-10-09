@@ -6,7 +6,7 @@
 const fs = require('fs'); const path = require('path')
 const { test, expect, chromium } = require('@playwright/test') // via pw test runner API
 ;(async () => {
-  const base = process.env.E2E_BASE || 'http://127.0.0.1:4178'
+  const base = process.env.E2E_BASE || 'http://127.0.0.1:5173'
   const distMap = path.join(process.cwd(), 'dist', 'sitemap.xml')
   let urls = []
   if (fs.existsSync(distMap)) {

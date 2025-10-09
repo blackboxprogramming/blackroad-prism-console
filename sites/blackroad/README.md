@@ -18,6 +18,11 @@ npm run build   # outputs to sites/blackroad/dist
 
 npm run preview # http://localhost:5174
 
+## Testing
+
+npm test           # runs Playwright smoke + regression suite (starts local dev server automatically)
+npm run e2e        # alias for the same Playwright test runner
+
 ## Deployment
 
 GitHub Pages builds and deploys `dist` on every push to `main` via `.github/workflows/site-build.yml`.

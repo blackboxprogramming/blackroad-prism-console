@@ -44,7 +44,7 @@ export default function AutoDiffLab(){
       <h2 className="text-xl font-semibold">Automatic Differentiation — Dual & Finite Diff</h2>
       <div className="grid" style={{gridTemplateColumns:'1fr 320px', gap:16}}>
         <Panel title="Function">
-          <p className="text-sm opacity-80">f(x) = e^{\{sin x\}} + x^3 − 2 log x</p>
+          <p className="text-sm opacity-80">f(x) = e^{sin x} + x^3 − 2 log x</p>
           <p className="text-sm">x = <b>{x.toFixed(6)}</b></p>
           <p className="text-sm">f(x) = <b>{dual.y.toFixed(6)}</b></p>
           <p className="text-sm">f′(x) via dual = <b>{dual.dy.toFixed(6)}</b></p>
