@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Determine repo root and navigate there so the script can be run from any path.
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+printf "== Blackroad Prism Console repository scan ==\n\n"
+
+# Basic repo metadata
+tracked_files=$(git ls-files | wc -l | tr -d '[:space:]')
+untracked_files=$(git ls-files --others --exclude-standard | wc -l | tr -d '[:space:]')
+
+printf "Tracked files: %s\n" "$tracked_files"
+printf "Untracked files: %s\n\n" "$untracked_files"
+
+printf "== Static keyword search (case-insensitive) ==\n"
+keywords=(
+  "error"
+  "fail"
+  "exception"
+  "todo"
+  "fixme"
+)
+
+for keyword in "${keywords[@]}"; do
+  printf "\n-- Keyword: %s --\n" "$keyword"
+  # ripgrep statistics give a quick overview without overwhelming output
+  rg --ignore-case --stats "$keyword" || true
+  # Show a few contextual examples to help triage quickly
+  rg --ignore-case --context 1 --max-count 5 "$keyword" || true
+  printf "\n"
+done
+
+printf "== Recent Git activity (last 5 commits) ==\n"
+git log -5 --oneline
+
+printf "\n== Suggested next steps ==\n"
+cat <<'SUGGESTIONS'
+- Review the keyword matches above to identify real issues versus noise.
+- Run project-specific test suites (e.g., pnpm test, pytest, go test) in the relevant packages.
+- Inspect CI/CD logs for failed pull requests using the repository's hosting platform.
+- Update this script with additional heuristics that fit your team's workflows.
+SUGGESTIONS
