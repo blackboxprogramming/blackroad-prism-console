@@ -1,69 +1,1362 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BlackRoad — Co-create with Lucidia</title>
-  <meta name="description" content="Symbolic agents, RoadCoin metering, and contradiction-aware AI." />
-  <script src="/socket.io/socket.io.js"></script>
-  <style>
-    body{margin:0;font-family:system-ui, sans-serif;background:#0c0f14;color:#e7ecf3}
-    a{color:#0096FF;text-decoration:none}
-    a:focus-visible{outline:2px solid #fff;outline-offset:2px}
-    .container{max-width:960px;margin:0 auto;padding:1rem}
-    .stats{display:flex;gap:1rem;flex-wrap:wrap}
-    .stat{flex:1 1 150px;background:#12161d;padding:1rem;border-radius:8px;text-align:center}
-    .features{display:flex;gap:1rem;flex-wrap:wrap;margin-top:2rem}
-    .card{flex:1 1 260px;background:#12161d;padding:1rem;border-radius:8px}
-    footer{margin-top:3rem;font-size:.875rem;text-align:center;color:#94A3B8}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad - The Ultimate Creator Platform</title>
+    <meta name="description" content="If you can dream it, you can make it. The ultimate AI-powered creator platform for homework, coding, videos, simulations, and infinite possibilities.">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/creator.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
 </head>
 <body>
-  <main class="container" id="app">
-    <section id="hero"></section>
-    <section id="live" class="stats" aria-live="polite"></section>
-    <section id="features" class="features"></section>
-    <section id="faq"></section>
-    <footer id="footer"></footer>
-  </main>
-  <script>
-    function el(tag, attrs={}, children=[]) {
-      const e=document.createElement(tag);Object.entries(attrs).forEach(([k,v])=>e[k]=v);children.forEach(c=>e.append(c));return e;
-    }
-    function updateStats(s){
-      const live=document.getElementById('live');
-      live.innerHTML='';
-      const items=[
-        ['Agents active', s.agents_active],
-        ['RC minted (24h)', s.rc_minted_24h],
-        ['Contradictions (24h)', s.contradictions_24h],
-        ['Uptime (24h)', s.uptime_24h_percent+'%'],
-        ['p50 latency', s.latency_p50_ms+'ms']
-      ];
-      for(const [label,val] of items){
-        live.append(el('div',{className:'stat'},[el('div',{},label),el('strong',{},val.toString())]));
-      }
-    }
-    async function boot(){
-      const landing=await fetch('/api/public/landing').then(r=>r.json());
-      const h=landing.sections.hero;
-      const hero=document.getElementById('hero');
-      hero.append(el('h1',{},h.headline), el('p',{},h.sub));
-      hero.append(el('p',{},''));
-      const btn=el('a',{href:'/login',className:'btn'},h.primaryCta);hero.append(btn);
-      document.title='BlackRoad — Co-create with Lucidia';
-      const features=landing.sections.features||[];const featWrap=document.getElementById('features');
-      features.forEach(f=>{featWrap.append(el('div',{className:'card'},[el('h3',{},f.title),el('p',{},f.desc)]));});
-      const faq=landing.sections.faq||[];const faqWrap=document.getElementById('faq');
-      faq.forEach(q=>{const d=el('details');d.append(el('summary',{},q.q),el('p',{},q.a));faqWrap.append(d);});
-      const footer=document.getElementById('footer');
-      const links=(landing.sections.footer||{links:[]}).links.map(l=>`<a href="${l.to}">${l.label}</a>`).join(' | ');
-      footer.innerHTML=links+`<div style="margin-top:0.5rem">&copy; ${new Date().getFullYear()} BlackRoad.io</div>`;
-      updateStats(await fetch('/api/public/stats').then(r=>r.json()));
-      const sock=io();
-      sock.on('public:stats', updateStats);
-    }
-    boot();
-  </script>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <a href="/">BlackRoad</a>
+                    <span class="tagline">Creator Universe</span>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="/" class="nav-link">Home</a></li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link">Create ▼</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/homework-ai">Homework AI</a></li>
+                            <li><a href="/co-coding">Co-Coding Portal</a></li>
+                            <li><a href="/video-creator">Video Creator</a></li>
+                            <li><a href="/simulation-labs">Simulation Labs</a></li>
+                            <li><a href="/roadworld">Road World</a></li>
+                            <li><a href="/roadview">RoadView Studio</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link">Explore ▼</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/tinkering-lab">Tinkering Lab</a></li>
+                            <li><a href="/math-3d">3D Math Visualizer</a></li>
+                            <li><a href="/file-manager">Ultimate File Manager</a></li>
+                            <li><a href="/community">Community</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item auth-item"><a href="/login" class="nav-link" id="auth-link">Login</a></li>
+                </ul>
+                <div class="nav-toggle" id="mobile-menu"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero creator-hero">
+            <div class="hero-background">
+                <div class="floating-elements">
+                    <div class="element code">{'code': 'dreams'}</div>
+                    <div class="element atom">⚛️</div>
+                    <div class="element video">🎬</div>
+                    <div class="element brain">🧠</div>
+                    <div class="element math">∞</div>
+                </div>
+            </div>
+            <div class="hero-container">
+                <h1 class="hero-title">If You Can Dream It,<br>You Can Make It</h1>
+                <p class="hero-subtitle">The ultimate AI-powered creator platform where imagination meets reality. From homework help to world simulations, from video creation to molecular tinkering - everything you need to bring your vision to life.</p>
+                <div class="hero-buttons">
+                    <a href="/register" class="btn btn-primary btn-glow">Start Creating</a>
+                    <a href="#features" class="btn btn-secondary">Explore Features</a>
+                    <a href="/demo" class="btn btn-accent">Watch Demo</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="creator-portals" id="features">
+            <div class="container">
+                <h2 class="section-title">Your Creative Universe</h2>
+                <div class="portals-grid">
+                    <div class="portal homework-portal">
+                        <div class="portal-icon">🎓</div>
+                        <h3>Homework AI Portals</h3>
+                        <p>AI tutors that understand every subject. Get explanations, solve problems, write essays, and learn at your own pace with personalized homework assistance.</p>
+                        <div class="portal-features">
+                            <span>✓ Math Problem Solver</span>
+                            <span>✓ Essay Writing Assistant</span>
+                            <span>✓ Science Explanations</span>
+                            <span>✓ Language Translation</span>
+                        </div>
+                        <a href="/homework-ai" class="portal-link">Enter Portal</a>
+                    </div>
+
+                    <div class="portal coding-portal">
+                        <div class="portal-icon">👥</div>
+                        <h3>Co-Coding Portals</h3>
+                        <p>Code together with AI and humans. Real-time collaboration, intelligent code completion, and safe sandbox environments where you can't break anything.</p>
+                        <div class="portal-features">
+                            <span>✓ Live Collaboration</span>
+                            <span>✓ AI Code Assistant</span>
+                            <span>✓ Safe Sandboxes</span>
+                            <span>✓ Version Control</span>
+                        </div>
+                        <a href="/co-coding" class="portal-link">Start Coding</a>
+                    </div>
+
+                    <div class="portal video-portal">
+                        <div class="portal-icon">🎬</div>
+                        <h3>RoadView Studio</h3>
+                        <p>Create Hollywood-level content with AI. Generate scripts, create faces, edit videos, and build complete storylines.</p>
+                        <div class="portal-features">
+                            <span>✓ AI Script Generation</span>
+                            <span>✓ Face & Voice Synthesis</span>
+                            <span>✓ Animated Videos</span>
+                            <span>✓ Story Arc Builder</span>
+                        </div>
+                        <a href="/roadview" class="portal-link">Create Stories</a>
+                    </div>
+
+                    <div class="portal simulation-portal">
+                        <div class="portal-icon">🌍</div>
+                        <h3>Road World Simulation</h3>
+                        <p>The ultimate real-world game. Simulate living through time itself, experience different eras, make decisions that shape history, and explore infinite possibilities.</p>
+                        <div class="portal-features">
+                            <span>✓ Historical Simulations</span>
+                            <span>✓ Future Scenarios</span>
+                            <span>✓ Decision Trees</span>
+                            <span>✓ Multi-Timeline</span>
+                        </div>
+                        <a href="/roadworld" class="portal-link">Enter World</a>
+                    </div>
+
+                    <div class="portal tinkering-portal">
+                        <div class="portal-icon">⚛️</div>
+                        <h3>Tinkering Labs</h3>
+                        <p>What happens when carbon meets hydrogen? Explore atomic interactions, visualize molecular bonds, and experiment with the building blocks of reality.</p>
+                        <div class="portal-features">
+                            <span>✓ Molecular Interactions</span>
+                            <span>✓ Chemical Reactions</span>
+                            <span>✓ Physics Simulations</span>
+                            <span>✓ 3D Visualizations</span>
+                        </div>
+                        <a href="/tinkering-lab" class="portal-link">Start Tinkering</a>
+                    </div>
+
+                    <div class="portal math-portal">
+                        <div class="portal-icon">📐</div>
+                        <h3>3D Math Visualizer</h3>
+                        <p>See mathematics come alive. Visualize complex equations, explore imaginary numbers, and understand what 'i' really looks like in dimensional space.</p>
+                        <div class="portal-features">
+                            <span>✓ 3D Equation Graphs</span>
+                            <span>✓ Complex Numbers</span>
+                            <span>✓ Interactive Geometry</span>
+                            <span>✓ Mathematical Art</span>
+                        </div>
+                        <a href="/math-3d" class="portal-link">Visualize Math</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="ultimate-features">
+            <div class="container">
+                <h2>Why BlackRoad is Ultimate</h2>
+                <div class="features-grid">
+                    <div class="feature">
+                        <div class="feature-icon">💾</div>
+                        <h3>Universal File System</h3>
+                        <p>Save everything in one place. Like GitHub but for all file types - code, videos, simulations, homework, dreams. Never lose your work again.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🏃‍♂️</div>
+                        <h3>Ultimate Runners</h3>
+                        <p>Safe execution environments for any code. Creators can experiment without breaking anything. From Python to JavaScript to quantum computing.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">💬</div>
+                        <h3>Smart Chat Platform</h3>
+                        <p>Chat with AI, humans, or your own creations. Collaborate in real-time, get instant feedback, and build together across all portals.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Infinite Creation Tools</h3>
+                        <p>From atomic simulations to epic novels, from homework help to world-building. Every tool you need to bring any idea to life.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats creator-stats" id="user-stats">
+            <div class="container">
+                <h2>Creator Community</h2>
+                <div class="stats-grid">
+                    <div class="stat-item"><span class="stat-number" id="total-creators">0</span><span class="stat-label">Active Creators</span></div>
+                    <div class="stat-item"><span class="stat-number" id="projects-created">0</span><span class="stat-label">Dreams Made Real</span></div>
+                    <div class="stat-item"><span class="stat-number" id="portals-active">6</span><span class="stat-label">Creative Portals</span></div>
+                    <div class="stat-item"><span class="stat-number" id="online-users">0</span><span class="stat-label">Creating Now</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <h2>Ready to Make Your Dreams Reality?</h2>
+                <p>Join thousands of creators who are already building the impossible.</p>
+                <div class="cta-buttons">
+                    <a href="/register" class="btn btn-primary btn-large">Start Creating Free</a>
+                    <a href="/demo" class="btn btn-secondary btn-large">See It In Action</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>BlackRoad</h3>
+                    <p>The Ultimate Creator Platform</p>
+                    <p>If you can dream it, you can make it.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Create</h4>
+                    <ul>
+                        <li><a href="/homework-ai">Homework AI</a></li>
+                        <li><a href="/co-coding">Co-Coding</a></li>
+                        <li><a href="/roadview">RoadView Studio</a></li>
+                        <li><a href="/roadworld">Road World</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Explore</h4>
+                    <ul>
+                        <li><a href="/tinkering-lab">Tinkering Lab</a></li>
+                        <li><a href="/math-3d">3D Math</a></li>
+                        <li><a href="/simulation-labs">Simulation Labs</a></li>
+                        <li><a href="/community">Community</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <p>Email: create@blackroad.io</p>
+                    <p>Support: help@blackroad.io</p>
+                    <p>Discord: /blackroad-creators</p>
+                </div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2024 BlackRoad. Where dreams become reality.</p></div>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/creator-portal.js"></script>
+</body>
+</html>
+<!DOCTYPE html><!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</html></body>    <script src="/js/creator-portal.js"></script>    <script src="/js/auth.js"></script>    <script src="/js/main.js"></script>    </footer>        </div>            </div>                <p>© 2023 BlackRoad. All rights reserved.</p>            <div class="footer-bottom">            </div>                </div>                    <a href="#" class="social-link">LinkedIn</a>                    <a href="#" class="social-link">Instagram</a>                    <a href="#" class="social-link">Twitter</a>                    <a href="#" class="social-link">Facebook</a>                <div class="footer-socials">                </ul>                    <li><a href="/terms">Terms of Service</a></li>                    <li><a href="/privacy">Privacy Policy</a></li>                    <li><a href="/contact">Contact</a></li>                    <li><a href="/about">About Us</a></li>                <ul class="footer-links">                </div>                    <a href="/">BlackRoad</a>                <div class="footer-logo">            <div class="footer-content">        <div class="container">    <footer>    </main>        </section>            </div>                </div>                    <a href="/demo" class="btn btn-secondary">Take a Tour</a>                    <a href="/register" class="btn btn-primary btn-glow">Join Now</a>                <div class="cta-buttons">                <p class="cta-subtitle">Join thousands of creators who are turning their dreams into reality. Sign up now and get a free trial of our premium features!</p>                <h2 class="cta-title">Ready to Start Your Creative Journey?</h2>            <div class="container">        <section class="cta">        </section>            </div>                </div>                    </div>                        </div>                            <p>Share your creations with the community. Collaborate with other creators and get feedback to improve your skills.</p>                            <h3>Share and Collaborate</h3>                        <div class="step-content">                        <div class="step-icon">4️⃣</div>                    <div class="step">                    </div>                        </div>                            <p>Jump into a portal and start your project. Use the AI tools and resources available to bring your ideas to life.</p>                            <h3>Start Creating</h3>                        <div class="step-content">                        <div class="step-icon">3️⃣</div>                    <div class="step">                    </div>                        </div>                            <p>Discover the various creator portals available. Each portal is a unique space tailored to different aspects of creation and learning.</p>                            <h3>Explore Portals</h3>                        <div class="step-content">                        <div class="step-icon">2️⃣</div>                    <div class="step">                    </div>                        </div>                            <p>Create an account and tell us about your interests and goals. This helps us personalize your experience.</p>                            <h3>Sign Up</h3>                        <div class="step-content">                        <div class="step-icon">1️⃣</div>                    <div class="step">                <div class="steps">                <h2 class="section-title">How It Works</h2>            <div class="container">        <section class="how-it-works">        </section>            </div>                </div>                    </div>                        <a href="/roadview" class="portal-link">Enter Portal</a>                        </div>                            <span>✓ Storyboarding and Script Assistance</span>                            <span>✓ Interactive Tutorial Creator</span>                            <span>✓ Video Editing Suite</span>                            <span>✓ High-Quality Screen Recording</span>                        <div class="portal-features">                        <p>Capture and share your virtual experiences. Create immersive stories and tutorials with our advanced screen recording and editing tools.</p>                        <h3>RoadView Studio</h3>                        <div class="portal-icon">🌍</div>                    <div class="portal roadview-portal">                    </div>                        <a href="/roadworld" class="portal-link">Enter Portal</a>                        </div>                            <span>✓ Community and Economy Management</span>                            <span>✓ Ecosystem Simulation</span>                            <span>✓ Infrastructure Planning</span>                            <span>✓ Terrain and Landscape Design</span>                        <div class="portal-features">                        <p>Design and manage your own virtual world. Create landscapes, build infrastructures, and simulate ecological and social dynamics.</p>                        <h3>Road World Builder</h3>                        <div class="portal-icon">🛣️</div>                    <div class="portal roadworld-portal">                    </div>                        <a href="/simulation-labs" class="portal-link">Enter Portal</a>                        </div>                            <span>✓ Environmental Impact Simulations</span>                            <span>✓ 3D Modeling and Printing</span>                            <span>✓ Circuit Simulation</span>                            <span>✓ Virtual Science Experiments</span>                        <div class="portal-features">                        <p>Experiment and explore in virtual labs. Conduct science experiments, build circuits, or simulate real-world processes safely and interactively.</p>                        <h3>Simulation Labs</h3>                        <div class="portal-icon">🔬</div>                    <div class="portal simulation-labs-portal">                    </div>                        <a href="/video-creator" class="portal-link">Enter Portal</a>                        </div>                            <span>✓ Direct Sharing to Social Media</span>                            <span>✓ Music and Sound Effects Library</span>                            <span>✓ AI Scene Creator</span>                            <span>✓ Drag-and-drop Video Editing</span>                        <div class="portal-features">                        <p>Unleash your inner filmmaker. Create, edit, and share stunning videos with our easy-to-use video creation tools and AI assistance.</p>                        <h3>Video Creator Studio</h3>                        <div class="portal-icon">🎥</div>                    <div class="portal video-creator-portal">                    </div>                        <a href="/co-coding" class="portal-link">Enter Portal</a>                        </div>                            <span>✓ Integrated Debugging</span>                            <span>✓ Multi-language Support</span>                            <span>✓ AI Code Assistant</span>                            <span>✓ Real-time Collaboration</span>                        <div class="portal-features">                        <p>Collaborate with AI and peers in real-time. Code together, debug, and learn in an interactive environment designed for coders of all levels.</p>                        <h3>Co-Coding Portal</h3>                        <div class="portal-icon">👩‍💻</div>                    <div class="portal co-coding-portal">                    </div>                        <a href="/homework-ai" class="portal-link">Enter Portal</a>                        </div>                            <span>✓ Language Translation</span>                            <span>✓ Science Explanations</span>                            <span>✓ Essay Writing Assistant</span>                            <span>✓ Math Problem Solver</span>                        <div class="portal-features">                        <p>AI tutors that understand every subject. Get explanations, solve problems, write essays, and learn at your own pace with personalized homework assistance.</p>                        <h3>Homework AI Portals</h3>                        <div class="portal-icon">🎓</div>                    <div class="portal homework-portal">                <div class="portals-grid">                <h2 class="section-title">Your Creative Universe</h2>            <div class="container">        <section class="creator-portals" id="features">        </section>            </div>                </div>                    <a href="/demo" class="btn btn-accent">Watch Demo</a>                    <a href="#features" class="btn btn-secondary">Explore Features</a>                    <a href="/register" class="btn btn-primary btn-glow">Start Creating</a>                <div class="hero-buttons">                <p class="hero-subtitle">The ultimate AI-powered creator platform where imagination meets reality. From homework help to world simulations, from video creation to molecular tinkering - everything you need to bring your vision to life.</p>                <h1 class="hero-title">If You Can Dream It,<br>You Can Make It</h1>            <div class="hero-container">            </div>                </div>                    <div class="element math">∞</div>                    <div class="element brain">🧠</div>                    <div class="element video">🎬</div>                    <div class="element atom">⚛️</div>                    <div class="element code">{'code': 'dreams'}</div>                <div class="floating-elements">            <div class="hero-background">        <section class="hero creator-hero">    <main>    </header>        </nav>            </div>                <div class="nav-toggle" id="mobile-menu"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>                </ul>                    <li class="nav-item auth-item"><a href="/login" class="nav-link" id="auth-link">Login</a></li>                    </li>                        </ul>                            <li><a href="/community">Community</a></li>                            <li><a href="/file-manager">Ultimate File Manager</a></li>                            <li><a href="/math-3d">3D Math Visualizer</a></li>                            <li><a href="/tinkering-lab">Tinkering Lab</a></li>                        <ul class="dropdown-menu">                        <a href="#" class="nav-link">Explore ▼</a>                    <li class="nav-item dropdown">                    </li>                        </ul>                            <li><a href="/roadview">RoadView Studio</a></li>                            <li><a href="/roadworld">Road World</a></li>                            <li><a href="/simulation-labs">Simulation Labs</a></li>                            <li><a href="/video-creator">Video Creator</a></li>                            <li><a href="/co-coding">Co-Coding Portal</a></li>                            <li><a href="/homework-ai">Homework AI</a></li>                        <ul class="dropdown-menu">                        <a href="#" class="nav-link">Create ▼</a>                    <li class="nav-item dropdown">                    <li class="nav-item"><a href="/" class="nav-link">Home</a></li>                <ul class="nav-menu">                </div>                    <span class="tagline">Creator Universe</span>                    <a href="/">BlackRoad</a>                <div class="nav-logo">            <div class="nav-container">        <nav class="navbar">    <header><body></head>    <link rel="icon" type="image/x-icon" href="/favicon.ico">    <link rel="stylesheet" href="/css/creator.css">    <link rel="stylesheet" href="/css/main.css">    <meta name="description" content="If you can dream it, you can make it. The ultimate AI-powered creator platform for homework, coding, videos, simulations, and infinite possibilities.">    <title>BlackRoad - The Ultimate Creator Platform</title>    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <meta charset="UTF-8"><head><html lang="en"><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad - The Ultimate Creator Platform</title>
+    <meta name="description" content="If you can dream it, you can make it. The ultimate AI-powered creator platform for homework, coding, videos, simulations, and infinite possibilities.">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/creator.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <a href="/">BlackRoad</a>
+                    <span class="tagline">Creator Universe</span>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="/" class="nav-link">Home</a></li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link">Create ▼</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/homework-ai">Homework AI</a></li>
+                            <li><a href="/co-coding">Co-Coding Portal</a></li>
+                            <li><a href="/video-creator">Video Creator</a></li>
+                            <li><a href="/simulation-labs">Simulation Labs</a></li>
+                            <li><a href="/roadworld">Road World</a></li>
+                            <li><a href="/roadview">RoadView Studio</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link">Explore ▼</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/tinkering-lab">Tinkering Lab</a></li>
+                            <li><a href="/math-3d">3D Math Visualizer</a></li>
+                            <li><a href="/file-manager">Ultimate File Manager</a></li>
+                            <li><a href="/community">Community</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item auth-item"><a href="/login" class="nav-link" id="auth-link">Login</a></li>
+                </ul>
+                <div class="nav-toggle" id="mobile-menu"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero creator-hero">
+            <div class="hero-background">
+                <div class="floating-elements">
+                    <div class="element code">{'code': 'dreams'}</div>
+                    <div class="element atom">⚛️</div>
+                    <div class="element video">🎬</div>
+                    <div class="element brain">🧠</div>
+                    <div class="element math">∞</div>
+                </div>
+            </div>
+            <div class="hero-container">
+                <h1 class="hero-title">If You Can Dream It,<br>You Can Make It</h1>
+                <p class="hero-subtitle">The ultimate AI-powered creator platform where imagination meets reality. From homework help to world simulations, from video creation to molecular tinkering - everything you need to bring your vision to life.</p>
+                <div class="hero-buttons">
+                    <a href="/register" class="btn btn-primary btn-glow">Start Creating</a>
+                    <a href="#features" class="btn btn-secondary">Explore Features</a>
+                    <a href="/demo" class="btn btn-accent">Watch Demo</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="creator-portals" id="features">
+            <div class="container">
+                <h2 class="section-title">Your Creative Universe</h2>
+                <div class="portals-grid">
+                    <div class="portal homework-portal">
+                        <div class="portal-icon">🎓</div>
+                        <h3>Homework AI Portals</h3>
+                        <p>AI tutors that understand every subject. Get explanations, solve problems, write essays, and learn at your own pace with personalized homework assistance.</p>
+                        <div class="portal-features">
+                            <span>✓ Math Problem Solver</span>
+                            <span>✓ Essay Writing Assistant</span>
+                            <span>✓ Science Explanations</span>
+                            <span>✓ Language Translation</span>
+                        </div>
+                        <a href="/homework-ai" class="portal-link">Enter Portal</a>
+                    </div>
+
+                    <div class="portal coding-portal">
+                        <div class="portal-icon">👥</div>
+                        <h3>Co-Coding Portals</h3>
+                        <p>Code together with AI and humans. Real-time collaboration, intelligent code completion, and safe sandbox environments where you can't break anything.</p>
+                        <div class="portal-features">
+                            <span>✓ Live Collaboration</span>
+                            <span>✓ AI Code Assistant</span>
+                            <span>✓ Safe Sandboxes</span>
+                            <span>✓ Version Control</span>
+                        </div>
+                        <a href="/co-coding" class="portal-link">Start Coding</a>
+                    </div>
+
+                    <div class="portal video-portal">
+                        <div class="portal-icon">🎬</div>
+                        <h3>RoadView Studio</h3>
+                        <p>Create Hollywood-level content with AI. Generate scripts, create faces, edit videos, and build complete storylines.</p>
+                        <div class="portal-features">
+                            <span>✓ AI Script Generation</span>
+                            <span>✓ Face & Voice Synthesis</span>
+                            <span>✓ Animated Videos</span>
+                            <span>✓ Story Arc Builder</span>
+                        </div>
+                        <a href="/roadview" class="portal-link">Create Stories</a>
+                    </div>
+
+                    <div class="portal simulation-portal">
+                        <div class="portal-icon">🌍</div>
+                        <h3>Road World Simulation</h3>
+                        <p>The ultimate real-world game. Simulate living through time itself, experience different eras, make decisions that shape history, and explore infinite possibilities.</p>
+                        <div class="portal-features">
+                            <span>✓ Historical Simulations</span>
+                            <span>✓ Future Scenarios</span>
+                            <span>✓ Decision Trees</span>
+                            <span>✓ Multi-Timeline</span>
+                        </div>
+                        <a href="/roadworld" class="portal-link">Enter World</a>
+                    </div>
+
+                    <div class="portal tinkering-portal">
+                        <div class="portal-icon">⚛️</div>
+                        <h3>Tinkering Labs</h3>
+                        <p>What happens when carbon meets hydrogen? Explore atomic interactions, visualize molecular bonds, and experiment with the building blocks of reality.</p>
+                        <div class="portal-features">
+                            <span>✓ Molecular Interactions</span>
+                            <span>✓ Chemical Reactions</span>
+                            <span>✓ Physics Simulations</span>
+                            <span>✓ 3D Visualizations</span>
+                        </div>
+                        <a href="/tinkering-lab" class="portal-link">Start Tinkering</a>
+                    </div>
+
+                    <div class="portal math-portal">
+                        <div class="portal-icon">📐</div>
+                        <h3>3D Math Visualizer</h3>
+                        <p>See mathematics come alive. Visualize complex equations, explore imaginary numbers, and understand what 'i' really looks like in dimensional space.</p>
+                        <div class="portal-features">
+                            <span>✓ 3D Equation Graphs</span>
+                            <span>✓ Complex Numbers</span>
+                            <span>✓ Interactive Geometry</span>
+                            <span>✓ Mathematical Art</span>
+                        </div>
+                        <a href="/math-3d" class="portal-link">Visualize Math</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="ultimate-features">
+            <div class="container">
+                <h2>Why BlackRoad is Ultimate</h2>
+                <div class="features-grid">
+                    <div class="feature">
+                        <div class="feature-icon">💾</div>
+                        <h3>Universal File System</h3>
+                        <p>Save everything in one place. Like GitHub but for all file types - code, videos, simulations, homework, dreams. Never lose your work again.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🏃‍♂️</div>
+                        <h3>Ultimate Runners</h3>
+                        <p>Safe execution environments for any code. Creators can experiment without breaking anything. From Python to JavaScript to quantum computing.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">💬</div>
+                        <h3>Smart Chat Platform</h3>
+                        <p>Chat with AI, humans, or your own creations. Collaborate in real-time, get instant feedback, and build together across all portals.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Infinite Creation Tools</h3>
+                        <p>From atomic simulations to epic novels, from homework help to world-building. Every tool you need to bring any idea to life.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats creator-stats" id="user-stats">
+            <div class="container">
+                <h2>Creator Community</h2>
+                <div class="stats-grid">
+                    <div class="stat-item"><span class="stat-number" id="total-creators">0</span><span class="stat-label">Active Creators</span></div>
+                    <div class="stat-item"><span class="stat-number" id="projects-created">0</span><span class="stat-label">Dreams Made Real</span></div>
+                    <div class="stat-item"><span class="stat-number" id="portals-active">6</span><span class="stat-label">Creative Portals</span></div>
+                    <div class="stat-item"><span class="stat-number" id="online-users">0</span><span class="stat-label">Creating Now</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <h2>Ready to Make Your Dreams Reality?</h2>
+                <p>Join thousands of creators who are already building the impossible.</p>
+                <div class="cta-buttons">
+                    <a href="/register" class="btn btn-primary btn-large">Start Creating Free</a>
+                    <a href="/demo" class="btn btn-secondary btn-large">See It In Action</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>BlackRoad</h3>
+                    <p>The Ultimate Creator Platform</p>
+                    <p>If you can dream it, you can make it.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Create</h4>
+                    <ul>
+                        <li><a href="/homework-ai">Homework AI</a></li>
+                        <li><a href="/co-coding">Co-Coding</a></li>
+                        <li><a href="/roadview">RoadView Studio</a></li>
+                        <li><a href="/roadworld">Road World</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Explore</h4>
+                    <ul>
+                        <li><a href="/tinkering-lab">Tinkering Lab</a></li>
+                        <li><a href="/math-3d">3D Math</a></li>
+                        <li><a href="/simulation-labs">Simulation Labs</a></li>
+                        <li><a href="/community">Community</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <p>Email: create@blackroad.io</p>
+                    <p>Support: help@blackroad.io</p>
+                    <p>Discord: /blackroad-creators</p>
+                </div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2024 BlackRoad. Where dreams become reality.</p></div>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/creator-portal.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad - The Ultimate Creator Platform</title>
+    <meta name="description" content="If you can dream it, you can make it. The ultimate AI-powered creator platform for homework, coding, videos, simulations, and infinite possibilities.">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/creator.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <a href="/">BlackRoad</a>
+                    <span class="tagline">Creator Universe</span>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link">Create ▼</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/homework-ai">Homework AI</a></li>
+                            <li><a href="/co-coding">Co-Coding Portal</a></li>
+                            <li><a href="/video-creator">Video Creator</a></li>
+                            <li><a href="/simulation-labs">Simulation Labs</a></li>
+                            <li><a href="/roadworld">Road World</a></li>
+                            <li><a href="/roadview">RoadView Studio</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link">Explore ▼</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/tinkering-lab">Tinkering Lab</a></li>
+                            <li><a href="/math-3d">3D Math Visualizer</a></li>
+                            <li><a href="/file-manager">Ultimate File Manager</a></li>
+                            <li><a href="/community">Community</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item auth-item">
+                        <a href="/login" class="nav-link" id="auth-link">Login</a>
+                    </li>
+                </ul>
+                <div class="nav-toggle" id="mobile-menu">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero creator-hero">
+            <div class="hero-background">
+                <div class="floating-elements">
+                    <div class="element code">{'code': 'dreams'}</div>
+                    <div class="element atom">⚛️</div>
+                    <div class="element video">🎬</div>
+                    <div class="element brain">🧠</div>
+                    <div class="element math">∞</div>
+                </div>
+            </div>
+            <div class="hero-container">
+                <h1 class="hero-title">If You Can Dream It,<br>You Can Make It</h1>
+                <p class="hero-subtitle">The ultimate AI-powered creator platform where imagination meets reality. From homework help to world simulations, from video creation to molecular tinkering - everything you need to bring your vision to life.</p>
+                <div class="hero-buttons">
+                    <a href="/register" class="btn btn-primary btn-glow">Start Creating</a>
+                    <a href="#features" class="btn btn-secondary">Explore Features</a>
+                    <a href="/demo" class="btn btn-accent">Watch Demo</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="creator-portals" id="features">
+            <div class="container">
+                <h2 class="section-title">Your Creative Universe</h2>
+                <div class="portals-grid">
+                    <div class="portal homework-portal">
+                        <div class="portal-icon">🎓</div>
+                        <h3>Homework AI Portals</h3>
+                        <p>AI tutors that understand every subject. Get explanations, solve problems, write essays, and learn at your own pace with personalized homework assistance.</p>
+                        <div class="portal-features">
+                            <span>✓ Math Problem Solver</span>
+                            <span>✓ Essay Writing Assistant</span>
+                            <span>✓ Science Explanations</span>
+                            <span>✓ Language Translation</span>
+                        </div>
+                        <a href="/homework-ai" class="portal-link">Enter Portal</a>
+                    </div>
+
+                    <div class="portal coding-portal">
+                        <div class="portal-icon">👥</div>
+                        <h3>Co-Coding Portals</h3>
+                        <p>Code together with AI and humans. Real-time collaboration, intelligent code completion, and safe sandbox environments where you can't break anything.</p>
+                        <div class="portal-features">
+                            <span>✓ Live Collaboration</span>
+                            <span>✓ AI Code Assistant</span>
+                            <span>✓ Safe Sandboxes</span>
+                            <span>✓ Version Control</span>
+                        </div>
+                        <a href="/co-coding" class="portal-link">Start Coding</a>
+                    </div>
+
+                    <div class="portal video-portal">
+                        <div class="portal-icon">🎬</div>
+                        <h3>RoadView Studio</h3>
+                        <p>Create Hollywood-level content with AI. Generate scripts like J.K. Rowling or Stephen King, create faces, edit videos, and build complete storylines.</p>
+                        <div class="portal-features">
+                            <span>✓ AI Script Generation</span>
+                            <span>✓ Face & Voice Synthesis</span>
+                            <span>✓ Animated Videos</span>
+                            <span>✓ Story Arc Builder</span>
+                        </div>
+                        <a href="/roadview" class="portal-link">Create Stories</a>
+                    </div>
+
+                    <div class="portal simulation-portal">
+                        <div class="portal-icon">🌍</div>
+                        <h3>Road World Simulation</h3>
+                        <p>The ultimate real-world game. Simulate living through time itself, experience different eras, make decisions that shape history, and explore infinite possibilities.</p>
+                        <div class="portal-features">
+                            <span>✓ Historical Simulations</span>
+                            <span>✓ Future Scenarios</span>
+                            <span>✓ Decision Trees</span>
+                            <span>✓ Multi-Timeline</span>
+                        </div>
+                        <a href="/roadworld" class="portal-link">Enter World</a>
+                    </div>
+
+                    <div class="portal tinkering-portal">
+                        <div class="portal-icon">⚛️</div>
+                        <h3>Tinkering Labs</h3>
+                        <p>What happens when carbon meets hydrogen? Explore atomic interactions, visualize molecular bonds, and experiment with the building blocks of reality.</p>
+                        <div class="portal-features">
+                            <span>✓ Molecular Interactions</span>
+                            <span>✓ Chemical Reactions</span>
+                            <span>✓ Physics Simulations</span>
+                            <span>✓ 3D Visualizations</span>
+                        </div>
+                        <a href="/tinkering-lab" class="portal-link">Start Tinkering</a>
+                    </div>
+
+                    <div class="portal math-portal">
+                        <div class="portal-icon">📐</div>
+                        <h3>3D Math Visualizer</h3>
+                        <p>See mathematics come alive. Visualize complex equations, explore imaginary numbers, and understand what 'i' really looks like in dimensional space.</p>
+                        <div class="portal-features">
+                            <span>✓ 3D Equation Graphs</span>
+                            <span>✓ Complex Numbers</span>
+                            <span>✓ Interactive Geometry</span>
+                            <span>✓ Mathematical Art</span>
+                        </div>
+                        <a href="/math-3d" class="portal-link">Visualize Math</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="ultimate-features">
+            <div class="container">
+                <h2>Why BlackRoad is Ultimate</h2>
+                <div class="features-grid">
+                    <div class="feature">
+                        <div class="feature-icon">💾</div>
+                        <h3>Universal File System</h3>
+                        <p>Save everything in one place. Like GitHub but for all file types - code, videos, simulations, homework, dreams. Never lose your work again.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🏃‍♂️</div>
+                        <h3>Ultimate Runners</h3>
+                        <p>Safe execution environments for any code. Creators can experiment without breaking anything. From Python to JavaScript to quantum computing.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">💬</div>
+                        <h3>Smart Chat Platform</h3>
+                        <p>Chat with AI, humans, or your own creations. Collaborate in real-time, get instant feedback, and build together across all portals.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Infinite Creation Tools</h3>
+                        <p>From atomic simulations to epic novels, from homework help to world-building. Every tool you need to bring any idea to life.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats creator-stats" id="user-stats">
+            <div class="container">
+                <h2>Creator Community</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-creators">0</span>
+                        <span class="stat-label">Active Creators</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="projects-created">0</span>
+                        <span class="stat-label">Dreams Made Real</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="portals-active">6</span>
+                        <span class="stat-label">Creative Portals</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="online-users">0</span>
+                        <span class="stat-label">Creating Now</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <h2>Ready to Make Your Dreams Reality?</h2>
+                <p>Join thousands of creators who are already building the impossible.</p>
+                <div class="cta-buttons">
+                    <a href="/register" class="btn btn-primary btn-large">Start Creating Free</a>
+                    <a href="/demo" class="btn btn-secondary btn-large">See It In Action</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>BlackRoad</h3>
+                    <p>The Ultimate Creator Platform</p>
+                    <p>If you can dream it, you can make it.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Create</h4>
+                    <ul>
+                        <li><a href="/homework-ai">Homework AI</a></li>
+                        <li><a href="/co-coding">Co-Coding</a></li>
+                        <li><a href="/roadview">RoadView Studio</a></li>
+                        <li><a href="/roadworld">Road World</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Explore</h4>
+                    <ul>
+                        <li><a href="/tinkering-lab">Tinkering Lab</a></li>
+                        <li><a href="/math-3d">3D Math</a></li>
+                        <li><a href="/simulation-labs">Simulation Labs</a></li>
+                        <li><a href="/community">Community</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <p>Email: create@blackroad.io</p>
+                    <p>Support: help@blackroad.io</p>
+                    <p>Discord: /blackroad-creators</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 BlackRoad. Where dreams become reality.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/creator-portal.js"></script>
+</body>
+</html>
+#!/bin/bash
+# filepath: /workspaces/blackroad-prism-console/setup.sh
+
+echo "Setting up BlackRoad websites..."
+
+# Create necessary directories
+mkdir -p public/css
+mkdir -p public/js
+mkdir -p public/images
+mkdir -p logs/nginx
+mkdir -p api
+
+# Add entries to /etc/hosts for local development (requires sudo)
+echo "Adding entries to /etc/hosts..."
+if ! grep -q "blackroad.io" /etc/hosts; then
+    echo "127.0.0.1 blackroad.io www.blackroad.io" | sudo tee -a /etc/hosts
+fi
+
+if ! grep -q "blackroadinc.us" /etc/hosts; then
+    echo "127.0.0.1 blackroadinc.us www.blackroadinc.us" | sudo tee -a /etc/hosts
+fi
+
+# Create a simple API server if the api directory doesn't exist
+if [ ! -f "api/package.json" ]; then
+    echo "Creating simple API server..."
+    cat > api/package.json << EOF
+{
+  "name": "blackroad-api",
+  "version": "1.0.0",
+  "description": "BlackRoad API Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
+EOF
+
+    cat > api/server.js << EOF
+const express = require('express');
+const cors = require('cors');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(express.json());
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Sample API endpoints
+app.get('/api/services', (req, res) => {
+    res.json([
+        { id: 1, name: 'Web Development', description: 'Custom web applications' },
+        { id: 2, name: 'Digital Strategy', description: 'Digital transformation consulting' },
+        { id: 3, name: 'Cloud Solutions', description: 'Cloud infrastructure and deployment' }
+    ]);
+});
+
+app.post('/api/contact', (req, res) => {
+    console.log('Contact form submission:', req.body);
+    res.json({ message: 'Thank you for your message. We will get back to you soon!' });
+});
+
+app.listen(PORT, () => {
+    console.log(\`BlackRoad API server running on port \${PORT}\`);
+});
+EOF
+fi
+
+# Create favicon
+if [ ! -f "public/favicon.ico" ]; then
+    echo "Creating favicon placeholder..."
+    # Create a simple text file as placeholder
+    echo "BlackRoad favicon placeholder" > public/favicon.ico
+fi
+
+# Set proper permissions
+chmod +x setup.sh
+chmod -R 755 public/
+
+echo "Setup complete!"
+echo ""
+echo "To start the websites:"
+echo "1. Run: ./setup.sh (if not already done)"
+echo "2. Run: docker-compose up -d"
+echo "3. Visit: http://blackroad.io or http://blackroadinc.us"
+echo ""
+echo "To stop: docker-compose down"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad - The Ultimate Creator Platform</title>
+    <meta name="description" content="If you can dream it, you can make it. The ultimate AI-powered creator platform for homework, coding, videos, simulations, and infinite possibilities.">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/creator.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <a href="/">BlackRoad</a>
+                    <span class="tagline">Creator Universe</span>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link">Create ▼</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/homework-ai">Homework AI</a></li>
+                            <li><a href="/co-coding">Co-Coding Portal</a></li>
+                            <li><a href="/video-creator">Video Creator</a></li>
+                            <li><a href="/simulation-labs">Simulation Labs</a></li>
+                            <li><a href="/roadworld">Road World</a></li>
+                            <li><a href="/roadview">RoadView Studio</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link">Explore ▼</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/tinkering-lab">Tinkering Lab</a></li>
+                            <li><a href="/math-3d">3D Math Visualizer</a></li>
+                            <li><a href="/file-manager">Ultimate File Manager</a></li>
+                            <li><a href="/community">Community</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item auth-item">
+                        <a href="/login" class="nav-link" id="auth-link">Login</a>
+                    </li>
+                </ul>
+                <div class="nav-toggle" id="mobile-menu">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero creator-hero">
+            <div class="hero-background">
+                <div class="floating-elements">
+                    <div class="element code">{'code': 'dreams'}</div>
+                    <div class="element atom">⚛️</div>
+                    <div class="element video">🎬</div>
+                    <div class="element brain">🧠</div>
+                    <div class="element math">∞</div>
+                </div>
+            </div>
+            <div class="hero-container">
+                <h1 class="hero-title">If You Can Dream It,<br>You Can Make It</h1>
+                <p class="hero-subtitle">The ultimate AI-powered creator platform where imagination meets reality. From homework help to world simulations, from video creation to molecular tinkering - everything you need to bring your vision to life.</p>
+                <div class="hero-buttons">
+                    <a href="/register" class="btn btn-primary btn-glow">Start Creating</a>
+                    <a href="#features" class="btn btn-secondary">Explore Features</a>
+                    <a href="/demo" class="btn btn-accent">Watch Demo</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="creator-portals" id="features">
+            <div class="container">
+                <h2 class="section-title">Your Creative Universe</h2>
+                <div class="portals-grid">
+                    <div class="portal homework-portal">
+                        <div class="portal-icon">🎓</div>
+                        <h3>Homework AI Portals</h3>
+                        <p>AI tutors that understand every subject. Get explanations, solve problems, write essays, and learn at your own pace with personalized homework assistance.</p>
+                        <div class="portal-features">
+                            <span>✓ Math Problem Solver</span>
+                            <span>✓ Essay Writing Assistant</span>
+                            <span>✓ Science Explanations</span>
+                            <span>✓ Language Translation</span>
+                        </div>
+                        <a href="/homework-ai" class="portal-link">Enter Portal</a>
+                    </div>
+
+                    <div class="portal coding-portal">
+                        <div class="portal-icon">👥</div>
+                        <h3>Co-Coding Portals</h3>
+                        <p>Code together with AI and humans. Real-time collaboration, intelligent code completion, and safe sandbox environments where you can't break anything.</p>
+                        <div class="portal-features">
+                            <span>✓ Live Collaboration</span>
+                            <span>✓ AI Code Assistant</span>
+                            <span>✓ Safe Sandboxes</span>
+                            <span>✓ Version Control</span>
+                        </div>
+                        <a href="/co-coding" class="portal-link">Start Coding</a>
+                    </div>
+
+                    <div class="portal video-portal">
+                        <div class="portal-icon">🎬</div>
+                        <h3>RoadView Studio</h3>
+                        <p>Create Hollywood-level content with AI. Generate scripts like J.K. Rowling or Stephen King, create faces, edit videos, and build complete storylines.</p>
+                        <div class="portal-features">
+                            <span>✓ AI Script Generation</span>
+                            <span>✓ Face & Voice Synthesis</span>
+                            <span>✓ Animated Videos</span>
+                            <span>✓ Story Arc Builder</span>
+                        </div>
+                        <a href="/roadview" class="portal-link">Create Stories</a>
+                    </div>
+
+                    <div class="portal simulation-portal">
+                        <div class="portal-icon">🌍</div>
+                        <h3>Road World Simulation</h3>
+                        <p>The ultimate real-world game. Simulate living through time itself, experience different eras, make decisions that shape history, and explore infinite possibilities.</p>
+                        <div class="portal-features">
+                            <span>✓ Historical Simulations</span>
+                            <span>✓ Future Scenarios</span>
+                            <span>✓ Decision Trees</span>
+                            <span>✓ Multi-Timeline</span>
+                        </div>
+                        <a href="/roadworld" class="portal-link">Enter World</a>
+                    </div>
+
+                    <div class="portal tinkering-portal">
+                        <div class="portal-icon">⚛️</div>
+                        <h3>Tinkering Labs</h3>
+                        <p>What happens when carbon meets hydrogen? Explore atomic interactions, visualize molecular bonds, and experiment with the building blocks of reality.</p>
+                        <div class="portal-features">
+                            <span>✓ Molecular Interactions</span>
+                            <span>✓ Chemical Reactions</span>
+                            <span>✓ Physics Simulations</span>
+                            <span>✓ 3D Visualizations</span>
+                        </div>
+                        <a href="/tinkering-lab" class="portal-link">Start Tinkering</a>
+                    </div>
+
+                    <div class="portal math-portal">
+                        <div class="portal-icon">📐</div>
+                        <h3>3D Math Visualizer</h3>
+                        <p>See mathematics come alive. Visualize complex equations, explore imaginary numbers, and understand what 'i' really looks like in dimensional space.</p>
+                        <div class="portal-features">
+                            <span>✓ 3D Equation Graphs</span>
+                            <span>✓ Complex Numbers</span>
+                            <span>✓ Interactive Geometry</span>
+                            <span>✓ Mathematical Art</span>
+                        </div>
+                        <a href="/math-3d" class="portal-link">Visualize Math</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="ultimate-features">
+            <div class="container">
+                <h2>Why BlackRoad is Ultimate</h2>
+                <div class="features-grid">
+                    <div class="feature">
+                        <div class="feature-icon">💾</div>
+                        <h3>Universal File System</h3>
+                        <p>Save everything in one place. Like GitHub but for all file types - code, videos, simulations, homework, dreams. Never lose your work again.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🏃‍♂️</div>
+                        <h3>Ultimate Runners</h3>
+                        <p>Safe execution environments for any code. Creators can experiment without breaking anything. From Python to JavaScript to quantum computing.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">💬</div>
+                        <h3>Smart Chat Platform</h3>
+                        <p>Chat with AI, humans, or your own creations. Collaborate in real-time, get instant feedback, and build together across all portals.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Infinite Creation Tools</h3>
+                        <p>From atomic simulations to epic novels, from homework help to world-building. Every tool you need to bring any idea to life.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats creator-stats" id="user-stats">
+            <div class="container">
+                <h2>Creator Community</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-creators">0</span>
+                        <span class="stat-label">Active Creators</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="projects-created">0</span>
+                        <span class="stat-label">Dreams Made Real</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="portals-active">6</span>
+                        <span class="stat-label">Creative Portals</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="online-users">0</span>
+                        <span class="stat-label">Creating Now</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <h2>Ready to Make Your Dreams Reality?</h2>
+                <p>Join thousands of creators who are already building the impossible.</p>
+                <div class="cta-buttons">
+                    <a href="/register" class="btn btn-primary btn-large">Start Creating Free</a>
+                    <a href="/demo" class="btn btn-secondary btn-large">See It In Action</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>BlackRoad</h3>
+                    <p>The Ultimate Creator Platform</p>
+                    <p>If you can dream it, you can make it.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Create</h4>
+                    <ul>
+                        <li><a href="/homework-ai">Homework AI</a></li>
+                        <li><a href="/co-coding">Co-Coding</a></li>
+                        <li><a href="/roadview">RoadView Studio</a></li>
+                        <li><a href="/roadworld">Road World</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Explore</h4>
+                    <ul>
+                        <li><a href="/tinkering-lab">Tinkering Lab</a></li>
+                        <li><a href="/math-3d">3D Math</a></li>
+                        <li><a href="/simulation-labs">Simulation Labs</a></li>
+                        <li><a href="/community">Community</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <p>Email: create@blackroad.io</p>
+                    <p>Support: help@blackroad.io</p>
+                    <p>Discord: /blackroad-creators</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 BlackRoad. Where dreams become reality.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/creator-portal.js"></script>
 </body>
 </html>

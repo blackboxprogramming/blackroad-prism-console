@@ -162,130 +162,130 @@ status notifications.
 
 # BlackRoad Prism Console
 
-This repository hosts experimental tooling and prototypes for BlackRoad.io.
+A comprehensive digital platform for BlackRoad's web presence, featuring both blackroad.io and blackroadinc.us websites.
 
-## CI/CD orchestrator
+## Quick Start
 
-`scripts/blackroad_ci.py` provides a scaffold for the end-to-end workflow
-connecting Codex, GitHub, external connectors and the deployment droplet. The
-script accepts natural language style commands and performs placeholder actions
-for now.
+1. **Setup the environment:**
+   ```bash
+   chmod +x setup.sh
+   ./setup.sh
+   ```
 
-Examples:
+2. **Start the services:**
+   ```bash
+   docker-compose up -d
+   ```
 
-```bash
-python scripts/blackroad_ci.py "Push latest to BlackRoad.io"
-python scripts/blackroad_ci.py "Refresh working copy and redeploy"
-python scripts/blackroad_ci.py "Rebase branch and update site"
-python scripts/blackroad_ci.py "Sync Salesforce -> Airtable -> Droplet"
-```
+3. **Access the websites:**
+   - http://blackroad.io
+   - http://blackroadinc.us
+   - http://localhost
 
-Connector and deployment steps are stubs; configure environment variables and
-extend the script to interact with real services.
-# BlackRoad Prism Console
+## Architecture
 
-This repository contains assorted utilities for the BlackRoad project.
+- **Frontend**: Static HTML/CSS/JS served by nginx
+- **Backend**: Node.js API server (optional)
+- **Reverse Proxy**: nginx for routing and static file serving
+- **Containerization**: Docker Compose for easy deployment
 
-## Codex Pipeline Scaffold
+## Development
 
-The `scripts/blackroad_pipeline.py` script offers a chat-oriented control
-surface that maps high level phrases to underlying actions. It currently
-wraps common Git operations and prints placeholders for connector sync,
-working copy refresh and droplet deployment.
+### Local Development Setup
 
-### Example
+1. **Prerequisites:**
+   - Docker and Docker Compose
+   - Node.js (for API development)
+   - sudo access (for /etc/hosts modification)
 
-```bash
-python scripts/blackroad_pipeline.py "Push latest to BlackRoad.io"
-```
+2. **File Structure:**
+   ```
+   /workspaces/blackroad-prism-console/
+   ├── public/                 # Static website files
+   │   ├── css/               # Stylesheets
+   │   ├── js/                # JavaScript files
+   │   ├── images/            # Images and assets
+   │   └── index.html         # Main entry point
+   ├── api/                   # API server (Node.js)
+   ├── nginx.conf             # nginx configuration
+   ├── docker-compose.yml     # Container orchestration
+   └── setup.sh              # Environment setup script
+   ```
 
-The phrases recognised by the controller can be listed by invoking the
-script with an unknown command.
-## Sync & Deploy
-## Codex Sync/Deploy
+3. **Making Changes:**
+   - Edit files in the `public/` directory for frontend changes
+   - Edit files in the `api/` directory for backend changes
+   - Restart containers after configuration changes: `docker-compose restart`
 
-An experimental control surface lives at `codex/tools/blackroad_pipeline.py`.
-It accepts chat-style commands and orchestrates a stubbed pipeline spanning
-GitHub commits, connector sync, Working Copy refresh, and droplet deployment.
+### Commands
 
-```bash
-python codex/tools/blackroad_pipeline.py "Push latest to BlackRoad.io" -m "chore: sync"
-```
+- **Start services:** `docker-compose up -d`
+- **Stop services:** `docker-compose down`
+- **View logs:** `docker-compose logs -f`
+- **Restart nginx:** `docker-compose restart nginx`
+- **Rebuild containers:** `docker-compose up -d --build`
 
-The script only logs each step today; extend the placeholders with real
-connectors, OAuth, and deployment hooks to enable end-to-end automation.
+## Features
 
-Additional operational docs live in the [`docs/`](docs) folder.
+- **Multi-domain support**: Serves both blackroad.io and blackroadinc.us
+- **Responsive design**: Mobile-friendly interface
+- **Fast loading**: Optimized static assets with caching
+- **SEO ready**: Proper meta tags and structure
+- **Security headers**: Basic security configurations
+- **API ready**: Optional backend API integration
 
-Use the `bin/blackroad-sync` script to push code and refresh the live site end to end.
+## Troubleshooting
 
-```bash
-# Push commits, trigger connector jobs, refresh the Working Copy, and redeploy the droplet
-bin/blackroad-sync push
+### Common Issues
 
-# Refresh deployment without new commits
-bin/blackroad-sync refresh
+1. **Domains not resolving:**
+   - Ensure /etc/hosts entries are added (run `./setup.sh`)
+   - Check entries: `cat /etc/hosts | grep blackroad`
 
-# Rebase with main, push, and redeploy
-bin/blackroad-sync rebase
-```
+2. **nginx not starting:**
+   - Check configuration: `docker-compose config`
+   - View logs: `docker-compose logs nginx`
 
-The script relies on environment variables like `DROPLET_HOST` and `WORKING_COPY_HOST` to reach remote hosts.
+3. **Port conflicts:**
+   - Ensure ports 80 and 3000 are available
+   - Stop other services using these ports
 
-Additional operational docs live in the [`docs/`](docs) folder.
+4. **Permission errors:**
+   - Ensure proper file permissions: `chmod -R 755 public/`
+   - Run setup script: `./setup.sh`
 
-## Codex Sync Script
+### Logs
 
-The repository includes a minimal scaffold to experiment with the end-to-end
-flow described in the BlackRoad deployment docs. The helper accepts natural
-language commands and turns them into git/deploy operations.
+- **nginx access logs:** `tail -f logs/nginx/access.log`
+- **nginx error logs:** `tail -f logs/nginx/error.log`
+- **Container logs:** `docker-compose logs -f [service_name]`
 
-```bash
-python scripts/blackroad_sync.py "Push latest to BlackRoad.io"
-```
+## Production Deployment
 
-Other examples:
+For production deployment:
 
-- `python scripts/blackroad_sync.py "Refresh working copy and redeploy"`
-- `python scripts/blackroad_sync.py "Rebase branch and update site"`
-- `python scripts/blackroad_sync.py "Sync Salesforce → Airtable → Droplet"`
+1. **SSL/HTTPS Setup:**
+   - Add SSL certificates
+   - Update nginx.conf with SSL configuration
+   - Redirect HTTP to HTTPS
 
-The script currently prints placeholder actions; extend the functions to hook
-into real connectors and infrastructure.
+2. **Performance Optimization:**
+   - Enable gzip compression (already configured)
+   - Optimize images and assets
+   - Configure proper caching headers
 
-## Bot Commands (ChatOps)
+3. **Security:**
+   - Update security headers
+   - Configure firewall rules
+   - Regular security updates
 
-- `/deploy blackroad <channel> [provider]` — deploy canary/beta/prod
-- `/rollback blackroad <channel> [steps] [provider]` — revert to earlier build
-- `/blog new "Title"` — scaffold blog post PR
-- `/promote prod` — open staging→prod PR
-- `/toggle <flag> on|off` — set feature flags in `.github/feature-flags.yml`
-- `/install all` — run universal installer
-- `/fix <freeform prompt>` — dispatch AI Fix with your prompt
+## Support
 
-## Agents Overview
-
-- **Auto-Heal**: reacts to failing workflows and dispatches **AI Fix**.
-- **AI Fix**: runs Codex/LLM prompts, formats, builds, opens PRs.
-- **AI Sweeper**: nightly formatter/linter; opens PR if needed.
-- **Labeler/Stale/Lock**: repo hygiene.
-- **Auto-merge**: merges labeled PRs when checks pass.
-- **CodeQL/Snyk/Scorecard**: security analysis.
-## Deployment
-
-Run the scaffolded end-to-end sync script to push local changes and deploy them
-to the live environment:
-
-```bash
-python scripts/blackroad_sync.py
-```
-
-The script pushes to GitHub, fans out to connector webhooks, refreshes an iOS
-Working Copy checkout and issues a remote deploy on the droplet when configured
-via environment variables.
-
-Additional operational docs live in the [`docs/`](docs) folder.
-
+For issues or questions:
+- Check the troubleshooting section above
+- Review container logs
+- Ensure all prerequisites are installed
+- Verify Docker and Docker Compose are running properly
 ## Codex Pipeline
 
 This repo ships with a chat-first deployment helper at
