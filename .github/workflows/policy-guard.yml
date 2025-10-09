@@ -1,0 +1,21 @@
+name: policy-guard
+
+on:
+  push:
+    branches: ["main", "master", "develop"]
+  pull_request:
+
+jobs:
+  org-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch repo settings
+        run: gh api repos/${{ github.repository }} > repo.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Evaluate policies
+        uses: open-policy-agent/opa-github-actions@v2
+        with:
+          policy-path: .github/policy
+          data: repo.json

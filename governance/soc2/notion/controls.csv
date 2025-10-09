@@ -1,0 +1,13 @@
+Control ID,Title,Owner,Evidence job,Frequency,TSC
+CC-1,Security Program,"Head of Security","policy-guard,evidence-pack",Annual,CC
+CC-2,Roles & Responsibility,"Head of Security","access-review",Quarterly,CC
+CC-3,Risk Management,"Head of Security","evidence-pack",Quarterly,CC
+CC-4/CC-7,Change Management,"Head of Engineering","policy-guard,evidence-pack",Per change,CC
+CC-6,Access Control,"IT Operations","access-review",Quarterly,CC
+CC-6.6,Secrets,"IT Operations","env-guard,evidence-pack",Continuous,CC
+CC-8,Logging & Monitoring,"Platform Engineering","evidence-pack",Continuous,CC
+CC-9,Incident Response,"Head of Security","evidence-pack",Per incident,CC
+CC-10,Vendor Management,"Business Operations","vendor-renewal-reminders",Annual,CC
+A1.2,Availability,"Platform Engineering","evidence-pack",Annual,A
+C1.1,Confidentiality,"Head of Security","env-guard,evidence-pack",Continuous,C
+PII/PHI,Privacy Controls,"Head of Privacy","evidence-pack",Annual,C

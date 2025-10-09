@@ -1,0 +1,36 @@
+name: evidence-pack
+
+on:
+  schedule:
+    - cron: "0 6 1 * *"
+  workflow_dispatch: {}
+
+jobs:
+  gather:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Change Mgmt (GitHub releases + PRs)
+        run: gh api repos/${{ github.repository }}/releases > releases.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: CI runs
+        run: gh run list --json conclusion,headBranch,updatedAt > ci.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: CloudTrail baseline
+        run: aws cloudtrail lookup-events --max-results 50 > cloudtrail.json
+      - name: Security scans (Snyk summary)
+        run: |
+          if [ -n "${SNYK_TOKEN}" ]; then
+            snyk report --json > snyk.json
+          else
+            echo '{}' > snyk.json
+          fi
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Zip
+        run: zip -r evidence-$(date +%F).zip *.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: evidence-monthly
+          path: evidence-*.zip
