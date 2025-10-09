@@ -1,0 +1,30 @@
+name: "🔁 Auto Re-run Failed Jobs (max 3)"
+
+on:
+  workflow_run:
+    types: [completed]
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  rerun-failed:
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'failure' &&
+      contains(github.event.workflow_run.name, 'CI') &&
+      github.event.workflow_run.run_attempt < 3 &&
+      !contains(github.event.workflow_run.head_branch, 'no-rerun')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const runId = context.payload.workflow_run.id;
+            await github.request('POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun-failed-jobs', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId,
+            });

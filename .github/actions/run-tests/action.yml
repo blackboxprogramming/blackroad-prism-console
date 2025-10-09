@@ -1,0 +1,63 @@
+name: Run Tests
+
+description: >-
+  Configure a language runtime, optionally install dependencies, and execute the
+  provided test command.
+
+inputs:
+  language:
+    description: Primary language runtime to configure (e.g. node, python).
+    required: true
+  version:
+    description: Version of the runtime to install.
+    required: true
+  test_command:
+    description: Command used to execute the test suite.
+    required: true
+  working-directory:
+    description: Directory where commands should run.
+    required: false
+    default: .
+  install-command:
+    description: Optional command to install dependencies before running tests.
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      if: inputs.language == 'node'
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.version }}
+        cache: npm
+        cache-dependency-path: |
+          **/package-lock.json
+          **/npm-shrinkwrap.json
+          **/package.json
+    - name: Setup Python
+      if: inputs.language == 'python'
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.version }}
+        cache: 'pip'
+        cache-dependency-path: |
+          **/requirements*.txt
+          **/pyproject.toml
+          **/setup.cfg
+    - name: Runtime not explicitly handled
+      if: inputs.language != 'node' && inputs.language != 'python'
+      shell: bash
+      run: echo "::notice::No explicit runtime setup for '${{ inputs.language }}'."
+    - name: Install dependencies
+      if: inputs.install-command != ''
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: ${{ inputs.install-command }}
+    - name: Run tests
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        CI: true
+      run: ${{ inputs.test_command }}
