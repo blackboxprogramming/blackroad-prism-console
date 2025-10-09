@@ -24,6 +24,7 @@ import {
   GitCommit,
   LayoutGrid,
   Rocket,
+  Shield,
   ShieldCheck,
   HeartPulse,
   Sparkles,
@@ -47,6 +48,7 @@ import Manifesto from './components/Manifesto.jsx'
 import AutoHeal from './pages/AutoHeal.jsx'
 import RoadView from './pages/RoadView.jsx'
 import Git from './pages/Git.jsx'
+import SecuritySpotlights from './pages/SecuritySpotlights.jsx'
 
 export default function App(){
   const location = useLocation()
@@ -211,6 +213,7 @@ export default function App(){
     { key: 'you', to: '/you', text: 'You', icon: <User size={18} /> },
     { key: 'roadview', to: '/roadview', text: 'RoadView', icon: <LayoutGrid size={18} /> },
     { key: 'autoheal', to: '/autoheal', text: 'Auto-Heal', icon: <HeartPulse size={18} /> },
+    { key: 'security', to: '/security', text: 'Security Spotlights', icon: <Shield size={18} /> },
     { key: 'guardian', to: '/guardian', text: 'Guardian', icon: <ShieldCheck size={18} /> },
     { key: 'claude', to: '/claude', text: 'Claude', icon: <Cpu size={18} /> },
     { key: 'codex', to: '/codex', text: 'Codex', icon: <Brain size={18} /> },
@@ -255,6 +258,7 @@ export default function App(){
               <Route path="/you" element={<Section><You /></Section>} />
               <Route path="/roadview" element={<Section><RoadView agents={agents} /></Section>} />
               <Route path="/autoheal" element={<Section><AutoHeal /></Section>} />
+              <Route path="/security" element={<Section><SecuritySpotlights /></Section>} />
               <Route path="/guardian" element={<Guardian />} />
               <Route path="/claude" element={<Section><Claude socket={socket} /></Section>} />
               <Route path="/codex" element={<Section><Codex socket={socket} /></Section>} />

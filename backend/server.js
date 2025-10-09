@@ -12,6 +12,73 @@ const VALID_USER = {
 };
 const tasks = [];
 
+const securitySpotlights = {
+  controlBarrier: {
+    requiredSlack: 0.18,
+    currentSlack: 0.24,
+    infeasibilityRate: 0.008,
+    interventionsToday: 3,
+    lastFailsafe: '2025-03-08T11:24:00.000Z',
+    killSwitchEngaged: false,
+    manualOverride: false,
+  },
+  dpAccountant: {
+    epsilonCap: 3.5,
+    epsilonSpent: 1.62,
+    delta: 1e-6,
+    releasesToday: 42,
+    momentsWindow: 1.2,
+    freezeQueries: false,
+    syntheticFallback: false,
+  },
+  pqHandshake: {
+    keyRotationMinutes: 45,
+    minutesSinceRotation: 32,
+    hybridSuccessRate: 0.998,
+    kemFailures: 1,
+    transcriptPinnedRate: 0.92,
+    haltChannel: false,
+  },
+};
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function snapshotSpotlights() {
+  const ctrl = securitySpotlights.controlBarrier;
+  const dp = securitySpotlights.dpAccountant;
+  const pq = securitySpotlights.pqHandshake;
+  const residualSlack = Math.max(ctrl.currentSlack - ctrl.requiredSlack, 0);
+  const residualEpsilon = Math.max(dp.epsilonCap - dp.epsilonSpent, 0);
+  const budgetUtilization = dp.epsilonCap > 0 ? dp.epsilonSpent / dp.epsilonCap : 0;
+  const timeToRotate = Math.max(pq.keyRotationMinutes - pq.minutesSinceRotation, 0);
+
+  return {
+    controlBarrier: {
+      ...ctrl,
+      residualSlack: Number(residualSlack.toFixed(3)),
+    },
+    dpAccountant: {
+      ...dp,
+      residualEpsilon: Number(residualEpsilon.toFixed(3)),
+      budgetUtilization: Number(budgetUtilization.toFixed(3)),
+    },
+    pqHandshake: {
+      ...pq,
+      timeToRotate,
+    },
+  };
+}
+
+function ensureAuth(req, res) {
+  if (req.headers.authorization !== `Bearer ${VALID_USER.token}`) {
+    send(res, 401, { error: 'unauthorized' });
+    return false;
+  }
+  return true;
+}
+
 function send(res, status, obj) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json');
@@ -69,9 +136,7 @@ const app = http.createServer(async (req, res) => {
   }
 
   if (req.method === 'POST' && url.pathname === '/api/tasks') {
-    if (req.headers.authorization !== `Bearer ${VALID_USER.token}`) {
-      return send(res, 401, { error: 'unauthorized' });
-    }
+    if (!ensureAuth(req, res)) return;
     try {
       const body = await parseBody(req);
       if (typeof body.title !== 'string' || !body.title.trim()) {
@@ -86,10 +151,113 @@ const app = http.createServer(async (req, res) => {
   }
 
   if (req.method === 'GET' && url.pathname === '/api/tasks') {
-    if (req.headers.authorization !== `Bearer ${VALID_USER.token}`) {
-      return send(res, 401, { error: 'unauthorized' });
-    }
+    if (!ensureAuth(req, res)) return;
     return send(res, 200, { tasks });
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/security/spotlights') {
+    if (!ensureAuth(req, res)) return;
+    return send(res, 200, { spotlights: snapshotSpotlights() });
+  }
+
+  if (
+    req.method === 'POST'
+    && segments[0] === 'api'
+    && segments[1] === 'security'
+    && segments[2] === 'spotlights'
+    && segments.length === 4
+  ) {
+    if (!ensureAuth(req, res)) return;
+    let body;
+    try {
+      body = await parseBody(req);
+    } catch {
+      return send(res, 400, { error: 'invalid json' });
+    }
+
+    const panelMap = {
+      'control-barrier': 'controlBarrier',
+      'dp-accountant': 'dpAccountant',
+      'pq-handshake': 'pqHandshake',
+    };
+    const panelKey = panelMap[segments[3]];
+    if (!panelKey) {
+      return send(res, 404, { error: 'not found' });
+    }
+
+    if (panelKey === 'controlBarrier') {
+      if (typeof body.requiredSlack === 'number') {
+        const value = clamp(body.requiredSlack, 0.05, 0.5);
+        securitySpotlights.controlBarrier.requiredSlack = Number(value.toFixed(3));
+        if (securitySpotlights.controlBarrier.requiredSlack > securitySpotlights.controlBarrier.currentSlack) {
+          securitySpotlights.controlBarrier.currentSlack = Number(
+            (securitySpotlights.controlBarrier.requiredSlack + 0.01).toFixed(3),
+          );
+        }
+      }
+      if (typeof body.killSwitchEngaged === 'boolean') {
+        securitySpotlights.controlBarrier.killSwitchEngaged = body.killSwitchEngaged;
+        securitySpotlights.controlBarrier.manualOverride = body.killSwitchEngaged;
+        if (body.killSwitchEngaged) {
+          securitySpotlights.controlBarrier.currentSlack = Number(
+            Math.max(securitySpotlights.controlBarrier.requiredSlack + 0.02, 0.04).toFixed(3),
+          );
+          securitySpotlights.controlBarrier.interventionsToday += 1;
+          securitySpotlights.controlBarrier.lastFailsafe = new Date().toISOString();
+        }
+      }
+      if (body.logIntervention) {
+        securitySpotlights.controlBarrier.interventionsToday += 1;
+        securitySpotlights.controlBarrier.lastFailsafe = new Date().toISOString();
+      }
+      if (typeof body.currentSlack === 'number') {
+        const value = clamp(body.currentSlack, 0, 0.6);
+        securitySpotlights.controlBarrier.currentSlack = Number(value.toFixed(3));
+      }
+    } else if (panelKey === 'dpAccountant') {
+      if (typeof body.epsilonCap === 'number') {
+        const value = clamp(body.epsilonCap, 0.5, 15);
+        securitySpotlights.dpAccountant.epsilonCap = Number(value.toFixed(2));
+        if (securitySpotlights.dpAccountant.epsilonCap < securitySpotlights.dpAccountant.epsilonSpent) {
+          securitySpotlights.dpAccountant.epsilonSpent = Number(
+            Math.max(securitySpotlights.dpAccountant.epsilonCap - 0.05, 0).toFixed(2),
+          );
+        }
+      }
+      if (typeof body.freezeQueries === 'boolean') {
+        securitySpotlights.dpAccountant.freezeQueries = body.freezeQueries;
+      }
+      if (typeof body.syntheticFallback === 'boolean') {
+        securitySpotlights.dpAccountant.syntheticFallback = body.syntheticFallback;
+      }
+      if (typeof body.epsilonSpent === 'number') {
+        const value = clamp(body.epsilonSpent, 0, 20);
+        securitySpotlights.dpAccountant.epsilonSpent = Number(value.toFixed(3));
+      }
+    } else if (panelKey === 'pqHandshake') {
+      if (typeof body.keyRotationMinutes === 'number') {
+        const value = clamp(body.keyRotationMinutes, 5, 240);
+        securitySpotlights.pqHandshake.keyRotationMinutes = Math.round(value);
+      }
+      if (typeof body.haltChannel === 'boolean') {
+        securitySpotlights.pqHandshake.haltChannel = body.haltChannel;
+      }
+      if (body.forceRekey) {
+        securitySpotlights.pqHandshake.minutesSinceRotation = 0;
+        securitySpotlights.pqHandshake.kemFailures = 0;
+      }
+      if (typeof body.minutesSinceRotation === 'number') {
+        const value = clamp(body.minutesSinceRotation, 0, 240);
+        securitySpotlights.pqHandshake.minutesSinceRotation = Math.round(value);
+      }
+      if (typeof body.hybridSuccessRate === 'number') {
+        const value = clamp(body.hybridSuccessRate, 0, 1);
+        securitySpotlights.pqHandshake.hybridSuccessRate = Number(value.toFixed(3));
+      }
+    }
+
+    const snapshot = snapshotSpotlights();
+    return send(res, 200, { key: panelKey, spotlight: snapshot[panelKey] });
   }
 
   if (req.method === 'POST' && url.pathname === '/exceptions') {
