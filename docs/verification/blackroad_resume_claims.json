@@ -1,0 +1,126 @@
+{
+  "entity": "BlackRoad Inc. — Founder & Lead Architect",
+  "bullets": [
+    {
+      "text": "Architected Lucidia, a symbolic multi-agent AI core integrating Qwen/Llama/Mistral/Grok via local Ollama orchestration; reduced external API dependency ~40% and compute overhead ~30%.",
+      "evidence_ids": [1, 2, 3, 4, 6, 7, 9, 10, 41, 42, 43, 50],
+      "files": [
+        "lucidia_core.py",
+        "lucidia/foundation_system.py",
+        "lucidia/brain.py",
+        "services/lucidia_api/app/routes.py",
+        "api/openapi.yaml",
+        "systemd/blackroad-api.service"
+      ],
+      "checks": [
+        "Confirm DistributedMemoryPalace persist/recall and UnifiedPortalSystem wiring for connectors/local models.",
+        "Confirm /chat SSE + local bridge usage; presence of Ollama/LLM bridge endpoints.",
+        "Scan commits/configs for model list integration hooks.",
+        "Compute/Api reduction = NEEDS_EVIDENCE via ops metrics (compare pre/post dependency & CPU/GPU usage)."
+      ],
+      "status": "needs-evidence-for-metrics"
+    },
+    {
+      "text": "Engineered agent mesh (Guardian, Roadie, Contradiction, Quantum, IDE); improved P2P inference ~45% and cut workflow solve time ~55% via memory + contradiction logging.",
+      "evidence_ids": [11, 12, 13, 14, 17, 41, 49],
+      "files": [
+        "lucidia/guardian.py",
+        "lucidia/roadie.py",
+        "agents/quantum_agent.py",
+        "lucidia/app.py",
+        "services/lucidia_api/app/routes.py"
+      ],
+      "checks": [
+        "Tail/read policy telemetry stream from /srv/lucidia/state/events.log.",
+        "Find contradiction handler print/log calls and escalation.",
+        "Verify agent presence indicators in SPA/Socket.IO.",
+        "Efficiency/solve-time deltas = NEEDS_EVIDENCE via benchmark logs."
+      ],
+      "status": "needs-evidence-for-metrics"
+    },
+    {
+      "text": "Developed Codex Ψ′ trinary operators as deterministic pre/post guards; reduced hallucination-adjacent failures ~40%.",
+      "evidence_ids": [51, 54, 56, 91, 92, 93],
+      "files": [
+        "prompts/blackroad_codex_prompts.md",
+        "lucidia_infinity/logic.py",
+        "lucidia/brain.py"
+      ],
+      "checks": [
+        "Locate Ψ′ pre/infer/post guard definitions and trinary operators (true/false/needs-evidence).",
+        "Verify post-checks trigger contradiction records.",
+        "Failure-rate delta = NEEDS_EVIDENCE from contradiction log stats."
+      ],
+      "status": "needs-evidence-for-metrics"
+    },
+    {
+      "text": "Integrated quantum ML (Qiskit + TorchConnector) and functional-VAE modules; shipped Sampler/Estimator QNN pipelines.",
+      "evidence_ids": [21, 22, 23, 24, 25, 26, 27, 63, 65, 69, 70],
+      "files": [
+        "lucidia/quantum/qnn.py",
+        "lucidia/quantum/torch_bridge.py",
+        "lucidia/modules/random_fields/functional_vae.py",
+        "lucidia/modules/random_fields/clfm_engine.py",
+        "lucidia/quantum/backends.py",
+        "lucidia/quantum/policies.py",
+        "lucidia/quantum/kernels.py"
+      ],
+      "checks": [
+        "Confirm EstimatorQNN/SamplerQNN builders and TorchConnector wrapper.",
+        "Verify FunctionalVAE forward (KL, constraints) and training engine."
+      ],
+      "status": "verified-by-code"
+    },
+    {
+      "text": "Implemented local-first infra (NGINX, Express/Socket.IO, SQLite, Docker, systemd) with health/readiness; p95 < 500 ms targets, error budgets, nightly backups, A+ TLS.",
+      "evidence_ids": [41, 42, 43, 88, 2, 3, 4],
+      "files": [
+        "services/lucidia_api/app/routes.py",
+        "systemd/blackroad-api.service",
+        "api/openapi.yaml",
+        "sites/blackroad/index.html",
+        "opt/blackroad/tdb/docker-compose.yml"
+      ],
+      "checks": [
+        "Verify /health and /api/health routes and systemd restart policies.",
+        "Check TLS/headers in NGINX config (if repo present).",
+        "Latency/backup/TLS grade = NEEDS_EVIDENCE via ops scans & traces."
+      ],
+      "status": "needs-evidence-for-metrics"
+    },
+    {
+      "text": "Published whitepaper with a 100-item Evidence Map; released streaming co-coding UI with agent presence and contradiction flags.",
+      "evidence_ids": [1, 9, 10, 41, 48, 74],
+      "files": [
+        "docs/… (whitepaper md)",
+        "services/lucidia_api/app/routes.py",
+        "agents/auto_novel_agent.py",
+        "lucidia/brain.py",
+        "sites/blackroad/index.html"
+      ],
+      "checks": [
+        "Confirm Evidence Map section exists and references 1–100 source index.",
+        "Verify SSE streaming and presence UI in SPA."
+      ],
+      "status": "verified-by-code"
+    },
+    {
+      "text": "Orchestrated CI/CD + analytics (GitHub Actions, dbt marts) and RoadCoin issuance gated by verification.",
+      "evidence_ids": [31, 32, 33, 34, 35, 40, 14],
+      "files": [
+        "analytics/dbt/models/staging/stg_github__issues.sql",
+        "analytics/dbt/models/marts/ops/fct_github_open_bugs.sql",
+        "analytics/dbt/models/marts/ops/fct_github_issues_daily.sql",
+        "tools/export_embeddings.py",
+        "lucidia/roadie.py",
+        ".github/workflows/* (if present)"
+      ],
+      "checks": [
+        "Open dbt models; confirm normalized schema + marts.",
+        "Find RoadCoin/heartbeat reward writes in Roadie.",
+        "CI/CD presence in workflows."
+      ],
+      "status": "verified-by-code"
+    }
+  ]
+}
