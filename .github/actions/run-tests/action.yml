@@ -1,0 +1,29 @@
+name: Run Tests
+inputs:
+  language:
+    description: "Language/runtime to configure"
+    required: true
+  version:
+    description: "Runtime version"
+    required: true
+  test_command:
+    description: "Command used to execute tests"
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      if: ${{ inputs.language == 'node' }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.version }}
+        cache: npm
+    - name: Setup Python
+      if: ${{ inputs.language == 'python' }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.version }}
+        cache: pip
+    - name: Run tests
+      shell: bash
+      run: ${{ inputs.test_command }}

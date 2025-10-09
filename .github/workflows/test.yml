@@ -1,9 +1,24 @@
 name: Tests
-on: { pull_request: {}, push: { branches: [ main ] } }
-permissions: { contents: read }
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 jobs:
   test:
+    if: |
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(format('{0}', github.event.pull_request.title), '[skip ci]')
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,7 +30,12 @@ jobs:
       - run: npm ci --omit=optional || npm i --package-lock-only
       - run: npm test
   site-playwright:
+    if: |
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(format('{0}', github.event.pull_request.title), '[skip ci]')
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: sites/blackroad
