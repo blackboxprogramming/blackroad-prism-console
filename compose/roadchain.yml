@@ -6,7 +6,7 @@ services:
     image: ghcr.io/roadchain/node:latest   # replace with your node image
     container_name: roadchain-node
     restart: unless-stopped
-    command: ["--network=testnet", "--http", "--http-port=8545", "--ws", "--ws-port=8546"]
+    command: ["--network=testnet", "--http", "--http-port=8545", "--http.addr=0.0.0.0", "--ws", "--ws-port=8546", "--ws.addr=0.0.0.0"]
     ports:
       - "8545:8545"   # HTTP RPC
       - "8546:8546"   # WebSocket
