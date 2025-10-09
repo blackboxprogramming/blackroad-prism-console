@@ -80,3 +80,8 @@ id_rsa
 *.pem
 *.key
 ssh-*
+
+# Debug/test data for br-ingest-github worker
+data/prism/
+data/ssm/
+workers/br-ingest-github/test-store.js
