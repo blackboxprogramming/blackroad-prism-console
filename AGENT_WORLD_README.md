@@ -140,31 +140,33 @@ Extend the system with:
 
 ## Integration
 
-### Connect Python and Unity/Unreal
+The system provides seamless integration between Python agents and Unity/Unreal worlds.
 
-**Option 1: JSON Files**
-```python
-# Python: Export agent data
-import json
-with open('agent_data.json', 'w') as f:
-    json.dump(agent_config, f)
+### Quick Integration
+
+**Export from Python:**
+```bash
+cd agents
+python export_agents.py
 ```
 
-```csharp
-// Unity: Import agent data
-string json = File.ReadAllText("agent_data.json");
-AgentConfig config = JsonUtility.FromJson<AgentConfig>(json);
-```
+This creates:
+- `agent_config.json` - Full configuration for Unity/Unreal
+- `agent_list.txt` - Human-readable reference
 
-**Option 2: Network Communication**
-- Use sockets or HTTP APIs
-- Real-time updates
-- Bidirectional communication
+**Import in Unity:**
+1. Copy `agent_config.json` to Unity project
+2. Add `AgentImporter.cs` component to scene
+3. Configure and press Play!
 
-**Option 3: File Watching**
-- Monitor files for changes
-- Auto-reload agent configurations
-- Live updates during development
+**See [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md) for:**
+- JSON file transfer (simplest)
+- Real-time HTTP/WebSocket communication
+- Shared database approach
+- Two-way synchronization
+- Event-driven updates
+- Performance optimization
+- Complete code examples
 
 ## Use Cases
 

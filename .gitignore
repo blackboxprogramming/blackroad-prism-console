@@ -81,3 +81,7 @@ id_rsa
 *.pem
 *.key
 ssh-*
+
+# Agent export files
+agents/agent_config.json
+agents/agent_list.txt
