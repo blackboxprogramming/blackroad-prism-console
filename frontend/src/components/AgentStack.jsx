@@ -1,6 +1,7 @@
 import React from 'react'
 import { Cpu, Activity, Wallet as WalletIcon } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts'
+import PiConsole from './PiConsole.jsx'
 
 function MiniChart({ data, dataKey }){
   return (
@@ -90,6 +91,7 @@ export default function AgentStack({ stream, setStream, system, wallet, contradi
         <div className="font-semibold mb-2">Session Notes</div>
         <textarea className="input w-full h-28 resize-none" value={notes} onChange={e=>setNotes(e.target.value)} />
       </div>
+      <PiConsole />
     </div>
   )
 }
