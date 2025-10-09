@@ -27,6 +27,142 @@ Lucidia, the core agent, embodies this stance. It sits at the intersection of sy
 
 ⸻
 
+## 1A. Evidence Map — 100 Code-Backed Statements
+
+The following catalog grounds the BlackRoad claims in repository artifacts across AI, quantum research, automation, and operations. Each statement references a concrete implementation so strategy, marketing, and hiring conversations can point to living code.
+
+### Core intelligence and memory
+
+1. `AI_Core.process` persists every intent timestamp into the shared `DistributedMemoryPalace`, giving Lucidia recall of recent goals before returning a plan stub. `lucidia_core.py`
+2. `DistributedMemoryPalace.save` immediately checkpoints to JSON so the local-first orchestration never loses state during agent handoffs. `lucidia_core.py`
+3. `UnifiedPortalSystem.__post_init__` wires GitHub, infrastructure, mobile sync, SSH, domain, model, and notification connectors into a single orchestrator instance. `lucidia_core.py`
+4. `UnifiedPortalSystem.status_report` triggers a synthetic intent check and enumerates wired connectors so operators can introspect system health. `lucidia_core.py`
+5. Façade helpers such as `create_repo` delegate to the GitHub automation connector, letting agent flows open repositories programmatically. `lucidia_core.py`
+6. `DistributedMemoryPalace` in `lucidia.foundation_system` formalizes save/retrieve semantics for future distributed backends. `lucidia/foundation_system.py`
+7. `MultiModelOrchestrator` provides a dedicated hook to route between classical, quantum, or future inference engines. `lucidia/foundation_system.py`
+8. `TeamNotificationSystem.notify` documents policy-aware messaging so orchestration steps emit auditable alerts. `lucidia/foundation_system.py`
+9. `LucidiaBrain.register` records ordered cognitive steps while guarding against duplicate stage names, mirroring theory-of-mind pipelines. `lucidia/brain.py`
+10. `LucidiaBrain.think` sequentially applies each registered transformation, enabling experiments with emergent reasoning chains. `lucidia/brain.py`
+
+### Agents and automation
+
+11. `Guardian.tail_file` streams new entries from `/srv/lucidia/state/events.log`, feeding policy loops with real-time agent telemetry. `lucidia/guardian.py`
+12. `Guardian.handle_contra` prints every contradiction context so human guardians see truth escalations immediately. `lucidia/guardian.py`
+13. `Roadie.health_checks` samples disk utilization and logs `health.disk` events to defend uptime budgets. `lucidia/roadie.py`
+14. `Roadie.mint_roadcoin` emits heartbeat rewards that write directly into the RoadCoin tokenomics ledger. `lucidia/roadie.py`
+15. `build_blackroad_site_agent.build_site` executes `npm run build` inside `sites/blackroad/`, proving bots can ship the marketing surface end-to-end. `agents/build_blackroad_site_agent.py`
+16. `AutoNovelAgent.generate_story` synthesizes themed narratives with adjustable excitement, exemplifying in-house generative AI. `agents/auto_novel_agent.py`
+17. `quantum_agent.invoke_quantum` measures contradiction states with Qiskit or PennyLane fallbacks and logs “Road Skip” tunneling events when outcomes diverge. `agents/quantum_agent.py`
+18. `scripts/blackroad_sync.sh` wraps git add/commit/push, optional webhooks, and droplet restarts so a single command refreshes GitHub and production. `scripts/blackroad_sync.sh`
+19. `refresh_working_copy` parses `WORKING_COPY_DEVICES` and issues git pulls over SSH, keeping iOS editors such as Textastic aligned with mainline history. `scripts/blackroad_sync.py`
+20. `deploy_to_droplet` shells into `/opt/blackroad`, applies migrations, and restarts `blackroad-api.service` as part of the automated release chain. `scripts/blackroad_sync.py`
+
+### Machine and deep learning
+
+21. `build_estimator_qnn` constructs gradient-enabled `EstimatorQNN` models with configurable feature maps and ansätze for local quantum classifiers. `lucidia/quantum/qnn.py`
+22. `build_sampler_qnn` prepares probabilistic `SamplerQNN` networks sized to multi-class outputs for measurement-based inference. `lucidia/quantum/qnn.py`
+23. `QModule` wraps Qiskit neural networks with `TorchConnector`, letting PyTorch autograd train quantum circuits alongside deep nets. `lucidia/quantum/torch_bridge.py`
+24. `FunctionalVAE.encode` splits latent means and log-variances, while `reparam` samples noise for unsupervised field modeling. `lucidia/modules/random_fields/functional_vae.py`
+25. `FunctionalVAE.forward` decodes functions, accumulates KL divergence, and returns constraint residuals for physics-informed learning. `lucidia/modules/random_fields/functional_vae.py`
+26. `CLFMEngine.pretrain_vae` iterates reconstruction, KL, and constraint losses to initialize DeepONet-style surrogates. `lucidia/modules/random_fields/clfm_engine.py`
+27. `CLFMEngine.train_flow` and `sample` learn conditional flows then solve latent ODEs to generate new functional fields. `lucidia/modules/random_fields/clfm_engine.py`
+28. `SyntheticGPDataset` analytically produces sine/cosine Gaussian-process samples for rapid simulation workloads. `lucidia/modules/random_fields/datasets/synthetic_gp.py`
+29. `MeanConstraint.residual` penalizes deviations from target mean functions, injecting domain priors into model training. `lucidia/modules/random_fields/constraints.py`
+30. `PoissonResidual.residual` differentiates decoded fields twice to enforce Poisson equations through automatic differentiation. `lucidia/modules/random_fields/constraints.py`
+
+### Data science and analytics
+
+31. `stg_github__issues.sql` normalizes GitHub issue payloads into typed columns for downstream modeling. `analytics/dbt/models/staging/stg_github__issues.sql`
+32. `fct_github_open_bugs.sql` filters open `bug` issues and aggregates counts per repo for ops dashboards. `analytics/dbt/models/marts/ops/fct_github_open_bugs.sql`
+33. `fct_github_issues_daily.sql` rolls issue creation and closure into day-level metrics to track throughput trends. `analytics/dbt/models/marts/ops/fct_github_issues_daily.sql`
+34. `export_embeddings.redact` strips emails and tokens before persisting embedding corpora for analytics. `tools/export_embeddings.py`
+35. `build_table` defines Arrow schemas with embedding vectors, projections, and truth metadata for BI consumers. `tools/export_embeddings.py`
+36. `annotate_dataset` merges attribute overrides, strips temporary keys, and logs audits when enriching metadata. `lucidia_meta_annotator/annotate.py`
+37. `strip_temp_attrs` recursively removes `_`-prefixed fields to keep persisted datasets clean. `lucidia_meta_annotator/tempattr.py`
+38. `write_metadata` applies configurable temp stripping before returning sanitized JSON documents. `lucidia_meta_annotator/io_generic.py`
+39. `log_event` appends JSON-line audit entries for every annotation run. `lucidia_meta_annotator/logging.py`
+40. `records()` demonstrates agent-tagged embeddings with contradiction levels ready for Atlas exports. `tools/export_embeddings.py`
+
+### Natural language and generative interfaces
+
+41. `/chat` streams Mistral 7B responses over Server-Sent Events for live conversational agents. `services/lucidia_api/app/routes.py`
+42. `/embed` validates input, deduplicates via Redis, and calls OpenAI’s embedding API on cache misses. `services/lucidia_api/app/routes.py`
+43. `/health` provides a simple `{"ok": true}` heartbeat for API clients. `services/lucidia_api/app/routes.py`
+44. `run_code` statically analyzes uploaded Python, restricts builtins, and captures stdout for safe execution. `lucidia/app.py`
+45. `evaluate_math` uses SymPy to compute expressions and optionally return symbolic derivatives. `lucidia/app.py`
+46. `install_package` enforces an allowlist and sanitized specs before invoking pip installs. `lucidia/app.py`
+47. `git_clean` issues `git reset --hard` plus `git clean -ffdx` to restore reproducible repos through the API. `lucidia/app.py`
+48. `AutoNovelAgent.generate_game_idea` produces engine-specific game pitches while rejecting unsupported engines or weaponized content. `agents/auto_novel_agent.py`
+49. The `SAFE_BUILTINS` map constrains executed code to harmless primitives such as `print`, `abs`, `round`, and `pow`. `lucidia/app.py`
+50. The root route renders the Lucidia IDE shell via `render_template("index.html")`, bridging human operators with AI tools. `lucidia/app.py`
+
+### Prompt engineering and expert systems
+
+51. The Ground Rule system prompt encodes security, consent, and culture guardrails for every BlackRoad agent. `prompts/blackroad_codex_prompts.md`
+52. The AI Identity Issuer prompt enforces DID issuance with anti-impersonation checks and signed proofs. `prompts/blackroad_codex_prompts.md`
+53. The Handle & Mail Minting prompt maps handles to TXT records and suggests edit-distance alternates when conflicts arise. `prompts/blackroad_codex_prompts.md`
+54. The Good Behavior Policy Engine prompt tiers actions and returns allow/soft-deny/deny decisions with remedies. `prompts/blackroad_codex_prompts.md`
+55. The Fair-Use Governor prompt applies token-bucket throttling, community multipliers, and retry guidance for heavy users. `prompts/blackroad_codex_prompts.md`
+56. The Resonance Search prompt scores results by human vouches, quality, conversation fit, and freshness instead of payments. `prompts/blackroad_codex_prompts.md`
+57. The Community Notes prompt produces peer-reviewed overlays with sources, contradiction flags, and confidence scores. `prompts/blackroad_codex_prompts.md`
+58. The Playful Ads generator prompt designs opt-in creative with safety checklists and community givebacks. `prompts/blackroad_codex_prompts.md`
+59. The Micro-Patronage wallet prompt applies fee caps, split rules, and immutable receipt hashes for micropayments. `prompts/blackroad_codex_prompts.md`
+60. The On-Chain-Optional Audit Log prompt emits Merkle-rooted append-only entries without exposing personal data. `prompts/blackroad_codex_prompts.md`
+
+### Quantum physics and advanced compute
+
+61. `is_enabled()` gates the quantum ML stack behind the `LUCIDIA_QML` feature flag. `lucidia/quantum/__init__.py`
+62. `get_backend` instantiates registered simulators while blocking remote providers unless explicitly allowed. `lucidia/quantum/__init__.py`
+63. `AerCPUBackend.run` seeds and executes circuits through Qiskit Aer simulators for local experimentation. `lucidia/quantum/backends.py`
+64. `AerGPUBackend` enables CUDA acceleration only when `LUCIDIA_QML_GPU` is turned on. `lucidia/quantum/backends.py`
+65. `validate_circuit` caps qubits, depth, and shot counts to respect resource budgets. `lucidia/quantum/policies.py`
+66. `test_qml.py` verifies sampler gradients remain finite and Pegasos QSVC training succeeds when quantum ML is enabled. `lucidia/quantum/tests/test_qml.py`
+67. `QModule.to` enforces GPU opt-in before moving quantum connectors to CUDA devices. `lucidia/quantum/torch_bridge.py`
+68. The Grover Sudoku example constructs oracle clauses and uncomputes ancillas to keep the quantum oracle reversible. `envs/quantum/src/torchquantum/examples/grover/grover_example_sudoku.py`
+69. `fit_qsvc` trains Pegasos quantum SVMs on local kernels for hybrid ML workflows. `lucidia/quantum/kernels.py`
+70. `build_sampler_qnn` (reused here) generates multi-class sampler networks for measurement-based predictions. `lucidia/quantum/qnn.py`
+
+### Consciousness, neuroscience, and AI education
+
+71. The `AI_Core` docstring positions the module as the “consciousness core” responsible for intention-first orchestration. `lucidia_core.py`
+72. Section 1 of the AI Consciousness & Intelligence Equation Codex spells out attention and convolution equations for a global workspace. `docs/ai-consciousness-intelligence-equation-codex.md`
+73. Section 8 of the same codex maps workspace, perception, memory, feeling, deliberation, and learning to mind-like roles. `docs/ai-consciousness-intelligence-equation-codex.md`
+74. `LucidiaBrain.steps` exposes the ordered reasoning pipeline for theory-of-mind introspection. `lucidia/brain.py`
+75. `opt/blackroad/tdb/docker-compose.yml` launches transformer neuron explainer services and a neuron viewer for activation studies. `opt/blackroad/tdb/docker-compose.yml`
+76. `apps/quantum/ternary_consciousness_v3.html` reserves an interactive qutrit lab for consciousness experiments. `apps/quantum/ternary_consciousness_v3.html`
+77. The AI Code Execution Gap plan bakes progressive prompts and inline education into workflows for non-technical builders. `docs/AI_CODE_EXECUTION_GAP_REMEDIATION_PLAN.md`
+78. The Dream-State Interface concept integrates subconscious data and privacy-preserving enclaves into care decisions. `docs/fusion-tier-concepts.md`
+79. The Quantum Empathy Lattice concept models probabilistic emotional states and entangled moderator pairs. `docs/fusion-tier-concepts.md`
+80. Section 4 of the AI Consciousness codex models reward signals and policy gradients as engineering stand-ins for “feeling.” `docs/ai-consciousness-intelligence-equation-codex.md`
+
+### Infrastructure, surfaces, and delivery pipelines
+
+81. `.devcontainer/devcontainer.json` provisions Git, Node 20, Python 3.11, and VS Code extensions for GitHub Codespaces parity. `.devcontainer/devcontainer.json`
+82. `/health` in the OpenAPI spec documents liveness responses with uptime metadata for monitoring hooks. `api/openapi.yaml`
+83. `/api/memory/index` describes JSON payloads with IDs, text, sources, and tags for knowledge ingestion. `api/openapi.yaml`
+84. The hero section in `sites/blackroad/index.html` invites users to enter the portal, explore Roadview, or start new work. `sites/blackroad/index.html`
+85. `sites/blackroad/src/styles.css` uses gradient tokens, rounded cards, and fast hover transitions to deliver neomorphic-speed UI. `sites/blackroad/src/styles.css`
+86. `hello-blackroad.json` packages blog titles, descriptions, and HTML content for static JSON delivery. `sites/blackroad/public/blog/hello-blackroad.json`
+87. `Working Copy — dead simple flow` documents the mobile Git workflow relied on by editors like Textastic. `blackroad-foundation/scripts/working_copy.md`
+88. `blackroad-api.service` runs the Express API with restart policies, environment files, and journal logging. `systemd/blackroad-api.service`
+89. `handle_command` parses natural-language requests (“push”, “deploy”, “refresh working copy”) into pipeline actions. `scripts/blackroad_sync.py`
+90. `verify_site` cURLs `https://blackroad.io/health` after deployments to confirm the site is live. `scripts/blackroad_sync.py`
+
+### Mathematics, computation, and zeta explorations
+
+91. `t_and` defines trinary AND as a minimum operator, supporting fuzzy logic over `(-1, 0, 1)` states. `lucidia_infinity/logic.py`
+92. `psi_merge` treats agreement as 0 and contradictions as 1, encoding Ψ′ paradox handling in logic space. `lucidia_infinity/logic.py`
+93. `generate_truth_tables` emits JSON, NumPy, and GEXF artifacts for every trinary operator into `output/logic`. `lucidia_infinity/logic.py`
+94. The Backbone equations list covers Turing’s halting problem, Kolmogorov complexity, RSA, and other computational theory staples. `docs/blackroad-equation-backbone.md`
+95. Logistic regression and cross-entropy equations document supervised learning updates within the AI consciousness codex. `docs/ai-consciousness-intelligence-equation-codex.md`
+96. Juxtaposing those supervised formulas with the unsupervised `FunctionalVAE.forward` loss highlights both learning regimes living in the codebase. `docs/ai-consciousness-intelligence-equation-codex.md`, `lucidia/modules/random_fields/functional_vae.py`
+97. `riemann_zeros` fetches the first `n` nontrivial Riemann zeta zeros and compares their spacings to Wigner distributions. `experiments/hilbert_polya_gue.py`
+98. `tail_risk` sums scenario scores and evaluates `mpmath.zeta(1 + s)` to quantify systemic risk. `risk/engine.py`
+99. The Grover Sudoku oracle uncomputes clause qubits to keep the electron-inspired search oracle reversible. `envs/quantum/src/torchquantum/examples/grover/grover_example_sudoku.py`
+100. The Backbone list also includes the Riemann zeta function and hypothesis entries—“Zeta lol” grounded in math instead of memes. `docs/blackroad-equation-backbone.md`
+
+⸻
+
 ## 2. Background & Motivation
 
 BlackRoad emerged from practical frustrations: stateless assistants, loss of continuity, unclear boundaries between “polite fiction” and actionable truth. The platform re‑centers on:
