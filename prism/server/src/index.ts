@@ -1,15 +1,30 @@
 import Fastify from 'fastify';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
 import { spawn } from 'child_process';
-import { writeFileSync, mkdirSync } from 'fs';
+import {
+  appendFileSync,
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+} from 'fs';
 import { join, dirname, resolve, sep } from 'path';
+import { fileURLToPath } from 'url';
 import { z } from 'zod';
 import { parse as parseShell } from 'shell-quote';
 
 interface PrismDiffHunk { lines: string[]; }
 interface PrismDiff { path: string; hunks: PrismDiffHunk[]; }
-interface PrismEvent<T = any> { id: string; kind: string; data: T; }
+interface PrismEvent<T = any> {
+  id: string;
+  kind: string;
+  data: T;
+  index: number;
+  ts: string;
+  prevHash: string;
+  hash: string;
+}
 interface RunRecord {
   id: string; projectId: string; sessionId: string; cmd: string; cwd?: string;
   status: 'running' | 'ok' | 'error' | 'cancelled'; exitCode?: number | null;
@@ -23,12 +38,71 @@ interface ApprovalRecord {
 
 const bus = new EventEmitter();
 
+const GENESIS = process.env.PRISM_EVENT_GENESIS || 'PRISM-GENESIS';
+const moduleDir = fileURLToPath(new URL('.', import.meta.url));
+const defaultLogDir = resolve(moduleDir, '../..', 'logs');
+const eventLogDir = process.env.PRISM_EVENT_LOG_DIR
+  ? resolve(process.env.PRISM_EVENT_LOG_DIR)
+  : defaultLogDir;
+const eventLogPath = join(eventLogDir, 'events.jsonl');
+
+function canonicalize(value: unknown): unknown {
+  if (value === null || typeof value !== 'object') return value;
+  if (Array.isArray(value)) return value.map((item) => canonicalize(item));
+  const entries = Object.entries(value as Record<string, unknown>).sort(([a], [b]) =>
+    a.localeCompare(b),
+  );
+  const result: Record<string, unknown> = {};
+  for (const [key, val] of entries) {
+    result[key] = canonicalize(val);
+  }
+  return result;
+}
+
+const canonicalJson = (value: unknown) => JSON.stringify(canonicalize(value));
+
+const hashMaterial = (material: string) => createHash('sha256').update(material).digest('hex');
+
+mkdirSync(eventLogDir, { recursive: true });
+
+let lastIndex = -1;
+let lastHash = GENESIS;
+
+if (existsSync(eventLogPath)) {
+  try {
+    const content = readFileSync(eventLogPath, 'utf8').trim();
+    const lastLine = content ? content.split('\n').filter(Boolean).pop() : undefined;
+    if (lastLine) {
+      const parsed = JSON.parse(lastLine) as Partial<PrismEvent>;
+      if (typeof parsed.index === 'number' && typeof parsed.hash === 'string') {
+        lastIndex = parsed.index;
+        lastHash = parsed.hash;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to read existing event log', err);
+  }
+}
+
 const policy = { write: 'auto' as 'auto' | 'review' };
 const runs: RunRecord[] = [];
 const approvals: ApprovalRecord[] = [];
 
 function emit<T>(kind: string, data: T) {
-  const event: PrismEvent<T> = { id: randomUUID(), kind, data };
+  const id = randomUUID();
+  const ts = new Date().toISOString();
+  const index = lastIndex + 1;
+  const prevHash = lastHash;
+  const material = `${prevHash}|${canonicalJson({ id, kind, data })}|${ts}|${index}`;
+  const hash = hashMaterial(material);
+  const event: PrismEvent<T> = { id, kind, data, index, ts, prevHash, hash };
+  try {
+    appendFileSync(eventLogPath, `${JSON.stringify(event)}\n`);
+  } catch (err) {
+    console.error('Failed to append event log', err);
+  }
+  lastIndex = index;
+  lastHash = hash;
   bus.emit('event', event);
 }
 
@@ -44,7 +118,7 @@ export function buildServer() {
     const listener = (event: PrismEvent<any>) => {
       reply.raw.write(`id: ${event.id}\n`);
       reply.raw.write(`event: ${event.kind}\n`);
-      reply.raw.write(`data: ${JSON.stringify(event.data)}\n\n`);
+      reply.raw.write(`data: ${JSON.stringify(event)}\n\n`);
     };
     bus.on('event', listener);
     req.raw.on('close', () => bus.off('event', listener));

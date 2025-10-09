@@ -22,6 +22,7 @@ yarn-debug.log*
 pr_autopilot.log
 pnpm-debug.log*
 blackroad_deploy.log
+prism/logs/
 
 # OS
 .DS_Store
