@@ -158,6 +158,9 @@ const app = express();
 app.set('trust proxy', 1);
 require('./modules/jsonEnvelope')(app);
 require('./modules/jsonify_proxy')({ app });
+// requestGuard preserves req.rawBody for webhook verification. If you swap it out,
+// ensure express.raw({ type: 'application/json' }) (or equivalent) runs before
+// the billing webhook route so Stripe receives the exact payload.
 require('./modules/requestGuard')(app);
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
@@ -334,10 +337,14 @@ app.post('/api/billing/webhook', (req, res) => {
     return res.status(501).json({ error: 'stripe_unconfigured' });
   }
   const sig = req.headers['stripe-signature'];
+  const rawBody =
+    typeof req.rawBody === 'string'
+      ? req.rawBody
+      : JSON.stringify(req.body ?? {});
   let event;
   try {
     event = stripeClient.webhooks.constructEvent(
-      JSON.stringify(req.body),
+      rawBody,
       sig,
       STRIPE_WEBHOOK_SECRET
     );
@@ -819,7 +826,7 @@ setInterval(() => {
     host: os.hostname(),
   };
   io.emit('metrics', payload);
-}, 2000);
+}, 2000).unref();
 
 // --- Start
 server.listen(PORT, () => {
