@@ -1,0 +1,111 @@
+name: Reusable Node Tests
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: Node.js version to use
+        required: false
+        default: '20'
+        type: string
+      install-command:
+        description: Command used to install dependencies
+        required: false
+        default: npm ci
+        type: string
+      test-command:
+        description: Command used to execute tests
+        required: false
+        default: npm test -- --ci
+        type: string
+      working-directory:
+        description: Directory to run commands from
+        required: false
+        default: .
+        type: string
+      junit-path:
+        description: Relative path for the junit XML output
+        required: false
+        default: reports/junit.xml
+        type: string
+      artifact-name:
+        description: Name of the uploaded artifact
+        required: false
+        default: node-test-results
+        type: string
+      package-manager:
+        description: Package manager used for caching
+        required: false
+        default: npm
+        type: string
+      cache-dependency-path:
+        description: Path(s) to dependency lockfiles for caching
+        required: false
+        default: package-lock.json
+        type: string
+      timeout-minutes:
+        description: Job timeout in minutes
+        required: false
+        default: 30
+        type: number
+      upload-artifact:
+        description: Whether to upload junit artifacts
+        required: false
+        default: true
+        type: boolean
+  workflow_dispatch:
+    inputs:
+      node-version:
+        description: Node.js version to use
+        required: false
+        default: '20'
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: read
+
+jobs:
+  tests:
+    name: Run Node tests
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    env:
+      CI: true
+      JEST_JUNIT_OUTPUT: ${{ inputs.junit-path }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: ${{ inputs.package-manager }}
+          cache-dependency-path: ${{ inputs.cache-dependency-path }}
+
+      - name: Install dependencies
+        if: ${{ inputs.install-command != '' }}
+        run: ${{ inputs.install-command }}
+
+      - name: Run tests
+        run: ${{ inputs.test-command }}
+
+      - name: Publish junit report
+        if: always()
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: ${{ inputs.working-directory != '.' && format('{0}/{1}', inputs.working-directory, inputs.junit-path) || inputs.junit-path }}
+          require_tests: false
+
+      - name: Upload test artifacts
+        if: ${{ always() && inputs.upload-artifact }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.working-directory != '.' && format('{0}/{1}', inputs.working-directory, inputs.junit-path) || inputs.junit-path }}
+          if-no-files-found: warn
+          retention-days: 7
