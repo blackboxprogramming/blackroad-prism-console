@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
 import { randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
-import { spawn } from 'child_process';
+import { spawn, type ChildProcessWithoutNullStreams } from 'child_process';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join, dirname, resolve, sep } from 'path';
 import { z } from 'zod';
@@ -17,7 +17,7 @@ interface RunRecord {
 }
 interface ApprovalRecord {
   id: string; capability: string; status: 'pending'|'approved'|'denied';
-  payload: unknown; createdAt: string; decidedBy?: string; decidedAt?: string; requestedBy?: string;
+  payload?: unknown; createdAt: string; decidedBy?: string; decidedAt?: string; requestedBy?: string;
 }
 
 
@@ -25,7 +25,59 @@ const bus = new EventEmitter();
 
 const policy = { write: 'auto' as 'auto' | 'review' };
 const runs: RunRecord[] = [];
+const activeRuns = new Map<string, ChildProcessWithoutNullStreams>();
 const approvals: ApprovalRecord[] = [];
+
+const MAX_RUN_HISTORY = 100;
+const MAX_APPROVAL_HISTORY = 100;
+
+function pruneRuns() {
+  if (runs.length <= MAX_RUN_HISTORY) return;
+  let removeCount = runs.length - MAX_RUN_HISTORY;
+  for (let i = 0; i < runs.length && removeCount > 0;) {
+    if (runs[i].status !== 'running') {
+      runs.splice(i, 1);
+      removeCount--;
+    } else {
+      i++;
+    }
+  }
+}
+
+function pruneApprovals() {
+  if (approvals.length <= MAX_APPROVAL_HISTORY) return;
+  let removeCount = approvals.length - MAX_APPROVAL_HISTORY;
+  for (let i = 0; i < approvals.length && removeCount > 0;) {
+    if (approvals[i].status !== 'pending') {
+      approvals.splice(i, 1);
+      removeCount--;
+    } else {
+      i++;
+    }
+  }
+}
+
+function finalizeRun(
+  rec: RunRecord,
+  status: RunRecord['status'],
+  exitCode: number | null,
+  extra?: Record<string, unknown>,
+) {
+  if (rec.endedAt) return;
+  const endedAt = new Date().toISOString();
+  rec.status = status;
+  rec.exitCode = exitCode;
+  rec.endedAt = endedAt;
+  activeRuns.delete(rec.id);
+  pruneRuns();
+  emit('run.end', {
+    runId: rec.id,
+    exitCode,
+    status,
+    durationMs: Date.parse(endedAt) - Date.parse(rec.startedAt),
+    ...(extra ?? {}),
+  });
+}
 
 function emit<T>(kind: string, data: T) {
   const event: PrismEvent<T> = { id: randomUUID(), kind, data };
@@ -106,19 +158,17 @@ export function buildServer() {
     };
     runs.push(rec);
     const child = spawn(command, parts.slice(1), { cwd, env });
-    (rec as any).child = child;
+    activeRuns.set(id, child);
     emit('run.start', { runId: id, cmd, cwd });
     child.stdout.on('data', (c) => emit('run.out', { runId: id, chunk: c.toString() }));
     child.stderr.on('data', (c) => emit('run.err', { runId: id, chunk: c.toString() }));
     child.on('close', (code) => {
-      rec.status = code === 0 ? 'ok' : 'error';
-      rec.exitCode = code ?? null;
-      rec.endedAt = new Date().toISOString();
-      emit('run.end', {
-        runId: id,
-        exitCode: code,
-        durationMs: Date.parse(rec.endedAt) - Date.parse(startedAt),
-      });
+      const status = rec.status === 'cancelled' ? 'cancelled' : code === 0 ? 'ok' : 'error';
+      finalizeRun(rec, status, code ?? null);
+    });
+    child.on('error', (err) => {
+      emit('run.err', { runId: id, chunk: err.message });
+      finalizeRun(rec, 'error', null, { error: err.message });
     });
     reply.send({ runId: id });
   });
@@ -131,11 +181,10 @@ export function buildServer() {
 
   app.post('/run/:id/cancel', async (req, reply) => {
     const rec = runs.find((r) => r.id === (req.params as any).id);
-    if (rec && (rec as any).child) {
-      (rec as any).child.kill('SIGTERM');
+    const child = rec ? activeRuns.get(rec.id) : undefined;
+    if (rec && child) {
       rec.status = 'cancelled';
-      rec.endedAt = new Date().toISOString();
-      emit('run.end', { runId: rec.id, exitCode: null, durationMs: 0 });
+      child.kill('SIGTERM');
     }
     reply.send({ ok: true });
   });
@@ -179,6 +228,7 @@ export function buildServer() {
         requestedBy: 'lucidia' as any,
       };
       approvals.push(approval);
+      pruneApprovals();
       emit('plan', { summary: 'Write requires approval', ctx: { approvalId } });
       reply.send({ status: 'pending', approvalId });
     } else {
@@ -225,6 +275,8 @@ export function buildServer() {
         return;
       }
     }
+    delete a.payload;
+    pruneApprovals();
     emit('approval.approved', { id });
     reply.send({ status: 'approved' });
   });
@@ -239,6 +291,8 @@ export function buildServer() {
     a.status = 'denied';
     a.decidedBy = 'user';
     a.decidedAt = new Date().toISOString();
+    delete a.payload;
+    pruneApprovals();
     emit('approval.denied', { id });
     reply.send({ status: 'denied' });
   });
