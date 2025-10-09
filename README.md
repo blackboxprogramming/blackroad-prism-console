@@ -1,4 +1,34 @@
-# BlackRoad.io — Dependency & Ops Bundle
+# BlackRoad Prism Console
+
+A comprehensive toolkit for the BlackRoad project, including agent orchestration, visualization, and deployment tools.
+
+## 🌟 New: Agent World Visualization
+
+Build realistic 3D worlds where BlackRoad agents live, learn, and celebrate together!
+
+**Quick Start:**
+```bash
+cd agents
+python deploy_students.py  # Deploy agents + run graduation ceremony! 🎓
+python export_agents.py    # Export to Unity/Unreal
+```
+
+**Features:**
+- 🎓 Deploy agent families with celebration ceremonies
+- 🎮 Visualize in Unity with realistic environments
+- 🎨 Create in Unreal Engine with high-fidelity graphics
+- 🔄 Seamless Python ↔ Unity/Unreal integration
+- 🌍 Realistic terrain, lighting, physics, and effects
+
+**Documentation:**
+- [Quick Start Guide](QUICKSTART.md) - Get started in 5 minutes
+- [Agent World Overview](AGENT_WORLD_README.md) - Complete system overview
+- [Unity Setup Guide](unity/SCENE_SETUP.md) - Step-by-step Unity tutorial
+- [Integration Guide](INTEGRATION_GUIDE.md) - Connect Python with Unity/Unreal
+
+---
+
+
 
 Date: 2025-08-22
 

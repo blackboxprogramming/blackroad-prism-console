@@ -1,0 +1,73 @@
+BLACKROAD AGENT FAMILY
+==================================================
+
+LEADERS:
+--------------------------------------------------
+  - phi
+  - gpt
+  - mistral
+  - codex
+  - lucidia
+
+TEACHERS:
+--------------------------------------------------
+  - teacher_agent_1 (guided by phi)
+    * teacher_agent_1_student_1
+    * teacher_agent_1_student_2
+  - teacher_agent_2 (guided by gpt)
+    * teacher_agent_2_student_1
+    * teacher_agent_2_student_2
+  - teacher_agent_3 (guided by mistral)
+    * teacher_agent_3_student_1
+    * teacher_agent_3_student_2
+  - teacher_agent_4 (guided by codex)
+    * teacher_agent_4_student_1
+    * teacher_agent_4_student_2
+  - teacher_agent_5 (guided by lucidia)
+    * teacher_agent_5_student_1
+    * teacher_agent_5_student_2
+  - teacher_agent_6 (guided by phi)
+    * teacher_agent_6_student_1
+    * teacher_agent_6_student_2
+  - teacher_agent_7 (guided by gpt)
+    * teacher_agent_7_student_1
+    * teacher_agent_7_student_2
+  - teacher_agent_8 (guided by mistral)
+    * teacher_agent_8_student_1
+    * teacher_agent_8_student_2
+  - teacher_agent_9 (guided by codex)
+    * teacher_agent_9_student_1
+    * teacher_agent_9_student_2
+  - teacher_agent_10 (guided by lucidia)
+    * teacher_agent_10_student_1
+    * teacher_agent_10_student_2
+  - teacher_agent_11 (guided by phi)
+    * teacher_agent_11_student_1
+    * teacher_agent_11_student_2
+  - teacher_agent_12 (guided by gpt)
+    * teacher_agent_12_student_1
+    * teacher_agent_12_student_2
+  - teacher_agent_13 (guided by mistral)
+    * teacher_agent_13_student_1
+    * teacher_agent_13_student_2
+  - teacher_agent_14 (guided by codex)
+    * teacher_agent_14_student_1
+    * teacher_agent_14_student_2
+  - teacher_agent_15 (guided by lucidia)
+    * teacher_agent_15_student_1
+    * teacher_agent_15_student_2
+  - teacher_agent_16 (guided by phi)
+    * teacher_agent_16_student_1
+    * teacher_agent_16_student_2
+  - teacher_agent_17 (guided by gpt)
+    * teacher_agent_17_student_1
+    * teacher_agent_17_student_2
+  - teacher_agent_18 (guided by mistral)
+    * teacher_agent_18_student_1
+    * teacher_agent_18_student_2
+  - teacher_agent_19 (guided by codex)
+    * teacher_agent_19_student_1
+    * teacher_agent_19_student_2
+  - teacher_agent_20 (guided by lucidia)
+    * teacher_agent_20_student_1
+    * teacher_agent_20_student_2

@@ -1,0 +1,775 @@
+{
+  "version": "1.0",
+  "timestamp": "2025-01-01T00:00:00Z",
+  "leaders": [
+    {
+      "name": "phi",
+      "type": "leader",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 500
+      }
+    },
+    {
+      "name": "gpt",
+      "type": "leader",
+      "position": {
+        "x": 400,
+        "y": 0,
+        "z": 500
+      }
+    },
+    {
+      "name": "mistral",
+      "type": "leader",
+      "position": {
+        "x": 800,
+        "y": 0,
+        "z": 500
+      }
+    },
+    {
+      "name": "codex",
+      "type": "leader",
+      "position": {
+        "x": 1200,
+        "y": 0,
+        "z": 500
+      }
+    },
+    {
+      "name": "lucidia",
+      "type": "leader",
+      "position": {
+        "x": 1600,
+        "y": 0,
+        "z": 500
+      }
+    }
+  ],
+  "teachers": [
+    {
+      "name": "teacher_agent_1",
+      "type": "teacher",
+      "leader": "phi",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_1_student_1",
+        "teacher_agent_1_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_2",
+      "type": "teacher",
+      "leader": "gpt",
+      "position": {
+        "x": 600,
+        "y": 0,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_2_student_1",
+        "teacher_agent_2_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_3",
+      "type": "teacher",
+      "leader": "mistral",
+      "position": {
+        "x": 1200,
+        "y": 0,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_3_student_1",
+        "teacher_agent_3_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_4",
+      "type": "teacher",
+      "leader": "codex",
+      "position": {
+        "x": 1800,
+        "y": 0,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_4_student_1",
+        "teacher_agent_4_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_5",
+      "type": "teacher",
+      "leader": "lucidia",
+      "position": {
+        "x": 2400,
+        "y": 0,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_5_student_1",
+        "teacher_agent_5_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_6",
+      "type": "teacher",
+      "leader": "phi",
+      "position": {
+        "x": 0,
+        "y": 800,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_6_student_1",
+        "teacher_agent_6_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_7",
+      "type": "teacher",
+      "leader": "gpt",
+      "position": {
+        "x": 600,
+        "y": 800,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_7_student_1",
+        "teacher_agent_7_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_8",
+      "type": "teacher",
+      "leader": "mistral",
+      "position": {
+        "x": 1200,
+        "y": 800,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_8_student_1",
+        "teacher_agent_8_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_9",
+      "type": "teacher",
+      "leader": "codex",
+      "position": {
+        "x": 1800,
+        "y": 800,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_9_student_1",
+        "teacher_agent_9_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_10",
+      "type": "teacher",
+      "leader": "lucidia",
+      "position": {
+        "x": 2400,
+        "y": 800,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_10_student_1",
+        "teacher_agent_10_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_11",
+      "type": "teacher",
+      "leader": "phi",
+      "position": {
+        "x": 0,
+        "y": 1600,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_11_student_1",
+        "teacher_agent_11_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_12",
+      "type": "teacher",
+      "leader": "gpt",
+      "position": {
+        "x": 600,
+        "y": 1600,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_12_student_1",
+        "teacher_agent_12_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_13",
+      "type": "teacher",
+      "leader": "mistral",
+      "position": {
+        "x": 1200,
+        "y": 1600,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_13_student_1",
+        "teacher_agent_13_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_14",
+      "type": "teacher",
+      "leader": "codex",
+      "position": {
+        "x": 1800,
+        "y": 1600,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_14_student_1",
+        "teacher_agent_14_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_15",
+      "type": "teacher",
+      "leader": "lucidia",
+      "position": {
+        "x": 2400,
+        "y": 1600,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_15_student_1",
+        "teacher_agent_15_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_16",
+      "type": "teacher",
+      "leader": "phi",
+      "position": {
+        "x": 0,
+        "y": 2400,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_16_student_1",
+        "teacher_agent_16_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_17",
+      "type": "teacher",
+      "leader": "gpt",
+      "position": {
+        "x": 600,
+        "y": 2400,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_17_student_1",
+        "teacher_agent_17_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_18",
+      "type": "teacher",
+      "leader": "mistral",
+      "position": {
+        "x": 1200,
+        "y": 2400,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_18_student_1",
+        "teacher_agent_18_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_19",
+      "type": "teacher",
+      "leader": "codex",
+      "position": {
+        "x": 1800,
+        "y": 2400,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_19_student_1",
+        "teacher_agent_19_student_2"
+      ]
+    },
+    {
+      "name": "teacher_agent_20",
+      "type": "teacher",
+      "leader": "lucidia",
+      "position": {
+        "x": 2400,
+        "y": 2400,
+        "z": -500
+      },
+      "students": [
+        "teacher_agent_20_student_1",
+        "teacher_agent_20_student_2"
+      ]
+    }
+  ],
+  "students": [
+    {
+      "name": "teacher_agent_1_student_1",
+      "type": "student",
+      "leader": "phi",
+      "teacher": "teacher_agent_1",
+      "position": {
+        "x": 200.0,
+        "y": 0.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_1_student_2",
+      "type": "student",
+      "leader": "phi",
+      "teacher": "teacher_agent_1",
+      "position": {
+        "x": -200.0,
+        "y": 2.4492935982947064e-14,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_2_student_1",
+      "type": "student",
+      "leader": "gpt",
+      "teacher": "teacher_agent_2",
+      "position": {
+        "x": 800.0,
+        "y": 0.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_2_student_2",
+      "type": "student",
+      "leader": "gpt",
+      "teacher": "teacher_agent_2",
+      "position": {
+        "x": 400.0,
+        "y": 2.4492935982947064e-14,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_3_student_1",
+      "type": "student",
+      "leader": "mistral",
+      "teacher": "teacher_agent_3",
+      "position": {
+        "x": 1400.0,
+        "y": 0.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_3_student_2",
+      "type": "student",
+      "leader": "mistral",
+      "teacher": "teacher_agent_3",
+      "position": {
+        "x": 1000.0,
+        "y": 2.4492935982947064e-14,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_4_student_1",
+      "type": "student",
+      "leader": "codex",
+      "teacher": "teacher_agent_4",
+      "position": {
+        "x": 2000.0,
+        "y": 0.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_4_student_2",
+      "type": "student",
+      "leader": "codex",
+      "teacher": "teacher_agent_4",
+      "position": {
+        "x": 1600.0,
+        "y": 2.4492935982947064e-14,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_5_student_1",
+      "type": "student",
+      "leader": "lucidia",
+      "teacher": "teacher_agent_5",
+      "position": {
+        "x": 2600.0,
+        "y": 0.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_5_student_2",
+      "type": "student",
+      "leader": "lucidia",
+      "teacher": "teacher_agent_5",
+      "position": {
+        "x": 2200.0,
+        "y": 2.4492935982947064e-14,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_6_student_1",
+      "type": "student",
+      "leader": "phi",
+      "teacher": "teacher_agent_6",
+      "position": {
+        "x": 200.0,
+        "y": 800.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_6_student_2",
+      "type": "student",
+      "leader": "phi",
+      "teacher": "teacher_agent_6",
+      "position": {
+        "x": -200.0,
+        "y": 800.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_7_student_1",
+      "type": "student",
+      "leader": "gpt",
+      "teacher": "teacher_agent_7",
+      "position": {
+        "x": 800.0,
+        "y": 800.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_7_student_2",
+      "type": "student",
+      "leader": "gpt",
+      "teacher": "teacher_agent_7",
+      "position": {
+        "x": 400.0,
+        "y": 800.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_8_student_1",
+      "type": "student",
+      "leader": "mistral",
+      "teacher": "teacher_agent_8",
+      "position": {
+        "x": 1400.0,
+        "y": 800.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_8_student_2",
+      "type": "student",
+      "leader": "mistral",
+      "teacher": "teacher_agent_8",
+      "position": {
+        "x": 1000.0,
+        "y": 800.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_9_student_1",
+      "type": "student",
+      "leader": "codex",
+      "teacher": "teacher_agent_9",
+      "position": {
+        "x": 2000.0,
+        "y": 800.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_9_student_2",
+      "type": "student",
+      "leader": "codex",
+      "teacher": "teacher_agent_9",
+      "position": {
+        "x": 1600.0,
+        "y": 800.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_10_student_1",
+      "type": "student",
+      "leader": "lucidia",
+      "teacher": "teacher_agent_10",
+      "position": {
+        "x": 2600.0,
+        "y": 800.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_10_student_2",
+      "type": "student",
+      "leader": "lucidia",
+      "teacher": "teacher_agent_10",
+      "position": {
+        "x": 2200.0,
+        "y": 800.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_11_student_1",
+      "type": "student",
+      "leader": "phi",
+      "teacher": "teacher_agent_11",
+      "position": {
+        "x": 200.0,
+        "y": 1600.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_11_student_2",
+      "type": "student",
+      "leader": "phi",
+      "teacher": "teacher_agent_11",
+      "position": {
+        "x": -200.0,
+        "y": 1600.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_12_student_1",
+      "type": "student",
+      "leader": "gpt",
+      "teacher": "teacher_agent_12",
+      "position": {
+        "x": 800.0,
+        "y": 1600.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_12_student_2",
+      "type": "student",
+      "leader": "gpt",
+      "teacher": "teacher_agent_12",
+      "position": {
+        "x": 400.0,
+        "y": 1600.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_13_student_1",
+      "type": "student",
+      "leader": "mistral",
+      "teacher": "teacher_agent_13",
+      "position": {
+        "x": 1400.0,
+        "y": 1600.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_13_student_2",
+      "type": "student",
+      "leader": "mistral",
+      "teacher": "teacher_agent_13",
+      "position": {
+        "x": 1000.0,
+        "y": 1600.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_14_student_1",
+      "type": "student",
+      "leader": "codex",
+      "teacher": "teacher_agent_14",
+      "position": {
+        "x": 2000.0,
+        "y": 1600.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_14_student_2",
+      "type": "student",
+      "leader": "codex",
+      "teacher": "teacher_agent_14",
+      "position": {
+        "x": 1600.0,
+        "y": 1600.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_15_student_1",
+      "type": "student",
+      "leader": "lucidia",
+      "teacher": "teacher_agent_15",
+      "position": {
+        "x": 2600.0,
+        "y": 1600.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_15_student_2",
+      "type": "student",
+      "leader": "lucidia",
+      "teacher": "teacher_agent_15",
+      "position": {
+        "x": 2200.0,
+        "y": 1600.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_16_student_1",
+      "type": "student",
+      "leader": "phi",
+      "teacher": "teacher_agent_16",
+      "position": {
+        "x": 200.0,
+        "y": 2400.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_16_student_2",
+      "type": "student",
+      "leader": "phi",
+      "teacher": "teacher_agent_16",
+      "position": {
+        "x": -200.0,
+        "y": 2400.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_17_student_1",
+      "type": "student",
+      "leader": "gpt",
+      "teacher": "teacher_agent_17",
+      "position": {
+        "x": 800.0,
+        "y": 2400.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_17_student_2",
+      "type": "student",
+      "leader": "gpt",
+      "teacher": "teacher_agent_17",
+      "position": {
+        "x": 400.0,
+        "y": 2400.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_18_student_1",
+      "type": "student",
+      "leader": "mistral",
+      "teacher": "teacher_agent_18",
+      "position": {
+        "x": 1400.0,
+        "y": 2400.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_18_student_2",
+      "type": "student",
+      "leader": "mistral",
+      "teacher": "teacher_agent_18",
+      "position": {
+        "x": 1000.0,
+        "y": 2400.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_19_student_1",
+      "type": "student",
+      "leader": "codex",
+      "teacher": "teacher_agent_19",
+      "position": {
+        "x": 2000.0,
+        "y": 2400.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_19_student_2",
+      "type": "student",
+      "leader": "codex",
+      "teacher": "teacher_agent_19",
+      "position": {
+        "x": 1600.0,
+        "y": 2400.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_20_student_1",
+      "type": "student",
+      "leader": "lucidia",
+      "teacher": "teacher_agent_20",
+      "position": {
+        "x": 2600.0,
+        "y": 2400.0,
+        "z": -500
+      }
+    },
+    {
+      "name": "teacher_agent_20_student_2",
+      "type": "student",
+      "leader": "lucidia",
+      "teacher": "teacher_agent_20",
+      "position": {
+        "x": 2200.0,
+        "y": 2400.0,
+        "z": -500
+      }
+    }
+  ]
+}
