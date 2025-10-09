@@ -1,0 +1,20 @@
+name: "🌿 Java Gradle CI – 11"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run tests via composite action
+        uses: ./.github/actions/run-tests
+        with:
+          language: "java-gradle"
+          version: "11"
+          test_command: "./gradlew test"

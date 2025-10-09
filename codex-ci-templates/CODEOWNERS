@@ -1,0 +1,16 @@
+# Update these entries to match your team's ownership model.
+# Lines starting with '#' are comments.
+
+# Default reviewers for everything.
+*       @blackroad/engineering-leads
+
+# Frontend projects.
+frontend/ @blackroad/web-platform
+apps/**   @blackroad/web-platform
+
+# Backend services.
+services/** @blackroad/backend-owners
+api/**      @blackroad/backend-owners
+
+# Infrastructure as code.
+infra/** @blackroad/infra-oncall
