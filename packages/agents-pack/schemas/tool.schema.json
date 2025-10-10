@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.ai/agents/schemas/tool.schema.json",
+  "title": "Agent Tool Definition",
+  "type": "object",
+  "required": ["name", "description", "input_schema"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{2,63}$",
+      "description": "Unique, URL-friendly name for the tool."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Concise description of what the tool does."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Optional short human readable summary displayed in menus."
+    },
+    "input_schema": {
+      "$ref": "#/$defs/jsonSchema"
+    },
+    "output_schema": {
+      "$ref": "#/$defs/jsonSchema"
+    },
+    "examples": {
+      "type": "array",
+      "description": "Illustrative examples of inputs and outputs for the tool.",
+      "items": {
+        "type": "object",
+        "required": ["input", "output"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Optional name for the example."
+          },
+          "input": {},
+          "output": {}
+        },
+        "additionalProperties": false
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Arbitrary metadata keyed by integrator defined values.",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "jsonSchema": {
+      "description": "Embedded JSON Schema describing tool IO payloads.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "$schema": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        }
+      ]
+    }
+  }
+}
