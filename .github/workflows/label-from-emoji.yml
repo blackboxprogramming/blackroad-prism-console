@@ -1,0 +1,29 @@
+name: Label from emoji
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Map emoji to labels
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: |
+            ✨=feature
+            🐛=bug
+            🧪=tests
+            ⚙️=ci
+            🧰=tooling
+            📦=deps
+            🧹=chore
+            📝=docs
+            🔒=security
+            🚀=perf
+            🧭=infra
+            🧩=agents
+            🔍=debug
+
