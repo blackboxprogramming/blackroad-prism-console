@@ -1,0 +1,38 @@
+name: Uptime Checks
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install requests pyyaml
+
+      - name: Execute uptime checks
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: python scripts/uptime_checks.py
+
+      - name: Upload uptime report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uptime-report
+          path: artifacts/uptime-report.json
+          if-no-files-found: warn
