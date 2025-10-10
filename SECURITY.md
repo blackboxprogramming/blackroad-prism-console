@@ -14,3 +14,4 @@ We run advisory scans (Semgrep, Trivy, Gitleaks, Checkov, CodeQL) behind feature
 
 - API responses enforce HTTP Strict Transport Security (HSTS) with subdomain preload to ensure encrypted connections.
 - Responses include `Referrer-Policy: no-referrer` to prevent leaking potentially sensitive URLs.
+- The `Secret Scanning Guardrail` workflow queries GitHub's secret scanning API on every push, pull request, and daily schedule to ensure newly detected credentials are triaged quickly.

@@ -1,17 +1,62 @@
-name: Bug report
-description: File a bug report
-labels: ["type/bug"]
+name: Bug Report
+description: Help us squash a defect quickly.
+labels: ["type/bug", "needs-triage"]
 body:
-  - type: textarea
-    id: description
+  - type: markdown
     attributes:
-      label: Description
-      description: What happened?
+      value: |
+        ### Quick triage
+        Provide as much context as possible so the on-call team can reproduce and mitigate the issue.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What went wrong and where did you notice it?
+      placeholder: The dashboard throws a 500 error when loading the analytics tab.
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
       label: Steps to Reproduce
+      description: Include URLs, API payloads, commands, or recordings if available.
+      placeholder: |
+        1. Go to …
+        2. Click …
+        3. Observe …
     validations:
       required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen instead?
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior / Logs
+      description: Paste stack traces, screenshots, or request IDs that illustrate the failure.
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How disruptive is this issue?
+      options:
+        - S0 - Outage / data loss
+        - S1 - Major feature broken
+        - S2 - Workaround available
+        - S3 - Cosmetic / low risk
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: production, staging, local, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: remediation
+    attributes:
+      label: Potential Fix / Notes
+      description: Optional hints about where to start debugging, related issues, or feature flags.

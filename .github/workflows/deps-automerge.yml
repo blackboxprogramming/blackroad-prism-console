@@ -1,0 +1,91 @@
+name: Dependency Auto Merge
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - labeled
+      - unlabeled
+      - synchronize
+      - ready_for_review
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  statuses: read
+
+jobs:
+  enable-automerge:
+    name: Enable auto-merge for dependency updates
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
+    steps:
+      - name: Determine merge eligibility
+        id: eligibility
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.setFailed('No pull request payload.');
+              return;
+            }
+
+            const labels = pr.labels?.map(label => label.name.toLowerCase()) ?? [];
+            const allowedLabels = new Set(['dependencies', 'dependency', 'deps', 'auto-merge']);
+            const isDependabot = pr.user?.login === 'dependabot[bot]';
+            const hasLabel = labels.some(name => allowedLabels.has(name));
+            const eligible = isDependabot || hasLabel;
+
+            core.setOutput('eligible', String(eligible));
+            core.setOutput('pull_number', String(pr.number));
+            core.setOutput('node_id', pr.node_id);
+            core.info(`Auto-merge eligibility: ${eligible ? 'yes' : 'no'}.`);
+      - name: Fetch latest pull request state
+        if: ${{ steps.eligibility.outputs.eligible == 'true' }}
+        id: pull
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pull_number = Number('${{ steps.eligibility.outputs.pull_number }}');
+            const { data } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number
+            });
+            core.setOutput('mergeable_state', data.mergeable_state ?? 'unknown');
+      - name: Enable auto-merge
+        if: ${{ steps.eligibility.outputs.eligible == 'true' && steps.pull.outputs.mergeable_state != 'dirty' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pull_number = Number('${{ steps.eligibility.outputs.pull_number }}');
+            const pullRequestId = '${{ steps.eligibility.outputs.node_id }}';
+
+            if (!pullRequestId) {
+              core.setFailed('Missing pull request node id.');
+              return;
+            }
+
+            await github.graphql(
+              `mutation($pullRequestId: ID!) {
+                enablePullRequestAutoMerge(input: {pullRequestId: $pullRequestId, mergeMethod: SQUASH}) {
+                  pullRequest {
+                    number
+                  }
+                }
+              }`,
+              { pullRequestId }
+            );
+
+            core.info(`Enabled auto-merge for #${pull_number}.`);
+      - name: Surface merge conflicts
+        if: ${{ steps.eligibility.outputs.eligible == 'true' && steps.pull.outputs.mergeable_state == 'dirty' }}
+        run: |
+          echo "Pull request #${{ steps.eligibility.outputs.pull_number }} has merge conflicts. Manual intervention required." >&2
+          exit 1
