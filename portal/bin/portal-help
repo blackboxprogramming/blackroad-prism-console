@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cat <<'TXT'
+Portal Help (key-safe; no seeds/private keys)
+
+Core:
+  portal-env                 Check required tools & files
+  portal-run                 One-button: proof → health → checklist
+  portal-tui                 Menu UI (if installed)
+  portal                     CLI (proof, psbt:new, verify, broadcast, policy, utxo freeze)
+
+Proofs:
+  portal proof /path/raw.descriptor
+  ltc-proof                  (fill configs/ltc.raw.descriptor)
+  eth-proof                  (fill configs/eth.json)
+
+PSBT (air-gap):
+  portal psbt:new <label> <outputs.json> <feerate>
+  psbt-to-qr /path/to.psbt            # encode for offline signer
+  qr-to-psbt  out.psbt IMG*.png
+  portal psbt:verify <label>.signed.psbt
+  CONFIRM_BROADCAST=1 portal psbt:broadcast <label>.signed.psbt
+
+Policy:
+  portal policy:request <request.json>
+  portal-build-from-request <request.json>
+  portal policy:collect <label> <sigfile>
+  portal policy:status <label>
+
+Health/Reports/Prices:
+  price set btc <number>    # offline price store
+  portal-health             # ${PORTAL_ROOT:-/home/pi/portal}/reports/health.html
+  portal-health-tor         # onion (read-only)
+  portal-checklist          # ops checklist HTML
+
+Backups:
+  portal-backup  [/home/pi/portal.backup.tgz]
+  portal-restore <backup.tgz>
+
+Tests:
+  portal-test               # policy gate test (earlier prompt)
+  portal-selftest           # smoke test; no broadcast
+
+Security rules:
+  - No private keys here. Signing is offline.
+  - No broadcast without CONFIRM_BROADCAST=1.
+TXT

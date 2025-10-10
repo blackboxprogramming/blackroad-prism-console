@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DEFAULT_ROOT="/home/pi/portal"
+ROOT="${PORTAL_ROOT:-$DEFAULT_ROOT}"
+ROOT="${ROOT%/}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ ! -d "$ROOT" ]]; then
+  ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+fi
+
+LABEL="${1:-}"
+if [[ -z "$LABEL" ]]; then
+  echo "usage: psbt-fake-sign <label>" >&2
+  exit 1
+fi
+
+IN="$ROOT/psbts/$LABEL.psbt"
+OUT="$ROOT/psbts/$LABEL.signed.psbt"
+
+if [[ ! -f "$IN" ]]; then
+  echo "missing PSBT: $IN" >&2
+  exit 2
+fi
+
+cp "$IN" "$OUT"
+echo "Fake-signed PSBT -> $OUT"

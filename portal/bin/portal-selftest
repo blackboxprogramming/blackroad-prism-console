@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DEFAULT_ROOT="/home/pi/portal"
+ROOT="${PORTAL_ROOT:-$DEFAULT_ROOT}"
+ROOT="${ROOT%/}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ ! -d "$ROOT" ]]; then
+  ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+fi
+
+LOG_DIR="$ROOT/logs"
+mkdir -p "$LOG_DIR"
+LOG="$LOG_DIR/selftest.$(date -u +%Y%m%d%H%M%S).log"
+
+{
+  echo "== selftest start =="
+  "$ROOT/bin/portal-env"
+  LABEL="selftest_$$"
+  OUT_JSON="$ROOT/configs/$LABEL.outputs.json"
+  echo '[{"address":"tb1qexampledestxxxxxxxxxxxxxxxxxxxxxxxxxxxx","amount_btc":"0.00001000"}]' > "$OUT_JSON"
+  "$ROOT/bin/portal" psbt:new "$LABEL" "$OUT_JSON" 2
+  if [[ -s "$ROOT/psbts/$LABEL.psbt" ]]; then
+    echo "PSBT created"
+  else
+    echo "expected PSBT at $ROOT/psbts/$LABEL.psbt" >&2
+    exit 10
+  fi
+  "$ROOT/bin/psbt-fake-sign" "$LABEL"
+  "$ROOT/bin/portal" psbt:verify "$ROOT/psbts/$LABEL.signed.psbt"
+  echo "verify ok; broadcast remains gated"
+  rm -f "$OUT_JSON" \
+        "$ROOT/psbts/$LABEL.psbt" \
+        "$ROOT/psbts/$LABEL.psbt.sha256" \
+        "$ROOT/psbts/$LABEL.meta.json" \
+        "$ROOT/psbts/$LABEL.signed.psbt" \
+        "$ROOT/psbts/$LABEL.verified.json"
+  echo "== selftest ok =="
+} | tee "$LOG"
+
+echo "LOG: $LOG"
