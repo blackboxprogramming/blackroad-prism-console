@@ -1,0 +1,544 @@
+name: ChatOps Command Router
+
+on:
+  issue_comment:
+    types:
+      - created
+
+permissions:
+  actions: write
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  dispatch:
+    name: Dispatch ChatOps Command
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse command
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const login = context.payload.comment.user.login;
+            const commentBody = context.payload.comment.body || "";
+            const lines = commentBody
+              .split(/\r?\n/)
+              .map((line) => line.trim())
+              .filter(Boolean);
+
+            const commandMap = new Map([
+              ["/retest", { key: "retest", minArgs: 0 }],
+              ["/rerun-failed", { key: "rerun-failed", minArgs: 0 }],
+              ["/label", { key: "label", minArgs: 1 }],
+              ["/unlabel", { key: "unlabel", minArgs: 1 }],
+              ["/assign", { key: "assign", minArgs: 1 }],
+              ["/update-branch", { key: "update-branch", minArgs: 0 }],
+              ["/rebase", { key: "update-branch", minArgs: 0 }],
+              ["/merge", { key: "merge", minArgs: 0 }],
+              ["/backport", { key: "backport", minArgs: 1 }],
+              ["/cherry-pick", { key: "cherry-pick", minArgs: 1 }],
+              ["/deploy-preview", { key: "deploy-preview", minArgs: 0 }],
+            ]);
+
+            let matchedLine;
+            let command;
+            let tokens = [];
+
+            for (const line of lines) {
+              const parts = line.split(/\s+/);
+              const candidate = parts[0];
+              if (commandMap.has(candidate)) {
+                matchedLine = line;
+                command = commandMap.get(candidate);
+                tokens = parts.slice(1);
+                break;
+              }
+            }
+
+            if (!command) {
+              core.setOutput("command", "");
+              core.setOutput("args", "[]");
+              core.setOutput("authorized", "false");
+              core.setOutput("message", "");
+              return;
+            }
+
+            let permission = "none";
+            let isOrgMember = false;
+
+            try {
+              const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner,
+                repo,
+                username: login,
+              });
+              permission = data.permission || "none";
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error;
+              }
+            }
+
+            try {
+              const { data } = await github.rest.users.getByUsername({ username: owner });
+              if (data.type === "Organization") {
+                await github.rest.orgs.getMembershipForUser({
+                  org: owner,
+                  username: login,
+                });
+                isOrgMember = true;
+              }
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error;
+              }
+            }
+
+            const isOwner = login.toLowerCase() === owner.toLowerCase();
+            const authorized =
+              ["admin", "maintain", "write"].includes(permission) || isOrgMember || isOwner;
+
+            const args = tokens;
+            let message = "";
+
+            if (!authorized) {
+              message = `🚫 @${login} is not authorized to run ChatOps commands.`;
+            } else if (args.length < command.minArgs) {
+              const usage = `${matchedLine.split(/\s+/)[0]} ${command.minArgs ? "<args>" : ""}`.trim();
+              message = `⚠️ Usage: \`${usage}\`.`;
+            }
+
+            core.setOutput("command", authorized && !message ? command.key : "");
+            core.setOutput("args", JSON.stringify(args));
+            core.setOutput("authorized", authorized ? "true" : "false");
+            core.setOutput("message", message);
+
+      - name: Notify
+        if: ${{ steps.parse.outputs.message != '' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.payload.issue.number,
+              body: `${process.env.MESSAGE}`,
+            });
+        env:
+          MESSAGE: ${{ steps.parse.outputs.message }}
+
+      - name: Checkout repository
+        if: ${{ steps.parse.outputs.command == 'backport' || steps.parse.outputs.command == 'cherry-pick' }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        if: ${{ steps.parse.outputs.command == 'backport' || steps.parse.outputs.command == 'cherry-pick' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Load PR context
+        id: pr
+        if: ${{ steps.parse.outputs.command != '' && steps.parse.outputs.command != 'label' && steps.parse.outputs.command != 'unlabel' && steps.parse.outputs.command != 'assign' && steps.parse.outputs.command != 'retest' && steps.parse.outputs.command != 'rerun-failed' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              ...context.repo,
+              pull_number: context.payload.issue.number,
+            });
+            return {
+              number: pr.number,
+              baseRef: pr.base.ref,
+              headRef: pr.head.ref,
+              headSha: pr.head.sha,
+              title: pr.title,
+              merged: pr.merged,
+              mergeCommitSha: pr.merge_commit_sha,
+              draft: pr.draft,
+            };
+
+      - name: Rerun latest workflow
+        if: ${{ steps.parse.outputs.command == 'retest' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pull_number = context.payload.issue.number;
+            const { data } = await github.rest.actions.listWorkflowRunsForPullRequest({
+              ...context.repo,
+              pull_number,
+              per_page: 1,
+            });
+
+            if (!data.workflow_runs.length) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: pull_number,
+                body: "⚠️ No workflow runs found to rerun.",
+              });
+              return;
+            }
+
+            const run = data.workflow_runs[0];
+            await github.rest.actions.reRunWorkflow({
+              ...context.repo,
+              run_id: run.id,
+            });
+
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: pull_number,
+              body: `🔁 Rerunning workflow **${run.name}** (#${run.id}).`,
+            });
+
+      - name: Rerun failed jobs
+        if: ${{ steps.parse.outputs.command == 'rerun-failed' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pull_number = context.payload.issue.number;
+            const { data } = await github.rest.actions.listWorkflowRunsForPullRequest({
+              ...context.repo,
+              pull_number,
+              per_page: 1,
+            });
+
+            if (!data.workflow_runs.length) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: pull_number,
+                body: "⚠️ No workflow runs found to rerun.",
+              });
+              return;
+            }
+
+            const run = data.workflow_runs[0];
+            await github.rest.actions.reRunWorkflowFailedJobs({
+              ...context.repo,
+              run_id: run.id,
+            });
+
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: pull_number,
+              body: `🔁 Rerunning failed jobs from workflow **${run.name}** (#${run.id}).`,
+            });
+
+      - name: Add label
+        if: ${{ steps.parse.outputs.command == 'label' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = JSON.parse(process.env.ARGS)[0];
+            await github.rest.issues.addLabels({
+              ...context.repo,
+              issue_number: context.payload.issue.number,
+              labels: [label],
+            });
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.payload.issue.number,
+              body: `🏷️ Added label \`${label}\`.`,
+            });
+        env:
+          ARGS: ${{ steps.parse.outputs.args }}
+
+      - name: Remove label
+        if: ${{ steps.parse.outputs.command == 'unlabel' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = JSON.parse(process.env.ARGS)[0];
+            try {
+              await github.rest.issues.removeLabel({
+                ...context.repo,
+                issue_number: context.payload.issue.number,
+                name: label,
+              });
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: context.payload.issue.number,
+                body: `🗑️ Removed label \`${label}\`.`,
+              });
+            } catch (error) {
+              if (error.status === 404) {
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: context.payload.issue.number,
+                  body: `⚠️ Label \`${label}\` was not present.`,
+                });
+              } else {
+                throw error;
+              }
+            }
+        env:
+          ARGS: ${{ steps.parse.outputs.args }}
+
+      - name: Assign users
+        if: ${{ steps.parse.outputs.command == 'assign' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const assignees = JSON.parse(process.env.ARGS).map((entry) => entry.replace(/^@/, ""));
+            await github.rest.issues.addAssignees({
+              ...context.repo,
+              issue_number: context.payload.issue.number,
+              assignees,
+            });
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.payload.issue.number,
+              body: `✅ Assigned ${assignees.map((a) => `@${a}`).join(", ")}.`,
+            });
+        env:
+          ARGS: ${{ steps.parse.outputs.args }}
+
+      - name: Update branch
+        if: ${{ steps.parse.outputs.command == 'update-branch' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = JSON.parse(process.env.PR_DATA);
+            try {
+              await github.rest.pulls.updateBranch({
+                ...context.repo,
+                pull_number: pr.number,
+              });
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: pr.number,
+                body: "🔄 Update branch requested.",
+              });
+            } catch (error) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: pr.number,
+                body: `⚠️ Unable to update branch: ${error.message}`,
+              });
+              throw error;
+            }
+        env:
+          PR_DATA: ${{ steps.pr.outputs.result }}
+
+      - name: Merge pull request
+        if: ${{ steps.parse.outputs.command == 'merge' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = JSON.parse(process.env.PR_DATA);
+            if (pr.draft) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: pr.number,
+                body: "⚠️ Cannot merge a draft pull request.",
+              });
+              return;
+            }
+            try {
+              await github.rest.pulls.merge({
+                ...context.repo,
+                pull_number: pr.number,
+                merge_method: "squash",
+              });
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: pr.number,
+                body: "✅ Pull request merged with squash merge.",
+              });
+            } catch (error) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: pr.number,
+                body: `❌ Merge failed: ${error.message}`,
+              });
+              throw error;
+            }
+        env:
+          PR_DATA: ${{ steps.pr.outputs.result }}
+
+      - name: Execute backport
+        id: backport
+        if: ${{ steps.parse.outputs.command == 'backport' }}
+        uses: actions/github-script@v7
+        env:
+          ARGS: ${{ steps.parse.outputs.args }}
+          PR_DATA: ${{ steps.pr.outputs.result }}
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const args = JSON.parse(process.env.ARGS);
+            const pr = JSON.parse(process.env.PR_DATA);
+            const target = args[0];
+
+            if (!pr.merged) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: pr.number,
+                body: "⚠️ Backport requires the pull request to be merged.",
+              });
+              core.setOutput('status', 'skipped');
+              return;
+            }
+
+            if (!target) {
+              core.setFailed('Target branch is required for backport.');
+              return;
+            }
+
+            const branchName = `backport/${target}/pr-${pr.number}`;
+            try {
+              execSync(`git fetch origin ${target}`, { stdio: 'inherit' });
+              execSync(`git checkout -b ${branchName} origin/${target}`, { stdio: 'inherit' });
+              execSync(`git cherry-pick -x -m 1 ${pr.mergeCommitSha}`, { stdio: 'inherit' });
+              execSync(`git push origin ${branchName}`, { stdio: 'inherit' });
+            } catch (error) {
+              try {
+                execSync('git cherry-pick --abort', { stdio: 'inherit' });
+              } catch (abortError) {
+                core.info(`Cherry-pick abort error: ${abortError.message}`);
+              }
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: pr.number,
+                body: `❌ Backport cherry-pick failed: ${error.message}`,
+              });
+              throw error;
+            }
+
+            core.setOutput('branch', branchName);
+            core.setOutput('target', target);
+
+      - name: Open backport PR
+        if: ${{ steps.parse.outputs.command == 'backport' && steps.backport.outputs.branch }}
+        uses: actions/github-script@v7
+        env:
+          PR_DATA: ${{ steps.pr.outputs.result }}
+          BACKPORT_BRANCH: ${{ steps.backport.outputs.branch }}
+          BACKPORT_TARGET: ${{ steps.backport.outputs.target }}
+        with:
+          script: |
+            const pr = JSON.parse(process.env.PR_DATA);
+            const branchName = process.env.BACKPORT_BRANCH;
+            const target = process.env.BACKPORT_TARGET;
+            const title = `[Backport ${target}] ${pr.title}`;
+            const body = `Backport of #${pr.number} to \`${target}\`.`;
+
+            const { data: newPr } = await github.rest.pulls.create({
+              ...context.repo,
+              title,
+              head: branchName,
+              base: target,
+              body,
+            });
+
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: pr.number,
+              body: `✅ Opened backport PR #${newPr.number} targeting \`${target}\`.`,
+            });
+
+      - name: Execute cherry-pick
+        id: cherry
+        if: ${{ steps.parse.outputs.command == 'cherry-pick' }}
+        uses: actions/github-script@v7
+        env:
+          ARGS: ${{ steps.parse.outputs.args }}
+          PR_DATA: ${{ steps.pr.outputs.result }}
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const args = JSON.parse(process.env.ARGS);
+            const pr = JSON.parse(process.env.PR_DATA);
+            const sha = args[0];
+
+            if (!sha) {
+              core.setFailed('A commit SHA is required for cherry-pick.');
+              return;
+            }
+
+            const branchName = `cherry-pick/${sha.slice(0, 12)}/pr-${pr.number}`;
+            try {
+              execSync(`git fetch origin ${pr.baseRef}`, { stdio: 'inherit' });
+              execSync(`git checkout -b ${branchName} origin/${pr.baseRef}`, { stdio: 'inherit' });
+              execSync(`git cherry-pick -x ${sha}`, { stdio: 'inherit' });
+              execSync(`git push origin ${branchName}`, { stdio: 'inherit' });
+            } catch (error) {
+              try {
+                execSync('git cherry-pick --abort', { stdio: 'inherit' });
+              } catch (abortError) {
+                core.info(`Cherry-pick abort error: ${abortError.message}`);
+              }
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: pr.number,
+                body: `❌ Cherry-pick failed: ${error.message}`,
+              });
+              throw error;
+            }
+
+            core.setOutput('branch', branchName);
+            core.setOutput('sha', sha);
+
+      - name: Open cherry-pick PR
+        if: ${{ steps.parse.outputs.command == 'cherry-pick' && steps.cherry.outputs.branch }}
+        uses: actions/github-script@v7
+        env:
+          PR_DATA: ${{ steps.pr.outputs.result }}
+          CHERRY_BRANCH: ${{ steps.cherry.outputs.branch }}
+          CHERRY_SHA: ${{ steps.cherry.outputs.sha }}
+        with:
+          script: |
+            const pr = JSON.parse(process.env.PR_DATA);
+            const branchName = process.env.CHERRY_BRANCH;
+            const sha = process.env.CHERRY_SHA;
+            const title = `[Cherry-pick ${sha.slice(0, 7)}] ${pr.title}`;
+            const body = `Cherry-picks ${sha} onto \`${pr.baseRef}\`. Related to #${pr.number}.`;
+
+            const { data: newPr } = await github.rest.pulls.create({
+              ...context.repo,
+              title,
+              head: branchName,
+              base: pr.baseRef,
+              body,
+            });
+
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: pr.number,
+              body: `✅ Opened cherry-pick PR #${newPr.number} for commit ${sha}.`,
+            });
+
+      - name: Dispatch deploy preview
+        if: ${{ steps.parse.outputs.command == 'deploy-preview' }}
+        uses: actions/github-script@v7
+        env:
+          PR_DATA: ${{ steps.pr.outputs.result }}
+          ARGS: ${{ steps.parse.outputs.args }}
+        with:
+          script: |
+            const pr = JSON.parse(process.env.PR_DATA);
+            const args = JSON.parse(process.env.ARGS);
+            const environment = args[0] || '';
+
+            await github.rest.actions.createWorkflowDispatch({
+              ...context.repo,
+              workflow_id: 'deploy-preview.yml',
+              ref: pr.baseRef,
+              inputs: {
+                environment,
+                pr: String(pr.number),
+                head_sha: pr.headSha,
+              },
+            });
+
+            const envLabel = environment ? ` for \`${environment}\`` : '';
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: pr.number,
+              body: `🚀 Deploy preview dispatched${envLabel}.`,
+            });
