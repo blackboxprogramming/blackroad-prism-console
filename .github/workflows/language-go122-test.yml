@@ -1,0 +1,58 @@
+name: Go 1.22 • Test
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Go 1.22 • Race Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+
+      - name: Cache Go build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Run go test (race)
+        env:
+          CGO_ENABLED: 1
+        run: |
+          if ! find . -name '*.go' -not -path './vendor/*' -print -quit | grep -q .; then
+            echo "No Go files found. Skipping."
+            exit 0
+          fi
+          mkdir -p reports/logs
+          set -o pipefail
+          go test -race -count=1 -json ./... | tee reports/logs/go-test.json
+
+      - name: Upload test log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: go122-test-log
+          path: reports
+          if-no-files-found: ignore

@@ -1,0 +1,72 @@
+name: PHP 8.3 • PHPUnit
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: PHP 8.3 • PHPUnit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.composer/cache/files
+            ~/.cache/composer
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        id: install-deps
+        run: |
+          if [ ! -f composer.json ]; then
+            echo "No composer.json found. Skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          composer install --no-interaction --no-progress --prefer-dist
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: Run PHPUnit
+        if: ${{ steps.install-deps.outputs.skip != 'true' }}
+        run: |
+          mkdir -p reports/junit
+          if [ -f vendor/bin/phpunit ]; then
+            vendor/bin/phpunit --log-junit reports/junit/phpunit.xml
+          else
+            if ! command -v phpunit >/dev/null 2>&1; then
+              composer global require phpunit/phpunit --quiet
+              export PATH="$HOME/.composer/vendor/bin:$PATH"
+            fi
+            phpunit --log-junit reports/junit/phpunit.xml
+          fi
+
+      - name: Upload PHPUnit artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php83-phpunit-reports
+          path: reports
+          if-no-files-found: ignore

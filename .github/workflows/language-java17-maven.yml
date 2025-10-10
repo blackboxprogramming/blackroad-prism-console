@@ -1,0 +1,47 @@
+name: Java 17 • Maven
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Java 17 • Maven
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build & test
+        run: |
+          if [ ! -f pom.xml ]; then
+            echo "No Maven project found. Skipping."
+            exit 0
+          fi
+          mvn -B -U test
+
+      - name: Publish JUnit results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: java17-maven-reports
+          path: |
+            **/target/surefire-reports/*.xml
+            **/target/failsafe-reports/*.xml
+          if-no-files-found: ignore
