@@ -1,0 +1,34 @@
+name: Notify on Failure
+
+on:
+  workflow_run:
+    workflows:
+      - prism-ci
+      - CI & Deploy to Droplet
+      - Release & Publish Image
+    types:
+      - completed
+
+permissions: {}
+
+jobs:
+  slack:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack alert
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          WORKFLOW_URL: ${{ github.event.workflow_run.html_url }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          ACTOR: ${{ github.event.workflow_run.actor.login }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "Slack webhook not configured."
+            exit 0
+          fi
+
+          text="❗ Workflow '$WORKFLOW_NAME' failed on branch $BRANCH (triggered by $ACTOR).\n$WORKFLOW_URL"
+          payload=$(jq -n --arg text "$text" '{text: $text}')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
