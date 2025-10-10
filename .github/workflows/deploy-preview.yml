@@ -1,0 +1,37 @@
+name: Deploy Preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment name
+        required: false
+        default: ''
+      pr:
+        description: Source pull request number
+        required: false
+      head_sha:
+        description: Head commit SHA for the preview
+        required: false
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: false
+      pr:
+        type: string
+        required: false
+      head_sha:
+        type: string
+        required: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log deployment request
+        run: |
+          echo "Deploy preview stub"
+          echo "PR: ${{ inputs.pr }}"
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Head SHA: ${{ inputs.head_sha }}"
