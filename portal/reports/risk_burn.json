@@ -1,0 +1,9 @@
+{
+  "api": 1.3,
+  "ui": 0.5,
+  "ingest-gh": 1.5,
+  "ingest-lin": 0.6,
+  "ingest-str": 0.9,
+  "infra": 0.4,
+  "data": 0.8
+}
