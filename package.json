@@ -29,6 +29,7 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@aws-sdk/client-cloudwatch": "^3.632.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "bcrypt": "^5.1.1",
@@ -49,7 +50,9 @@
     "react-dom": "^18.2.0",
     "stripe": "^12.18.0",
     "ethers": "^6.10.0",
-    "yaml": "^2.3.4"
+    "yaml": "^2.3.4",
+    "lucide-react": "^0.460.0",
+    "swr": "^2.2.4"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
