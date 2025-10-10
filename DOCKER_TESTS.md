@@ -4,24 +4,32 @@ This repository includes Docker support for running tests in an isolated environ
 
 ## Quick Start
 
+### Validate Setup
+
+First, validate your Docker test environment:
+
+```bash
+./scripts/validate-docker-test.sh
+```
+
 ### Run All Tests
 
 To run both JavaScript (Jest) and Python (pytest) tests in a Docker container:
 
 ```bash
-docker-compose run --rm tests
+docker compose run --rm tests
 ```
 
 ### Run Specific Test Suites
 
 **JavaScript tests only:**
 ```bash
-docker-compose run --rm test-node
+docker compose run --rm test-node
 ```
 
 **Python tests only:**
 ```bash
-docker-compose run --rm test-python
+docker compose run --rm test-python
 ```
 
 ## Docker Services
@@ -37,7 +45,7 @@ The `docker-compose.yml` file defines the following test services:
 The test services use the same Docker image as the development environment. To build it:
 
 ```bash
-docker-compose build tests
+docker compose build tests
 ```
 
 Or build explicitly:
@@ -93,7 +101,7 @@ The test setup is designed to work in GitHub Actions and other CI/CD systems. Th
 To get a bash shell in the test container:
 
 ```bash
-docker-compose run --rm tests bash
+docker compose run --rm tests bash
 ```
 
 From there, you can run tests interactively:
@@ -109,7 +117,7 @@ pytest tests/specific_test.py
 Pass arguments to pytest:
 
 ```bash
-docker-compose run --rm tests bash -c "pytest -v -k test_specific"
+docker compose run --rm tests bash -c "pytest -v -k test_specific"
 ```
 
 ### Debugging Failed Tests
@@ -117,5 +125,5 @@ docker-compose run --rm tests bash -c "pytest -v -k test_specific"
 For verbose output:
 
 ```bash
-docker-compose run --rm tests bash -c "npm test -- --verbose && pytest -vv"
+docker compose run --rm tests bash -c "npm test -- --verbose && pytest -vv"
 ```
