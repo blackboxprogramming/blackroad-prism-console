@@ -1,0 +1,17 @@
+[Unit]
+Description=Agent to Pi-Holo bridge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/pi_ops_bridge
+Environment=MQTT_HOST=localhost
+ExecStart=/home/pi/pi_ops_bridge/run.sh
+Restart=on-failure
+RestartSec=5
+TimeoutSec=30
+
+[Install]
+WantedBy=multi-user.target

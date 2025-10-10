@@ -1,0 +1,13 @@
+{
+  "defaults": {
+    "min_conf": 0.5,
+    "bg_color": [0, 0, 0],
+    "text_color": [255, 255, 255],
+    "scene": "text",
+    "text_template": "{label_upper} ({confidence_pct}%)"
+  },
+  "labels": {
+    "cat": { "color": [0, 200, 255], "text": "CAT" },
+    "dog": { "color": [255, 180, 0], "text": "DOG" }
+  }
+}
