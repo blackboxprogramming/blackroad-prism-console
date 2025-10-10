@@ -1,4 +1,8 @@
 import pytest
+import json
+from pathlib import Path
+
+import pytest
 from fastapi import Request
 from fastapi.testclient import TestClient
 
@@ -6,7 +10,15 @@ from autopal_fastapi.app import Identity, create_app, get_identity
 
 
 @pytest.fixture
-def app():
+def audit_log_path(tmp_path, monkeypatch) -> Path:
+    path = tmp_path / "audit-log.jsonl"
+    monkeypatch.setenv("AUTOPAL_AUDIT_LOG_PATH", str(path))
+    yield path
+    monkeypatch.delenv("AUTOPAL_AUDIT_LOG_PATH", raising=False)
+
+
+@pytest.fixture
+def app(audit_log_path: Path):
     test_app = create_app()
 
     def identity_override(request: Request) -> Identity:
@@ -90,3 +102,17 @@ def test_rate_limit_can_be_tightened_and_triggers_429(client):
     third = client.get("/limited/ping", headers={"x-actor": "ratelimited"})
     assert third.status_code == 429
     assert third.json()["detail"] == "rate_limit_exceeded"
+
+
+def test_audit_log_captures_trace_context(client, audit_log_path: Path):
+    response = client.get("/health/live")
+    trace_id = response.headers.get("x-trace-id")
+    assert trace_id, "trace header should be attached to responses"
+
+    assert audit_log_path.exists()
+    entries = [json.loads(line) for line in audit_log_path.read_text().splitlines() if line.strip()]
+    assert entries, "audit log should contain at least one entry"
+
+    matching = [event for event in entries if event.get("event") == "http.request" and event.get("path") == "/health/live"]
+    assert matching, "expected a request audit entry for /health/live"
+    assert matching[-1].get("trace_id") == trace_id
