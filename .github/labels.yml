@@ -19,3 +19,9 @@
 - name: status/help-wanted
   color: "5319e7"
   description: Needs attention
+- name: automerge
+  color: "0e8a16"
+  description: Auto-merge when checks succeed
+- name: no-rerun
+  color: "b60205"
+  description: Opt out of automatic reruns
