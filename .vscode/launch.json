@@ -1,0 +1,61 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug br-ingest-github Worker",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/workers/br-ingest-github",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--loader",
+        "tsx"
+      ],
+      "args": [
+        "src/index.ts"
+      ],
+      "env": {
+        "SOURCE_ID": "test-source-1",
+        "PRISM_DATA_DIR": "${workspaceFolder}/data/prism",
+        "SSM_MOCK_DIR": "${workspaceFolder}/data/ssm"
+      },
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "name": "Debug Store Functions",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/workers/br-ingest-github",
+      "program": "${workspaceFolder}/workers/br-ingest-github/src/store.ts",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--loader",
+        "tsx",
+        "--inspect-brk"
+      ],
+      "env": {
+        "PRISM_DATA_DIR": "${workspaceFolder}/data/prism",
+        "SSM_MOCK_DIR": "${workspaceFolder}/data/ssm"
+      },
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    }
+  ]
+}
