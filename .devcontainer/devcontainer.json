@@ -25,6 +25,14 @@
         "editor.formatOnSave": true,
         "python.analysis.typeCheckingMode": "basic"
       }
+    },
+    "codespaces": {
+      "secrets": {
+        "required": [
+          "OPENAI_API_KEY",
+          "GH_TOKEN"
+        ]
+      }
     }
   },
   "postCreateCommand": "python -m pip install -U pip && (pip install -r requirements.txt || true) && corepack enable pnpm && (pnpm install --frozen-lockfile || pnpm install || true) && (npm i || true)",
