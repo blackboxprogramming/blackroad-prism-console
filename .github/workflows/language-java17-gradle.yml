@@ -1,0 +1,57 @@
+name: Java 17 • Gradle
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Java 17 • Gradle
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-read-only: false
+
+      - name: Run Gradle tests
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+        run: |
+          if [ ! -f build.gradle ] && [ ! -f build.gradle.kts ]; then
+            echo "No Gradle build file found. Skipping."
+            exit 0
+          fi
+          if [ -x ./gradlew ]; then
+            ./gradlew test --console=plain --stacktrace
+          else
+            gradle test --console=plain --stacktrace
+          fi
+
+      - name: Upload JUnit XML on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: java17-gradle-reports
+          path: |
+            **/build/test-results/test/*.xml
+            **/build/reports/tests/test
+          if-no-files-found: ignore

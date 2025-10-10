@@ -1,0 +1,68 @@
+name: .NET 8 • Test
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: .NET 8 • Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          cache: true
+
+      - name: Restore dependencies
+        id: restore
+        run: |
+          if ! find . \( -name '*.sln' -o -name '*.csproj' \) -print -quit | grep -q .; then
+            echo "No .NET project detected. Skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          dotnet restore
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: Run tests
+        if: ${{ steps.restore.outputs.skip != 'true' }}
+        run: |
+          mkdir -p reports/trx
+          dotnet test \
+            --no-build \
+            --logger "trx;LogFileName=test-results.trx" \
+            --results-directory reports/trx
+
+      - name: Convert TRX to JUnit
+        if: always()
+        run: |
+          if find reports/trx -maxdepth 1 -name '*.trx' -print -quit >/dev/null 2>&1; then
+            dotnet tool install --global trx2junit --version 1.5.0 || dotnet tool update --global trx2junit --version 1.5.0
+            export PATH="$PATH:$HOME/.dotnet/tools"
+            mkdir -p reports/junit
+            trx2junit reports/trx/*.trx --output reports/junit
+          else
+            echo "No TRX report found to convert."
+          fi
+
+      - name: Upload .NET artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet8-test-reports
+          path: reports
+          if-no-files-found: ignore
