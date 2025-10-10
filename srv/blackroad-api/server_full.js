@@ -34,6 +34,8 @@ const attachLlmRoutes = require('./routes/admin_llm');
 const gitRouter = require('./routes/git');
 const providersRouter = require('./routes/providers');
 const attachSlackExceptions = require('./modules/slack_exceptions');
+const { loadFlags } = require('../../packages/flags/store');
+const { isOn } = require('../../packages/flags/eval');
 
 // --- Config
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -52,6 +54,30 @@ const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
 const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
   ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
   : [];
+const FLAGS_PARAM = process.env.FLAGS_PARAM || '/blackroad/dev/flags';
+const FLAGS_MAX_AGE_MS = Number(process.env.FLAGS_MAX_AGE_MS || '30000');
+const PRISM_PLACEHOLDER = {
+  github: [
+    { label: 'Mon', value: 32 },
+    { label: 'Tue', value: 41 },
+    { label: 'Wed', value: 27 },
+    { label: 'Thu', value: 36 },
+    { label: 'Fri', value: 44 },
+    { label: 'Sat', value: 15 },
+    { label: 'Sun', value: 18 },
+  ],
+  linear: [
+    { label: 'Backlog', value: 128 },
+    { label: 'In Progress', value: 64 },
+    { label: 'Blocked', value: 9 },
+    { label: 'Done', value: 302 },
+  ],
+  stripe: {
+    mrr: 128_400,
+    arr: 1_540_800,
+    churnRate: 1.8,
+  },
+};
 
 ['SESSION_SECRET', 'INTERNAL_TOKEN'].forEach((name) => {
   if (!process.env[name]) {
@@ -215,6 +241,45 @@ app.use((req, res, next) => {
   });
   next();
 });
+app.use(async (req, res, next) => {
+  try {
+    const doc = await loadFlags(FLAGS_PARAM, FLAGS_MAX_AGE_MS);
+    const sessionUser = (req.session && req.session.user) || {};
+    const userId = sessionUser.id || sessionUser.username || undefined;
+    const email = sessionUser.email || undefined;
+    const headerReqId = req.headers['x-request-id'];
+    const resReqId = res.getHeader('X-Request-ID');
+    const reqId =
+      (typeof headerReqId === 'string' && headerReqId) ||
+      (typeof resReqId === 'string' && resReqId) ||
+      (req.id && String(req.id)) ||
+      randomUUID();
+
+    req.flags = {
+      docVersion: doc.version || 0,
+      on: (key) => {
+        try {
+          return isOn(doc, key, { userId, email, reqId });
+        } catch (error) {
+          logger.warn('flag_eval_failed', {
+            key,
+            message: error && error.message ? error.message : 'unknown_error',
+          });
+          return false;
+        }
+      },
+      doc,
+    };
+  } catch (error) {
+    logger.error('flag_load_failed', error);
+    req.flags = {
+      docVersion: 0,
+      on: () => false,
+      doc: { features: {} },
+    };
+  }
+  next();
+});
 app.use(compression());
 app.use(morgan('tiny'));
 app.use(
@@ -266,6 +331,47 @@ app.get('/api/health', async (_req, res) => {
     version: '1.0.0',
     uptime: process.uptime(),
     services: { api: true, llm },
+  });
+});
+
+// --- PRISM metrics
+function ensureFlag(req, res, flagKey) {
+  if (!req.flags || typeof req.flags.on !== 'function') {
+    return res
+      .status(503)
+      .json({ error: 'flags_unavailable', flag: flagKey, version: 0 });
+  }
+  if (!req.flags.on(flagKey)) {
+    return res.status(404).json({
+      error: 'feature_disabled',
+      flag: flagKey,
+      version: req.flags.docVersion,
+    });
+  }
+  return null;
+}
+
+app.get('/api/prism/github/issues_opened', requireAuth, (req, res) => {
+  const blocked = ensureFlag(req, res, 'prism.github.tiles');
+  if (blocked) return;
+  res.json({ series: PRISM_PLACEHOLDER.github, version: req.flags.docVersion });
+});
+
+app.get('/api/prism/linear/board', requireAuth, (req, res) => {
+  const blocked = ensureFlag(req, res, 'prism.linear.tiles');
+  if (blocked) return;
+  res.json({
+    columns: PRISM_PLACEHOLDER.linear,
+    version: req.flags.docVersion,
+  });
+});
+
+app.get('/api/prism/stripe/summary', requireAuth, (req, res) => {
+  const blocked = ensureFlag(req, res, 'prism.stripe.tiles');
+  if (blocked) return;
+  res.json({
+    summary: PRISM_PLACEHOLDER.stripe,
+    version: req.flags.docVersion,
   });
 });
 
@@ -785,7 +891,6 @@ app.post('/api/exec', requireAuth, (req, res) => {
     res.json({ out: stdout, stderr });
   });
 });
-
 
 // --- Quantum AI summaries
 app.get('/api/quantum/:topic', (req, res) => {
