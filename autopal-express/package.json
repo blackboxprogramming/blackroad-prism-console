@@ -4,8 +4,8 @@
   "description": "Autopal control plane implemented with Express, mirroring security rails from the FastAPI service.",
   "main": "src/server.js",
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
+    "dev": "nodemon --require ./otel.js src/server.js",
+    "start": "node --require ./otel.js src/server.js",
     "test": "npm run lint",
     "lint": "node ./scripts/run-lint.js"
   },
@@ -18,6 +18,10 @@
   "license": "Apache-2.0",
   "type": "commonjs",
   "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.52.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.52.0",
+    "@opentelemetry/sdk-node": "^0.52.0",
     "axios": "^1.12.2",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
