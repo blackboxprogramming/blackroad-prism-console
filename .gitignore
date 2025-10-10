@@ -56,6 +56,9 @@ rag/index/meta.json
 !secrets/hosts.json
 !secrets/known_hosts
 
+# Lucidia rituals (generated each morning)
+ritual/
+
 # Codex CI kit
 tests/_codex_autogen/
 .tmp/
