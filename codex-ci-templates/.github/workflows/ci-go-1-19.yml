@@ -1,0 +1,20 @@
+name: "🐹 Go CI – 1.19"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run tests via composite action
+        uses: ./.github/actions/run-tests
+        with:
+          language: "go"
+          version: "1.19"
+          test_command: "go test ./..."

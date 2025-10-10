@@ -1,0 +1,20 @@
+name: "🧪 Elixir CI – 1.16"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run tests via composite action
+        uses: ./.github/actions/run-tests
+        with:
+          language: "elixir"
+          version: "1.16"
+          test_command: "mix test"

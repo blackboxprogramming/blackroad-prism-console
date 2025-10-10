@@ -1,0 +1,20 @@
+name: "🐘 PHP CI – 8.3"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run tests via composite action
+        uses: ./.github/actions/run-tests
+        with:
+          language: "php"
+          version: "8.3"
+          test_command: "vendor/bin/phpunit"

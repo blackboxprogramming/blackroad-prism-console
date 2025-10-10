@@ -1,0 +1,284 @@
+name: "Run Tests"
+description: "Set up the requested language toolchain and run the repository test command"
+author: "BlackRoad Ops"
+inputs:
+  language:
+    description: "Language to configure (node, python, go, java-maven, java-gradle, ruby, php, rust, dotnet, elixir)"
+    required: true
+  version:
+    description: "Language/runtime version to install"
+    required: true
+  test_command:
+    description: "Command used to execute the test suite (defaults vary per language)"
+    required: false
+    default: ""
+  working_directory:
+    description: "Directory to run commands in"
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      if: ${{ inputs.language == 'node' }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.version }}
+        cache: npm
+        cache-dependency-path: |
+          package-lock.json
+          **/package-lock.json
+          **/npm-shrinkwrap.json
+
+    - name: Install Node.js dependencies
+      if: ${{ inputs.language == 'node' }}
+      shell: bash
+      env:
+        WORKDIR: ${{ inputs.working_directory != '' && inputs.working_directory || '.' }}
+      run: |
+        set -euo pipefail
+        cd "$WORKDIR"
+        if [ -f package-lock.json ]; then
+          npm ci
+        elif [ -f pnpm-lock.yaml ]; then
+          corepack enable pnpm >/dev/null 2>&1 || true
+          pnpm install --frozen-lockfile
+        elif [ -f yarn.lock ]; then
+          corepack enable yarn >/dev/null 2>&1 || true
+          yarn install --frozen-lockfile
+        else
+          npm install
+        fi
+
+    - name: Set up Python
+      if: ${{ inputs.language == 'python' }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.version }}
+        cache: pip
+        cache-dependency-path: |
+          requirements*.txt
+          **/requirements*.txt
+
+    - name: Install Python dependencies
+      if: ${{ inputs.language == 'python' }}
+      shell: bash
+      env:
+        WORKDIR: ${{ inputs.working_directory != '' && inputs.working_directory || '.' }}
+      run: |
+        set -euo pipefail
+        cd "$WORKDIR"
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then
+          python -m pip install -r requirements.txt
+        fi
+        if [ -f requirements-dev.txt ]; then
+          python -m pip install -r requirements-dev.txt
+        fi
+
+    - name: Set up Go
+      if: ${{ inputs.language == 'go' }}
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.version }}
+        check-latest: true
+
+    - name: Download Go dependencies
+      if: ${{ inputs.language == 'go' }}
+      shell: bash
+      env:
+        WORKDIR: ${{ inputs.working_directory != '' && inputs.working_directory || '.' }}
+      run: |
+        set -euo pipefail
+        cd "$WORKDIR"
+        if [ -f go.mod ]; then
+          go mod download
+        fi
+
+    - name: Set up Java (Maven)
+      if: ${{ inputs.language == 'java-maven' }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.version }}
+        distribution: temurin
+        cache: maven
+
+    - name: Set up Java (Gradle)
+      if: ${{ inputs.language == 'java-gradle' }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.version }}
+        distribution: temurin
+        cache: gradle
+
+    - name: Prepare Gradle wrapper
+      if: ${{ inputs.language == 'java-gradle' }}
+      shell: bash
+      env:
+        WORKDIR: ${{ inputs.working_directory != '' && inputs.working_directory || '.' }}
+      run: |
+        set -euo pipefail
+        cd "$WORKDIR"
+        chmod +x gradlew || true
+
+    - name: Set up Ruby
+      if: ${{ inputs.language == 'ruby' }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ inputs.version }}
+        bundler-cache: true
+
+    - name: Install Ruby dependencies
+      if: ${{ inputs.language == 'ruby' }}
+      shell: bash
+      env:
+        WORKDIR: ${{ inputs.working_directory != '' && inputs.working_directory || '.' }}
+      run: |
+        set -euo pipefail
+        cd "$WORKDIR"
+        if [ -f Gemfile ]; then
+          bundle install --jobs 4 --retry 3
+        fi
+
+    - name: Set up PHP
+      if: ${{ inputs.language == 'php' }}
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.version }}
+        coverage: none
+        tools: composer
+
+    - name: Install PHP dependencies
+      if: ${{ inputs.language == 'php' }}
+      shell: bash
+      env:
+        WORKDIR: ${{ inputs.working_directory != '' && inputs.working_directory || '.' }}
+      run: |
+        set -euo pipefail
+        cd "$WORKDIR"
+        if [ -f composer.lock ]; then
+          composer install --prefer-dist --no-interaction --no-progress
+        elif [ -f composer.json ]; then
+          composer install --prefer-dist --no-interaction --no-progress
+        fi
+
+    - name: Set up Rust
+      if: ${{ inputs.language == 'rust' }}
+      uses: dtolnay/rust-toolchain@v1
+      with:
+        toolchain: ${{ inputs.version }}
+        components: clippy
+
+    - name: Set up .NET
+      if: ${{ inputs.language == 'dotnet' }}
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ inputs.version }}
+
+    - name: Restore .NET dependencies
+      if: ${{ inputs.language == 'dotnet' }}
+      shell: bash
+      env:
+        WORKDIR: ${{ inputs.working_directory != '' && inputs.working_directory || '.' }}
+      run: |
+        set -euo pipefail
+        cd "$WORKDIR"
+        if ls *.sln >/dev/null 2>&1; then
+          dotnet restore
+        elif [ -n "$(find . -maxdepth 2 -name '*.csproj' -print -quit)" ]; then
+          dotnet restore
+        fi
+
+    - name: Set up Elixir
+      if: ${{ inputs.language == 'elixir' }}
+      uses: erlef/setup-beam@v1
+      with:
+        elixir-version: ${{ inputs.version }}
+        otp-version: 26.2
+
+    - name: Install Elixir dependencies
+      if: ${{ inputs.language == 'elixir' }}
+      shell: bash
+      env:
+        WORKDIR: ${{ inputs.working_directory != '' && inputs.working_directory || '.' }}
+      run: |
+        set -euo pipefail
+        cd "$WORKDIR"
+        if [ -f mix.exs ]; then
+          mix deps.get
+        fi
+
+    - name: Resolve test command
+      id: resolve-command
+      shell: bash
+      env:
+        LANGUAGE: ${{ inputs.language }}
+        CUSTOM_COMMAND: ${{ inputs.test_command }}
+      run: |
+        set -euo pipefail
+        if [ -n "$CUSTOM_COMMAND" ]; then
+          echo "value=$CUSTOM_COMMAND" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        case "$LANGUAGE" in
+          node)
+            cmd="npm test"
+            ;;
+          python)
+            cmd="pytest -q"
+            ;;
+          go)
+            cmd="go test ./..."
+            ;;
+          java-maven)
+            cmd="mvn -B test"
+            ;;
+          java-gradle)
+            if [ -f "gradlew" ]; then
+              cmd="./gradlew test"
+            else
+              cmd="gradle test"
+            fi
+            ;;
+          ruby)
+            if [ -f "bin/rails" ]; then
+              cmd="bundle exec rails test"
+            else
+              cmd="bundle exec rspec"
+            fi
+            ;;
+          php)
+            if [ -f "vendor/bin/phpunit" ]; then
+              cmd="vendor/bin/phpunit"
+            else
+              cmd="composer test"
+            fi
+            ;;
+          rust)
+            cmd="cargo test --all --locked"
+            ;;
+          dotnet)
+            cmd="dotnet test"
+            ;;
+          elixir)
+            cmd="mix test"
+            ;;
+          *)
+            echo "Unsupported language: $LANGUAGE" >&2
+            exit 1
+            ;;
+        esac
+        echo "value=$cmd" >> "$GITHUB_OUTPUT"
+
+    - name: Run test command
+      shell: bash
+      env:
+        WORKDIR: ${{ inputs.working_directory != '' && inputs.working_directory || '.' }}
+        TEST_COMMAND: ${{ steps.resolve-command.outputs.value }}
+      run: |
+        set -euo pipefail
+        cd "$WORKDIR"
+        eval "$TEST_COMMAND"

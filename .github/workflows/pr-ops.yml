@@ -1,0 +1,50 @@
+name: "🤖 PR Ops"
+
+on:
+  pull_request_target:
+    types: [opened, reopened, ready_for_review]
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  prep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply default labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = ['status: awaiting-ci'];
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number,
+              labels,
+            });
+
+      - name: Leave onboarding comment
+        if: ${{ github.event.action == 'opened' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const body = [
+              '👋 Thanks for opening this pull request!',
+              '',
+              'The CI workflows will kick off shortly. They need to finish successfully before we can merge.',
+              '',
+              'If you run into a flaky failure, the 🔁 auto re-run workflow will queue up to two additional attempts for you.',
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body,
+            });

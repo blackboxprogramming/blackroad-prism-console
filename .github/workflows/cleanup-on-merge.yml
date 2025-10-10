@@ -1,0 +1,33 @@
+name: "🧹 Cleanup on Merge"
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  cleanup:
+    if: >-
+      ${{
+        github.event.pull_request.merged == true &&
+        github.event.pull_request.head.repo.full_name == github.repository
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete merged branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const ref = pr.head.ref;
+            const { owner, repo } = context.repo;
+
+            core.info(`Deleting branch ${ref}`);
+            await github.rest.git.deleteRef({
+              owner,
+              repo,
+              ref: `heads/${ref}`,
+            });

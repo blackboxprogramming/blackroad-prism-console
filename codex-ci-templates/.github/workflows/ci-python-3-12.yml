@@ -1,0 +1,20 @@
+name: "🐍 Python CI – 3.12"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run tests via composite action
+        uses: ./.github/actions/run-tests
+        with:
+          language: "python"
+          version: "3.12"
+          test_command: "pytest -q"

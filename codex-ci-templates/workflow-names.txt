@@ -1,0 +1,50 @@
+🟢 Node CI – 16
+🟢 Node CI – 18
+🟢 Node CI – 20
+🟢 Node CI – 21
+🟢 Node CI – 22
+🐍 Python CI – 3.8
+🐍 Python CI – 3.9
+🐍 Python CI – 3.10
+🐍 Python CI – 3.11
+🐍 Python CI – 3.12
+🐹 Go CI – 1.18
+🐹 Go CI – 1.19
+🐹 Go CI – 1.20
+🐹 Go CI – 1.21
+🐹 Go CI – 1.22
+☕ Java Maven CI – 8
+☕ Java Maven CI – 11
+☕ Java Maven CI – 17
+☕ Java Maven CI – 21
+☕ Java Maven CI – 22
+🌿 Java Gradle CI – 8
+🌿 Java Gradle CI – 11
+🌿 Java Gradle CI – 17
+🌿 Java Gradle CI – 21
+🌿 Java Gradle CI – 22
+💎 Ruby CI – 2.7
+💎 Ruby CI – 3.0
+💎 Ruby CI – 3.1
+💎 Ruby CI – 3.2
+💎 Ruby CI – 3.3
+🐘 PHP CI – 7.4
+🐘 PHP CI – 8.0
+🐘 PHP CI – 8.1
+🐘 PHP CI – 8.2
+🐘 PHP CI – 8.3
+🦀 Rust CI – stable
+🦀 Rust CI – beta
+🦀 Rust CI – nightly
+🦀 Rust CI – 1.74.0
+🦀 Rust CI – 1.75.0
+🔷 .NET CI – 5.0.x
+🔷 .NET CI – 6.0.x
+🔷 .NET CI – 7.0.x
+🔷 .NET CI – 8.0.x
+🔷 .NET CI – 9.0.x
+🧪 Elixir CI – 1.13
+🧪 Elixir CI – 1.14
+🧪 Elixir CI – 1.15
+🧪 Elixir CI – 1.16
+🧪 Elixir CI – 1.17

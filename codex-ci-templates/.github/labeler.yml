@@ -1,0 +1,19 @@
+# Example labeler configuration. Adjust paths and labels to match your components.
+"area: frontend":
+  - "frontend/**"
+  - "apps/**/*.tsx"
+  - "apps/**/*.ts"
+
+"area: backend":
+  - "services/**"
+  - "api/**"
+  - "backend/**"
+
+"area: infrastructure":
+  - "infra/**"
+  - "infrastructure/**"
+  - "k8s/**"
+
+"priority: high":
+  - "**/SECURITY.md"
+  - "security/**"
