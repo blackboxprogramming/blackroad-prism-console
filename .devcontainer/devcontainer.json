@@ -7,7 +7,8 @@
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/node:1": { "version": "lts" },
     "ghcr.io/devcontainers/features/python:1": { "version": "3.11" },
-    "ghcr.io/devcontainers/features/common-utils:2": {}
+    "ghcr.io/devcontainers/features/common-utils:2": {},
+    "ghcr.io/devcontainers/features/pnpm:2": {}
   },
   "customizations": {
     "vscode": {
@@ -26,7 +27,7 @@
       }
     }
   },
-  "postCreateCommand": "python -m pip install -U pip && (pip install -r requirements.txt || true) && (npm i || true)",
+  "postCreateCommand": "python -m pip install -U pip && (pip install -r requirements.txt || true) && corepack enable pnpm && (pnpm install --frozen-lockfile || pnpm install || true) && (npm i || true)",
   "forwardPorts": [3000, 4000, 5173, 8000],
   "remoteUser": "vscode",
   "updateRemoteUserUID": true,

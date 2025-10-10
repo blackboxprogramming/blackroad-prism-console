@@ -1,0 +1,73 @@
+name: Emoji to Label Mapper
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+      - reopened
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - reopened
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  apply-label:
+    name: Apply label based on emoji prefix
+    runs-on: ubuntu-latest
+    steps:
+      - name: Map emoji to label
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const mapping = {
+              '🐛': 'bug',
+              '✨': 'enhancement',
+              '🛡️': 'security',
+              '⚙️': 'ops',
+              '🧰': 'maintenance',
+              '🧪': 'tests',
+              '📦': 'dependencies',
+              '📚': 'docs'
+            };
+
+            const payload = context.payload.pull_request ?? context.payload.issue;
+            if (!payload) {
+              core.info('No pull request or issue payload detected.');
+              return;
+            }
+
+            const title = payload.title ?? '';
+            const trimmedTitle = title.trim();
+            const emoji = Object.keys(mapping).find(symbol => trimmedTitle.startsWith(symbol));
+            if (!emoji) {
+              core.info('No emoji prefix detected.');
+              return;
+            }
+
+            const label = mapping[emoji];
+            if (!label) {
+              core.info(`Emoji ${emoji} not mapped to a label.`);
+              return;
+            }
+
+            const labels = (payload.labels ?? []).map(label => label.name.toLowerCase());
+            if (labels.includes(label.toLowerCase())) {
+              core.info(`Label ${label} already present on #${payload.number}.`);
+              return;
+            }
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: payload.number,
+              labels: [label]
+            });
+            core.info(`Applied label ${label} because the title started with ${emoji}.`);

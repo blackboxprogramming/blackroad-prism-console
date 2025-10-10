@@ -1,14 +1,22 @@
 
-## What
-- Summary
+## Quick pulse
+- [ ] Impact assessed (customer, ops, or security)
+- [ ] Risk call-out (low / medium / high)
+- [ ] Rollback or feature flag noted
 
-## Why
-- Business / reliability impact
+## Optional Ops
+- [ ] Added or updated dashboards / alerts
+- [ ] Announced in release notes or status channel
+- [ ] Coordinated with on-call / runbook owners
 
-## Checks
-- [ ] CI green
-- [ ] API /api/health returns 200
-- [ ] Updated docs/tests as needed
+## Next steps
+- [ ] Follow-up issue linked (if needed)
+- [ ] Docs updated or slated for update
+- [ ] Tests or benchmarks captured
+
+### Context
+- What changed and why?
+- Anything reviewers should focus on?
 
 > Comment `@codex fix comments` (or `@cadillac`, `@lucidia`, `@bbpteam`, `@blackboxprogramming`) to trigger bot autofix.
 

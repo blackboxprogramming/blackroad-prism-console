@@ -30,5 +30,13 @@ the code owners list.
   fast-forward merges; otherwise merge queues may fail unexpectedly.
 - **Lock branch.** Use only during incident response when you need to temporarily prevent merges.
 
+## Automation alignment
+- **Title guard** – pair the branch rule with the `PR Title Guard` workflow so malformed titles fail
+  fast. Add the workflow status check to the protected list when ready.
+- **Dependency queue** – mark `Dependency Auto Merge` as required for the `dependencies` label so
+  Dependabot updates clear the merge queue automatically.
+- **Secret scanning** – audit that the `Secret Scanning Guardrail` workflow is listed under required
+  checks to guarantee security hygiene before merges land.
+
 Document any deviations from this baseline in `docs/CHANGE_MGMT.md` so auditors understand why the
 protections differ from the default posture.
