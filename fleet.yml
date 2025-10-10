@@ -1,0 +1,101 @@
+# One-file Ansible playbook for a 3-Pi fleet with visual pings.
+# Requirements on each Pi:
+#   - Python 3 (default on Raspberry Pi OS)
+#   - An LED on GPIO 18 with resistor to GND (or switch gpio_pin as needed)
+# How to run (from your laptop/controller with Ansible installed):
+#   ansible-playbook -i "alice.local, lucidia.local, aria.local," -u pi fleet.yml --ask-pass -e action=up
+#   ansible-playbook -i "alice.local, lucidia.local, aria.local," -u pi fleet.yml --ask-pass -e action=down
+#   ansible-playbook -i "alice.local, lucidia.local, aria.local," -u pi fleet.yml --ask-pass -e action=ping
+
+- name: Pi Fleet Orchestrator (Alice · Lucidia · Aria)
+  hosts: all
+  gather_facts: false
+  vars:
+    # change these if your hosts are different
+    fleet_hosts: ["alice.local","lucidia.local","aria.local"]
+    gpio_pin: 18
+    services_to_control:
+      - docker
+      - nginx
+      - lucidia-llm
+    # accepted: up | down | ping
+    action: "{{ action | default('ping') }}"
+
+  pre_tasks:
+    - name: Verify target is in our fleet list
+      assert:
+        that: inventory_hostname in fleet_hosts
+        fail_msg: "Host {{ inventory_hostname }} is not in the approved fleet list."
+        success_msg: "Host {{ inventory_hostname }} authorized."
+
+    - name: Ensure python3, pip, and gpio library present
+      become: true
+      apt:
+        name:
+          - python3
+          - python3-pip
+        state: present
+        update_cache: yes
+
+    - name: Install gpiozero (for LED ping)
+      become: true
+      pip:
+        name: gpiozero
+        executable: pip3
+
+  tasks:
+    - name: Bring services UP
+      become: true
+      when: action == 'up'
+      loop: "{{ services_to_control }}"
+      loop_control: { label: "{{ item }}" }
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+
+    - name: Bring services DOWN
+      become: true
+      when: action == 'down'
+      loop: "{{ services_to_control }}"
+      loop_control: { label: "{{ item }}" }
+      service:
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+
+    - name: Visual ping (3 quick blinks)
+      when: action in ['ping','up','down']
+      vars:
+        blink_count: "{{ 3 if action == 'ping' else (2 if action == 'up' else 1) }}"
+        on_time: 0.2
+        off_time: 0.2
+      ansible.builtin.shell: |
+        python3 - <<'PY'
+        from gpiozero import LED
+        from time import sleep
+        led = LED({{ gpio_pin }})
+        for _ in range({{ blink_count }}):
+            led.on(); sleep({{ on_time }})
+            led.off(); sleep({{ off_time }})
+        PY
+
+    - name: Synchronized wait barrier (keeps fleet in lockstep)
+      ansible.builtin.wait_for:
+        timeout: 2
+
+  post_tasks:
+    - name: Report final state for this host
+      debug:
+        msg: >
+          {{ inventory_hostname }} => action={{ action }} services={{ services_to_control | join(',') }}
+
+# How to use (copy/paste):
+#   • Save as fleet.yml on your control machine.
+#   • Run one command for all three at once (adjust user/hosts if needed):
+#   • Power up + sync + double-blink:
+#       ansible-playbook -i "alice.local, lucidia.local, aria.local," -u pi fleet.yml -e action=up
+#   • Power down + sync + single-blink:
+#       ansible-playbook -i "alice.local, lucidia.local, aria.local," -u pi fleet.yml -e action=down
+#   • Just a health ping (triple-blink):
+#       ansible-playbook -i "alice.local, lucidia.local, aria.local," -u pi fleet.yml -e action=ping
