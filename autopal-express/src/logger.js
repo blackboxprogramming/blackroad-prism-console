@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { context, trace } = require('@opentelemetry/api');
 const { getConfig } = require('./config');
 
 function ensureDir(filePath) {
@@ -9,12 +10,27 @@ function ensureDir(filePath) {
   }
 }
 
+function resolveTraceId(explicitTraceId) {
+  if (explicitTraceId) {
+    return explicitTraceId;
+  }
+  const span = trace.getSpan(context.active());
+  const spanContext = span?.spanContext();
+  return spanContext?.traceId;
+}
+
 function writeAudit(event) {
   const config = getConfig();
+  const traceId = resolveTraceId(event.trace_id);
   const payload = {
     timestamp: new Date().toISOString(),
     ...event
   };
+  if (traceId) {
+    payload.trace_id = traceId;
+  } else if ('trace_id' in payload && payload.trace_id == null) {
+    delete payload.trace_id;
+  }
   const serialized = JSON.stringify(payload);
   const logPath = path.resolve(config.auditLogPath);
   ensureDir(logPath);

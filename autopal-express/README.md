@@ -18,6 +18,11 @@ npm run dev
 
 The service listens on port `8080` by default. Override the port and other runtime values via `.env` or environment variables.
 
+Tracing is enabled automatically via OpenTelemetry. Point the SDK at your collector with the
+`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` environment variable (default:
+`http://localhost:4318/v1/traces`). Every HTTP response now carries an `X-Trace-Id` header so you can
+jump straight to the corresponding span in Jaeger.
+
 ### Environment Variables
 
 | Variable | Purpose |
@@ -43,6 +48,16 @@ The service listens on port `8080` by default. Override the port and other runti
 
 All request completions, authentication failures, break-glass events, and privileged actions are written as JSON lines to the configured audit log. The default location is `./logs/audit.log`.
 
+Each audit record now includes a `trace_id` property, making it easy to pivot from log lines to the
+trace visualized in Jaeger (or vice versa).
+
 ### Rate Limiting
 
 If `REDIS_URL` is provided the service uses `rate-limiter-flexible` with Redis for cross-instance throttling. Otherwise, the limiter falls back to an in-memory store.
+
+### Observability
+
+- `GET /metrics` returns JSON counters for rate-limit rejections, step-up prompts, and maintenance
+  blocks. Feed this endpoint into Prometheus or curl it locally during smoke tests.
+- Traces are exported over OTLP/HTTP via the OpenTelemetry Node SDK; use `npm start` (or the `dev`
+  script) to run the service with the instrumentation bootstrap applied.
