@@ -17,8 +17,10 @@ RUN pip install -U pip && pip install -e . || true
 # --- website deps ---
 FROM base as webdeps
 COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+# Use public npm registry if internal registry is not accessible
+RUN npm config set registry https://registry.npmjs.org/
 # Choose your PM; default to npm if lock missing
-RUN if [ -f package-lock.json ]; then npm ci; \
+RUN if [ -f package-lock.json ]; then npm ci --legacy-peer-deps || npm install --legacy-peer-deps; \
     elif [ -f yarn.lock ]; then npm i -g yarn && yarn --frozen-lockfile; \
     elif [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm i --frozen-lockfile; \
     else npm init -y; fi

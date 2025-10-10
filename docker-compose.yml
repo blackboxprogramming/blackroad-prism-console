@@ -16,4 +16,25 @@ services:
     volumes:
       - .:/workspace
     working_dir: /workspace
+    environment:
+      - CI=true
+      - APP_ENV=development
+    command: bash -lc "scripts/docker-test.sh"
+
+  test-node:
+    build: .
+    image: blackroad/prism-console:test
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    environment:
+      - CI=true
+    command: bash -lc "npm test"
+
+  test-python:
+    build: .
+    image: blackroad/prism-console:test
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
     command: bash -lc "pytest -q"
