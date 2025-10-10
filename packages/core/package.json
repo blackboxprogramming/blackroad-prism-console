@@ -1,7 +1,7 @@
 {
   "name": "@lucidia/core",
   "version": "0.0.1",
-  "description": "Core domain types, validators, crypto helpers, and the FeeForge billing engine for BlackRoad Finance.",
+  "description": "Core domain types, validators, crypto helpers, and the SurveillanceHub engine for BlackRoad Finance.",
   "type": "module",
   "license": "Apache-2.0",
   "main": "dist/index.js",
@@ -14,6 +14,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
+    "@blackroad/worm": "workspace:*",
     "decimal.js": "^10.4.3",
     "luxon": "^3.4.4",
     "uuid": "^9.0.1",
