@@ -1,0 +1,3 @@
+# Copy this file to /home/pi/portal/configs/api.token and replace the value with a random token string.
+# The token is used to authorize calls to the localhost-only REST shim.
+REPLACE_WITH_RANDOM_TOKEN
