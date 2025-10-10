@@ -1,0 +1,233 @@
+name: Daily PD↔Jira Smoke
+
+on:
+  schedule:
+    # 14:00 UTC is 08:00 America/Chicago (CST/CDT auto-handled by changing this when clocks move)
+    - cron: "0 14 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  BASE_URL: ${{ vars.OPSPORTAL_BASE_URL }}
+  ACTOR_EMAIL: ${{ vars.SMOKE_ACTOR_EMAIL }}
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_SMOKE }}
+  PD_EVENTS_URL: https://events.pagerduty.com/v2/enqueue
+  PD_ROUTING_KEY: ${{ secrets.PD_ROUTING_KEY_SMOKE }}
+  JIRA_BASE: ${{ vars.NEXT_PUBLIC_JIRA_BASE }}
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Open PD (sandbox) via Ops API
+        id: open
+        run: |
+          set -euo pipefail
+
+          curl_retry() {
+            local attempt=1
+            local max_attempts=2
+            local exit_code=0
+            while [ "$attempt" -le "$max_attempts" ]; do
+              if output=$(curl --max-time 25 -sS --fail-with-body "$@"); then
+                printf '%s' "$output"
+                return 0
+              fi
+              exit_code=$?
+              if [ "$attempt" -lt "$max_attempts" ]; then
+                sleep 3
+              fi
+              attempt=$((attempt + 1))
+            done
+            return "$exit_code"
+          }
+
+          BODY='{"systemKey":"sandbox","overrideUrgency":"low"}'
+          RES=$(curl_retry -X POST "$BASE_URL/api/pd/create?sandbox=1" \
+            -H "Content-Type: application/json" \
+            -H "x-user-email: $ACTOR_EMAIL" \
+            --data "$BODY")
+          echo "$RES"
+          URL=$(echo "$RES" | jq -r '.url // ""')
+          if [ -z "$URL" ]; then
+            echo "PagerDuty URL missing in response" >&2
+            exit 1
+          fi
+          echo "pd_url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Wait briefly (allow linkage propagation)
+        run: sleep 10
+
+      - name: Fetch risk snapshot & Jira linkage
+        id: link
+        run: |
+          set -euo pipefail
+
+          curl_retry() {
+            local attempt=1
+            local max_attempts=2
+            local exit_code=0
+            while [ "$attempt" -le "$max_attempts" ]; do
+              if output=$(curl --max-time 25 -sS --fail-with-body "$@"); then
+                printf '%s' "$output"
+                return 0
+              fi
+              exit_code=$?
+              if [ "$attempt" -lt "$max_attempts" ]; then
+                sleep 3
+              fi
+              attempt=$((attempt + 1))
+            done
+            return "$exit_code"
+          }
+
+          SNAP=$(curl_retry "$BASE_URL/api/scorecard/risk?sandbox=1")
+          echo "$SNAP"
+          JIRA=$(echo "$SNAP" | jq -r '.systems[] | select(.key=="sandbox") | .jiraKey // ""' || echo "")
+          echo "jira_key=$JIRA" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve PD (attach PM link) via Ops API
+        id: resolve
+        run: |
+          set -euo pipefail
+
+          curl_retry() {
+            local attempt=1
+            local max_attempts=2
+            local exit_code=0
+            while [ "$attempt" -le "$max_attempts" ]; do
+              if output=$(curl --max-time 25 -sS --fail-with-body "$@"); then
+                printf '%s' "$output"
+                return 0
+              fi
+              exit_code=$?
+              if [ "$attempt" -lt "$max_attempts" ]; then
+                sleep 3
+              fi
+              attempt=$((attempt + 1))
+            done
+            return "$exit_code"
+          }
+
+          PM="https://notion.so/.../sandbox-daily-$(date +%F)"
+          BODY=$(jq -n --arg pm "$PM" '{incidentId:"infer",postmortemUrl:$pm}')
+          RES=$(curl_retry -X POST "$BASE_URL/api/pd/resolve?sandbox=1" \
+            -H "Content-Type: application/json" \
+            -H "x-user-email: $ACTOR_EMAIL" \
+            --data "$BODY")
+          echo "$RES"
+
+      - name: Post Slack ✅
+        if: success()
+        run: |
+          set -euo pipefail
+
+          curl_retry() {
+            local attempt=1
+            local max_attempts=2
+            local exit_code=0
+            while [ "$attempt" -le "$max_attempts" ]; do
+              if output=$(curl --max-time 25 -sS --fail-with-body "$@"); then
+                printf '%s' "$output"
+                return 0
+              fi
+              exit_code=$?
+              if [ "$attempt" -lt "$max_attempts" ]; then
+                sleep 3
+              fi
+              attempt=$((attempt + 1))
+            done
+            return "$exit_code"
+          }
+
+          PD_URL="${{ steps.open.outputs.pd_url }}"
+          JIRA_KEY="${{ steps.link.outputs.jira_key }}"
+          TRIMMED_BASE="${JIRA_BASE%/}"
+
+          JIRA_LINE="• Jira: N/A"
+          if [ -n "$JIRA_KEY" ] && [ -n "$TRIMMED_BASE" ]; then
+            JIRA_LINE="• Jira: ${TRIMMED_BASE}/browse/$JIRA_KEY"
+          elif [ -n "$JIRA_KEY" ]; then
+            JIRA_LINE="• Jira: $JIRA_KEY"
+          else
+            JIRA_LINE="• Jira: Pending (link not yet available)"
+          fi
+
+          MSG="✅ Daily smoke passed\n• PD: ${PD_URL:-N/A}\n$JIRA_LINE"
+          if [ -z "$JIRA_KEY" ]; then
+            MSG="${MSG}\n⚠️ Jira linkage pending — no page triggered."
+          fi
+
+          PAYLOAD=$(jq -n --arg text "$MSG" '{text:$text}')
+          curl_retry -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" --data "$PAYLOAD" >/dev/null
+
+      - name: Post Slack ❌ + Page PagerDuty
+        if: failure()
+        run: |
+          set -euo pipefail
+
+          curl_retry() {
+            local attempt=1
+            local max_attempts=2
+            local exit_code=0
+            while [ "$attempt" -le "$max_attempts" ]; do
+              if output=$(curl --max-time 25 -sS --fail-with-body "$@"); then
+                printf '%s' "$output"
+                return 0
+              fi
+              exit_code=$?
+              if [ "$attempt" -lt "$max_attempts" ]; then
+                sleep 3
+              fi
+              attempt=$((attempt + 1))
+            done
+            return "$exit_code"
+          }
+
+          MSG="❌ Daily smoke FAILED — check Ops Portal logs"
+          PAYLOAD=$(jq -n --arg text "$MSG" '{text:$text}')
+          curl_retry -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" --data "$PAYLOAD" >/dev/null
+
+          PD_PAYLOAD=$(jq -n \
+            --arg routing_key "$PD_ROUTING_KEY" \
+            '{routing_key:$routing_key,event_action:"trigger",payload:{summary:"Daily PD↔Jira smoke failed",severity:"error",source:"ops-portal"}}')
+          curl_retry -X POST "$PD_EVENTS_URL" -H "Content-Type: application/json" --data "$PD_PAYLOAD" >/dev/null
+
+      - name: Callback status (store)
+        if: always()
+        run: |
+          set -euo pipefail
+
+          curl_retry() {
+            local attempt=1
+            local max_attempts=2
+            local exit_code=0
+            while [ "$attempt" -le "$max_attempts" ]; do
+              if output=$(curl --max-time 25 -sS --fail-with-body "$@"); then
+                printf '%s' "$output"
+                return 0
+              fi
+              exit_code=$?
+              if [ "$attempt" -lt "$max_attempts" ]; then
+                sleep 3
+              fi
+              attempt=$((attempt + 1))
+            done
+            return "$exit_code"
+          }
+
+          PD_URL="${{ steps.open.outputs.pd_url }}"
+          JIRA_KEY="${{ steps.link.outputs.jira_key }}"
+
+          PAYLOAD=$(jq -n \
+            --argjson ok ${{ job.status == 'success' }} \
+            --arg at "$(date -Iseconds)" \
+            --arg pd "${PD_URL:-}" \
+            --arg jira "${JIRA_KEY:-}" \
+            '{ok:$ok,at:$at,pd:$pd,jira:$jira}')
+
+          curl_retry -X POST "$BASE_URL/api/smoke/status" -H "Content-Type: application/json" --data "$PAYLOAD" >/dev/null || true
