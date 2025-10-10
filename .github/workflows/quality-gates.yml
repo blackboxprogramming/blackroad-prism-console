@@ -1,0 +1,71 @@
+name: quality-gates
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [main, master]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pulse-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Quick Pulse checklist
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const core = require('@actions/core');
+            const body = context.payload.pull_request.body || "";
+            const required = [
+              "No secrets in code/logs/configs",
+              "Least-privilege access in agents/pipelines",
+              "SBOM/deps reviewed; issues triaged",
+              "All suites green (link to run)",
+              "Auth/perm edge cases covered",
+              "Rollback path described",
+              "Change size/blast radius acknowledged",
+              "Sequence: migrations/flags → deploy → post-checks",
+              "Approvals gathered; freeze windows honored"
+            ];
+            const unchecked = [];
+            for (const item of required) {
+              const escaped = item.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+              const uncheckedPattern = new RegExp(`- \\[ \\] ${escaped}`);
+              const checkedPattern = new RegExp(`- \\[[xX]\\] ${escaped}`);
+              if (uncheckedPattern.test(body) || !checkedPattern.test(body)) {
+                unchecked.push(item);
+              }
+            }
+            if (unchecked.length) {
+              core.setFailed(`Quick Pulse items still unchecked or missing:\n- ${unchecked.join("\n- ")}`);
+            }
+
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gitleaks (secret scan)
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: detect --no-banner --redact
+
+  tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test -- --runInBand

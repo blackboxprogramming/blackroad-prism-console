@@ -1,0 +1,96 @@
+name: codex-commands
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  actions: write
+  checks: write
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  detect:
+    if: ${{ github.event.issue.pull_request && contains(fromJson('["MEMBER","OWNER","COLLABORATOR"]'), github.event.comment.author_association) }}
+    runs-on: ubuntu-latest
+    outputs:
+      run_security: ${{ steps.parse.outputs.run_security }}
+      run_tests: ${{ steps.parse.outputs.run_tests }}
+      auto_merge: ${{ steps.parse.outputs.auto_merge }}
+    steps:
+      - name: Parse comment commands
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const core = require('@actions/core');
+            const body = (context.payload.comment.body || '').toLowerCase();
+            const runSecurity = body.includes('@codex run security-sanity');
+            const runTests = body.includes('@codex run tests');
+            const autoMerge = body.includes('@codex ship when green');
+            core.setOutput('run_security', String(runSecurity));
+            core.setOutput('run_tests', String(runTests));
+            core.setOutput('auto_merge', String(autoMerge));
+            if (runSecurity || runTests || autoMerge) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                body: `👋 Command received: ${[
+                  runSecurity ? 'security-sanity' : null,
+                  runTests ? 'tests' : null,
+                  autoMerge ? 'ship when green' : null,
+                ].filter(Boolean).join(', ')}. Triggering automation now.`
+              });
+            }
+
+  security:
+    needs: detect
+    if: ${{ needs.detect.outputs.run_security == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.issue.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.issue.pull_request.head.ref }}
+      - name: Run security sanity (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: detect --no-banner --redact
+
+  tests:
+    needs: detect
+    if: ${{ needs.detect.outputs.run_tests == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.issue.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.issue.pull_request.head.ref }}
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test -- --runInBand
+
+  enable-auto-merge:
+    needs: detect
+    if: ${{ needs.detect.outputs.auto_merge == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add codex:auto-merge label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              labels: ['codex:auto-merge']
+            });
