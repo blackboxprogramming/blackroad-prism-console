@@ -1,0 +1,34 @@
+{
+  "systems": {
+    "default": {
+      "serviceId": "PD_SERVICE_DEFAULT",
+      "escalationPolicyId": "EP_DEFAULT",
+      "assignees": [],
+      "urgency": "low"
+    },
+    "api": {
+      "serviceId": "PD_SERVICE_API",
+      "escalationPolicyId": "EP_API",
+      "assignees": ["PDU123", "PDU456"],
+      "urgency": "high"
+    },
+    "ui": {
+      "serviceId": "PD_SERVICE_UI",
+      "escalationPolicyId": "EP_UI",
+      "assignees": ["PDU789"],
+      "urgency": "low"
+    },
+    "bulk": {
+      "serviceId": "PD_SERVICE_API",
+      "escalationPolicyId": "EP_API",
+      "assignees": ["PDU123"],
+      "urgency": "high"
+    }
+  },
+  "runbooks": {
+    "api": "https://notion.so/.../API-Incident-Runbook",
+    "ui": "https://notion.so/.../UI-Incident-Runbook",
+    "ingest-gh": "https://notion.so/.../Ingest-GitHub-Runbook",
+    "bulk": "https://notion.so/.../Ops-Risk-Sweep"
+  }
+}

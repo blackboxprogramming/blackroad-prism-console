@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2025-02-01T00:00:00Z",
+  "systems": [
+    {
+      "key": "api",
+      "name": "Public API",
+      "color": "red",
+      "risk": 0.92,
+      "action": "Rate-limit spikes impacting checkout",
+      "owner": "Ops"
+    },
+    {
+      "key": "ui",
+      "name": "Web UI",
+      "color": "yellow",
+      "risk": 0.66,
+      "action": "Audit stale feature flags",
+      "owner": "Ops"
+    },
+    {
+      "key": "ingest-gh",
+      "name": "GitHub Ingest",
+      "color": "yellow",
+      "risk": 0.61,
+      "action": "Requeue stalled repo syncs",
+      "owner": "Data Platform"
+    },
+    {
+      "key": "billing",
+      "name": "Billing",
+      "color": "green",
+      "risk": 0.21,
+      "action": "Continue monitoring nightly jobs",
+      "owner": "FinOps"
+    }
+  ]
+}
