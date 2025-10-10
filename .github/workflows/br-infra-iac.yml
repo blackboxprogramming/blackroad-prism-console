@@ -1,0 +1,33 @@
+name: br-infra-iac
+
+on:
+  push:
+    branches: ["main", "master", "develop"]
+    paths:
+      - 'br-infra-iac/**'
+  pull_request:
+    paths:
+      - 'br-infra-iac/**'
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: br-infra-iac
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+      - name: Terraform init
+        run: terraform init -backend=false
+      - name: Terraform plan
+        run: terraform plan -no-color -out=plan.bin
+      - name: Terraform plan (json)
+        run: terraform show -json plan.bin > plan.json
+      - name: Conftest
+        uses: instrumenta/conftest-action@v0.3.0
+        with:
+          files: plan.json
+          policy: policy

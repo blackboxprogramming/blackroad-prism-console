@@ -1,0 +1,9 @@
+Task Name,Description,Assignee Email,Section,Due Date
+Standing up SOC2 controls,"Create Notion Controls DB + starter set; map to TSC.",amundsonalexa@gmail.com,Today,2025-10-28
+Policies v1,"Publish Security/Access/Change/SDLC/IR/Classification/DR.",amundsonalexa@gmail.com,Today,2025-10-28
+Org guard (OPA),"Add GitHub org & Terraform OPA checks; fail on violations.",amundsonalexa@gmail.com,This Week,2025-10-30
+AWS guardrails,"Enable Config, Security Hub, GuardDuty org-wide via TF.",amundsonalexa@gmail.com,This Week,2025-10-30
+Access review job,"Ship access-review.yml + playbook; schedule quarterly.",amundsonalexa@gmail.com,This Week,2025-10-30
+Evidence pack job,"Ship evidence-pack.yml; wire to Notion Evidence page monthly.",amundsonalexa@gmail.com,This Week,2025-10-30
+Vendor DB + reminders,"Create Airtable Vendors + Slack renewals 30/7 days.",amundsonalexa@gmail.com,This Week,2025-10-31
+DR drill,"Schedule annual restore test; record evidence.",amundsonalexa@gmail.com,Next Month,2025-11-07
