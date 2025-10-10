@@ -1,0 +1,6 @@
+Task Name,Description,Assignee Email,Section,Due Date
+PD auto-assign map,Add per-system assignees + EP + urgency config.,amundsonalexa@gmail.com,Today,2025-10-31
+Resolve endpoint,/api/pd/resolve to close incidents with post-mortem link.,amundsonalexa@gmail.com,Today,2025-10-31
+Bulk PD sweep,/api/pd/bulk to open coordination incident when ≥3 yellow.,amundsonalexa@gmail.com,Today,2025-10-31
+Throttle & dedupe,Server-side limit + open-incident reuse per system.,amundsonalexa@gmail.com,Today,2025-10-31
+Audit & UI,Show PD status on cards; list last 10 PD ops on /ops.,amundsonalexa@gmail.com,Today,2025-10-31
