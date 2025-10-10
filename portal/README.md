@@ -26,6 +26,48 @@ sudo apt-get install qrencode zbar-tools tor
 | `portal-static [addr:port]` | Serve `reports/health.html` over HTTP on localhost. Used internally by the Tor helper. |
 | `portal-health-tor` | Print the Tor onion URL for the health page and launch the local static server on `127.0.0.1:8088`. |
 
+### Nightly proofs, log rotation, and REST shim
+
+The Raspberry Pi deployment picks up three additional helpers to keep proofs fresh and
+expose a localhost-only API surface:
+
+1. **Log rotation** – install the sample config in `/etc/logrotate.d/portal` to rotate
+   `~/portal/logs/*.log` daily with a 14-day retention window:
+   ```bash
+   sudo cp ~/portal/configs/logrotate.portal /etc/logrotate.d/portal
+   sudo logrotate --force /etc/logrotate.d/portal  # optional smoke-test
+   ```
+2. **Nightly proofs** – `~/portal/bin/portal-nightly` re-generates proofs at
+   02:17 UTC when `configs/raw.descriptor` is present. Install the cron job via:
+   ```bash
+   ( crontab -l 2>/dev/null | grep -v 'portal-nightly' ; \
+     echo "17 2 * * * /home/pi/portal/bin/portal-nightly" ) | crontab -
+   ```
+   Logs land in `~/portal/logs/nightly.YYYYMMDD.log`.
+3. **REST shim** – `~/portal/bin/portal-rest` binds to `127.0.0.1:8787` and requires
+   a bearer token stored at `~/portal/configs/api.token` (copy
+   `api.token.example`, replace the value with a random string, and run
+   `chmod 600 ~/portal/configs/api.token`). Start it manually or wire it up to
+   systemd with the provided unit file:
+   ```bash
+   sudo cp ~/portal/systemd/portal-rest.service /etc/systemd/system/
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now portal-rest.service
+   ```
+   The `ENABLE_PSBT_API` environment variable gates the PSBT authoring endpoint
+   and defaults to `0` (read-only mode).
+
+Run `~/portal/ops/last_mile_glue.sh` to apply the full set of steps above on a
+fresh Raspberry Pi deployment.
+
+Curl example (replace `${TOKEN}` with the generated value):
+
+```bash
+curl -s \
+  -H "Authorization: Bearer ${TOKEN}" \
+  http://127.0.0.1:8787/health | jq
+```
+
 ### PSBT via QR workflow
 
 1. Place the unsigned PSBT in `~/portal/psbts/NAME.psbt`.
