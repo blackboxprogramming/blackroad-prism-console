@@ -1,0 +1,13 @@
+{
+  "name": "performance-overlay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser overlay for captions and gestures controlled by the conductor.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
