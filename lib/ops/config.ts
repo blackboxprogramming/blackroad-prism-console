@@ -67,7 +67,10 @@ export function getSystemPagerDutyConfig(systemKey: string): SystemPagerDutyConf
   return cfg.systems[systemKey] ?? cfg.systems["default"];
 }
 
-export function getRunbookUrl(systemKey: string): string | undefined {
+export function getRunbookUrl(systemKey: string, options: { sandbox?: boolean } = {}): string | undefined {
+  if (options.sandbox && process.env.RUNBOOK_URL_SANDBOX) {
+    return process.env.RUNBOOK_URL_SANDBOX;
+  }
   const cfg = loadPagerDutyConfig();
   const map = cfg.runbooks ?? {};
   return map[systemKey] ?? map["default"] ?? process.env.RUNBOOK_URL;

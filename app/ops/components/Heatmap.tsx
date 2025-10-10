@@ -23,6 +23,7 @@ export default function Heatmap({ initialSystems, initialAudit, generatedAt }: P
   const [audit, setAudit] = useState(initialAudit);
   const [user, setUser] = useState<OpsUser | null>(null);
   const [loading, setLoading] = useState(false);
+  const [smokeLoading, setSmokeLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,7 +56,7 @@ export default function Heatmap({ initialSystems, initialAudit, generatedAt }: P
     setError(null);
     try {
       const [riskRes, auditRes] = await Promise.all([
-        fetch("/api/scorecard/risk"),
+        fetch("/api/scorecard/risk?sandbox=1"),
         hasOpsAccess
           ? fetch("/api/pd/audit", { headers: withUserHeaders() })
           : Promise.resolve(new Response(JSON.stringify({ events: [] })))
@@ -165,6 +166,32 @@ export default function Heatmap({ initialSystems, initialAudit, generatedAt }: P
     }
   }
 
+  async function handleSmoke() {
+    if (!hasOpsAccess) return;
+    setMessage(null);
+    setError(null);
+    setSmokeLoading(true);
+    try {
+      const res = await fetch("/api/smoke/pd-jira?sandbox=1", {
+        method: "POST",
+        headers: withUserHeaders({ "Content-Type": "application/json" }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        throw new Error(data?.error || "smoke_failed");
+      }
+      const pd = data.pd ? `PD ${data.pd}` : "";
+      const jira = data.jira ? `Jira ${data.jira}` : "";
+      const parts = ["Smoke passed", pd, jira].filter(Boolean);
+      setMessage(parts.join("\n"));
+      await refresh();
+    } catch (err: any) {
+      setError(String(err?.message || err));
+    } finally {
+      setSmokeLoading(false);
+    }
+  }
+
   function updateUser(next: OpsUser) {
     setUser(next);
     if (typeof window !== "undefined") {
@@ -186,6 +213,13 @@ export default function Heatmap({ initialSystems, initialAudit, generatedAt }: P
             style={{ ...buttonStyle, backgroundColor: "#f59e0b", color: "#0f172a" }}
           >
             Open PD Sweep
+          </button>
+          <button
+            onClick={handleSmoke}
+            disabled={!hasOpsAccess || loading || smokeLoading}
+            style={{ ...buttonStyle, backgroundColor: "#0ea5e9", color: "white" }}
+          >
+            {smokeLoading ? "Running Smoke…" : "Run PD+Jira Smoke"}
           </button>
           <span style={{ fontSize: "0.85rem", color: "#64748b" }}>
             Snapshot: {new Date(generatedAt).toLocaleString()}
@@ -225,6 +259,11 @@ export default function Heatmap({ initialSystems, initialAudit, generatedAt }: P
               ) : (
                 <p style={{ marginTop: "0.5rem", fontSize: "0.8rem", color: "#475569" }}>No open PD incident</p>
               )}
+              {system.jiraKey && (
+                <p style={{ marginTop: "0.35rem", fontSize: "0.8rem" }}>
+                  Jira: <a href={system.jiraUrl || "#"} target="_blank" rel="noreferrer">{system.jiraKey}</a>
+                </p>
+              )}
               <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                 <button
                   onClick={() => handleCreate(system)}
@@ -261,6 +300,9 @@ export default function Heatmap({ initialSystems, initialAudit, generatedAt }: P
               </div>
               {event.pdIncidentId && (
                 <div style={{ fontSize: "0.8rem" }}>PD: {event.pdIncidentId}</div>
+              )}
+              {event.jiraKey && (
+                <div style={{ fontSize: "0.8rem" }}>Jira: {event.jiraKey}</div>
               )}
             </div>
           ))}

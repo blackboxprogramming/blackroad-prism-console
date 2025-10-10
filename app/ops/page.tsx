@@ -5,7 +5,7 @@ import { getRecentIncidentEvents } from "@/lib/ops/db";
 export const dynamic = "force-dynamic";
 
 export default async function OpsPage() {
-  const snapshot = getRiskSnapshot();
+  const snapshot = getRiskSnapshot({ includeSandbox: true });
   const audit = getRecentIncidentEvents(10);
 
   return (
