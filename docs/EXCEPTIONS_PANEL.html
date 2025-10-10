@@ -1,0 +1,39 @@
+<h3>Active exceptions (this rule)</h3>
+<label>Org:
+  <select id="orgSel">
+    <option value="">All</option>
+    <option value="acme">acme</option>
+    <option value="umbrella">umbrella</option>
+  </select>
+</label>
+<div id="exc-list">Loading…</div>
+<script>
+(async function(){
+  const el = document.getElementById('exc-list');
+  const sel = document.getElementById('orgSel');
+  sel.addEventListener('change', load);
+  await load();
+  async function load(){
+    el.textContent = "Loading…";
+    const org = sel.value;
+    const url = new URL('/exceptions/active', window.location.origin || 'http://localhost');
+    url.searchParams.set('rule_id', '{{ .RuleID }}');
+    if(org) url.searchParams.set('org_id', org);
+    try {
+      const res = await fetch(url.toString());
+      if(!res.ok) throw new Error(res.status);
+      const data = await res.json();
+      if(!data.items || data.items.length===0){ el.textContent="(none)"; return; }
+      el.innerHTML = `<table border="0" cellpadding="6">
+        <tr><th>ID</th><th>Subject</th><th>Requested by</th><th>Valid until</th></tr>
+        ${data.items.map(i=>`<tr>
+          <td>#${i.id}</td>
+          <td><code>${i.subject_type}:${i.subject_id}</code></td>
+          <td>${i.requested_by||"?"}</td>
+          <td>${i.valid_until? new Date(i.valid_until).toISOString() : "(none)"}</td>
+        </tr>`).join("")}
+      </table>`;
+    } catch(e){ el.textContent="(error loading exceptions)"; }
+  }
+})();
+</script>
