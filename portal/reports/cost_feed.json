@@ -1,0 +1,9 @@
+{
+  "api": { "actual": 1320.5, "forecast": 1500 },
+  "ui": { "actual": 220.1, "forecast": 250 },
+  "ingest-gh": { "actual": 410.2, "forecast": 380 },
+  "ingest-lin": { "actual": 120.0, "forecast": 140 },
+  "ingest-str": { "actual": 305.5, "forecast": 290 },
+  "infra": { "actual": 980.0, "forecast": 950 },
+  "data": { "actual": 640.8, "forecast": 620 }
+}

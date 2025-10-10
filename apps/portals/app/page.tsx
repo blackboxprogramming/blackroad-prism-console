@@ -12,6 +12,7 @@ const portals = [
   { name: "Lucidia", href: "/portal" },
   { name: "Codex", href: "/codex" },
   { name: "Prism Sources", href: "/prism/sources" },
+  { name: "Risk Heatmap", href: "/scorecard/risk" },
 ];
 
 export default function HomePage() {
