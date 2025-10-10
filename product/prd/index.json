@@ -1,1 +1,10 @@
-{ "list": [] }
+{
+  "list": [
+    {
+      "id": "wallet-dashboard-v1",
+      "title": "Wallet Dashboard v1",
+      "path": "product/prd/wallet-dashboard-v1.md",
+      "status": "draft"
+    }
+  ]
+}
