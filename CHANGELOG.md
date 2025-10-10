@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.8.0...v1.9.0) (2025-10-10)
+
+
+### Features
+
+* sync PagerDuty incidents with Jira ([a967901](https://github.com/blackboxprogramming/blackroad-prism-console/commit/a967901141d0d72ddb3eb117065dec0a80a1a982))
+
 ## [1.8.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.7.0...v1.8.0) (2025-10-05)
 
 
