@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# Generates a static HTML checklist that stitches all portal steps:
+#  Scan → Proof → PSBT → QR → Offline Sign → Verify → Broadcast (+ Health/Prices/Backups)
+set -euo pipefail
+R="/home/pi/portal"
+OUT="$R/reports/ops-checklist.html"
+
+btc_proof="$(ls -1t "$R/proofs"/aura-proof.json 2>/dev/null | head -n1 || true)"
+ltc_proof="$(ls -1t "$R/proofs"/ltc-proof.json  2>/dev/null | head -n1 || true)"
+btc_price="$(jq -r '.btc // empty' "$R/configs/prices.json" 2>/dev/null || true)"
+
+cat > "$OUT" <<HTML
+<!doctype html><meta charset="utf-8">
+<title>Portal Ops Checklist</title>
+<style>
+body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;background:#0b0f14;color:#e6edf3;margin:0;padding:24px}
+h1{margin:0 0 12px;font-size:22px} h2{font-size:18px;margin:20px 0 8px}
+.card{background:#0f1720;border:1px solid #22303d;border-radius:12px;padding:16px;margin:12px 0}
+pre{background:#0b1320;border-radius:8px;padding:12px;overflow:auto}
+small{opacity:.7} .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+.step{counter-increment:s; } .step::before{content:counter(s) ". ";opacity:.7}
+kbd{background:#111723;border:1px solid #22303d;border-radius:6px;padding:2px 6px}
+.warn{color:#ffb4a3}
+.ok{color:#b7f0b1}
+</style>
+
+<h1>Portal Ops Checklist</h1>
+<p class="mono"><small>Everything here is key-safe. No seeds/private keys ever touch the Pi.</small></p>
+
+<div class="card"><h2 class="step">Scan &amp; Proof (watch-only)</h2>
+<ol>
+<li>Place your raw descriptor at <span class="mono">/home/pi/portal/configs/raw.descriptor</span></li>
+<li>Run: <pre><code>/home/pi/portal/bin/portal proof /home/pi/portal/configs/raw.descriptor</code></pre></li>
+<li>Result: <span class="mono">BTC: ${btc_proof:-N/A}</span><br><span class="mono">LTC: ${ltc_proof:-N/A}</span> (hashes in <span class="mono">aura-proof.sha256</span> / <span class="mono">ltc-proof.sha256</span>)</li>
+</ol>
+</div>
+
+<div class="card"><h2 class="step">Prepare PSBT (multi-dest allowed)</h2>
+<ol>
+<li>Create outputs file (example):
+<pre><code>cat &gt; /home/pi/portal/configs/pay001.outputs.json &lt;&lt;'JSON'
+[
+  {"address":"bc1qDEST...", "amount_btc":"0.01000000"}
+]
+JSON</code></pre></li>
+<li>Build PSBT:
+<pre><code>/home/pi/portal/bin/portal psbt:new pay001 /home/pi/portal/configs/pay001.outputs.json 3
+# =&gt; creates /home/pi/portal/psbts/pay001.psbt</code></pre></li>
+</ol>
+</div>
+
+<div class="card"><h2 class="step">Air-Gap Handoff (QR or USB)</h2>
+<ol>
+<li>QR (single or chunked):
+<pre><code>/home/pi/portal/bin/psbt-to-qr-robust /home/pi/portal/psbts/pay001.psbt</code></pre></li>
+<li>On offline signer: scan QR(s), sign; export as <span class="mono">pay001.signed.psbt</span></li>
+<li>Return file and (optionally) verify QR reassembly:
+<pre><code>/home/pi/portal/bin/qr-to-psbt-robust /home/pi/portal/psbts/pay001.signed.psbt IMG*.png</code></pre></li>
+</ol>
+<p class="warn"><strong>Never</strong> transfer seeds/keys. Only move PSBTs.</p>
+</div>
+
+<div class="card"><h2 class="step">Verify &amp; Broadcast</h2>
+<ol>
+<li>Verify signatures:
+<pre><code>/home/pi/portal/bin/portal psbt:verify /home/pi/portal/psbts/pay001.signed.psbt
+# =&gt; writes pay001.verified.json</code></pre></li>
+<li>Broadcast (requires explicit confirm):
+<pre><code>CONFIRM_BROADCAST=1 /home/pi/portal/bin/portal psbt:broadcast /home/pi/portal/psbts/pay001.signed.psbt</code></pre></li>
+</ol>
+</div>
+
+<div class="card"><h2 class="step">Health &amp; Reports</h2>
+<ol>
+<li>Set an offline price (optional): <pre><code>/home/pi/portal/bin/price set btc ${btc_price:-68000}</code></pre></li>
+<li>Generate Health page:
+<pre><code>/home/pi/portal/bin/portal-health
+# HTML at /home/pi/portal/reports/health.html</code></pre></li>
+<li>Tor (read-only):
+<pre><code>/home/pi/portal/bin/portal-health-tor
+# or with Basic-Auth front: portal-health-auth ; caddy-setpass &lt;user&gt; &lt;pass&gt;</code></pre></li>
+</ol>
+</div>
+
+<div class="card"><h2 class="step">Policy &amp; Coin Control (optional)</h2>
+<ol>
+<li>Create a request file (<span class="mono">configs/&lt;label&gt;.request.json</span>)</li>
+<li>Collect offline signatures into <span class="mono">configs/approvals/&lt;label&gt;/</span></li>
+<li>Build from request: <pre><code>/home/pi/portal/bin/portal-build-from-request configs/&lt;label&gt;.request.json</code></pre></li>
+<li>Freeze specific UTXOs locally: <pre><code>/home/pi/portal/bin/portal utxo:freeze &lt;txid&gt;:&lt;vout&gt;</code></pre></li>
+</ol>
+</div>
+
+<div class="card"><h2 class="step">Backups</h2>
+<pre><code>/home/pi/portal/bin/portal-backup  /home/pi/portal/backups/portal.$(date -u +%Y%m%d).tgz
+/home/pi/portal/bin/portal-restore /home/pi/portal/backups/portal.YYYYMMDD.tgz</code></pre>
+</div>
+
+<div class="card"><h2>Safety Rules (must always hold)</h2>
+<ul>
+<li class="warn">No seeds/private keys on the Pi. Signing is offline only.</li>
+<li>No broadcast without env flag <span class="mono">CONFIRM_BROADCAST=1</span>.</li>
+<li>Proofs are non-secret JSON + sha256 only.</li>
+<li>Keep descriptors/xpubs separate from any human commentary.</li>
+</ul>
+</div>
+
+<p class="ok mono"><small>Done. You can print or share this file: ${OUT}</small></p>
+HTML
+
+echo "CHECKLIST: $OUT"
