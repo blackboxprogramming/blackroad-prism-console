@@ -21,10 +21,17 @@ sudo apt-get install qrencode zbar-tools tor
 
 | Script | Purpose |
 | --- | --- |
+| `portal-env` | Check the runtime environment and required dependencies. |
+| `portal-run` | Execute the one-button workflow (proof → health → checklist). |
+| `portal-selftest` | Run a quick smoke test that builds a PSBT and verifies signing flow without broadcasting. |
+| `portal-help` | Display a help index of the major Portal commands and workflows. |
 | `psbt-to-qr <file.psbt> [out.png]` | Encode a (signed or unsigned) PSBT into a QR image. Files larger than ~2500 base64 characters are split into numbered parts. |
 | `qr-to-psbt <out.psbt> <img1.png> [img2.png ...]` | Reconstruct a PSBT from one or more QR images scanned on an offline machine. |
 | `portal-static [addr:port]` | Serve `reports/health.html` over HTTP on localhost. Used internally by the Tor helper. |
 | `portal-health-tor` | Print the Tor onion URL for the health page and launch the local static server on `127.0.0.1:8088`. |
+| `psbt-fake-sign <label>` | Clone `<label>.psbt` to `<label>.signed.psbt` for offline signer simulations and automated tests. |
+
+The new `portal-env` helper checks that `bitcoin-cli`, `jq`, and `python3` are available and that `configs/raw.descriptor` is populated. `portal-run` chains a descriptor proof, the health report generator, and the checklist builder for a single-command operations sweep. `portal-selftest` performs a key-safe smoke test that exercises PSBT creation and verification using the `psbt-fake-sign` shim, while `portal-help` prints a concise index of the most common workflows.
 
 ### Nightly proofs, log rotation, and REST shim
 
