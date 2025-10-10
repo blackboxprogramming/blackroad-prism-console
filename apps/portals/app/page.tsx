@@ -12,6 +12,7 @@ const portals = [
   { name: "Lucidia", href: "/portal" },
   { name: "Codex", href: "/codex" },
   { name: "Prism Sources", href: "/prism/sources" },
+  { name: "Ops Incidents", href: "/ops/incidents" },
 ];
 
 export default function HomePage() {
