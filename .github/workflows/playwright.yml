@@ -1,0 +1,74 @@
+name: Playwright smoke
+
+on:
+  pull_request:
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - package.json
+      - package-lock.json
+      - pnpm-lock.yaml
+      - yarn.lock
+      - playwright.config.*
+      - .github/workflows/playwright.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect Playwright projects
+        id: detect
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > playwright-projects.txt
+import json
+import pathlib
+paths = []
+for pkg in pathlib.Path('.').glob('**/package.json'):
+    try:
+        data = json.loads(pkg.read_text())
+    except Exception:
+        continue
+    deps = {}
+    for key in ('dependencies', 'devDependencies'):
+        value = data.get(key, {})
+        if isinstance(value, dict):
+            deps.update(value)
+    if '@playwright/test' in deps:
+        paths.append(pkg.parent)
+if paths:
+    print("\n".join(sorted(set(str(p) or '.' for p in paths))))
+PY
+          if [[ -s playwright-projects.txt ]]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "Detected Playwright projects:" >&2
+            cat playwright-projects.txt >&2
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "No Playwright projects detected; skipping tests." >&2
+          fi
+
+      - name: Install dependencies and run tests
+        if: steps.detect.outputs.found == 'true'
+        run: |
+          set -euo pipefail
+          while IFS= read -r project; do
+            project=${project:-.}
+            echo "::group::Playwright in $project"
+            pushd "$project" >/dev/null
+            if [[ -f package-lock.json ]]; then
+              npm ci
+            else
+              npm install
+            fi
+            npx playwright install --with-deps
+            npx playwright test --reporter=line --config=playwright.config.ts || npx playwright test --reporter=line
+            popd >/dev/null
+            echo "::endgroup::"
+          done < playwright-projects.txt
