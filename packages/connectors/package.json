@@ -1,7 +1,7 @@
 {
-  "name": "@blackroad/worm",
+  "name": "@blackroad/connectors",
   "version": "0.1.0",
-  "description": "Append-only WORM archive and verification utilities for BlackRoad SurveillanceHub evidence.",
+  "description": "Connectors for communications ingestion into SurveillanceHub.",
   "type": "module",
   "license": "Apache-2.0",
   "main": "dist/index.js",
@@ -12,7 +12,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@blackroad/db": "workspace:*"
+    "@lucidia/core": "workspace:*",
+    "@blackroad/worm": "workspace:*"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",

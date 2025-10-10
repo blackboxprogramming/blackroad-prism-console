@@ -7,6 +7,67 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AlertKind {
+  TRADE
+  CRYPTO
+  COMMS
+  INSIDER
+  SYSTEM
+}
+
+enum AlertStatus {
+  Open
+  Suppressed
+  InCase
+  Closed
+}
+
+enum CaseStatus {
+  Open
+  UnderReview
+  Escalated
+  SAR_Drafted
+  Closed_NoIssue
+  Closed_Remediation
+  Closed_SARFiled
+}
+
+enum CaseItemType {
+  Alert
+  Trade
+  WalletTx
+  Comm
+  Document
+  Note
+  Task
+}
+
+enum LexiconStatus {
+  Active
+  Disabled
+}
+
+enum CommChannel {
+  EMAIL
+  IM
+  SMS
+  FILE
+  NOTE
+}
+
+enum InsiderEvent {
+  EARNINGS
+  MNA
+  SECONDARY
+  TOKEN_LISTING
+  OTHER
+}
+
+enum SARDraftStatus {
+  Draft
+  ReadyForFiling
+}
+
 model FeeSchedule {
   id        String   @id @default(cuid())
   name      String
@@ -96,6 +157,129 @@ model ErrorLedger {
   description String
   correction  Json?
   createdAt   DateTime @default(now())
+}
+
+model Alert {
+  id        String      @id @default(cuid())
+  kind      AlertKind
+  scenario  String
+  severity  Int
+  status    AlertStatus @default(Open)
+  key       String
+  signal    Json
+  createdAt DateTime    @default(now())
+
+  @@index([kind])
+  @@index([status])
+  @@index([scenario, key])
+}
+
+model Case {
+  id        String     @id @default(cuid())
+  title     String
+  status    CaseStatus @default(Open)
+  ownerId   String?
+  summary   String?
+  createdAt DateTime   @default(now())
+  closedAt  DateTime?
+  alerts    CaseItem[]
+}
+
+model CaseItem {
+  id     String       @id @default(cuid())
+  caseId String
+  type   CaseItemType
+  refId  String
+  meta   Json
+  case   Case         @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@index([type])
+}
+
+model Lexicon {
+  id        String        @id @default(cuid())
+  key       String        @unique
+  phrases   String[]
+  proximity Int
+  riskBase  Int
+  status    LexiconStatus @default(Active)
+}
+
+model Comm {
+  id           String      @id @default(cuid())
+  channel      CommChannel
+  threadId     String?
+  from         String
+  to           String[]
+  subject      String?
+  ts           DateTime
+  text         String
+  sha256       String
+  retentionKey String
+  archived     Boolean     @default(false)
+
+  @@index([channel])
+  @@index([ts])
+  @@unique([channel, sha256])
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  commId    String?
+  name      String
+  sha256    String   @unique
+  path      String
+  createdAt DateTime @default(now())
+}
+
+model InsiderIssuer {
+  id             String       @id @default(cuid())
+  symbol         String?
+  name           String
+  event          InsiderEvent
+  windowStart    DateTime
+  windowEnd      DateTime
+  restrictedList Boolean      @default(false)
+  persons        InsiderPerson[]
+
+  @@index([symbol])
+  @@index([restrictedList])
+}
+
+model InsiderPerson {
+  id            String   @id @default(cuid())
+  personId      String
+  issuerId      String
+  wallCrossedAt DateTime
+  notes         String?
+  issuer        InsiderIssuer @relation(fields: [issuerId], references: [id], onDelete: Cascade)
+
+  @@index([issuerId])
+  @@index([personId])
+}
+
+model SuppressionRule {
+  id         String   @id @default(cuid())
+  scenario   String
+  keyPattern String
+  expiresAt  DateTime?
+  reason     String
+  createdBy  String
+  createdAt  DateTime @default(now())
+
+  @@index([scenario])
+}
+
+model SARDraft {
+  id          String        @id @default(cuid())
+  caseId      String
+  summary     String
+  subjects    Json
+  narrative   String
+  attachments String[]
+  status      SARDraftStatus @default(Draft)
+  createdAt   DateTime       @default(now())
 }
 
 model WormBlock {
