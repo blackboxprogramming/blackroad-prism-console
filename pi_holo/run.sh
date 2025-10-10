@@ -17,4 +17,9 @@ pip install -r "$SCRIPT_DIR/requirements.txt"
 
 export PYTHONPATH="$SCRIPT_DIR:$PYTHONPATH"
 
-python "$SCRIPT_DIR/holo_renderer.py" "$@"
+extra_args=( )
+if [[ "${DISABLE_AUDIO:-0}" == "1" ]]; then
+  extra_args+=("--disable-audio")
+fi
+
+python "$SCRIPT_DIR/holo_renderer.py" "${extra_args[@]}" "$@"
