@@ -1,0 +1,53 @@
+name-template: "v$NEXT_PATCH_VERSION"
+tag-template: "v$NEXT_PATCH_VERSION"
+categories:
+  - title: "🚀 Features"
+    labels:
+      - feature
+      - enhancement
+      - feat
+  - title: "🐛 Fixes"
+    labels:
+      - fix
+      - bug
+      - bugfix
+      - hotfix
+  - title: "🧰 Maintenance"
+    labels:
+      - chore
+      - maintenance
+      - refactor
+  - title: "🛡️ Security"
+    labels:
+      - security
+exclude-labels:
+  - skip-release-notes
+change-template: "- $TITLE (#$NUMBER) @$AUTHOR"
+autolabeler:
+  - label: chore
+    files:
+      - "**/*.md"
+      - "**/*.yml"
+      - "**/*.yaml"
+  - label: security
+    title:
+      - "security"
+  - label: fix
+    title:
+      - "fix"
+      - "bug"
+  - label: feature
+    title:
+      - "feat"
+      - "feature"
+replacers:
+  - search: '/@dependabot\b/'
+    replace: ""
+template: |
+  ## What Changed
+
+  $CHANGES
+
+  ## Contributors
+
+  $CONTRIBUTORS
