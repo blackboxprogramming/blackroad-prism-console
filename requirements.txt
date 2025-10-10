@@ -24,3 +24,7 @@ uvicorn
 whisper
 typer
 pytest
+opentelemetry-sdk
+opentelemetry-exporter-otlp
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-asgi
