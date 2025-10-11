@@ -1,7 +1,7 @@
 {
-  "name": "@blackroad/worm",
-  "version": "0.2.0",
-  "description": "Append-only WORM archive for BlackRoad evidence.",
+  "name": "@blackroad/grc-jobs",
+  "version": "0.1.0",
+  "description": "BullMQ job processors for BlackRoad GRC",
   "type": "module",
   "license": "Apache-2.0",
   "main": "dist/index.js",
@@ -9,16 +9,16 @@
   "files": ["dist"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "clean": "rimraf dist",
-    "test": "vitest"
+    "clean": "rimraf dist"
   },
   "dependencies": {
-    "@prisma/client": "^5.18.0"
+    "@blackroad/grc-core": "workspace:*",
+    "bullmq": "^5.7.1",
+    "ioredis": "^5.4.1"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",
     "rimraf": "^6.0.1",
-    "typescript": "^5.4.5",
-    "vitest": "^1.6.0"
+    "typescript": "^5.4.5"
   }
 }
