@@ -1,0 +1,7 @@
+artifacts/
+10_genesis/outputs_*/
+40_compare/outputs/summary_variants_*.json
+40_compare/outputs/summary_variants_*.csv
+40_compare/outputs/summary_variants_*.txt
+!40_compare/outputs/.gitkeep
+90_reports/variants_report.md
