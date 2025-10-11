@@ -327,6 +327,18 @@ const app = http.createServer(async (req, res) => {
     }
   }
 
+  if (req.method === 'GET' && url.pathname === '/exceptions/active') {
+    const page = clamp(parseInt(url.searchParams.get('page') || '1', 10) || 1, 1, 10000);
+    const pageSize = clamp(parseInt(url.searchParams.get('page_size') || '10', 10) || 10, 1, 50);
+    const payload = data.listActiveExceptions({
+      ruleId: url.searchParams.get('rule_id') || undefined,
+      orgId: url.searchParams.get('org_id') || undefined,
+      page,
+      pageSize,
+    });
+    return send(res, 200, payload);
+  }
+
   if (req.method === 'GET' && url.pathname === '/exceptions') {
     const list = data.listExceptions({
       ruleId: url.searchParams.get('rule_id') || undefined,

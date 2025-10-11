@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Active Exceptions Dashboard</title>
+    <style>
+      body {
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f5f6fa;
+        margin: 0;
+        color: #1f2933;
+      }
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px 24px;
+      }
+      h1 {
+        font-size: 1.75rem;
+        margin-bottom: 12px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+      }
+      th, td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid #e4e7eb;
+        font-size: 0.9rem;
+      }
+      th {
+        background: #f0f4f8;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+      }
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+      .meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 16px;
+        font-size: 0.85rem;
+      }
+      .pager button {
+        border: none;
+        background: #2563eb;
+        color: #fff;
+        padding: 8px 14px;
+        margin-left: 8px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+      .pager button[disabled] {
+        background: #cbd5f5;
+        cursor: not-allowed;
+      }
+      .status {
+        margin-bottom: 16px;
+        color: #52606d;
+      }
+      .error {
+        color: #b91c1c;
+      }
+      .retry {
+        border: none;
+        background: none;
+        color: #2563eb;
+        cursor: pointer;
+        text-decoration: underline;
+        font-size: 0.9rem;
+        padding: 0;
+        margin-left: 4px;
+      }
+      svg {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Active Exceptions</h1>
+      <div id="status" class="status">Loading…</div>
+      <div id="table-wrapper"></div>
+      <div class="meta">
+        <div id="summary"></div>
+        <div class="pager">
+          <button id="prev" type="button">◀ Prev</button>
+          <button id="next" type="button">Next ▶</button>
+        </div>
+      </div>
+    </main>
+    <script>
+      const state = {
+        page: 1,
+        totalPages: 1,
+        pageSize: 10,
+        rule: '',
+        org: '',
+      };
+
+      async function load(page = 1) {
+        const status = document.getElementById('status');
+        status.textContent = 'Loading…';
+        status.classList.remove('error');
+        try {
+          const params = new URLSearchParams({
+            page: String(page),
+            page_size: String(state.pageSize),
+          });
+          if (state.rule) params.set('rule_id', state.rule);
+          if (state.org) params.set('org_id', state.org);
+          const res = await fetch(`/exceptions/active?${params.toString()}`);
+          if (!res.ok) {
+            throw new Error(`Request failed with ${res.status}`);
+          }
+          const data = await res.json();
+          renderTable(data);
+          state.page = data.page || 1;
+          state.totalPages = data.totalPages || 1;
+          updatePager();
+          status.textContent = '';
+        } catch (err) {
+          console.error(err);
+          showError('Unable to load active exceptions.');
+        }
+      }
+
+      function showError(message) {
+        const status = document.getElementById('status');
+        status.innerHTML = '';
+        status.classList.add('error');
+        const text = document.createElement('span');
+        text.textContent = message;
+        const retry = document.createElement('button');
+        retry.textContent = 'Retry';
+        retry.type = 'button';
+        retry.className = 'retry';
+        retry.addEventListener('click', () => load(state.page));
+        status.append(text, retry);
+      }
+
+      function renderTable(data) {
+        const wrapper = document.getElementById('table-wrapper');
+        wrapper.innerHTML = '';
+        const table = document.createElement('table');
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Rule</th>
+              <th>Subject</th>
+              <th>Org</th>
+              <th>Requested by</th>
+              <th>Window</th>
+              <th>Time remaining</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        `;
+        const tbody = table.querySelector('tbody');
+        const items = Array.isArray(data.exceptions) ? data.exceptions : [];
+        if (items.length === 0) {
+          const row = document.createElement('tr');
+          const cell = document.createElement('td');
+          cell.colSpan = 6;
+          cell.textContent = 'No active exceptions.';
+          row.appendChild(cell);
+          tbody.appendChild(row);
+        } else {
+          for (const item of items) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td><code>${escapeHtml(item.rule_id || '')}</code></td>
+              <td><code>${escapeHtml(formatSubject(item))}</code></td>
+              <td><code>${escapeHtml(item.org_id || '')}</code></td>
+              <td>${escapeHtml(item.requested_by || '(unknown)')}</td>
+              <td>${formatWindow(item.valid_from, item.valid_until)}</td>
+              <td>${renderGaugeExact(item.valid_from, item.valid_until)}</td>
+            `;
+            tbody.appendChild(row);
+          }
+        }
+        wrapper.appendChild(table);
+
+        const summary = document.getElementById('summary');
+        const total = typeof data.total === 'number' ? data.total : items.length;
+        summary.textContent = `${total} active ${total === 1 ? 'exception' : 'exceptions'}`;
+      }
+
+      function escapeHtml(value) {
+        return String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+      }
+
+      function formatSubject(item) {
+        const type = item.subject_type || 'subject';
+        const id = item.subject_id || '';
+        return `${type}:${id}`;
+      }
+
+      function formatWindow(from, until) {
+        const start = from ? new Date(from).toISOString().replace('T', ' ').slice(0, 16) : '(unspecified)';
+        const end = until ? new Date(until).toISOString().replace('T', ' ').slice(0, 16) : '(none)';
+        return `${start} → ${end}`;
+      }
+
+      function renderGaugeExact(valid_from, valid_until) {
+        if (!valid_until) {
+          return '(none)';
+        }
+        const now = Date.now();
+        const until = new Date(valid_until).getTime();
+        const from = valid_from ? new Date(valid_from).getTime() : until - 7 * 24 * 3600 * 1000;
+        const capEnd = from + 7 * 24 * 3600 * 1000;
+        const denom = Math.max(1, capEnd - now);
+        const numer = Math.max(0, Math.min(capEnd, until) - now);
+        const p = Math.max(0, Math.min(1, numer / denom));
+        return tinyGauge(p);
+      }
+
+      function tinyGauge(p) {
+        const w = 120;
+        const h = 18;
+        const bg = '#e5e9f0';
+        const fg = '#2563eb';
+        const x = Math.round((w - 2) * p);
+        const label = `${Math.round(p * 100)}%`;
+        return `
+          <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+            <rect x="0" y="0" width="${w}" height="${h}" rx="3" ry="3" fill="#fff" stroke="#d8dee9" />
+            <rect x="1" y="1" width="${w - 2}" height="${h - 2}" fill="${bg}" rx="2" ry="2" />
+            <rect x="1" y="1" width="${x}" height="${h - 2}" fill="${fg}" rx="2" ry="2" />
+            <text x="${w - 32}" y="${h - 5}" font-size="10" fill="#1f2933">${label}</text>
+          </svg>
+        `;
+      }
+
+      function updatePager() {
+        const prev = document.getElementById('prev');
+        const next = document.getElementById('next');
+        prev.disabled = state.page <= 1;
+        next.disabled = state.page >= state.totalPages;
+      }
+
+      document.getElementById('prev').addEventListener('click', () => {
+        if (state.page > 1) {
+          load(state.page - 1);
+        }
+      });
+      document.getElementById('next').addEventListener('click', () => {
+        if (state.page < state.totalPages) {
+          load(state.page + 1);
+        }
+      });
+
+      load(state.page);
+    </script>
+  </body>
+</html>
