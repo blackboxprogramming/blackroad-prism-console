@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROOF="${1:-$ROOT/proofs/aura-proof.json}"
+
+if [[ ! -s "$PROOF" ]]; then
+  echo "missing proof" >&2
+  exit 2
+fi
+
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "$1 is required" >&2
+    exit 1
+  fi
+}
+
+require_cmd jq
+require_cmd sha256sum
+
+SUM="$(sha256sum "$PROOF" | awk '{print $1}')"
+SIZE="$(wc -c < "$PROOF" | tr -d ' ')"
+TIP="$(jq -r '.tip // .scantxoutset.height // empty' "$PROOF" 2>/dev/null || true)"
+
+jq -n \
+  --arg file "$PROOF" \
+  --arg sha256 "$SUM" \
+  --arg size "$SIZE" \
+  --arg tip "$TIP" \
+  '{
+    file: $file,
+    sha256: $sha256,
+    bytes: ($size | tonumber),
+    tip: (if ($tip | length) == 0 then null else (try ($tip | tonumber) catch $tip) end),
+    utc: (now | todate)
+  }'

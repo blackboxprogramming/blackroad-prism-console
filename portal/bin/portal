@@ -193,6 +193,10 @@ case "$CMD" in
       echo "Refuse: set CONFIRM_BROADCAST=1 to allow broadcast" >&2
       exit 2
     fi
+    if [[ -f "$ROOT/configs/BROADCAST_DISABLED" ]]; then
+      echo "Panic: broadcasting disabled" >&2
+      exit 9
+    fi
     local file="$1"
     local fin txid
     fin=$(bitcoin-cli finalizepsbt "$(cat "$file")" true)

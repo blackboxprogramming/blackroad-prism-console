@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+FLAG="$ROOT/configs/BROADCAST_DISABLED"
+PORTAL_BIN="$ROOT/bin/portal"
+WALLET="watchonly_main"
+
+echo "== PANIC MODE =="
+
+touch "$FLAG"
+echo "BROADCAST_DISABLED set" >&2
+
+if [[ -x "$PORTAL_BIN" ]] && ! grep -q 'BROADCAST_DISABLED' "$PORTAL_BIN"; then
+  cp "$PORTAL_BIN" "$PORTAL_BIN.bak.$(date -u +%s)"
+  sed -i "/psbt:broadcast)/a\\
+    if [[ -f \"$ROOT/configs/BROADCAST_DISABLED\" ]]; then echo \"Panic: broadcasting disabled\" >&2; exit 9; fi" "$PORTAL_BIN"
+fi
+
+if command -v bitcoin-cli >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+  if bitcoin-cli -rpcwallet="$WALLET" getwalletinfo >/dev/null 2>&1; then
+    UTXO_JSON="$(bitcoin-cli -rpcwallet="$WALLET" listunspent | jq -c '[.[] | {txid:.txid, vout:.vout}]')"
+    if [[ "$UTXO_JSON" != "[]" ]]; then
+      bitcoin-cli -rpcwallet="$WALLET" lockunspent false "$UTXO_JSON" >/dev/null || true
+    fi
+  fi
+fi
+
+sudo systemctl stop portal-rest 2>/dev/null || true
+
+echo "PANIC engaged. To revert: rm $FLAG && restore portal from backup if needed."
