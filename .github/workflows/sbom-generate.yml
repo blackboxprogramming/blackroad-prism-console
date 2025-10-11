@@ -1,0 +1,79 @@
+name: Supply Chain • SBOM generator
+
+on:
+  workflow_call:
+    inputs:
+      subject:
+        description: 'Path or OCI image reference to catalog'
+        type: string
+        required: true
+      subject-type:
+        description: "Set to 'image' or 'path' to override automatic detection"
+        type: string
+        required: false
+        default: auto
+      format:
+        description: 'SBOM output format understood by Syft'
+        type: string
+        required: false
+        default: cyclonedx-json
+      artifact-name:
+        description: 'Name for the uploaded SBOM artifact'
+        type: string
+        required: false
+        default: sbom
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a095c2875d
+      - name: Detect subject type
+        id: detect
+        run: |
+          python - <<'PY'
+import os
+import pathlib
+subject = os.environ['SUBJECT']
+mode = os.environ['MODE'].lower()
+if mode not in {'auto', 'image', 'path'}:
+    raise SystemExit(f"Unsupported subject type override: {mode}")
+if mode == 'auto':
+    if '://' in subject or '@' in subject:
+        mode = 'image'
+    elif subject.startswith('ghcr.io/'):
+        mode = 'image'
+    else:
+        candidate = pathlib.Path(subject)
+        if candidate.exists():
+            mode = 'path'
+        else:
+            mode = 'image'
+with open(os.environ['GITHUB_OUTPUT'], 'w') as fh:
+    fh.write(f"mode={mode}\n")
+    fh.write(f"target={subject}\n")
+PY
+        env:
+          SUBJECT: ${{ inputs.subject }}
+          MODE: ${{ inputs['subject-type'] }}
+      - name: Authenticate to GHCR
+        if: steps.detect.outputs.mode == 'image' && startsWith(steps.detect.outputs.target, 'ghcr.io/')
+        run: |
+          echo '${{ github.token }}' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
+      - name: Generate SBOM with Syft
+        uses: anchore/sbom-action@f8bdd1d8ac5e901a77a92f111440fdb1b593736b
+        with:
+          format: ${{ inputs.format }}
+          artifact-name: ${{ inputs['artifact-name'] }}
+          output-file: sbom.json
+          dependency-snapshot: false
+          upload-release-assets: false
+          path: ${{ steps.detect.outputs.mode == 'path' && steps.detect.outputs.target || '' }}
+          image: ${{ steps.detect.outputs.mode == 'image' && steps.detect.outputs.target || '' }}
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
