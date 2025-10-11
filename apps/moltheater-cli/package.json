@@ -1,0 +1,25 @@
+{
+  "name": "@blackroad/moltheater-cli",
+  "version": "0.1.0",
+  "description": "Creator tools for converting Lua/ECM or coding-key markup into conductor JSON payloads.",
+  "type": "module",
+  "bin": {
+    "moltheater": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/cli.ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "luaparse": "^0.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.15.7",
+    "typescript": "^5.6.3"
+  }
+}

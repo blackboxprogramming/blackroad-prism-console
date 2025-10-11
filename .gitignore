@@ -73,6 +73,7 @@ target/
 **/target/
 *.db
 *.sqlite
+*.tsbuildinfo
 
 # Never commit SSH private keys
 id_ed25519
