@@ -22,6 +22,8 @@ def test_eval_when_allows_basic_expressions():
         "steps.__class__",
         "steps.__class__.__mro__[1].__subclasses__()",
         "__import__('os').system('echo hacked')",
+        "{{ steps.__class__ }}",
+        "{{ steps.__class__.__mro__[1].__subclasses__() }}",
     ],
 )
 def test_eval_when_rejects_dangerous_expressions(expr):

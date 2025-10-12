@@ -51,6 +51,10 @@ def _eval_node(node: ast.AST, context: Dict[str, Any]) -> Any:
         if node.id not in context:
             raise ValueError("Unknown variable")
         return context[node.id]
+    if isinstance(node, ast.Attribute):
+        raise ValueError("Attribute access is not allowed")
+    if isinstance(node, ast.Call):
+        raise ValueError("Function calls are not allowed")
     if isinstance(node, ast.BoolOp):
         values = (_eval_node(value, context) for value in node.values)
         if isinstance(node.op, ast.And):
