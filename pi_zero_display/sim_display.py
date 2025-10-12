@@ -26,7 +26,7 @@ from typing import Any, Optional, Sequence, Tuple
 
 import paho.mqtt.client as mqtt
 import pygame
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 LOGGER = logging.getLogger("pi_zero_display")
 DEFAULT_TOPIC = "pi-zero/display"
@@ -156,11 +156,14 @@ class DisplayClient:
             blob = base64.b64decode(b64_data)
         except (base64.binascii.Error, ValueError) as exc:
             raise PayloadError(f"invalid base64 payload: {exc}") from exc
-        with Image.open(io.BytesIO(blob)) as img:
-            img = img.convert("RGB")
-            img = img.resize(self._size, Image.Resampling.LANCZOS)
-            mode = img.mode
-            data_bytes = img.tobytes()
+        try:
+            with Image.open(io.BytesIO(blob)) as img:
+                img = img.convert("RGB")
+                img = img.resize(self._size, Image.Resampling.LANCZOS)
+                mode = img.mode
+                data_bytes = img.tobytes()
+        except (UnidentifiedImageError, OSError) as exc:
+            raise PayloadError(f"invalid image payload: {exc}") from exc
         surface = pygame.image.fromstring(data_bytes, self._size, mode)
         return surface, (0, 0, 0)
 
