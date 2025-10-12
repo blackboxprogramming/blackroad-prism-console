@@ -17,6 +17,7 @@ integrations.
 | 022 | The Security Spine     | Security backbone with layered zero-trust defenses. |
 | 043 | The Equity Oath        | Fairness, access, and inclusion are systemic.   |
 | 044 | The Transparency of Process | Trust grows when workflows stay visible end-to-end. |
+| 057 | The Mutual Aid Protocol | Mutual aid infrastructure lends support in crises. |
 
 ## BlackRoad Pipeline
 
