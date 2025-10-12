@@ -92,15 +92,48 @@ module.exports = function attachDevices(ctx = {}) {
   });
   nsp.on("connection", (socket) => {
     let joined = null;
+    const allowedRooms = new Set();
+
+    function addAllowed(value) {
+      if (!value) return;
+      if (Array.isArray(value)) {
+        for (const item of value) addAllowed(item);
+        return;
+      }
+      const parts = String(value)
+        .split(/[,\s]+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      for (const entry of parts) {
+        allowedRooms.add(entry);
+      }
+    }
+
+    const headers = socket.handshake.headers || {};
+    addAllowed(headers["x-blackroad-room"]);
+    addAllowed(headers["x-blackroad-rooms"]);
+    addAllowed(socket.handshake.query && socket.handshake.query.room);
+    addAllowed(socket.handshake.query && socket.handshake.query.rooms);
+    addAllowed(socket.handshake.auth && socket.handshake.auth.room);
+    addAllowed(socket.handshake.auth && socket.handshake.auth.rooms);
+
+    const allowWildcard = () => allowedRooms.has("*");
+
     socket.on("register", ({ id }) => {
       if (!id) return;
       if (joined) socket.leave(joined);
       joined = String(id);
+      allowedRooms.add(joined);
       socket.join(joined);
       socket.emit("registered", { id: joined });
     });
     socket.on("join", (room) => {
-      if (room) socket.join(String(room));
+      if (!room) return;
+      const target = String((room && room.id) || room);
+      if (!target) return;
+      if (!allowWildcard() && !allowedRooms.has(target)) return;
+      socket.join(target);
+      socket.emit("joined", { id: target });
     });
     socket.on("disconnect", () => {});
   });
