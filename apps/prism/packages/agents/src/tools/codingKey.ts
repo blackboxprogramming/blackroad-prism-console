@@ -186,6 +186,7 @@ export function parseKey(line: string): Say[] {
 
   const words: Say[] = [];
   let match: RegExpExecArray | null;
+  BLOCK_RX.lastIndex = 0;
   while ((match = BLOCK_RX.exec(line)) !== null) {
     const raw = match[1];
     const segments = raw.split('|');
