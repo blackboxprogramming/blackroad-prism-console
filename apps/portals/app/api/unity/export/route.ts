@@ -1,56 +1,63 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const DEFAULT_EXPORTER_URL = 'http://127.0.0.1:3001';
 
-function normalizeUrl(url: string) {
-  return url.endsWith('/') ? url.slice(0, -1) : url;
-}
+const payloadSchema = z.object({
+  projectName: z.string().trim().min(1, 'projectName is required.'),
+  template: z.string().trim().min(1).optional(),
+  targets: z.array(z.string().trim().min(1)).min(1, 'Provide at least one build target.'),
+  notes: z
+    .string()
+    .trim()
+    .transform((value) => (value.length > 0 ? value : undefined))
+    .optional(),
+});
 
-export async function POST(request: Request) {
-  const body = await request.json().catch(() => null);
-  if (!body || typeof body !== 'object') {
+export async function POST(request: NextRequest) {
+  let parsed;
+  try {
+    parsed = payloadSchema.safeParse(await request.json());
+  } catch (error) {
+    console.error('Unity exporter proxy rejected request body', error);
     return NextResponse.json(
       { ok: false, error: 'Invalid request payload.' },
       { status: 400 },
     );
   }
 
-  const { projectName, template, targets, notes } = body as {
-    projectName?: unknown;
-    template?: unknown;
-    targets?: unknown;
-    notes?: unknown;
-  };
-
-  if (!projectName || typeof projectName !== 'string' || projectName.trim().length === 0) {
+  if (!parsed.success) {
+    const [issue] = parsed.error.issues;
     return NextResponse.json(
-      { ok: false, error: 'projectName is required.' },
+      { ok: false, error: issue?.message || 'Invalid request payload.' },
       { status: 400 },
     );
   }
 
-  if (!Array.isArray(targets) || targets.length === 0 || targets.some((t) => typeof t !== 'string')) {
+  const { projectName, template, targets, notes } = parsed.data;
+
+  const exporterBase = (process.env.UNITY_EXPORTER_URL || '').trim() || DEFAULT_EXPORTER_URL;
+
+  let exporterUrl: URL;
+  try {
+    exporterUrl = new URL(exporterBase);
+  } catch {
+    console.error('Invalid UNITY_EXPORTER_URL provided', exporterBase);
     return NextResponse.json(
-      { ok: false, error: 'Provide at least one build target.' },
-      { status: 400 },
+      { ok: false, error: 'UNITY_EXPORTER_URL is not a valid URL.' },
+      { status: 500 },
     );
   }
-
-  const exporterUrl = normalizeUrl(
-    process.env.UNITY_EXPORTER_URL && process.env.UNITY_EXPORTER_URL.trim().length > 0
-      ? process.env.UNITY_EXPORTER_URL
-      : DEFAULT_EXPORTER_URL,
-  );
 
   try {
-    const response = await fetch(`${exporterUrl}/export`, {
+    const response = await fetch(new URL('/export', exporterUrl).toString(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        projectName: projectName.trim(),
-        template,
+        projectName,
+        template: template ?? undefined,
         targets,
-        notes,
+        notes: notes ?? undefined,
       }),
     });
 

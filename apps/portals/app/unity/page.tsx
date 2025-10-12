@@ -9,21 +9,21 @@ import { Button } from '../../components/ui/button';
 const templates = [
   {
     id: 'sandbox',
-    name: 'Sandbox HDRP World',
+    name: 'HDRP Sandbox',
     description:
-      'High Definition Render Pipeline scene with chunk streaming, volumetrics, and atmospheric systems aligned to the shared asset library.',
+      'Baseline lighting, VFX, and level streaming tuned for benchmarking new features before they reach shared projects.',
   },
   {
     id: 'expedition',
-    name: 'Expedition Story Track',
+    name: 'Narrative Expedition',
     description:
-      'Narrative-driven template with day/night cycles, cinematic camera rigs, and dialogue hooks ready for AutoNovel story beats.',
+      'Story-driven scene with timeline cues, dialogue hooks, and cinematics for publishing weekly milestone builds.',
   },
   {
     id: 'lab',
     name: 'Simulation Lab',
     description:
-      'Deterministic physics sandbox tuned for engineering and STEM scenarios with profiler markers baked in.',
+      'Physics-heavy environment that mirrors production quality settings used across engineering demos.',
   },
 ];
 
@@ -52,33 +52,33 @@ type BuildRecord = {
 
 const pipelinePhases = [
   {
-    title: 'Template Curation',
+    title: 'Prepare Project',
     items: [
-      'Keep HDRP baseline scenes in sync with shared texture atlases and shader graphs.',
-      'Validate voxel mesh plugins, animation rigs, and StoryTrack bindings before each release.',
+      'Sync template changes and confirm scenes open without missing packages or GUID conflicts.',
+      'Review platform-specific scripting defines before triggering new exports.',
     ],
   },
   {
     title: 'Build & Export',
     items: [
-      'Automate Unity CLI builds per target and package artifacts in the downloads vault.',
-      'Capture profiler traces and frame grabs for regression comparison against Unreal parity goals.',
+      'Run Unity CLI builds per target and capture console output for the activity log.',
+      'Drop successful artifacts into the exporter downloads share for downstream automation.',
     ],
   },
   {
-    title: 'Quality Gates',
+    title: 'Quality Review',
     items: [
-      'Hold frame timing budgets under 12ms on CPU/GPU for 60 FPS delivery tiers.',
-      'Audit volumetric lighting, water shaders, and atmospheric profiles for parity across environments.',
+      'Check GPU/CPU frame timings, memory usage, and bundle sizes against current targets.',
+      'Validate lighting, post-processing, and platform toggles match the intended release channel.',
     ],
   },
 ];
 
 const renderChecklist = [
-  'HDRP volumetrics tuned per performance tier with Enlighten GI probes.',
-  'ChunkRenderSystem streaming jobs budgeted with profiler markers.',
-  'Planar reflections active on water materials with fallback path for WebGL.',
-  'Shared Substance texture atlases validated for consistent texel density.',
+  'Bake lighting and probes for the current platform group.',
+  'Verify streaming assets and addressables load without stutter on target hardware.',
+  'Confirm reflection probes, volumetric settings, and skyboxes are aligned with latest art direction.',
+  'Update release notes with known issues or manual steps before promoting the build.',
 ];
 
 function makeId() {
@@ -93,6 +93,15 @@ export default function UnityPortalPage() {
   const [submitting, setSubmitting] = useState(false);
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [history, setHistory] = useState<BuildRecord[]>([]);
+
+  const templateLookup = useMemo(
+    () => new Map(templates.map((item) => [item.id, item.name])),
+    [],
+  );
+  const targetLookup = useMemo(
+    () => new Map(targetOptions.map((item) => [item.id, item.label])),
+    [],
+  );
 
   const toggleTarget = (value: BuildTarget) => {
     setTargets((prev) =>
@@ -170,13 +179,27 @@ export default function UnityPortalPage() {
       setNotes('');
     } catch (error) {
       console.error('Unity export request failed', error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Something went wrong while contacting the Unity exporter.';
       setAlert({
         type: 'error',
-        message:
-          error instanceof Error
-            ? error.message
-            : 'Something went wrong while contacting the Unity exporter.',
+        message,
       });
+      setHistory((prev) => [
+        {
+          id: makeId(),
+          project: trimmedName,
+          template,
+          targets,
+          status: 'failed',
+          notes: trimmedNotes || undefined,
+          message,
+          timestamp: Date.now(),
+        },
+        ...prev,
+      ]);
     } finally {
       setSubmitting(false);
     }
@@ -338,9 +361,23 @@ export default function UnityPortalPage() {
                       </span>
                     </div>
                     <div className="mt-1 flex flex-wrap gap-2 text-xs text-gray-400">
-                      <span className="rounded bg-gray-800 px-2 py-0.5">Template: {entry.template}</span>
                       <span className="rounded bg-gray-800 px-2 py-0.5">
-                        Targets: {entry.targets.join(', ')}
+                        Template: {templateLookup.get(entry.template) ?? entry.template}
+                      </span>
+                      <span className="rounded bg-gray-800 px-2 py-0.5">
+                        Targets:{' '}
+                        {entry.targets
+                          .map((target) => targetLookup.get(target) ?? target)
+                          .join(', ')}
+                      </span>
+                      <span
+                        className={`rounded px-2 py-0.5 font-medium ${
+                          entry.status === 'ready'
+                            ? 'bg-emerald-500/10 text-emerald-300'
+                            : 'bg-rose-500/10 text-rose-300'
+                        }`}
+                      >
+                        {entry.status === 'ready' ? 'Success' : 'Failed'}
                       </span>
                     </div>
                     {entry.artifact && (
