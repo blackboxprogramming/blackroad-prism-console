@@ -410,7 +410,7 @@ export function buildServer() {
       paceBias: paceBias ?? session.paceBias,
     };
     const schedule = buildSchedule(filled, scheduleState);
-    const startAt = performance.now() + Math.max(0, startOffsetMs);
+    const startAt = Date.now() + Math.max(0, startOffsetMs);
     const timeline = schedule.map((entry) => ({
       word: entry.word,
       offset: entry.offset,
