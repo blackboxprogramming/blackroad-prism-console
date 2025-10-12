@@ -357,6 +357,67 @@ function setExceptionTicket(exceptionId, system, key, url) {
   return getException(exceptionId);
 }
 
+const PENDING_TICKET_KEY = '__pending_ticket__';
+
+function claimExceptionTicket(exceptionId, system = null) {
+  const db = getDb();
+  const select = db.prepare('SELECT * FROM exceptions WHERE id = ?');
+  const update = db.prepare(
+    `UPDATE exceptions
+     SET ticket_system = ?, ticket_key = ?, ticket_url = NULL, updated_at = ?
+     WHERE id = ? AND ticket_key IS NULL`,
+  );
+
+  const tx = db.transaction((id) => {
+    const current = select.get(id);
+    if (!current) {
+      return { exception: null, status: 'not_found' };
+    }
+
+    if (current.ticket_key && current.ticket_key !== PENDING_TICKET_KEY) {
+      return { exception: current, status: 'has_ticket' };
+    }
+
+    if (current.ticket_key === PENDING_TICKET_KEY) {
+      return { exception: current, status: 'pending' };
+    }
+
+    const now = nowISO();
+    const result = update.run(system || null, PENDING_TICKET_KEY, now, id);
+    if (result.changes === 0) {
+      const refreshed = select.get(id);
+      if (!refreshed) {
+        return { exception: null, status: 'not_found' };
+      }
+      if (refreshed.ticket_key === PENDING_TICKET_KEY) {
+        return { exception: refreshed, status: 'pending' };
+      }
+      if (refreshed.ticket_key) {
+        return { exception: refreshed, status: 'has_ticket' };
+      }
+      return { exception: refreshed, status: 'unavailable' };
+    }
+
+    const claimed = select.get(id);
+    return { exception: claimed, status: 'claimed' };
+  });
+
+  return tx(exceptionId);
+}
+
+function releasePendingTicket(exceptionId) {
+  const db = getDb();
+  const now = nowISO();
+  const result = db
+    .prepare(
+      `UPDATE exceptions
+       SET ticket_system = NULL, ticket_key = NULL, ticket_url = NULL, updated_at = ?
+       WHERE id = ? AND ticket_key = ?`,
+    )
+    .run(now, exceptionId, PENDING_TICKET_KEY);
+  return result.changes > 0;
+}
+
 function getTicketQueueEntry(exceptionId) {
   return getDb().prepare('SELECT * FROM ticket_queue WHERE exception_id = ?').get(exceptionId);
 }
@@ -441,5 +502,8 @@ module.exports = {
   updateTicketQueue,
   deleteTicketQueue,
   deleteTicketQueueByException,
+  claimExceptionTicket,
+  releasePendingTicket,
+  PENDING_TICKET_KEY,
 };
 
