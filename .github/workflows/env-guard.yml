@@ -1,0 +1,19 @@
+name: env-guard
+
+on:
+  push:
+    branches: ["main", "master", "develop"]
+  pull_request:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Block production database references
+        run: |
+          set -e
+          if git ls-files | xargs grep -R "PROD_DB_URL" -n; then
+            echo "❌ Prod DB var referenced" >&2
+            exit 1
+          fi

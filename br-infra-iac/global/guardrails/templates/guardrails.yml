@@ -1,0 +1,68 @@
+Resources:
+  ConfigRuleEbsEncrypted:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: ebs-encryption-enabled
+      Scope: {}
+      Source:
+        Owner: AWS
+        SourceIdentifier: EBS_ENCRYPTION_BY_DEFAULT
+  ConfigRuleS3Encryption:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: s3-encryption-enabled
+      Scope: {}
+      Source:
+        Owner: AWS
+        SourceIdentifier: S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED
+  ConfigRuleRootMfa:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: root-account-mfa
+      Source:
+        Owner: AWS
+        SourceIdentifier: ROOT_ACCOUNT_MFA_ENABLED
+  ConfigRuleS3PublicRead:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: s3-public-read-prohibited
+      Source:
+        Owner: AWS
+        SourceIdentifier: S3_BUCKET_PUBLIC_READ_PROHIBITED
+  ConfigRuleS3PublicWrite:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: s3-public-write-prohibited
+      Source:
+        Owner: AWS
+        SourceIdentifier: S3_BUCKET_PUBLIC_WRITE_PROHIBITED
+  ConfigRuleIamKeyRotation:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: iam-access-key-rotation
+      InputParameters:
+        MaxAccessKeyAge: '90'
+      Source:
+        Owner: AWS
+        SourceIdentifier: ACCESS_KEYS_ROTATED
+  ConfigRuleSgSsh:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: ssh-remote-access-restricted
+      Source:
+        Owner: AWS
+        SourceIdentifier: INCOMING_SSH_DISABLED
+  ConfigRuleSgRdp:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: rdp-remote-access-restricted
+      Source:
+        Owner: AWS
+        SourceIdentifier: INCOMING_RDP_DISABLED
+  ConfigRuleAlbHttps:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: alb-https-only
+      Source:
+        Owner: AWS
+        SourceIdentifier: ALB_HTTP_TO_HTTPS_REDIRECTION_CHECK
