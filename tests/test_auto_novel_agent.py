@@ -19,4 +19,10 @@ def test_generate_story_uses_protagonist():
     agent = AutoNovelAgent()
     story = agent.generate_story("an ancient temple", protagonist="Lara")
     assert "Lara" in story
-    assert story.startswith("An ancient temple")
+    assert story.startswith("an ancient temple")
+
+
+def test_generate_story_rejects_blank_prompt():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError):
+        agent.generate_story("   ")

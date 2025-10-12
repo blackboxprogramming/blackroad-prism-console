@@ -41,7 +41,9 @@ class AutoNovelAgent:
         Returns:
             A tiny story incorporating the protagonist and the prompt.
         """
-        cleaned_prompt = prompt.strip().capitalize()
+        cleaned_prompt = prompt.strip()
+        if not cleaned_prompt:
+            raise ValueError("Prompt must not be empty.")
         return f"{cleaned_prompt} stars {protagonist} in a short tale."
 
     def list_supported_engines(self) -> List[str]:
