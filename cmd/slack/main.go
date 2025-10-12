@@ -60,11 +60,11 @@ type activeException struct {
 }
 
 type activeExceptionsResponse struct {
-	Exceptions []activeException `json:"exceptions"`
-	Page       int               `json:"page"`
-	TotalPages int               `json:"total_pages"`
-	Total      int               `json:"total"`
-	PageSize   int               `json:"page_size"`
+        Exceptions []activeException `json:"exceptions"`
+        Page       int               `json:"page"`
+        TotalPages int               `json:"totalPages"`
+        Total      int               `json:"total"`
+        PageSize   int               `json:"pageSize"`
 }
 
 var adminMessages = struct {
