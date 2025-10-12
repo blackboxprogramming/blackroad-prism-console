@@ -40,8 +40,14 @@ class AutoNovelAgent:
 
         Args:
             engine: Name of the engine to add.
+
+        Raises:
+            ValueError: If the provided engine name is blank.
         """
-        self.SUPPORTED_ENGINES.add(engine.lower())
+        normalized_engine = engine.strip().lower()
+        if not normalized_engine:
+            raise ValueError("Engine name cannot be empty.")
+        self.SUPPORTED_ENGINES.add(normalized_engine)
 
 
 if __name__ == "__main__":

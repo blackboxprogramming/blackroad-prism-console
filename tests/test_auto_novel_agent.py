@@ -21,6 +21,19 @@ def test_add_engine_and_list():
     assert "cryengine" in agent.list_supported_engines()
 
 
+def test_add_engine_rejects_blank_name():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError):
+        agent.add_engine("   ")
+
+
+def test_add_engine_normalizes_case():
+    agent = AutoNovelAgent()
+    agent.add_engine("CRYENGINE")
+    assert "cryengine" in agent.list_supported_engines()
+    assert all(engine == engine.lower() for engine in AutoNovelAgent.SUPPORTED_ENGINES)
+
+
 def test_invalid_engine_raises():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
