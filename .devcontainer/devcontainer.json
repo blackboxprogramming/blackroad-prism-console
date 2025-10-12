@@ -4,7 +4,8 @@
   "features": {
     "ghcr.io/devcontainers/features/node:1": { "version": "20" },
     "ghcr.io/devcontainers/features/python:1": { "version": "3.11" },
-    "ghcr.io/devcontainers/features/git:1": {}
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/pnpm:1": {}
   },
   "customizations": {
     "vscode": {
@@ -21,7 +22,7 @@
       }
     }
   },
-  "postCreateCommand": "pip3 install -U pip && if [ -f requirements.txt ]; then pip3 install -r requirements.txt; fi && if [ -f package-lock.json ]; then npm ci; elif [ -f package.json ]; then npm install; fi",
+  "postCreateCommand": "pip3 install -U pip && if [ -f requirements.txt ]; then pip3 install -r requirements.txt; fi && if [ -f pnpm-lock.yaml ] || [ -f pnpm-workspace.yaml ]; then corepack enable pnpm && pnpm install; elif [ -f package-lock.json ]; then npm ci; elif [ -f package.json ]; then npm install; fi",
   "forwardPorts": [3000, 4000, 5173, 8000],
   "remoteUser": "vscode",
   "updateRemoteUserUID": true
