@@ -1,5 +1,6 @@
 const http = require('http');
 const data = require('./data');
+const tickets = require('./tickets');
 
 const PORT = process.env.PORT || 4000;
 const HOST = '0.0.0.0';
@@ -118,6 +119,8 @@ setInterval(() => {
     console.error('exception expiry failed', err); // eslint-disable-line no-console
   }
 }, ONE_DAY_MS);
+
+tickets.startTicketWorker();
 
 const app = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
@@ -313,6 +316,7 @@ const app = http.createServer(async (req, res) => {
         valid_until: body.valid_until,
       });
       if (!approved) return send(res, 404, { error: 'not found' });
+      tickets.scheduleTicketCreation(approved.id);
       return send(res, 200, approved);
     }
     if (segments[2] === 'deny') {
