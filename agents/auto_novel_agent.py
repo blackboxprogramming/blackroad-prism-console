@@ -1,5 +1,6 @@
 """Simple auto novel agent example with game creation abilities."""
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import ClassVar, List
 
@@ -10,6 +11,7 @@ class AutoNovelAgent:
 
     name: str = "AutoNovelAgent"
     SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal"}
+    LEAST_PRIVILEGE_SCOPES: ClassVar[set[str]] = {"outline:read", "outline:write"}
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
@@ -58,6 +60,23 @@ class AutoNovelAgent:
 
         outline = [f"Chapter {i}:" for i in range(1, chapters + 1)]
         return [f"{heading} {title_clean}" for heading in outline]
+
+    def validate_scopes(self, requested_scopes: Iterable[str]) -> None:
+        """Validate that requested scopes adhere to the least-privilege policy.
+
+        Args:
+            requested_scopes: Scopes requested for the agent configuration.
+
+        Raises:
+            ValueError: If any requested scope falls outside the allowed set.
+        """
+
+        invalid_scopes = sorted(set(requested_scopes) - self.LEAST_PRIVILEGE_SCOPES)
+        if invalid_scopes:
+            joined = ", ".join(invalid_scopes)
+            raise ValueError(
+                f"Requested scopes exceed least-privilege policy. Invalid scopes: {joined}."
+            )
 
 
 if __name__ == "__main__":

@@ -25,3 +25,16 @@ def test_generate_novel_outline_rejects_blank_title():
 
     with pytest.raises(ValueError, match="Title must be a non-empty string"):
         agent.generate_novel_outline("   ")
+
+
+def test_validate_scopes_accepts_least_privilege_subset():
+    agent = AutoNovelAgent()
+
+    agent.validate_scopes(["outline:read"])
+
+
+def test_validate_scopes_rejects_broad_scope():
+    agent = AutoNovelAgent()
+
+    with pytest.raises(ValueError, match="Invalid scopes: admin"):
+        agent.validate_scopes(["outline:read", "admin"])
