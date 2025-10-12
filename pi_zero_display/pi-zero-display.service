@@ -1,0 +1,17 @@
+[Unit]
+Description=Pi Zero MQTT Display Client
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/pi_zero_display
+ExecStart=/home/pi/pi_zero_display/run.sh --fullscreen
+Restart=always
+RestartSec=5
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/pi/.Xauthority
+
+[Install]
+WantedBy=multi-user.target
