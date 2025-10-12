@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { UNITY_TARGET_OPTIONS, mergeUnityPortalContent } from '../../../../lib/unity/config';
+import { mergeUnityPortalContent } from '../../../../lib/unity/config';
 import { resolveUnityExporterUrl } from '../../../../lib/unity/exporter';
 
 interface OverridesResult {
@@ -39,7 +39,7 @@ export async function GET() {
       pipelinePhases: merged.pipelinePhases,
       renderChecklist: merged.renderChecklist,
       defaultTargets: merged.defaultTargets,
-      targetOptions: UNITY_TARGET_OPTIONS,
+      targetOptions: merged.targetOptions,
     },
     meta: {
       overridesApplied: Boolean(overrides),

@@ -8,13 +8,14 @@ import { Button } from '../../components/ui/button';
 import { Topbar } from '../../components/ui/topbar';
 import {
   DEFAULT_UNITY_PORTAL_CONTENT,
-  UNITY_TARGET_OPTIONS,
   sanitizeUnityChecklist,
   sanitizeUnityPipeline,
   sanitizeUnityTargetIds,
+  sanitizeUnityTargetOptions,
   sanitizeUnityTemplates,
   type UnityPipelinePhase,
   type UnityTargetId,
+  type UnityTargetOption,
   type UnityTemplate,
 } from '../../lib/unity/config';
 import { UNITY_EXPORTER_DEFAULT_URL } from '../../lib/unity/exporter';
@@ -38,11 +39,20 @@ type ConfigState = {
   error: string | null;
   warning: string | null;
   exporterUrl: string;
+  overridesActive: boolean;
+};
+
+type ExporterStatusState = {
+  state: 'idle' | 'checking' | 'ready' | 'error';
+  statusCode?: number;
+  method?: string;
+  path?: string;
+  message?: string;
+  checkedAt: number | null;
 };
 
 const HISTORY_STORAGE_KEY = 'unity-portal-history';
 const HISTORY_LIMIT = 25;
-const targetOptions = UNITY_TARGET_OPTIONS;
 const defaultTemplateId = DEFAULT_UNITY_PORTAL_CONTENT.templates[0]?.id ?? 'sandbox';
 
 function makeId() {
@@ -68,8 +78,21 @@ function cloneDefaultChecklist(): string[] {
   return [...DEFAULT_UNITY_PORTAL_CONTENT.renderChecklist];
 }
 
-function cloneDefaultTargets(): BuildTarget[] {
-  return [...DEFAULT_UNITY_PORTAL_CONTENT.defaultTargets];
+function cloneDefaultTargetOptions(): UnityTargetOption[] {
+  return DEFAULT_UNITY_PORTAL_CONTENT.targetOptions.map((option) => ({ ...option }));
+}
+
+function cloneDefaultTargets(targetOptionsOverride?: UnityTargetOption[]): BuildTarget[] {
+  const allowed = targetOptionsOverride && targetOptionsOverride.length > 0 ? targetOptionsOverride : DEFAULT_UNITY_PORTAL_CONTENT.targetOptions;
+  const sanitized = sanitizeUnityTargetIds(
+    DEFAULT_UNITY_PORTAL_CONTENT.defaultTargets,
+    allowed,
+  ) as BuildTarget[];
+  if (sanitized.length > 0) {
+    return sanitized;
+  }
+
+  return allowed.length > 0 ? [(allowed[0].id as BuildTarget)] : [];
 }
 
 function sanitizeHistoryRecords(value: unknown): BuildRecord[] {
@@ -124,14 +147,18 @@ export default function UnityPortalPage() {
   const [history, setHistory] = useState<BuildRecord[]>([]);
   const [templates, setTemplates] = useState<UnityTemplate[]>(() => cloneDefaultTemplates());
   const [pipelinePhases, setPipelinePhases] = useState<UnityPipelinePhase[]>(() => cloneDefaultPipeline());
+  const [targetOptions, setTargetOptions] = useState<UnityTargetOption[]>(() => cloneDefaultTargetOptions());
   const [renderChecklist, setRenderChecklist] = useState<string[]>(() => cloneDefaultChecklist());
+  const [defaultConfigTargets, setDefaultConfigTargets] = useState<BuildTarget[]>(() => cloneDefaultTargets());
   const [configState, setConfigState] = useState<ConfigState>({
     loading: true,
     error: null,
     warning: null,
     exporterUrl: UNITY_EXPORTER_DEFAULT_URL,
+    overridesActive: false,
   });
   const [configRefreshedAt, setConfigRefreshedAt] = useState<number | null>(null);
+  const [exporterStatus, setExporterStatus] = useState<ExporterStatusState>({ state: 'idle', checkedAt: null });
 
   const hasCustomTargets = useRef(false);
   const configTargetsApplied = useRef(false);
@@ -149,7 +176,7 @@ export default function UnityPortalPage() {
   );
   const targetLookup = useMemo(
     () => new Map(targetOptions.map((item) => [item.id, item.label])),
-    [],
+    [targetOptions],
   );
 
   const loadConfig = useCallback(async () => {
@@ -183,15 +210,20 @@ export default function UnityPortalPage() {
       const pipelineFromApi = sanitizeUnityPipeline(config.pipelinePhases);
       setPipelinePhases(pipelineFromApi.length > 0 ? pipelineFromApi : cloneDefaultPipeline());
 
+      const optionsFromApi = sanitizeUnityTargetOptions(config.targetOptions);
+      const nextTargetOptions = optionsFromApi.length > 0 ? optionsFromApi : cloneDefaultTargetOptions();
+      setTargetOptions(nextTargetOptions);
+
       const checklistFromApi = sanitizeUnityChecklist(config.renderChecklist);
       setRenderChecklist(checklistFromApi.length > 0 ? checklistFromApi : cloneDefaultChecklist());
 
-      const defaultTargets = sanitizeUnityTargetIds(config.defaultTargets) as BuildTarget[];
-      if (defaultTargets.length > 0 && !hasCustomTargets.current) {
-        setTargets(defaultTargets);
-        configTargetsApplied.current = true;
-      } else if (!configTargetsApplied.current) {
-        setTargets(cloneDefaultTargets());
+      const defaultsFromApi = sanitizeUnityTargetIds(config.defaultTargets, nextTargetOptions) as BuildTarget[];
+      const resolvedDefaults =
+        defaultsFromApi.length > 0 ? defaultsFromApi : cloneDefaultTargets(nextTargetOptions);
+      setDefaultConfigTargets(resolvedDefaults);
+
+      if (!hasCustomTargets.current || !configTargetsApplied.current) {
+        setTargets(resolvedDefaults);
         configTargetsApplied.current = true;
       }
 
@@ -210,12 +242,20 @@ export default function UnityPortalPage() {
         error: null,
         warning: overrideWarning,
         exporterUrl,
+        overridesActive: Boolean(body?.meta?.overridesApplied),
       });
       setConfigRefreshedAt(Date.now());
     } catch (error) {
       console.error('Unity portal configuration fetch failed', error);
       if (!isMountedRef.current) {
         return;
+      }
+      const fallbackTargets = cloneDefaultTargets();
+      setTargetOptions(cloneDefaultTargetOptions());
+      setDefaultConfigTargets(fallbackTargets);
+      if (!hasCustomTargets.current || !configTargetsApplied.current) {
+        setTargets(fallbackTargets);
+        configTargetsApplied.current = true;
       }
       setConfigState({
         loading: false,
@@ -225,6 +265,7 @@ export default function UnityPortalPage() {
             : 'Unable to load Unity portal configuration.',
         warning: null,
         exporterUrl: UNITY_EXPORTER_DEFAULT_URL,
+        overridesActive: false,
       });
     }
   }, []);
@@ -273,6 +314,58 @@ export default function UnityPortalPage() {
       templates.some((item) => item.id === current) ? current : templates[0].id,
     );
   }, [templates]);
+
+  useEffect(() => {
+    setExporterStatus({ state: 'idle', checkedAt: null });
+  }, [configState.exporterUrl]);
+
+  const checkExporterStatus = useCallback(async () => {
+    setExporterStatus({ state: 'checking', checkedAt: null });
+    try {
+      const response = await fetch('/api/unity/exporter/status', { cache: 'no-store' });
+      const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null;
+
+      if (!payload || typeof payload !== 'object') {
+        throw new Error(`Unexpected exporter status response (${response.status}).`);
+      }
+
+      const ok = payload.ok === true;
+      const statusCode = typeof payload.status === 'number' ? payload.status : response.status;
+      const method = typeof payload.method === 'string' ? payload.method : undefined;
+      const path = typeof payload.path === 'string' ? payload.path : undefined;
+      const rawMessage =
+        (typeof payload.message === 'string' && payload.message.trim().length > 0
+          ? payload.message.trim()
+          : null) ||
+        (typeof payload.error === 'string' && payload.error.trim().length > 0
+          ? payload.error.trim()
+          : null);
+
+      const message = rawMessage
+        ? rawMessage
+        : ok
+        ? `Exporter responded with HTTP ${statusCode}.`
+        : `Exporter status check failed (${statusCode}).`;
+
+      setExporterStatus({
+        state: ok ? 'ready' : 'error',
+        statusCode,
+        method,
+        path,
+        message,
+        checkedAt: Date.now(),
+      });
+    } catch (error) {
+      setExporterStatus({
+        state: 'error',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Unable to reach the Unity exporter service.',
+        checkedAt: Date.now(),
+      });
+    }
+  }, []);
 
   const toggleTarget = (value: BuildTarget) => {
     hasCustomTargets.current = true;
@@ -403,6 +496,24 @@ export default function UnityPortalPage() {
         label: 'Ready',
         className: 'border border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
       };
+
+  const exporterStatusMessage =
+    exporterStatus.state === 'idle'
+      ? null
+      : exporterStatus.message ??
+        (exporterStatus.state === 'ready'
+          ? `Exporter responded with HTTP ${exporterStatus.statusCode ?? ''}.`
+          : 'Exporter status check failed.');
+  const exporterStatusMeta =
+    exporterStatus.state === 'idle' || exporterStatus.checkedAt === null
+      ? null
+      : `Checked ${new Date(exporterStatus.checkedAt).toLocaleTimeString()}${
+          exporterStatus.path
+            ? ` • ${exporterStatus.method ?? 'GET'} ${exporterStatus.path}`
+            : ''
+        }`;
+  const checkButtonLabel =
+    exporterStatus.state === 'checking' ? 'Checking…' : 'Check connection';
   return (
     <div className="flex min-h-screen flex-col bg-gray-950 text-gray-100">
       <Topbar title="Unity Portal" />
@@ -415,44 +526,133 @@ export default function UnityPortalPage() {
             </p>
           </div>
 
-          <Card className="space-y-3 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold">Exporter Endpoint</h2>
-                <p className="text-xs text-gray-400">Unity exporter proxy target for build submissions.</p>
+          <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+            <Card className="space-y-4 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-semibold">Exporter Endpoint</h2>
+                  <p className="text-xs text-gray-400">Unity exporter proxy target for build submissions.</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`rounded px-2 py-1 text-xs font-semibold ${configStatus.className}`}>
+                    {configStatus.label}
+                  </span>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      void loadConfig();
+                    }}
+                    disabled={configState.loading}
+                    className="bg-gray-800 px-3 py-1 text-xs text-gray-200 hover:bg-gray-700"
+                  >
+                    Refresh
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      void checkExporterStatus();
+                    }}
+                    disabled={configState.loading || exporterStatus.state === 'checking'}
+                    className="bg-gray-800 px-3 py-1 text-xs text-gray-200 hover:bg-gray-700 disabled:opacity-60"
+                  >
+                    {checkButtonLabel}
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className={`rounded px-2 py-1 text-xs font-semibold ${configStatus.className}`}>
-                  {configStatus.label}
-                </span>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    void loadConfig();
-                  }}
-                  disabled={configState.loading}
-                  className="bg-gray-800 px-3 py-1 text-xs text-gray-200 hover:bg-gray-700"
+              <p className="break-all text-sm text-gray-300">{configState.exporterUrl}</p>
+              {configState.loading ? (
+                <p className="text-xs text-gray-500">Loading configuration…</p>
+              ) : configState.error ? (
+                <p className="text-xs text-rose-400">{configState.error}</p>
+              ) : (
+                <p className="text-xs text-gray-500">
+                  {configRefreshedAt
+                    ? `Updated ${new Date(configRefreshedAt).toLocaleTimeString()}`
+                    : 'Using default Unity portal settings.'}
+                </p>
+              )}
+              {configState.warning && !configState.error && (
+                <p className="text-xs text-amber-300">{configState.warning}</p>
+              )}
+              {exporterStatusMessage && (
+                <p
+                  className={`text-xs ${
+                    exporterStatus.state === 'ready' ? 'text-emerald-300' : 'text-rose-300'
+                  }`}
                 >
-                  Refresh
-                </Button>
+                  {exporterStatusMessage}
+                  {exporterStatusMeta && (
+                    <span className="ml-2 text-gray-500">{exporterStatusMeta}</span>
+                  )}
+                </p>
+              )}
+              <div className="grid gap-4 border-t border-gray-800 pt-4 text-xs text-gray-300 sm:grid-cols-3">
+                <div className="space-y-2">
+                  <span className="font-semibold text-gray-200">Default targets</span>
+                  {defaultConfigTargets.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {defaultConfigTargets.map((target) => (
+                        <span
+                          key={target}
+                          className="rounded border border-gray-800 bg-gray-900/60 px-2 py-0.5 text-xs text-gray-200"
+                        >
+                          {targetLookup.get(target) ?? target}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-gray-500">No defaults configured.</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <span className="font-semibold text-gray-200">Templates</span>
+                  <p className="text-[11px] text-gray-400">
+                    {templates.length} available
+                    {selectedTemplate ? ` • ${selectedTemplate.name}` : ''}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <span className="font-semibold text-gray-200">Config overrides</span>
+                  <p className="text-[11px] text-gray-400">
+                    {configState.overridesActive
+                      ? 'Active via UNITY_PORTAL_CONFIG_JSON'
+                      : 'Not configured'}
+                  </p>
+                </div>
               </div>
-            </div>
-            <p className="break-all text-sm text-gray-300">{configState.exporterUrl}</p>
-            {configState.loading ? (
-              <p className="text-xs text-gray-500">Loading configuration…</p>
-            ) : configState.error ? (
-              <p className="text-xs text-rose-400">{configState.error}</p>
-            ) : (
-              <p className="text-xs text-gray-500">
-                {configRefreshedAt
-                  ? `Updated ${new Date(configRefreshedAt).toLocaleTimeString()}`
-                  : 'Using default Unity portal settings.'}
-              </p>
-            )}
-            {configState.warning && !configState.error && (
-              <p className="text-xs text-amber-300">{configState.warning}</p>
-            )}
-          </Card>
+            </Card>
+            <Card className="space-y-3 p-4">
+              <div>
+                <h2 className="text-lg font-semibold">Template Presets</h2>
+                <p className="text-xs text-gray-400">Review Unity starter scenes before requesting exports.</p>
+              </div>
+              {templates.length === 0 ? (
+                <p className="text-sm text-gray-500">No templates available.</p>
+              ) : (
+                <ul className="space-y-3 text-sm text-gray-300">
+                  {templates.map((item) => {
+                    const isSelected = item.id === template;
+                    return (
+                      <li
+                        key={item.id}
+                        className="rounded border border-gray-800 bg-gray-900/50 p-3"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-gray-100">{item.name}</span>
+                          {isSelected && (
+                            <span className="text-[10px] font-semibold uppercase tracking-wide text-[#FFB000]">
+                              Selected
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-1 text-xs text-gray-400">{item.description}</p>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </Card>
+          </div>
 
           <div className="grid gap-4 md:grid-cols-3">
             {pipelinePhases.map((phase) => (
