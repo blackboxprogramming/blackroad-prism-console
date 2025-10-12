@@ -1,5 +1,6 @@
 import importlib
 import json
+import textwrap
 import time
 from dataclasses import asdict
 from datetime import datetime
@@ -52,6 +53,20 @@ app = typer.Typer()
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / "artifacts"
+
+
+def _prompt_non_empty(message: str) -> str:
+    """Prompt the user until a non-empty response is provided."""
+
+    while True:
+        value = typer.prompt(message).strip()
+        if value:
+            if value == "-":
+                return ""
+            return value
+        typer.echo(
+            "Please enter at least one character. If you want to leave it blank, type '-'."
+        )
 
 
 def _next_task_id() -> str:
@@ -599,6 +614,137 @@ def learn_feedback_summary(course: str = typer.Option(..., "--course")):
 def status_build():
     status_gen.build()
     typer.echo("built")
+
+
+@app.command("creativity:constraint-inversion")
+def creativity_constraint_inversion(
+    output: Optional[Path] = typer.Option(
+        None,
+        "--output",
+        help="Optional path to write a markdown summary of the sprint.",
+    ),
+    include_timestamp: bool = typer.Option(
+        True,
+        "--timestamp/--no-timestamp",
+        help="Include the current UTC timestamp in the summary header.",
+    ),
+):
+    """Run the Constraint Inversion Sprint micro-practice interactively."""
+
+    typer.echo(
+        textwrap.dedent(
+            """
+            Constraint Inversion Sprint — 10-minute creativity reset.
+            Step 1: Ugly First Draft (2 min)
+            Step 2: Flip One Constraint (7 min)
+            Step 3: Most Testable Today (1 min)
+            """
+        ).strip()
+    )
+    typer.echo("")
+
+    typer.echo("Step 1 — Ugly First Draft")
+    pain = _prompt_non_empty("Pain")
+    affected = _prompt_non_empty("Who's affected")
+    good = _prompt_non_empty('"Good" by next week means')
+    typer.echo("")
+
+    typer.echo("Step 2 — Flip One Constraint")
+    constraint_labels = [
+        "Zero budget",
+        "Offline-only",
+        "No secrets",
+        "No backend",
+        "Only CLI/SMS",
+        "24-hour deadline",
+        "Single file deploy",
+        "Read-only data",
+        "No meetings",
+        "Other",
+    ]
+    for idx, label in enumerate(constraint_labels, start=1):
+        typer.echo(f"{idx}. {label}")
+
+    while True:
+        choice_raw = typer.prompt("Pick a constraint by number").strip()
+        if choice_raw.isdigit():
+            selection = int(choice_raw)
+            if 1 <= selection <= len(constraint_labels):
+                break
+        typer.echo(f"Please enter a number between 1 and {len(constraint_labels)}.")
+
+    flipped_constraint = constraint_labels[selection - 1]
+    if flipped_constraint == "Other":
+        flipped_constraint = _prompt_non_empty("Describe your flipped constraint")
+
+    typer.echo("")
+    typer.echo("Generate three approaches (capture sketches, not specs).")
+    approaches = []
+    for idx in range(1, 4):
+        idea = _prompt_non_empty(f"Idea {idx}")
+        approaches.append(idea)
+
+    typer.echo("")
+    typer.echo("Step 3 — Most Testable Today")
+    smallest_test = _prompt_non_empty("Smallest test I can run today (≤ 1 hour)")
+    learnings = _prompt_non_empty("What success/failure teaches us")
+    first_action = _prompt_non_empty("First action (start now)")
+
+    timestamp = datetime.utcnow()
+    session = {
+        "pain": pain,
+        "affected": affected,
+        "good": good,
+        "constraint": flipped_constraint,
+        "approaches": approaches,
+        "smallest_test": smallest_test,
+        "learnings": learnings,
+        "first_action": first_action,
+        "timestamp": timestamp.isoformat(timespec="seconds") + "Z",
+    }
+
+    summary_lines = ["Constraint Inversion Sprint"]
+    if include_timestamp:
+        summary_lines.append(f"Timestamp: {timestamp.strftime('%Y-%m-%d %H:%M UTC')}")
+    summary_lines.extend(
+        [
+            "",
+            "Problem – ugly first draft:",
+            f"  • Pain: {session['pain']}",
+            f"  • Who's affected: {session['affected']}",
+            f"  • \"Good\" by next week means: {session['good']}",
+            "",
+            f"Flipped constraint: {session['constraint'] or '—'}",
+            "",
+            "Three approaches:",
+        ]
+    )
+
+    for idx, idea in enumerate(session["approaches"], start=1):
+        bullet = idea or "(left intentionally blank)"
+        summary_lines.append(f"  {idx}) {bullet}")
+
+    summary_lines.extend(
+        [
+            "",
+            "Pick one:",
+            f"  • Smallest test I can run today: {session['smallest_test'] or '—'}",
+            f"  • What success/failure teaches us: {session['learnings'] or '—'}",
+            f"  • First action (start now): {session['first_action'] or '—'}",
+        ]
+    )
+
+    summary = "\n".join(summary_lines)
+
+    typer.echo("")
+    typer.echo(summary)
+
+    if output:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(summary + "\n", encoding="utf-8")
+        typer.echo(f"\nSaved summary to {output.resolve()}")
+
+    return session
 
 
 if __name__ == "__main__":
