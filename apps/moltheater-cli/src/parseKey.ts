@@ -6,6 +6,7 @@ export function parseKey(line: string): Say[] {
   const entries: Say[] = [];
   let match: RegExpExecArray | null;
 
+  TOKEN_REGEX.lastIndex = 0;
   while ((match = TOKEN_REGEX.exec(line)) !== null) {
     const word = match[1];
     const rawFields = match[2] ?? "";
