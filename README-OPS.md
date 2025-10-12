@@ -15,3 +15,11 @@ On the server you can run:
 scripts/nginx-ensure-and-health.sh
 scripts/nginx-enable-tls.sh   # optional TLS helper
 ```
+
+## Post-merge checklist
+
+- [ ] Rebuild local `.env` files and verify agent manifests have the minimal scopes required for their tasking.
+- [ ] Run `npm run lint` and `npm test -- --runInBand` locally to confirm the API package scripts still pass.
+- [ ] Confirm GitHub Actions (`ci.yml`, deploy workflows) completed successfully for the merge commit.
+- [ ] Review dependency diffs for unexpected upgrades; freeze minors if the CI image diverges from prod.
+- [ ] Double-check secrets and telemetry destinations for the release to ensure no credentials leaked in logs.
