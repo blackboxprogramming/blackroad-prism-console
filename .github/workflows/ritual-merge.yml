@@ -86,7 +86,14 @@ jobs:
             exit 1
           fi
 
-          FAILED_CONTEXTS=$(jq '[( (.statusCheckRollup.contexts // [])[] | select(.state != "SUCCESS" and .state != "NEUTRAL" and .state != "SKIPPED"))] | length' "$SUMMARY_JSON")
+          FAILED_CONTEXTS=$(jq '
+            def is_success_state($value):
+              ($value != null) and ($value == "SUCCESS" or $value == "NEUTRAL" or $value == "SKIPPED");
+            def context_passed:
+              is_success_state(.state)
+              or (((.status // empty) == "COMPLETED") and is_success_state(.conclusion));
+            [ (.statusCheckRollup.contexts // [])[] | select(context_passed | not) ] | length
+          ' "$SUMMARY_JSON")
           if [ "$FAILED_CONTEXTS" -gt 0 ]; then
             printf 'PR #%s has failing or pending required checks.\n' "$PR" | tee "$FAIL_FILE"
             exit 1
