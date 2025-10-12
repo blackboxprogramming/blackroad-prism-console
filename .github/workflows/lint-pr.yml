@@ -1,4 +1,4 @@
-name: lint-pr
+name: "🧪 Commitlint"
 
 on:
   pull_request:
@@ -6,6 +6,7 @@ on:
 
 jobs:
   commitlint:
+    name: "🧪 commitlint"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
