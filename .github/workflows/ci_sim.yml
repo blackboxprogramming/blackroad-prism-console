@@ -19,7 +19,7 @@ jobs:
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
       - name: Run test suite
         run: |
-          if [ -f pytest.ini ] || ls tests/*.py >/dev/null 2>&1 || ls */tests/*.py >/dev/null 2>&1; then
+          if [ -f pytest.ini ] || find . -type f -path '*/tests/*.py' -print -quit | grep -q .; then
             pytest -q
           else
             echo "No tests discovered; skipping";
