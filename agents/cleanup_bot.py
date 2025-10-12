@@ -28,6 +28,34 @@ class CleanupBot:
             return
         subprocess.run(cmd, check=True)
 
+    def validate_environment(self) -> bool:
+        """Verify the current repository is suitable for branch cleanup."""
+
+        checks = (
+            (
+                ("git", "rev-parse", "--is-inside-work-tree"),
+                "Not inside a Git work tree. Aborting cleanup.",
+            ),
+            (
+                ("git", "remote", "get-url", "origin"),
+                "Remote 'origin' is not configured. Aborting cleanup.",
+            ),
+        )
+        for cmd, failure_message in checks:
+            try:
+                subprocess.run(
+                    cmd,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+            except CalledProcessError as error:
+                print(failure_message)
+                if error.stderr:
+                    print(error.stderr.strip())
+                return False
+        return True
+
     def delete_branch(self, branch: str) -> bool:
         """Delete a branch locally and remotely.
 
@@ -59,6 +87,9 @@ class CleanupBot:
 
     def cleanup(self) -> Dict[str, bool]:
         """Remove the configured branches locally and remotely."""
+
+        if not self.validate_environment():
+            return {branch: False for branch in self.branches}
 
         results: Dict[str, bool] = {}
         for branch in self.branches:
