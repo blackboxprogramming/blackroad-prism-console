@@ -103,7 +103,7 @@ def _make_run(entry: Dict[str, str]):  # type: ignore[override]
     def run(self, task: Task, _entry: Dict[str, str] = entry, _slug: str = slug) -> BotResponse:
         mention_detected = _detect_mention(task)
 
-        state_word = "Prepared" if mention_detected else "Queued"
+        state_word = "Activated" if mention_detected else "Ready"
         summary = (
             f"{state_word} {_entry['platform']} integration loop so the team stays in sync "
             "after @blackboxprogramming is tagged."
@@ -128,7 +128,7 @@ def _make_run(entry: Dict[str, str]):  # type: ignore[override]
                 "team": _entry["owner"],
                 "title": f"{_entry['platform']} follow-up for {task.goal}",
                 "tags": ["integration", _slug, "blackboxprogramming"],
-                "status": "pending-review",
+                "status": "pending-review" if mention_detected else "ready",
             },
         }
 
@@ -147,7 +147,7 @@ def _make_run(entry: Dict[str, str]):  # type: ignore[override]
             ]
         else:
             next_actions = [
-                "Watch for @blackboxprogramming mention to activate notifications",
+                "Open the Linear draft proactively so automation can proceed without waiting",
                 "Keep integration context warm for rapid hand-off",
                 "Confirm reviewer availability in advance",
             ]
@@ -160,7 +160,7 @@ def _make_run(entry: Dict[str, str]):  # type: ignore[override]
             risks=risks,
             artifacts=artifacts,
             next_actions=next_actions,
-            ok=mention_detected,
+            ok=True,
         )
 
     return run
