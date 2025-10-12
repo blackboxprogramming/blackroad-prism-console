@@ -1,0 +1,10 @@
+{
+  // Prevent the Jest extension from auto-starting in this devcontainer where npm isn't available.
+  "jest.autoEnable": false,
+  "jest.runAllWhenWorkspaceOpen": false,
+  "jest.showCoverageOnLoad": false,
+
+  // Provide our test task as an easy way to run tests inside Docker
+  "testing.defaultGutterClickAction": "run",
+  "testing.automaticallyOpenPeekView": "never"
+}
