@@ -15,7 +15,6 @@ const fs = require('fs');
 
 const express = require('express');
 const compression = require('compression');
-const morgan = require('morgan');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cors = require('cors');
@@ -29,11 +28,13 @@ const Stripe = require('stripe');
 const verify = require('./lib/verify');
 const notify = require('./lib/notify');
 const logger = require('./lib/log');
+const attachDebugProbes = require('./modules/debug_probes');
 const maintenanceGuard = require('./modules/maintenanceGuard');
 const attachLlmRoutes = require('./routes/admin_llm');
 const gitRouter = require('./routes/git');
 const providersRouter = require('./routes/providers');
 const attachSlackExceptions = require('./modules/slack_exceptions');
+const { fetchWithProbe } = require('./lib/fetch_probe');
 
 // --- Config
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -52,10 +53,13 @@ const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
 const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
   ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
   : [];
+const DEBUG_MODE =
+  String(process.env.DEBUG_MODE || process.env.DEBUG_PROBES || 'false').toLowerCase() ===
+  'true';
 
 ['SESSION_SECRET', 'INTERNAL_TOKEN'].forEach((name) => {
   if (!process.env[name]) {
-    console.error(`Missing required env ${name}`);
+    logger.fatal({ event: 'missing_env', name });
     process.exit(1);
   }
 });
@@ -202,21 +206,8 @@ app.use(
   })
 );
 app.use(rateLimit({ windowMs: 60_000, max: 100 }));
-app.use((req, res, next) => {
-  const start = Date.now();
-  res.on('finish', () => {
-    logger.info({
-      id: res.getHeader('X-Request-ID'),
-      method: req.method,
-      path: req.originalUrl,
-      status: res.statusCode,
-      duration: Date.now() - start,
-    });
-  });
-  next();
-});
+attachDebugProbes({ app, logger, enabled: DEBUG_MODE });
 app.use(compression());
-app.use(morgan('tiny'));
 app.use(
   cookieSession({
     name: 'brsess',
@@ -349,7 +340,7 @@ app.post('/api/billing/webhook', (req, res) => {
       STRIPE_WEBHOOK_SECRET
     );
   } catch (e) {
-    logger.error('stripe_webhook_verify_failed', e);
+    logger.error({ event: 'stripe_webhook_verify_failed', err: e });
     return res.status(400).json({ error: 'invalid_signature' });
   }
   res.json({ received: true });
@@ -731,11 +722,15 @@ app.get('/api/subscribe/plans', requireAuth, (_req, res) => {
 // Forwards body to FastAPI (LLM_URL) and streams raw text back to the client.
 app.post('/api/llm/chat', requireAuth, async (req, res) => {
   try {
-    const upstream = await fetch(LLM_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body || {}),
-    });
+    const upstream = await fetchWithProbe(
+      LLM_URL,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(req.body || {}),
+      },
+      { label: 'llm_chat', enabled: DEBUG_MODE, logger }
+    );
 
     // Stream if possible
     if (upstream.ok && upstream.body) {
@@ -830,13 +825,18 @@ setInterval(() => {
 
 // --- Start
 server.listen(PORT, () => {
-  console.log(
-    `[blackroad-api] listening on ${PORT} (db: ${DB_PATH}, llm: ${LLM_URL}, shell: ${ALLOW_SHELL})`
-  );
+  logger.info({
+    event: 'server_start',
+    port: PORT,
+    db: DB_PATH,
+    llm: LLM_URL,
+    shell: ALLOW_SHELL,
+    debug: DEBUG_MODE,
+  });
 });
 
 // --- Safety
-process.on('unhandledRejection', (e) => console.error('UNHANDLED', e));
-process.on('uncaughtException', (e) => console.error('UNCAUGHT', e));
+process.on('unhandledRejection', (e) => logger.error({ event: 'unhandled_rejection', error: String(e) }));
+process.on('uncaughtException', (e) => logger.error({ event: 'uncaught_exception', error: String(e) }));
 
 module.exports = { app, server };
