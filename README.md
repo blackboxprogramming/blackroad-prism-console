@@ -548,3 +548,34 @@ automation bots to the BlackRoad Prism Console, review
 [`INTEGRATIONS_SECURITY.md`](./INTEGRATIONS_SECURITY.md). The playbook documents
 hardening steps for key management, OAuth scopes, monitoring, and incident response so
 that integrations remain auditable and compliant.
+
+## Running Tests in Docker
+
+This repository includes Docker support for running tests in an isolated environment.
+
+### Quick Start
+
+Validate your Docker test environment:
+
+```bash
+./scripts/validate-docker-test.sh
+```
+
+Run all tests (Jest + pytest):
+
+```bash
+docker compose run --rm tests
+```
+
+Run specific test suites:
+
+```bash
+# JavaScript tests only
+docker compose run --rm test-node
+
+# Python tests only
+docker compose run --rm test-python
+```
+
+For detailed documentation, see [DOCKER_TESTS.md](DOCKER_TESTS.md).
+
