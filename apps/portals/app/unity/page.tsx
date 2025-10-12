@@ -137,6 +137,91 @@ function sanitizeHistoryRecords(value: unknown): BuildRecord[] {
   return records;
 }
 
+type ItemProgressState = {
+  done: boolean;
+  updatedAt: number | null;
+};
+
+const CHECKLIST_PROGRESS_STORAGE_KEY = 'unity-portal-checklist-progress';
+const PIPELINE_PROGRESS_STORAGE_KEY = 'unity-portal-pipeline-progress';
+
+function sanitizeProgressMap(value: unknown): Record<string, ItemProgressState> {
+  if (!value || typeof value !== 'object') {
+    return {};
+  }
+
+  const result: Record<string, ItemProgressState> = {};
+  const entries = Object.entries(value as Record<string, unknown>);
+  for (const [key, raw] of entries) {
+    if (!raw || typeof raw !== 'object') {
+      continue;
+    }
+
+    const { done, updatedAt } = raw as { done?: unknown; updatedAt?: unknown };
+    if (typeof done !== 'boolean') {
+      continue;
+    }
+
+    const normalizedTimestamp =
+      typeof updatedAt === 'number' && Number.isFinite(updatedAt) ? updatedAt : null;
+
+    result[key] = {
+      done,
+      updatedAt: normalizedTimestamp,
+    };
+  }
+
+  return result;
+}
+
+function pruneProgressMap(
+  progress: Record<string, ItemProgressState>,
+  allowed: Iterable<string>,
+): Record<string, ItemProgressState> {
+  const allowedSet = new Set(allowed);
+  if (allowedSet.size === 0) {
+    return Object.keys(progress).length === 0 ? progress : {};
+  }
+
+  const next: Record<string, ItemProgressState> = {};
+  for (const key of allowedSet) {
+    if (key in progress) {
+      next[key] = progress[key];
+    }
+  }
+
+  if (Object.keys(next).length === Object.keys(progress).length) {
+    let identical = true;
+    for (const key of Object.keys(next)) {
+      if (next[key] !== progress[key]) {
+        identical = false;
+        break;
+      }
+    }
+    if (identical) {
+      return progress;
+    }
+  }
+
+  return next;
+}
+
+function makePipelineKey(phaseTitle: string, item: string) {
+  return `${phaseTitle}::${item}`;
+}
+
+function formatProgressTimestamp(value: number | null): string | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return null;
+  }
+
+  try {
+    return new Date(value).toLocaleString();
+  } catch {
+    return null;
+  }
+}
+
 export default function UnityPortalPage() {
   const [projectName, setProjectName] = useState('');
   const [template, setTemplate] = useState(defaultTemplateId);
@@ -149,6 +234,8 @@ export default function UnityPortalPage() {
   const [pipelinePhases, setPipelinePhases] = useState<UnityPipelinePhase[]>(() => cloneDefaultPipeline());
   const [targetOptions, setTargetOptions] = useState<UnityTargetOption[]>(() => cloneDefaultTargetOptions());
   const [renderChecklist, setRenderChecklist] = useState<string[]>(() => cloneDefaultChecklist());
+  const [checklistProgress, setChecklistProgress] = useState<Record<string, ItemProgressState>>({});
+  const [pipelineProgress, setPipelineProgress] = useState<Record<string, ItemProgressState>>({});
   const [defaultConfigTargets, setDefaultConfigTargets] = useState<BuildTarget[]>(() => cloneDefaultTargets());
   const [configState, setConfigState] = useState<ConfigState>({
     loading: true,
@@ -178,6 +265,16 @@ export default function UnityPortalPage() {
     () => new Map(targetOptions.map((item) => [item.id, item.label])),
     [targetOptions],
   );
+  const checklistKeys = useMemo(() => [...renderChecklist], [renderChecklist]);
+  const checklistKeySet = useMemo(() => new Set(checklistKeys), [checklistKeys]);
+  const pipelineKeys = useMemo(
+    () =>
+      pipelinePhases.flatMap((phase) =>
+        phase.items.map((item) => makePipelineKey(phase.title, item)),
+      ),
+    [pipelinePhases],
+  );
+  const pipelineKeySet = useMemo(() => new Set(pipelineKeys), [pipelineKeys]);
 
   const loadConfig = useCallback(async () => {
     setConfigState((prev) => ({
@@ -278,6 +375,36 @@ export default function UnityPortalPage() {
     if (typeof window === 'undefined') return;
 
     try {
+      const storedChecklist = window.localStorage.getItem(CHECKLIST_PROGRESS_STORAGE_KEY);
+      if (storedChecklist) {
+        const parsed = JSON.parse(storedChecklist);
+        const sanitized = sanitizeProgressMap(parsed);
+        if (Object.keys(sanitized).length > 0) {
+          setChecklistProgress(sanitized);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load Unity checklist progress from storage', error);
+    }
+
+    try {
+      const storedPipeline = window.localStorage.getItem(PIPELINE_PROGRESS_STORAGE_KEY);
+      if (storedPipeline) {
+        const parsed = JSON.parse(storedPipeline);
+        const sanitized = sanitizeProgressMap(parsed);
+        if (Object.keys(sanitized).length > 0) {
+          setPipelineProgress(sanitized);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load Unity pipeline progress from storage', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    try {
       const stored = window.localStorage.getItem(HISTORY_STORAGE_KEY);
       if (!stored) return;
       const parsed = JSON.parse(stored);
@@ -304,6 +431,50 @@ export default function UnityPortalPage() {
       console.error('Failed to persist Unity export history', error);
     }
   }, [history]);
+
+  useEffect(() => {
+    setChecklistProgress((prev) => pruneProgressMap(prev, checklistKeySet));
+  }, [checklistKeySet]);
+
+  useEffect(() => {
+    setPipelineProgress((prev) => pruneProgressMap(prev, pipelineKeySet));
+  }, [pipelineKeySet]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    if (Object.keys(checklistProgress).length === 0) {
+      window.localStorage.removeItem(CHECKLIST_PROGRESS_STORAGE_KEY);
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(
+        CHECKLIST_PROGRESS_STORAGE_KEY,
+        JSON.stringify(checklistProgress),
+      );
+    } catch (error) {
+      console.error('Failed to persist Unity checklist progress', error);
+    }
+  }, [checklistProgress]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    if (Object.keys(pipelineProgress).length === 0) {
+      window.localStorage.removeItem(PIPELINE_PROGRESS_STORAGE_KEY);
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(
+        PIPELINE_PROGRESS_STORAGE_KEY,
+        JSON.stringify(pipelineProgress),
+      );
+    } catch (error) {
+      console.error('Failed to persist Unity pipeline progress', error);
+    }
+  }, [pipelineProgress]);
 
   useEffect(() => {
     if (templates.length === 0) {
@@ -374,9 +545,97 @@ export default function UnityPortalPage() {
     );
   };
 
+  const toggleChecklistItem = useCallback(
+    (item: string) => {
+      if (!checklistKeySet.has(item)) {
+        return;
+      }
+
+      setChecklistProgress((prev) => {
+        const next = { ...prev };
+        const previous = prev[item];
+        const nextDone = !(previous?.done ?? false);
+        if (nextDone) {
+          next[item] = { done: true, updatedAt: Date.now() };
+        } else {
+          delete next[item];
+        }
+        return next;
+      });
+    },
+    [checklistKeySet],
+  );
+
+  const togglePipelineItem = useCallback(
+    (phaseTitle: string, item: string) => {
+      const key = makePipelineKey(phaseTitle, item);
+      if (!pipelineKeySet.has(key)) {
+        return;
+      }
+
+      setPipelineProgress((prev) => {
+        const next = { ...prev };
+        const previous = prev[key];
+        const nextDone = !(previous?.done ?? false);
+        if (nextDone) {
+          next[key] = { done: true, updatedAt: Date.now() };
+        } else {
+          delete next[key];
+        }
+        return next;
+      });
+    },
+    [pipelineKeySet],
+  );
+
+  const handleResetChecklist = useCallback(() => {
+    setChecklistProgress({});
+  }, []);
+
+  const handleResetPipeline = useCallback(() => {
+    setPipelineProgress({});
+  }, []);
+
   const selectedTemplate = useMemo(
     () => templates.find((item) => item.id === template) ?? templates[0],
     [templates, template],
+  );
+
+  const checklistSummary = useMemo(() => {
+    const total = renderChecklist.length;
+    let complete = 0;
+    for (const item of renderChecklist) {
+      if (checklistProgress[item]?.done) {
+        complete += 1;
+      }
+    }
+
+    return { total, complete };
+  }, [renderChecklist, checklistProgress]);
+
+  const pipelineSummary = useMemo(() => {
+    let total = 0;
+    let complete = 0;
+
+    for (const phase of pipelinePhases) {
+      for (const item of phase.items) {
+        total += 1;
+        if (pipelineProgress[makePipelineKey(phase.title, item)]?.done) {
+          complete += 1;
+        }
+      }
+    }
+
+    return { total, complete };
+  }, [pipelinePhases, pipelineProgress]);
+
+  const hasChecklistProgress = useMemo(
+    () => Object.keys(checklistProgress).length > 0,
+    [checklistProgress],
+  );
+  const hasPipelineProgress = useMemo(
+    () => Object.keys(pipelineProgress).length > 0,
+    [pipelineProgress],
   );
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -654,19 +913,85 @@ export default function UnityPortalPage() {
             </Card>
           </div>
 
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold">Production Pipeline</h2>
+              <p className="text-xs text-gray-400">Track each step as you prepare builds for export.</p>
+            </div>
+            {pipelineSummary.total > 0 && (
+              <div className="flex items-center gap-3 text-xs text-gray-400">
+                <span>
+                  {pipelineSummary.complete} / {pipelineSummary.total} complete
+                </span>
+                <Button
+                  type="button"
+                  onClick={handleResetPipeline}
+                  disabled={!hasPipelineProgress}
+                  className="bg-gray-800 px-3 py-1 text-xs text-gray-200 hover:bg-gray-700"
+                >
+                  Reset
+                </Button>
+              </div>
+            )}
+          </div>
           <div className="grid gap-4 md:grid-cols-3">
-            {pipelinePhases.map((phase) => (
-              <Card key={phase.title} className="space-y-3 p-4">
-                <h2 className="text-lg font-semibold">{phase.title}</h2>
-                <ul className="space-y-2 text-sm text-gray-300">
-                  {phase.items.map((item) => (
-                    <li key={item} className="leading-relaxed">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            ))}
+            {pipelinePhases.map((phase) => {
+              const phaseComplete = phase.items.reduce((count, item) => {
+                const key = makePipelineKey(phase.title, item);
+                return pipelineProgress[key]?.done ? count + 1 : count;
+              }, 0);
+
+              return (
+                <Card key={phase.title} className="space-y-3 p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-lg font-semibold">{phase.title}</h3>
+                    <span className="text-[11px] text-gray-400">
+                      {phaseComplete}/{phase.items.length} done
+                    </span>
+                  </div>
+                  <ul className="space-y-2">
+                    {phase.items.map((item) => {
+                      const key = makePipelineKey(phase.title, item);
+                      const entry = pipelineProgress[key];
+                      const done = entry?.done ?? false;
+                      const timestamp = formatProgressTimestamp(entry?.updatedAt ?? null);
+
+                      return (
+                        <li
+                          key={key}
+                          className={`rounded border px-3 py-2 text-sm transition ${
+                            done
+                              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-100'
+                              : 'border-gray-800 bg-gray-900/60 text-gray-300'
+                          }`}
+                        >
+                          <label className="flex cursor-pointer items-start gap-3">
+                            <input
+                              type="checkbox"
+                              className="mt-1 h-4 w-4 accent-[#FFB000]"
+                              checked={done}
+                              onChange={() => togglePipelineItem(phase.title, item)}
+                            />
+                            <span
+                              className={`flex-1 leading-relaxed ${
+                                done
+                                  ? 'text-emerald-50 line-through decoration-emerald-300/60'
+                                  : 'text-gray-200'
+                              }`}
+                            >
+                              {item}
+                            </span>
+                          </label>
+                          {done && timestamp && (
+                            <p className="mt-1 pl-7 text-[11px] text-gray-500">Checked {timestamp}</p>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </Card>
+              );
+            })}
           </div>
         </section>
 
@@ -849,17 +1174,70 @@ export default function UnityPortalPage() {
           </Card>
 
           <Card className="space-y-4 p-6">
-            <div>
-              <h2 className="text-xl font-semibold">Render Readiness Checklist</h2>
-              <p className="text-sm text-gray-400">Confirm these Unity-specific tasks before promoting a build.</p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-semibold">Render Readiness Checklist</h2>
+                <p className="text-sm text-gray-400">Confirm these Unity-specific tasks before promoting a build.</p>
+              </div>
+              {checklistSummary.total > 0 && (
+                <div className="flex items-center gap-3 text-xs text-gray-400">
+                  <span>
+                    {checklistSummary.complete} / {checklistSummary.total} done
+                  </span>
+                  <Button
+                    type="button"
+                    onClick={handleResetChecklist}
+                    disabled={!hasChecklistProgress}
+                    className="bg-gray-800 px-3 py-1 text-xs text-gray-200 hover:bg-gray-700"
+                  >
+                    Reset
+                  </Button>
+                </div>
+              )}
             </div>
-            <ul className="space-y-2 text-sm text-gray-300">
-              {renderChecklist.map((item) => (
-                <li key={item} className="leading-relaxed">
-                  {item}
-                </li>
-              ))}
-            </ul>
+            {renderChecklist.length === 0 ? (
+              <p className="text-sm text-gray-500">No readiness tasks configured.</p>
+            ) : (
+              <ul className="space-y-2">
+                {renderChecklist.map((item) => {
+                  const entry = checklistProgress[item];
+                  const done = entry?.done ?? false;
+                  const timestamp = formatProgressTimestamp(entry?.updatedAt ?? null);
+
+                  return (
+                    <li
+                      key={item}
+                      className={`rounded border px-3 py-2 text-sm transition ${
+                        done
+                          ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-100'
+                          : 'border-gray-800 bg-gray-900/60 text-gray-300'
+                      }`}
+                    >
+                      <label className="flex cursor-pointer items-start gap-3">
+                        <input
+                          type="checkbox"
+                          className="mt-1 h-4 w-4 accent-[#FFB000]"
+                          checked={done}
+                          onChange={() => toggleChecklistItem(item)}
+                        />
+                        <span
+                          className={`flex-1 leading-relaxed ${
+                            done
+                              ? 'text-emerald-50 line-through decoration-emerald-300/60'
+                              : 'text-gray-200'
+                          }`}
+                        >
+                          {item}
+                        </span>
+                      </label>
+                      {done && timestamp && (
+                        <p className="mt-1 pl-7 text-[11px] text-gray-500">Checked {timestamp}</p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </Card>
         </section>
       </main>
