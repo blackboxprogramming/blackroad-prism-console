@@ -54,6 +54,11 @@ bash tools/verify-runtime.sh
 
 If anything looks off, run `bash tools/verify-runtime.sh` and share the output.
 
+## Testing
+
+- `npm test` runs the smoke test harness (`tests/smoke.test.mjs`).
+- `npm run test:jest` executes the Jest integration suite with `NODE_ENV` preloaded to `test` via `tests/jest.setup.js`.
+
 ## Subscribe API
 
 Environment variables for Stripe integration:
