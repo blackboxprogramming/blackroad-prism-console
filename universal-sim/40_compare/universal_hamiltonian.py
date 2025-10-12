@@ -155,7 +155,7 @@ def leapfrog_step(q: Array, p: Array, system: CoupledHamiltonian, t: float, dt: 
     dHdq, dHdp = gradients(q, p, system, t)
     damping_term = 1.0 - system.damping * dt
     p_half = damping_term * (p - 0.5 * dt * dHdq)
-    q_new = q + dt * dHdp
+    q_new = q + dt * p_half
     dHdq_new, _ = gradients(q_new, p_half, system, t + dt)
     p_new = damping_term * (p_half - 0.5 * dt * dHdq_new)
     return q_new, p_new
