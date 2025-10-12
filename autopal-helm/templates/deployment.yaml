@@ -16,9 +16,20 @@ spec:
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- with .Values.podAnnotations }}
+      {{- $configEnabled := .Values.config.enabled }}
+      {{- $breakGlassValue := .Values.secrets.breakGlass.value }}
+      {{- $podAnnotations := .Values.podAnnotations }}
+      {{- if or $configEnabled (or $breakGlassValue $podAnnotations) }}
       annotations:
+        {{- if $configEnabled }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if $breakGlassValue }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with $podAnnotations }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
     spec:
       serviceAccountName: {{ include "autopal.serviceAccountName" . }}
