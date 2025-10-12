@@ -1,0 +1,128 @@
+name: Tests Touched Gate
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+      - labeled
+      - unlabeled
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  require-tests:
+    if: github.event.pull_request.draft == false && !contains(github.event.pull_request.labels.*.name, 'no-test-change-required')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed files
+        id: changes
+        uses: tj-actions/changed-files@v45
+        with:
+          separator: '\n'
+
+      - name: Ensure tests accompany code changes
+        run: |
+          set -euo pipefail
+          has_code=0
+          has_tests=0
+
+          is_test_file() {
+            local path="$1"
+            local lower="${path,,}"
+            local base
+            base="$(basename "$path")"
+
+            if [[ "$lower" =~ (^|/)(test|tests|__tests__|spec|specs|integration|integration-tests|e2e|qa|cypress|unit-tests|utest|itests|acceptance)(/|$) ]]; then
+              return 0
+            fi
+
+            if [[ "$base" =~ ^test[_.-].* ]]; then
+              return 0
+            fi
+
+            if [[ "$base" =~ (_test|_tests|_spec|_specs)\.[^.]+$ ]]; then
+              return 0
+            fi
+
+            if [[ "$base" =~ (Test|Tests|Spec|Specs)\.(py|js|mjs|cjs|ts|tsx|jsx|go|rb|rs|java|kt|kts|swift|php|cs|cpp|c|m|mm)$ ]]; then
+              return 0
+            fi
+
+            if [[ "$base" =~ \.test\.(py|js|mjs|cjs|ts|tsx|jsx|go|rb|rs|java|kt|kts|swift|php|cs)$ ]]; then
+              return 0
+            fi
+
+            if [[ "$base" =~ \.spec\.(py|js|mjs|cjs|ts|tsx|jsx|go|rb|rs|java|kt|kts|swift|php|cs)$ ]]; then
+              return 0
+            fi
+
+            return 1
+          }
+
+          is_code_file() {
+            local path="$1"
+            local lower="${path,,}"
+            local base="$(basename "$path")"
+
+            if [[ "$lower" =~ (^|/)(docs|doc|documentation|changelog|.github)(/|$) ]]; then
+              return 1
+            fi
+
+            case "$base" in
+              Dockerfile|Makefile|CMakeLists.txt)
+                return 0
+                ;;
+            esac
+
+            local ext="${base##*.}"
+            case "$ext" in
+              py|pyw|js|mjs|cjs|ts|tsx|jsx|vue|svelte|go|rb|rs|java|kt|kts|swift|php|cs|cpp|c|h|hpp|hh|m|mm|scala|sc|clj|cljs|cljc|ex|exs|erl|hs|lua|dart|fs|fsi|fsx|fsproj|ps1|psm1|bat|cmd|sh|bash|zsh|fish|swift|groovy|gradle)
+                return 0
+                ;;
+              *)
+                return 1
+                ;;
+            esac
+          }
+
+          changed_files=$(cat <<'FILES'
+${{ steps.changes.outputs.all_changed_files }}
+FILES
+)
+
+          if [[ -z "$changed_files" ]]; then
+            echo "No files changed; skipping gate."
+            exit 0
+          fi
+
+          while IFS= read -r file; do
+            [[ -z "$file" ]] && continue
+
+            if is_test_file "$file"; then
+              has_tests=1
+              continue
+            fi
+
+            if ! is_code_file "$file"; then
+              continue
+            fi
+
+            has_code=1
+          done <<<"$changed_files"
+
+          if [[ "$has_code" -eq 1 && "$has_tests" -eq 0 ]]; then
+            echo "::error::Code changes detected without accompanying test updates. Add tests or apply the 'no-test-change-required' label."
+            exit 1
+          fi
+
+          echo "Test gate satisfied."

@@ -1,0 +1,21 @@
+name: Auto Backport
+
+on:
+  pull_request_target:
+    types:
+      - labeled
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  run-backport:
+    if: startsWith(github.event.label.name, 'backport-') && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Backport merged pull request
+        uses: tibdex/backport@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          label_pattern: '^backport-(?<base>.+)$'

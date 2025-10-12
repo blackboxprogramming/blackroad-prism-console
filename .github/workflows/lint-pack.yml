@@ -1,0 +1,104 @@
+name: Lint Pack
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect changed files
+        id: changes
+        uses: tj-actions/changed-files@v45
+        with:
+          files_yaml: |
+            workflows:
+              - '.github/workflows/**/*.yml'
+              - '.github/workflows/**/*.yaml'
+            markdown:
+              - '**/*.md'
+              - '**/*.MD'
+            yaml:
+              - '**/*.yml'
+              - '**/*.yaml'
+            shell:
+              - '**/*.sh'
+              - '**/*.bash'
+              - '**/*.zsh'
+              - 'scripts/**/*.sh'
+              - 'scripts/**/*.bash'
+              - 'bin/*'
+              - '!**/node_modules/**'
+
+      - name: Install lint tooling
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y shellcheck yamllint
+          npm install -g markdownlint-cli@0.42.0
+          curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash | bash -s -- -b /usr/local/bin latest
+
+      - name: Run actionlint
+        if: github.event_name == 'push' || steps.changes.outputs.workflows_any_changed == 'true'
+        run: |
+          set -euo pipefail
+          actionlint
+
+      - name: Run markdownlint
+        if: github.event_name == 'push' || steps.changes.outputs.markdown_any_changed == 'true'
+        run: |
+          set -euo pipefail
+          files="${{ steps.changes.outputs.markdown_all_changed_files }}"
+          if [ -z "$files" ]; then
+            echo "No markdown files changed"
+            exit 0
+          fi
+          mapfile -t targets <<<"$files"
+          if [ "${#targets[@]}" -eq 0 ]; then
+            echo "No markdown files to lint"
+            exit 0
+          fi
+          markdownlint "${targets[@]}"
+
+      - name: Run yamllint
+        if: github.event_name == 'push' || steps.changes.outputs.yaml_any_changed == 'true'
+        run: |
+          set -euo pipefail
+          files="${{ steps.changes.outputs.yaml_all_changed_files }}"
+          if [ -z "$files" ]; then
+            echo "No YAML files changed"
+            exit 0
+          fi
+          mapfile -t targets <<<"$files"
+          if [ "${#targets[@]}" -eq 0 ]; then
+            echo "No YAML files to lint"
+            exit 0
+          fi
+          yamllint "${targets[@]}"
+
+      - name: Run shellcheck
+        if: github.event_name == 'push' || steps.changes.outputs.shell_any_changed == 'true'
+        run: |
+          set -euo pipefail
+          files="${{ steps.changes.outputs.shell_all_changed_files }}"
+          if [ -z "$files" ]; then
+            echo "No shell scripts changed"
+            exit 0
+          fi
+          mapfile -t targets <<<"$files"
+          if [ "${#targets[@]}" -eq 0 ]; then
+            echo "No shell scripts to lint"
+            exit 0
+          fi
+          shellcheck --severity=style "${targets[@]}"
