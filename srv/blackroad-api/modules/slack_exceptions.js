@@ -15,8 +15,9 @@ module.exports = function slackExceptions({ app, db }) {
   const signingSecret = process.env.SLACK_SIGNING_SECRET || '';
   const botToken = process.env.SLACK_BOT_TOKEN || '';
   const channel = process.env.SECOPS_CHANNEL || '';
-  const docsBase = (process.env.RULE_DOCS_BASE_URL || 'https://docs.blackroad.io/rules')
-    .replace(/\/$/, '');
+  const docsBase = (
+    process.env.RULE_DOCS_BASE_URL || 'https://docs.blackroad.io/rules'
+  ).replace(/\/$/, '');
 
   db.prepare(
     `
@@ -59,6 +60,26 @@ module.exports = function slackExceptions({ app, db }) {
   `
   ).run();
 
+  // Legacy databases created before event typing shipped were missing the
+  // `event_type` column. Running the current code against those installs
+  // throws an error when we prepare the insert statement below. Patch the
+  // table in place so the API can boot without manual intervention.
+  const eventColumns = db.prepare('PRAGMA table_info(exception_events)').all();
+  const existingEventCols = new Set(eventColumns.map((col) => col.name));
+  const eventColumnDefinitions = {
+    event_type: "TEXT NOT NULL DEFAULT 'info'",
+    actor: 'TEXT',
+    detail: 'TEXT',
+    correlation_id: 'TEXT',
+  };
+  for (const [column, definition] of Object.entries(eventColumnDefinitions)) {
+    if (!existingEventCols.has(column)) {
+      db.prepare(
+        `ALTER TABLE exception_events ADD COLUMN ${column} ${definition}`
+      ).run();
+    }
+  }
+
   const insertException = db.prepare(
     `
     INSERT INTO exception_requests (
@@ -99,7 +120,8 @@ module.exports = function slackExceptions({ app, db }) {
   const emailCache = new Map();
 
   app.post('/slack/command', rawBodyParser, async (req, res) => {
-    const raw = req.body instanceof Buffer ? req.body : Buffer.from(req.body || '');
+    const raw =
+      req.body instanceof Buffer ? req.body : Buffer.from(req.body || '');
     if (!verifySlack(req, raw)) {
       logger.warn({ event: 'slack_verify_failed', path: req.path });
       return res.status(401).send('invalid signature');
@@ -109,12 +131,10 @@ module.exports = function slackExceptions({ app, db }) {
       return res.status(200).send('');
     }
     if (!botToken) {
-      return res
-        .status(200)
-        .json({
-          response_type: 'ephemeral',
-          text: 'Slack bot token not configured. Please contact an administrator.',
-        });
+      return res.status(200).json({
+        response_type: 'ephemeral',
+        text: 'Slack bot token not configured. Please contact an administrator.',
+      });
     }
     const defaults = parseCommandDefaults(params.text || '');
     defaults.reason = defaults.reason || '';
@@ -123,15 +143,17 @@ module.exports = function slackExceptions({ app, db }) {
       await slackFetch('views.open', { trigger_id: params.trigger_id, view });
     } catch (err) {
       logger.error({ event: 'slack_open_modal_failed', error: String(err) });
-      return res
-        .status(200)
-        .json({ response_type: 'ephemeral', text: 'Unable to open exception form. Try again later.' });
+      return res.status(200).json({
+        response_type: 'ephemeral',
+        text: 'Unable to open exception form. Try again later.',
+      });
     }
     return res.status(200).send('');
   });
 
   app.post('/slack/interact', rawBodyParser, async (req, res) => {
-    const raw = req.body instanceof Buffer ? req.body : Buffer.from(req.body || '');
+    const raw =
+      req.body instanceof Buffer ? req.body : Buffer.from(req.body || '');
     if (!verifySlack(req, raw)) {
       logger.warn({ event: 'slack_verify_failed', path: req.path });
       return res.status(401).send('invalid signature');
@@ -148,7 +170,10 @@ module.exports = function slackExceptions({ app, db }) {
       return res.status(400).send('invalid payload');
     }
 
-    if (payload.type === 'view_submission' && payload.view?.callback_id === 'exception_modal') {
+    if (
+      payload.type === 'view_submission' &&
+      payload.view?.callback_id === 'exception_modal'
+    ) {
       const response = await handleViewSubmission(payload);
       return res.status(200).json(response);
     }
@@ -172,7 +197,10 @@ module.exports = function slackExceptions({ app, db }) {
     const hmac = crypto.createHmac('sha256', signingSecret);
     const digest = `v0=${hmac.update(base).digest('hex')}`;
     try {
-      return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+      return crypto.timingSafeEqual(
+        Buffer.from(signature),
+        Buffer.from(digest)
+      );
     } catch {
       return false;
     }
@@ -240,20 +268,44 @@ module.exports = function slackExceptions({ app, db }) {
       close: { type: 'plain_text', text: 'Cancel' },
       private_metadata: JSON.stringify(defaults),
       blocks: [
-        inputBlock('rule_id', 'Rule ID', textInput('rule_id', defaults.rule_id, true)),
-        inputBlock('org_id', 'Org ID', textInput('org_id', defaults.org_id, true)),
+        inputBlock(
+          'rule_id',
+          'Rule ID',
+          textInput('rule_id', defaults.rule_id, true)
+        ),
+        inputBlock(
+          'org_id',
+          'Org ID',
+          textInput('org_id', defaults.org_id, true)
+        ),
         inputBlock(
           'subject_type',
           'Subject Type',
-          staticSelect('subject_type', Array.from(SUBJECT_TYPES), defaults.subject_type)
+          staticSelect(
+            'subject_type',
+            Array.from(SUBJECT_TYPES),
+            defaults.subject_type
+          )
         ),
-        inputBlock('subject_id', 'Subject ID', textInput('subject_id', defaults.subject_id, true)),
+        inputBlock(
+          'subject_id',
+          'Subject ID',
+          textInput('subject_id', defaults.subject_id, true)
+        ),
         inputBlock(
           'valid_for',
           'Duration (hours, 1–72)',
-          textInput('valid_for', defaults.valid_for || String(DEFAULT_DURATION_HOURS), false)
+          textInput(
+            'valid_for',
+            defaults.valid_for || String(DEFAULT_DURATION_HOURS),
+            false
+          )
         ),
-        inputBlock('reason', 'Reason', textArea('reason', defaults.reason || '', true)),
+        inputBlock(
+          'reason',
+          'Reason',
+          textArea('reason', defaults.reason || '', true)
+        ),
       ],
     };
   }
@@ -308,7 +360,8 @@ module.exports = function slackExceptions({ app, db }) {
     const values = payload.view?.state?.values || {};
     const ruleId = getTextValue(values, 'rule_id', 'rule_id');
     const orgId = getTextValue(values, 'org_id', 'org_id');
-    const subjectType = getSelectValue(values, 'subject_type', 'subject_type') || 'repo';
+    const subjectType =
+      getSelectValue(values, 'subject_type', 'subject_type') || 'repo';
     const subjectId = getTextValue(values, 'subject_id', 'subject_id');
     const reason = getTextValue(values, 'reason', 'reason');
     const validForRaw = getTextValue(values, 'valid_for', 'valid_for');
@@ -319,7 +372,11 @@ module.exports = function slackExceptions({ app, db }) {
     if (!subjectId) errors.subject_id = 'Required';
     let duration = parseInt(validForRaw || String(DEFAULT_DURATION_HOURS), 10);
     if (!Number.isFinite(duration)) duration = NaN;
-    if (Number.isNaN(duration) || duration < MIN_DURATION_HOURS || duration > MAX_DURATION_HOURS) {
+    if (
+      Number.isNaN(duration) ||
+      duration < MIN_DURATION_HOURS ||
+      duration > MAX_DURATION_HOURS
+    ) {
       errors.valid_for = 'Enter hours between 1 and 72';
     }
     if ((reason || '').trim().length < 5) {
@@ -377,10 +434,18 @@ module.exports = function slackExceptions({ app, db }) {
           updateMessage.run(response.ts, response.channel, record.id);
         }
       } catch (err) {
-        logger.error({ event: 'slack_post_card_failed', error: String(err), exception_id: record.id });
+        logger.error({
+          event: 'slack_post_card_failed',
+          error: String(err),
+          exception_id: record.id,
+        });
       }
     } else {
-      logger.warn({ event: 'slack_card_skipped', reason: 'missing_token_or_channel', exception_id: record.id });
+      logger.warn({
+        event: 'slack_card_skipped',
+        reason: 'missing_token_or_channel',
+        exception_id: record.id,
+      });
     }
 
     return { response_action: 'clear' };
@@ -399,29 +464,54 @@ module.exports = function slackExceptions({ app, db }) {
     if (!exceptionId) return;
     const record = getException.get(exceptionId);
     if (!record) {
-      await postResponse(payload.response_url, ':warning: Exception no longer exists.');
+      await postResponse(
+        payload.response_url,
+        ':warning: Exception no longer exists.'
+      );
       return;
     }
     if (record.status !== 'pending') {
-      await postResponse(payload.response_url, 'That exception request has already been processed.');
+      await postResponse(
+        payload.response_url,
+        'That exception request has already been processed.'
+      );
       return;
     }
     if (!canApprove(payload.user?.id, record.org_id)) {
-      await postResponse(payload.response_url, ':no_entry: You are not allowed to approve this exception.');
+      await postResponse(
+        payload.response_url,
+        ':no_entry: You are not allowed to approve this exception.'
+      );
       return;
     }
     const decisionActor = displayName(payload.user);
     const decisionId = payload.user?.id || null;
-    const correlationId = payload.container?.message_ts || record.message_ts || null;
+    const correlationId =
+      payload.container?.message_ts || record.message_ts || null;
 
     let status;
     if (action.action_id === 'approve_exception') {
       status = 'approved';
-      recordEvent.run(record.id, 'approved', decisionActor, 'Approved via Slack', correlationId);
-      await postResponse(payload.response_url, ':white_check_mark: Exception approved.');
+      recordEvent.run(
+        record.id,
+        'approved',
+        decisionActor,
+        'Approved via Slack',
+        correlationId
+      );
+      await postResponse(
+        payload.response_url,
+        ':white_check_mark: Exception approved.'
+      );
     } else if (action.action_id === 'deny_exception') {
       status = 'denied';
-      recordEvent.run(record.id, 'denied', decisionActor, 'Denied via Slack', correlationId);
+      recordEvent.run(
+        record.id,
+        'denied',
+        decisionActor,
+        'Denied via Slack',
+        correlationId
+      );
       await postResponse(payload.response_url, ':no_entry: Exception denied.');
     } else {
       return;
@@ -433,7 +523,11 @@ module.exports = function slackExceptions({ app, db }) {
       try {
         await updateExceptionCard(updated);
       } catch (err) {
-        logger.error({ event: 'slack_update_card_failed', error: String(err), exception_id: updated.id });
+        logger.error({
+          event: 'slack_update_card_failed',
+          error: String(err),
+          exception_id: updated.id,
+        });
       }
     }
   }
@@ -499,14 +593,17 @@ module.exports = function slackExceptions({ app, db }) {
       return null;
     }
     try {
-      const response = await fetch('https://slack.com/api/users.lookupByEmail', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          Authorization: `Bearer ${botToken}`,
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        'https://slack.com/api/users.lookupByEmail',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            Authorization: `Bearer ${botToken}`,
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
       const data = await response.json();
       if (data.ok && data.user?.id) {
         emailCache.set(key, data.user.id);
@@ -515,7 +612,11 @@ module.exports = function slackExceptions({ app, db }) {
       emailCache.set(key, null);
       return null;
     } catch (err) {
-      logger.warn({ event: 'slack_lookup_email_failed', error: String(err), email });
+      logger.warn({
+        event: 'slack_lookup_email_failed',
+        error: String(err),
+        email,
+      });
       emailCache.set(key, null);
       return null;
     }
@@ -602,7 +703,11 @@ module.exports = function slackExceptions({ app, db }) {
       });
     }
     if (actionElements.length) {
-      blocks.push({ type: 'actions', block_id: 'exception_actions', elements: actionElements });
+      blocks.push({
+        type: 'actions',
+        block_id: 'exception_actions',
+        elements: actionElements,
+      });
     }
 
     if (record.status !== 'pending' && record.decision_at) {
@@ -613,7 +718,10 @@ module.exports = function slackExceptions({ app, db }) {
         record.status === 'approved'
           ? `:white_check_mark: Approved by ${actor} • ${formatTimestamp(record.decision_at)}`
           : `:no_entry: Denied by ${actor} • ${formatTimestamp(record.decision_at)}`;
-      blocks.push({ type: 'context', elements: [{ type: 'mrkdwn', text: statusLine }] });
+      blocks.push({
+        type: 'context',
+        elements: [{ type: 'mrkdwn', text: statusLine }],
+      });
     }
     return blocks;
   }
@@ -645,7 +753,11 @@ module.exports = function slackExceptions({ app, db }) {
       await fetch(responseUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json; charset=utf-8' },
-        body: JSON.stringify({ text, response_type: 'ephemeral', replace_original: false }),
+        body: JSON.stringify({
+          text,
+          response_type: 'ephemeral',
+          replace_original: false,
+        }),
       });
     } catch (err) {
       logger.warn({ event: 'slack_response_post_failed', error: String(err) });
