@@ -1,0 +1,259 @@
+name: ritual-merge
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number
+        required: true
+        type: string
+      reactor:
+        description: GitHub login that fired the rocket reaction
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  statuses: write
+
+jobs:
+  ritual:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR_NUMBER: ${{ inputs.pr }}
+      REACTOR_LOGIN: ${{ inputs.reactor }}
+    steps:
+      - name: Prepare environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "FAIL_FILE=$RUNNER_TEMP/ritual_failure.txt" >> "$GITHUB_ENV"
+          echo "SUCCESS_FILE=$RUNNER_TEMP/ritual_success.md" >> "$GITHUB_ENV"
+          echo "DEPLOY_STATE_FILE=$RUNNER_TEMP/ritual_deploy_state.txt" >> "$GITHUB_ENV"
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Verify PR state & permissions
+        id: gate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          FAIL_FILE="${FAIL_FILE:?missing}"
+          rm -f "$FAIL_FILE"
+          PR="$PR_NUMBER"
+
+          SUMMARY_JSON="$RUNNER_TEMP/pr.json"
+          gh pr view "$PR" --json number,state,isDraft,reviewDecision,mergeable,mergeStateStatus,statusCheckRollup,headRefName,baseRefName,title,url > "$SUMMARY_JSON"
+
+          STATE=$(jq -r '.state' "$SUMMARY_JSON")
+          if [ "$STATE" != "OPEN" ]; then
+            printf 'PR #%s is not open (state: %s)\n' "$PR" "$STATE" | tee "$FAIL_FILE"
+            exit 1
+          fi
+
+          if [ "$(jq -r '.isDraft' "$SUMMARY_JSON")" = "true" ]; then
+            printf 'PR #%s is still marked as draft.\n' "$PR" | tee "$FAIL_FILE"
+            exit 1
+          fi
+
+          if [ "$(jq -r '.reviewDecision' "$SUMMARY_JSON")" != "APPROVED" ]; then
+            printf 'PR #%s is not approved.\n' "$PR" | tee "$FAIL_FILE"
+            exit 1
+          fi
+
+          MERGEABLE=$(jq -r '.mergeable' "$SUMMARY_JSON")
+          if [ "$MERGEABLE" != "MERGEABLE" ]; then
+            printf 'PR #%s is not mergeable (state: %s).\n' "$PR" "$MERGEABLE" | tee "$FAIL_FILE"
+            exit 1
+          fi
+
+          MERGE_STATE=$(jq -r '.mergeStateStatus' "$SUMMARY_JSON")
+          if [ "$MERGE_STATE" != "CLEAN" ]; then
+            printf 'PR #%s merge status is %s (not clean).\n' "$PR" "$MERGE_STATE" | tee "$FAIL_FILE"
+            exit 1
+          fi
+
+          FAILED_CONTEXTS=$(jq '[( (.statusCheckRollup.contexts // [])[] | select(.state != "SUCCESS" and .state != "NEUTRAL" and .state != "SKIPPED"))] | length' "$SUMMARY_JSON")
+          if [ "$FAILED_CONTEXTS" -gt 0 ]; then
+            printf 'PR #%s has failing or pending required checks.\n' "$PR" | tee "$FAIL_FILE"
+            exit 1
+          fi
+
+          ROLE=$(gh api "repos/${GITHUB_REPOSITORY}/collaborators/${REACTOR_LOGIN}/permission" -q .permission 2>/dev/null || echo none)
+          case "$ROLE" in
+            admin|maintain|write)
+              ;;
+            *)
+              printf '@%s lacks permission to trigger ritual merge (role: %s).\n' "$REACTOR_LOGIN" "$ROLE" | tee "$FAIL_FILE"
+              exit 1
+              ;;
+          esac
+
+          BASE_REF=$(jq -r '.baseRefName' "$SUMMARY_JSON")
+          HEAD_REF=$(jq -r '.headRefName' "$SUMMARY_JSON")
+          PR_URL=$(jq -r '.url' "$SUMMARY_JSON")
+          PR_TITLE=$(jq -r '.title' "$SUMMARY_JSON")
+
+          {
+            echo "BASE_REF=$BASE_REF"
+            echo "HEAD_REF=$HEAD_REF"
+            echo "PR_URL=$PR_URL"
+            echo "PR_TITLE=$PR_TITLE"
+          } >> "$GITHUB_ENV"
+
+      - name: Re-run tests on PR head
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'status=$?; if [ $status -ne 0 ]; then echo "Test suite failed on PR head." > "$FAIL_FILE"; fi' EXIT
+          gh pr checkout "$PR_NUMBER"
+          npm ci --no-audit --no-fund
+          npm test -- --ci
+          npm run build --if-present
+
+      - name: Merge PR with squash commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'status=$?; if [ $status -ne 0 ]; then echo "PR merge failed." > "$FAIL_FILE"; fi' EXIT
+          gh pr merge "$PR_NUMBER" --squash --delete-branch --body "Ritual merge triggered by :rocket: from @${REACTOR_LOGIN}."
+
+      - name: Sync base branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'status=$?; if [ $status -ne 0 ]; then echo "Unable to sync base branch after merge." > "$FAIL_FILE"; fi' EXIT
+          git fetch origin "$BASE_REF"
+          git checkout "$BASE_REF"
+          git pull --ff-only origin "$BASE_REF"
+
+      - name: Configure git user
+        shell: bash
+        run: |
+          git config user.name "blackroad-ritual-bot"
+          git config user.email "infra+ritual@blackroad.io"
+
+      - name: Version bump & changelog
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'status=$?; if [ $status -ne 0 ]; then echo "Version bump failed." > "$FAIL_FILE"; fi' EXIT
+          npm ci --no-audit --no-fund
+          npx standard-version -a -m "chore(release): %s [skip ci]"
+          VERSION=$(node -p "require('./package.json').version")
+          echo "RITUAL_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "RITUAL_TAG=v$VERSION" >> "$GITHUB_ENV"
+          git push --follow-tags origin "$BASE_REF"
+
+      - name: Build release artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'status=$?; if [ $status -ne 0 ]; then echo "Release build failed." > "$FAIL_FILE"; fi' EXIT
+          npm run build --if-present
+          WORKDIR="$RUNNER_TEMP/ritual-release"
+          rm -rf "$WORKDIR"
+          mkdir -p "$WORKDIR"
+
+          if [ -d web/dist ]; then
+            mkdir -p "$WORKDIR/web"
+            rsync -a --delete web/dist/ "$WORKDIR/web/"
+          elif [ -d web/build ]; then
+            mkdir -p "$WORKDIR/web"
+            rsync -a --delete web/build/ "$WORKDIR/web/"
+          elif [ -d web/public ]; then
+            mkdir -p "$WORKDIR/web"
+            rsync -a --delete web/public/ "$WORKDIR/web/"
+          elif [ -d web ]; then
+            mkdir -p "$WORKDIR/web"
+            rsync -a --delete --exclude node_modules web/ "$WORKDIR/web/"
+          fi
+
+          if [ -d api ]; then
+            mkdir -p "$WORKDIR/api"
+            rsync -a --delete --exclude node_modules --exclude .git api/ "$WORKDIR/api/"
+          fi
+
+          TAR_PATH="$RUNNER_TEMP/${RITUAL_TAG:-release}.tar.gz"
+          if [ -d "$WORKDIR" ] && [ "$(find "$WORKDIR" -mindepth 1 -maxdepth 1 | wc -l | tr -d ' ')" -eq 0 ]; then
+            printf 'Release bundle is empty.\n' | tee "$FAIL_FILE"
+            exit 1
+          fi
+
+          tar -czf "$TAR_PATH" -C "$WORKDIR" .
+          echo "RELEASE_TARBALL=$TAR_PATH" >> "$GITHUB_ENV"
+
+      - name: Publish GitHub release
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'status=$?; if [ $status -ne 0 ]; then echo "Release creation failed." > "$FAIL_FILE"; fi' EXIT
+          TAG="${RITUAL_TAG:?missing tag}"
+          TAR="${RELEASE_TARBALL:?missing tarball}"
+          gh release create "$TAG" "$TAR" --generate-notes --title "${TAG}" >/dev/null
+          RELEASE_URL=$(gh release view "$TAG" --json url --jq .url)
+          echo "RELEASE_URL=$RELEASE_URL" >> "$GITHUB_ENV"
+
+      - name: Deploy release (conditional)
+        shell: bash
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KEY_PATH: ${{ secrets.SSH_KEY_PATH }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SERVER_HOST:-}" ] || [ -z "${SERVER_USER:-}" ] || { [ -z "${SSH_KEY:-}" ] && [ -z "${SSH_KEY_PATH:-}" ]; }; then
+            echo "Deployment skipped (missing SSH configuration)." | tee "$DEPLOY_STATE_FILE"
+            exit 0
+          fi
+
+          cp "${RELEASE_TARBALL:?}" ./release.tar.gz
+          trap 'status=$?; if [ $status -ne 0 ]; then echo "Deployment failed." > "$FAIL_FILE"; fi' EXIT
+          ./scripts/deploy.sh release.tar.gz
+          echo "Deployment triggered via scripts/deploy.sh." | tee "$DEPLOY_STATE_FILE"
+
+      - name: Ritual receipt (success)
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${RITUAL_TAG:-unknown}"
+          RELEASE_URL="${RELEASE_URL:-}"
+          if [ -z "$RELEASE_URL" ]; then
+            RELEASE_URL=$(gh release view "$TAG" --json url --jq .url 2>/dev/null || echo '')
+          fi
+          DEPLOY_NOTE=$(cat "$DEPLOY_STATE_FILE" 2>/dev/null || echo 'Deployment skipped.')
+          {
+            echo "### 🚀 Ritual merge complete"
+            echo ""
+            echo "- Reactor: @${REACTOR_LOGIN}"
+            if [ -n "$RELEASE_URL" ]; then
+              echo "- Release: [${TAG}](${RELEASE_URL})"
+            else
+              echo "- Release: ${TAG}"
+            fi
+            echo "- Deploy: ${DEPLOY_NOTE}"
+          } > "$SUCCESS_FILE"
+          gh pr comment "$PR_NUMBER" --body-file "$SUCCESS_FILE"
+
+      - name: Ritual receipt (failure)
+        if: failure()
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOTE="$(cat "$FAIL_FILE" 2>/dev/null || echo 'Unknown failure (check workflow logs).')"
+          gh pr comment "$PR_NUMBER" --body "🚫 Ritual merge failed: ${NOTE}"
