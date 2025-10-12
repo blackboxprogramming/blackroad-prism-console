@@ -362,11 +362,17 @@ def fractional_damped_oscillator(
     q[0] = q0
     dq[0] = dq0
 
+    # Seed the fractional velocity with the derivative of the known history at t=0.
+    frac_vel = caputo_fractional_derivative(q[:1], dt=dt, alpha=alpha)[0]
+
     for idx in range(1, steps):
-        frac_vel = caputo_fractional_derivative(q[: idx + 1], dt=dt, alpha=alpha)[idx]
         accel = -2.0 * zeta * omega_0 * frac_vel - (omega_0 ** 2) * q[idx - 1]
         dq[idx] = dq[idx - 1] + dt * accel
         q[idx] = q[idx - 1] + dt * dq[idx]
+
+        # Update the fractional derivative now that q[idx] has been advanced so the
+        # next step uses a velocity consistent with the full history.
+        frac_vel = caputo_fractional_derivative(q[: idx + 1], dt=dt, alpha=alpha)[idx]
     return t, q
 
 
