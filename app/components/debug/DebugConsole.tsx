@@ -4,7 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import type { BrLogEntry } from '@/lib/debug/brLog';
 import { getBrLogHistory, subscribeToBrLog } from '@/lib/debug/brLog';
 
-const ENABLED = process.env.NEXT_PUBLIC_DEBUG_CONSOLE !== 'false';
+const DEBUG_CONSOLE_FLAG = process.env.NEXT_PUBLIC_DEBUG_CONSOLE;
+const ENABLED =
+  DEBUG_CONSOLE_FLAG === 'true' ||
+  (DEBUG_CONSOLE_FLAG !== 'false' && process.env.NODE_ENV !== 'production');
 const MAX_RENDERED = 200;
 
 function levelColor(level: BrLogEntry['level']) {
@@ -59,7 +62,7 @@ export default function DebugConsole() {
       .map((entry) => ({ ...entry, data: entry.data }));
   }, [entries]);
 
-  if (!ENABLED && process.env.NODE_ENV === 'production') {
+  if (!ENABLED) {
     return null;
   }
 

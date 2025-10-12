@@ -63,13 +63,24 @@ async function fetchWithProbe(input, init = {}, options = {}) {
 
   try {
     const response = await fetch(input, init);
+    const responseHeaders = Object.fromEntries(response.headers.entries());
+    const isStreamingBody =
+      response.body != null &&
+      (typeof response.body.getReader === 'function' ||
+        typeof response.body.pipe === 'function') &&
+      !responseHeaders['content-length'];
+
     let bodyPreview;
-    try {
-      const clone = response.clone();
-      const text = await clone.text();
-      bodyPreview = truncateString(text, maxBodyLength);
-    } catch (err) {
-      bodyPreview = `[body-unavailable: ${err?.message || 'unknown'}]`;
+    if (isStreamingBody) {
+      bodyPreview = '[streaming-body-skipped]';
+    } else {
+      try {
+        const clone = response.clone();
+        const text = await clone.text();
+        bodyPreview = truncateString(text, maxBodyLength);
+      } catch (err) {
+        bodyPreview = `[body-unavailable: ${err?.message || 'unknown'}]`;
+      }
     }
 
     customLogger.debug({
@@ -79,7 +90,7 @@ async function fetchWithProbe(input, init = {}, options = {}) {
       status: response.status,
       ok: response.ok,
       durationMs: Date.now() - start,
-      headers: redactHeaders(Object.fromEntries(response.headers.entries())),
+      headers: redactHeaders(responseHeaders),
       body: bodyPreview,
     });
 
