@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="/home/pi/portal"
+DESCFILE="${1:?usage: descriptor-lint <descriptor-or-xpub-file> [--expect-branch both|external|change] [--min-range N]}"
+shift || true
+EXPECT="both"
+MINR=1000
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --expect-branch)
+      EXPECT="${2:?both|external|change}"
+      shift 2
+      ;;
+    --min-range)
+      MINR="${2:?}"
+      shift 2
+      ;;
+    *)
+      echo "unknown arg: $1" >&2
+      exit 2
+      ;;
+  esac
+done
+
+RAW="$(tr -d '\r' < "$DESCFILE")"
+if [[ -z "$RAW" ]]; then
+  echo "empty input"
+  exit 3
+fi
+
+# quick fingerprints
+is_desc=0
+[[ "$RAW" =~ ^(pkh|sh\(wpkh|wpkh|tr)\(.*\)$ ]] && is_desc=1
+is_xpub=0
+[[ "$RAW" =~ ^(xpub|ypub|zpub|tpub|vpub|upub|Vpub|Ypub|Zpub) ]] && is_xpub=1
+
+# infer family/branch
+families=("pkh" "sh(wpkh" "wpkh" "tr")
+branches=("0/*" "1/*")
+
+# coin-type guidance (mainnet): 44 legacy, 49 sh-wpkh, 84 wpkh, 86 tr
+warn() { echo "WARN: $*" >&2; }
+ok()   { echo "OK: $*"; }
+
+if [[ $is_desc -eq 0 && $is_xpub -eq 0 ]]; then
+  warn "Input looks neither like a descriptor nor an xpub-family key."
+fi
+
+# Prepare candidates to test
+CANDS=()
+if [[ $is_desc -eq 1 ]]; then
+  CANDS+=("$RAW")
+else
+  # try to attach generic derivations; fingerprint placeholder if not provided
+  FPR="00000000"
+  for fam in "${families[@]}"; do
+    case "$fam" in
+      "pkh") P="44h"; WRAP="pkh" ;;
+      "sh(wpkh") P="49h"; WRAP="sh(wpkh" ;;
+      "wpkh") P="84h"; WRAP="wpkh" ;;
+      "tr") P="86h"; WRAP="tr" ;;
+    esac
+    for br in "${branches[@]}"; do
+      if [[ "$fam" == "sh(wpkh" ]]; then
+        CANDS+=("sh(wpkh([$FPR/$P/0h/0h]$RAW/$br))")
+      else
+        CANDS+=("$WRAP([$FPR/$P/0h/0h]$RAW/$br)")
+      fi
+    done
+  done
+fi
+
+# Normalize each with bitcoin-cli getdescriptorinfo (if available)
+HAVE_BC=1
+if ! command -v bitcoin-cli >/dev/null 2>&1; then
+  HAVE_BC=0
+fi
+
+NORM=()
+if [[ $HAVE_BC -eq 1 ]]; then
+  for c in "${CANDS[@]}"; do
+    n="$(bitcoin-cli getdescriptorinfo "$c" 2>/dev/null | jq -r .descriptor 2>/dev/null || true)"
+    if [[ -n "$n" && "$n" != "null" ]]; then
+      NORM+=("$n")
+    fi
+  done
+else
+  warn "bitcoin-cli not found; syntax validation limited."
+  NORM=("${CANDS[@]}")
+fi
+
+# Deduplicate normalized list
+mapfile -t NORM < <(printf "%s\n" "${NORM[@]}" | sort -u)
+
+if [[ ${#NORM[@]} -eq 0 ]]; then
+  echo "FAIL: no valid descriptor candidates"
+  exit 4
+fi
+
+echo "Candidates: ${#NORM[@]}"
+
+# Branch coverage check
+has_ext=0
+has_chg=0
+for n in "${NORM[@]}"; do
+  [[ "$n" =~ /0/\*\)$ ]] && has_ext=1
+  [[ "$n" =~ /1/\*\)$ ]] && has_chg=1
+done
+case "$EXPECT" in
+  both)
+    if [[ $has_ext -ne 1 || $has_chg -ne 1 ]]; then
+      warn "Expected both branches; found ext=$has_ext change=$has_chg"
+    fi
+    ;;
+  external)
+    [[ $has_ext -eq 1 ]] || warn "Expected external branch (/0/*)"
+    ;;
+  change)
+    [[ $has_chg -eq 1 ]] || warn "Expected change branch (/1/*)"
+    ;;
+  *)
+    warn "Unknown expect-branch hint: $EXPECT"
+    ;;
+esac
+
+# Script family hints
+fam_seen=()
+for n in "${NORM[@]}"; do
+  case "$n" in
+    pkh\(*\)) fam_seen+=("pkh (legacy 1-addresses; high fees)") ;;
+    sh\(wpkh\(*\)\)) fam_seen+=("sh(wpkh) (wrapped SegWit 3-addresses)") ;;
+    wpkh\(*\)) fam_seen+=("wpkh (native SegWit bech32 bc1q)") ;;
+    tr\(*\)) fam_seen+=("tr (Taproot bc1p)") ;;
+  esac
+done
+if [[ ${#fam_seen[@]} -gt 0 ]]; then
+  printf "Families: %s\n" "$(printf "%s\n" "${fam_seen[@]}" | sort -u | paste -sd', ' -)"
+else
+  warn "Could not infer script family from descriptor candidates."
+fi
+
+# Range hint (dry-run scantxoutset with small/large ranges if available)
+if [[ $HAVE_BC -eq 1 ]]; then
+  GROW=0
+  for n in "${NORM[@]}"; do
+    small=$(bitcoin-cli scantxoutset start "[{\"desc\":\"$n\",\"range\":$MINR}]" 2>/dev/null | jq -r .total_amount 2>/dev/null || echo "")
+    big=$(bitcoin-cli scantxoutset start "[{\"desc\":\"$n\",\"range\":20000}]" 2>/dev/null | jq -r .total_amount 2>/dev/null || echo "")
+    if [[ -n "$small" && -n "$big" && "$small" != "$big" ]]; then
+      GROW=1
+    fi
+  done
+  if [[ $GROW -eq 1 ]]; then
+    warn "Balance increased when range grew: set a higher scan range (≥ 20000)."
+  fi
+fi
+
+ok "Lint complete. Use these normalized descriptors:"
+printf '%s\n' "${NORM[@]}"
