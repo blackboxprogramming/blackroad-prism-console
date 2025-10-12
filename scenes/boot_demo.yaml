@@ -1,0 +1,29 @@
+name: Boot Demo
+description: Warm-up script for the Pi-Holo and Pi-Sim pairing.
+defaults:
+  topic: holo/text
+  wait: 1.25
+steps:
+  - label: Title card
+    payload:
+      text: "BlackRoad Systems"
+      duration_ms: 3200
+      size: 72
+      effect: fade-in
+  - label: Bring systems online
+    payload:
+      text: "Initializing subsystems"
+      duration_ms: 2600
+      size: 56
+      effect: scan
+  - label: Status banner
+    topic: sim/panel
+    wait: 2.0
+    payload:
+      panel_id: status
+      duration_ms: 6000
+      accent: "#16A34A"
+      lines:
+        - text: Boot complete
+          icon: check
+        - text: All services nominal
