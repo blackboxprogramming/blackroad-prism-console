@@ -1,0 +1,20 @@
+{
+  "bpm": 122,
+  "time": "4/4",
+  "quant": "1/16",
+  "voice": "warm",
+  "seq": [
+    {"t": "We", "pace": 1.0, "emph": 0.0, "pitch": 0, "beat": "@1:1:1"},
+    {"t": "really", "pace": 0.85, "emph": 0.35, "pitch": 2, "beat": "@1:1:3", "overlay": "harm"},
+    {"t": "need", "pace": 0.92, "emph": 0.18, "pitch": 1, "beat": "@1:2:1"},
+    {"t": "this", "pace": 0.9, "emph": 0.17, "pitch": 1, "beat": "@1:2:2", "gesture": "microZoom"},
+    {"t": "to", "pace": 1.0, "emph": 0.0, "pitch": 0, "beat": "@1:2:3"},
+    {"t": "land", "pace": 0.96, "emph": 0.08, "pitch": 0, "beat": "@1:3:1"},
+    {"t": "clearly.", "pace": 0.86, "emph": 0.22, "pitch": 2, "beat": "@1:3:3", "gesture": "microZoom"}
+  ],
+  "post": [
+    {"kind": "pause", "ms": 140, "beat": "@1:4:1"},
+    {"kind": "stinger", "type": "hit", "dur_ms": 120, "beat": "@1:4:3", "overlay": "lower-third:flash"}
+  ],
+  "meta": {"budgetUsed": 0.8}
+}
