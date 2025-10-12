@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-const DEFAULT_EXPORTER_URL = 'http://127.0.0.1:3001';
+import { resolveUnityExporterUrl } from '../../../../lib/unity/exporter';
 
 const payloadSchema = z.object({
   projectName: z.string().trim().min(1, 'projectName is required.'),
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
   const { projectName, template, targets, notes } = parsed.data;
 
-  const exporterBase = (process.env.UNITY_EXPORTER_URL || '').trim() || DEFAULT_EXPORTER_URL;
+  const exporterBase = resolveUnityExporterUrl(process.env.UNITY_EXPORTER_URL);
 
   let exporterUrl: URL;
   try {
