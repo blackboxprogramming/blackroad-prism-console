@@ -1,9 +1,16 @@
-# Content Security Policy
+# Content Security Policy (CSP)
 
-The site uses the following CSP header:
+Start strict and relax as needed:
 
 ```
-Content-Security-Policy: default-src 'self'; object-src 'none'; base-uri 'self';
+default-src 'self';
+script-src 'self';
+style-src 'self' 'unsafe-inline';
+img-src 'self' data:;
+connect-src 'self';
+font-src 'self' data:;
+base-uri 'self';
+frame-ancestors 'none';
 ```
 
-No third-party domains are permitted.
+Adjust `connect-src` if your app calls APIs (add domains). For analytics, add their script and connect origins explicitly.
