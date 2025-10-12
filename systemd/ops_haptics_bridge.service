@@ -1,0 +1,19 @@
+[Unit]
+Description=BlackRoad Ops Haptics Bridge
+After=network.target
+StartLimitIntervalSec=30
+StartLimitBurst=3
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pi
+ExecStart=/usr/bin/env python3 /home/pi/ops_haptics_bridge.py --mqtt-host localhost
+Restart=on-failure
+RestartSec=5
+User=pi
+Group=pi
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
