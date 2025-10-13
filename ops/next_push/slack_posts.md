@@ -52,3 +52,17 @@ Webhook optional for near-real-time freshness.
 
 GitHub PATs stored only as SSM SecureString refs; no plaintext DB storage.
 Upgrade path to GitHub App is prepped; rotates tokens automatically.
+
+## #exec — Risk heatmap drilldowns
+
+Risk Heatmap now clicks through:
+- “Grafana / SecHub / Cost” buttons on each system
+- Export CSV + quick Slack “Top 3 risks” digest
+Bookmark: app.blackroadinc.us/scorecard/risk
+
+## #eng — Grafana + findings wiring
+
+Red cards link straight to the exact Grafana panel and findings list.
+If a link feels off, ping here and we’ll fix the mapping JSON.
+
+Want me to wire PD “Create Incident” directly from a red card (one click opens a templated incident)?
