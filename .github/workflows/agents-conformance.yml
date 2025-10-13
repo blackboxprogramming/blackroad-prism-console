@@ -1,0 +1,40 @@
+name: Agents Conformance
+
+on:
+  pull_request:
+    paths:
+      - "packages/agents-pack/**"
+      - ".github/workflows/agents-conformance.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/agents-pack/**"
+      - ".github/workflows/agents-conformance.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate agent schemas and run tests
+        working-directory: packages/agents-pack
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run check
