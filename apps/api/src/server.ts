@@ -19,12 +19,19 @@ import clmContracts from './routes/clm/contracts.js';
 import clmApprovals from './routes/clm/approvals.js';
 import clmEsign from './routes/clm/esign.js';
 import clmOblig from './routes/clm/obligations.js';
+import hrOnOff from './routes/hr/onoff.js';
+import hrOrg from './routes/hr/org.js';
+import hrPto from './routes/hr/pto.js';
+import hrReviews from './routes/hr/reviews.js';
+import hrTraining from './routes/hr/training.js';
+import hrPolicies from './routes/hr/policies.js';
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(morgan('dev'));
+app.use(express.json());
 app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));
 app.use(regionMiddleware());
 app.use(localeMiddleware());
@@ -42,6 +49,7 @@ app.use('/api/notify/webpush', webpush);
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
+app.use('/api/hr', hrOnOff, hrOrg, hrPto, hrReviews, hrTraining, hrPolicies);
 
 // raw body for e-sign verification
 app.use((req:any,res,next)=>{ if (req.url.startsWith('/api/clm/esign')) { const b:Buffer[]=[]; req.on('data',(c)=>b.push(c)); req.on('end',()=>{ req.rawBody = Buffer.concat(b).toString(); next(); }); } else next(); });
