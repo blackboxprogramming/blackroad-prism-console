@@ -1,0 +1,26 @@
+[
+  {
+    "shipment": 1,
+    "lane": "L1",
+    "cost": 363,
+    "lead_time": 10
+  },
+  {
+    "shipment": 2,
+    "lane": "L2",
+    "cost": 123,
+    "lead_time": 5
+  },
+  {
+    "shipment": 3,
+    "lane": "L3",
+    "cost": 384,
+    "lead_time": 2
+  },
+  {
+    "shipment": 4,
+    "lane": "L4",
+    "cost": 430,
+    "lead_time": 5
+  }
+]

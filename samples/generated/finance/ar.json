@@ -1,0 +1,18 @@
+[
+  {
+    "invoice": 1,
+    "amount": 696
+  },
+  {
+    "invoice": 2,
+    "amount": 135
+  },
+  {
+    "invoice": 3,
+    "amount": 787
+  },
+  {
+    "invoice": 4,
+    "amount": 809
+  }
+]

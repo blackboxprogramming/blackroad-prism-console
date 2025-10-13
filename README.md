@@ -914,4 +914,26 @@ python -m cli.console aiops:execute --plan artifacts/aiops/plan.json --dry-run
 python -m cli.console aiops:canary --base artifacts/healthchecks/CoreAPI/baseline.json --canary artifacts/healthchecks/CoreAPI/latest.json
 python -m cli.console aiops:baseline:record && python -m cli.console aiops:drift:check
 python -m cli.console aiops:budget --service CoreAPI --window 30d && python -m cli.console aiops:window --service CoreAPI --action remediate
+## Samples & Pipelines Quickstart
+
+```bash
+make samples
+python -m pipelines.finance_margin_pipeline
+python -m pipelines.reliability_pipeline
+```
+
+## Cookbook Index
+
+See [cookbook/README.md](cookbook/README.md) for 25 example tasks. Run any recipe via:
+
+```bash
+python -m cli.console cookbook:run --name <slug>
+```
+
+## Fuzzing & Goldens
+
+Property-based fuzz tests live under `tests/fuzz`. Regenerate golden artifacts offline:
+
+```bash
+make goldens
 ```
