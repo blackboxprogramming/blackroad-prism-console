@@ -1,5 +1,10 @@
 import fs from 'fs';
-import fetch from 'node-fetch';
+
+const fetch = globalThis.fetch;
+
+if (!fetch) {
+  throw new Error('Global fetch API is not available in this runtime.');
+}
 
 const FILE = 'data/mkt/campaigns.jsonl';
 
