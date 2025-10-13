@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import fs from 'fs';
+import { v4 as uuid } from 'uuid';
+const r = Router(); const TEST='data/bcdr/restore_tests.jsonl';
+const append=(row:any)=>{ fs.mkdirSync('data/bcdr',{recursive:true}); fs.appendFileSync(TEST, JSON.stringify(row)+'\n'); };
+const read=()=> fs.existsSync(TEST)? fs.readFileSync(TEST,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[];
+r.post('/restore/test/create',(req,res)=>{ const row={ ts:Date.now(), state:'scheduled', testId: req.body?.testId || uuid(), ...req.body }; append(row); res.json({ ok:true, testId: row.testId }); });
+r.post('/restore/test/result',(req,res)=>{ append({ ts:Date.now(), state:'completed', ...req.body }); res.json({ ok:true }); });
+r.get('/restore/test/recent',(req,res)=>{ const svc=String(req.query.service||''); const items=read().reverse().filter((x:any)=>!svc||x.service===svc).slice(0,50); res.json({ items }); });
+export default r;

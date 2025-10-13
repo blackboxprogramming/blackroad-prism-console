@@ -147,6 +147,12 @@ import atsINT from './routes/ats/interviews.js';
 import atsOF from './routes/ats/offers_bg.js';
 import atsOB from './routes/ats/onboarding.js';
 import atsAR from './routes/ats/analytics_reports.js';
+import bcdrPolicy from './routes/bcdr/policy.js';
+import bcdrBackups from './routes/bcdr/backups.js';
+import bcdrRestore from './routes/bcdr/restore.js';
+import bcdrFailover from './routes/bcdr/failover.js';
+import bcdrPlans from './routes/bcdr/plans.js';
+import bcdrDrills from './routes/bcdr/drills.js';
 
 dotenv.config();
 
@@ -259,6 +265,7 @@ app.use('/api/dev', devApis, devKeys, devPlans, devGW, devHooks, devDocs, devAna
 app.use('/api/tprm', tprmV, tprmQ, tprmR, tprmM, tprmMap, tprmB);
 app.use('/api/portal', portalAnn, portalCh, portalPrefs, portalBan, portalI18n, portalSearch);
 app.use('/api/ats', atsJC, atsAPP, atsINT, atsOF, atsOB, atsAR);
+app.use('/api/bcdr', bcdrPolicy, bcdrBackups, bcdrRestore, bcdrFailover, bcdrPlans, bcdrDrills);
 
 const port = process.env.PORT || 4000;
 
