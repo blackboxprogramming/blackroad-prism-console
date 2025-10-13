@@ -1,0 +1,59 @@
+name: staging
+branch: staging
+description: >-
+  Pre-production stack that mirrors production for integration testing, release
+  rehearsals, and data verification before a mainline cutover.
+urls:
+  primary: https://staging.blackroad.io
+  preview_route: https://staging.blackroad.io/prism
+reviewers:
+  - platform-ops
+  - qa-team
+  - security-reviewers
+deploy_targets:
+  - surface: marketing-site
+    provider: cloudflare_pages
+    artifact_path: sites/blackroad
+    workflow: .github/workflows/pages-stage.yml
+  - surface: customer-app
+    provider: fly_io
+    app: blackroad-app-staging
+    release_channel: staging
+    regions: [iad]
+    workflow: .github/workflows/canary.yml
+    secrets:
+      - FLY_STAGING_API_TOKEN
+  - surface: api
+    provider: aws_ecs
+    cluster: blackroad-staging
+    service: prism-console-api-staging
+    workflow: .github/workflows/_backup_132_deploy.yml
+    container:
+      port: 4010
+      healthcheck: /api/llm/health
+    load_balancer:
+      host: api.staging.blackroad.io
+      https_listener_secret: AWS_STAGING_HTTPS_LISTENER_ARN
+    iam:
+      deploy_role_secret: AWS_STAGING_DEPLOY_ROLE
+qa:
+  regression_suite:
+    command: make test ENV=staging
+    location: tools/lucidia-autotester
+  smoke_tests:
+    - curl -fsS https://staging.blackroad.io/healthz
+    - curl -fsS https://api.staging.blackroad.io/api/llm/health
+approvals:
+  required_roles:
+    - platform
+    - qa
+  change_windows:
+    - name: daily-promotion
+      schedule: 16:00-18:00 UTC
+observability:
+  grafana: https://blackroad.io/monitoring
+  notes: Mirrors production dashboards with staging data source wiring.
+notes:
+  - >-
+    Exercise the autopal environment access workflow for staging when dual
+    control is required.

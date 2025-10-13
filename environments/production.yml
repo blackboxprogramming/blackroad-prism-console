@@ -1,4 +1,68 @@
 name: production
-url: https://blackroad.io
+branch: main
+description: >-
+  Primary customer-facing deployment served from blackroad.io with the marketing
+  surface, application, and API footprint.
+urls:
+  marketing: https://blackroad.io
+  app: https://app.blackroad.io
+  api: https://api.blackroad.io
+  status: https://status.blackroad.io
 reviewers:
   - blackboxprogramming
+  - platform-ops
+  - security-reviewers
+deploy_targets:
+  - surface: marketing-site
+    provider: cloudflare_pages
+    artifact_path: sites/blackroad
+    workflow: .github/workflows/pages-landing.yml
+    notes: >-
+      BuildBlackRoadSiteAgent builds the static site and WebsiteBot deploys it to
+      Cloudflare Pages.
+  - surface: customer-app
+    provider: fly_io
+    app: blackroad-app
+    release_channel: stable
+    regions: [iad, ord]
+    workflow: .github/workflows/canary.yml
+    secrets:
+      - FLY_API_TOKEN
+  - surface: api
+    provider: aws_ecs
+    cluster: blackroad-prod
+    service: prism-console-api
+    workflow: .github/workflows/_backup_132_deploy.yml
+    container:
+      port: 4010
+      healthcheck: /api/llm/health
+    load_balancer:
+      host: api.blackroad.io
+      https_listener_secret: AWS_PROD_HTTPS_LISTENER_ARN
+    iam:
+      deploy_role_secret: AWS_PROD_DEPLOY_ROLE
+observability:
+  grafana: https://blackroad.io/monitoring
+  alerting_channel: https://blackroad.io/monitoring
+  healthchecks:
+    - https://blackroad.io/healthz
+    - https://blackroad.io/api/llm/health
+runbooks:
+  - DEPLOYMENT.md
+  - RUNBOOK.md
+  - ROLLBACK.md
+approvals:
+  change_windows:
+    - name: weekly_release
+      schedule: Tuesday 02:00-05:00 UTC
+  required_roles:
+    - platform
+    - security
+backups:
+  schedule: "0 3 * * *"
+  script: /usr/local/bin/blackroad-backup-sqlite.sh
+  location: /var/backups/blackroad/sqlite/
+notes:
+  - >-
+    Use the autopal dual-approval environment access workflow before making
+    production changes.
