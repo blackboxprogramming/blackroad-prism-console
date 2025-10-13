@@ -53,6 +53,10 @@ from close import journal as close_journal
 from close import packet as close_packet
 from close import recon as close_recon
 from close import sox as close_sox
+from orchestrator import orchestrator, slo_report
+from orchestrator.perf import perf_timer
+from orchestrator.protocols import Task
+from tools import storage
 
 app = typer.Typer()
 
@@ -114,6 +118,9 @@ def bot_list():
 def _perf_footer(perf: bool, data: dict) -> None:
     if perf:
         typer.echo(f"time={data.get('elapsed_ms')} rss={data.get('rss_mb')} cache=na exec=inproc")
+        typer.echo(
+            f"time={data.get('elapsed_ms')} rss={data.get('rss_mb')} cache=na exec=inproc"
+        )
 
 
 @app.command("bench:list")
