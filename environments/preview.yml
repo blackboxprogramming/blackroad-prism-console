@@ -1,0 +1,4 @@
+name: preview
+url: https://pr-<pr-number>.dev.blackroad.io
+reviewers:
+  - blackboxprogramming
