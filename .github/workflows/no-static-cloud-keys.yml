@@ -1,0 +1,57 @@
+name: no-static-cloud-keys
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  detect-static-keys:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail on committed cloud credentials
+        run: |
+          set -euo pipefail
+
+          aws_matches=$(rg --multiline --multiline-dotall \
+            --glob '!docs/**' \
+            --glob '!**/*.md' \
+            --glob '!**/*.MD' \
+            --glob '!**/*.png' \
+            --glob '!**/*.jpg' \
+            --glob '!**/*.jpeg' \
+            --glob '!**/*.gif' \
+            --glob '!**/*.svg' \
+            --glob '!**/*.pdf' \
+            --regexp "(AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY)\s*[:=]\s*['\"]?(AKIA|ASIA|[A-Za-z0-9/+]{16,})" \
+            -n || true)
+          gcp_matches=$(rg --multiline --multiline-dotall \
+            --glob '!docs/**' \
+            --glob '!**/*.md' \
+            --glob '!**/*.MD' \
+            --glob '!**/*.png' \
+            --glob '!**/*.jpg' \
+            --glob '!**/*.jpeg' \
+            --glob '!**/*.gif' \
+            --glob '!**/*.svg' \
+            --glob '!**/*.pdf' \
+            --regexp "\"type\"\s*:\s*\"service_account\"" \
+            -n || true)
+
+          if [[ -n "$aws_matches" || -n "$gcp_matches" ]]; then
+            echo "Detected potential static cloud credentials in the repository:" >&2
+            [[ -n "$aws_matches" ]] && echo "$aws_matches" >&2
+            [[ -n "$gcp_matches" ]] && echo "$gcp_matches" >&2
+            exit 1
+          fi
+
+          echo "✅ No static AWS or GCP keys detected."
