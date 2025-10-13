@@ -19,7 +19,7 @@ here—pay close attention to the docstrings for required behaviour.
 
 from __future__ import annotations
 
-from decimal import Decimal, getcontext
+from decimal import Decimal, ROUND_FLOOR, getcontext
 
 getcontext().prec = 50
 
@@ -64,7 +64,17 @@ def bits_to_target(nbits: int) -> int:
     * Ignore the sign bit—``nBits`` is assumed positive for valid headers.
     """
 
-    raise NotImplementedError("Step 1A: bits_to_target")
+    exponent = (nbits >> 24) & 0xFF
+    coefficient = nbits & 0x007FFFFF
+
+    if exponent <= 3:
+        shift = 8 * (3 - exponent)
+        target = coefficient >> shift
+    else:
+        shift = 8 * (exponent - 3)
+        target = coefficient << shift
+
+    return target
 
 
 def target_to_bits(target: int) -> int:
@@ -80,31 +90,62 @@ def target_to_bits(target: int) -> int:
     * Return ``(exponent << 24) | coefficient``.
     """
 
-    raise NotImplementedError("Step 1B: target_to_bits")
+    if target == 0:
+        return 0
+
+    # Big-endian bytes without leading zeroes.
+    byte_length = max(1, (target.bit_length() + 7) // 8)
+    raw = target.to_bytes(byte_length, byteorder="big", signed=False)
+
+    if raw[0] & 0x80:
+        raw = b"\x00" + raw
+
+    exponent = len(raw)
+    coefficient = int.from_bytes(raw[:3], byteorder="big")
+
+    if exponent < 3:
+        coefficient <<= 8 * (3 - exponent)
+
+    return (exponent << 24) | coefficient
 
 
 def target_to_difficulty(target: int) -> Decimal:
     """Step 1C – convert a target into human-readable difficulty."""
 
-    raise NotImplementedError("Step 1C: target_to_difficulty")
+    if target <= 0:
+        raise ValueError("target must be positive")
+
+    return Decimal(T1) / Decimal(target)
 
 
 def difficulty_to_target(difficulty: Decimal) -> int:
     """Step 1D – invert :func:`target_to_difficulty` using ``Decimal`` math."""
 
-    raise NotImplementedError("Step 1D: difficulty_to_target")
+    if difficulty <= 0:
+        raise ValueError("difficulty must be positive")
+
+    quotient = Decimal(T1) / Decimal(difficulty)
+    target = int(quotient.to_integral_value(rounding=ROUND_FLOOR))
+    return max(1, target)
 
 
 def le_hex_to_bytes(hex_string: str) -> bytes:
     """Step 2A – convert big-endian display hex into little-endian bytes."""
 
-    raise NotImplementedError("Step 2A: le_hex_to_bytes")
+    if len(hex_string) % 2 == 1:
+        hex_string = "0" + hex_string
+
+    be_bytes = bytes.fromhex(hex_string)
+    return be_bytes[::-1]
 
 
 def dsha256(payload: bytes) -> bytes:
     """Step 2B – return ``SHA256(SHA256(payload))`` bytes."""
 
-    raise NotImplementedError("Step 2B: dsha256")
+    import hashlib
+
+    first = hashlib.sha256(payload).digest()
+    return hashlib.sha256(first).digest()
 
 
 def serialize_header(
@@ -117,7 +158,31 @@ def serialize_header(
 ) -> bytes:
     """Step 2C – serialize a block header into 80 little-endian bytes."""
 
-    raise NotImplementedError("Step 2C: serialize_header")
+    parts = [
+        int(version).to_bytes(4, "little"),
+    ]
+
+    prev_bytes = le_hex_to_bytes(prev_block_hex)
+    merkle_bytes = le_hex_to_bytes(merkle_root_hex)
+
+    if len(prev_bytes) != 32 or len(merkle_bytes) != 32:
+        raise ValueError("block hash fields must be 32 bytes")
+
+    parts.extend(
+        [
+            prev_bytes,
+            merkle_bytes,
+            int(timestamp).to_bytes(4, "little"),
+            int(nbits).to_bytes(4, "little"),
+            int(nonce).to_bytes(4, "little"),
+        ]
+    )
+
+    header = b"".join(parts)
+    if len(header) != 80:
+        raise ValueError("header must be exactly 80 bytes")
+
+    return header
 
 
 def header_hash(
@@ -130,13 +195,20 @@ def header_hash(
 ) -> tuple[int, str]:
     """Step 2D – compute the double-SHA256 hash and big-endian hex digest."""
 
-    raise NotImplementedError("Step 2D: header_hash")
+    header = serialize_header(
+        version, prev_block_hex, merkle_root_hex, timestamp, nbits, nonce
+    )
+    digest = dsha256(header)
+    hash_le = digest[::-1]
+    hash_hex = hash_le.hex()
+    hash_int = int.from_bytes(hash_le, byteorder="big")
+    return hash_int, hash_hex
 
 
 def is_valid_pow(hash_value: int, target: int) -> bool:
     """Step 2E – return ``True`` when ``hash_value <= target``."""
 
-    raise NotImplementedError("Step 2E: is_valid_pow")
+    return hash_value <= target
 
 
 def merkle_root(txids_hex: list[str]) -> tuple[str, str]:
@@ -147,37 +219,66 @@ def merkle_root(txids_hex: list[str]) -> tuple[str, str]:
     Duplicate the final hash on odd levels.
     """
 
-    raise NotImplementedError("Step 3: merkle_root")
+    if not txids_hex:
+        zero = "00" * 32
+        return zero, zero
+
+    level = [le_hex_to_bytes(txid) for txid in txids_hex]
+
+    while len(level) > 1:
+        if len(level) % 2 == 1:
+            level.append(level[-1])
+
+        level = [
+            dsha256(level[i] + level[i + 1])
+            for i in range(0, len(level), 2)
+        ]
+
+    root_le = level[0]
+    root_be = root_le[::-1]
+    return root_be.hex(), root_le.hex()
 
 
 def success_prob_per_hash(target: int) -> Decimal:
     """Step 4A – approximate ``target / 2**256`` as a :class:`Decimal`."""
 
-    raise NotImplementedError("Step 4A: success_prob_per_hash")
+    if target <= 0:
+        return Decimal(0)
+
+    return Decimal(target) / TWO_256
 
 
 def expected_hashes(target: int) -> Decimal:
     """Step 4B – return the expected number of hashes for success."""
 
-    raise NotImplementedError("Step 4B: expected_hashes")
+    probability = success_prob_per_hash(target)
+    if probability == 0:
+        return Decimal("Infinity")
+
+    return Decimal(1) / probability
 
 
 def expected_time_seconds(target: int, hashrate_hs: Decimal) -> Decimal:
     """Step 4C – expected seconds to solve a block at ``hashrate_hs``."""
 
-    raise NotImplementedError("Step 4C: expected_time_seconds")
+    if hashrate_hs <= 0:
+        raise ValueError("hashrate_hs must be positive")
+
+    return expected_hashes(target) / Decimal(hashrate_hs)
 
 
 def is_share_valid(hash_value: int, share_target: int) -> bool:
     """Step 4D – helper for pool share validation checks."""
 
-    raise NotImplementedError("Step 4D: is_share_valid")
+    return hash_value <= share_target
 
 
 def clamp_retarget_timespan(actual_timespan: int, target_timespan: int = TARGET_TIMESPAN) -> int:
     """Step 5A – clamp the observed timespan by Bitcoin's 4× bounds."""
 
-    raise NotImplementedError("Step 5A: clamp_retarget_timespan")
+    minimum = target_timespan // 4
+    maximum = target_timespan * 4
+    return max(minimum, min(actual_timespan, maximum))
 
 
 def compute_retarget(
@@ -188,4 +289,10 @@ def compute_retarget(
 ) -> tuple[int, int]:
     """Step 5B – compute the next target and compact bits after retarget."""
 
-    raise NotImplementedError("Step 5B: compute_retarget")
+    actual_timespan = last_timestamp - first_timestamp
+    clamped = clamp_retarget_timespan(actual_timespan, target_timespan)
+
+    new_target = (old_target * clamped) // target_timespan
+    new_target = min(new_target, T1)
+    new_bits = target_to_bits(new_target)
+    return new_target, new_bits
