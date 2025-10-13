@@ -29,6 +29,7 @@ extension points for future integrations.
 | 022 | The Security Spine      | Security backbone with layered zero-trust defenses.  |
 | 028 | The Custodianship Code  | Stewardship keeps Lucidia tended, transparent, safe. |
 | 033 | The Wholeness Rule      | People remain whole; balance is built into Lucidia.  |
+| 027 | The Integrity Pact     | Honest metrics, transparent reporting, visible corrections. |
 
 ## BlackRoad Pipeline
 
