@@ -18,68 +18,95 @@ const APPS = {
 };
 
 function defaultWin(key) {
-  const layout = APPS[key];
-  const size = layout?.size || {};
+  const layout = APPS[key] || {};
+  const size = layout.size || {};
+
   return {
     id: createId(),
     app: key,
-    title: layout?.title || key,
+    title: layout.title || key,
     x: 80,
     y: 80,
     w: size.width || 400,
     h: size.height || 320,
-
-const APPS = {
-  api: { title: "API Agent", icon: "API" },
-  llm: { title: "LLM Agent", icon: "LLM" },
-  math: { title: "Math Agent", icon: "MATH" },
-  echo: { title: "Echo Agent", icon: "ECHO" },
-  guardian: { title: "Guardian Agent", icon: "GUARD" },
-  explorer: { title: "Prism Explorer", icon: "FS" },
-};
-
-function defaultWin(key) {
-  return {
-    id: crypto.randomUUID(),
-    app: key,
-    title: APPS[key].title,
-    x: 80,
-    y: 80,
-    w: 400,
-    h: 300,
     minimized: false,
     maximized: false,
   };
 }
 
+function hydrateWindow(win) {
+  if (!win || !win.app) {
+    return null;
+  }
+
+  const layout = APPS[win.app] || {};
+  const size = layout.size || {};
+
+  return {
+    ...defaultWin(win.app),
+    ...win,
+    title: win.title || layout.title || win.app,
+    w: win.w || size.width || 400,
+    h: win.h || size.height || 320,
+  };
+}
+
 function loadLayout() {
+  if (typeof indexedDB === "undefined") {
+    return Promise.resolve([]);
+  }
+
   return new Promise((resolve) => {
-    const req = indexedDB.open("prism-desktop", 1);
-    req.onupgradeneeded = () => {
-      req.result.createObjectStore("layout");
+    const request = indexedDB.open("prism-desktop", 1);
+
+    request.onupgradeneeded = () => {
+      request.result.createObjectStore("layout");
     };
-    req.onsuccess = () => {
-      const db = req.result;
+
+    request.onsuccess = () => {
+      const db = request.result;
       const tx = db.transaction("layout", "readonly");
       const store = tx.objectStore("layout");
       const getReq = store.get("windows");
-      getReq.onsuccess = () => resolve(getReq.result || []);
+
+      getReq.onsuccess = () => {
+        const raw = Array.isArray(getReq.result) ? getReq.result : [];
+        resolve(raw.map(hydrateWindow).filter(Boolean));
+      };
+
       getReq.onerror = () => resolve([]);
     };
-    req.onerror = () => resolve([]);
+
+    request.onerror = () => resolve([]);
   });
 }
 
 function saveLayout(windows) {
-  const req = indexedDB.open("prism-desktop", 1);
-  req.onupgradeneeded = () => {
-    req.result.createObjectStore("layout");
+  if (typeof indexedDB === "undefined") {
+    return;
+  }
+
+  const request = indexedDB.open("prism-desktop", 1);
+
+  request.onupgradeneeded = () => {
+    request.result.createObjectStore("layout");
   };
-  req.onsuccess = () => {
-    const db = req.result;
+
+  request.onsuccess = () => {
+    const db = request.result;
     const tx = db.transaction("layout", "readwrite");
     tx.objectStore("layout").put(windows, "windows");
   };
+}
+
+function renderApp(key) {
+  const entry = APPS[key];
+  if (!entry || !entry.component) {
+    return null;
+  }
+
+  const Component = entry.component;
+  return <Component />;
 }
 
 export default function Desktop() {
@@ -94,27 +121,31 @@ export default function Desktop() {
   }, [wins]);
 
   const open = (key) => {
-    setWins((ws) => {
-      const existing = ws.find((w) => w.app === key);
-      if (existing) return ws.map((w) => (w.app === key ? { ...w, minimized: false } : w));
-      return [...ws, defaultWin(key)];
+    setWins((windows) => {
+      const existing = windows.find((win) => win.app === key);
+      if (existing) {
+        const restored = { ...existing, minimized: false };
+        return [...windows.filter((win) => win.app !== key), restored];
+      }
+
+      const next = defaultWin(key);
+      return [...windows, next];
     });
   };
 
-  const update = (id, patch) => setWins((ws) => ws.map((w) => (w.id === id ? { ...w, ...patch } : w)));
+  const update = (id, patch) =>
+    setWins((windows) => windows.map((win) => (win.id === id ? { ...win, ...patch } : win)));
 
   return (
     <div
       className="w-screen h-screen relative overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg,#FF4FD8,#0096FF,#FDBA2D)",
-      }}
+      style={{ background: "linear-gradient(135deg,#FF4FD8,#0096FF,#FDBA2D)" }}
     >
       {wins.map((win) => (
         <Window
           key={win.id}
           win={win}
-          onClose={() => setWins((ws) => ws.filter((w) => w.id !== win.id))}
+          onClose={() => setWins((windows) => windows.filter((w) => w.id !== win.id))}
           onToggleMin={() => update(win.id, { minimized: !win.minimized })}
           onToggleMax={() => update(win.id, { maximized: !win.maximized })}
           onUpdate={(data) => update(win.id, data)}
@@ -137,27 +168,3 @@ export default function Desktop() {
     </div>
   );
 }
-
-function renderApp(key) {
-  const entry = APPS[key];
-  if (!entry || !entry.component) return null;
-  const Component = entry.component;
-  return <Component />;
-  switch (key) {
-    case "api":
-      return <pre className="p-2">/prism/logs/api tail</pre>;
-    case "llm":
-      return <div className="p-2">LLM chat placeholder</div>;
-    case "math":
-      return <div className="p-2">Graph canvas placeholder</div>;
-    case "echo":
-      return <div className="p-2">Echo agent window</div>;
-    case "guardian":
-      return <div className="p-2">Contradictions list</div>;
-    case "explorer":
-      return <div className="p-2">/prism file explorer</div>;
-    default:
-      return null;
-  }
-}
-
