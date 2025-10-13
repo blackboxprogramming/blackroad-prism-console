@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+FLAG="$ROOT/configs/BROADCAST_DISABLED"
+
+rm -f "$FLAG"
+sudo systemctl restart portal-rest 2>/dev/null || true
+echo "Panic flag cleared. Review wallet locks separately with 'bitcoin-cli -rpcwallet=watchonly_main listlockunspent'."

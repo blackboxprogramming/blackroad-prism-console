@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+CONFIG="$ROOT/configs/doctor.desc.list"
+DOCTOR="$ROOT/bin/descriptor-doctor"
+
+if [[ ! -x "$DOCTOR" ]]; then
+  echo "missing descriptor-doctor at $DOCTOR" >&2
+  exit 1
+fi
+
+if [[ ! -f "$CONFIG" ]]; then
+  echo "missing descriptor list: $CONFIG" >&2
+  exit 1
+fi
+
+status=0
+ran=0
+while IFS= read -r raw || [[ -n "$raw" ]]; do
+  line="$(printf '%s' "$raw" | tr -d '\r' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+  [[ -z "$line" ]] && continue
+  [[ "$line" =~ ^# ]] && continue
+  ran=1
+  candidate="$line"
+  if [[ -f "$candidate" ]]; then
+    arg="$candidate"
+  elif [[ -f "$ROOT/$candidate" ]]; then
+    arg="$ROOT/$candidate"
+  elif [[ -f "$ROOT/configs/$candidate" ]]; then
+    arg="$ROOT/configs/$candidate"
+  else
+    arg="$candidate"
+  fi
+  if ! "$DOCTOR" "$arg"; then
+    status=1
+  fi
+done < "$CONFIG"
+
+if [[ $ran -eq 0 ]]; then
+  echo "no descriptors in $CONFIG" >&2
+  exit 2
+fi
+
+exit $status
