@@ -1,0 +1,2 @@
+# Replace <pr> with the pull request number for the preview deployment URL.
+url: "https://pr-<pr>.dev.blackroad.io"
