@@ -79,6 +79,15 @@ class CommentBot:
         if not self.token:
             raise RuntimeError("A GitHub token is required to post comments.")
 
+        """Post a comment on a GitHub issue or pull request.
+
+        Args:
+            issue_number: The target issue or pull request number.
+            body: Markdown content of the comment.
+
+        Returns:
+            The JSON response from the GitHub API.
+        """
         url = f"https://api.github.com/repos/{self.repo}/issues/{issue_number}/comments"
         url = (
             f"https://api.github.com/repos/{self.repo}/issues/{issue_number}/comments"

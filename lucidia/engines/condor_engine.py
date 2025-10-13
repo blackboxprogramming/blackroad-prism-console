@@ -5,10 +5,17 @@ interfaces.  The helpers are intentionally small so that unit tests can run
 without requiring the real Condor dependency.  The goal is to expose a stable
 Python API that can be imported by agents or HTTP routes in constrained
 environments.
+"""Utilities for working with Condor models.
+
+Wrappers for running NASA Condor models locally. The helpers implement a
+small subset of the full Condor API suitable for local experimentation
+and unit tests.
 """
 
 from __future__ import annotations
 
+from dataclasses import asdict, is_dataclass
+from pathlib import Path
 import ast
 import importlib.util
 import sys
@@ -45,6 +52,12 @@ FORBIDDEN_NAMES = {
 def _to_primitive(obj: Any) -> Any:
     """Recursively convert dataclasses and arrays into Python primitives."""
 
+def _dataclass_to_dict(obj: Any) -> Any:
+    """Recursively convert dataclasses and ``numpy`` arrays into primitives.
+
+    This helper ensures that results are JSON serialisable. ``numpy`` arrays
+    are transformed into Python lists.
+    """
     if is_dataclass(obj):
         return {k: _to_primitive(v) for k, v in asdict(obj).items()}
     if np is not None and isinstance(obj, np.ndarray):
@@ -63,8 +76,11 @@ def validate_model_source(py_text: str) -> None:
     Only a small allow-list of imports is permitted and several dangerous
     names are rejected.  The intent is to catch obvious misuse before
     executing code in a sandbox.
+    The validator performs a conservative static analysis using ``ast``. Only
+    a small allow-list of imports is permitted and several dangerous names are
+    rejected. The intent is to catch obvious misuse before executing code in a
+    sandbox.
     """
-
     tree = ast.parse(py_text)
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
@@ -114,6 +130,8 @@ def solve_algebraic(model_cls: Type[Any], **params: Any) -> Any:
     instantiated and a :class:`RuntimeError` is raised.  User supplied
     models remain supported even without Condor installed.
     """
+def solve_algebraic(model_cls: Type[Any], **params: Any) -> Dict[str, Any]:
+    """Solve a Condor ``AlgebraicSystem`` model."""
 
     if condor is None and model_cls.__module__.split(".")[0] == "condor":
         raise RuntimeError("Condor is not installed")
@@ -132,6 +150,12 @@ def simulate_ode(
     modes: Any = None,
 ) -> Any:
     """Simulate an ODE system if the model exposes a ``simulate`` method."""
+    initial: Dict[str, Any],
+    params: Dict[str, Any],
+    events: Any | None = None,
+    modes: Any | None = None,
+) -> Dict[str, Any]:
+    """Simulate an ``ODESystem`` until ``t_final``."""
 
     model = model_cls(**(params or {}))
     if hasattr(model, "simulate"):
@@ -164,3 +188,5 @@ __all__ = [
     "solve_algebraic",
     "validate_model_source",
 ]
+    result = problem.solve(initial_guess=initial_guess, bounds=bounds, options=options)
+    return _dataclass_to_dict(result)
