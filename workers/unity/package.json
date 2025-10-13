@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "yazl": "^2.5.1"
   }
 }
