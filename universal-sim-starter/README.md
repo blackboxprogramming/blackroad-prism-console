@@ -18,6 +18,9 @@ make genesis   # run Genesis generation
 make solid     # run the solid benchmark
 make fluid     # run the fluid benchmark
 make diag      # generate diagnostics (extend as needed)
+make variants  # materialise baseline + variant prompt directories
+make variants-batch  # compute metrics for baseline + variants
+make report-all  # build consolidated Markdown report
 ```
 
 ## Next Steps

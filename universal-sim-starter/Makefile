@@ -1,4 +1,4 @@
-.PHONY: genesis solid fluid diag clean
+.PHONY: genesis solid fluid diag variants variants-batch report-all clean
 
 PYTHON ?= python3
 ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
@@ -27,6 +27,15 @@ fluid: artifacts/fluid
 
 diag: genesis solid fluid
 	@echo "Diagnostics ready. Wire in analysis via 40_compare/metrics.py"
+
+variants:
+	$(PYTHON) 10_genesis/build_variants.py --artifacts $(ARTIFACTS)
+
+variants-batch: variants
+	$(PYTHON) 40_compare/variants_batch.py --artifacts $(ARTIFACTS)
+
+report-all:
+	$(PYTHON) 40_compare/report_all.py --outputs-dir 40_compare/outputs --output 90_reports/variants_report.md
 
 clean:
 	rm -rf $(ARTIFACTS)
