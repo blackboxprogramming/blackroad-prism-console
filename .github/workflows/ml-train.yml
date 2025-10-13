@@ -1,0 +1,33 @@
+name: ML Train & Register
+on:
+  schedule: [{ cron: "10 3 * * *" }]
+  workflow_dispatch:
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install scikit-learn pandas matplotlib
+      - name: Train
+        run: python ml/train.py
+      - name: Evaluate
+        run: python ml/evaluate.py
+      - name: Register model (quality gate)
+        run: |
+          AUC=$(jq -r '.auc' ml/artifacts/metrics.json || echo 0)
+          GATE=${ML_QUALITY_GATE_AUC:-0.70}
+          echo "AUC=$AUC GATE=$GATE"
+          if awk "BEGIN {exit !($AUC >= $GATE)}"; then
+            jq --arg ts "$(date -Is)" '. + [{version: (length+1), path:"ml/artifacts/model.pkl", registered_at:$ts, metrics: "ml/artifacts/metrics.json"}]' ml/registry/models.json > /tmp/models.json && mv /tmp/models.json ml/registry/models.json
+            jq -n '{version: input_filename|capture("models.json")|.version, path:"ml/artifacts/model.pkl", metrics:"ml/artifacts/metrics.json"}' ml/registry/models.json >/dev/null 2>&1 || true
+            echo '{"path":"ml/artifacts/model.pkl","metrics":"ml/artifacts/metrics.json"}' > ml/registry/active.json
+          else
+            echo "Quality gate failed"; exit 0
+          fi
+      - uses: actions/upload-artifact@v4
+        with: { name: ml-artifacts, path: ml/artifacts }
