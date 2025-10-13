@@ -1,0 +1,156 @@
+meta:
+  name: production
+  tier: critical
+  description: Customer-facing deployment served from the DigitalOcean perimeter with Cloudflare in front.
+  owners:
+    - sre@blackroad.io
+    - security@blackroad.io
+  tags: [production, digitalocean, cloudflare, restic]
+
+runtime:
+  code:
+    repo: blackroad-prism-console
+    entrypoints:
+      - path: sites/blackroad
+        type: nextjs
+      - path: srv/blackroad-api
+        type: express
+    static_roots:
+      - path: /var/www/blackroad
+        description: Exported static assets served by Caddy/Nginx.
+  artifacts:
+    - workflow: .github/workflows/prism-ci.yml
+      produces: [docker-image, static-assets]
+    - workflow: .github/workflows/blackroad-deploy.yml
+      produces: [deployed-release]
+    - workflow: .github/workflows/deploy.yml
+      produces: [docker-image, droplet-release]
+
+infrastructure:
+  compute:
+    - id: prod-droplet-01
+      platform: digitalocean-droplet
+      hostname: blackroad-prod-01
+      region: nyc3
+      size: s-2vcpu-4gb
+      os: ubuntu-22.04
+      orchestrator: docker-compose
+      configuration_sources:
+        - deploy/ansible/site.yml
+        - docker-compose.prod.yml
+      workloads:
+        - caddy reverse proxy
+        - prism-console container (Next.js build served via node)
+        - blackroad-api service (Express + Socket.IO)
+      health_checks:
+        - path: /healthz
+          protocol: https
+          interval_seconds: 30
+    - id: prod-workers
+      platform: digitalocean-droplet
+      hostname: blackroad-workers-01
+      region: nyc3
+      role: scheduled-jobs
+      orchestration: systemd timers + node scripts under ops/
+      notes: Handles cron-like jobs triggered by GitHub Actions dispatches.
+  data:
+    - name: prod-sqlite
+      type: sqlite
+      path: /srv/blackroad-api/blackroad.db
+      backups:
+        method: restic
+        target: digitalocean-spaces://blackroad-backups
+        retention:
+          daily: 7
+          weekly: 4
+          monthly: 6
+    - name: prod-artifacts
+      type: filesystem
+      path: /var/www/blackroad
+      replication: restic (same policy as prod-sqlite)
+    - name: prod-secrets
+      type: sops
+      files:
+        - .env.enc
+      rotation: .github/workflows/rotate-secrets.yml
+  networking:
+    - domain: blackroad.io
+      provider: cloudflare
+      records:
+        - type: A
+          name: @
+          target: 159.65.43.12
+          proxied: true
+        - type: A
+          name: api
+          target: 159.65.43.12
+          proxied: true
+    - domain: *.blackroad.io
+      provider: cloudflare
+      waf_mode: strict
+      cache_rules:
+        - id: spa-cache
+          description: Cache static assets aggressively; bypass API routes.
+  secrets:
+    - name: prod-runtime
+      source: sops
+      path: .env.enc
+    - name: prod-actions
+      source: github-environment
+      environment: production
+      description: Contains deploy bearer token, Cloudflare creds, Slack webhook.
+
+operations:
+  deployments:
+    - workflow: .github/workflows/blackroad-deploy.yml
+      description: Builds Next.js bundle and triggers authenticated deploy hook.
+      approvals: []
+    - workflow: .github/workflows/deploy.yml
+      description: Builds container, pushes to GHCR, and rsyncs release onto the droplet.
+      approvals:
+        - sre@blackroad.io
+    - workflow: .github/workflows/deploy-canary.yml
+      description: Optional ECS blue/green path used during migrations.
+      approvals:
+        - sre@blackroad.io
+        - security@blackroad.io
+    - command: /deploy blackroad pages
+      description: ChatOps entry point that fans out to deploy + cache warm.
+  observability:
+    - name: observability-smoke
+      type: github-workflow
+      workflow: .github/workflows/observability-smoke.yml
+      cadence: nightly
+    - name: grafana-prod
+      url: https://grafana.blackroad.io/d/prod-overview
+      description: Main dashboard covering ALB/CDN latencies and app health.
+    - name: lighthouse
+      type: github-workflow
+      workflow: .github/workflows/lighthouse.yml
+      cadence: nightly
+    - name: pagerduty
+      service: BlackRoad Production
+      escalation_policy: 24x7
+  runbooks:
+    - name: incident-response
+      url: RUNBOOK.md#site-down-checklist
+      summary: Checklist for outages including docker/nginx validation.
+    - name: backup-restore
+      url: BACKUP_POLICY.md
+      summary: Restic policy and restore procedures.
+    - name: nginx-runtime
+      url: RUNBOOK.md#nginx-runtime-checks
+      summary: Steps for safe reloads and TLS verification.
+  compliance:
+    - control: soc2-backups
+      description: Restic backups validated weekly per docs/HARDENING_AND_BACKUP_PLAYBOOK.md.
+    - control: waf-logging
+      description: Cloudflare WAF logs exported to SIEM every 15 minutes.
+    - control: access-review
+      description: Monthly review of deploy bearer tokens (see access-review-quarterly workflow).
+
+slo:
+  availability: 99.9%
+  latency_ms_p95: 450
+  rto_minutes: 15
+  rpo_minutes: 5
