@@ -17,7 +17,7 @@ const APPS = {
   explorer: { title: "Prism Explorer", icon: "FS", component: ExplorerAgent, size: { width: 460, height: 360 } },
 };
 
-function defaultWin(key) {
+function defaultWindow(key) {
   const layout = APPS[key];
   const size = layout?.size || {};
   return {
@@ -28,25 +28,6 @@ function defaultWin(key) {
     y: 80,
     w: size.width || 400,
     h: size.height || 320,
-
-const APPS = {
-  api: { title: "API Agent", icon: "API" },
-  llm: { title: "LLM Agent", icon: "LLM" },
-  math: { title: "Math Agent", icon: "MATH" },
-  echo: { title: "Echo Agent", icon: "ECHO" },
-  guardian: { title: "Guardian Agent", icon: "GUARD" },
-  explorer: { title: "Prism Explorer", icon: "FS" },
-};
-
-function defaultWin(key) {
-  return {
-    id: crypto.randomUUID(),
-    app: key,
-    title: APPS[key].title,
-    x: 80,
-    y: 80,
-    w: 400,
-    h: 300,
     minimized: false,
     maximized: false,
   };
@@ -54,81 +35,110 @@ function defaultWin(key) {
 
 function loadLayout() {
   return new Promise((resolve) => {
-    const req = indexedDB.open("prism-desktop", 1);
-    req.onupgradeneeded = () => {
-      req.result.createObjectStore("layout");
+    if (!globalThis.indexedDB) {
+      resolve([]);
+      return;
+    }
+    const request = indexedDB.open("prism-desktop", 1);
+    request.onupgradeneeded = () => {
+      request.result.createObjectStore("layout");
     };
-    req.onsuccess = () => {
-      const db = req.result;
+    request.onerror = () => resolve([]);
+    request.onsuccess = () => {
+      const db = request.result;
       const tx = db.transaction("layout", "readonly");
       const store = tx.objectStore("layout");
       const getReq = store.get("windows");
-      getReq.onsuccess = () => resolve(getReq.result || []);
+      getReq.onsuccess = () => resolve(Array.isArray(getReq.result) ? getReq.result : []);
       getReq.onerror = () => resolve([]);
     };
-    req.onerror = () => resolve([]);
   });
 }
 
 function saveLayout(windows) {
-  const req = indexedDB.open("prism-desktop", 1);
-  req.onupgradeneeded = () => {
-    req.result.createObjectStore("layout");
+  if (!globalThis.indexedDB) {
+    return;
+  }
+  const request = indexedDB.open("prism-desktop", 1);
+  request.onupgradeneeded = () => {
+    request.result.createObjectStore("layout");
   };
-  req.onsuccess = () => {
-    const db = req.result;
+  request.onsuccess = () => {
+    const db = request.result;
     const tx = db.transaction("layout", "readwrite");
     tx.objectStore("layout").put(windows, "windows");
   };
 }
 
+function renderApp(key) {
+  const entry = APPS[key];
+  if (!entry || !entry.component) {
+    return null;
+  }
+  const Component = entry.component;
+  return <Component />;
+}
+
 export default function Desktop() {
-  const [wins, setWins] = useState([]);
+  const [windows, setWindows] = useState([]);
 
   useEffect(() => {
-    loadLayout().then((data) => setWins(data));
+    let ignore = false;
+    loadLayout().then((data) => {
+      if (!ignore) {
+        setWindows(data.map((win) => ({ ...defaultWindow(win.app), ...win, id: win.id || createId() })));
+      }
+    });
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   useEffect(() => {
-    saveLayout(wins);
-  }, [wins]);
+    saveLayout(windows);
+  }, [windows]);
 
-  const open = (key) => {
-    setWins((ws) => {
-      const existing = ws.find((w) => w.app === key);
-      if (existing) return ws.map((w) => (w.app === key ? { ...w, minimized: false } : w));
-      return [...ws, defaultWin(key)];
+  const openWindow = (key) => {
+    if (!APPS[key]) return;
+    setWindows((prev) => {
+      const existing = prev.find((win) => win.app === key);
+      if (existing) {
+        return prev.map((win) => (win.app === key ? { ...win, minimized: false } : win));
+      }
+      return [...prev, defaultWindow(key)];
     });
   };
 
-  const update = (id, patch) => setWins((ws) => ws.map((w) => (w.id === id ? { ...w, ...patch } : w)));
+  const updateWindow = (id, patch) => {
+    setWindows((prev) => prev.map((win) => (win.id === id ? { ...win, ...patch } : win)));
+  };
 
   return (
     <div
-      className="w-screen h-screen relative overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg,#FF4FD8,#0096FF,#FDBA2D)",
-      }}
+      className="relative h-screen w-screen overflow-hidden"
+      style={{ background: "linear-gradient(135deg,#FF4FD8,#0096FF,#FDBA2D)" }}
     >
-      {wins.map((win) => (
+      {windows.map((win) => (
         <Window
           key={win.id}
           win={win}
-          onClose={() => setWins((ws) => ws.filter((w) => w.id !== win.id))}
-          onToggleMin={() => update(win.id, { minimized: !win.minimized })}
-          onToggleMax={() => update(win.id, { maximized: !win.maximized })}
-          onUpdate={(data) => update(win.id, data)}
+          onClose={() => setWindows((prev) => prev.filter((item) => item.id !== win.id))}
+          onToggleMin={() => updateWindow(win.id, { minimized: !win.minimized })}
+          onToggleMax={() => updateWindow(win.id, { maximized: !win.maximized })}
+          onUpdate={(patch) => updateWindow(win.id, patch)}
         >
           {renderApp(win.app)}
         </Window>
       ))}
 
-      <div className="taskbar absolute bottom-0 left-0 right-0 bg-black/60 text-white flex gap-2 p-2">
+      <div className="absolute inset-x-0 bottom-0 flex items-center gap-3 bg-black/60 px-3 py-2 text-white">
         {Object.entries(APPS).map(([key, app]) => (
           <button
             key={key}
-            onClick={() => open(key)}
-            className="px-2 py-1 bg-white/20 rounded hover:bg-white/30"
+            type="button"
+            onClick={() => openWindow(key)}
+            className="rounded bg-white/15 px-3 py-1 text-sm font-semibold tracking-wide hover:bg-white/25"
+            title={app.title}
           >
             {app.icon}
           </button>
@@ -137,27 +147,3 @@ export default function Desktop() {
     </div>
   );
 }
-
-function renderApp(key) {
-  const entry = APPS[key];
-  if (!entry || !entry.component) return null;
-  const Component = entry.component;
-  return <Component />;
-  switch (key) {
-    case "api":
-      return <pre className="p-2">/prism/logs/api tail</pre>;
-    case "llm":
-      return <div className="p-2">LLM chat placeholder</div>;
-    case "math":
-      return <div className="p-2">Graph canvas placeholder</div>;
-    case "echo":
-      return <div className="p-2">Echo agent window</div>;
-    case "guardian":
-      return <div className="p-2">Contradictions list</div>;
-    case "explorer":
-      return <div className="p-2">/prism file explorer</div>;
-    default:
-      return null;
-  }
-}
-
