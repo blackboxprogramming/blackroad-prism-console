@@ -37,6 +37,35 @@ script.
 
 _Last updated on 2025-09-11_
 
+## Unity engine bootstrap
+
+Codex can now ask the Unity exporter service to scaffold multiple editor
+targets at once. Start the service with:
+
+```bash
+node workers/unity/server.js
+```
+
+Then request paired Unity builds (for example, current LTS and bleeding-edge
+releases) using `curl`:
+
+```bash
+curl -X POST http://localhost:3000/export \
+  -H "Content-Type: application/json" \
+  -d '{
+        "projectName": "BlackRoadSandbox",
+        "unityVersions": ["2022.3.10f1", "6000.0.4f1"],
+        "renderPipeline": "urp",
+        "template": "codex-prototype"
+      }'
+```
+
+The response lists the generated zip archives under `downloads/`. Extract
+both, open them in Unity Hub, and use the prompts in
+`codex/prompts/blackroad_high_impact_codex_prompts.prompt.md` to drive rapid
+scene authoring. Keeping two Unity versions handy ensures Codex output stays
+compatible with production support needs and experimental research tracks.
+
 ## Auditing Historic Entries
 
 Use the Codex audit helper to generate a quick report of every entry and
