@@ -56,6 +56,9 @@ import aiSafety from './routes/ai/safety.js';
 import aiRun from './routes/ai/run.js';
 import cookieParser from 'cookie-parser';
 import { assignExperiment } from './middleware/experiment.js';
+import agentsCommand from './routes/agents/command.js';
+import agentsSlack from './routes/agents/slack.js';
+import agentsDiscord from './routes/agents/discord.js';
 
 dotenv.config();
 
@@ -65,6 +68,20 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
+
+const urlencodedParser = express.urlencoded({ extended: true });
+app.use((req: any, res, next) => {
+  if (req.originalUrl.startsWith('/api/agents/slack')) {
+    return express.urlencoded({
+      extended: true,
+      verify: (slackReq: any, _res, buf) => {
+        slackReq.rawBody = buf.toString();
+      },
+    })(req, res, next);
+  }
+  return urlencodedParser(req, res, next);
+});
+
 app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));
 app.use(regionMiddleware());
 app.use(localeMiddleware());
@@ -107,6 +124,10 @@ app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
 app.use('/api/ml/predict', predict);
 app.use('/api/reco', reco);
+
+app.use('/api/agents/command', agentsCommand);
+app.use('/api/agents/slack', agentsSlack);
+app.use('/api/agents/discord', agentsDiscord);
 
 const port = process.env.PORT || 4000;
 
