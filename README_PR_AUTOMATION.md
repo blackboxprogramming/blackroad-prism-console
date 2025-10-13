@@ -16,6 +16,11 @@ What it does
 
 For alias- and consent-focused wrapper configuration snippets that pair with the automation prompts, see
 [`docs/WRAPPER_ALIAS_CONFIG.md`](docs/WRAPPER_ALIAS_CONFIG.md).
+1. Creates a timestamped branch.
+2. Syncs generator artifacts (hook in scripts/sync_artifacts.sh).
+3. Writes an evidence bundle to /evidence/<ts>_bootstrap/.
+4. Opens a PR, applies labels, requests review, optionally enables auto-merge.
+5. Prints the PR link.
 
 ---
 

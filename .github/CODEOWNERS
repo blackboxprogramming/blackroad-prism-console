@@ -9,6 +9,9 @@ scripts/** @blackboxprogramming/maintainers
 prs.csv @blackboxprogramming/maintainers
 miners/** @blackboxprogramming/maintainers
 lightning/** @blackboxprogramming/maintainers
+# Default reviewers for all files
+* @blackboxprogramming/core
+
 /infra/            @platform-team
 /flows/            @integration-team
 /monitors/         @sre-team
