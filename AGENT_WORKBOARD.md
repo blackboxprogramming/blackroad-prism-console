@@ -29,6 +29,7 @@
 
 ## Done
 <!-- Agents move tasks here on success -->
+- Upgraded Unity exporter service to emit structured Unity archives with scene stubs and metadata. (2025-10-05)
 
 ---
 
