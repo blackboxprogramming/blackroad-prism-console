@@ -1,0 +1,15 @@
+using UnityEngine;
+
+namespace BlackRoad
+{
+    public class BlackRoadBootstrap : MonoBehaviour
+    {
+        [SerializeField]
+        private string projectName = "__PROJECT_NAME__";
+
+        private void Start()
+        {
+            Debug.Log($"Welcome to {projectName}! Let's build something amazing.");
+        }
+    }
+}

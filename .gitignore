@@ -9,6 +9,7 @@ dist/
 .cache/
 .env
 !tools/tools-adapter/.env
+workers/unity/downloads/
 artifacts.sha256
 public/artifacts.sha256
 
