@@ -34,6 +34,7 @@ extension points for future integrations.
 | 028 | The Custodianship Code | Custodial stewardship over ownership and power. |
 | 034 | The Humility Clause    | Confidence with limits, always signaling uncertainty. |
 | 018 | The Memory Covenant    | Memory stays purposeful, finite, and revocable. |
+| 020 | The Governance Charter | Transparent RFC-led decisions with recorded votes. |
 
 ## BlackRoad Pipeline
 
