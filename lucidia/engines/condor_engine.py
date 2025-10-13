@@ -10,6 +10,10 @@ environments.
 Wrappers for running NASA Condor models locally. The helpers implement a
 small subset of the full Condor API suitable for local experimentation
 and unit tests.
+This module intentionally implements only a very small subset of the full
+design proposed in the specification. The helpers defined here are sufficient
+for local experimentation and unit testing. Advanced sandboxing, provenance
+and solver features should be implemented in the future.
 """
 
 from __future__ import annotations
@@ -26,6 +30,7 @@ from types import ModuleType
 from typing import Any, Dict, Optional, Type
 
 try:  # Optional dependency used only at runtime
+try:  # pragma: no cover - optional dependency
     import numpy as np  # type: ignore
 except Exception:  # pragma: no cover - numpy may be absent
     np = None  # type: ignore
@@ -53,7 +58,7 @@ def _to_primitive(obj: Any) -> Any:
     """Recursively convert dataclasses and arrays into Python primitives."""
 
 def _dataclass_to_dict(obj: Any) -> Any:
-    """Recursively convert dataclasses and ``numpy`` arrays into primitives.
+    """Recursively convert dataclasses and numpy arrays into primitives.
 
     This helper ensures that results are JSON serialisable. ``numpy`` arrays
     are transformed into Python lists.
@@ -92,10 +97,14 @@ def validate_model_source(py_text: str) -> None:
                 raise ValueError(f"from '{node.module}' import is not allowed")
         elif isinstance(node, ast.Name):
             if node.id in FORBIDDEN_NAMES:
-                raise ValueError(f"usage of '{node.id}' is forbidden")
+                raise ValueError(f"use of '{node.id}' is forbidden")
         elif isinstance(node, ast.Attribute):
             if node.attr.startswith("__"):
                 raise ValueError("dunder attribute access is forbidden")
+
+    for token in FORBIDDEN_NAMES:
+        if token in py_text:
+            raise ValueError(f"forbidden token found: {token}")
 
 
 def _load_module_from_source(source: str, module_name: str) -> ModuleType:
@@ -129,6 +138,11 @@ def solve_algebraic(model_cls: Type[Any], **params: Any) -> Any:
     models that originate from the ``condor`` package cannot be
     instantiated and a :class:`RuntimeError` is raised.  User supplied
     models remain supported even without Condor installed.
+def solve_algebraic(model_cls: Type[Any], **params: Any) -> Dict[str, Any]:
+    """Instantiate ``model_cls`` and call its ``solve`` method.
+
+    The returned object is converted to basic Python types so that it is
+    easy to serialise to JSON.
     """
 def solve_algebraic(model_cls: Type[Any], **params: Any) -> Dict[str, Any]:
     """Solve a Condor ``AlgebraicSystem`` model."""
@@ -139,6 +153,9 @@ def solve_algebraic(model_cls: Type[Any], **params: Any) -> Dict[str, Any]:
     model = model_cls(**params)
     result = model.solve() if hasattr(model, "solve") else model
     return _to_primitive(result)
+    model = model_cls(**params)
+    result = model.solve() if hasattr(model, "solve") else model
+    return _dataclass_to_dict(result)
 
 
 def simulate_ode(
@@ -151,11 +168,12 @@ def simulate_ode(
 ) -> Any:
     """Simulate an ODE system if the model exposes a ``simulate`` method."""
     initial: Dict[str, Any],
-    params: Dict[str, Any],
+    params: Dict[str, Any] | None = None,
     events: Any | None = None,
     modes: Any | None = None,
 ) -> Dict[str, Any]:
     """Simulate an ``ODESystem`` until ``t_final``."""
+    """Simulate an ``ODESystem`` until ``t_final`` if the model supports it."""
 
     model = model_cls(**(params or {}))
     if hasattr(model, "simulate"):
@@ -163,6 +181,9 @@ def simulate_ode(
     else:  # pragma: no cover - dummy fallback for tests
         result = {}
     return _to_primitive(result)
+    else:  # pragma: no cover - dummy fallback
+        result = {}
+    return _dataclass_to_dict(result)
 
 
 def optimize(
@@ -171,6 +192,10 @@ def optimize(
     bounds: Any = None,
     options: Optional[Dict[str, Any]] = None,
 ) -> Any:
+    initial_guess: Dict[str, Any],
+    bounds: Dict[str, Any] | None = None,
+    options: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
     """Solve an optimisation problem if ``problem_cls`` implements ``solve``."""
 
     problem = problem_cls()
