@@ -25,7 +25,7 @@ class QuantumDevice:
         for i in range(self.n_wires):
             mats.append(mat if i == wire else I2.to(mat.device))
         full = self._kron(mats)
-        self.state = torch.matmul(self.state, full.T)
+        self.state = torch.matmul(self.state, full.transpose(-2, -1))
 
     def apply(self, name, mat, wire, params=None):
         self.ops.append((name, wire, params))
@@ -38,7 +38,8 @@ class QuantumDevice:
             mats.append(Z if i == wire else I2.to(self.state.device))
         full = self._kron(mats)
         psi = self.state
-        return torch.einsum('bi,ij,bj->b', psi.conj(), full, psi).real
+        tmp = torch.matmul(psi, full.transpose(-2, -1))
+        return torch.sum(psi.conj() * tmp, dim=1).real
 
     def measure_all(self):
         vals = [self.expval_z(w) for w in range(self.n_wires)]
@@ -77,9 +78,11 @@ class RX(nn.Module):
 
     def forward(self, qdev, wires):
         t = self.theta
-        c = torch.cos(t / 2)
-        s = -1j * torch.sin(t / 2)
-        mat = torch.stack([torch.stack([c, s]), torch.stack([s, c])])
+        c = torch.cos(t / 2).to(torch.cfloat)
+        s = (-1j * torch.sin(t / 2)).to(torch.cfloat)
+        row0 = torch.stack((c, s), dim=0).squeeze(-1)
+        row1 = torch.stack((s, c), dim=0).squeeze(-1)
+        mat = torch.stack([row0, row1], dim=0)
         qdev.apply('rx', mat, wires, params=[t])
 
 class RY(nn.Module):
@@ -92,9 +95,11 @@ class RY(nn.Module):
 
     def forward(self, qdev, wires):
         t = self.theta
-        c = torch.cos(t / 2)
-        s = torch.sin(t / 2)
-        mat = torch.stack([torch.stack([c, -s]), torch.stack([s, c])]).to(torch.cfloat)
+        c = torch.cos(t / 2).to(torch.cfloat)
+        s = torch.sin(t / 2).to(torch.cfloat)
+        row0 = torch.stack((c, -s), dim=0).squeeze(-1)
+        row1 = torch.stack((s, c), dim=0).squeeze(-1)
+        mat = torch.stack([row0, row1], dim=0)
         qdev.apply('ry', mat, wires, params=[t])
 
 class RZ(nn.Module):
@@ -107,8 +112,11 @@ class RZ(nn.Module):
 
     def forward(self, qdev, wires):
         t = self.theta
-        e = torch.exp(-0.5j * t)
-        mat = torch.stack([torch.stack([e, torch.zeros_like(e)]), torch.stack([torch.zeros_like(e), e.conj()])])
+        e = torch.exp(-0.5j * t).to(torch.cfloat)
+        zero = torch.zeros_like(e)
+        row0 = torch.stack((e, zero), dim=0).squeeze(-1)
+        row1 = torch.stack((zero, e.conj()), dim=0).squeeze(-1)
+        mat = torch.stack([row0, row1], dim=0)
         qdev.apply('rz', mat, wires, params=[t])
 
 class PauliZ:
