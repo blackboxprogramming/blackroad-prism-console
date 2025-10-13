@@ -2,8 +2,9 @@ name: production
 slug: prod
 state: active
 description: >-
-  Primary public environment exposed to customers via blackroad.io. Covers the
-  marketing SPA and API gateway that the deploy workflows publish.
+  Primary public environment exposed to customers via blackroad.io. Static
+  assets publish through GitHub Pages while the API gateway deploys via the
+  `BlackRoad • Deploy` workflow.
 contacts:
   reviewers:
     - blackboxprogramming
@@ -28,12 +29,12 @@ deployments:
     provider: aws-ecs-fargate
     terraform_directory: br-infra-iac/envs/prod
     module: modules/ecs-service-alb
-    status: planned
+    state: planned
     notes: >-
-      Production wiring tracks the dev module that provisions api.blackroad.io
+      Production wiring follows the dev module that provisions api.blackroad.io
       behind an ALB-backed Fargate service.
     health_check: https://api.blackroad.io/health
-    release_workflow: .github/workflows/blackroad-deploy.yml
+    workflow: .github/workflows/blackroad-deploy.yml
 change_management:
   approvals:
     - .github/workflows/change-approve.yml

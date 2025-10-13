@@ -22,7 +22,7 @@ deployments:
     type: container-service
     provider: aws-ecs-fargate
     terraform_directory: br-infra-iac/envs/stg
-    status: planned
+    state: planned
     notes: >-
       Network, ECS, and RDS resources are defined; service wiring will follow the
       production module once ready.
@@ -32,4 +32,4 @@ change_management:
 observability:
   health_checks:
     - name: static-health
-      path: blackroad-stage/health.json
+      url: https://stage.blackroad.io/health.json
