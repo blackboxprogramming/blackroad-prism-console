@@ -1,20 +1,77 @@
-name: Trivy Image Scan
+name: Security • Trivy
+
 on:
   pull_request:
-    paths:
-      - "apps/api/**"
-      - ".github/workflows/trivy.yml"
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      image:
+        description: 'Optional OCI image reference to scan'
+        type: string
+        required: false
+
+permissions:
+  contents: read
+  security-events: write
+  packages: read
+
 jobs:
-  scan:
+  filesystem:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.image == ''
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Build local image
-        run: docker build -t local/blackroad-api:pr apps/api
-      - name: Scan with Trivy
-        uses: aquasecurity/trivy-action@0.28.0
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a095c2875d
+      - name: Trivy filesystem scan
+        id: trivy_fs
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
-          image-ref: local/blackroad-api:pr
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          skip-dirs: |
+            .git
+            node_modules
+            vendor
+          timeout: 15m
+          exit-code: '1'
+      - name: Upload filesystem SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@528ca598d956c91826bd742262cdfc5d02b77710
+        with:
+          sarif_file: trivy-fs.sarif
+      - name: Fail when filesystem vulnerabilities detected
+        if: steps.trivy_fs.outcome == 'failure'
+        run: |
+          echo 'Trivy reported critical or high vulnerabilities in the repository.'
+          exit 1
+
+  image:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.image != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to GHCR (if applicable)
+        if: startsWith(github.event.inputs.image, 'ghcr.io/')
+        run: |
+          echo '${{ github.token }}' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
+      - name: Trivy image scan
+        id: trivy_image
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+        with:
+          scan-type: image
+          image-ref: ${{ github.event.inputs.image }}
           format: table
-          exit-code: '0'
-          vuln-type: 'os,library'
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+      - name: Fail when image vulnerabilities detected
+        if: steps.trivy_image.outcome == 'failure'
+        run: |
+          echo 'Trivy reported critical or high vulnerabilities in the container image.'
+          exit 1

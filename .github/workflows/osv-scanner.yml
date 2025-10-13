@@ -1,0 +1,41 @@
+name: Security • OSV Scanner
+
+on:
+  pull_request:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a095c2875d
+      - name: Run OSV scanner
+        id: osv
+        continue-on-error: true
+        uses: docker://ghcr.io/google/osv-scanner:v2.2.3
+        with:
+          args: >-
+            --recursive
+            --skip-dirs node_modules
+            --skip-dirs vendor
+            --skip-dirs .git
+            --format sarif
+            --output osv-results.sarif
+            .
+      - name: Upload OSV results
+        if: always()
+        uses: github/codeql-action/upload-sarif@528ca598d956c91826bd742262cdfc5d02b77710
+        with:
+          sarif_file: osv-results.sarif
+      - name: Fail on detected vulnerabilities
+        if: steps.osv.outcome == 'failure'
+        run: |
+          echo 'OSV scanner found known vulnerabilities.'
+          exit 1

@@ -1,0 +1,71 @@
+name: Supply Chain • SLSA generic provenance
+
+on:
+  workflow_call:
+    inputs:
+      artifact-pattern:
+        description: 'Glob pattern for artifacts to include in the provenance statement'
+        type: string
+        required: true
+      provenance-name:
+        description: 'Optional override for the provenance file name'
+        type: string
+        required: false
+        default: ''
+      upload-release-assets:
+        description: 'Upload provenance alongside GitHub Releases'
+        type: boolean
+        required: false
+        default: false
+      upload-tag-name:
+        description: 'Tag name to use when uploading provenance assets'
+        type: string
+        required: false
+        default: ''
+      private-repository:
+        description: 'If true, allows private repositories to publish to public transparency logs'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compute artifact digests
+        id: subjects
+        run: |
+          python - <<'PY'
+import base64
+import glob
+import hashlib
+import os
+from pathlib import Path
+pattern = os.environ['PATTERN']
+paths = [Path(p) for p in glob.glob(pattern)]
+if not paths:
+    raise SystemExit(f'No artifacts matched pattern: {pattern}')
+lines = []
+for path in sorted(paths):
+    if path.is_dir():
+        raise SystemExit(f'Cannot generate provenance for directory: {path}')
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    lines.append(f"{digest}  {path.as_posix()}")
+encoded = base64.b64encode(('\n'.join(lines) + '\n').encode()).decode()
+with open(os.environ['GITHUB_OUTPUT'], 'w') as fh:
+    fh.write(f"subjects={encoded}\n")
+PY
+        env:
+          PATTERN: ${{ inputs['artifact-pattern'] }}
+      - name: Generate provenance
+        uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+        with:
+          base64-subjects: ${{ steps.subjects.outputs.subjects }}
+          provenance-name: ${{ inputs.provenance-name }}
+          upload-assets: ${{ inputs.upload-release-assets }}
+          upload-tag-name: ${{ inputs.upload-tag-name }}
+          private-repository: ${{ inputs.private-repository }}

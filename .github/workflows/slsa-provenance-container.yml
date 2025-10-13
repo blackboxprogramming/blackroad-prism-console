@@ -1,0 +1,81 @@
+name: Supply Chain • SLSA container provenance
+
+on:
+  workflow_call:
+    secrets:
+      registry_username:
+        description: 'Optional registry username override'
+      registry_password:
+        description: 'Optional registry password override'
+    inputs:
+      image:
+        description: 'OCI image reference (tag or digest) for provenance generation'
+        type: string
+        required: true
+      private-registry:
+        description: 'Set to true when the image registry requires authentication'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+  packages: read
+
+jobs:
+  provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse image reference
+        id: parse
+        run: |
+          python - <<'PY'
+import os
+image = os.environ['IMAGE']
+repo = image
+if '@' in image:
+    repo = image.split('@', 1)[0]
+elif ':' in image.rsplit('/', 1)[-1]:
+    repo = image.rsplit(':', 1)[0]
+if '/' in repo:
+    first = repo.split('/', 1)[0]
+    if '.' in first or ':' in first:
+        registry = first
+    else:
+        registry = 'index.docker.io'
+else:
+    registry = 'index.docker.io'
+with open(os.environ['GITHUB_OUTPUT'], 'w') as fh:
+    fh.write(f"repository={repo}\n")
+    fh.write(f"registry={registry}\n")
+PY
+        env:
+          IMAGE: ${{ inputs.image }}
+      - name: Authenticate to registry
+        if: inputs.private-registry
+        env:
+          REGISTRY: ${{ steps.parse.outputs.registry }}
+          USERNAME: ${{ secrets.registry_username || github.actor }}
+          PASSWORD: ${{ secrets.registry_password || secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "$REGISTRY" = 'index.docker.io' ]; then
+            echo 'Skipping registry login for Docker Hub.'
+            exit 0
+          fi
+          echo "$PASSWORD" | docker login "$REGISTRY" -u "$USERNAME" --password-stdin
+      - name: Install crane
+        uses: imjasonh/setup-crane@31b88efe9de28ae0ffa220711af4b60be9435f6e
+      - name: Resolve digest
+        id: digest
+        run: |
+          echo "digest=$(crane digest '${{ inputs.image }}')" >> "$GITHUB_OUTPUT"
+      - name: Generate provenance
+        uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
+        with:
+          image: ${{ steps.parse.outputs.repository }}
+          digest: ${{ steps.digest.outputs.digest }}
+          private-repository: ${{ inputs.private-registry }}
+        secrets:
+          registry-username: ${{ secrets.registry_username || github.actor }}
+          registry-password: ${{ secrets.registry_password || secrets.GITHUB_TOKEN }}
