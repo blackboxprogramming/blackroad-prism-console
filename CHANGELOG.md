@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.9.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.8.0...v1.9.0) (2025-10-13)
+
+
+### Features
+
+* implement lucidia sim bridge runtime ([8e038e9](https://github.com/blackboxprogramming/blackroad-prism-console/commit/8e038e94c6ba5de75d4f3872f3d8709b6c124407))
+* sync PagerDuty incidents with Jira ([a967901](https://github.com/blackboxprogramming/blackroad-prism-console/commit/a967901141d0d72ddb3eb117065dec0a80a1a982))
+
+
+### Bug Fixes
+
+* rely on global fetch in campaign runner ([35d5960](https://github.com/blackboxprogramming/blackroad-prism-console/commit/35d59601f226cd0e9fe549ce9394e86b15b57bda))
+* resolve CLM templates from module directory ([35008cc](https://github.com/blackboxprogramming/blackroad-prism-console/commit/35008ccab6938b6c0162d724a18cd8c0cd953db5))
+* restore product api and secure prompt keys ([f9b07cd](https://github.com/blackboxprogramming/blackroad-prism-console/commit/f9b07cd3be68c37bd0675eb5eeb829e58f1efff2))
+* run experiments report via tsx ([adf0e17](https://github.com/blackboxprogramming/blackroad-prism-console/commit/adf0e17e471348599e379d1c2f17606ae1258f82))
+* sanitize BI dataset names ([f60fb73](https://github.com/blackboxprogramming/blackroad-prism-console/commit/f60fb732ec40b1dbfeffc2d5e6c379ffe896fe13))
+
 ## [1.8.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.7.0...v1.8.0) (2025-10-05)
 
 
