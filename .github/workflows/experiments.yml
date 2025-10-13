@@ -9,6 +9,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - run: node scripts/experiments_report.ts
+      - run: npx tsx scripts/experiments_report.ts
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
