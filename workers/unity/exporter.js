@@ -6,11 +6,19 @@ import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
 
+const sanitizeDescription = (input) => {
+  if (typeof input !== "string") {
+    return "";
+  }
+
+  return input.trim();
+};
+
 const UNITY_TEMPLATE_FILES = (
   projectName,
   description,
 ) => {
-  const sanitizedDescription = description?.trim();
+  const sanitizedDescription = sanitizeDescription(description);
   return [
     {
       relativePath: path.join(projectName, "README.md"),
