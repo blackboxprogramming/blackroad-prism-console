@@ -36,6 +36,24 @@ import mktJourneys from './routes/mkt/journeys.js';
 import mktTemplates from './routes/mkt/templates.js';
 import mktScore from './routes/mkt/score.js';
 import mktUtm from './routes/mkt/utm.js';
+import supTickets from './routes/support/tickets.js';
+import supSla from './routes/support/sla.js';
+import supMacros from './routes/support/macros.js';
+import supKb from './routes/support/kb.js';
+import supChat from './routes/support/chat.js';
+import productIdeas from './routes/product/ideas.js';
+import productPrd from './routes/product/prd.js';
+import productRoadmap from './routes/product/roadmap.js';
+import productReleases from './routes/product/releases.js';
+import productFeedback from './routes/product/feedback.js';
+import aiPrompts from './routes/ai/prompts.js';
+import aiTools from './routes/ai/tools.js';
+import aiRag from './routes/ai/rag.js';
+import aiAssist from './routes/ai/assistants.js';
+import aiEvals from './routes/ai/evals.js';
+import aiExps from './routes/ai/experiments.js';
+import aiSafety from './routes/ai/safety.js';
+import aiRun from './routes/ai/run.js';
 
 dotenv.config();
 
@@ -70,6 +88,9 @@ app.use(express.json());
 app.use('/api/clm', clmTemplates, clmContracts, clmApprovals, clmEsign, clmOblig);
 app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
 app.use('/api/mkt', mktSegments, mktCampaigns, mktJourneys, mktTemplates, mktScore, mktUtm);
+app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
+app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFeedback);
+app.use('/api/ai', aiPrompts, aiTools, aiRag, aiAssist, aiEvals, aiExps, aiSafety, aiRun);
 
 const port = process.env.PORT || 4000;
 
