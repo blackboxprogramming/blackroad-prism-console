@@ -21,6 +21,9 @@ function defaultWin(key) {
   const layout = APPS[key] || {};
   const size = layout.size || {};
 
+function defaultWindow(key) {
+  const layout = APPS[key];
+  const size = layout?.size || {};
   return {
     id: createId(),
     app: key,
@@ -63,6 +66,15 @@ function loadLayout() {
       request.result.createObjectStore("layout");
     };
 
+    if (!globalThis.indexedDB) {
+      resolve([]);
+      return;
+    }
+    const request = indexedDB.open("prism-desktop", 1);
+    request.onupgradeneeded = () => {
+      request.result.createObjectStore("layout");
+    };
+    request.onerror = () => resolve([]);
     request.onsuccess = () => {
       const db = request.result;
       const tx = db.transaction("layout", "readonly");
@@ -78,6 +90,9 @@ function loadLayout() {
     };
 
     request.onerror = () => resolve([]);
+      getReq.onsuccess = () => resolve(Array.isArray(getReq.result) ? getReq.result : []);
+      getReq.onerror = () => resolve([]);
+    };
   });
 }
 
@@ -92,6 +107,13 @@ function saveLayout(windows) {
     request.result.createObjectStore("layout");
   };
 
+  if (!globalThis.indexedDB) {
+    return;
+  }
+  const request = indexedDB.open("prism-desktop", 1);
+  request.onupgradeneeded = () => {
+    request.result.createObjectStore("layout");
+  };
   request.onsuccess = () => {
     const db = request.result;
     const tx = db.transaction("layout", "readwrite");
@@ -293,6 +315,15 @@ function renderApp(key) {
   return <Component />;
 }
 
+function renderApp(key) {
+  const entry = APPS[key];
+  if (!entry || !entry.component) {
+    return null;
+  }
+  const Component = entry.component;
+  return <Component />;
+}
+
 export default function Desktop() {
   return (
     <div className="min-h-screen bg-[#05070F] text-white">
@@ -434,9 +465,45 @@ export default function Desktop() {
   return (
     <div
       className="w-screen h-screen relative overflow-hidden"
+  const [windows, setWindows] = useState([]);
+
+  useEffect(() => {
+    let ignore = false;
+    loadLayout().then((data) => {
+      if (!ignore) {
+        setWindows(data.map((win) => ({ ...defaultWindow(win.app), ...win, id: win.id || createId() })));
+      }
+    });
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    saveLayout(windows);
+  }, [windows]);
+
+  const openWindow = (key) => {
+    if (!APPS[key]) return;
+    setWindows((prev) => {
+      const existing = prev.find((win) => win.app === key);
+      if (existing) {
+        return prev.map((win) => (win.app === key ? { ...win, minimized: false } : win));
+      }
+      return [...prev, defaultWindow(key)];
+    });
+  };
+
+  const updateWindow = (id, patch) => {
+    setWindows((prev) => prev.map((win) => (win.id === id ? { ...win, ...patch } : win)));
+  };
+
+  return (
+    <div
+      className="relative h-screen w-screen overflow-hidden"
       style={{ background: "linear-gradient(135deg,#FF4FD8,#0096FF,#FDBA2D)" }}
     >
-      {wins.map((win) => (
+      {windows.map((win) => (
         <Window
           key={win.id}
           win={win}
@@ -444,17 +511,23 @@ export default function Desktop() {
           onToggleMin={() => update(win.id, { minimized: !win.minimized })}
           onToggleMax={() => update(win.id, { maximized: !win.maximized })}
           onUpdate={(data) => update(win.id, data)}
+          onClose={() => setWindows((prev) => prev.filter((item) => item.id !== win.id))}
+          onToggleMin={() => updateWindow(win.id, { minimized: !win.minimized })}
+          onToggleMax={() => updateWindow(win.id, { maximized: !win.maximized })}
+          onUpdate={(patch) => updateWindow(win.id, patch)}
         >
           {renderApp(win.app)}
         </Window>
       ))}
 
-      <div className="taskbar absolute bottom-0 left-0 right-0 bg-black/60 text-white flex gap-2 p-2">
+      <div className="absolute inset-x-0 bottom-0 flex items-center gap-3 bg-black/60 px-3 py-2 text-white">
         {Object.entries(APPS).map(([key, app]) => (
           <button
             key={key}
-            onClick={() => open(key)}
-            className="px-2 py-1 bg-white/20 rounded hover:bg-white/30"
+            type="button"
+            onClick={() => openWindow(key)}
+            className="rounded bg-white/15 px-3 py-1 text-sm font-semibold tracking-wide hover:bg-white/25"
+            title={app.title}
           >
             {app.icon}
           </button>
