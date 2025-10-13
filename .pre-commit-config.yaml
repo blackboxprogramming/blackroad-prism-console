@@ -32,6 +32,13 @@ repos:
       - id: eslint
         args: ['--fix']
         files: "\\.(js|jsx|ts|tsx)$"
+  - repo: https://github.com/gitguardian/ggshield
+    rev: v1.25.0
+    hooks:
+      - id: ggshield
+        name: ggshield secret scan (GitGuardian)
+        args: ["secret", "scan", "pre-commit"]
+        pass_filenames: false
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.18.4
     hooks:
