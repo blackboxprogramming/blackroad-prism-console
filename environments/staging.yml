@@ -1,0 +1,8 @@
+name: staging
+url: https://staging.blackroad.io
+reviewers:
+  - blackboxprogramming
+  - platform-duty
+notes:
+  - Primary integration environment for release candidates.
+  - Deploys via Fly.io for the web tier and AWS ECS for APIs.

@@ -2,3 +2,5 @@ name: production
 url: https://blackroad.io
 reviewers:
   - blackboxprogramming
+notes:
+  - Public site served via GitHub Pages; API and relay live on AWS ECS.
