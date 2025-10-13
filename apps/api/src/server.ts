@@ -129,6 +129,24 @@ import devGW from './routes/dev/gateway.js';
 import devHooks from './routes/dev/webhooks.js';
 import devDocs from './routes/dev/docs.js';
 import devAnalytics from './routes/dev/analytics.js';
+import tprmV from './routes/tprm/vendors.js';
+import tprmQ from './routes/tprm/questionnaires.js';
+import tprmR from './routes/tprm/risk_issues.js';
+import tprmM from './routes/tprm/monitor_sla.js';
+import tprmMap from './routes/tprm/mapping.js';
+import tprmB from './routes/tprm/breach.js';
+import portalAnn from './routes/portal/announcements.js';
+import portalCh from './routes/portal/channels.js';
+import portalPrefs from './routes/portal/prefs_acks.js';
+import portalBan from './routes/portal/banners.js';
+import portalI18n from './routes/portal/i18n.js';
+import portalSearch from './routes/portal/search.js';
+import atsJC from './routes/ats/jobs_candidates.js';
+import atsAPP from './routes/ats/applications.js';
+import atsINT from './routes/ats/interviews.js';
+import atsOF from './routes/ats/offers_bg.js';
+import atsOB from './routes/ats/onboarding.js';
+import atsAR from './routes/ats/analytics_reports.js';
 
 dotenv.config();
 
@@ -238,6 +256,9 @@ app.use('/api/agents/discord', agentsDiscord);
 app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamTokens, iamSecrets, iamDevices);
 app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
 app.use('/api/dev', devApis, devKeys, devPlans, devGW, devHooks, devDocs, devAnalytics);
+app.use('/api/tprm', tprmV, tprmQ, tprmR, tprmM, tprmMap, tprmB);
+app.use('/api/portal', portalAnn, portalCh, portalPrefs, portalBan, portalI18n, portalSearch);
+app.use('/api/ats', atsJC, atsAPP, atsINT, atsOF, atsOB, atsAR);
 
 const port = process.env.PORT || 4000;
 
