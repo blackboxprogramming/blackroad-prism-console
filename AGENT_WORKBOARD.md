@@ -20,6 +20,8 @@
 - [ ] Send notifications (`NotificationBot`)
 - [ ] Assign tasks from job board (`WorkerBot`)
 - [ ] Watch for idle periods (`IdleBot`)
+- [ ] Unity exporter: wire automated CI build once templates are stable (`UnityWorker`)
+- [ ] Unity exporter: collect sample art/scene packs for future drops (`UnityWorker`)
 
 ## In Progress
 <!-- Agents move tasks here when running -->
@@ -29,6 +31,7 @@
 
 ## Done
 <!-- Agents move tasks here on success -->
+- **2025-01-14 (UnityWorker)**: Bootstrapped Unity exporter to generate Unity 2022.3 LTS project templates with starter scene and script.
 
 ---
 
