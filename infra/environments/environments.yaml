@@ -1,0 +1,151 @@
+apiVersion: ops.blackroad.io/v1alpha1
+kind: EnvironmentSet
+metadata:
+  service: prism-console
+  owners:
+    - platform@blackroad.io
+  description: Canonical deploy surfaces for Prism Console across preview, staging, and production.
+  documentation: DEPLOYMENT.md
+environments:
+  preview:
+    summary: Ephemeral environments created per pull request for UI/UX validation and integration testing.
+    lifecycle: ephemeral
+    source:
+      trigger: pull_request
+      branches:
+        - main
+      workflow: .github/workflows/deploy-preview.yml
+    targets:
+      - name: prism-console-preview
+        provider: fly.io
+        app: prism-console-preview
+        region: den
+        release:
+          strategy: rolling
+          concurrency: 1
+          resources:
+            cpu: shared-cpu-1x
+            memoryMB: 512
+        artifact:
+          type: container-image
+          image: "ghcr.io/blackroad/prism-console:${{ github.sha }}"
+        endpoints:
+          - type: https
+            url: "https://pr-${{ github.event.number }}.preview.blackroad.run"
+    policies:
+      promotion:
+        requires:
+          - status: lint
+          - status: unit-tests
+      rollback:
+        runbook: RUNBOOK.md#preview-rollbacks
+  staging:
+    summary: Persistent environment for release candidate hardening and integration with managed services.
+    lifecycle: persistent
+    source:
+      trigger: branch
+      branches:
+        - staging
+      workflow: .github/workflows/deploy-staging.yml
+    targets:
+      - name: prism-console-staging
+        provider: fly.io
+        app: prism-console-staging
+        region: ord
+        release:
+          strategy: rolling
+          maxUnavailable: 1
+          resources:
+            cpu: performance-1x
+            memoryMB: 1024
+        artifact:
+          type: container-image
+          image: "ghcr.io/blackroad/prism-console:${{ github.sha }}"
+        endpoints:
+          - type: https
+            url: "https://staging.console.blackroad.io"
+      - name: job-workers
+        provider: aws-ecs
+        cluster: prism-shared-staging
+        service: prism-console-workers
+        region: us-east-1
+        taskDefinition: prism-console-workers
+        release:
+          strategy: canary
+          bakeTimeMinutes: 15
+          alarms:
+            - arn: arn:aws:cloudwatch:us-east-1:123456789012:alarm:prism-console-worker-errors-staging
+    policies:
+      promotion:
+        requires:
+          - status: integration-tests
+          - checklist: qa-signoff
+          - checklist: security-review
+      rollback:
+        runbook: RUNBOOK.md#staging-rollbacks
+  production:
+    summary: Customer-facing environment serving prism.blackroad.io with failover automation.
+    lifecycle: persistent
+    source:
+      trigger: release
+      workflow: .github/workflows/deploy-production.yml
+    targets:
+      - name: prism-console-prod-web
+        provider: aws-ecs
+        cluster: prism-shared-prod
+        service: prism-console-web
+        region: us-east-1
+        taskDefinition: prism-console-web
+        release:
+          strategy: blue-green
+          bakeTimeMinutes: 30
+          approvals:
+            - stakeholder: platform-lead
+            - stakeholder: security
+          alarms:
+            - arn: arn:aws:cloudwatch:us-east-1:123456789012:alarm:prism-console-5xx-prod
+            - arn: arn:aws:cloudwatch:us-east-1:123456789012:alarm:prism-console-latency-prod
+        endpoints:
+          - type: https
+            url: "https://prism.blackroad.io"
+      - name: prism-console-prod-workers
+        provider: aws-ecs
+        cluster: prism-shared-prod
+        service: prism-console-workers
+        region: us-east-1
+        taskDefinition: prism-console-workers
+        release:
+          strategy: blue-green
+          bakeTimeMinutes: 30
+          approvals:
+            - stakeholder: platform-lead
+          alarms:
+            - arn: arn:aws:cloudwatch:us-east-1:123456789012:alarm:prism-console-worker-errors-prod
+      - name: status-site
+        provider: fly.io
+        app: prism-console-status
+        region: iad
+        release:
+          strategy: rolling
+          resources:
+            cpu: shared-cpu-1x
+            memoryMB: 256
+        artifact:
+          type: static-site
+          path: infra/status-site/public
+        endpoints:
+          - type: https
+            url: "https://status.blackroad.io"
+    policies:
+      promotion:
+        requires:
+          - checklist: release-manager-approval
+          - checklist: change-advisory-signoff
+          - status: observability-green
+      rollback:
+        runbook: RUNBOOK.md#production-rollbacks
+    compliance:
+      dataResidency: us
+      incidentComms:
+        slackChannel: "#status"
+        statusPage: infra/status-site/README.md
