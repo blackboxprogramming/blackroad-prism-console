@@ -33,6 +33,7 @@ extension points for future integrations.
 | 031 | The Silence Accord     | Silence respected as an intentional, user-led state. |
 | 028 | The Custodianship Code | Custodial stewardship over ownership and power. |
 | 034 | The Humility Clause    | Confidence with limits, always signaling uncertainty. |
+| 018 | The Memory Covenant    | Memory stays purposeful, finite, and revocable. |
 
 ## BlackRoad Pipeline
 
