@@ -34,6 +34,15 @@ function closeDb() {
   }
 }
 
+function nowISO() {
+  return new Date().toISOString();
+}
+
+function isoAfterMinutes(minutes) {
+  const mins = Number.isFinite(minutes) ? Math.max(0, minutes) : 0;
+  return new Date(Date.now() + mins * 60 * 1000).toISOString();
+}
+
 // ---- Users ----
 function addUser(email, passwordHash) {
   const id = uuidv4();
@@ -200,6 +209,9 @@ function mapException(row) {
     status: row.status,
     valid_from: row.valid_from,
     valid_until: row.valid_until,
+    ticket_system: row.ticket_system || null,
+    ticket_key: row.ticket_key || null,
+    ticket_url: row.ticket_url || null,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
@@ -209,7 +221,7 @@ function recordExceptionEvent(exceptionId, actor, action, note, at) {
   const db = getDb();
   db.prepare(
     'INSERT INTO exception_events (exception_id, at, actor, action, note) VALUES (?, ?, ?, ?, ?)',
-  ).run(exceptionId, at || new Date().toISOString(), actor, action, note || null);
+  ).run(exceptionId, at || nowISO(), actor, action, note || null);
 }
 
 function createException(entry) {
@@ -365,6 +377,126 @@ function addLog(service, message) {
 
 function getLogs() {
   return getDb().prepare('SELECT * FROM logs ORDER BY timestamp DESC').all();
+function setExceptionTicket(exceptionId, system, key, url) {
+  const db = getDb();
+  const now = nowISO();
+  db.prepare(
+    `UPDATE exceptions
+     SET ticket_system = ?, ticket_key = ?, ticket_url = ?, updated_at = ?
+     WHERE id = ?`,
+  ).run(system || null, key || null, url || null, now, exceptionId);
+  return getException(exceptionId);
+}
+
+const PENDING_TICKET_KEY = '__pending_ticket__';
+
+function claimExceptionTicket(exceptionId, system = null) {
+  const db = getDb();
+  const select = db.prepare('SELECT * FROM exceptions WHERE id = ?');
+  const update = db.prepare(
+    `UPDATE exceptions
+     SET ticket_system = ?, ticket_key = ?, ticket_url = NULL, updated_at = ?
+     WHERE id = ? AND ticket_key IS NULL`,
+  );
+
+  const tx = db.transaction((id) => {
+    const current = select.get(id);
+    if (!current) {
+      return { exception: null, status: 'not_found' };
+    }
+
+    if (current.ticket_key && current.ticket_key !== PENDING_TICKET_KEY) {
+      return { exception: current, status: 'has_ticket' };
+    }
+
+    if (current.ticket_key === PENDING_TICKET_KEY) {
+      return { exception: current, status: 'pending' };
+    }
+
+    const now = nowISO();
+    const result = update.run(system || null, PENDING_TICKET_KEY, now, id);
+    if (result.changes === 0) {
+      const refreshed = select.get(id);
+      if (!refreshed) {
+        return { exception: null, status: 'not_found' };
+      }
+      if (refreshed.ticket_key === PENDING_TICKET_KEY) {
+        return { exception: refreshed, status: 'pending' };
+      }
+      if (refreshed.ticket_key) {
+        return { exception: refreshed, status: 'has_ticket' };
+      }
+      return { exception: refreshed, status: 'unavailable' };
+    }
+
+    const claimed = select.get(id);
+    return { exception: claimed, status: 'claimed' };
+  });
+
+  return tx(exceptionId);
+}
+
+function releasePendingTicket(exceptionId) {
+  const db = getDb();
+  const now = nowISO();
+  const result = db
+    .prepare(
+      `UPDATE exceptions
+       SET ticket_system = NULL, ticket_key = NULL, ticket_url = NULL, updated_at = ?
+       WHERE id = ? AND ticket_key = ?`,
+    )
+    .run(now, exceptionId, PENDING_TICKET_KEY);
+  return result.changes > 0;
+}
+
+function getTicketQueueEntry(exceptionId) {
+  return getDb().prepare('SELECT * FROM ticket_queue WHERE exception_id = ?').get(exceptionId);
+}
+
+function upsertTicketQueue(exceptionId, attempts, lastError, delayMinutes = 10) {
+  const db = getDb();
+  const now = nowISO();
+  const nextTry = isoAfterMinutes(delayMinutes);
+  db.prepare(
+    `INSERT INTO ticket_queue (exception_id, attempts, last_error, next_try, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT(exception_id) DO UPDATE SET
+       attempts = excluded.attempts,
+       last_error = excluded.last_error,
+       next_try = excluded.next_try,
+       updated_at = excluded.updated_at`,
+  ).run(exceptionId, attempts, lastError || null, nextTry, now, now);
+  return getTicketQueueEntry(exceptionId);
+}
+
+function getDueTicketQueue(limit = 20) {
+  return getDb()
+    .prepare(
+      `SELECT * FROM ticket_queue
+       WHERE datetime(next_try) <= datetime('now')
+       ORDER BY datetime(next_try) ASC
+       LIMIT ?`,
+    )
+    .all(limit);
+}
+
+function updateTicketQueue(id, attempts, lastError, delayMinutes = 10) {
+  const db = getDb();
+  const now = nowISO();
+  const nextTry = isoAfterMinutes(delayMinutes);
+  db.prepare(
+    `UPDATE ticket_queue
+     SET attempts = ?, last_error = ?, next_try = ?, updated_at = ?
+     WHERE id = ?`,
+  ).run(attempts, lastError || null, nextTry, now, id);
+}
+
+function deleteTicketQueue(id) {
+  getDb().prepare('DELETE FROM ticket_queue WHERE id = ?').run(id);
+}
+
+function deleteTicketQueueByException(exceptionId) {
+  getDb().prepare('DELETE FROM ticket_queue WHERE exception_id = ?').run(exceptionId);
 }
 
 module.exports = {
@@ -393,5 +525,16 @@ module.exports = {
   denyException,
   revokeException,
   expireApprovedExceptions,
+  recordExceptionEvent,
+  setExceptionTicket,
+  getTicketQueueEntry,
+  upsertTicketQueue,
+  getDueTicketQueue,
+  updateTicketQueue,
+  deleteTicketQueue,
+  deleteTicketQueueByException,
+  claimExceptionTicket,
+  releasePendingTicket,
+  PENDING_TICKET_KEY,
 };
 
