@@ -36,6 +36,7 @@ your API, install missing npm packages, set up env defaults, and (optionally) bo
 LLM stub on port **8000** if none is running.
 
 **What’s included**
+
 - `ops/install.sh` — one-shot setup for `/srv/blackroad-api` (or detected API path)
 - `tools/dep-scan.js` — scans JS/TS for `require()`/`import` usage and installs missing packages
 - `tools/verify-runtime.sh` — quick health checks (API on 4000, LLM on 8000)
@@ -59,10 +60,12 @@ LLM stub on port **8000** if none is running.
 **On the server**
 
 **On your workstation**
-1) Unzip this at the **root of your working copy** (where your repo root lives).
-2) Commit and push.
+
+1. Unzip this at the **root of your working copy** (where your repo root lives).
+2. Commit and push.
 
 **On the server**
+
 ```bash
 cd /path/to/your/working/copy
 sudo bash ops/install.sh
@@ -120,6 +123,7 @@ up-to-date.
 ## Developing with VS Code and Docker on macOS
 
 ## Developing with VS Code and Docker on macOS
+
 1. Start [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac/).
 2. Install [Visual Studio Code](https://code.visualstudio.com/) and the **Dev Containers** extension.
 3. Open this repository in VS Code and select **Reopen in Container** to use `.devcontainer/devcontainer.json`.
@@ -170,6 +174,7 @@ Example calls:
 
 ```bash
 ## Notes & assumptions
+
 - Stack recorded in memory (Aug 2025): SPA on `/var/www/blackroad/index.html`, Express API on port **4000**
   at `/srv/blackroad-api` with SQLite; LLM service on **127.0.0.1:8000**; NGINX proxies `/api` and `/ws`.
 - This bundle does **not** ship `node_modules/` (native builds vary by machine). Instead, it generates
@@ -527,6 +532,7 @@ cd prism/server
 npm install
 npm run dev
 ```
+
 ## Unified Sync Pipeline
 
 Use `scripts/blackroad_sync.sh` to drive a chat-style deployment flow.
@@ -555,16 +561,19 @@ python -m cli.console task:route --id <ID> --bot "Treasury-BOT"
 ```
 
 The script also understands:
+
 - "Refresh working copy and redeploy"
 - "Rebase branch and update site"
 - "Sync Salesforce -> Airtable -> Droplet"
 
 It pulls from GitHub, triggers connector webhooks, updates a Working Copy checkout, and
 executes a remote refresh command on the droplet.
+
 ### BlackRoad Sync CLI
+
 `codex/tools/blackroad_sync.py` scaffolds a chat-friendly pipeline that mirrors
 commands like "Push latest to BlackRoad.io" or "Refresh working copy and
-redeploy".  Each sub-command currently logs the intended action:
+redeploy". Each sub-command currently logs the intended action:
 
 ```bash
 python codex/tools/blackroad_sync.py push
@@ -682,6 +691,7 @@ python scripts/blackroad_ci.py "Sync Salesforce -> Airtable -> Droplet"
 
 Connector and deployment steps are stubs; configure environment variables and
 extend the script to interact with real services.
+
 # BlackRoad Prism Console
 
 This repository contains assorted utilities for the BlackRoad project.
@@ -701,7 +711,9 @@ python scripts/blackroad_pipeline.py "Push latest to BlackRoad.io"
 
 The phrases recognised by the controller can be listed by invoking the
 script with an unknown command.
+
 ## Sync & Deploy
+
 ## Codex Sync/Deploy
 
 An experimental control surface lives at `codex/tools/blackroad_pipeline.py`.
@@ -771,6 +783,7 @@ into real connectors and infrastructure.
 - **Labeler/Stale/Lock**: repo hygiene.
 - **Auto-merge**: merges labeled PRs when checks pass.
 - **CodeQL/Snyk/Scorecard**: security analysis.
+
 ## Deployment
 
 Run the scaffolded end-to-end sync script to push local changes and deploy them
@@ -815,6 +828,7 @@ scripts/blackroad_codex.sh sync
 ```
 
 Set `REMOTE`, `BRANCH`, and `DROPLET_HOST` to customize targets. Provide `SLACK_WEBHOOK` to post updates.
+
 ## BlackRoad Sync & Deploy
 
 Run `scripts/blackroad_sync.sh` to push the latest changes to GitHub and roll them out to the droplet. The script accepts natural language commands, for example:
@@ -825,6 +839,7 @@ scripts/blackroad_sync.sh "Refresh working copy and redeploy"
 ```
 
 Set `WORKING_COPY_SSH`, `DROPLET_SSH`, and optionally `SLACK_WEBHOOK` environment variables before running. Logs are written to `blackroad_sync.log`.
+
 ## Codex Sync & Deploy
 
 An initial scaffold for the end-to-end BlackRoad deployment flow lives in
@@ -844,6 +859,7 @@ python3 scripts/blackroad_sync.py deploy --host user@droplet
 
 The script only prints the operations it would perform, acting as a
 placeholder for future automation.
+
 ---
 
 ## Codex Deploy Flow
@@ -885,3 +901,7 @@ scripts/blackroad_sync.py push -m "feat: update site"
 scripts/blackroad_sync.py refresh
 scripts/blackroad_sync.py sync-connectors
 ```
+
+## Backbone Equations Reference
+
+See [docs/blackroad-equation-backbone.md](docs/blackroad-equation-backbone.md) for a curated list of one hundred foundational equations across mathematics, physics, computer science, and engineering.
