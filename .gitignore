@@ -40,6 +40,10 @@ __pycache__/
 codex/runtime/
 benchmarks/
 
+# Python packaging artifacts
+*.egg-info/
+**/*.egg-info/
+
 # Lucidia artifacts
 secrets/*
 datasets/
