@@ -30,6 +30,7 @@ extension points for future integrations.
 | 028 | The Custodianship Code  | Stewardship keeps Lucidia tended, transparent, safe. |
 | 033 | The Wholeness Rule      | People remain whole; balance is built into Lucidia.  |
 | 027 | The Integrity Pact     | Honest metrics, transparent reporting, visible corrections. |
+| 031 | The Silence Accord     | Silence respected as an intentional, user-led state. |
 
 ## BlackRoad Pipeline
 
