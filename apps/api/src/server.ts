@@ -105,6 +105,15 @@ import relRel from './routes/release/rel.js';
 import patchV from './routes/patch/vuln.js';
 import patchP from './routes/patch/plan.js';
 import lic from './routes/cmdb/license.js';
+import iamIdp from './routes/iam/idp.js';
+import iamDir from './routes/iam/directory.js';
+import iamPol from './routes/iam/policies.js';
+import iamPdp from './routes/iam/pdp.js';
+import iamScim from './routes/iam/scim.js';
+import iamAccess from './routes/iam/access.js';
+import iamTokens from './routes/iam/tokens.js';
+import iamSecrets from './routes/iam/secrets.js';
+import iamDevices from './routes/iam/devices.js';
 import ds from './routes/aiops/datasets.js';
 import ft from './routes/aiops/features.js';
 import ex from './routes/aiops/experiments.js';
@@ -219,6 +228,8 @@ app.use('/api/auth/okta', okta);
 app.use('/api/agents/command', agentsCommand);
 app.use('/api/agents/slack', agentsSlack);
 app.use('/api/agents/discord', agentsDiscord);
+app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamTokens, iamSecrets, iamDevices);
+app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
 
 const port = process.env.PORT || 4000;
 
