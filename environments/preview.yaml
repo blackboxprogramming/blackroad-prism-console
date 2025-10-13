@@ -1,0 +1,95 @@
+meta:
+  name: preview
+  tier: ephemeral
+  description: Ephemeral review environments created per pull request for web + API smoke testing.
+  owners:
+    - platform@blackroad.io
+  tags: [preview, ecs, terraform, pr]
+
+runtime:
+  code:
+    repo: blackroad-prism-console
+    entrypoints:
+      - path: sites/blackroad
+        type: nextjs
+      - path: srv/blackroad-api
+        type: express
+  artifacts:
+    - workflow: .github/workflows/prism-ci.yml
+      produces: [docker-image, static-assets]
+    - workflow: .github/workflows/preview-frontend-host.yml
+      produces: [docker-image]
+
+infrastructure:
+  compute:
+    - id: pr-console
+      platform: aws-ecs
+      description: Fargate task that serves the combined Next.js app behind the shared ALB.
+      cluster: prism-preview
+      task_family: br-web-preview
+      cpu: 256
+      memory: 512
+      container_port: 3000
+      desired_count: 1
+      autoscaling:
+        min: 1
+        max: 3
+        policy: request-per-target
+        target: 50
+      image:
+        registry: ${{ secrets.PREVIEW_ENV_ECR_REGISTRY }}
+        repository: ${{ secrets.PREVIEW_ENV_ECR_REPOSITORY }}
+        tag_pattern: pr${PR_NUMBER}
+      source: infra/preview-env
+  networking:
+    - domain: dev.blackroad.io
+      type: route53-hosted-zone
+      records:
+        - name: pr-<pr>.dev.blackroad.io
+          target: application-load-balancer
+          alb_listener: arn:aws:elasticloadbalancing:us-east-1:ACCOUNT:listener/app/preview/https
+    - domain: web.dev.blackroad.io
+      type: route53-hosted-zone
+      records:
+        - name: pr-<pr>.web.dev.blackroad.io
+          target: application-load-balancer
+          alb_listener: arn:aws:elasticloadbalancing:us-east-1:ACCOUNT:listener/app/preview/https
+  data:
+    - name: preview-shared-state
+      type: terraform-backend
+      backend: s3
+      bucket: ${{ secrets.PREVIEW_ENV_TF_STATE_BUCKET }}
+      locking_table: ${{ secrets.PREVIEW_ENV_TF_LOCK_TABLE }}
+  secrets:
+    - name: preview-runtime
+      description: Injected environment variables (API keys, tokens) for PR previews.
+      source: secrets manager JSON referenced by PREVIEW_ENV_SECRETS_JSON.
+
+operations:
+  deployments:
+    - workflow: .github/workflows/preview-env.yml
+      description: Builds the PR image, provisions ECS service + DNS, and posts preview URL.
+      approvals: []
+    - workflow: .github/workflows/preview-frontend-host.yml
+      description: Alternate lightweight preview path for the static frontend.
+      approvals: []
+  observability:
+    - name: awslogs
+      description: Container logs shipped to CloudWatch log group `/blackroad/br-web-pr-<pr>`.
+    - name: slack-preview
+      description: Preview notifications delivered to Slack channel stored in SLACK_PREVIEW_CHANNEL.
+  runbooks:
+    - name: preview-destroy
+      url: RUNBOOK.md#preview-environments
+      summary: Manual cleanup steps if automation fails to destroy resources.
+  compliance:
+    - control: retention
+      description: ECS task logs retained for 14 days.
+    - control: isolation
+      description: Preview stack runs in isolated subnets with dedicated security groups.
+
+slo:
+  availability: best-effort
+  latency_ms_p95: 800
+  rto_minutes: 30
+  rpo_minutes: 0

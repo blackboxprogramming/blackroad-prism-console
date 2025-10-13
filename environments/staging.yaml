@@ -1,0 +1,152 @@
+meta:
+  name: staging
+  tier: stable
+  description: Production-like stack for regression, load, and rollout rehearsals before promoting to prod.
+  owners:
+    - platform@blackroad.io
+    - sre@blackroad.io
+  tags: [staging, fly.io, ecs, canary]
+
+runtime:
+  code:
+    repo: blackroad-prism-console
+    entrypoints:
+      - path: sites/blackroad
+        type: nextjs
+      - path: srv/blackroad-api
+        type: express
+      - path: deploy/scripts
+        type: ops-tooling
+  artifacts:
+    - workflow: .github/workflows/prism-ci.yml
+      produces: [docker-image, static-assets]
+    - workflow: .github/workflows/deploy-canary.yml
+      produces: [docker-image]
+    - workflow: .github/workflows/pages-stage.yml
+      produces: [static-artifact]
+
+infrastructure:
+  compute:
+    - id: staging-web
+      platform: fly.io
+      app: blackroad-staging
+      regions: [iad, ord, fra]
+      machine_size: shared-cpu-2x
+      min_machines: 2
+      max_machines: 4
+      release_channel: staging
+      health_checks:
+        http_path: /healthz
+        interval_seconds: 15
+    - id: staging-api
+      platform: aws-ecs
+      cluster: prism-staging
+      service: prism-console
+      task_family: prism-console-staging
+      cpu: 512
+      memory: 1024
+      desired_count: 2
+      autoscaling:
+        min: 2
+        max: 6
+        policy: request-per-target
+        target: 60
+      network:
+        subnets: private
+        security_groups: [sg-prism-staging-web]
+      load_balancer:
+        type: application
+        listener_arn: arn:aws:elasticloadbalancing:us-east-1:ACCOUNT:listener/app/prism-staging/https
+        target_groups:
+          - name: tg-blue
+            weight: 100
+          - name: tg-green
+            weight: 0
+    - id: staging-workers
+      platform: aws-ecs
+      cluster: prism-staging
+      service: async-jobs
+      schedule: cron(*/5 * * * ? *)
+      cpu: 256
+      memory: 512
+  data:
+    - name: staging-db
+      type: aws-aurora-postgresql
+      cluster: br-prism-stg
+      engine_version: '15.3'
+      instance_class: db.t4g.medium
+      multi_az: true
+      backups:
+        retention_days: 7
+        preferred_window: 05:00-06:00UTC
+    - name: staging-redis
+      type: elasticache-redis
+      node_class: cache.t3.small
+      multi_az: true
+      retention_hours: 0
+    - name: staging-artifacts
+      type: s3-bucket
+      bucket: br-prism-stg-artifacts
+      encryption: aws-managed
+      lifecycle:
+        - rule: expire-preview-builds
+          prefix: preview/
+          expiration_days: 3
+  networking:
+    - domain: staging.blackroad.io
+      provider: cloudflare
+      records:
+        - type: CNAME
+          name: staging
+          target: blackroad-staging.fly.dev
+          proxied: true
+    - domain: api.staging.blackroad.io
+      provider: cloudflare
+      records:
+        - type: CNAME
+          name: api.staging
+          target: prism-staging-alb-123.us-east-1.elb.amazonaws.com
+          proxied: false
+  secrets:
+    - name: staging-runtime
+      source: aws-ssm-parameter-store
+      path: /blackroad/staging/
+    - name: staging-deploy
+      source: github-actions
+      description: GitHub environment secrets + vars (AWS role, Fly API token, Slack webhook).
+
+operations:
+  deployments:
+    - workflow: .github/workflows/deploy-canary.yml
+      description: Builds image, registers ECS task, and adjusts ALB weights for staged rollout.
+      approvals:
+        - sre@blackroad.io
+    - workflow: .github/workflows/pages-stage.yml
+      description: Produces static proofs for staging domain.
+      approvals: []
+    - command: /deploy blackroad staging
+      description: ChatOps alias that triggers the staging pipeline via WebsiteBot.
+  observability:
+    - name: grafana-staging
+      url: https://grafana.blackroad.io/d/staging-overview
+      description: Unified dashboards (ALB, Fly latency, worker queues).
+    - name: pagerduty-service
+      description: PagerDuty service "Prism Staging" with auto-escalation after 10 minutes.
+  runbooks:
+    - name: rollback
+      url: ROLLBACK.md#staging
+      summary: Steps to flip ALB weights back or revert Fly release.
+    - name: promote
+      url: RUNBOOK.md#promote-staging-to-prod
+      summary: Promotion checklist and verification plan.
+  compliance:
+    - control: access-review
+      description: Quarterly review of staging IAM roles (see access-review-quarterly workflow).
+    - control: data-sanitisation
+      description: Production dumps are de-identified before loading into staging.
+
+slo:
+  availability: 99.5%
+  latency_ms_p95: 600
+  rto_minutes: 30
+  rpo_minutes: 15
