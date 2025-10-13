@@ -38,6 +38,9 @@ def set_auth_token(payload: Dict[str, Any] | None) -> Dict[str, Any]:
     save_cfg(cfg)
     return {"ok": True, "enabled": bool(token)}
 """FastAPI surface for the BlackRoad device dashboard."""
+"""FastAPI application exposing BlackRoad agent endpoints."""
+
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict
@@ -56,6 +59,19 @@ templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
 @app.get("/", response_class=HTMLResponse)
 def dashboard(request: Request) -> HTMLResponse:
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
+
+from agent import discover
+from agent.config import active_target, set_target
+
+app = FastAPI(title="BlackRoad Agent", docs_url="/_docs")
+_templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent / "templates"))
+
+
+@app.get("/")
+def dashboard(request: Request):
+    """Serve the dashboard template."""
     context: Dict[str, Any] = {
         "request": request,
         "target": active_target(),
@@ -65,6 +81,11 @@ def dashboard(request: Request) -> HTMLResponse:
 
 @app.get("/discover/scan")
 def discover_scan() -> Dict[str, Any]:
+    return _templates.TemplateResponse("dashboard.html", context)
+
+
+@app.get("/discover/scan")
+def discover_scan():
     return discover.scan()
 
 
@@ -82,11 +103,18 @@ def discover_set(payload: Dict[str, Any] = Body(...)) -> Dict[str, Any]:
         return {"ok": False, "error": str(exc)}
     except Exception:
         return {"ok": False, "error": "failed to update target"}
+def discover_set(j: Dict[str, Any]):
+    host = j.get("host")
+    user = j.get("user", "jetson")
+    if not host:
+        return {"ok": False, "error": "host required"}
+    set_target(host, user)
     return {"ok": True, "jetson": {"host": host, "user": user}}
 
 
 @app.get("/discover/target")
 def get_target() -> Dict[str, Any]:
+def discover_target():
     target = active_target()
     if not target:
         return {"ok": False, "jetson": None}
