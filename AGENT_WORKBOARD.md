@@ -20,6 +20,8 @@
 - [ ] Send notifications (`NotificationBot`)
 - [ ] Assign tasks from job board (`WorkerBot`)
 - [ ] Watch for idle periods (`IdleBot`)
+- [ ] Hook Unity exporter into the build queue with artifact uploads
+- [ ] Draft art direction brief for the "Gateway Plaza" starter scene
 
 ## In Progress
 <!-- Agents move tasks here when running -->
@@ -28,7 +30,7 @@
 <!-- Agents move tasks here if they fail, with error info -->
 
 ## Done
-<!-- Agents move tasks here on success -->
+- [x] Enrich Unity exporter with templated project output and metadata logging
 
 ---
 
@@ -44,3 +46,7 @@
 - Landed the RoadStudio pipeline MVP with deterministic renders and a golden-frame regression check.
 - Established observability baselines (OTel collectors, Prometheus/Grafana integration, exemplar stubs).
 - Next focus: auto-captioning, public API + SDKs, and tokenomics simulation unless strategic priorities shift.
+
+### 2025-10-06
+- Delivered Unity exporter MVP capable of generating structured scenes, scripts, and metadata-rich archives for collaborators.
+- Teed up follow-up tasks for queue integration and environment/world-building handoff.
