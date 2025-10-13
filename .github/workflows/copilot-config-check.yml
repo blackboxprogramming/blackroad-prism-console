@@ -1,0 +1,33 @@
+name: Copilot Config Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-copilot-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for Copilot secrets
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const org = process.env.GITHUB_REPOSITORY.split('/')[0];
+            const repo = process.env.GITHUB_REPOSITORY.split('/')[1];
+            const secrets = ['COPILOT_CLIENT_ID', 'COPILOT_CLIENT_SECRET'];
+            const missing = [];
+            for (const s of secrets) {
+              try {
+                const resp = await github.rest.actions.getRepoSecret({ owner: org, repo, secret_name: s });
+                if (!resp) missing.push(s);
+              } catch (e) {
+                missing.push(s);
+              }
+            }
+            if (missing.length) {
+              core.notice(`Missing Copilot secrets: ${missing.join(', ')}. See COPILOT_SETUP.md`);
+            } else {
+              core.info('Copilot secrets appear configured');
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

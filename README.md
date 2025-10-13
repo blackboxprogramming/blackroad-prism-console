@@ -12,6 +12,11 @@ LLM stub on port **8000** if none is running.
 > **Heads-up from the maintainer:** I'm still getting everything set up and I'm honestly not a
 > strong coder yet. Thank you for your patience if anything here is rough around the edges —
 > I'm doing my best and truly sorry for any bumps along the way.
+## Note on GitHub Copilot agent UI
+
+The Codespaces chat quick-actions are provided by GitHub Copilot's agent features and are
+controlled by the Copilot service (not repo files). See `COPILOT_SETUP.md` and
+`.github/copilot-instructions.md` for guidance to enable and tune Copilot agent behavior.
 
 **What’s included**
 
@@ -163,6 +168,7 @@ Example:
 ```
 
 The script also understands:
+
 - "Refresh working copy and redeploy"
 - "Rebase branch and update site"
 - "Sync Salesforce -> Airtable -> Droplet"
