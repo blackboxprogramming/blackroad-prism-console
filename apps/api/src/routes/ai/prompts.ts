@@ -1,34 +1,104 @@
 import { Router } from 'express';
 import fs from 'fs';
+import path from 'path';
+
 const r = Router();
-const IDX='ai/prompts/index.json';
-const DIR='ai/prompts/versions';
-const idx=()=> fs.existsSync(IDX)? JSON.parse(fs.readFileSync(IDX,'utf-8')) : { prompts:{} };
-const write=(o:any)=> { fs.mkdirSync('ai/prompts',{recursive:true}); fs.writeFileSync(IDX, JSON.stringify(o,null,2)); };
+const INDEX_PATH = path.join('ai', 'prompts', 'index.json');
+const VERSIONS_DIR = path.join('ai', 'prompts', 'versions');
+const KEY_PATTERN = /^[a-zA-Z0-9_.-]+$/;
+const VERSION_PATTERN = /^[a-zA-Z0-9_.-]+$/;
 
-r.post('/prompts/upsert',(req,res)=>{
-  const { key, version, role, content, metadata } = req.body||{};
-  const o=idx(); o.prompts[key] ||= { latest:null, versions:[] };
-  const v = version || `v${(o.prompts[key].versions?.length||0)+1}`;
-  fs.mkdirSync(DIR,{recursive:true});
-  fs.writeFileSync(`${DIR}/${key}@${v}.md`, content||'');
-  o.prompts[key].versions = Array.from(new Set([...(o.prompts[key].versions||[]), v]));
-  o.prompts[key].latest = v;
-  o.prompts[key].role = role||'system';
-  o.prompts[key].metadata = metadata||{};
-  write(o); res.json({ ok:true, key, version: v });
+const ensureIndexDir = () => fs.mkdirSync(path.dirname(INDEX_PATH), { recursive: true });
+const loadIndex = () => (fs.existsSync(INDEX_PATH) ? JSON.parse(fs.readFileSync(INDEX_PATH, 'utf-8')) : { prompts: {} });
+const writeIndex = (data: any) => {
+  ensureIndexDir();
+  fs.writeFileSync(INDEX_PATH, JSON.stringify(data, null, 2));
+};
+
+const sanitizeKey = (rawKey: unknown) => {
+  const key = String(rawKey ?? '');
+  if (!key || !KEY_PATTERN.test(key)) {
+    return null;
+  }
+  return key;
+};
+
+const sanitizeVersion = (rawVersion: unknown) => {
+  const version = String(rawVersion ?? '');
+  if (!version || !VERSION_PATTERN.test(version)) {
+    return null;
+  }
+  return version;
+};
+
+const buildVersionPath = (key: string, version: string) => path.join(VERSIONS_DIR, `${key}@${version}.md`);
+
+r.post('/prompts/upsert', (req, res) => {
+  const { key: rawKey, version: rawVersion, role, content, metadata } = req.body || {};
+  const key = sanitizeKey(rawKey);
+  if (!key) {
+    return res.status(400).json({ error: 'invalid_key' });
+  }
+
+  const index = loadIndex();
+  index.prompts[key] ||= { latest: null, versions: [] };
+
+  const existingVersions = index.prompts[key].versions || [];
+  const nextVersion = `v${(existingVersions.length || 0) + 1}`;
+  const version = rawVersion ? sanitizeVersion(rawVersion) : nextVersion;
+
+  if (!version) {
+    return res.status(400).json({ error: 'invalid_version' });
+  }
+
+  fs.mkdirSync(VERSIONS_DIR, { recursive: true });
+  fs.writeFileSync(buildVersionPath(key, version), content || '');
+
+  index.prompts[key].versions = Array.from(new Set([...existingVersions, version]));
+  index.prompts[key].latest = version;
+  index.prompts[key].role = role || 'system';
+  index.prompts[key].metadata = metadata || {};
+
+  writeIndex(index);
+  res.json({ ok: true, key, version });
 });
 
-r.get('/prompts/:key',(req,res)=>{
-  const key=String(req.params.key); const o=idx().prompts[key]; if(!o) return res.status(404).json({error:'not_found'});
-  const versions=(o.versions||[]).map((v:string)=>({ version:v, path:`ai/prompts/versions/${key}@${v}.md` }));
-  res.json({ key, latest:o.latest, role:o.role, metadata:o.metadata, versions });
+r.get('/prompts/:key', (req, res) => {
+  const key = sanitizeKey(req.params.key);
+  if (!key) {
+    return res.status(400).json({ error: 'invalid_key' });
+  }
+
+  const prompt = loadIndex().prompts[key];
+  if (!prompt) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  const versions = (prompt.versions || []).map((version: string) => ({
+    version,
+    path: path.posix.join('ai/prompts/versions', `${key}@${version}.md`),
+  }));
+
+  res.json({ key, latest: prompt.latest, role: prompt.role, metadata: prompt.metadata, versions });
 });
 
-r.post('/prompts/rollback',(req,res)=>{
-  const { key, version } = req.body||{};
-  const o=idx(); if (!o.prompts[key] || !(o.prompts[key].versions||[]).includes(version)) return res.status(404).json({error:'not_found'});
-  o.prompts[key].latest = version; write(o); res.json({ ok:true });
+r.post('/prompts/rollback', (req, res) => {
+  const { key: rawKey, version: rawVersion } = req.body || {};
+  const key = sanitizeKey(rawKey);
+  const version = sanitizeVersion(rawVersion);
+
+  if (!key || !version) {
+    return res.status(400).json({ error: 'invalid_key_or_version' });
+  }
+
+  const index = loadIndex();
+  if (!index.prompts[key] || !(index.prompts[key].versions || []).includes(version)) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+
+  index.prompts[key].latest = version;
+  writeIndex(index);
+  res.json({ ok: true });
 });
 
 export default r;

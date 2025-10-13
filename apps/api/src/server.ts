@@ -65,6 +65,7 @@ app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
 app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
 app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
+app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFeedback);
 app.use('/api/ai', aiPrompts, aiTools, aiRag, aiAssist, aiEvals, aiExps, aiSafety, aiRun);
 
 const port = process.env.PORT || 4000;
