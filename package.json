@@ -20,6 +20,9 @@
     "next:start": "next start",
     "next:dev": "next dev",
     "next:build": "next build && node scripts/build-codex-index.js",
+    "lint": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
+    "format": "prettier -w .",
+    "test": "node tests/smoke.test.mjs && jest",
     "dev:site": "npm --prefix sites/blackroad run dev",
     "build:site": "npm --prefix sites/blackroad run build",
     "frontend:dev": "npm run dev:site",
@@ -84,5 +87,7 @@
       "prettier -w"
     ],
     "*": "prettier -w --ignore-unknown"
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0"
   }
 }

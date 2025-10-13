@@ -34,7 +34,10 @@ find_free_port(){
 }
 
 update_nginx_port(){
-  local label=$1 port=$2
+  local label
+  label=$1
+  local port
+  port=$2
   sed -i "s/127\.0\.0\.1:[0-9]\+/127.0.0.1:${port}/" /etc/nginx/sites-enabled/blackroad.conf
   nginx -t && systemctl reload nginx && log "Rebound $label to port $port"
 }
@@ -52,7 +55,8 @@ install_math_deps(){ (cd "$MATH_DIR" && pip install -r requirements.txt) }
 
 perform_backup(){
   mkdir -p "$BACKUP_ROOT/blackroad" "$BACKUP_ROOT/lucidia-math"
-  local ts=$(date +%Y%m%d)
+  local ts
+  ts=$(date +%Y%m%d)
   tar -czf "$BACKUP_ROOT/blackroad/blackroad.db-$ts.tar.gz" -C "$API_DIR" blackroad.db
   tar -czf "$BACKUP_ROOT/lucidia-math/output-$ts.tar.gz" -C "$MATH_DIR" output
   log "Backup completed for $ts"
@@ -61,8 +65,27 @@ perform_backup(){
 }
 
 rotate_keep(){
-  local dir=$1 keep=$2
+  local dir
+  dir=$1
+  local keep
+  keep=$2
+  # shellcheck disable=SC2012
   ls -1t "$dir" | tail -n +$((keep+1)) | xargs -r -I{} rm "$dir/{}"
+}
+
+trigger_rollback(){
+  local latest
+  # shellcheck disable=SC2012
+  latest=$(ls -1t "$BACKUP_ROOT/blackroad"/* 2>/dev/null | head -n1 || true)
+  if [ -z "$latest" ]; then
+    log "No snapshots found; rollback skipped"
+    return 1
+  fi
+  if [ -x "$REPO/scripts/rollback.sh" ]; then
+    SNAPSHOT_FILE="$latest" DB_PATH="$API_DIR/blackroad.db" "$REPO/scripts/rollback.sh" || log "Rollback script failed"
+  else
+    log "Rollback script not found"
+  fi
 }
 
 update_repo(){
@@ -79,16 +102,23 @@ update_repo(){
 }
 
 update_failure_state(){
-  local now=$(date +%s)
-  local count=0 last=0
+  local now
+  now=$(date +%s)
+  local failure_count=0
+  local last_failure_time=0
   if [ -f "$STATE_FILE" ]; then
-    read count last <"$STATE_FILE"
+    if IFS=' ' read -r stored_count stored_last <"$STATE_FILE"; then
+      failure_count=$stored_count
+      last_failure_time=$stored_last
+    fi
   fi
-  if (( now - last > 600 )); then count=0; fi
-  count=$((count+1))
-  echo "$count $now" >"$STATE_FILE"
-  if (( count >= 3 )); then
-    log "Escalation: $count failures in 10 minutes"
+  if (( now - last_failure_time > 600 )); then failure_count=0; fi
+  failure_count=$((failure_count+1))
+  echo "$failure_count $now" >"$STATE_FILE"
+  if (( failure_count >= 3 )); then
+    log "Escalation: $failure_count failures in 10 minutes"
+    log "See rollback test workflow: https://github.com/blackroad-io/prism-console/actions/workflows/rollback-tests.yml"
+    trigger_rollback
   fi
 }
 
@@ -106,8 +136,9 @@ validate(){
   curl_check http://127.0.0.1:4000/api/health
   curl_check http://127.0.0.1:8000/health
   curl_check http://127.0.0.1:8500/health
-  local t=$(curl -o /dev/null -s -w "%{time_total}" https://blackroad.io/)
-  log "Frontend load time ${t}s"
+  local frontend_load_time
+  frontend_load_time=$(curl -o /dev/null -s -w "%{time_total}" https://blackroad.io/)
+  log "Frontend load time ${frontend_load_time}s"
   curl -s http://127.0.0.1:8000/health > /var/log/blackroad-llm-proof.log || true
 }
 
