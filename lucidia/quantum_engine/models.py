@@ -22,7 +22,11 @@ class PQCClassifier(nn.Module):
         self.rx0(qdev, wires=0)
         self.ry0(qdev, wires=1)
         self.rz0(qdev, wires=2)
-        logits = self.measure(qdev).reshape(bsz, 2, 2).sum(-1)
+        measurements = self.measure(qdev)
+        if measurements.shape[1] < 4:
+            pad = 4 - measurements.shape[1]
+            measurements = F.pad(measurements, (0, pad))
+        logits = measurements[:, :4].reshape(bsz, 2, 2).sum(-1)
         return F.log_softmax(logits, dim=1)
 
 
