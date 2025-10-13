@@ -21,6 +21,7 @@ permissions:
 jobs:
   route:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout default branch
@@ -43,6 +44,12 @@ jobs:
             }
             if (!number) {
               throw new Error('A pull request number is required.')
+      - name: Calculate mentions
+        id: calc
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
             const fs = require('fs');
 
             function loadConfig() {
@@ -255,6 +262,39 @@ jobs:
             if (!number) {
               throw new Error('Missing pull request number.')
             }
+              try {
+                return JSON.parse(raw);
+              } catch (err) {
+                throw new Error(`Failed to parse .github/mention-routes.yml: ${err.message}`);
+              }
+            }
+
+            function matches(pattern, file) {
+              if (pattern === '**') return true;
+              if (pattern.endsWith('/**')) {
+                const prefix = pattern.slice(0, -3);
+                return file.startsWith(prefix);
+              }
+              if (pattern.startsWith('**/')) {
+                const suffix = pattern.slice(3);
+                return file.endsWith(suffix);
+              }
+              if (pattern.includes('*')) {
+                const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp('^' + escaped.replace(/\*+/g, '.*') + '$');
+                return regex.test(file);
+              }
+              return file === pattern;
+            }
+
+            const config = loadConfig();
+            const routes = Array.isArray(config.routes) ? config.routes : [];
+            const always = Array.isArray(config.always)
+              ? config.always.map(value => String(value).trim()).filter(Boolean)
+              : [];
+            const { owner, repo } = context.repo;
+            const number = context.payload.pull_request.number;
+
             const files = await github.paginate(github.rest.pulls.listFiles, {
               owner,
               repo,
@@ -308,6 +348,23 @@ jobs:
                 const parts = mentionValue.slice(1).split('/')
                 if (parts.length === 2 && parts[1]) {
                   teamSlugs.add(parts[1].trim())
+            });
+
+            const filenames = files.map(file => file.filename);
+            const mentions = new Set(always);
+            const teamSlugs = new Set();
+
+            for (const route of routes) {
+              if (!route || !route.patterns || !route.mention) continue;
+              const patterns = (Array.isArray(route.patterns) ? route.patterns : [route.patterns])
+                .map(pattern => String(pattern).trim())
+                .filter(Boolean);
+              if (!patterns.length) continue;
+              const hit = filenames.some(file => patterns.some(pattern => matches(pattern, file)));
+              if (hit) {
+                const mentionValue = String(route.mention).trim();
+                if (mentionValue) {
+                  mentions.add(mentionValue);
                 }
               }
             }
@@ -405,6 +462,14 @@ jobs:
                 const parts = body.split('/')
                 if (parts.length === 2 && parts[1]) {
                   teamSlugs.add(parts[1].trim())
+            const ordered = Array.from(mentions).filter(Boolean);
+            const mentionLine = ordered.join(' ');
+
+            for (const mention of ordered) {
+              if (mention.startsWith('@')) {
+                const parts = mention.slice(1).split('/');
+                if (parts.length === 2 && parts[1]) {
+                  teamSlugs.add(parts[1].trim());
                 }
               }
             }
@@ -539,6 +604,32 @@ jobs:
         env:
           TEAM_REVIEWERS: ${{ steps.merge_co.outputs.TEAM_REVIEWERS }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
+            core.setOutput('MENTIONS', mentionLine);
+            core.setOutput('TEAM_REVIEWERS', Array.from(teamSlugs).join(','));
+
+      - name: Add mention comment
+        if: ${{ steps.calc.outputs.MENTIONS != '' }}
+        uses: actions/github-script@v7
+        env:
+          MENTIONS: ${{ steps.calc.outputs.MENTIONS }}
+        with:
+          script: |
+            const mentions = (process.env.MENTIONS || '').trim();
+            if (!mentions) return;
+            const { owner, repo } = context.repo;
+            const number = context.payload.pull_request.number;
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
+              body: `Routing ${mentions} based on changed files.`
+            });
+
+      - name: Request team reviewers
+        if: ${{ steps.calc.outputs.MENTIONS != '' && steps.calc.outputs.TEAM_REVIEWERS != '' }}
+        uses: actions/github-script@v7
+        env:
+          TEAM_REVIEWERS: ${{ steps.calc.outputs.TEAM_REVIEWERS }}
         with:
           script: |
             const teams = (process.env.TEAM_REVIEWERS || '')
@@ -548,6 +639,10 @@ jobs:
             if (!teams.length) return
             const { owner, repo } = context.repo
             const number = Number(process.env.PR_NUMBER)
+              .filter(Boolean);
+            if (!teams.length) return;
+            const { owner, repo } = context.repo;
+            const number = context.payload.pull_request.number;
             await github.rest.pulls.requestReviewers({
               owner,
               repo,
@@ -710,3 +805,4 @@ PY
             })
         env:
           MENTIONS: ${{ steps.calc.outputs.MENTIONS }}
+            });
