@@ -6,9 +6,16 @@ description = "Offline PLM & Manufacturing Ops (Phase 37) — deterministic, fil
 readme = "README.md"
 authors = [{ name = "Blackroad", email = "eng@blackroadinc.us" }]
 dependencies = ["paho-mqtt", "typer"]
+dependencies = [
+    "typer",
+    "fastapi",
+    "pydantic",
+    "uvicorn",
+]
 
 [project.scripts]
 brc = "cli.console:main"
+blackroad-api = "agent.api:main"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
