@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "index": {"type": "string"},
+    "kpi_table": {"type": "string"},
+    "risks": {"type": "string"},
+    "program_roadmap": {"type": "string"},
+    "finance": {"type": "string"}
+  },
+  "required": ["index", "kpi_table", "risks", "program_roadmap", "finance"]
+}

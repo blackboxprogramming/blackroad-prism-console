@@ -1,0 +1,6 @@
+quiet_periods:
+  - start: 2025-09-01
+    end: 2025-10-01
+blackouts:
+  - start: 2025-09-10
+    end: 2025-09-20
