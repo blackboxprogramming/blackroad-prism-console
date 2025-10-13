@@ -34,6 +34,16 @@ function closeDb() {
   }
 }
 
+function toInt(value, fallback) {
+  const n = parseInt(value, 10);
+  if (Number.isFinite(n)) return n;
+  return fallback;
+}
+
+function clampInt(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
 // ---- Users ----
 function addUser(email, passwordHash) {
   const id = uuidv4();
@@ -266,6 +276,52 @@ function listExceptions(filters = {}) {
   return rows.map(mapException).filter(Boolean);
 }
 
+function listActiveExceptions(options = {}) {
+  const db = getDb();
+  const page = clampInt(toInt(options.page, 1), 1, 10000);
+  const pageSize = clampInt(toInt(options.pageSize, 10), 1, 50);
+  const nowIso = new Date().toISOString();
+
+  const conditions = [
+    "status = 'approved'",
+    '(valid_from IS NULL OR datetime(valid_from) <= datetime(?))',
+    '(valid_until IS NULL OR datetime(valid_until) >= datetime(?))',
+  ];
+  const params = [nowIso, nowIso];
+  if (options.ruleId) {
+    conditions.push('rule_id = ?');
+    params.push(options.ruleId);
+  }
+  if (options.orgId) {
+    conditions.push('org_id = ?');
+    params.push(options.orgId);
+  }
+  const where = `WHERE ${conditions.join(' AND ')}`;
+
+  const totalRow = db.prepare(`SELECT COUNT(*) AS count FROM exceptions ${where}`).get(...params);
+  const total = totalRow ? Number(totalRow.count || 0) : 0;
+  const totalPages = total > 0 ? Math.ceil(total / pageSize) : 0;
+
+  let currentPage = page;
+  if (totalPages > 0 && currentPage > totalPages) {
+    currentPage = totalPages;
+  }
+  const offset = (currentPage - 1) * pageSize;
+  const rows = db
+    .prepare(
+      `SELECT * FROM exceptions ${where} ORDER BY datetime(valid_until) ASC LIMIT ? OFFSET ?`,
+    )
+    .all(...params, pageSize, Math.max(0, offset));
+
+  return {
+    exceptions: rows.map(mapException).filter(Boolean),
+    page: currentPage,
+    totalPages,
+    total,
+    pageSize,
+  };
+}
+
 function approveException(id, options) {
   const exception = getException(id);
   if (!exception) return null;
@@ -356,6 +412,7 @@ module.exports = {
   createException,
   getException,
   listExceptions,
+  listActiveExceptions,
   approveException,
   denyException,
   revokeException,
