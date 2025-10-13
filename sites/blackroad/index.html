@@ -124,6 +124,18 @@
       .muted {
         color: var(--text-2);
       }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-2);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        text-transform: uppercase;
+      }
       .stack-4 > * + * {
         margin-top: var(--s-4);
       }
@@ -418,6 +430,8 @@
 
         <nav class="nav-links" aria-label="Primary">
           <a href="#features">Features</a>
+          <a href="#investor">Investor Relations</a>
+          <a href="#product-access">Product Access</a>
           <a href="#docs">Docs</a>
           <a href="#portal">Portal</a>
           <a href="#pricing">Pricing</a>
@@ -456,6 +470,7 @@
             <a class="btn btn-primary" href="/portal.html">Enter Portal</a>
             <a class="btn btn-secondary" href="/portal/roadview">Explore Roadview</a>
             <a class="btn btn-secondary" href="/portal/roadwork">Start New Work</a>
+            <a class="btn btn-secondary" href="#investor">Investor Relations</a>
           </div>
         </div>
       </section>
@@ -516,6 +531,156 @@
               </p>
             </div>
           </article>
+        </div>
+      </section>
+
+      <!-- Investor relations & funding -->
+      <section
+        id="investor"
+        class="container"
+        aria-labelledby="investor-title"
+        style="margin-top: var(--s-7)"
+      >
+        <div class="grid" style="grid-template-columns: 1.1fr 0.9fr; gap: var(--gap)">
+          <article class="card stack-5">
+            <div class="tag">BlackRoad, Inc.</div>
+            <h2 id="investor-title">Investor relations &amp; funding brief</h2>
+            <p>
+              BlackRoad, Inc. operates the operations hub at
+              <strong>blackroadinc.us</strong>. We coordinate infrastructure, compliance,
+              and commercialization of BlackRoad Labs—powering autonomous agents, simulation
+              research, and immersive learning. The investor program aligns capital with a
+              staged build-out of our platform, talent, and strategic partnerships.
+            </p>
+            <div class="grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap)">
+              <div class="card stack-4" style="background: rgba(15, 26, 48, 0.8)">
+                <div class="muted" style="font-size: 0.85rem">Current raise</div>
+                <strong>$6.5M seed extension</strong>
+                <p style="margin: 0">Convertible SAFE (caps available on request).</p>
+              </div>
+              <div class="card stack-4" style="background: rgba(15, 26, 48, 0.8)">
+                <div class="muted" style="font-size: 0.85rem">Deployment</div>
+                <strong>18-month runway</strong>
+                <p style="margin: 0">Platform R&amp;D, security hardening, GTM pilots.</p>
+              </div>
+              <div class="card stack-4" style="background: rgba(15, 26, 48, 0.8)">
+                <div class="muted" style="font-size: 0.85rem">Milestones</div>
+                <strong>Q3 2025</strong>
+                <p style="margin: 0">Enterprise pilot, Unity simulation suite, SOC 2 Type I.</p>
+              </div>
+            </div>
+            <div class="card" style="background: rgba(15, 26, 48, 0.65)">
+              <h3 style="margin-bottom: var(--s-3)">Funding cadence</h3>
+              <ul style="margin: 0; padding-left: 1.25rem; display: grid; gap: var(--s-3); color: var(--text-2)">
+                <li><strong>Monthly</strong>: investor memo, platform health metrics, customer traction.</li>
+                <li><strong>Quarterly</strong>: board briefings, security posture reviews, roadmap checkpoints.</li>
+                <li><strong>Ad hoc</strong>: diligence data room access for qualified partners.</li>
+              </ul>
+            </div>
+            <div style="display: flex; gap: var(--s-4); flex-wrap: wrap">
+              <a
+                class="btn btn-primary"
+                href="mailto:invest@blackroadinc.us?subject=Investor%20Relations%20Inquiry"
+              >
+                Contact Investor Team
+              </a>
+              <a class="btn btn-secondary" href="/docs/blackroad-website-plan.md">Download Brief</a>
+            </div>
+          </article>
+          <aside class="card stack-5" aria-labelledby="investor-resources-title">
+            <h3 id="investor-resources-title">Investor resources</h3>
+            <p>
+              Access diligence materials, compliance artifacts, and investor office hours through
+              the BlackRoad Hub. Request credentials and we will provision secure data room access.
+            </p>
+            <dl style="display: grid; gap: var(--s-4); margin: 0">
+              <div>
+                <dt class="muted" style="font-weight: 600">Data room</dt>
+                <dd style="margin: var(--s-2) 0 0"><a href="https://blackroadinc.us/data-room">blackroadinc.us/data-room</a></dd>
+              </div>
+              <div>
+                <dt class="muted" style="font-weight: 600">Compliance</dt>
+                <dd style="margin: var(--s-2) 0 0"><a href="/docs/blackroad_ops_execution_plan.md">Ops execution plan</a></dd>
+              </div>
+              <div>
+                <dt class="muted" style="font-weight: 600">Capital updates</dt>
+                <dd style="margin: var(--s-2) 0 0"><a href="https://blackroadinc.us/investor-updates">Investor update archive</a></dd>
+              </div>
+              <div>
+                <dt class="muted" style="font-weight: 600">Office hours</dt>
+                <dd style="margin: var(--s-2) 0 0">Fridays 10:00–12:00 PT (virtual or HQ)</dd>
+              </div>
+            </dl>
+            <div class="card" style="background: rgba(15, 26, 48, 0.65)">
+              <h4 style="margin-bottom: var(--s-3)">Who we partner with</h4>
+              <p style="margin: 0">
+                Applied AI, defense, and simulation funds that align with long-horizon R&amp;D. We also
+                co-invest with strategic partners building on BlackRoad agents.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- Product access -->
+      <section
+        id="product-access"
+        class="container"
+        aria-labelledby="product-access-title"
+        style="margin-top: var(--s-7)"
+      >
+        <div class="card">
+          <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--gap)">
+            <div class="stack-5">
+              <div class="tag">blackroad.io</div>
+              <h2 id="product-access-title">Access products, co-coding, and simulations</h2>
+              <p>
+                Visit <strong>blackroad.io</strong> to launch the full product suite: the Co-Coding
+                Portal, autonomous agent workspaces, Unity-powered simulation labs, and training
+                sandboxes. Accounts provisioned via the Hub seamlessly unlock both environments.
+              </p>
+              <ul style="margin: 0; padding-left: 1.25rem; display: grid; gap: var(--s-3); color: var(--text-2)">
+                <li>Spin up collaborative IDEs, notebooks, and agent orchestration pipelines.</li>
+                <li>Stream high-fidelity Unity scenes and physics sims directly in the portal.</li>
+                <li>Bridge production deployments with API, terminal, and canvas interfaces.</li>
+              </ul>
+              <div style="display: flex; gap: var(--s-4); flex-wrap: wrap">
+                <a
+                  class="btn btn-primary"
+                  href="https://blackroad.io"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Launch blackroad.io
+                </a>
+                <a class="btn btn-secondary" href="/portal-main">View co-coding portal map</a>
+                <a class="btn btn-secondary" href="/scenes">Browse simulation catalog</a>
+              </div>
+            </div>
+            <div class="stack-5">
+              <div class="card" style="background: rgba(15, 26, 48, 0.8)">
+                <h3 style="margin-bottom: var(--s-3)">Unified account model</h3>
+                <p style="margin: 0">
+                  One identity spans <strong>blackroadinc.us</strong> and <strong>blackroad.io</strong>.
+                  Role-based controls ensure funding, compliance, and product teams stay in sync.
+                </p>
+              </div>
+              <div class="card" style="background: rgba(15, 26, 48, 0.8)">
+                <h3 style="margin-bottom: var(--s-3)">Simulation pipeline</h3>
+                <p style="margin: 0">
+                  Unity, Unreal, and custom physics stacks feed into our compute clusters with
+                  reproducible builds and artifact snapshots for investors and partners.
+                </p>
+              </div>
+              <div class="card" style="background: rgba(15, 26, 48, 0.8)">
+                <h3 style="margin-bottom: var(--s-3)">Support &amp; onboarding</h3>
+                <p style="margin: 0">
+                  Dedicated onboarding engineers host white-glove sessions, while the Hub tracks
+                  agreements, billing, and security reviews for each workspace.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
