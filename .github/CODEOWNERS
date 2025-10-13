@@ -9,3 +9,7 @@ scripts/** @blackboxprogramming/maintainers
 prs.csv @blackboxprogramming/maintainers
 miners/** @blackboxprogramming/maintainers
 lightning/** @blackboxprogramming/maintainers
+/infra/            @platform-team
+/flows/            @integration-team
+/monitors/         @sre-team
+/runbooks/         @platform-team
