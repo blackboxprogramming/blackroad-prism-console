@@ -1,0 +1,26 @@
+name: preview
+slug: pr
+state: active
+description: >-
+  Ephemeral review environments created per pull request on AWS ECS Fargate.
+  Each PR receives a dedicated hostname under dev.blackroad.io and tears down
+  automatically when the PR closes.
+contacts:
+  slack: "#eng"
+domains:
+  root: https://dev.blackroad.io
+  pattern: https://pr-<pr-number>.dev.blackroad.io
+deployments:
+  - service: web-console
+    type: container-service
+    provider: aws-ecs-fargate
+    workflow: .github/workflows/preview-env.yml
+    terraform_directory: infra/preview-env
+    domain_pattern: https://pr-<pr-number>.dev.blackroad.io
+    health_check: https://pr-<pr-number>.dev.blackroad.io/health
+    environment_variables: secrets starting with PREVIEW_ENV_
+change_management:
+  approvals: []
+observability:
+  verification:
+    - terraform output preview_url

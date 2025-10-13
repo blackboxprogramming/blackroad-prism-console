@@ -1,0 +1,35 @@
+name: staging
+slug: stg
+state: provisioning
+description: >-
+  Pre-production environment for QA. Static assets publish to stage.blackroad.io
+  while AWS infrastructure scaffolding mirrors production.
+contacts:
+  slack: "#eng"
+domains:
+  marketing: https://stage.blackroad.io
+deployments:
+  - service: marketing-site
+    type: static-site
+    provider: github-pages
+    repo: blackboxprogramming/blackroad-prism-console
+    workflow: .github/workflows/pages-stage.yml
+    artifacts:
+      path: blackroad-stage
+    domain: https://stage.blackroad.io
+    health_check: https://stage.blackroad.io/health.json
+  - service: api-gateway
+    type: container-service
+    provider: aws-ecs-fargate
+    terraform_directory: br-infra-iac/envs/stg
+    status: planned
+    notes: >-
+      Network, ECS, and RDS resources are defined; service wiring will follow the
+      production module once ready.
+change_management:
+  approvals:
+    - .github/workflows/change-approve.yml
+observability:
+  health_checks:
+    - name: static-health
+      path: blackroad-stage/health.json

@@ -1,4 +1,50 @@
 name: production
-url: https://blackroad.io
-reviewers:
-  - blackboxprogramming
+slug: prod
+state: active
+description: >-
+  Primary public environment exposed to customers via blackroad.io. Covers the
+  marketing SPA and API gateway that the deploy workflows publish.
+contacts:
+  reviewers:
+    - blackboxprogramming
+  slack: "#eng"
+domains:
+  marketing: https://blackroad.io
+  canonical: https://www.blackroad.io
+  api: https://api.blackroad.io
+  status: https://status.blackroad.io
+deployments:
+  - service: marketing-site
+    type: static-site
+    provider: github-pages
+    repo: blackboxprogramming/blackroad-prism-console
+    workflow: .github/workflows/blackroad-deploy.yml
+    artifacts:
+      path: sites/blackroad
+    domain: https://blackroad.io
+    health_check: https://blackroad.io/healthz
+  - service: api-gateway
+    type: container-service
+    provider: aws-ecs-fargate
+    terraform_directory: br-infra-iac/envs/prod
+    module: modules/ecs-service-alb
+    status: planned
+    notes: >-
+      Production wiring tracks the dev module that provisions api.blackroad.io
+      behind an ALB-backed Fargate service.
+    health_check: https://api.blackroad.io/health
+    release_workflow: .github/workflows/blackroad-deploy.yml
+change_management:
+  approvals:
+    - .github/workflows/change-approve.yml
+  runbooks:
+    - README-DEPLOY.md
+    - README-OPS.md
+observability:
+  health_checks:
+    - name: frontend
+      url: https://blackroad.io/healthz
+    - name: api
+      url: https://api.blackroad.io/health
+  scripts:
+    - scripts/blackroad-autoheal.sh
