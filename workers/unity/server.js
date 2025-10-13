@@ -34,6 +34,36 @@ const sanitizeForPath = (value, fallback) => {
 
 const makeGuid = () => crypto.randomUUID().replace(/-/g, "").toLowerCase();
 
+const DEG2RAD = Math.PI / 180;
+const eulerToQuaternion = ({ x = 0, y = 0, z = 0 }) => {
+  const halfX = (x * DEG2RAD) / 2;
+  const halfY = (y * DEG2RAD) / 2;
+  const halfZ = (z * DEG2RAD) / 2;
+
+  const sinX = Math.sin(halfX);
+  const cosX = Math.cos(halfX);
+  const sinY = Math.sin(halfY);
+  const cosY = Math.cos(halfY);
+  const sinZ = Math.sin(halfZ);
+  const cosZ = Math.cos(halfZ);
+
+  const quaternion = {
+    x: sinX * cosY * cosZ + cosX * sinY * sinZ,
+    y: cosX * sinY * cosZ - sinX * cosY * sinZ,
+    z: cosX * cosY * sinZ + sinX * sinY * cosZ,
+    w: cosX * cosY * cosZ - sinX * sinY * sinZ,
+  };
+
+  const magnitude = Math.hypot(quaternion.x, quaternion.y, quaternion.z, quaternion.w) || 1;
+
+  return {
+    x: quaternion.x / magnitude,
+    y: quaternion.y / magnitude,
+    z: quaternion.z / magnitude,
+    w: quaternion.w / magnitude,
+  };
+};
+
 const ensureScenes = (scenes) => {
   const candidates = Array.isArray(scenes) ? scenes : [];
   const normalized = candidates
@@ -90,7 +120,8 @@ const ensureScenes = (scenes) => {
 
 const renderSceneUnity = (scene, bootstrapGuid) => {
   const { position, rotation } = scene.camera;
-  return `// ${scene.name}.unity\n// ${scene.description}\n%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!1 &1000\nGameObject:\n  m_ObjectHideFlags: 0\n  m_Name: Main Camera\n  m_Component:\n  - component: {fileID: 1001}\n  - component: {fileID: 1002}\n  - component: {fileID: 1003}\n  m_Transform: {fileID: 1004}\n--- !u!20 &1001\nCamera:\n  m_ObjectHideFlags: 0\n  m_GameObject: {fileID: 1000}\n  field of view: 60\n  m_FocalLength: 50\n  near clip plane: 0.3\n  far clip plane: 1000\n--- !u!81 &1002\nAudioListener:\n  m_ObjectHideFlags: 0\n  m_GameObject: {fileID: 1000}\n--- !u!92 &1003\nBehaviour:\n  m_ObjectHideFlags: 0\n  m_GameObject: {fileID: 1000}\n--- !u!4 &1004\nTransform:\n  m_ObjectHideFlags: 0\n  m_GameObject: {fileID: 1000}\n  m_LocalPosition: {x: ${position.x.toFixed(2)}, y: ${position.y.toFixed(2)}, z: ${position.z.toFixed(2)}}\n  m_LocalRotation: {x: ${rotation.x.toFixed(3)}, y: ${rotation.y.toFixed(3)}, z: ${rotation.z.toFixed(3)}, w: 1}\n  m_LocalScale: {x: 1, y: 1, z: 1}\n--- !u!1 &2000\nGameObject:\n  m_ObjectHideFlags: 0\n  m_Name: Scene Bootstrap\n  m_Component:\n  - component: {fileID: 2001}\n  m_Transform: {fileID: 2002}\n--- !u!4 &2002\nTransform:\n  m_ObjectHideFlags: 0\n  m_GameObject: {fileID: 2000}\n  m_LocalPosition: {x: 0, y: 0, z: 0}\n  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}\n  m_LocalScale: {x: 1, y: 1, z: 1}\n--- !u!114 &2001\nMonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_GameObject: {fileID: 2000}\n  m_Script: {fileID: 11500000, guid: ${bootstrapGuid}, type: 3}\n  m_Name: SceneBootstrap\n  m_EditorClassIdentifier: \n  sceneLabel: ${scene.name}\n  sceneDescription: ${scene.description}\n  rotationSpeed: ${scene.rotationSpeed}\n`;
+  const quaternion = eulerToQuaternion(rotation);
+  return `// ${scene.name}.unity\n// ${scene.description}\n%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!1 &1000\nGameObject:\n  m_ObjectHideFlags: 0\n  m_Name: Main Camera\n  m_Component:\n  - component: {fileID: 1001}\n  - component: {fileID: 1002}\n  - component: {fileID: 1003}\n  m_Transform: {fileID: 1004}\n--- !u!20 &1001\nCamera:\n  m_ObjectHideFlags: 0\n  m_GameObject: {fileID: 1000}\n  field of view: 60\n  m_FocalLength: 50\n  near clip plane: 0.3\n  far clip plane: 1000\n--- !u!81 &1002\nAudioListener:\n  m_ObjectHideFlags: 0\n  m_GameObject: {fileID: 1000}\n--- !u!92 &1003\nBehaviour:\n  m_ObjectHideFlags: 0\n  m_GameObject: {fileID: 1000}\n--- !u!4 &1004\nTransform:\n  m_ObjectHideFlags: 0\n  m_GameObject: {fileID: 1000}\n  m_LocalPosition: {x: ${position.x.toFixed(2)}, y: ${position.y.toFixed(2)}, z: ${position.z.toFixed(2)}}\n  m_LocalRotation: {x: ${quaternion.x.toFixed(6)}, y: ${quaternion.y.toFixed(6)}, z: ${quaternion.z.toFixed(6)}, w: ${quaternion.w.toFixed(6)}}\n  m_LocalScale: {x: 1, y: 1, z: 1}\n--- !u!1 &2000\nGameObject:\n  m_ObjectHideFlags: 0\n  m_Name: Scene Bootstrap\n  m_Component:\n  - component: {fileID: 2001}\n  m_Transform: {fileID: 2002}\n--- !u!4 &2002\nTransform:\n  m_ObjectHideFlags: 0\n  m_GameObject: {fileID: 2000}\n  m_LocalPosition: {x: 0, y: 0, z: 0}\n  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}\n  m_LocalScale: {x: 1, y: 1, z: 1}\n--- !u!114 &2001\nMonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_GameObject: {fileID: 2000}\n  m_Script: {fileID: 11500000, guid: ${bootstrapGuid}, type: 3}\n  m_Name: SceneBootstrap\n  m_EditorClassIdentifier: \n  sceneLabel: ${scene.name}\n  sceneDescription: ${scene.description}\n  rotationSpeed: ${scene.rotationSpeed}\n`;
 };
 
 const renderSceneMeta = (guid) => `fileFormatVersion: 2\nguid: ${guid}\nSceneImporter:\n  externalObjects: {}\n  userData: \n  assetBundleName: \n  assetBundleVariant: \n`;
