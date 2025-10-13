@@ -1,7 +1,7 @@
-const express = require('express');
-const os = require('os');
-const fs = require('fs');
-const crypto = require('crypto');
+import express from 'express';
+import os from 'os';
+import fs from 'fs';
+import crypto from 'crypto';
 
 const app = express();
 app.use(express.json({limit: '1mb'}));
@@ -189,4 +189,4 @@ app.listen(PORT, ()=>{
   console.log(`ollama-bridge listening on ${PORT}`);
 });
 
-module.exports = app;
+export default app;
