@@ -1,0 +1,74 @@
+name: Sentry Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'release-*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Override release version'
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install sentry-cli
+        run: npm install -g @sentry/cli@2
+
+      - name: Create Sentry release
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          SENTRY_URL: ${{ vars.SENTRY_URL }}
+          SENTRY_SOURCEMAPS: ${{ vars.SENTRY_SOURCEMAPS }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          if [ -z "$SENTRY_AUTH_TOKEN" ] || [ -z "$SENTRY_ORG" ] || [ -z "$SENTRY_PROJECT" ]; then
+            echo "Sentry secrets missing. Skipping release creation."
+            exit 0
+          fi
+
+          VERSION="${INPUT_VERSION:-$GITHUB_REF_NAME}"
+          if [ -z "$VERSION" ]; then
+            echo "Unable to determine release version."
+            exit 1
+          fi
+
+          export SENTRY_URL=${SENTRY_URL:-https://sentry.io}
+
+          echo "Creating Sentry release $VERSION"
+          sentry-cli releases new "$VERSION"
+          sentry-cli releases set-commits "$VERSION" --auto
+
+          if [ -n "$SENTRY_SOURCEMAPS" ] && [ -d "$SENTRY_SOURCEMAPS" ]; then
+            echo "Uploading sourcemaps from $SENTRY_SOURCEMAPS"
+            sentry-cli sourcemaps upload --release "$VERSION" "$SENTRY_SOURCEMAPS"
+          else
+            echo "No sourcemaps directory configured."
+          fi
+
+          sentry-cli releases finalize "$VERSION"
+
+      - name: Notify Slack
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "Slack webhook not configured."
+            exit 0
+          fi
+          payload=$(jq -n --arg text "Sentry release workflow failed for ${GITHUB_REF_NAME}." '{text: $text}')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"

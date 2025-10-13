@@ -1,0 +1,95 @@
+name: PagerDuty Incident
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Trigger or resolve an incident
+        required: true
+        type: choice
+        options:
+          - trigger
+          - resolve
+      summary:
+        description: Incident summary (required for trigger)
+        required: false
+        type: string
+      severity:
+        description: Severity level (info, warning, error, critical)
+        required: false
+        type: choice
+        options:
+          - info
+          - warning
+          - error
+          - critical
+        default: error
+      source:
+        description: Source of the incident event
+        required: false
+        type: string
+        default: github-actions
+      dedup_key:
+        description: Deduplication key to reuse for trigger/resolve
+        required: false
+        type: string
+      details:
+        description: Additional JSON details
+        required: false
+        type: string
+
+permissions: {}
+
+jobs:
+  incident:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call PagerDuty Events API
+        env:
+          ACTION: ${{ github.event.inputs.action }}
+          SUMMARY: ${{ github.event.inputs.summary }}
+          SEVERITY: ${{ github.event.inputs.severity }}
+          SOURCE: ${{ github.event.inputs.source }}
+          DEDUP_KEY: ${{ github.event.inputs.dedup_key }}
+          DETAILS: ${{ github.event.inputs.details }}
+          PD_ROUTING_KEY: ${{ secrets.PD_ROUTING_KEY }}
+        run: |
+          if [ -z "$PD_ROUTING_KEY" ]; then
+            echo "PD_ROUTING_KEY secret is not configured."
+            exit 1
+          fi
+
+          if [ "$ACTION" = "trigger" ]; then
+            if [ -z "$SUMMARY" ]; then
+              echo "Summary is required to trigger an incident."
+              exit 1
+            fi
+            if [ -z "$DEDUP_KEY" ]; then
+              DEDUP_KEY=$(uuidgen)
+              echo "Generated dedup key: $DEDUP_KEY"
+            fi
+            PAYLOAD=$(jq -n \
+              --arg routing_key "$PD_ROUTING_KEY" \
+              --arg summary "$SUMMARY" \
+              --arg source "$SOURCE" \
+              --arg severity "$SEVERITY" \
+              --argjson details "$( [ -n "$DETAILS" ] && echo "$DETAILS" || echo '{}' )" \
+              --arg dedup_key "$DEDUP_KEY" \
+              '{routing_key: $routing_key, event_action: "trigger", dedup_key: $dedup_key, payload: {summary: $summary, source: $source, severity: $severity, custom_details: $details}}')
+          else
+            if [ -z "$DEDUP_KEY" ]; then
+              echo "dedup_key is required to resolve an incident."
+              exit 1
+            fi
+            PAYLOAD=$(jq -n \
+              --arg routing_key "$PD_ROUTING_KEY" \
+              --arg dedup_key "$DEDUP_KEY" \
+              '{routing_key: $routing_key, event_action: "resolve", dedup_key: $dedup_key}')
+          fi
+
+          curl --fail --show-error --silent \
+            -H 'Content-Type: application/json' \
+            --data "$PAYLOAD" \
+            https://events.pagerduty.com/v2/enqueue
+
+          echo "PagerDuty event ${ACTION} sent. Dedup key: $DEDUP_KEY"
