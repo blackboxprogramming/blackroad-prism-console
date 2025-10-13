@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from typing import ClassVar, List, Set
+from typing import ClassVar
 
 
 @dataclass
@@ -47,7 +48,8 @@ class AutoNovelAgent:
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
-        print(f"Creating a {engine_lower.capitalize()} game without weapons...")
+        article = "an" if engine_lower == "unreal" else "a"
+        print(f"Creating {article} {engine_lower.capitalize()} game without weapons...")
 
     def add_supported_engine(self, engine: str) -> None:
         """Register a new game engine.
@@ -68,6 +70,7 @@ class AutoNovelAgent:
         self.SUPPORTED_ENGINES.discard(engine.lower())
 
     def list_supported_engines(self) -> List[str]:
+    def list_supported_engines(self) -> list[str]:
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
