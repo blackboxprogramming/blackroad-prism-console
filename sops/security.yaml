@@ -1,0 +1,29 @@
+vulnerability_patch:
+  title: Vulnerability Patching
+  purpose: Patch vulnerabilities with rollback capability
+  scope: Security
+  procedure:
+    - id: detect
+      action: detect_vulnerability
+    - id: patch
+      action: apply_patch
+    - id: verify
+      action: verify_patch
+    - id: rollback
+      action: rollback_if_needed
+  quality_control:
+    - review: penetration_test
+
+key_rotation:
+  title: Encryption Key Rotation
+  purpose: Rotate encryption keys regularly
+  scope: Security
+  procedure:
+    - id: schedule
+      action: schedule_rotation
+    - id: rotate
+      action: rotate_keys
+    - id: distribute
+      action: distribute_keys
+  quality_control:
+    - review: key_audit
