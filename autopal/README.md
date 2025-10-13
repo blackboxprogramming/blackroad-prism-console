@@ -11,6 +11,11 @@ pip install -r requirements.txt
 AUTOPAL_CONFIG=./autopal.config.json uvicorn app.main:app --reload --port 8080
 ```
 
+The application emits OpenTelemetry traces by default. Override the OTLP HTTP endpoint with
+`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` (defaults to `http://otel-collector:4318/v1/traces`). Every
+response includes the current trace identifier via the `X-Trace-Id` header for quick lookups in
+Jaeger or other backends.
+
 ## Docker
 
 ```bash
@@ -71,3 +76,11 @@ Check the status of an environment access request:
 ```bash
 curl localhost:8080/environments/<request-id>
 ```
+
+## Observability
+
+- `GET /metrics` – lightweight JSON counters for rate-limit rejections, maintenance blocks, and
+  step-up prompts. Useful for quick spot checks or to feed into Prometheus.
+- OpenTelemetry traces are sent via OTLP/HTTP. Point the service at a collector (for example the
+  one defined in `docker-compose.yml`) and use the `X-Trace-Id` response header to jump straight to
+  the corresponding trace in Jaeger.

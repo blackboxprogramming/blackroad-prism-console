@@ -10,7 +10,8 @@ router.post('/materialize', authenticateRequest, (req, res) => {
     action: 'secret_materialized',
     subject: identity.subject,
     break_glass: identity.breakGlass,
-    audiences: identity.audiences
+    audiences: identity.audiences,
+    trace_id: req.traceId
   });
   res.status(200).json({
     materialized: true,
