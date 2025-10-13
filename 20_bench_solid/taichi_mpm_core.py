@@ -8,11 +8,12 @@ model, and finally exports a voxel-averaged von Mises stress field.
 """
 from __future__ import annotations
 
+import csv
 import json
 import math
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Tuple
+from typing import List, Tuple
 
 import numpy as np
 
@@ -22,6 +23,8 @@ class SimulationParams:
     grid_n: int
     duration_s: float
     dt: float
+    dt_min: float
+    cfl_max: float
     rho: float
     e_a: float
     e_b: float
@@ -35,12 +38,23 @@ class SimulationParams:
             grid_n=int(data["grid_n"]),
             duration_s=float(data["duration_s"]),
             dt=float(data["dt"]),
+            dt_min=float(data.get("dt_min", 2.0e-5)),
+            cfl_max=float(data.get("cfl_max", 0.4)),
             rho=float(data["rho"]),
             e_a=float(data["E_A"]),
             e_b=float(data["E_B"]),
             nu=float(data["nu"]),
             contact_damping=float(data.get("contact_damping", 0.0)),
         )
+
+
+@dataclass(frozen=True)
+class EnergySample:
+    step: int
+    dt: float
+    vmax: float
+    cfl_dt: float
+    dx: float
 
 
 def initialize_lattice(params: SimulationParams) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -64,34 +78,62 @@ def apply_floor_contact(positions: np.ndarray, velocities: np.ndarray, damping: 
     velocities[mask, :2] *= damping_factor
 
 
-def clamp_velocity(velocities: np.ndarray, max_speed: float) -> None:
-    """Apply a global velocity clamp to maintain a CFL-like condition."""
-    if max_speed <= 0:
-        return
+def get_vmax(velocities: np.ndarray) -> float:
+    """Return the maximum grid velocity magnitude."""
+    if velocities.size == 0:
+        return 0.0
     speed = np.linalg.norm(velocities, axis=1)
-    mask = speed > max_speed
-    if not np.any(mask):
-        return
-    velocities[mask] *= (max_speed / speed[mask])[:, None]
+    return float(np.max(speed))
 
 
-def run_simulation(params: SimulationParams) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def run_simulation(
+    params: SimulationParams,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[EnergySample]]:
     positions, initial_positions, velocities = initialize_lattice(params)
-    dt = params.dt
-    steps = int(round(params.duration_s / dt))
     dx = 1.0 / params.grid_n
-    max_speed = 0.25 * dx / max(dt, 1e-6)
+    dt = params.dt
+    dt_min = max(params.dt_min, 0.0)
+    total_time = params.duration_s
     gravity = np.array([0.0, 0.0, -9.81], dtype=np.float64)
+    log: List[EnergySample] = []
+    step = 0
+    elapsed = 0.0
+    eps = 1.0e-8
 
-    for _ in range(steps):
-        velocities += gravity * dt
-        clamp_velocity(velocities, max_speed)
-        positions += velocities * dt
+    if dt_min == 0.0:
+        dt_min = 1.0e-6
+    if not math.isfinite(dt) or dt <= 0.0:
+        dt = max(params.dt_min, 1.0e-4)
+
+    while elapsed < total_time - 1e-12:
+        vmax = get_vmax(velocities)
+        cfl_dt = params.cfl_max * dx / (vmax + eps)
+        upper = max(cfl_dt, dt_min)
+        dt = float(np.clip(dt, dt_min, upper))
+        if dt < cfl_dt:
+            dt = min(cfl_dt, params.dt)
+        dt = min(dt, params.dt)
+        remaining = total_time - elapsed
+        dt_step = dt if dt < remaining else remaining
+
+        velocities += gravity * dt_step
+        positions += velocities * dt_step
         apply_floor_contact(positions, velocities, params.contact_damping)
-        clamp_velocity(velocities, max_speed)
         positions = np.clip(positions, 0.0, 1.0)
+        log.append(
+            EnergySample(
+                step=step,
+                dt=float(dt_step),
+                vmax=vmax,
+                cfl_dt=float(cfl_dt),
+                dx=float(dx),
+            )
+        )
+        elapsed += dt_step
+        dt = dt_step
+        step += 1
 
-    return positions, initial_positions, velocities
+    return positions, initial_positions, velocities, log
 
 
 def compute_elastic_modulus(initial_positions: np.ndarray, params: SimulationParams) -> np.ndarray:
@@ -162,6 +204,8 @@ def save_volume(von_mises_volume: np.ndarray, params: SimulationParams, output_p
             "grid_n": params.grid_n,
             "duration_s": params.duration_s,
             "dt": params.dt,
+            "dt_min": params.dt_min,
+            "cfl_max": params.cfl_max,
             "rho": params.rho,
             "E_A": params.e_a,
             "E_B": params.e_b,
@@ -171,15 +215,29 @@ def save_volume(von_mises_volume: np.ndarray, params: SimulationParams, output_p
     )
 
 
+def write_energy_log(samples: List[EnergySample], base_dir: Path) -> Path:
+    logs_dir = base_dir / "outputs" / "logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    log_path = logs_dir / "energy.csv"
+    with log_path.open("w", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["step", "dt", "vmax", "cfl_dt", "dx"])
+        for sample in samples:
+            writer.writerow([sample.step, sample.dt, sample.vmax, sample.cfl_dt, sample.dx])
+    return log_path
+
+
 def main() -> None:
     params_path = Path(__file__).with_name("params.json")
     params = SimulationParams.from_json(params_path)
-    positions, initial_positions, velocities = run_simulation(params)
+    positions, initial_positions, velocities, diagnostics = run_simulation(params)
     von_mises_particles, von_mises_grid = compute_von_mises(positions, initial_positions, params)
     averaged = voxel_average(positions, von_mises_particles, grid_size=64)
     output_path = Path(__file__).with_name("von_mises_t000400.npz")
     save_volume(averaged, params, output_path)
+    log_path = write_energy_log(diagnostics, Path(__file__).parent)
     print(f"Generated von Mises volume at {output_path}")
+    print(f"CFL diagnostics written to {log_path}")
 
 
 if __name__ == "__main__":
