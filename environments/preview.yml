@@ -1,0 +1,5 @@
+name: preview
+# Preview environments are provisioned per pull request; replace <pr> with the PR number.
+url: "https://pr-<pr>.dev.blackroad.io"
+reviewers:
+  - blackboxprogramming
