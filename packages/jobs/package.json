@@ -1,7 +1,7 @@
 {
-  "name": "@blackroad/worm",
+  "name": "@blackroad/jobs",
   "version": "0.1.0",
-  "description": "Append-only WORM archive and verification utilities for BlackRoad SurveillanceHub evidence.",
+  "description": "BullMQ job orchestrators for SurveillanceHub.",
   "type": "module",
   "license": "Apache-2.0",
   "main": "dist/index.js",
@@ -12,7 +12,10 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@blackroad/db": "workspace:*"
+    "bullmq": "^5.12.7",
+    "@lucidia/core": "workspace:*",
+    "@blackroad/connectors": "workspace:*",
+    "@blackroad/worm": "workspace:*"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
