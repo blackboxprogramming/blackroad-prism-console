@@ -1,6 +1,6 @@
 # Pull Request Preview Environments
 
-Preview environments are provisioned per pull request using ECS Fargate. The Terraform module under `modules/preview-env` creates an application load balancer, task definition, ECS service, and Route53 alias record (`pr-###.dev.blackroad.io`).
+Preview environments are provisioned per pull request using ECS Fargate. The Terraform module under `modules/preview-env` creates an application load balancer, task definition, ECS service, and Route53 alias record (`pr-###.dev.blackroad.io`). See [`environments/preview.yml`](../../environments/preview.yml) for the canonical manifest that release tooling and ChatOps reference.
 
 ## GitHub Action flow
 

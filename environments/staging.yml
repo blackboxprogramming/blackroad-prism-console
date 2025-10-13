@@ -1,0 +1,21 @@
+name: staging
+url: https://staging.blackroad.io
+reviewers:
+  - blackboxprogramming
+status: planned
+kind: persistent
+chatops:
+  command: "/deploy blackroad staging"
+  workflow: .github/workflows/_backup_132_deploy-blackroad-staging.yml
+  branch: staging
+deploy:
+  description: >-
+    GitHub Actions builds `sites/blackroad` from the `staging` branch and publishes it to the
+    GitHub Pages staging environment for QA sign-off before production pushes.
+verification:
+  checklist:
+    - Confirm the GitHub Pages environment named "staging" is green before approving.
+    - Once DNS is wired, curl https://staging.blackroad.io/healthz and confirm HTTP 200.
+notes:
+  - DNS for `staging.blackroad.io` has not been delegated yet; rely on the Pages preview URL until the cutover completes.
+  - Feature flags and config overrides should be staged here before `main` merges trigger production deploys.
