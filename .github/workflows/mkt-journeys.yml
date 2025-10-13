@@ -1,0 +1,12 @@
+name: Marketing Journeys Tick
+on:
+  schedule: [{ cron: "*/10 * * * *" }]
+  workflow_dispatch:
+jobs:
+  journeys:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/mkt/journey_tick.ts

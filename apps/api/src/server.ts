@@ -25,6 +25,17 @@ import hrPto from './routes/hr/pto.js';
 import hrReviews from './routes/hr/reviews.js';
 import hrTraining from './routes/hr/training.js';
 import hrPolicies from './routes/hr/policies.js';
+import adminAccess from './routes/admin/access_review.js';
+import adminLic from './routes/admin/licensing.js';
+import adminDev from './routes/admin/devices.js';
+import adminVend from './routes/admin/vendors.js';
+import adminPO from './routes/admin/procurement.js';
+import mktSegments from './routes/mkt/segments.js';
+import mktCampaigns from './routes/mkt/campaigns.js';
+import mktJourneys from './routes/mkt/journeys.js';
+import mktTemplates from './routes/mkt/templates.js';
+import mktScore from './routes/mkt/score.js';
+import mktUtm from './routes/mkt/utm.js';
 
 dotenv.config();
 
@@ -57,6 +68,8 @@ app.use((req:any,res,next)=>{ if (req.url.startsWith('/api/clm/esign')) { const 
 app.use(express.json());
 
 app.use('/api/clm', clmTemplates, clmContracts, clmApprovals, clmEsign, clmOblig);
+app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
+app.use('/api/mkt', mktSegments, mktCampaigns, mktJourneys, mktTemplates, mktScore, mktUtm);
 
 const port = process.env.PORT || 4000;
 
