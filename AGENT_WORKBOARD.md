@@ -21,6 +21,12 @@
 - [ ] Assign tasks from job board (`WorkerBot`)
 - [ ] Watch for idle periods (`IdleBot`)
 
+### Unity Exporter
+- [x] Generate templated Unity project archives from `/export` (2025-10-13).
+- [ ] Add regression test that inspects the archive manifest and metadata.
+- [ ] Replace handwritten YAML/script stubs with real Unity exports once the build agent lands.
+- [ ] Surface download URLs through the console UI so humans can pull artifacts without SSH.
+
 ## In Progress
 <!-- Agents move tasks here when running -->
 
