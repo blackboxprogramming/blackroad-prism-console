@@ -1,0 +1,12 @@
+{
+  "status": "waiting_for_build",
+  "buildPath": "",
+  "updated": "",
+  "message": "No Unity WebGL build has been uploaded yet. Export a build from Unity and copy it into public/unity to make it available at blackroad.io.",
+  "checklist": [
+    "Export a WebGL player from Unity (File → Build Settings → WebGL → Build).",
+    "Copy the generated Build/, TemplateData/, and StreamingAssets/ folders into sites/blackroad/public/unity.",
+    "Add an index.html entry point in public/unity that bootstraps your Unity loader.",
+    "Update this status file with the new buildPath (for example \"/unity/index.html\") and optionally a timestamp."
+  ]
+}

@@ -35,6 +35,7 @@ import BlueNoiseTSPLab from './pages/BlueNoiseTSPLab.jsx';
 import BezierShadedSurfaceLab from './pages/BezierShadedSurfaceLab.jsx';
 import Kalman2DTrackerLab from './pages/Kalman2DTrackerLab.jsx';
 import VorticityStreamLab from './pages/VorticityStreamLab.jsx';
+import UnityHost from './pages/UnityHost.jsx';
 
 function useApiHealth() {
   const [state, setState] = useState({ ok: null, info: '' });
@@ -113,6 +114,9 @@ function LegacyApp() {
           <NavLink className="nav-link" to="/backroad">
             Backroad
           </NavLink>
+          <NavLink className="nav-link" to="/unity">
+            Unity Host
+          </NavLink>
           <NavLink className="nav-link" to="/agents">
             Agents
           </NavLink>
@@ -164,6 +168,7 @@ function LegacyApp() {
             <Route path="/terminal" element={<Terminal />} />
             <Route path="/roadview" element={<RoadView />} />
             <Route path="/backroad" element={<Backroad />} />
+            <Route path="/unity" element={<UnityHost />} />
             <Route path="/agents" element={<Agents />} />
             <Route path="/subscribe" element={<Subscribe />} />
             <Route path="/lucidia" element={<Lucidia />} />
@@ -197,6 +202,7 @@ function LegacyApp() {
             <Route path="terminal" element={<Terminal />} />
             <Route path="roadview" element={<RoadView />} />
             <Route path="backroad" element={<Backroad />} />
+            <Route path="unity" element={<UnityHost />} />
             <Route path="subscribe" element={<Subscribe />} />
             <Route path="lucidia" element={<Lucidia />} />
             <Route path="math" element={<InfinityMath />} />

@@ -44,6 +44,17 @@ export default function Home(){
           <li>Enterprise: contact us for custom agent graphs</li>
         </ul>
       </section>
+
+      <section className="card mt-6">
+        <h2 className="text-2xl font-bold mb-2">Unity WebGL Hosting</h2>
+        <p className="opacity-90">
+          Drop your Unity WebGL export into the site and preview it instantly on blackroad.io.
+          Follow the guided checklist and embed viewer to keep your simulation live.
+        </p>
+        <Link className="btn mt-4" to={withPrefix('/unity', lang)}>
+          Open Unity Host
+        </Link>
+      </section>
     </>
   )
 }
