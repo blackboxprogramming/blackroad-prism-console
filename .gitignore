@@ -12,6 +12,10 @@ dist/
 artifacts.sha256
 public/artifacts.sha256
 
+# Python
+**/*.egg-info/
+*.egg-info
+
 # Local data
 srv/blackroad-api/blackroad.db
 _trash/
