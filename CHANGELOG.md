@@ -92,6 +92,7 @@
 * scaffold supply chain ops ([#1475](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1475)) ([4b9a2a0](https://github.com/blackboxprogramming/blackroad-prism-console/commit/4b9a2a09b97ff8e25cb914319512de21c20349ca))
 
 ## [1.2.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.1.0...v1.2.0) (2025-09-14)
+## [1.2.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.1.0...v1.2.0) (2025-09-13)
 
 
 ### Features
@@ -103,6 +104,7 @@
 * add offline plm and manufacturing ops layer ([#1474](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1474)) ([5857a67](https://github.com/blackboxprogramming/blackroad-prism-console/commit/5857a6742218c5614c5e1fabd92dd03049a11445))
 * add SSO and governance utilities ([#1439](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1439)) ([82e3498](https://github.com/blackboxprogramming/blackroad-prism-console/commit/82e349837a01977e7662a43571bf64a0feac40d9))
 * **cpm:** add corporate performance management layer ([#1476](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1476)) ([bd12797](https://github.com/blackboxprogramming/blackroad-prism-console/commit/bd12797d05345713f3021c338603e9544ab51f34))
+* add SSO and governance utilities ([#1439](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1439)) ([82e3498](https://github.com/blackboxprogramming/blackroad-prism-console/commit/82e349837a01977e7662a43571bf64a0feac40d9))
 * **exec-ops:** add okr kpi forecasting and dashboards ([#1453](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1453)) ([108501a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/108501a4e9e4154e8c5bf99e2d11eebe0427a748))
 * **product:** add roadmap and release management ([#1465](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1465)) ([ec7098f](https://github.com/blackboxprogramming/blackroad-prism-console/commit/ec7098fb09a4fbf659010f032de305cfc4a03f30))
 * **support:** add help center and support desk ([#1462](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1462)) ([432c79f](https://github.com/blackboxprogramming/blackroad-prism-console/commit/432c79f2b1dc36e3b0a207a96a2f3024d7bfe7c5))
