@@ -9,6 +9,9 @@ from typing import Deque, Dict, Iterable
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+
+from .audit import AuditLogger, append_trace_headers, current_trace_ids
+from .observability import configure_observability
 from pydantic import BaseModel, Field, PositiveInt
 
 
@@ -88,11 +91,53 @@ def create_app() -> FastAPI:
 
     app = FastAPI(title="Autopal Controls API", version="1.0.0")
 
+    configure_observability(app, service_version=app.version)
+
     # Global state shared between requests for the lifetime of the application instance.
     app.state.maintenance_mode = False
     app.state.maintenance_allowlist = ("/health", "/maintenance")
     app.state.rate_limiter = RateLimiter()
     app.state.overrides: Dict[str, Override] = {}
+    app.state.audit_logger = AuditLogger.from_environment()
+
+    @app.middleware("http")
+    async def observability_middleware(request: Request, call_next):  # type: ignore[override]
+        start = time.perf_counter()
+        audit_logger: AuditLogger | None = getattr(request.app.state, "audit_logger", None)
+        try:
+            response = await call_next(request)
+        except HTTPException as exc:
+            if audit_logger:
+                audit_logger.log(
+                    "http.request",
+                    path=request.url.path,
+                    method=request.method,
+                    status=exc.status_code,
+                    duration_ms=(time.perf_counter() - start) * 1000,
+                )
+            raise
+        except Exception:
+            if audit_logger:
+                audit_logger.log(
+                    "http.request",
+                    path=request.url.path,
+                    method=request.method,
+                    status=500,
+                    duration_ms=(time.perf_counter() - start) * 1000,
+                )
+            raise
+        else:
+            duration_ms = (time.perf_counter() - start) * 1000
+            append_trace_headers(response, current_trace_ids())
+            if audit_logger:
+                audit_logger.log(
+                    "http.request",
+                    path=request.url.path,
+                    method=request.method,
+                    status=response.status_code,
+                    duration_ms=duration_ms,
+                )
+            return response
 
     @app.middleware("http")
     async def maintenance_middleware(request: Request, call_next):  # type: ignore[override]
@@ -114,16 +159,29 @@ def create_app() -> FastAPI:
     @app.post("/maintenance/activate")
     async def activate_maintenance() -> dict[str, bool]:
         app.state.maintenance_mode = True
+        audit_logger: AuditLogger | None = getattr(app.state, "audit_logger", None)
+        if audit_logger:
+            audit_logger.log("maintenance.toggle", state="activated")
         return {"maintenance_mode": True}
 
     @app.post("/maintenance/deactivate")
     async def deactivate_maintenance() -> dict[str, bool]:
         app.state.maintenance_mode = False
+        audit_logger: AuditLogger | None = getattr(app.state, "audit_logger", None)
+        if audit_logger:
+            audit_logger.log("maintenance.toggle", state="deactivated")
         return {"maintenance_mode": False}
 
     @app.post("/config/rate-limit")
     async def configure_rate_limit(payload: RateLimitConfig) -> RateLimitConfig:
         app.state.rate_limiter.configure(limit=payload.limit, window_seconds=payload.window_seconds)
+        audit_logger: AuditLogger | None = getattr(app.state, "audit_logger", None)
+        if audit_logger:
+            audit_logger.log(
+                "rate_limit.updated",
+                limit=payload.limit,
+                window_seconds=payload.window_seconds,
+            )
         return payload
 
     @app.get("/limited/ping")
@@ -137,6 +195,9 @@ def create_app() -> FastAPI:
         request: Request, identity: Identity = Depends(get_identity)
     ) -> dict[str, str]:
         require_step_up(request)
+        audit_logger: AuditLogger | None = getattr(app.state, "audit_logger", None)
+        if audit_logger:
+            audit_logger.log("secrets.materialized", subject=identity.subject)
         return {"materialized": "secret", "granted_to": identity.subject}
 
     @app.post("/controls/overrides", status_code=201)
@@ -144,6 +205,9 @@ def create_app() -> FastAPI:
         override_id = str(uuid.uuid4())
         override = Override(override_id=override_id, reason=reason)
         app.state.overrides[override_id] = override
+        audit_logger: AuditLogger | None = getattr(app.state, "audit_logger", None)
+        if audit_logger:
+            audit_logger.log("controls.override.created", override_id=override_id)
         return override
 
     @app.post("/controls/overrides/{override_id}/approve")
@@ -163,6 +227,14 @@ def create_app() -> FastAPI:
             override.granted = True
 
         overrides[override_id] = override
+        audit_logger: AuditLogger | None = getattr(app.state, "audit_logger", None)
+        if audit_logger:
+            audit_logger.log(
+                "controls.override.approved",
+                override_id=override_id,
+                approvals=list(override.approvals),
+                granted=override.granted,
+            )
         return override
 
     return app

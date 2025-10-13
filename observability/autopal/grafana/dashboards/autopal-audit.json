@@ -1,0 +1,102 @@
+{
+  "id": null,
+  "uid": "autopal-audit",
+  "title": "Autopal – Controls Overview",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1,
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "type": "timeseries",
+      "title": "Audit event rate",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (event)(rate(autopal_audit_events_total[5m]))",
+          "legendFormat": "{{event}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops/s",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "type": "timeseries",
+      "title": "API latency quantiles",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.5, sum by (le, method)(rate(autopal_http_server_duration_bucket[5m])))",
+          "legendFormat": "p50 {{method}}"
+        },
+        {
+          "refId": "B",
+          "expr": "histogram_quantile(0.95, sum by (le, method)(rate(autopal_http_server_duration_bucket[5m])))",
+          "legendFormat": "p95 {{method}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 8 },
+      "type": "table",
+      "title": "Audit events by action",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "autopal_audit_events_total",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "align": "auto" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true
+      }
+    },
+    {
+      "id": 4,
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 8 },
+      "type": "traceqlSearch",
+      "title": "Recent traces",
+      "datasource": { "type": "tempo", "uid": "tempo" },
+      "targets": [
+        {
+          "refId": "A",
+          "queryType": "traceql",
+          "query": "{ service.name =~ \"autopal-.*\" } | traces"
+        }
+      ],
+      "transformations": []
+    }
+  ]
+}

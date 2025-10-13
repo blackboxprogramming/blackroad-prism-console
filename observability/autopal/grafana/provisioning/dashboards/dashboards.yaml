@@ -1,0 +1,12 @@
+apiVersion: 1
+
+datasources: []
+
+dashboardProviders:
+  - name: autopal
+    orgId: 1
+    folder: Autopal
+    type: file
+    disableDeletion: false
+    options:
+      path: /var/lib/grafana/dashboards
