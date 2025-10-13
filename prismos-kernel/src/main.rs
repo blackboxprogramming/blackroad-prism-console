@@ -1,8 +1,8 @@
 #![no_std]
 #![no_main]
 
-use core::panic::PanicInfo;
 use core::fmt::Write;
+use core::panic::PanicInfo;
 use spin::Mutex;
 use uart_16550::SerialPort;
 
@@ -20,8 +20,8 @@ macro_rules! serial_println {
 }
 
 pub mod serial {
-    use core::fmt::{self, Write};
     use super::SERIAL1;
+    use core::fmt::{self, Write};
 
     pub fn _println(args: fmt::Arguments) {
         let mut serial = SERIAL1.lock();
