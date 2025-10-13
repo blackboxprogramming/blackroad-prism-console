@@ -91,6 +91,13 @@ export default function App(){
       })
       .finally(()=>setAuthChecked(true))
   // eslint-disable-next-line react-hooks/exhaustive-deps
+      } catch(e) {
+        if (e?.response?.status === 401) {
+          localStorage.removeItem('token')
+          setToken('')
+        }
+      }
+    })()
   }, [])
 
   useEffect(()=>()=>{ socketRef.current?.close() }, [])

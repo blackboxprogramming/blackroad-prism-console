@@ -4,6 +4,11 @@ This module provides a small helper class that uses the GitHub REST API to
 create issue or pull request comments. If a token is not supplied explicitly,
 the ``GITHUB_TOKEN`` environment variable is used. Requests are retried for
 transient failures.
+"""Post comments to GitHub issues and pull requests.
+
+This module provides a small helper class that uses the GitHub REST API to
+create issue or pull request comments. If a token is not supplied explicitly,
+the ``GITHUB_TOKEN`` environment variable is used.
 """
 
 from __future__ import annotations
@@ -75,6 +80,9 @@ class CommentBot:
             raise RuntimeError("A GitHub token is required to post comments.")
 
         url = f"https://api.github.com/repos/{self.repo}/issues/{issue_number}/comments"
+        url = (
+            f"https://api.github.com/repos/{self.repo}/issues/{issue_number}/comments"
+        )
         headers = {
             "Authorization": f"token {self.token}",
             "Accept": "application/vnd.github+json",

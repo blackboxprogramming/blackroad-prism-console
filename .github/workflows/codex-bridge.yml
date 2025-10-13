@@ -14,12 +14,15 @@ jobs:
       || startsWith(github.event.comment.body, '@BBPTeam')
       || startsWith(github.event.comment.body, '@blackboxprogramming')
       || startsWith(github.event.comment.body, '@Blackboxprogramming')
+    if: startsWith(github.event.comment.body, '/codex ') || startsWith(github.event.comment.body, '@codex ')
     runs-on: ubuntu-latest
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       BOT_USER: ${{ secrets.BOT_USER || 'blackroad-bot' }}
       CODEX_BODY: ${{ github.event.comment.body }}
       CODEX_PERMISSION: ${{ github.event.comment.author_association }}
+      CODEx_BODY: ${{ github.event.comment.body }}
+      CODEx_PERMISSION: ${{ github.event.comment.author_association }}
     steps:
       - uses: actions/checkout@v4
         with: { persist-credentials: false, fetch-depth: 0 }

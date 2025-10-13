@@ -32,6 +32,12 @@ def test_run_code_rejects_import():
     assert resp.status_code == 400
 
 
+def test_install_package():
+    client = app.test_client()
+    resp = client.post("/run", json={"code": "import os"})
+    assert resp.status_code == 400
+
+
 def test_install_package_allowlisted(monkeypatch):
     client = app.test_client()
 

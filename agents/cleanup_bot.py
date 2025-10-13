@@ -5,6 +5,9 @@ from __future__ import annotations
 # --- Imports ---
 import argparse
 import logging
+import argparse
+import logging
+import sys
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -166,6 +169,9 @@ def main(argv: List[str] | None = None) -> int:
         logging.info("No merged branches to clean up.")
         return 0
 
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
+
+    bot = CleanupBot.from_merged(base=args.base, dry_run=args.dry_run)
     results = bot.cleanup()
     for branch, deleted in results.items():
         status = "deleted" if deleted else "failed"
@@ -176,6 +182,7 @@ def main(argv: List[str] | None = None) -> int:
     logging.info("Summary: %d deleted, %d failed", successes, failures)
 
     return 0 if failures == 0 else 1
+    return 0 if all(results.values()) else 1
 
 
 if __name__ == "__main__":

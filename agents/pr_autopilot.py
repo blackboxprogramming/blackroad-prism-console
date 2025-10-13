@@ -1,4 +1,5 @@
 """Automates pull request management tasks for BlackRoad repositories."""
+"""Automated pull request manager for BlackRoad repos."""
 
 from __future__ import annotations
 
@@ -9,6 +10,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Sequence
+from typing import Optional
 
 import requests
 
@@ -16,6 +18,7 @@ import requests
 @dataclass
 class AutomatedPullRequestManager:
     """Monitor Git events and orchestrate draft pull requests."""
+    """Monitor git events and orchestrate draft pull requests."""
 
     repo: str
     branch_prefix: str = "codex/"
@@ -39,6 +42,14 @@ class AutomatedPullRequestManager:
 
     def prepare_draft_pr(self) -> None:
         """Create a draft pull request from the latest commit."""
+        """Return True if repo has uncommitted changes."""
+        result = subprocess.run(
+            ["git", "status", "--porcelain"], capture_output=True, text=True, check=False
+        )
+        return bool(result.stdout.strip())
+
+    def prepare_draft_pr(self) -> None:
+        """Create a draft pull request from latest commit."""
         commit_msg = subprocess.run(
             ["git", "log", "-1", "--pretty=%s"], capture_output=True, text=True, check=False
         ).stdout.strip()
@@ -57,6 +68,9 @@ class AutomatedPullRequestManager:
 
     def _create_pr(self, title: str, head: str, base: str, body: str) -> dict:
         """Create a pull request via the GitHub API and return its response."""
+        logging.info("Opened draft PR #%s", pr["number"])
+
+    def _create_pr(self, title: str, head: str, base: str, body: str) -> dict:
         url = f"https://api.github.com/repos/{self.repo}/pulls"
         headers = {"Accept": "application/vnd.github+json"}
         if self.token:
@@ -321,6 +335,27 @@ class AutomatedPullRequestManager:
         except requests.RequestException as exc:
             self.log(f"Failed to fetch PR #{pr_number} metadata: {exc}")
             return None
+    def handle_trigger(self, phrase: str) -> None:
+        """React to codex trigger phrases."""
+        phrase_lower = phrase.lower()
+        if "fix comments" in phrase_lower:
+            self.apply_comment_fixes()
+        elif "summarize" in phrase_lower:
+            self.log("Summarizing PR (placeholder)")
+        elif "merge" in phrase_lower:
+            self.log("Merging PR (placeholder)")
+
+    def apply_comment_fixes(self) -> None:
+        """Run the Codex comment fixer script."""
+        subprocess.run(
+            ["node", ".github/tools/codex-apply.js", ".github/prompts/codex-fix-comments.md"],
+            check=False,
+        )
+        self.log("Applied comment fixes")
+
+    def log(self, message: str) -> None:
+        """Log an arbitrary message to the log file."""
+        logging.info(message)
 
 
 if __name__ == "__main__":

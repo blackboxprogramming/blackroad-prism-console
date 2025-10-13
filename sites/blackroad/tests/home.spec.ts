@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test("home renders new landing hero", async ({ page }) => {
   await page.goto("/");
+  await page.goto(base + "/");
   await expect(page.getByRole("heading", { name: /Welcome to Blackroad/i })).toBeVisible();
   await expect(page.getByRole("link", { name: /Enter Portal/i })).toBeVisible();
   // status widget should eventually resolve

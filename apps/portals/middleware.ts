@@ -7,6 +7,9 @@ const PASS = process.env.BASIC_AUTH_PASS || "";
 export function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const proto = req.headers.get("x-forwarded-proto");
+export function middleware(request: NextRequest) {
+  const url = request.nextUrl.clone();
+  const proto = request.headers.get("x-forwarded-proto");
 
   if (proto === "http") {
     url.protocol = "https";
@@ -51,6 +54,7 @@ export function middleware(req: NextRequest) {
     "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'"
   );
   return res;
+  return NextResponse.next();
 }
 
 export const config = {

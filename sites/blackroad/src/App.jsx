@@ -35,6 +35,19 @@ import BlueNoiseTSPLab from './pages/BlueNoiseTSPLab.jsx';
 import BezierShadedSurfaceLab from './pages/BezierShadedSurfaceLab.jsx';
 import Kalman2DTrackerLab from './pages/Kalman2DTrackerLab.jsx';
 import VorticityStreamLab from './pages/VorticityStreamLab.jsx';
+import { NavLink, Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
+import Chat from "./pages/Chat.jsx";
+import Canvas from "./pages/Canvas.jsx";
+import Editor from "./pages/Editor.jsx";
+import Terminal from "./pages/Terminal.jsx";
+import RoadView from "./pages/RoadView.jsx";
+import Backroad from "./pages/Backroad.jsx";
+import Subscribe from "./pages/Subscribe.jsx";
+import Lucidia from "./pages/Lucidia.jsx";
+import InfinityMath from "./pages/InfinityMath.jsx";
+import Agents from "./pages/Agents.jsx";
+import Desktop from "./pages/Desktop.jsx";
 
 function useApiHealth() {
   const [state, setState] = useState({ ok: null, info: '' });
@@ -122,6 +135,15 @@ function LegacyApp() {
           <NavLink className="nav-link" to="/lucidia">
             Lucidia
           </NavLink>
+          <NavLink className="nav-link" to="/chat">Chat</NavLink>
+          <NavLink className="nav-link" to="/canvas">Canvas</NavLink>
+          <NavLink className="nav-link" to="/editor">Editor</NavLink>
+          <NavLink className="nav-link" to="/terminal">Terminal</NavLink>
+          <NavLink className="nav-link" to="/roadview">RoadView</NavLink>
+          <NavLink className="nav-link" to="/backroad">Backroad</NavLink>
+          <NavLink className="nav-link" to="/agents">Agents</NavLink>
+          <NavLink className="nav-link" to="/subscribe">Subscribe</NavLink>
+          <NavLink className="nav-link" to="/lucidia">Lucidia</NavLink>
           <NavLink className="nav-link" to="/math">
             <span
               style={{
@@ -224,6 +246,27 @@ function LegacyApp() {
              <Route path="kf-2d" element={<Kalman2DTrackerLab />} />
              <Route path="vorticity" element={<VorticityStreamLab />} />
              <Route path="*" element={<div>Not found</div>} />
+            <Route path="/" element={<Chat/>} />
+            <Route path="/chat" element={<Chat/>} />
+            <Route path="/canvas" element={<Canvas/>} />
+            <Route path="/editor" element={<Editor/>} />
+            <Route path="/terminal" element={<Terminal/>} />
+            <Route path="/roadview" element={<RoadView/>} />
+            <Route path="/backroad" element={<Backroad/>} />
+            <Route path="/agents" element={<Agents/>} />
+            <Route path="/subscribe" element={<Subscribe/>} />
+            <Route path="/lucidia" element={<Lucidia/>} />
+            <Route path="/math" element={<InfinityMath/>} />
+            <Route path="chat" element={<Chat/>} />
+            <Route path="canvas" element={<Canvas/>} />
+            <Route path="editor" element={<Editor/>} />
+            <Route path="terminal" element={<Terminal/>} />
+            <Route path="roadview" element={<RoadView/>} />
+            <Route path="backroad" element={<Backroad/>} />
+            <Route path="subscribe" element={<Subscribe/>} />
+            <Route path="lucidia" element={<Lucidia/>} />
+            <Route path="math" element={<InfinityMath/>} />
+            <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
       </main>
