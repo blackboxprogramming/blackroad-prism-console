@@ -24,3 +24,5 @@ uvicorn
 whisper
 typer
 pytest
+openai-whisper
+torch
