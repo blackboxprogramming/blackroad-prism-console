@@ -30,7 +30,8 @@ def _next_task_id() -> str:
     counter_path = ARTIFACTS / "last_task_id.txt"
     last = int(storage.read(str(counter_path)) or 0)
     new = last + 1
-    storage.write(str(counter_path), str(new))
+    if not settings.DRY_RUN:
+        storage.write(str(counter_path), str(new))
     return f"T{new:04d}"
 
 
