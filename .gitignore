@@ -8,6 +8,8 @@ publicssh.sh
 dist/
 .cache/
 .env
+downloads/
+**/downloads/
 !tools/tools-adapter/.env
 artifacts.sha256
 public/artifacts.sha256
