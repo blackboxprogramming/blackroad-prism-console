@@ -153,6 +153,13 @@ import bcdrRestore from './routes/bcdr/restore.js';
 import bcdrFailover from './routes/bcdr/failover.js';
 import bcdrPlans from './routes/bcdr/plans.js';
 import bcdrDrills from './routes/bcdr/drills.js';
+import arInvoice from './routes/ar/invoice.js';
+import arPayment from './routes/ar/payment.js';
+import arCash from './routes/ar/cashapp.js';
+import arCredit from './routes/ar/credit.js';
+import arDunning from './routes/ar/dunning.js';
+import arDispute from './routes/ar/dispute.js';
+import arLockbox from './routes/ar/lockbox.js';
 
 dotenv.config();
 
@@ -266,6 +273,7 @@ app.use('/api/tprm', tprmV, tprmQ, tprmR, tprmM, tprmMap, tprmB);
 app.use('/api/portal', portalAnn, portalCh, portalPrefs, portalBan, portalI18n, portalSearch);
 app.use('/api/ats', atsJC, atsAPP, atsINT, atsOF, atsOB, atsAR);
 app.use('/api/bcdr', bcdrPolicy, bcdrBackups, bcdrRestore, bcdrFailover, bcdrPlans, bcdrDrills);
+app.use('/api/ar', arInvoice, arPayment, arCash, arCredit, arDunning, arDispute, arLockbox);
 
 const port = process.env.PORT || 4000;
 
