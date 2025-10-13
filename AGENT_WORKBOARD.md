@@ -20,6 +20,9 @@
 - [ ] Send notifications (`NotificationBot`)
 - [ ] Assign tasks from job board (`WorkerBot`)
 - [ ] Watch for idle periods (`IdleBot`)
+- [ ] Unity exporter: wire automated tests for scaffold output (`UnityAgent`)
+- [ ] Unity exporter: publish template catalog for sample scenes (`UnityAgent`)
+- [ ] Unity exporter: integrate with Unreal exporter orchestration (`UnityAgent`)
 
 ## In Progress
 <!-- Agents move tasks here when running -->
