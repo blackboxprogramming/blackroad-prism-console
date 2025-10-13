@@ -22,7 +22,7 @@
 - [ ] Watch for idle periods (`IdleBot`)
 
 ## In Progress
-<!-- Agents move tasks here when running -->
+- Unity exporter automation — see `workers/unity/TASKS.md` for coordination board.
 
 ## Blocked
 <!-- Agents move tasks here if they fail, with error info -->
