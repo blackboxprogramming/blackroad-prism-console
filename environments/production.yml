@@ -2,3 +2,7 @@ name: production
 url: https://blackroad.io
 reviewers:
   - blackboxprogramming
+description: >-
+  Primary customer-facing deployment managed by the CI & Deploy to Droplet workflow.
+workflows:
+  - .github/workflows/deploy.yml
