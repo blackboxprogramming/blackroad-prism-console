@@ -35,6 +35,12 @@ from services import catalog as svc_catalog
 from services import deps as svc_deps
 from status import generator as status_gen
 from tools import storage
+from aiops import canary as aiops_canary
+from aiops import config_drift as aiops_drift
+from aiops import correlation as aiops_correlation
+from aiops import maintenance as aiops_maintenance
+from aiops import remediation as aiops_remediation
+from aiops import slo_budget as aiops_budget
 
 VERB_FUN: dict[str, str] = {}
 VERB_FUN['plm:bom:where-used'] = 'cli_bom_where_used'
@@ -599,6 +605,52 @@ def learn_feedback_summary(course: str = typer.Option(..., "--course")):
 def status_build():
     status_gen.build()
     typer.echo("built")
+@app.command("aiops:correlate")
+def aiops_correlate():
+    aiops_correlation.correlate(datetime.utcnow())
+
+
+@app.command("aiops:plan")
+def aiops_plan(correlations: str = typer.Option(..., "--correlations")):
+    corr = aiops_remediation.load_correlations(correlations)
+    aiops_remediation.plan(corr)
+
+
+@app.command("aiops:execute")
+def aiops_execute(
+    plan: Path = typer.Option(..., "--plan", exists=True, dir_okay=False),
+    dry_run: bool = typer.Option(False, "--dry-run"),
+):
+    aiops_remediation.execute(plan, dry_run)
+
+
+@app.command("aiops:canary")
+def aiops_canary_cmd(
+    base: Path = typer.Option(..., "--base", exists=True, dir_okay=False),
+    canary: Path = typer.Option(..., "--canary", exists=True, dir_okay=False),
+):
+    aiops_canary.analyze(base, canary)
+
+
+@app.command("aiops:baseline:record")
+def aiops_baseline_record():
+    aiops_drift.record_baseline({})
+
+
+@app.command("aiops:drift:check")
+def aiops_drift_check():
+    aiops_drift.compare()
+
+
+@app.command("aiops:budget")
+def aiops_budget_cmd(service: str = typer.Option(..., "--service"), window: str = typer.Option(..., "--window")):
+    aiops_budget.budget_status(service, window)
+
+
+@app.command("aiops:window")
+def aiops_window(service: str = typer.Option(..., "--service"), action: str = typer.Option(..., "--action")):
+    w = aiops_maintenance.next_window(service, action)
+    typer.echo(json.dumps(w) if w else "null")
 
 
 if __name__ == "__main__":
