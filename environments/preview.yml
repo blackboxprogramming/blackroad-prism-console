@@ -1,0 +1,47 @@
+name: preview
+slug: pr
+status: planned
+description: >-
+  Ephemeral review apps spun up per pull request for product acceptance testing.
+domains:
+  primary: https://preview.blackroad.local
+deploy_targets:
+  - provider: fly.io
+    status: planned
+    app: blackroad-prism-console-preview
+    region: ord
+    release_channel: pull-request
+    notes:
+      - Create one app per PR and destroy after merge.
+  - provider: aws-ecs
+    status: planned
+    cluster: prism-console-preview
+    service: pr-*
+    region: us-east-2
+    release_channel: pull-request
+    notes:
+      - Provisioned by automation only when required for load tests.
+ci_cd:
+  branch: feature/*
+  promotes_from: null
+  workflows:
+    - deploy/ci/woodpecker.yml
+    - deploy/ci/semgrep.yml
+approvals:
+  required: false
+  reviewers: []
+  policy_gates:
+    - SECURITY_BASELINE.md
+runbooks:
+  deploy: README-OPS.md#hybrid-deploy
+  rollback: RUNBOOK.md#restoring-from-backup
+observability:
+  dashboards:
+    grafana: ops/observability/grafana
+  alerts:
+    pagerduty: pending
+  logging:
+    primary: pending
+notes:
+  - Surface preview URLs back to GitHub PRs for design and QA review.
+  - Destroy environments automatically after merges or 48 hours of inactivity.

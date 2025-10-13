@@ -37,6 +37,7 @@ cmd/slack/slack
 repos/
 runtime/
 __pycache__/
+*.egg-info/
 codex/runtime/
 benchmarks/
 

@@ -1,0 +1,48 @@
+name: staging
+slug: stg
+status: planned
+description: >-
+  Pre-production validation environment used for release candidate burn-in.
+domains:
+  primary: https://staging.blackroad.local
+deploy_targets:
+  - provider: fly.io
+    status: planned
+    app: blackroad-prism-console-staging
+    region: ord
+    release_channel: main
+    notes:
+      - Mirrors the production Fly.io configuration with throttled autoscaling.
+  - provider: aws-ecs
+    status: planned
+    cluster: prism-console
+    service: staging
+    region: us-east-2
+    release_channel: main
+    notes:
+      - Runs the same container image as production with masked datasets.
+ci_cd:
+  branch: release/staging
+  promotes_from: preview
+  workflows:
+    - deploy/ci/woodpecker.yml
+approvals:
+  required: true
+  reviewers:
+    - blackboxprogramming
+  change_window: Coordinate with production on-call
+  policy_gates:
+    - SECURITY_BASELINE.md
+runbooks:
+  deploy: README-OPS.md#hybrid-deploy
+  rollback: RUNBOOK.md#restoring-from-backup
+observability:
+  dashboards:
+    grafana: ops/observability/grafana
+  alerts:
+    pagerduty: pending
+  logging:
+    primary: pending
+notes:
+  - Sanitize production backups before loading into staging.
+  - Enable automatic smoke tests before promoting to production.
