@@ -87,6 +87,10 @@ refresh_working_copy() {
 
   if [[ $processed -eq 0 ]]; then
     log "No valid working copy targets resolved; skipping working copy refresh"
+  if [[ -n "${WORKING_COPY_HOST:-}" ]]; then
+    run ssh "$WORKING_COPY_HOST" "cd ${WORKING_COPY_PATH:-/var/mobile/blackroad} && git pull --rebase"
+  else
+    log "WORKING_COPY_HOST not set; skipping working copy refresh"
   fi
 }
 

@@ -334,6 +334,39 @@ function expireApprovedExceptions(now = new Date()) {
   return ids.length;
 }
 
+function getTasks(projectId) {
+  return getDb()
+    .prepare('SELECT * FROM tasks WHERE project_id = ? ORDER BY created_at DESC')
+    .all(projectId);
+}
+
+function getAllTasks() {
+  return getDb().prepare('SELECT * FROM tasks ORDER BY created_at DESC').all();
+}
+
+function updateTask(id, fields) {
+  const { title, status } = fields || {};
+  getDb()
+    .prepare(
+      `UPDATE tasks SET title = COALESCE(?, title), status = COALESCE(?, status), updated_at = datetime('now') WHERE id = ?`
+    )
+    .run(title || null, status || null, id);
+  return getTask(id);
+}
+
+function deleteTask(id) {
+  getDb().prepare('DELETE FROM tasks WHERE id = ?').run(id);
+}
+
+// ---- Logs ----
+function addLog(service, message) {
+  getDb().prepare('INSERT INTO logs (service, message) VALUES (?, ?)').run(service, message);
+}
+
+function getLogs() {
+  return getDb().prepare('SELECT * FROM logs ORDER BY timestamp DESC').all();
+}
+
 module.exports = {
   getDb,
   closeDb,

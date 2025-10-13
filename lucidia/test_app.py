@@ -3,6 +3,8 @@ import sys
 
 from lucidia.app import ALLOWLISTED_PACKAGES, app
 
+from lucidia.app import app
+
 
 def test_index():
     client = app.test_client()
@@ -72,6 +74,10 @@ def test_install_package_allowlisted(monkeypatch):
         ALLOWLISTED_PACKAGES["itsdangerous"],
     ]
     assert called["env"].get("PIP_NO_INPUT") == "1"
+    resp = client.post("/install", json={"package": "itsdangerous==2.2.0"})
+    data = resp.get_json()
+    assert resp.status_code == 200
+    assert data["code"] == 0
 
 
 def test_install_package_invalid():

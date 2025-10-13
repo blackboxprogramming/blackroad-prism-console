@@ -9,6 +9,11 @@ jobs:
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       BOT_USER: ${{ secrets.BOT_USER || 'blackroad-bot' }}
+    if: startsWith(github.event.comment.body, '/')
+    runs-on: ubuntu-latest
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      BOT_USER:  ${{ secrets.BOT_USER || 'blackroad-bot' }}
     steps:
       - uses: actions/checkout@v4
         with: { persist-credentials: false, fetch-depth: 0 }

@@ -98,11 +98,44 @@ export default function App() {
       <Route path="/" element={<Desktop />} />
       <Route path="/quantum-consciousness" element={<QuantumConsciousness />} />
       <Route path="/*" element={<LegacyApp />} />
+function useApiHealth(){
+  const [state,setState]=useState({ok:null, info:""});
+  useEffect(()=>{ let dead=false;
+    (async()=>{
+      const probe = async (path)=>{
+        try{
+          const r = await fetch(path,{cache:"no-store"});
+          const t = await r.text();
+          let info=""; try{ const j=JSON.parse(t); info=`${j.status||"ok"} • ${j.time||""}`; }catch{}
+          return {ok:r.ok, info};
+        }catch{ return {ok:false, info:""} }
+      };
+      let res = await probe("/api/health");
+      if(!res.ok) res = await probe("/api/health.json");
+      if(!dead) setState(res);
+    })(); return ()=>{dead=true};
+  },[]);
+  return state;
+}
+
+function StatusPill(){
+  const {ok, info} = useApiHealth();
+  const tone = ok==null ? "opacity-60" : ok ? "text-green-400" : "text-red-400";
+  const label = ok==null ? "Checking API…" : ok ? "API healthy" : "API error";
+  return <span className={`text-sm ${tone}`}>{label}{info?` — ${info}`:""}</span>;
+}
+
+export default function App(){
+  return (
+    <Routes>
+      <Route path="/" element={<Desktop/>} />
+      <Route path="/*" element={<LegacyApp/>} />
     </Routes>
   );
 }
 
 function LegacyApp() {
+function LegacyApp(){
   return (
     <div className="min-h-screen grid md:grid-cols-[240px_1fr] gap-4 p-4">
       <aside className="sidebar p-3">
@@ -246,6 +279,27 @@ function LegacyApp() {
              <Route path="kf-2d" element={<Kalman2DTrackerLab />} />
              <Route path="vorticity" element={<VorticityStreamLab />} />
              <Route path="*" element={<div>Not found</div>} />
+                background: "linear-gradient(90deg,#FF4FD8,#0096FF,#FDBA2D)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              ∞
+            </span>{" "}
+            Infinity Math
+          </NavLink>
+        </nav>
+        <div className="mt-6 text-xs text-neutral-400"><StatusPill/></div>
+      </aside>
+
+      <main className="space-y-4">
+        <header className="panel p-4 flex items-center justify-between">
+          <h1 className="brand-gradient text-xl font-semibold">Co-coding Portal</h1>
+          <a className="btn-primary" href="/api/health" target="_blank" rel="noreferrer">API Health</a>
+        </header>
+
+        <section className="card">
+          <Routes>
             <Route path="/" element={<Chat/>} />
             <Route path="/chat" element={<Chat/>} />
             <Route path="/canvas" element={<Canvas/>} />

@@ -15,6 +15,10 @@
     "format:check": "prettier package.json tests/api_health.test.js srv/lucidia-llm/test_app.py var/www/blackroad/.prettierrc.json .prettierrc.json RUNME.sh Makefile .github/workflows/ci.yml CLEANUP_PLAN.md CLEANUP_DECISIONS.md CLEANUP_RESULTS.md ROLLBACK.md CHANGELOG.md --check --ignore-unknown",
     "test": "npx jest",
     "guard:dev-mode": "node scripts/security/dev_mode_guard.js",
+    "start": "node srv/blackroad-api/server_full.js",
+    "dev": "nodemon srv/blackroad-api/server_full.js",
+    "seed": "node scripts/seed_admin.js",
+    "prepare": "husky",
     "lint": "eslint --config .eslintrc.cjs srv/blackroad-api/server_full.js tests/api_health.test.js",
     "format": "prettier . --write",
     "format:check": "prettier package.json tests/api_health.test.js srv/lucidia-llm/test_app.py var/www/blackroad/.prettierrc.json .prettierrc.json RUNME.sh Makefile .github/workflows/ci.yml CLEANUP_PLAN.md CLEANUP_DECISIONS.md CLEANUP_RESULTS.md ROLLBACK.md CHANGELOG.md --check --ignore-unknown",
@@ -28,6 +32,11 @@
     "frontend:build": "npm --prefix sites/blackroad run build",
     "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true",
     "demo": "brc plm:items:load --dir fixtures/plm/items && brc plm:bom:load --dir fixtures/plm/boms && brc mfg:wc:load --file fixtures/mfg/work_centers.csv && brc mfg:routing:load --dir fixtures/mfg/routings && brc mfg:routing:capcheck --item PROD-100 --rev B --qty 1000 && brc mfg:wi:render --item PROD-100 --rev B && brc mfg:spc:analyze --op OP-200 --window 50 && brc mfg:yield --period 2025-09 && brc mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv && brc mfg:coq --period 2025-Q3"
+    "build": "npm --prefix sites/blackroad run build",
+    "test-agents-pack": "node tests/test_agents_mega.js",
+    "frontend:dev": "npm --prefix sites/blackroad run dev",
+    "frontend:build": "npm --prefix sites/blackroad run build",
+    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
   },
   "engines": {
     "node": ">=20"
@@ -54,6 +63,7 @@
     "stripe": "^12.18.0",
     "ethers": "^6.10.0",
     "yaml": "^2.3.4"
+    "stripe": "^12.18.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
@@ -68,6 +78,7 @@
     "@types/node-fetch": "^2.6.11",
     "@types/react": "^18.2.64",
     "typescript": "^5.6.3"
+    "lint-staged": "^15.2.7"
   },
   "lint-staged": {
     "*.{js,jsx,mjs,cjs,ts,tsx}": [

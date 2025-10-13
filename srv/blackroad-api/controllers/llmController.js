@@ -12,6 +12,7 @@ exports.chat = async (req, res, next) => {
     const payload = { ok: upstream.ok, data: text };
     await logSnapshot(payload);
     res.status(upstream.ok ? 200 : upstream.status).json(payload);
+    res.status(upstream.ok ? 200 : upstream.status).type('text/plain').send(text);
   } catch (err) {
     next(err);
   }

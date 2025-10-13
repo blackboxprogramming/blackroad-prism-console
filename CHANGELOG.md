@@ -7,7 +7,9 @@
 
 * implement lucidia sim bridge runtime ([8e038e9](https://github.com/blackboxprogramming/blackroad-prism-console/commit/8e038e94c6ba5de75d4f3872f3d8709b6c124407))
 * sync PagerDuty incidents with Jira ([a967901](https://github.com/blackboxprogramming/blackroad-prism-console/commit/a967901141d0d72ddb3eb117065dec0a80a1a982))
+## 2025-08-16
 
+- Cleanup: hardened API, added tests and CI tooling.
 
 ### Bug Fixes
 

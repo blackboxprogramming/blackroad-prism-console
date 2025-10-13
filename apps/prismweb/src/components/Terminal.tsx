@@ -52,6 +52,9 @@ const Terminal: React.FC<Props> = ({ kernel, onChange }) => {
           }
           break;
         }
+        case 'cat':
+          print(kernel.cat(parts[1]) ?? '');
+          break;
         default:
           print('unknown command');
       }

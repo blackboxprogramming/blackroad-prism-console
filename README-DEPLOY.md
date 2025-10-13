@@ -6,6 +6,7 @@
 - `SLACK_WEBHOOK_URL` — optional Slack notification URL
 
 ## Legacy SSH deploy secrets
+## Secrets (GitHub → Settings → Secrets and variables → Actions)
 - `SERVER_HOST` — your server or domain (e.g., blackroad.io)
 - `SERVER_USER` — SSH user with permission to write to `/opt/blackroad` and restart `blackroad-api`
 - `SSH_KEY` — private key **text** (RSA/ED25519). Use `SSH_KEY_PATH` instead if you prefer a file path.

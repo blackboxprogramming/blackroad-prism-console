@@ -32,6 +32,14 @@ To run nightly, install the service and timer from `etc/systemd/system/` and rel
 sudo cp etc/systemd/system/br-cleanup-nightly.* /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now br-cleanup-nightly.timer
+
+API health check: http://127.0.0.1:4000/api/health
+
+On the server you can run:
+
+```sh
+scripts/nginx-ensure-and-health.sh
+scripts/nginx-enable-tls.sh   # optional TLS helper
 ```
 
 An optional sudoers snippet is in `etc/sudoers.d/br-cleanup`.

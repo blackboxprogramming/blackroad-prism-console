@@ -3,6 +3,8 @@
 
 use core::fmt::Write;
 use core::panic::PanicInfo;
+use core::panic::PanicInfo;
+use core::fmt::Write;
 use spin::Mutex;
 use uart_16550::SerialPort;
 
@@ -22,6 +24,8 @@ macro_rules! serial_println {
 pub mod serial {
     use super::SERIAL1;
     use core::fmt::{self, Write};
+    use core::fmt::{self, Write};
+    use super::SERIAL1;
 
     pub fn _println(args: fmt::Arguments) {
         let mut serial = SERIAL1.lock();

@@ -15,6 +15,9 @@ from subprocess import CalledProcessError
 from typing import Dict, List
 from dataclasses import dataclass
 from subprocess import CalledProcessError, DEVNULL, run
+from dataclasses import dataclass
+from subprocess import CalledProcessError
+from typing import Dict, List
 
 
 # --- Core functionality ---
@@ -50,6 +53,12 @@ class CleanupBot:
         except CalledProcessError as exc:
             logging.error("Failed to list merged branches: %s", exc)
             raise RuntimeError("Could not list merged branches") from exc
+        result = subprocess.run(
+            ["git", "branch", "--merged", base],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
         branches: List[str] = []
         for line in result.stdout.splitlines():
             name = line.strip().lstrip("*").strip()
@@ -111,6 +120,9 @@ class CleanupBot:
             removed or already absent, False otherwise.
         """
         local_deleted = True
+        Returns:
+            True if the branch was deleted locally and remotely, False otherwise.
+        """
         try:
             self._run("git", "branch", "-D", branch)
             self._run("git", "push", "origin", "--delete", branch)
@@ -129,12 +141,15 @@ class CleanupBot:
         return local_deleted and remote_deleted
 
     def cleanup(self) -> dict[str, bool]:
+
+    def cleanup(self) -> Dict[str, bool]:
         """Remove the configured branches locally and remotely.
 
         Returns:
             Mapping of branch names to deletion success.
         """
         results: dict[str, bool] = {}
+        results: Dict[str, bool] = {}
         for branch in self.branches:
             results[branch] = self.delete_branch(branch)
         return results

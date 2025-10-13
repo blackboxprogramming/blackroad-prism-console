@@ -1,3 +1,4 @@
+<!-- FILE: srv/blackroad-api/server_full.js -->
 /* BlackRoad API — Express + SQLite + Socket.IO + LLM bridge
    Runs behind Nginx on port 4000 with cookie-session auth.
    Env (optional):
@@ -34,6 +35,13 @@ const attachLlmRoutes = require('./routes/admin_llm');
 const gitRouter = require('./routes/git');
 const providersRouter = require('./routes/providers');
 const attachSlackExceptions = require('./modules/slack_exceptions');
+const EventEmitter = require('events');
+const Stripe = require('stripe');
+const verify = require('./lib/verify');
+const git = require('./lib/git');
+const deploy = require('./lib/deploy');
+const notify = require('./lib/notify');
+const logger = require('./lib/log');
 
 // --- Config
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -52,6 +60,17 @@ const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
 const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
   ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
   : [];
+const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
+const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
+const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
+const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
+const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
+const BRANCH_MAIN = process.env.BRANCH_MAIN || 'main';
+const BRANCH_STAGING = process.env.BRANCH_STAGING || 'staging';
+const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
+const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim()) : [];
 
 ['SESSION_SECRET', 'INTERNAL_TOKEN'].forEach((name) => {
   if (!process.env[name]) {
@@ -192,6 +211,38 @@ app.use(
   })
 );
 app.use(helmet.referrerPolicy({ policy: 'no-referrer' }));
+const emitter = new EventEmitter();
+const jobs = new Map();
+let jobSeq = 0;
+
+function addJob(type, payload, runner) {
+  const id = String(++jobSeq);
+  const job = { id, type, payload, status: 'queued', created: Date.now(), logs: [] };
+  jobs.set(id, job);
+  process.nextTick(async () => {
+    job.status = 'running';
+    try {
+      await runner(id, payload);
+      job.status = 'success';
+    } catch (e) {
+      job.status = 'failed';
+      job.error = String(e);
+    } finally {
+      emitter.emit(id, null);
+    }
+  });
+  return job;
+}
+
+function logLine(id, line) {
+  const job = jobs.get(id);
+  if (job) job.logs.push(line);
+  emitter.emit(id, line);
+}
+
+// --- Middleware
+app.disable('x-powered-by');
+app.use(helmet());
 app.use(
   cors({
     origin: (origin, cb) => {
@@ -212,10 +263,20 @@ app.use((req, res, next) => {
       status: res.statusCode,
       duration: Date.now() - start,
     });
+  }),
+);
+app.use(rateLimit({ windowMs: 60_000, max: 100 }));
+app.use((req, res, next) => {
+  const id = randomUUID();
+  req.id = id;
+  const start = Date.now();
+  res.on('finish', () => {
+    logger.info({ id, method: req.method, path: req.originalUrl, status: res.statusCode, duration: Date.now() - start });
   });
   next();
 });
 app.use(compression());
+app.use(express.json({ limit: '1mb' }));
 app.use(morgan('tiny'));
 app.use(
   cookieSession({
@@ -229,6 +290,9 @@ app.use(
 );
 
 app.use(maintenanceGuard({ logger }));
+
+  }),
+);
 
 // --- Homepage
 app.get('/', (_, res) => {
@@ -253,6 +317,7 @@ app.get('/health', (_req, res) => {
   res.json({ ok: true, version: '1.0.0', uptime: process.uptime() });
 });
 
+
 // --- Health
 app.head('/api/health', (_, res) => res.status(200).end());
 app.get('/api/health', async (_req, res) => {
@@ -266,6 +331,7 @@ app.get('/api/health', async (_req, res) => {
     version: '1.0.0',
     uptime: process.uptime(),
     services: { api: true, llm },
+    services: { api: true, llm }
   });
 });
 
@@ -291,11 +357,13 @@ app.post(
       (username === 'root' && password === 'Codex2025') ||
       process.env.BYPASS_LOGIN === 'true'
     ) {
+    if ((username === 'root' && password === 'Codex2025') || process.env.BYPASS_LOGIN === 'true') {
       req.session.user = { username, role: 'dev', plan: 'free' };
       return res.json({ ok: true, user: req.session.user });
     }
     return res.status(401).json({ error: 'invalid_credentials' });
   }
+  },
 );
 app.post('/api/logout', (req, res) => {
   req.session = null;
@@ -345,6 +413,10 @@ app.post('/api/billing/webhook', (req, res) => {
   try {
     event = stripeClient.webhooks.constructEvent(
       rawBody,
+  let event;
+  try {
+    event = stripeClient.webhooks.constructEvent(
+      JSON.stringify(req.body),
       sig,
       STRIPE_WEBHOOK_SECRET
     );
@@ -352,6 +424,7 @@ app.post('/api/billing/webhook', (req, res) => {
     logger.error('stripe_webhook_verify_failed', e);
     return res.status(400).json({ error: 'invalid_signature' });
   }
+  emitter.emit('stripe:event', event);
   res.json({ received: true });
 });
 
@@ -379,6 +452,7 @@ for (const t of TABLES) {
 // Subscription tables
 db.prepare(
   `
+db.prepare(`
   CREATE TABLE IF NOT EXISTS subscribers (
     id TEXT PRIMARY KEY,
     email TEXT UNIQUE,
@@ -391,6 +465,8 @@ db.prepare(
 ).run();
 db.prepare(
   `
+`).run();
+db.prepare(`
   CREATE TABLE IF NOT EXISTS subscriptions (
     id TEXT PRIMARY KEY,
     subscriber_id TEXT,
@@ -406,6 +482,8 @@ db.prepare(
 ).run();
 db.prepare(
   `
+`).run();
+db.prepare(`
   CREATE TABLE IF NOT EXISTS payments (
     id TEXT PRIMARY KEY,
     subscription_id TEXT,
@@ -420,6 +498,8 @@ db.prepare(
 ).run();
 db.prepare(
   `
+`).run();
+db.prepare(`
   CREATE TABLE IF NOT EXISTS logs_connectors (
     id TEXT PRIMARY KEY,
     subscriber_id TEXT,
@@ -435,6 +515,10 @@ db.prepare(
 // Billing tables (minimal subset)
 db.prepare(
   `
+`).run();
+
+// Billing tables (minimal subset)
+db.prepare(`
   CREATE TABLE IF NOT EXISTS plans (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -445,6 +529,7 @@ db.prepare(
   )
 `
 ).run();
+`).run();
 
 // Seed default plans if table empty
 const planCount = db.prepare('SELECT COUNT(*) as c FROM plans').get().c;
@@ -482,6 +567,12 @@ if (planCount === 0) {
   const stmt = db.prepare(
     'INSERT INTO plans (id, name, monthly_price_cents, yearly_price_cents, features, is_active) VALUES (?, ?, ?, ?, ?, 1)'
   );
+    { id: 'free', name: 'Free', monthly: 0, yearly: 0, features: ['Basic access'] },
+    { id: 'builder', name: 'Builder', monthly: 1500, yearly: 15000, features: ['Builder tools', 'Email support'] },
+    { id: 'pro', name: 'Pro', monthly: 4000, yearly: 40000, features: ['All builder features', 'Priority support'] },
+    { id: 'enterprise', name: 'Enterprise', monthly: 0, yearly: 0, features: ['Custom pricing', 'Dedicated support'] },
+  ];
+  const stmt = db.prepare('INSERT INTO plans (id, name, monthly_price_cents, yearly_price_cents, features, is_active) VALUES (?, ?, ?, ?, ?, 1)');
   for (const p of defaultPlans) {
     stmt.run(p.id, p.name, p.monthly, p.yearly, JSON.stringify(p.features));
   }
@@ -727,6 +818,79 @@ app.get('/api/subscribe/plans', requireAuth, (_req, res) => {
   }
 });
 
+// --- Subscribe & connectors
+const VALID_PLANS = ['free', 'builder', 'guardian'];
+const VALID_CYCLES = ['monthly', 'annual'];
+
+app.get('/api/connectors/status', (req, res) => {
+  const stripe = !!(process.env.STRIPE_PUBLIC_KEY && process.env.STRIPE_SECRET && process.env.STRIPE_WEBHOOK_SECRET);
+  const mail = !!process.env.MAIL_PROVIDER;
+  const sheets = !!(process.env.GSHEETS_SA_JSON || process.env.SHEETS_CONNECTOR_TOKEN);
+  const calendar = !!(process.env.GOOGLE_CALENDAR_CREDENTIALS || process.env.ICS_URL);
+  const discord = !!process.env.DISCORD_INVITE;
+  const webhooks = stripe; // placeholder
+  res.json({ stripe, mail, sheets, calendar, discord, webhooks });
+});
+
+// Basic health endpoint exposing provider mode
+app.get('/api/subscribe/health', (_req, res) => {
+  const mode = process.env.SUBSCRIBE_MODE || (process.env.STRIPE_SECRET ? 'stripe' : process.env.GUMROAD_TOKEN ? 'gumroad' : 'local');
+  let providerReady = false;
+  if (mode === 'stripe') providerReady = !!process.env.STRIPE_SECRET;
+  else if (mode === 'gumroad') providerReady = !!process.env.GUMROAD_TOKEN;
+  else providerReady = true;
+  res.json({ ok: true, mode, providerReady });
+});
+
+app.post('/api/subscribe/checkout', (req, res) => {
+  const { plan, cycle } = req.body || {};
+  if (!VALID_PLANS.includes(plan) || !VALID_CYCLES.includes(cycle)) {
+    return res.status(400).json({ error: 'invalid_input' });
+  }
+  if (!process.env.STRIPE_SECRET) {
+    return res.status(409).json({ mode: 'invoice' });
+  }
+  // Stripe integration would go here
+  res.json({ url: 'https://stripe.example/checkout' });
+});
+
+app.post('/api/subscribe/invoice-intent', (req, res) => {
+  const { plan, cycle, email, name, company, address, notes } = req.body || {};
+  if (!email || !VALID_PLANS.includes(plan) || !VALID_CYCLES.includes(cycle)) {
+    return res.status(400).json({ error: 'invalid_input' });
+  }
+  let sub = db.prepare('SELECT id FROM subscribers WHERE email = ?').get(email);
+  let subscriberId = sub ? sub.id : randomUUID();
+  if (!sub) {
+    db.prepare('INSERT INTO subscribers (id, email, name, company, created_at, source) VALUES (?, ?, ?, ?, datetime("now"), ?)')
+      .run(subscriberId, email, name || null, company || null, 'invoice');
+  }
+  const subscriptionId = randomUUID();
+  db.prepare('INSERT INTO subscriptions (id, subscriber_id, plan, cycle, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, datetime("now"), datetime("now"))')
+    .run(subscriptionId, subscriberId, plan, cycle, 'pending_invoice');
+  res.json({ ok: true, next: '/subscribe/thanks' });
+});
+
+app.get('/api/subscribe/status', (req, res) => {
+  const { email } = req.query || {};
+  if (!email) return res.status(400).json({ error: 'email_required' });
+  const row = db.prepare('SELECT s.plan, s.cycle, s.status FROM subscribers sub JOIN subscriptions s ON sub.id = s.subscriber_id WHERE sub.email = ? ORDER BY datetime(s.created_at) DESC LIMIT 1').get(email);
+  res.json(row || { status: 'none' });
+});
+
+// --- Billing: plans
+app.get('/api/subscribe/plans', requireAuth, (_req, res) => {
+  try {
+    const rows = db.prepare('SELECT id, name, monthly_price_cents, yearly_price_cents, features, is_active FROM plans WHERE is_active = 1').all();
+    for (const r of rows) {
+      try { r.features = JSON.parse(r.features); } catch { r.features = []; }
+    }
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: 'db_plans_failed', detail: String(e) });
+  }
+});
+
 // --- LLM bridge (/api/llm/chat)
 // Forwards body to FastAPI (LLM_URL) and streams raw text back to the client.
 app.post('/api/llm/chat', requireAuth, async (req, res) => {
@@ -795,6 +959,103 @@ app.get('/api/quantum/:topic', (req, res) => {
     .get(topic);
   if (!row) return res.status(404).json({ error: 'not_found' });
   res.json({ topic, summary: row.summary });
+// --- Deployment and CI endpoints
+app.post('/api/webhooks/github', async (req, res) => {
+  const sig = req.get('X-Hub-Signature-256');
+  const raw = JSON.stringify(req.body || {});
+  if (!verify.verifySignature(GITHUB_WEBHOOK_SECRET, raw, sig)) {
+    return res.status(401).end('invalid_signature');
+  }
+  const event = req.get('X-GitHub-Event');
+  if (event === 'ping') return res.json({ ok: true });
+  if (event === 'push') {
+    const branch = req.body.ref?.replace('refs/heads/', '');
+    if (!verify.branchAllowed(branch, [BRANCH_MAIN, BRANCH_STAGING])) return res.status(202).end();
+    const sha = req.body.after;
+    const job = addJob('deploy', { branch, sha }, async (id, payload) => {
+      logLine(id, 'git fetch');
+      await git.fetch();
+      await git.checkout(payload.branch);
+      await git.resetHard(payload.sha);
+      await git.clean();
+      logLine(id, 'deploy');
+      await deploy.stageAndSwitch(payload);
+      await notify.slack(`Deploy ${payload.branch} ${payload.sha} succeeded`);
+    });
+    return res.json({ ok: true, jobId: job.id });
+  }
+  if (event === 'pull_request') {
+    const job = addJob('ci', {}, async (id) => logLine(id, 'ci not implemented'));
+    return res.json({ ok: true, jobId: job.id });
+  }
+  res.json({ ok: true });
+});
+
+app.post('/api/deploy/plan', (req, res) => {
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  res.json({ ok: true, steps: ['build', 'switch'] });
+});
+
+app.post('/api/deploy/execute', (req, res) => {
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  const { branch = BRANCH_MAIN, sha } = req.body || {};
+  const job = addJob('deploy_manual', { branch, sha }, async (id, payload) => {
+    await git.fetch();
+    await git.checkout(payload.branch);
+    if (payload.sha) await git.resetHard(payload.sha);
+    await git.clean();
+    await deploy.stageAndSwitch(payload);
+  });
+  res.json({ ok: true, jobId: job.id });
+});
+
+app.post('/api/git/sync', (req, res) => {
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  const { branch = BRANCH_MAIN } = req.body || {};
+  addJob('git_sync', { branch }, async (id, payload) => {
+    await git.fetch();
+    await git.checkout(payload.branch);
+    await git.resetHard(`origin/${payload.branch}`);
+    await git.clean();
+  });
+  res.json({ ok: true });
+});
+
+app.get('/api/jobs', (req, res) => {
+  res.json(Array.from(jobs.values()).reverse());
+});
+
+app.get('/api/jobs/:id/log', (req, res) => {
+  const { id } = req.params;
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  const send = (line) => {
+    if (line === null) return res.write('event: end\n\n');
+    res.write(`data: ${line}\n\n`);
+  };
+  const listener = (l) => send(l);
+  emitter.on(id, listener);
+  const job = jobs.get(id);
+  if (job) job.logs.forEach(send);
+  req.on('close', () => emitter.removeListener(id, listener));
+});
+
+app.post('/api/rollback/:releaseId', (req, res) => {
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  const releaseId = req.params.releaseId;
+  const job = addJob('rollback', { releaseId }, async (id, payload) => {
+    await deploy.stageAndSwitch({ branch: 'rollback', sha: payload.releaseId });
+  });
+  res.json({ ok: true, jobId: job.id });
+});
+
+app.get('/api/connectors/status', async (_req, res) => {
+  const status = { slack: false, airtable: false, linear: false, salesforce: false };
+  try { if (process.env.SLACK_WEBHOOK_URL) { await notify.slack('status check'); status.slack = true; } } catch {}
+  try { if (process.env.AIRTABLE_API_KEY) status.airtable = true; } catch {}
+  try { if (process.env.LINEAR_API_KEY) status.linear = true; } catch {}
+  try { if (process.env.SF_USERNAME) status.salesforce = true; } catch {}
+  res.json(status);
 });
 
 // --- Actions (stubs)

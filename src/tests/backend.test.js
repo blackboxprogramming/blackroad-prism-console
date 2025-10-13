@@ -151,6 +151,9 @@ describe('Logs and Contradictions', () => {
     expect(cRes.body.claim).toBeDefined();
     expect(cRes.body.claim.claim_id).toBe(cRes.body.observation.claim_id);
     contradictionId = cRes.body.observation.id;
+      .send({ description: 'issue' });
+    expect(cRes.status).toBe(200);
+    contradictionId = cRes.body.id;
 
     const failResolve = await request(app)
       .post(`/api/contradictions/${contradictionId}/resolve`)
@@ -164,6 +167,8 @@ describe('Logs and Contradictions', () => {
     expect(resolve.status).toBe(200);
     expect(resolve.body.observation.status).toBe('resolved');
     expect(resolve.body.observation.note).toBe('restart worker and verified stable state');
+      .set('Cookie', adminCookie);
+    expect(resolve.status).toBe(200);
   });
 
   test('bad session cookie yields 401', async () => {

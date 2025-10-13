@@ -28,6 +28,25 @@ function defaultWin(key) {
     y: 80,
     w: size.width || 400,
     h: size.height || 320,
+
+const APPS = {
+  api: { title: "API Agent", icon: "API" },
+  llm: { title: "LLM Agent", icon: "LLM" },
+  math: { title: "Math Agent", icon: "MATH" },
+  echo: { title: "Echo Agent", icon: "ECHO" },
+  guardian: { title: "Guardian Agent", icon: "GUARD" },
+  explorer: { title: "Prism Explorer", icon: "FS" },
+};
+
+function defaultWin(key) {
+  return {
+    id: crypto.randomUUID(),
+    app: key,
+    title: APPS[key].title,
+    x: 80,
+    y: 80,
+    w: 400,
+    h: 300,
     minimized: false,
     maximized: false,
   };
@@ -124,5 +143,21 @@ function renderApp(key) {
   if (!entry || !entry.component) return null;
   const Component = entry.component;
   return <Component />;
+  switch (key) {
+    case "api":
+      return <pre className="p-2">/prism/logs/api tail</pre>;
+    case "llm":
+      return <div className="p-2">LLM chat placeholder</div>;
+    case "math":
+      return <div className="p-2">Graph canvas placeholder</div>;
+    case "echo":
+      return <div className="p-2">Echo agent window</div>;
+    case "guardian":
+      return <div className="p-2">Contradictions list</div>;
+    case "explorer":
+      return <div className="p-2">/prism file explorer</div>;
+    default:
+      return null;
+  }
 }
 

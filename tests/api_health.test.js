@@ -73,6 +73,16 @@ describe('API security and health', () => {
 
   it('responds to /health', async () => {
     const res = await request(app).get('/health').set(originHeaders);
+const request = require('supertest');
+const { app, server } = require('../srv/blackroad-api/server_full.js');
+
+describe('API security and health', () => {
+  afterAll((done) => {
+    server.close(done);
+  });
+
+  it('responds to /health', async () => {
+    const res = await request(app).get('/health');
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
   });
@@ -94,6 +104,7 @@ describe('API security and health', () => {
       .post('/api/login')
       .set(originHeaders)
       .send({});
+    const res = await request(app).post('/api/login').send({});
     expect(res.status).toBe(400);
   });
 

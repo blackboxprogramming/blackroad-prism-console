@@ -3,7 +3,11 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
+  "name": "blackroad",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
   "features": {
+    "ghcr.io/devcontainers/features/python:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/node:1": { "version": "lts" },
     "ghcr.io/devcontainers/features/python:1": { "version": "3.11" },
@@ -34,4 +38,21 @@
   "mounts": [
     "source=${localWorkspaceFolder}/.cache,target=/workspaces/.cache,type=bind"
   ]
+  "postCreateCommand": "bash scripts/bootstrap.sh || true",
+  "customizations": {
+    "vscode": {
+      "settings": { "editor.formatOnSave": true, "files.eol": "\\n" },
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-playwright.playwright"
+      ]
+    }
+  },
+  "remoteEnv": {
+    "VITE_SITE_URL": "http://localhost:5173",
+    "VITE_TELEMETRY": "off"
+  },
+  "forwardPorts": [5173],
+  "remoteUser": "node"
 }

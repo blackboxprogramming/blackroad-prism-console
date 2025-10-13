@@ -123,6 +123,7 @@ def evaluate_math():
 @app.post("/install")
 def install_package():
     """Install an allowlisted Python package via ``pip`` within the environment."""
+    """Install a Python package via ``pip`` within the environment."""
     data = request.get_json(silent=True) or {}
     package = data.get("package")
     if not package:
@@ -150,6 +151,10 @@ def install_package():
         capture_output=True,
         text=True,
         env=pip_env,
+    proc = subprocess.run(
+        ["pip", "install", package],
+        capture_output=True,
+        text=True,
     )
     return (
         jsonify({"code": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr}),

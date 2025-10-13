@@ -182,6 +182,8 @@ class SlackConnector(Connector):
             resp.raise_for_status()
         except Exception as exc:  # pragma: no cover - network
             logging.warning("Slack notification failed: %s", exc)
+    def notify(self, message: str) -> None:  # pragma: no cover - placeholder
+        logging.info("Posting Slack message (placeholder): %s", message)
 
 
 def sync_connectors() -> None:
@@ -190,6 +192,7 @@ def sync_connectors() -> None:
     at = AirtableConnector(token=os.getenv("AIRTABLE_TOKEN"))
     ln = LinearConnector(token=os.getenv("LINEAR_TOKEN"))
     slack = SlackConnector(token=os.getenv("SLACK_WEBHOOK_URL"))
+    slack = SlackConnector(token=os.getenv("SLACK_TOKEN"))
 
     for conn in (sf, at, ln):
         conn.sync()
@@ -244,6 +247,15 @@ def handle_command(command: str) -> None:
         git_recent_log()
     elif "linear" in cmd:
         sync_linear()
+    if "push" in cmd:
+        push_latest()
+        deploy_to_droplet()
+    elif "refresh" in cmd and "redeploy" in cmd:
+        refresh_working_copy()
+        deploy_to_droplet()
+    elif "rebase" in cmd:
+        rebase_branch()
+        deploy_to_droplet()
     elif "sync" in cmd:
         sync_connectors()
         deploy_to_droplet()

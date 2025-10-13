@@ -113,6 +113,8 @@ def run_pipeline(action: str) -> None:
             print("-> rebase failed; aborting deployment")
             return
 
+        subprocess.run(["git", "fetch"], check=False)
+        subprocess.run(["git", "rebase", "origin/main"], check=False)
         deploy_droplet()
     elif "sync" in a and "salesforce" in a:
         sync_connectors()

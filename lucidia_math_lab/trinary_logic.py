@@ -37,6 +37,15 @@ class SimpleDiGraph:
 GraphReturn = Union["nx.DiGraph", SimpleDiGraph]
 
 
+import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List
+
+import networkx as nx
+import numpy as np
+
+
 TRIT_VALUES: List[int] = [-1, 0, 1]
 
 
@@ -101,9 +110,20 @@ class TrinaryLogicEngine:
                 res = self.operate(op, a)
                 graph.add_edge(a, res, op=op)
             return graph
+    def to_graph(self, op: str) -> nx.DiGraph:
+        """Visualize operator relations as a directed graph."""
+
+        g = nx.DiGraph()
+        if op == "NOT":
+            for a in TRIT_VALUES:
+                res = self.operate(op, a)
+                g.add_edge(a, res, op=op)
+            return g
 
         for a in TRIT_VALUES:
             for b in TRIT_VALUES:
                 res = self.operate(op, a, b)
                 graph.add_edge((a, b), res, op=op)
         return graph
+                g.add_edge((a, b), res, op=op)
+        return g

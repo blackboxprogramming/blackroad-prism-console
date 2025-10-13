@@ -96,6 +96,9 @@ export async function resolveGuardianAlert(id, status = 'resolved'){
   return data.alert
 }
 
+export async function resolveGuardianAlert(id, status='resolved'){
+  const { data } = await axios.post(`${API_BASE}/api/guardian/alerts/${id}/resolve`, { status })
+  return data.alert
 export async function fetchDashboardSystem(){
   const { data } = await axios.get(`${API_BASE}/api/dashboard/system`)
   return data
@@ -111,6 +114,7 @@ export async function fetchProfile(){
   return data.profile
 }
 
+  return data
 export async function claudeChat(prompt){
   const { data } = await axios.post(`${API_BASE}/api/claude/chat`, { prompt })
   return data

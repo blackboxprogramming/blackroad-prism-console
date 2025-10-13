@@ -159,6 +159,11 @@ def refresh_working_copy(ctx: PipelineContext) -> bool:
             LOG.info("Refreshing Working Copy mirror at %s", target.path)
             success &= run("git pull --rebase", cwd=str(target.path))
     return success
+    """Refresh Working Copy mirror at the designated path."""
+    wc = ctx.working_copy
+    wc.mkdir(parents=True, exist_ok=True)
+    LOG.info("Refreshing Working Copy mirror at %s", wc)
+    return run("git pull --rebase", cwd=str(wc))
 
 
 def deploy_to_droplet(ctx: PipelineContext) -> bool:
