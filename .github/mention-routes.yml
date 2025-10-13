@@ -31,4 +31,18 @@ routes:
     mention: "@alexalouise"
 
 # Optional: always add these mentions on every PR
+routes:
+  - patterns:
+      - "blackroad/**"
+      - "BlackRoad/**"
+      - "apps/blackroad/**"
+    mention: "@blackboxprogramming/blackroad"
+  - patterns:
+      - "prism/**"
+      - "apps/prism/**"
+    mention: "@blackboxprogramming/prism"
+  - patterns:
+      - "infra/**"
+      - ".github/workflows/**"
+    mention: "@blackboxprogramming/platform"
 always: []
