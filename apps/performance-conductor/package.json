@@ -1,0 +1,28 @@
+{
+  "name": "performance-conductor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OBS conductor service for coordinating performances and overlays.",
+  "main": "dist/conductor.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/conductor.js",
+    "dev": "ts-node src/conductor.ts"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "express": "^4.19.2",
+    "obs-websocket-js": "^5.0.3",
+    "node-fetch": "^2.7.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.19.5",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.16.5",
+    "@types/node-fetch": "^2.6.11",
+    "@types/ws": "^8.5.12",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}
