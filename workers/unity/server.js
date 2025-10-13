@@ -19,9 +19,10 @@ const DEFAULT_PROJECT_NAME = "BlackRoadUnitySample";
 const DEFAULT_SCENE_NAME = "SampleScene";
 const DEFAULT_SCRIPT_NAME = "HelloBlackRoad";
 
-const DEFAULT_SCRIPT = `using UnityEngine;
+function createDefaultScript(scriptName) {
+  return `using UnityEngine;
 
-public class HelloBlackRoad : MonoBehaviour
+public class ${scriptName} : MonoBehaviour
 {
     void Start()
     {
@@ -29,6 +30,7 @@ public class HelloBlackRoad : MonoBehaviour
     }
 }
 `;
+}
 
 const DEFAULT_SCENE = `# BlackRoad Unity Scene Placeholder
 # Open in Unity and add objects to build out your world.
@@ -111,7 +113,11 @@ async function createUnityTemplate(projectRoot, options) {
   const projectReadme = path.join(projectRoot, "README.md");
 
   await Promise.all([
-    writeFile(scriptFile, scriptContents ?? DEFAULT_SCRIPT, "utf8"),
+    writeFile(
+      scriptFile,
+      scriptContents ?? createDefaultScript(scriptName),
+      "utf8"
+    ),
     writeFile(sceneFile, sceneContents ?? DEFAULT_SCENE, "utf8"),
     writeFile(packageManifest, PACKAGE_MANIFEST, "utf8"),
     writeFile(projectVersion, PROJECT_VERSION, "utf8"),
