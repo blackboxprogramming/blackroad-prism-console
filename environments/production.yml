@@ -1,4 +1,55 @@
 name: production
-url: https://blackroad.io
-reviewers:
-  - blackboxprogramming
+slug: prod
+status: active
+description: >-
+  Primary customer-facing footprint for the BlackRoad Prism Console.
+domains:
+  primary: https://blackroad.io
+deploy_targets:
+  - provider: docker-compose
+    status: active
+    config: docker-compose.prod.yml
+    image: ghcr.io/blackroad-prism/blackroad-prism-console:latest
+    notes:
+      - Reverse proxy and TLS termination handled by the bundled Caddy service.
+  - provider: fly.io
+    status: planned
+    app: blackroad-prism-console
+    region: ord
+    release_channel: main
+    notes:
+      - Wire up once Fly.io credentials are stored and validated in CI.
+  - provider: aws-ecs
+    status: planned
+    cluster: prism-console
+    service: production
+    region: us-east-2
+    release_channel: main
+    notes:
+      - Mirrors the Fly.io footprint for redundancy once provisioned.
+ci_cd:
+  branch: main
+  promotes_from: staging
+  workflows:
+    - deploy/ci/woodpecker.yml
+    - deploy/ci/semgrep.yml
+approvals:
+  required: true
+  reviewers:
+    - blackboxprogramming
+  change_window: Coordinate via README-OPS.md#hybrid-deploy
+  policy_gates:
+    - SECURITY_BASELINE.md
+runbooks:
+  deploy: RUNBOOK.md#blackroad-stack-runbook
+  rollback: RUNBOOK.md#restoring-from-backup
+observability:
+  dashboards:
+    grafana: ops/observability/grafana
+  alerts:
+    pagerduty: pending
+  logging:
+    primary: pending
+notes:
+  - Cloudflare cache procedures are documented in sites/blackroad/AGENTS.md.
+  - Update `deploy_targets` entries as new infrastructure comes online.
