@@ -1,3 +1,4 @@
+<!-- FILE: /srv/blackroad-api/server_full.js -->
 /* BlackRoad API — Express + SQLite + Socket.IO + LLM bridge
    Runs behind Nginx on port 4000 with cookie-session auth.
    Env (optional):
@@ -212,6 +213,8 @@ app.use(
 );
 app.use(helmet.referrerPolicy({ policy: 'no-referrer' }));
 require('./modules/trust_math')({ app });
+// Devices backplane
+require('./modules/devices')({ app, io, dbPath: DB_PATH });
 
 const emitter = new EventEmitter();
 const jobs = new Map();

@@ -1,0 +1,78 @@
+<!-- FILE: /var/www/blackroad/devices.html -->
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlackRoad • Devices</title>
+<style>
+  :root{--accent:#FF4FD8;--accent2:#0096FF;--panel:#131320;--bg:#0b0b10;--text:#e9e9f1;--muted:#9aa0aa}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:14px system-ui}
+  header{display:flex;gap:10px;align-items:center;padding:12px;border-bottom:1px solid #1f2032;background:#0f0f1a}
+  .pill{border:1px solid #24244a;border-radius:999px;padding:4px 10px;font-size:12px;background:#141428}
+  main{max-width:1000px;margin:16px auto;padding:0 12px;display:grid;grid-template-columns:320px 1fr;gap:12px}
+  .card{background:var(--panel);border:1px solid #24244a;border-radius:14px;padding:12px}
+  textarea,input,select{width:100%;background:#10102a;border:1px solid #24244a;color:var(--text);border-radius:10px;padding:8px}
+  button{background:var(--accent2);color:#fff;border:none;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer}
+  ul{list-style:none;margin:0;padding:0} li{padding:8px;border-bottom:1px dashed #24244a}
+  small{color:var(--muted)}
+</style>
+<header>
+  <div class="pill">Devices Backplane</div>
+  <div class="pill">/api/devices</div>
+</header>
+<main>
+  <div class="card">
+    <h3>Devices</h3>
+    <ul id="list"></ul>
+    <button onclick="refresh()">Refresh</button>
+  </div>
+  <div class="card">
+    <h3>Send Command</h3>
+    <label>Device ID <input id="did" placeholder="pi-01"></label>
+    <label>JSON Payload <textarea id="payload" rows="8">{ "type":"led.emotion","emotion":"thinking","ttl_s":120 }</textarea></label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
+      <button onclick='quick("led.emotion",{emotion:"ok"})'>LED ok</button>
+      <button onclick='quick("led.emotion",{emotion:"busy"})'>LED busy</button>
+      <button onclick='quick("led.emotion",{emotion:"hot"})'>LED hot</button>
+      <button onclick='quick("led.emotion",{emotion:"thinking"})'>LED thinking</button>
+      <button onclick='quick("display.show",{target:"main",mode:"image",src:"https://blackroad.io/icon.png"})'>Show img (main)</button>
+    </div>
+    <label>Origin Key <input id="key" type="password" placeholder="X-BlackRoad-Key"></label>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button onclick="send()">Send</button>
+      <button onclick="saveKey()">Save key</button>
+    </div>
+    <pre id="out" style="margin-top:12px;white-space:pre-wrap"></pre>
+  </div>
+</main>
+<script>
+const out =(x)=>document.getElementById('out').textContent=x;
+function saveKey(){ localStorage.setItem('br_origin_key', document.getElementById('key').value); out("saved"); }
+document.getElementById('key').value = localStorage.getItem('br_origin_key') || "";
+async function refresh(){
+  const k = localStorage.getItem('br_origin_key') || "";
+  const r = await fetch('/api/devices', {headers: {'X-BlackRoad-Key': k}});
+  const arr = await r.json();
+  const ul = document.getElementById('list'); ul.innerHTML="";
+  for (const d of arr){
+    const li = document.createElement('li');
+    li.innerHTML = `<b>${d.id}</b> <small>role=${d.role||"?"} • seen ${new Date(d.ts*1000).toLocaleTimeString()}</small>`;
+    li.onclick = ()=> document.getElementById('did').value = d.id;
+    ul.appendChild(li);
+  }
+}
+function quick(type, extra){
+  const did = document.getElementById('did').value || 'pi-01';
+  const obj = Object.assign({type}, extra||{});
+  document.getElementById('payload').value = JSON.stringify(obj, null, 2);
+}
+async function send(){
+  const did = document.getElementById('did').value.trim();
+  const k = localStorage.getItem('br_origin_key') || "";
+  const body = document.getElementById('payload').value;
+  const r = await fetch('/api/devices/'+encodeURIComponent(did)+'/command', {
+    method:'POST', headers:{'Content-Type':'application/json','X-BlackRoad-Key':k}, body
+  });
+  out((r.status)+' '+await r.text()); refresh();
+}
+refresh();
+</script>
