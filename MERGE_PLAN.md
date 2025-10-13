@@ -60,6 +60,15 @@
 | #1002 | feat: add Athena orchestrator | merged | none | conflicts with PR #1001; conflicts with PR #1025 |
 | #997 | feat: recursively test agents | merged | none | conflicts with PR #987 |
 
+## Operational Checklist
+
+- [ ] **Security sweep:** confirm credentials, tokens, and secrets are not present in logs or configuration artifacts.
+- [ ] **Test verification:** rerun automated suites with emphasis on authentication, authorization, and timeout edge cases.
+- [ ] **Least-privilege review:** ensure all agents and services operate with minimally required scopes and permissions.
+- [ ] **Dependency audit:** verify dependency versions match expectations and that no implicit upgrades are introduced.
+- [ ] **CI/CD parity:** validate pipeline runs are clean and environments remain consistent across test, staging, and production.
+- [ ] **Deploy monitoring:** monitor the first deployment window for anomalous telemetry spikes or unexpected behavior.
+
 ## Dependency Graph
 
 ```
