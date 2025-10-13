@@ -1,5 +1,20 @@
 # Merge Plan
 
+## Pulse Check Status
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| Security sanity | In progress | Reviewing recent logs and configs to ensure no credentials or tokens are present before sign-off. |
+| Tests | Scheduled | Rerunning auth and permission-focused suites; monitoring for regressions or timeout edges. |
+| Merge plan | Pending review | Will proceed to main once verification steps below are complete and no blockers are reported. |
+
+### Next Steps
+
+- [ ] Confirm agents are configured with least-privilege access scopes.
+- [ ] Review dependency versions to ensure no unplanned upgrades slip into the release.
+- [ ] Validate CI/CD pipelines finish cleanly across environments.
+- [ ] Monitor the first deploy window for telemetry anomalies or drift.
+
 ## Pull Requests
 
 | PR | Title | State | Impacts | Risks |
