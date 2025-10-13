@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 26
+  productName: __PROJECT_NAME__
+  companyName: BlackRoad Systems
+  bundleVersion: 0.1.0
+  defaultScreenWidth: 1920
+  defaultScreenHeight: 1080
+  defaultScreenWidthWeb: 960
+  defaultScreenHeightWeb: 600
+  fullscreenMode: 1
+  runInBackground: 1
+  captureSingleScreen: 0
+  muteOtherAudioSources: 0
+  forceSingleInstance: 0
+  usePlayerLog: 1
+  resizableWindow: 1
+  visibleInBackground: 1
+  allowFullScreenSwitch: 1
+  displayResolutionDialog: 1
+  useMacAppStoreValidation: 0
+  macAppStoreCategory: public.app-category.education
+  deferSystemGesturesMode: 0
+  hideHomeButton: 0
+  renderOutsideSafeArea: 1
+  defaultIsNativeResolution: 1
+  forceSRGBBlit: 1
+  useFlare: 1
+  useFog: 1
+  activeColorSpace: 1
+  scriptingRuntimeVersion: 1
+  managedStrippingLevel: 1
+  gcIncremental: 1
+  legacyClampBlendShapeWeights: 0
+  virtualRealitySupported: 0
+  scriptingDefineSymbols: {}
