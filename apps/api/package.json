@@ -41,6 +41,7 @@
     "uuid": "^9.0.1",
     "yaml": "^2.5.0",
     "mustache": "^4.2.0"
+    "uuid": "^9.0.1",
     "yaml": "^2.5.0"
   },
   "devDependencies": {

@@ -136,6 +136,21 @@ app.use((req: any, res, next) => {
   return urlencodedParser(req, res, next);
 });
 
+// Capture the raw Slack payload before body parsers consume the stream so signature checks work.
+app.use((req: any, _res, next) => {
+  if (req.url.startsWith('/api/agents/slack')) {
+    const chunks: Buffer[] = [];
+    req.on('data', (chunk: Buffer) => chunks.push(chunk));
+    req.on('end', () => {
+      req.rawBody = Buffer.concat(chunks).toString();
+      next();
+    });
+  } else {
+    next();
+  }
+});
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));
 app.use(regionMiddleware());
 app.use(localeMiddleware());
@@ -195,6 +210,15 @@ app.use('/api/change', changeCRQ, changeCal);
 app.use('/api/release', relRel);
 app.use('/api/patch', patchV, patchP);
 app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
+import agentsCommand from './routes/agents/command.js';
+import agentsSlack from './routes/agents/slack.js';
+import agentsDiscord from './routes/agents/discord.js';
+app.use('/api/hooks', hooks);
+app.use('/api/metrics', metrics);
+app.use('/api/auth/okta', okta);
+app.use('/api/agents/command', agentsCommand);
+app.use('/api/agents/slack', agentsSlack);
+app.use('/api/agents/discord', agentsDiscord);
 
 const port = process.env.PORT || 4000;
 
