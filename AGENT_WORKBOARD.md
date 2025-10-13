@@ -20,6 +20,8 @@
 - [ ] Send notifications (`NotificationBot`)
 - [ ] Assign tasks from job board (`WorkerBot`)
 - [ ] Watch for idle periods (`IdleBot`)
+- [ ] Unity Exporter: add automated validation for generated archives (Owner: open)
+- [ ] Unity Exporter: integrate exporter output with asset ingestion queue (Owner: open)
 
 ## In Progress
 <!-- Agents move tasks here when running -->
@@ -29,6 +31,7 @@
 
 ## Done
 <!-- Agents move tasks here on success -->
+- 2025-10-05 — Unity exporter now produces structured ZIP templates with metadata + CLI helper. (Owner: gpt-5-codex)
 
 ---
 
