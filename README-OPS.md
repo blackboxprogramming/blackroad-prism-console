@@ -36,5 +36,11 @@ sudo systemctl enable --now br-cleanup-nightly.timer
 
 An optional sudoers snippet is in `etc/sudoers.d/br-cleanup`.
 
+## Environment manifests
+
+- `environments/production.yml` documents the GitHub Environment that drives the main deploy workflow.
+- `environments/staging.yml` captures pre-production checks (smoke tests and Slack alerts) used before promoting builds.
+- `environments/preview.yml` maps the per-PR AWS ECS Fargate previews under `dev.blackroad.io` managed by Terraform.
+
 
 _Last updated on 2025-09-11_

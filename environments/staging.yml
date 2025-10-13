@@ -1,0 +1,12 @@
+name: staging
+url: https://staging.blackroad.io
+reviewers:
+  - blackboxprogramming
+description: >-
+  Pre-production environment used for regression checks before promoting releases.
+workflows:
+  - .github/workflows/_backup_132_lucidia-ci.yml
+checks:
+  - npm run test:smoke -- --baseUrl=https://staging.blackroad.io
+notifications:
+  slack_channel: "#deployments"
