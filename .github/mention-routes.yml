@@ -15,6 +15,7 @@
   ],
   "always": []
 }
+# Globs → who to @
 routes:
   - patterns: ["frontend/**", "apps/web/**"]
     mention: "@your-org/frontend-team"
@@ -26,4 +27,8 @@ routes:
     mention: "@your-org/data-team"
   - patterns: ["docs/**"]
     mention: "@your-handle"
+  - patterns: ["docs/**"]
+    mention: "@alexalouise"
+
+# Optional: always add these mentions on every PR
 always: []
