@@ -22,7 +22,11 @@ class PQCClassifier(nn.Module):
         self.rx0(qdev, wires=0)
         self.ry0(qdev, wires=1)
         self.rz0(qdev, wires=2)
-        logits = self.measure(qdev).reshape(bsz, 2, 2).sum(-1)
+        meas = self.measure(qdev)
+        if meas.shape[-1] < 4:
+            pad = torch.zeros(bsz, 4 - meas.shape[-1], device=meas.device, dtype=meas.dtype)
+            meas = torch.cat([meas, pad], dim=-1)
+        logits = meas[..., :4].reshape(bsz, 2, 2).sum(-1)
         return F.log_softmax(logits, dim=1)
 
 

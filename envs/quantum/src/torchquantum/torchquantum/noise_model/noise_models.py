@@ -22,13 +22,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import os
+
 import numpy as np
 import torch
 import torchquantum as tq
 
 from torchpack.utils.logging import logger
-from qiskit_aer.noise import NoiseModel
 from torchquantum.util import get_provider, get_circ_stats
+
+if os.getenv("TORCHQUANTUM_USE_QISKIT", "0") == "1":
+    from qiskit_aer.noise import NoiseModel  # type: ignore
+else:
+    class NoiseModel:  # type: ignore[override]
+        def __init__(self, *args, **kwargs):
+            raise ImportError("Qiskit Aer noise models are disabled in this build")
 
 
 __all__ = [

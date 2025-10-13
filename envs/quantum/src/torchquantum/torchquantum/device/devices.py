@@ -64,10 +64,10 @@ class QuantumDevice(nn.Module):
         _state = torch.zeros(2**self.n_wires, dtype=C_DTYPE)
         _state[0] = 1 + 0j  # type: ignore
         _state = torch.reshape(_state, [2] * self.n_wires).to(self.device)
-        self.register_buffer("state", _state)
+        self.register_buffer("_state_tensor", _state)
 
-        repeat_times = [bsz] + [1] * len(self.state.shape)  # type: ignore
-        self._states = self.state.repeat(*repeat_times)  # type: ignore
+        repeat_times = [bsz] + [1] * len(self._state_tensor.shape)  # type: ignore
+        self._states = self._state_tensor.repeat(*repeat_times)  # type: ignore
         self.register_buffer("states", self._states)
 
         self.record_op = record_op
@@ -88,15 +88,15 @@ class QuantumDevice(nn.Module):
 
     def reset_states(self, bsz: int):
         """Reset the States of the quantum device"""
-        repeat_times = [bsz] + [1] * len(self.state.shape)
-        self.states = self.state.repeat(*repeat_times).to(self.state.device)
+        repeat_times = [bsz] + [1] * len(self._state_tensor.shape)
+        self.states = self._state_tensor.repeat(*repeat_times).to(self._state_tensor.device)
 
     def reset_identity_states(self):
         """Make the states as the identity matrix, one dim is the batch
         dim. Useful for verification.
         """
         self.states = torch.eye(
-            2**self.n_wires, device=self.state.device, dtype=C_DTYPE
+            2**self.n_wires, device=self._state_tensor.device, dtype=C_DTYPE
         ).reshape([2**self.n_wires] + [2] * self.n_wires)
 
     def reset_all_eq_states(self, bsz: int):
@@ -108,8 +108,8 @@ class QuantumDevice(nn.Module):
             energy + energy * 1j
         )
         all_eq_state = all_eq_state.reshape([2] * self.n_wires)
-        repeat_times = [bsz] + [1] * len(self.state.shape)
-        self.states = all_eq_state.repeat(*repeat_times).to(self.state.device)
+        repeat_times = [bsz] + [1] * len(self._state_tensor.shape)
+        self.states = all_eq_state.repeat(*repeat_times).to(self._state_tensor.device)
 
     def get_states_1d(self):
         """Return the states in a 1d tensor."""
@@ -118,7 +118,22 @@ class QuantumDevice(nn.Module):
 
     def get_state_1d(self):
         """Return the state in a 1d tensor."""
-        return torch.reshape(self.state, [2**self.n_wires])
+        return torch.reshape(self._state_tensor, [2**self.n_wires])
+
+    @property
+    def state(self):
+        """Return batched state amplitudes for compatibility."""
+
+        bsz = self.states.shape[0]
+        return torch.reshape(self.states, [bsz, 2**self.n_wires])
+
+    @state.setter
+    def state(self, value):
+        if value.dim() == 1:
+            value = value.unsqueeze(0)
+        reshaped = value.reshape([value.shape[0]] + [2] * self.n_wires)
+        self.states = reshaped
+        self._state_tensor = reshaped[0]
 
     @property
     def name(self):
@@ -126,7 +141,7 @@ class QuantumDevice(nn.Module):
         return self.__class__.__name__
 
     def __repr__(self):
-        return f" class: {self.name} \n device name: {self.device_name} \n number of qubits: {self.n_wires} \n batch size: {self.bsz} \n current computing device: {self.state.device} \n recording op history: {self.record_op} \n current states: {repr(self.get_states_1d().cpu().detach().numpy())}"
+        return f" class: {self.name} \n device name: {self.device_name} \n number of qubits: {self.n_wires} \n batch size: {self.bsz} \n current computing device: {self._state_tensor.device} \n recording op history: {self.record_op} \n current states: {repr(self.get_states_1d().cpu().detach().numpy())}"
 
 
 for func_name, func in func_name_dict.items():
