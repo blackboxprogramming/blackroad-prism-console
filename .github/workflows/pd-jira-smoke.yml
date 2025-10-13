@@ -1,0 +1,72 @@
+name: PD+Jira Smoke (Sandbox)
+
+on:
+  workflow_dispatch:
+    inputs:
+      sandbox:
+        type: boolean
+        default: true
+        description: "Use sandbox mappings"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ vars.OPSPORTAL_BASE_URL }}
+      ACTOR_EMAIL: ${{ vars.SMOKE_ACTOR_EMAIL }}
+      ACTOR_GROUPS: ${{ vars.SMOKE_ACTOR_GROUPS || 'Ops' }}
+      SMOKE_SYSTEM_KEY: ${{ vars.SMOKE_SYSTEM_KEY || 'sandbox' }}
+    steps:
+      - name: Open PD (sandbox) via Ops API
+        id: open
+        run: |
+          set -euo pipefail
+          if [ -z "${BASE_URL}" ]; then
+            echo "BASE_URL is required" >&2
+            exit 1
+          fi
+          BODY='{"systemKey":"'"${SMOKE_SYSTEM_KEY:-sandbox}"'","overrideUrgency":"low"}'
+          RES=$(curl -sS -X POST "$BASE_URL/api/pd/create?sandbox=1" \
+            -H "Content-Type: application/json" \
+            -H "x-user-email: $ACTOR_EMAIL" \
+            -H "x-user-groups: $ACTOR_GROUPS" \
+            --data "$BODY")
+          echo "$RES"
+          URL=$(echo "$RES" | jq -r '.url // empty')
+          JIRA_URL=$(echo "$RES" | jq -r '.jira.url // empty')
+          test -n "$URL"
+          echo "pd_url=$URL" >> "$GITHUB_OUTPUT"
+          if [ -n "$JIRA_URL" ]; then
+            echo "jira_url=$JIRA_URL" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch risk snapshot & linkage
+        id: risk
+        run: |
+          set -euo pipefail
+          SNAP=$(curl -sS "$BASE_URL/api/scorecard/risk?sandbox=1")
+          echo "$SNAP" | jq '.systems[] | select(.key=="'"${SMOKE_SYSTEM_KEY:-sandbox}"'")'
+          JIRA=$(echo "$SNAP" | jq -r '.systems[] | select(.key=="'"${SMOKE_SYSTEM_KEY:-sandbox}"'") | .jiraKey // empty')
+          echo "jira_key=$JIRA" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve PD (attach PM link) via Ops API
+        if: steps.risk.outputs.jira_key != ''
+        id: resolve
+        run: |
+          set -euo pipefail
+          PM="https://notion.so/.../sandbox-smoke-$(date +%s)"
+          RES=$(curl -sS -X POST "$BASE_URL/api/pd/resolve?sandbox=1" \
+            -H "Content-Type: application/json" \
+            -H "x-user-email: $ACTOR_EMAIL" \
+            -H "x-user-groups: $ACTOR_GROUPS" \
+            --data '{"incidentId":"infer","postmortemUrl":"'"$PM"'","systemKey":"'"${SMOKE_SYSTEM_KEY:-sandbox}"'"}')
+          echo "$RES"
+
+      - name: Resolve Jira (fallback) — direct call
+        if: steps.risk.outputs.jira_key != '' && always()
+        run: |
+          echo "Resolved by /api/pd/resolve; this is a no-op fallback."

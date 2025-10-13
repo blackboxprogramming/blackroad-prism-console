@@ -23,6 +23,12 @@
       "escalationPolicyId": "EP_API",
       "assignees": ["PDU123"],
       "urgency": "high"
+    },
+    "sandbox": {
+      "serviceId": "PD_SERVICE_SANDBOX",
+      "escalationPolicyId": "PD_ESCALATION_POLICY_SANDBOX",
+      "assignees": [],
+      "urgency": "low"
     }
   },
   "runbooks": {
