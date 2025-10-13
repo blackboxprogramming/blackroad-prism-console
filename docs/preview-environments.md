@@ -1,6 +1,6 @@
 # Preview Environments on ECS + ALB
 
-This repository now provisions short-lived preview environments for every pull request. The automation uses GitHub Actions with the AWS CLI to provision the ECS/Fargate service, ALB listener rule, target group, and Route53 DNS records, then tears everything back down when the PR closes.
+This repository now provisions short-lived preview environments for every pull request. The automation uses GitHub Actions with the AWS CLI to provision the ECS/Fargate service, ALB listener rule, target group, and Route53 DNS records, then tears everything back down when the PR closes. Operational details and required secrets live in [`environments/preview.yml`](../environments/preview.yml).
 
 ## Required repository configuration
 

@@ -1,0 +1,37 @@
+name: preview
+host_pattern: https://pr-<pr>.dev.blackroad.io
+status: active
+kind: ephemeral
+provisioning:
+  workflow: .github/workflows/preview.yml
+  module: infra/preview-env
+  terraform_workspace: preview
+  description: >-
+    Every pull request builds a container image, registers an ECS task definition, and wires the
+    load balancer + Route53 alias under `pr-<number>.dev.blackroad.io`. Closing the PR tears the
+    stack back down automatically.
+reviewers:
+  - blackboxprogramming
+operations:
+  secrets:
+    - PREVIEW_ENV_AWS_ROLE
+    - PREVIEW_ENV_ECR_REGISTRY
+    - PREVIEW_ENV_ECR_REPOSITORY
+    - PREVIEW_ENV_TF_STATE_BUCKET
+    - PREVIEW_ENV_TF_LOCK_TABLE
+    - PREVIEW_ENV_CLUSTER_ARN
+    - PREVIEW_ENV_EXECUTION_ROLE_ARN
+    - PREVIEW_ENV_TASK_ROLE_ARN
+    - PREVIEW_ENV_PRIVATE_SUBNET_IDS
+    - PREVIEW_ENV_PUBLIC_SUBNET_IDS
+    - PREVIEW_ENV_VPC_ID
+    - PREVIEW_ENV_HOSTED_ZONE_ID
+    - PREVIEW_ENV_VARS_JSON
+    - PREVIEW_ENV_SECRETS_JSON
+    - SLACK_BOT_TOKEN
+    - SLACK_PREVIEW_CHANNEL
+  health_checks:
+    - https://pr-<pr>.dev.blackroad.io/healthz/ui
+notes:
+  - Use `PR=<number> make deploy` from `infra/preview-env` for manual smoke tests when debugging the workflow.
+  - Listener rule priorities default to `5000 + PR % 4000`; adjust if the ALB approaches the priority limit.
