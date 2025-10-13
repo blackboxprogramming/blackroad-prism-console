@@ -1,12 +1,22 @@
 import { Router } from 'express';
 import fs from 'fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import yaml from 'yaml';
 import mustache from 'mustache';
 
 const r = Router();
-const templatesDir = path.resolve('legal/templates');
-function loadClauses(){ return yaml.parse(fs.readFileSync('legal/clauses/library.yaml','utf-8')) || {}; }
+
+const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+const legalBaseDir = path.resolve(
+  process.env.CLM_LEGAL_DIR || path.join(moduleDir, '../../../../../legal')
+);
+const templatesDir = path.join(legalBaseDir, 'templates');
+const clausesPath = path.join(legalBaseDir, 'clauses', 'library.yaml');
+
+function loadClauses(){
+  return yaml.parse(fs.readFileSync(clausesPath,'utf-8')) || {};
+}
 function render(tplPath:string, vars:any){
   const tpl = fs.readFileSync(tplPath,'utf-8');
   const ctx = { ...vars, clause: (loadClauses().clauses||{}) };
