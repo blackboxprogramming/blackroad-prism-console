@@ -215,6 +215,9 @@ app.use(helmet.referrerPolicy({ policy: 'no-referrer' }));
 require('./modules/trust_math')({ app });
 // Devices backplane
 require('./modules/devices')({ app, io, dbPath: DB_PATH });
+// Mount project-specific job runner under a separate prefix so the
+// legacy deployment job endpoints at `/api/jobs` continue to work.
+require('./modules/jobs')({ app, prefix: '/api/project-jobs' });
 
 const emitter = new EventEmitter();
 const jobs = new Map();
