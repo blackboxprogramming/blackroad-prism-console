@@ -1,7 +1,7 @@
 """Bot for cleaning up merged Git branches."""
 
 from dataclasses import dataclass
-from subprocess import CalledProcessError, run
+from subprocess import CalledProcessError, DEVNULL, run
 
 
 @dataclass
@@ -18,6 +18,19 @@ class CleanupBot:
             return
         run(cmd, check=True)
 
+    def _local_branch_exists(self, branch: str) -> bool:
+        """Return True if the local branch still exists."""
+        if self.dry_run:
+            return True
+
+        result = run(
+            ("git", "show-ref", "--verify", f"refs/heads/{branch}"),
+            stdout=DEVNULL,
+            stderr=DEVNULL,
+            check=False,
+        )
+        return result.returncode == 0
+
     def delete_branch(self, branch: str) -> bool:
         """Delete a branch locally and remotely.
 
@@ -25,14 +38,22 @@ class CleanupBot:
             branch: The branch name to remove.
 
         Returns:
-            True if the branch was deleted both locally and remotely, False otherwise.
+            True if the remote deletion succeeded and the local branch was
+            removed or already absent, False otherwise.
         """
+        local_deleted = True
         try:
             self._run("git", "branch", "-D", branch)
-            self._run("git", "push", "origin", "--delete", branch)
-            return True
         except CalledProcessError:
-            return False
+            local_deleted = not self._local_branch_exists(branch)
+
+        remote_deleted = True
+        try:
+            self._run("git", "push", "origin", "--delete", branch)
+        except CalledProcessError:
+            remote_deleted = False
+
+        return local_deleted and remote_deleted
 
     def cleanup(self) -> dict[str, bool]:
         """Remove the configured branches locally and remotely.
