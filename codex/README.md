@@ -41,6 +41,8 @@ extension points for future integrations.
 | 041 | The Restraint Principle | Restraint on data, models, features, and kill switches. |
 | 021 | The Interface Promise  | Interfaces stay honest, accessible, and quiet.   |
 | 012 | The Creativity Pact    | Sandbox-first rituals keep experimentation safe and playful. |
+| 028 | The Custodianship Code | Custodians steward Lucidia as a shared trust.   |
+| 038 | The Connection Creed   | Bridges Lucidia with open, respectful interoperability. |
 
 ## BlackRoad Pipeline
 
