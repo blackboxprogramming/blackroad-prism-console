@@ -24,3 +24,32 @@ maintenance, step-up authentication, dual-control overrides, and rate limiting.
 pip install -r requirements.txt
 pytest autopal_fastapi/tests
 ```
+
+## Local observability stack
+
+The repository includes a docker-compose environment that launches the FastAPI
+service alongside Loki, Promtail, and Grafana. Bring everything up with:
+
+```bash
+cd autopal_fastapi
+docker compose up --build
+```
+
+The stack exposes the following endpoints:
+
+* **API** – http://localhost:8080
+* **Grafana** – http://localhost:3000 (admin / admin)
+* **Loki** – http://localhost:3100
+
+Promtail scrapes the Docker logs produced by the `autopal` container, parses the
+structured audit fields (event, endpoint, status code, subject, trace ID), and
+ships them to Loki. Grafana is pre-provisioned with the "AutoPal – Audit & Ops"
+dashboard that visualises:
+
+* A live audit log stream with JSON fields expanded for quick filtering.
+* 1-hour counters for maintenance blocks, step-up prompts, and rate-limit hits.
+* A dedicated panel that highlights events carrying a `trace_id`, making it easy
+  to correlate requests with distributed traces.
+
+Hit the API a few times (trigger maintenance mode, step-up prompts, and the
+rate limiter) to watch the panels update in real time.

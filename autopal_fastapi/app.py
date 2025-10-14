@@ -2,14 +2,49 @@
 
 from __future__ import annotations
 
+import json
+import logging
 import time
 import uuid
 from collections import deque
-from typing import Deque, Dict, Iterable
+from typing import Any, Deque, Dict, Iterable
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, PositiveInt
+
+
+logger = logging.getLogger("autopal.audit")
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+logger.propagate = False
+
+
+def audit_log(request: Request, event: str, **fields: Any) -> None:
+    """Emit a structured audit log entry for operational dashboards."""
+
+    record: dict[str, Any] = {
+        "event": event,
+        "endpoint": request.url.path,
+        "method": request.method,
+    }
+
+    trace_id = request.headers.get("x-trace-id")
+    if trace_id:
+        record["trace_id"] = trace_id
+
+    subject = request.headers.get("x-actor")
+    if subject:
+        record.setdefault("subject", subject)
+
+    for key, value in fields.items():
+        if value is not None:
+            record[key] = value
+
+    logger.info(json.dumps(record))
 
 
 class Identity(BaseModel):
@@ -80,6 +115,7 @@ def require_step_up(request: Request) -> None:
     """Ensure the caller satisfied a hypothetical step-up challenge."""
 
     if request.headers.get("x-step-up") != "verified":
+        audit_log(request, "step_up.prompt", status_code=401)
         raise HTTPException(status_code=401, detail="step_up_required")
 
 
@@ -99,6 +135,7 @@ def create_app() -> FastAPI:
         if request.app.state.maintenance_mode and not _allowlisted(
             request.url.path, request.app.state.maintenance_allowlist
         ):
+            audit_log(request, "maintenance.block", status_code=503)
             return JSONResponse(status_code=503, content={"detail": "maintenance_mode"})
 
         return await call_next(request)
@@ -127,9 +164,21 @@ def create_app() -> FastAPI:
         return payload
 
     @app.get("/limited/ping")
-    async def limited_ping(identity: Identity = Depends(get_identity)) -> dict[str, str]:
+    async def limited_ping(request: Request, identity: Identity = Depends(get_identity)) -> dict[str, str]:
         limiter: RateLimiter = app.state.rate_limiter
-        limiter.check(identity.subject)
+        try:
+            limiter.check(identity.subject)
+        except HTTPException as exc:
+            if exc.status_code == 429:
+                audit_log(
+                    request,
+                    "rate_limit.hit",
+                    status_code=exc.status_code,
+                    subject=identity.subject,
+                    limit=limiter.limit,
+                    window_seconds=limiter.window_seconds,
+                )
+            raise
         return {"message": "pong", "subject": identity.subject}
 
     @app.get("/secrets/materialize")
@@ -137,6 +186,7 @@ def create_app() -> FastAPI:
         request: Request, identity: Identity = Depends(get_identity)
     ) -> dict[str, str]:
         require_step_up(request)
+        audit_log(request, "step_up.granted", status_code=200, subject=identity.subject)
         return {"materialized": "secret", "granted_to": identity.subject}
 
     @app.post("/controls/overrides", status_code=201)
@@ -166,6 +216,7 @@ def create_app() -> FastAPI:
         return override
 
     return app
+
 
 
 app = create_app()
