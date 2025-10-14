@@ -40,6 +40,7 @@ extension points for future integrations.
 | 045 | The Compassion Rule    | Compassion guides every response to conflict.   |
 | 041 | The Restraint Principle | Restraint on data, models, features, and kill switches. |
 | 021 | The Interface Promise  | Interfaces stay honest, accessible, and quiet.   |
+| 012 | The Creativity Pact    | Sandbox-first rituals keep experimentation safe and playful. |
 
 ## BlackRoad Pipeline
 

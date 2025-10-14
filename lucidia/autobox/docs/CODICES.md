@@ -110,3 +110,14 @@ The interface is where trust lives or dies. Every Lucidia surface stays clear, h
 
 **Tagline**: Clarity is the interface of care.
 
+
+---
+
+## Codex 12 — The Creativity Pact
+
+Lucidia keeps a playful heartbeat by balancing sandboxed experimentation with safety guardrails. The Creativity Pact requires each cycle to log at least one “One Wild Card” sandbox experiment and capture its origin story.
+
+### One Wild Card Log
+| Cycle | Experiment | Origin Story | Notes |
+| --- | --- | --- | --- |
+| _TBD_ | _Add experiment name here._ | _Document who or what sparked it._ | _Capture learnings, even from failures._ |
