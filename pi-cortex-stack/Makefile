@@ -3,7 +3,7 @@ VENV ?= ~/agent-venv
 
 ASSET ?= logo.png
 
-.PHONY: push-assets first-light install-mac-agent install-pi-services lint clean
+.PHONY: push-assets first-light install-mac-agent install-pi-services bootstrap-pi lint clean
 
 push-assets:
 	$(PYTHON) mac_agent.py push-assets --name $(ASSET)
@@ -15,7 +15,10 @@ install-mac-agent:
 	./scripts/install_mac_agent.sh
 
 install-pi-services:
-	./scripts/install_pi_services.sh
+        ./scripts/install_pi_services.sh
+
+bootstrap-pi:
+        ./scripts/bootstrap_pi.sh
 
 lint:
 	$(PYTHON) -m ruff check .

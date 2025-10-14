@@ -91,6 +91,28 @@ source ~/agent-venv/bin/activate
 python mac_agent.py run
 ```
 
+## Raspberry Pi bootstrap
+
+All Raspberry Pi components run under `systemd` and rely on a Python virtual
+environment that mirrors the packages used by the Mac agent. A convenience
+script, `scripts/bootstrap_pi.sh`, prepares the environment and installs the
+services in one go.
+
+```bash
+cd pi-cortex-stack
+./scripts/bootstrap_pi.sh
+```
+
+The script will create (or reuse) the `~/agent-venv` virtual environment,
+install the dependencies listed in `requirements.txt`, generate a default
+`.env` from `.env.example` if one does not already exist, and then copy the
+`systemd` unit files into place (you may be prompted for your sudo password).
+You can override the virtual environment location or Python interpreter by
+exporting `VENV_DIR` or `PYTHON_BIN` before running the script.
+
+If you prefer to manage the steps manually, the `install_pi_services.sh` helper
+still accepts direct invocation.
+
 ## Raspberry Pi services
 
 All Raspberry Pi components run as `systemd` services. The provided helper
@@ -133,9 +155,9 @@ sudo systemctl enable --now pi-ops-heartbeat.service
 
 ## Configuration
 
-Configuration is managed via environment variables. Create a `.env` file in the
-root of `pi-cortex-stack` and export it before running the agent, or use your
-shell's environment. The following variables are recognized:
+Configuration is managed via environment variables. Copy `.env.example` to
+`.env` in the root of `pi-cortex-stack` and export it before running the agent,
+or use your shell's environment. The following variables are recognized:
 
 - `PI_CORTEX_MQTT_HOST` (default `localhost`)
 - `PI_CORTEX_MQTT_PORT` (default `1883`)
