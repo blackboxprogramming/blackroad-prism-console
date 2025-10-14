@@ -1,4 +1,5 @@
 import Heatmap from "./components/Heatmap";
+import SmokeStatusTile from "./components/SmokeStatusTile";
 import { getRiskSnapshot } from "@/lib/ops/risk";
 import { getRecentIncidentEvents } from "@/lib/ops/db";
 
@@ -13,6 +14,9 @@ export default async function OpsPage() {
       <header style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }}>
         <h1 style={{ fontSize: "1.75rem", fontWeight: 600 }}>Ops Heatmap</h1>
       </header>
+      <section style={{ marginBottom: "1.5rem" }}>
+        <SmokeStatusTile />
+      </section>
       <Heatmap initialSystems={snapshot.systems} initialAudit={audit} generatedAt={snapshot.generatedAt} />
     </main>
   );
