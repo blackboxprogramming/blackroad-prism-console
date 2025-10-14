@@ -142,7 +142,6 @@ async function openFile(path) {
   editor.setModel(model);
 }
 
-function detectLanguage(p) {
 async function pushAutosave(path){
   const key = `${currentProject}:${path}`;
   const text = PENDING[key];
