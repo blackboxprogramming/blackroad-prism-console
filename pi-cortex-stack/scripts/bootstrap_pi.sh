@@ -15,6 +15,8 @@ APT_PACKAGES=(
 )
 STATE_ROOT="/var/lib/pi-cortex"
 LOG_ROOT="/var/log/pi-cortex"
+OWNER="${SUDO_USER:-$USER}"
+GROUP="$(id -gn "$OWNER")"
 
 if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
   echo "error: $PYTHON_BIN is not available. Install Python 3 before continuing." >&2
@@ -54,13 +56,13 @@ if [ ! -f "$STACK_DIR/.env" ] && [ -f "$STACK_DIR/.env.example" ]; then
 fi
 
 echo "Preparing state directories under $STATE_ROOT and log directories under $LOG_ROOT"
-sudo install -d -m 775 -o "$USER" -g "$USER" \
+sudo install -d -m 775 -o "$OWNER" -g "$GROUP" \
   "$STATE_ROOT" \
   "$STATE_ROOT/holo" \
   "$STATE_ROOT/panel" \
   "$STATE_ROOT/audio" \
   "$STATE_ROOT/shared"
-sudo install -d -m 775 -o "$USER" -g "$USER" "$LOG_ROOT"
+sudo install -d -m 775 -o "$OWNER" -g "$GROUP" "$LOG_ROOT"
 
 echo "Installing systemd services"
 "$STACK_DIR/scripts/install_pi_services.sh"
