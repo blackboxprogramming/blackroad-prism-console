@@ -45,7 +45,7 @@
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const {useState,useEffect,useMemo,useRef} = React; const styled = window.styled;
+const {useState,useEffect,useMemo,useRef,useCallback} = React; const styled = window.styled;
 /* ------------ API helpers ------------- */
 async function apiGet(p){const r=await fetch(p,{credentials:"include"});if(!r.ok)throw new Error(await r.text());return r.json()}
 async function apiPost(p,b={}){const r=await fetch(p,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify(b)});if(!r.ok)throw new Error(await r.text());return r.json()}
@@ -113,7 +113,115 @@ function CanvasPage(){const ref=useRef(null);const[draw,setDraw]=useState(false)
 function EditorPage({onRun,onCommit,code,setCode}){return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',justify-content:'space-between'}}><strong>Editor</strong><div style={{display:'flex',gap:8}}><button class="btn small" onClick={onRun}>Run</button><button class="btn small" onClick={onCommit}>Commit</button></div></div><div onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>setCode(String(r.result));r.readAsText(f)}}><CodeEditor value={code} onChange={setCode}/></div></div>)}
 function TerminalPage({onCommand}){return <Terminal onCommand={onCommand}/>}
 function RoadViewPage({timeline,filteredTimeline,filter,setFilter,modal,setModal,itemAction,build,cpu,mem,gpu}){return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',alignItems:'center',gap:8}}><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Search timeline…" style={{flex:1,background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'var(--text)',padding:'8px 10px'}}/></div><div style={{display:'grid',gap:10}}>{filteredTimeline.map(item=><ActivityItem key={item.id} item={{...item,onAction:itemAction}} onOpen={setModal}/>)}</div><div style={{display:'grid',gap:10}}><div style={{fontWeight:700}}>Build</div><div style={{height:10,background:'#0b1324',border:'1px solid var(--border)',borderRadius:10,overflow:'hidden'}}><div style={{height:'100%',width:build+'%',background:'linear-gradient(90deg,var(--accent),var(--accent-2))',transition:'width .6s'}}></div></div><div style={{display:'grid',gap:6}}><div style={{display:'flex',justifyContent:'space-between'}}><span>CPU</span><span>{Math.round(cpu.at(-1))}%</span></div><Sparkline data={cpu} color={theme.colors.accent2}/><div style={{display:'flex',justifyContent:'space-between'}}><span>Memory</span><span>{Math.round(mem.at(-1))}%</span></div><Sparkline data={mem} color={theme.colors.accent}/><div style={{display:'flex',justifyContent:'space-between'}}><span>GPU</span><span>{Math.round(gpu.at(-1))}%</span></div><Sparkline data={gpu} color={theme.colors.accent3}/></div></div>)}
-function BackRoadPage({agents,setAgents,streamOn,setStreamOn,wallet,setWallet,notes,setNotes}){return(<div style={{display:'grid',gap:10}}><div style={{fontWeight:700}}>Agent Stack</div><div style={{display:'flex',gap:8}}>{Object.keys(agents).map(k=>(<label key={k} class="chip" style={{cursor:'pointer'}}><input type="checkbox" checked={agents[k]} onChange={()=>setAgents(a=>({...a,[k]:!a[k]}))}/> {k}</label>))}</div><label style={{display:'inline-flex',alignItems:'center',gap:8}}><input type="checkbox" checked={streamOn} onChange={()=>setStreamOn(s=>!s)}/><span>Stream</span></label><div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><div><div style={{fontWeight:700}}>Wallet</div><div class="chip">{wallet} RC</div></div><div style={{display:'flex',gap:8}}><button class="btn small" onClick={()=>setWallet(w=>(parseFloat(w)+0.1).toFixed(2))}>Stake</button><button class="btn small" onClick={()=>setWallet(w=>(Math.max(0,parseFloat(w)-0.1)).toFixed(2))}>Unstake</button></div></div><div style={{fontWeight:700}}>Session Notes</div><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Type notes…" style={{minHeight:140,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:10}}/></div>)}
+function BackRoadPage({agents,setAgents,streamOn,setStreamOn,wallet,setWallet,notes,setNotes}){
+  const capLogRef = useRef(null);
+  const capChunks = useRef([]);
+  const capRecorder = useRef(null);
+  const capStreamRef = useRef(null);
+  const capTimer = useRef(null);
+  const [capRunning,setCapRunning] = useState(false);
+  const [capLog,setCapLog] = useState('Captions idle…\n');
+
+  const stopCaptions = useCallback((silent=false)=>{
+    if(capTimer.current){clearInterval(capTimer.current);capTimer.current=null;}
+    if(capRecorder.current && capRecorder.current.state!=='inactive'){capRecorder.current.stop();}
+    if(capStreamRef.current){capStreamRef.current.getTracks().forEach(t=>t.stop());capStreamRef.current=null;}
+    capChunks.current=[];
+    capRecorder.current=null;
+    if(capRunning){
+      if(!silent){setCapLog(log=>log+'\n[stopped]\n');}
+      setCapRunning(false);
+    }
+  },[capRunning]);
+
+  const startCaptions = useCallback(async()=>{
+    if(capRunning) return;
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      setCapLog(prev=>prev+'[mic error] media devices unavailable\n');
+      return;
+    }
+    if(typeof MediaRecorder==='undefined'){
+      setCapLog(prev=>prev+'[mic error] MediaRecorder unsupported\n');
+      return;
+    }
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      capStreamRef.current = stream;
+      const recorder = new MediaRecorder(stream,{mimeType:'audio/webm'});
+      capRecorder.current = recorder;
+      capChunks.current=[];
+      recorder.ondataavailable = e=>{if(e.data && e.data.size>0) capChunks.current.push(e.data);};
+      recorder.start();
+      setCapRunning(true);
+      setCapLog('Captions started…\n');
+      capTimer.current = setInterval(async()=>{
+        if(!capChunks.current.length) return;
+        const blob = new Blob(capChunks.current,{type:'audio/webm'});
+        capChunks.current=[];
+        const fd = new FormData();
+        fd.append('file',blob,'chunk.webm');
+        try{
+          const up = await fetch('/transcribe/upload',{method:'POST',body:fd});
+          if(!up.ok) throw new Error('upload failed');
+          const data = await up.json();
+          if(!data.token) throw new Error('missing token');
+          const proto = location.protocol==='https:'?'wss':'ws';
+          const ws = new WebSocket(`${proto}://${location.host}/ws/transcribe/run`);
+          ws.onopen = ()=>ws.send(JSON.stringify({token:data.token,lang:'en'}));
+          ws.onmessage = ev=>{
+            if(ev.data==='[[BLACKROAD_WHISPER_DONE]]'){ws.close();return;}
+            setCapLog(prev=>prev+ev.data+'\n');
+          };
+          ws.onerror = ()=>ws.close();
+        }catch(err){
+          setCapLog(prev=>prev+`[error] ${err.message}\n`);
+        }
+      },4000);
+    }catch(err){
+      setCapLog(prev=>prev+`[mic error] ${err.message}\n`);
+    }
+  },[capRunning]);
+
+  useEffect(()=>()=>stopCaptions(true),[stopCaptions]);
+  useEffect(()=>{if(capLogRef.current) capLogRef.current.scrollTop = capLogRef.current.scrollHeight;},[capLog]);
+
+  return(
+    <div style={{display:'grid',gap:10}}>
+      <div style={{fontWeight:700}}>Agent Stack</div>
+      <div style={{display:'flex',gap:8}}>
+        {Object.keys(agents).map(k=>(
+          <label key={k} class="chip" style={{cursor:'pointer'}}>
+            <input type="checkbox" checked={agents[k]} onChange={()=>setAgents(a=>({...a,[k]:!a[k]}))}/> {k}
+          </label>
+        ))}
+      </div>
+      <label style={{display:'inline-flex',alignItems:'center',gap:8}}>
+        <input type="checkbox" checked={streamOn} onChange={()=>setStreamOn(s=>!s)}/>
+        <span>Stream</span>
+      </label>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div>
+          <div style={{fontWeight:700}}>Wallet</div>
+          <div class="chip">{wallet} RC</div>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <button class="btn small" onClick={()=>setWallet(w=>(parseFloat(w)+0.1).toFixed(2))}>Stake</button>
+          <button class="btn small" onClick={()=>setWallet(w=>(Math.max(0,parseFloat(w)-0.1)).toFixed(2))}>Unstake</button>
+        </div>
+      </div>
+      <div style={{background:'var(--subpanel)',border:'1px solid var(--border)',borderRadius:12,padding:14,display:'flex',flexDirection:'column',gap:10}}>
+        <div style={{fontWeight:700}}>Live Captions</div>
+        <div style={{display:'flex',gap:8}}>
+          <button class="btn small" onClick={startCaptions} disabled={capRunning} style={{opacity:capRunning?0.5:1,cursor:capRunning?'not-allowed':'pointer'}}>Start Captions</button>
+          <button class="btn small" onClick={()=>stopCaptions()} disabled={!capRunning} style={{opacity:!capRunning?0.5:1,cursor:!capRunning?'not-allowed':'pointer'}}>Stop</button>
+        </div>
+        <pre ref={capLogRef} style={{background:'#000',color:'#0f0',padding:'1em',height:220,overflow:'auto',borderRadius:6,margin:0,fontSize:12,lineHeight:'1.4em'}}>{capLog}</pre>
+      </div>
+      <div style={{fontWeight:700}}>Session Notes</div>
+      <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Type notes…" style={{minHeight:140,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:10}}/>
+    </div>
+  )
+}
 function CrudPage({kind,title,fields}){const[list,setList]=useState([]);const[loading,setLoading]=useState(true);const[modalOpen,setModalOpen]=useState(false);const[item,setItem]=useState({});const[query,setQuery]=useState('');async function load(){try{const d=await apiGet(`/api/${kind}`);setList(d)}catch{setList([])}finally{setLoading(false)}}useEffect(()=>{load()},[kind]);function edit(x){setItem(x||{});setModalOpen(true)}async function save(){const body={...item};if(item.id){await apiPut(`/api/${kind}/${item.id}`,body)}else{await apiPost(`/api/${kind}`,body)}setModalOpen(false);load()}async function del(id){if(!confirm('Delete?'))return;await apiDel(`/api/${kind}/${id}`);load()}const cols=fields.map(f=>f.name);const filtered=list.filter(r=>JSON.stringify(r).toLowerCase().includes(query.toLowerCase()));return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',justify-content:'space-between',alignItems:'center'}}><strong>{title}</strong><div style={{display:'flex',gap:8}}><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search…" style={{background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'#fff',padding:'8px 10px'}}/><button class="btn small" onClick={()=>edit({})}>New</button></div></div><div style={{overflow:'auto',border:'1px solid var(--border)',borderRadius:12}}><table style={{width:'100%',borderCollapse:'collapse'}}><thead><tr>{cols.map(c=><th key={c} style={{textAlign:'left',padding:'10px 12px',borderBottom:'1px solid var(--border)',color:'var(--muted)'}}>{c}</th>)}<th style={{padding:'10px 12px',borderBottom:'1px solid var(--border)'}}></th></tr></thead><tbody>{loading?<tr><td colSpan={cols.length+1} style={{padding:12}}>Loading…</td></tr>:filtered.map(row=>(<tr key={row.id}><>{cols.map(c=><td key={c} style={{padding:'10px 12px',borderBottom:'1px solid var(--border)'}}>{String(row[c]??'')}</td>)}</><td style={{padding:'10px 12px',borderBottom:'1px solid var(--border)'}}><button class="btn small" onClick={()=>edit(row)}>Edit</button> <button class="btn small" onClick={()=>del(row.id)}>Delete</button></td></tr>))}</tbody></table></div><Modal open={modalOpen} onClose={()=>setModalOpen(false)} title={item.id?'Edit':'New'}><div style={{display:'grid',gap:8}}>{fields.map(f=>(<div key={f.name} style={{display:'grid',gap:6}}><label style={{color:'var(--muted)'}}>{f.name}</label><input value={item[f.name]||''} onChange={e=>setItem({...item,[f.name]:e.target.value})} placeholder={f.placeholder||''} style={{background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'#fff',padding:'8px 10px'}}/></div>))}<div style={{display:'flex',gap:8,justifyContent:'flex-end',marginTop:6}}><button class="btn" onClick={()=>setModalOpen(false)}>Cancel</button><button class="btn primary" onClick={save}>Save</button></div></div></Modal></div>)}
 function S3Uploader(){
   const [file,setFile]=useState(null);
