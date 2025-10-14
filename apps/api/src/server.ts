@@ -202,6 +202,12 @@ import costVar from './routes/cost/variance.js';
 import invCount from './routes/inv/count.js';
 import costGL from './routes/cost/gl.js';
 import supEmail from './routes/support/email.js';
+import eltConn from './routes/elt/connectors.js';
+import eltP from './routes/elt/pipelines.js';
+import eltDag from './routes/elt/dag.js';
+import eltLin from './routes/elt/lineage.js';
+import eltLake from './routes/elt/lakehouse.js';
+import eltQC from './routes/elt/quality_costs.js';
 
 dotenv.config();
 
@@ -338,6 +344,7 @@ app.use('/api/inv', invTxn, invCount);
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 app.use('/api/cs', csWeights, csSignals, csHealth, csPlay, csOnb, csQbr, csAlerts);
 app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
+app.use('/api/elt', eltConn, eltP, eltDag, eltLin, eltLake, eltQC);
 
 const port = process.env.PORT || 4000;
 

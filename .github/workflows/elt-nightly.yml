@@ -1,0 +1,13 @@
+name: ELT Nightly (Lineage & Costs Reports)
+on:
+  schedule: [{ cron: "28 5 * * *" }]
+  workflow_dispatch:
+jobs:
+  elt-nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/elt/lineage_report.ts
+      - run: node scripts/elt/costs_report.ts
