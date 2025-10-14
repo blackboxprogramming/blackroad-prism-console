@@ -36,6 +36,7 @@ extension points for future integrations.
 | 018 | The Memory Covenant    | Memory stays purposeful, finite, and revocable. |
 | 020 | The Governance Charter | Transparent RFC-led decisions with recorded votes. |
 | 015 | The Trust Ledger       | Trust is tracked via a public reliability ledger. |
+| 007 | The Resilience Code    | Failure is expected; recovery keeps service live. |
 
 ## BlackRoad Pipeline
 
