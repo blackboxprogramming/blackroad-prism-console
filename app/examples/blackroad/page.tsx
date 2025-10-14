@@ -1,5 +1,7 @@
 'use client';
 import { useState } from 'react';
+import { brFetch } from '@/lib/debug/fetchProbe';
+import { brLog } from '@/lib/debug/brLog';
 
 type Mode = 'machine' | 'chit-chat';
 interface Item {
@@ -19,12 +21,17 @@ export default function Page() {
     setItems(out);
     setInput('');
     setBusy(true);
+    brLog('chat:submit', { mode, message: input }, 'debug');
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: out, mode }),
-      });
+      const res = await brFetch(
+        '/api/chat',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: out, mode }),
+          label: 'chat',
+        }
+      );
       const data = await res.json();
       setItems([
         ...out,
@@ -33,6 +40,13 @@ export default function Page() {
           content: data?.content ?? JSON.stringify(data),
         },
       ]);
+      brLog('chat:response', { mode, content: data?.content }, 'info');
+    } catch (error) {
+      brLog(
+        'chat:error',
+        { mode, error: error instanceof Error ? error.message : String(error) },
+        'error'
+      );
     } finally {
       setBusy(false);
     }
