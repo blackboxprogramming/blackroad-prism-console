@@ -3,16 +3,17 @@ process.env.INTERNAL_TOKEN = 'x';
 process.env.ALLOW_ORIGINS = 'https://example.com';
 process.env.MINT_PK = '0x' + '1'.repeat(64);
 process.env.ETH_RPC_URL = 'http://127.0.0.1:8545';
+
 const fs = require('fs');
 const path = require('path');
 const originKeyPath = path.join(__dirname, 'origin.key');
 fs.writeFileSync(originKeyPath, 'test-origin-key');
 process.env.ORIGIN_KEY_PATH = originKeyPath;
-jest.mock(
-  'compression',
-  () => () => (_req, _res, next) => next(),
-  { virtual: true }
-);
+
+jest.mock('compression', () => () => (_req, _res, next) => next(), {
+  virtual: true,
+});
+
 jest.mock(
   'express-validator',
   () => {
@@ -36,6 +37,7 @@ jest.mock(
   },
   { virtual: true }
 );
+
 jest.mock(
   'winston',
   () => {
@@ -60,6 +62,7 @@ jest.mock(
   },
   { virtual: true }
 );
+
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
 const originHeaders = { 'X-BlackRoad-Key': 'test-origin-key' };
@@ -69,16 +72,6 @@ describe('API security and health', () => {
     server.close(() => {
       fs.rm(originKeyPath, { force: true }, () => done());
     });
-  });
-
-  it('responds to /health', async () => {
-    const res = await request(app).get('/health').set(originHeaders);
-const request = require('supertest');
-const { app, server } = require('../srv/blackroad-api/server_full.js');
-
-describe('API security and health', () => {
-  afterAll((done) => {
-    server.close(done);
   });
 
   it('responds to /health', async () => {
@@ -104,7 +97,6 @@ describe('API security and health', () => {
       .post('/api/login')
       .set(originHeaders)
       .send({});
-    const res = await request(app).post('/api/login').send({});
     expect(res.status).toBe(400);
   });
 
