@@ -962,3 +962,17 @@ Run `python -m cli.console obs:report` to generate a local dashboard under `arti
 
 ## Dry-Run Mode
 Pass `--dry-run` to any CLI command to skip writing artifacts. The action still executes but prints `DRY-RUN: no artifacts written`.
+## Air-Gapped Install
+
+1. `python build/repro/compile_deps.py`
+2. `python build/offline_wheels.py`
+3. `bash install/offline_install.sh`
+4. `python -m cli.console integrity:verify`
+5. `bash install/offline_uninstall.sh`
+
+### Integrity Verification
+
+```
+python build/signing/verify_wheels.py
+python build/attest.py && gpg --verify dist/attestation.json.asc dist/attestation.json
+```
