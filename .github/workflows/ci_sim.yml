@@ -1,0 +1,26 @@
+name: sim-ci
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+
+jobs:
+  run-sims:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+      - name: Run test suite
+        run: |
+          if [ -f pytest.ini ] || find . -type f -path '*/tests/*.py' -print -quit | grep -q .; then
+            pytest -q
+          else
+            echo "No tests discovered; skipping";
+          fi
