@@ -19,3 +19,5 @@ Lucidia exists to protect participant agency. This document records the data-han
 ## Data Minimization
 - The `/classify` endpoint performs ephemeral processing. Text is discarded after the response unless the user explicitly saves it.
 - Sensitive configuration (keys, algorithms) is isolated per user and never shared across tenants.
+# Data Privacy & Governance
+- Policies/classifications, ROPA, consent, DSARs, DPIAs, retention/holds, DLP, and tokenization.

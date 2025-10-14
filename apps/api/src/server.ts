@@ -208,6 +208,14 @@ import eltDag from './routes/elt/dag.js';
 import eltLin from './routes/elt/lineage.js';
 import eltLake from './routes/elt/lakehouse.js';
 import eltQC from './routes/elt/quality_costs.js';
+import pvPolicies from './routes/privacy/policies.js';
+import pvRopa from './routes/privacy/ropa.js';
+import pvConsent from './routes/privacy/consent.js';
+import pvDsar from './routes/privacy/dsar.js';
+import pvDpia from './routes/privacy/dpia.js';
+import pvRetention from './routes/privacy/retention.js';
+import pvDlp from './routes/privacy/dlp.js';
+import pvTokens from './routes/privacy/tokens.js';
 
 dotenv.config();
 
@@ -345,6 +353,7 @@ app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, 
 app.use('/api/cs', csWeights, csSignals, csHealth, csPlay, csOnb, csQbr, csAlerts);
 app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
 app.use('/api/elt', eltConn, eltP, eltDag, eltLin, eltLake, eltQC);
+app.use('/api/privacy', pvPolicies, pvRopa, pvConsent, pvDsar, pvDpia, pvRetention, pvDlp, pvTokens);
 
 const port = process.env.PORT || 4000;
 
