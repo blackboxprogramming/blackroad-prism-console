@@ -103,10 +103,20 @@ cd pi-cortex-stack
 ./scripts/bootstrap_pi.sh
 ```
 
-The script will create (or reuse) the `~/agent-venv` virtual environment,
-install the dependencies listed in `requirements.txt`, generate a default
-`.env` from `.env.example` if one does not already exist, and then copy the
-`systemd` unit files into place (you may be prompted for your sudo password).
+The script will:
+
+1. Ensure the Raspberry Pi has the core Debian packages required by the stack
+   (Python tooling, OpenCV/Pillow libraries, etc.).
+2. Create (or reuse) the `~/agent-venv` virtual environment and install the
+   dependencies listed in `requirements.txt`.
+3. Generate a default `.env` from `.env.example` if one does not already
+   exist.
+4. Create the state and log directories under `/var/lib/pi-cortex` and
+   `/var/log/pi-cortex` with the correct permissions for the `pi` user.
+5. Copy the `systemd` unit files into place (you may be prompted for your sudo
+   password) and restart the services so that any configuration changes take
+   effect immediately.
+
 You can override the virtual environment location or Python interpreter by
 exporting `VENV_DIR` or `PYTHON_BIN` before running the script.
 
@@ -166,6 +176,8 @@ or use your shell's environment. The following variables are recognized:
 - `PI_CORTEX_HOLO_TOPIC` (default `pi/holo/text`)
 - `PI_CORTEX_PANEL_TOPIC` (default `pi/panel/text`)
 - `PI_CORTEX_HEARTBEAT_TOPIC` (default `pi/ops/heartbeat`)
+- `PI_CORTEX_HOLO_STATE_DIR` (default `/var/lib/pi-cortex/holo`)
+- `PI_CORTEX_PANEL_STATE_DIR` (default `/var/lib/pi-cortex/panel`)
 
 ## Development tips
 
