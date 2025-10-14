@@ -231,6 +231,14 @@ import expEV from './routes/exp/events.js';
 import expMT from './routes/exp/metrics.js';
 import expRG from './routes/exp/ramps_guardrails.js';
 import expAP from './routes/exp/approvals.js';
+import samlMeta from './routes/saml/metadata.js';
+import samlAcs from './routes/saml/acs.js';
+import samlSlo from './routes/saml/slo.js';
+import scimUsers from './routes/scim/users.js';
+import scimGroups from './routes/scim/groups.js';
+import { dlpRedact } from './middleware/dlp.js';
+import edrHold from './routes/edr/legal_hold.js';
+import edrExport from './routes/edr/export_audit.js';
 
 dotenv.config();
 
@@ -279,6 +287,8 @@ app.use(assignExperiment(['A','B']));
 // raw body for email signature verification
 app.use((req:any,res,next)=>{ if (req.url.startsWith('/api/support/email/ingest')) { const b:Buffer[]=[]; req.on('data',(c)=>b.push(c)); req.on('end',()=>{ req.rawBody = Buffer.concat(b).toString(); next(); }); } else next(); });
 app.use(meter());
+// DLP must run early for inbound JSON
+app.use(dlpRedact());
 
 app.get('/api/health', cacheHeaders('health'), (_req,res)=> res.json({ ok:true, ts: Date.now() }));
 
@@ -386,6 +396,16 @@ app.get('/api/feature/reco-advanced', requireEntitlement('reco_advanced'), (_req
 app.use('/api/dq', dqSchemas, dqContracts, dqExpects, dqRun, dqSla);
 app.use('/api/exp', expFS, expEX, expEV, expMT, expRG, expAP);
 app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
+
+// SAML
+app.use('/saml', samlMeta, samlAcs, samlSlo);
+
+// SCIM
+app.use('/scim/v2', scimUsers);
+app.use('/scim/v2', scimGroups);
+
+// eDiscovery / legal hold (admin scope in real deployment)
+app.use('/api/edr', edrHold, edrExport);
 
 const port = process.env.PORT || 4000;
 

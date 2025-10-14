@@ -1,0 +1,14 @@
+name: SCIM Reconcile
+on:
+  schedule: [{ cron: "20 2 * * *" }]
+  workflow_dispatch:
+jobs:
+  scim:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconcile users/groups (stub)
+        run: |
+          echo '{"ok":true,"synced":"users,groups"}' > /tmp/scim_sync.json
+      - uses: actions/upload-artifact@v4
+        with: { name: scim-sync, path: /tmp/scim_sync.json }
