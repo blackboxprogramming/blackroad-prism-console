@@ -19,8 +19,11 @@ metadata:
 
 When the Jetson responds, the script prints `[FOUND] host: ...` with the first
 line of `/etc/nv_tegra_release`. Provide `--host` or `--subnet` to check custom
-targets or broader address ranges. Set `--skip-scan` to avoid subnet sweeps if
-you only want to test explicit hostnames.
+targets or broader address ranges. The helper autodetects active IPv4 networks
+via `ip` on Linux or `ifconfig` on macOS and sweeps them in parallel (16 worker
+threads by default) so larger subnets complete quickly even over flaky Wi-Fi.
+Tune concurrency with `--workers` or set `--skip-scan` to avoid subnet sweeps
+when you only want to test explicit hostnames.
 
 ## 1. Host override (quick workaround)
 

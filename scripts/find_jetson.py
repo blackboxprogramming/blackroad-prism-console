@@ -10,8 +10,9 @@ import shutil
 import socket
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from typing import Iterable, List, Optional, Sequence, Set
+from typing import Dict, Iterable, List, Optional, Sequence, Set
 
 DEFAULT_CANDIDATES: Sequence[str] = (
     "jetson.local",
@@ -103,38 +104,101 @@ def parse_networks(cidr_values: Sequence[str]) -> List[ipaddress.IPv4Network]:
     return networks
 
 
-def collect_local_networks() -> List[ipaddress.IPv4Network]:
-    if shutil.which("ip") is None:
-        return []
+def _prefix_from_netmask(netmask: str) -> Optional[int]:
     try:
-        result = subprocess.run(
-            ["ip", "-o", "-4", "addr", "show"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    except OSError:
-        return []
+        if netmask.startswith(("0x", "0X")):
+            mask_value = int(netmask, 16)
+            network = ipaddress.IPv4Network((0, mask_value), strict=False)
+        else:
+            network = ipaddress.IPv4Network((0, netmask), strict=False)
+    except (ValueError, ipaddress.NetmaskValueError):
+        return None
+    return network.prefixlen
 
+
+def collect_local_networks() -> List[ipaddress.IPv4Network]:
     networks: List[ipaddress.IPv4Network] = []
-    for line in result.stdout.splitlines():
-        parts = line.split()
-        if "inet" not in parts:
+
+    def _append_network(network: ipaddress.IPv4Network) -> None:
+        if network.is_loopback or network.is_link_local:
+            return
+        if isinstance(network, ipaddress.IPv6Network):
+            return
+        if network not in networks:
+            networks.append(network)
+
+    if shutil.which("ip") is not None:
+        try:
+            result = subprocess.run(
+                ["ip", "-o", "-4", "addr", "show"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except OSError:
+            result = None
+        else:
+            for line in result.stdout.splitlines():
+                parts = line.split()
+                if "inet" not in parts:
+                    continue
+                idx = parts.index("inet")
+                if idx + 1 >= len(parts):
+                    continue
+                cidr = parts[idx + 1]
+                try:
+                    interface = ipaddress.ip_interface(cidr)
+                except ValueError:
+                    continue
+                network = interface.network
+                _append_network(network)
+
+    if networks:
+        return networks
+
+    if shutil.which("ifconfig") is None:
+        return networks
+
+    try:
+        result = subprocess.run(["ifconfig"], capture_output=True, text=True, check=False)
+    except OSError:
+        return networks
+
+    for raw_line in result.stdout.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("inet6"):
             continue
-        idx = parts.index("inet")
+        if "inet " not in line:
+            continue
+        parts = line.split()
+        try:
+            idx = parts.index("inet")
+        except ValueError:
+            continue
         if idx + 1 >= len(parts):
             continue
-        cidr = parts[idx + 1]
+        address = parts[idx + 1]
+        if address.startswith("127."):
+            continue
+        netmask: Optional[str] = None
+        for token in ("netmask", "mask"):
+            if token in parts:
+                token_idx = parts.index(token)
+                if token_idx + 1 < len(parts):
+                    netmask = parts[token_idx + 1]
+                    break
+        if not netmask:
+            continue
+        prefix = _prefix_from_netmask(netmask)
+        if prefix is None:
+            continue
         try:
-            interface = ipaddress.ip_interface(cidr)
+            interface = ipaddress.ip_interface(f"{address}/{prefix}")
         except ValueError:
             continue
         network = interface.network
-        if network.is_loopback or network.is_link_local:
-            continue
-        if isinstance(network, ipaddress.IPv6Network):
-            continue
-        networks.append(network)
+        _append_network(network)
+
     return networks
 
 
@@ -158,8 +222,37 @@ def display_result(result: ProbeResult) -> None:
         "ssh-error": "[WARN]",
         "reachable": "[INFO]",
         "unreachable": "[WARN]",
+        "internal-error": "[WARN]",
     }.get(status, "[INFO]")
     print(f"{prefix} {result.host}: {result.detail}")
+
+
+def probe_batch(
+    hosts: Sequence[str],
+    user: str,
+    timeout: float,
+    workers: int,
+) -> List[ProbeResult]:
+    if not hosts:
+        return []
+
+    ordered_hosts: Dict[str, int] = {host: idx for idx, host in enumerate(hosts)}
+
+    if workers <= 1:
+        results = [probe_host(host, user, timeout) for host in hosts]
+    else:
+        results: List[ProbeResult] = []
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = {executor.submit(probe_host, host, user, timeout): host for host in hosts}
+            for future in as_completed(futures):
+                host = futures[future]
+                try:
+                    result = future.result()
+                except Exception as exc:  # noqa: BLE001 - surface unexpected issues
+                    result = ProbeResult(host, "internal-error", f"Unhandled error: {exc}")
+                results.append(result)
+    results.sort(key=lambda item: ordered_hosts.get(item.host, 0))
+    return results
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -189,6 +282,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         action="store_true",
         help="Do not sweep local subnets; only probe explicit hostnames.",
     )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=16,
+        help="Concurrent SSH probe workers (default: %(default)s).",
+    )
     args = parser.parse_args(argv)
 
     seen: Set[str] = set()
@@ -207,10 +306,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     confirmed: List[ProbeResult] = []
     potential: List[ProbeResult] = []
 
+    workers = max(1, args.workers)
+
     if unique_candidates:
         print("[INFO] Probing candidate hosts...")
-    for host in unique_candidates:
-        result = probe_host(host, args.user, args.timeout)
+    candidate_results = probe_batch(unique_candidates, args.user, args.timeout, workers)
+    for result in candidate_results:
         display_result(result)
         potential.append(result)
         if result.confirmed:
@@ -241,11 +342,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     for network in subnets:
         print(f"[INFO] Scanning {network}...")
+        hosts_to_probe: List[str] = []
         for host in hosts_in_network(network, args.max_hosts):
             if host in seen:
                 continue
             seen.add(host)
-            result = probe_host(host, args.user, args.timeout)
+            hosts_to_probe.append(host)
+
+        results = probe_batch(hosts_to_probe, args.user, args.timeout, workers)
+        for result in results:
             if result.status == "unreachable":
                 continue
             display_result(result)
