@@ -1,0 +1,13 @@
+{
+  "name": "yjs-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Yjs websocket server service for BlackRoad deployment.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "node ./node_modules/y-websocket/bin/server.js"
+  },
+  "dependencies": {
+    "y-websocket": "^1.5.0"
+  }
+}
