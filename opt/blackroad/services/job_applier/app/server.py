@@ -1,10 +1,9 @@
-from fastapi import FastAPI, BackgroundTasks
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi.responses import JSONResponse, PlainTextResponse, Response
 from pathlib import Path
 import os, json
-from typing import Dict
 from .models import ApplyRequest
-from . import aih_runner
+from . import aih_runner, assets
 
 app = FastAPI(title="Job Applier (AIHawk wrapper)")
 
@@ -42,3 +41,27 @@ def run_logs(run_id: str, kind: str):
     if not path.exists():
         return PlainTextResponse("", status_code=204)
     return path.read_text()
+
+
+@app.get("/assets")
+def asset_index():
+    """List available static assets for downstream automations."""
+
+    return {"assets": assets.list_assets()}
+
+
+@app.get("/assets/{asset_key}")
+def asset_detail(asset_key: str):
+    """Return the requested asset content."""
+
+    try:
+        asset = assets.get_asset(asset_key)
+    except KeyError as exc:  # pragma: no cover - fastapi handles HTTPException
+        raise HTTPException(status_code=404, detail="asset_not_found") from exc
+
+    payload = asset.load()
+    if asset.media_type == "application/json":
+        return JSONResponse(payload)
+    if asset.media_type == "text/plain":
+        return PlainTextResponse(payload)
+    return Response(content=payload, media_type=asset.media_type)
