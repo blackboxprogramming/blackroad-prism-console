@@ -38,6 +38,7 @@ extension points for future integrations.
 | 015 | The Trust Ledger       | Trust is tracked via a public reliability ledger. |
 | 007 | The Resilience Code    | Failure is expected; recovery keeps service live. |
 | 045 | The Compassion Rule    | Compassion guides every response to conflict.   |
+| 041 | The Restraint Principle | Restraint on data, models, features, and kill switches. |
 
 ## BlackRoad Pipeline
 
