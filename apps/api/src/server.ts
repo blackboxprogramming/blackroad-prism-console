@@ -246,6 +246,11 @@ import esgEthics from './routes/esg/ethics.js';
 import esgReports from './routes/esg/reports.js';
 
 dotenv.config();
+import express from "express";
+import helmet from "helmet";
+import cors from "cors";
+import classifyRouter from "./routes/classify.js";
+import exceptionsRouter from "./routes/exceptions.js";
 
 const app = express();
 app.use(express.json());
@@ -279,6 +284,25 @@ app.use((req: any, _res, next) => {
   } else {
     next();
   }
+app.use(helmet());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
+app.use(express.json({ limit: "1mb" }));
+app.use(
+  express.urlencoded({
+    extended: false,
+    verify: (req, _res, buf) => {
+      (req as any).rawBody = buf.toString();
+    },
+  })
+);
+
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
 });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -413,6 +437,8 @@ app.use('/scim/v2', scimGroups);
 app.use('/api/edr', edrHold, edrExport);
 app.use('/api/esg', esgActivity, esgCarbon, esgDei, esgEthics, esgReports);
 app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamTokens, iamSecrets, iamDevices);
+app.use("/", classifyRouter);
+app.use("/", exceptionsRouter);
 
 const port = process.env.PORT || 4000;
 
