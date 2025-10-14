@@ -12,6 +12,9 @@ const readO=()=> fs.existsSync(O)? fs.readFileSync(O,'utf-8').trim().split('\n')
 const readQ=()=> fs.existsSync(Q)? fs.readFileSync(Q,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)) : [];
 const appendO=(row:any)=>{ fs.mkdirSync('data/cpq',{recursive:true}); fs.appendFileSync(O, JSON.stringify(row)+'\n'); };
 const readO=()=> fs.existsSync(O)? fs.readFileSync(O,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)) : [];
+const readQ=()=> fs.existsSync(Q)? fs.readFileSync(Q,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
+const appendO=(row:any)=>{ fs.mkdirSync('data/cpq',{recursive:true}); fs.appendFileSync(O, JSON.stringify(row)+'\n'); };
+const readO=()=> fs.existsSync(O)? fs.readFileSync(O,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
 r.post('/order/create',(req,res)=>{
   const quoteId=String(req.body?.quoteId||''); const q=readQ().find((x:any)=>x.id===quoteId); if(!q) return res.status(404).json({error:'not_found'});
   const id=uuid(); appendO({ id, ts: Date.now(), quoteId, customer: q.customer, total: q.total, lines: q.lines||[], status:'open' });

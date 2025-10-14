@@ -5,6 +5,7 @@ const Q='data/cpq/quotes.jsonl', A='data/cpq/approvals.jsonl';
 const readQ=()=> fs.existsSync(Q)? fs.readFileSync(Q,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):
 [];
 const readQ=()=> fs.existsSync(Q)? fs.readFileSync(Q,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[];
+const readQ=()=> fs.existsSync(Q)? fs.readFileSync(Q,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
 const writeQ=(rows:any[])=> fs.writeFileSync(Q, rows.map(x=>JSON.stringify(x)).join('\n')+'\n');
 const appendA=(row:any)=>{ fs.mkdirSync('data/cpq',{recursive:true}); fs.appendFileSync(A, JSON.stringify(row)+'\n'); };
 

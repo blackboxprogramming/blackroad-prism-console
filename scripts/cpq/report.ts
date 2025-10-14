@@ -3,6 +3,7 @@ function yyyymm(){ const d=new Date(); return `${d.getFullYear()}${String(d.getM
 const Q='data/cpq/quotes.jsonl';
 const rows = fs.existsSync(Q)? fs.readFileSync(Q,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[];
 const rows = fs.existsSync(Q)? fs.readFileSync(Q,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)) : [];
+const rows = fs.existsSync(Q)? fs.readFileSync(Q,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
 const byState:Record<string,number>={}; rows.forEach((q:any)=>{ byState[q.state]=(byState[q.state]||0)+1; });
 const md = `# CPQ Report ${yyyymm()}
 
