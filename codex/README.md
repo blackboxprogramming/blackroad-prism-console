@@ -56,6 +56,7 @@ extension points for future integrations.
 | 050 | The Endurance Mandate  | Core systems survive disruption and recover fast. |
 | 057 | The Mutual Aid Protocol | Mutual aid infrastructure lends support in crises. |
 | 052 | The Reverence Clause   | Ground every build in ecological responsibility. |
+| 008 | The Identity Guard     | Identity stays layered, minimal, and observable. |
 
 ## BlackRoad Pipeline
 
