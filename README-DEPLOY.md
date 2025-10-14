@@ -54,6 +54,23 @@ Rollback notes
 
 The script auto-selects the previous directory in /opt/blackroad/releases/ and switches symlinks back, then restarts blackroad-api.
 
+### Rollback / roll forward playbook
+
+Follow the `runbooks/examples/release_rollback_forward.yaml` runbook when a
+deployment needs human review. It captures the pre-checks, health validation,
+and paths for both rollback and roll forward so the on-call can document the
+decision and keep the rest of engineering in the loop.
+
+Quick reference from the runbook:
+
+1. Announce the investigation and complete the pre-checks (latest deploy SHA,
+   change approval status, and health probes).
+2. Record the decision in the runbook artifacts and, if rolling back, point the
+   symlinks at the previous release using `scripts/deploy.sh <prior-tarball>`.
+3. After the environment stabilises, either re-run the deploy workflow from the
+   target SHA (roll forward) or confirm rollback completion in `#eng` with links
+   to the collected metrics and health checks.
+
 Monorepo notes
 •If your SPA is at web/, it will be built and packaged automatically.
 •If your API is at api/, its source is packaged (prod deps installed on the server).

@@ -1,0 +1,55 @@
+name: release_rollback_forward
+steps:
+  - action: notify
+    params:
+      channel: "#eng"
+      message: "Starting release rollback/forward decision playbook for <environment>."
+  - action: create_task
+    params:
+      bot: "RunbookBot"
+      intent: "release_prechecks"
+      inputs:
+        environment: "<environment>"
+        checklist:
+          - "Confirm latest deploy SHA from GitHub Actions and artifact version."
+          - "Verify change-approve workflow completed with required reviewers."
+          - "Run health checks: curl -fsSL <primary_url>/healthz and <api_url>/health."
+          - "Capture metrics snapshots for dashboards noted in README-OPS.md."
+  - action: create_task
+    params:
+      bot: "RunbookBot"
+      intent: "release_decision"
+      inputs:
+        environment: "<environment>"
+        checklist:
+          - "Document outcome of health verification (pass/fail with timestamps)."
+          - "Decide whether to rollback or roll forward based on impact summary."
+          - "If rollback is needed, confirm target release directory in /opt/blackroad/releases."
+  - action: create_task
+    params:
+      bot: "RunbookBot"
+      intent: "release_rollback"
+      inputs:
+        environment: "<environment>"
+        checklist:
+          - "If rollback path is not required, mark task as N/A and skip remaining items."
+          - "Announce rollback in #eng with impacted services and ETA."
+          - "Run scripts/deploy.sh with previous release tarball and confirm symlinks."
+          - "Execute scripts/blackroad-autoheal.sh to warm caches."
+          - "Capture status in artifacts/runbooks/releases/<environment>/rollback.md."
+  - action: create_task
+    params:
+      bot: "RunbookBot"
+      intent: "release_rollforward"
+      inputs:
+        environment: "<environment>"
+        checklist:
+          - "If roll-forward path is not required, mark task as N/A and skip remaining items."
+          - "Re-run workflow .github/workflows/blackroad-deploy.yml from desired SHA."
+          - "Validate Terraform or infra changes in br-infra-iac/envs/<environment>."
+          - "Re-check health endpoints and attach proof to artifacts run."
+          - "Post final status in #eng with links to dashboards and run artifacts."
+  - action: notify
+    params:
+      channel: "#eng"
+      message: "Release rollback/forward playbook completed for <environment>."

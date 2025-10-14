@@ -38,6 +38,10 @@ deployments:
       - SLACK_BOT_TOKEN
 change_management:
   approvals: []
+  runbooks:
+    - README-DEPLOY.md
+    - README-OPS.md
+    - runbooks/examples/release_rollback_forward.yaml
 observability:
   verification:
     - terraform output -raw preview_url
