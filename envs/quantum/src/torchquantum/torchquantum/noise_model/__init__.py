@@ -22,4 +22,60 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from .noise_models import *
+import os
+
+if os.getenv("TORCHQUANTUM_USE_QISKIT", "0") == "1":
+    from .noise_models import *  # type: ignore
+else:
+    class _BaseNoiseModel:
+        """Fallback noise model that performs no-op adjustments."""
+
+        is_add_noise = False
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def add_noise(self, params):
+            return params
+
+        def sample_noise_op(self, op):
+            return []
+
+
+    class NoiseModelTQ(_BaseNoiseModel):
+        pass
+
+
+    class NoiseModelTQActivation(_BaseNoiseModel):
+        pass
+
+
+    class NoiseModelTQPhase(_BaseNoiseModel):
+        pass
+
+
+    class NoiseModelTQReadoutOnly(_BaseNoiseModel):
+        pass
+
+
+    class NoiseModelTQActivationReadout(_BaseNoiseModel):
+        pass
+
+
+    class NoiseModelTQPhaseReadout(_BaseNoiseModel):
+        pass
+
+
+    class NoiseModelTQQErrorOnly(_BaseNoiseModel):
+        pass
+
+
+    __all__ = [
+        "NoiseModelTQ",
+        "NoiseModelTQActivation",
+        "NoiseModelTQPhase",
+        "NoiseModelTQReadoutOnly",
+        "NoiseModelTQActivationReadout",
+        "NoiseModelTQPhaseReadout",
+        "NoiseModelTQQErrorOnly",
+    ]

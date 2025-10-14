@@ -22,14 +22,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import os
+from abc import ABCMeta
+from typing import Iterable
+
 import torch
 import torchquantum as tq
 
 from torchquantum.functional import func_name_dict
-from typing import Iterable
 from torchquantum.macro import C_DTYPE
-from abc import ABCMeta
-from qiskit import QuantumCircuit
+
+if os.getenv("TORCHQUANTUM_USE_QISKIT", "0") == "1":
+    from qiskit import QuantumCircuit  # type: ignore
+else:
+    class QuantumCircuit:  # type: ignore[override]
+        def __init__(self, *args, **kwargs):
+            raise ImportError("Qiskit is disabled in the vendored TorchQuantum build")
 
 
 class Encoder(tq.QuantumModule):

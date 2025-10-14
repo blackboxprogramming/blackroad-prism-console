@@ -22,16 +22,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import os
+from typing import Iterable
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torchquantum as tq
 import torchquantum.functional as tqf
-import numpy as np
-
-
-from typing import Iterable
-from torchquantum.plugin.qiskit import QISKIT_INCOMPATIBLE_FUNC_NAMES
 from torchpack.utils.logging import logger
+
+if os.getenv("TORCHQUANTUM_USE_QISKIT", "0") == "1":
+    from torchquantum.plugin.qiskit import QISKIT_INCOMPATIBLE_FUNC_NAMES  # type: ignore
+else:
+    QISKIT_INCOMPATIBLE_FUNC_NAMES = set()
 
 __all__ = [
     "QuantumModuleFromOps",

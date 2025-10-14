@@ -22,8 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import os
+
 __version__ = "0.2.0"
 __author__ = "TorchQuantum Authors"
+
+_USE_QISKIT = os.getenv("TORCHQUANTUM_USE_QISKIT", "0") == "1"
 
 from .macro import *
 from .device import *
@@ -33,32 +37,30 @@ from .measurement import *
 from .functional import *
 from .graph import *
 from .layer import *
-from .encoding import *
 from .util import *
-from .noise_model import *
 from .algorithm import *
 from .dataset import *
-from .pulse import *
 
-# here we check whether the Qiskit parameterization bug is fixed, if not, a
-# warning message will be printed
-import qiskit
-import os
+if _USE_QISKIT:
+    from .encoding import *
+    from .noise_model import *
+    from .pulse import *
 
-path = os.path.abspath(qiskit.__file__)
-# print(path)
-# path for aer provider
-path_provider = path.replace("__init__.py", "providers/aer/backends/aerbackend.py")
-# print(path_provider)
+    # here we check whether the Qiskit parameterization bug is fixed, if not, a
+    # warning message will be printed
+    import qiskit
 
-# with open(path_provider, 'r') as fid:
-#     for line in fid.readlines():
-#         if 'FIXED' in line:
-#             # print('The qiskit parameterization bug is already fixed!')
-#             break
-#         else:
-#             print(f'\n\n WARNING: The qiskit parameterization bug is not '
-#                   f'fixed!\n\n'
-#                   f'run python fix_qiskit_parameterization.py to fix it!'
-#                   )
-#             break
+    path = os.path.abspath(qiskit.__file__)
+    # path for aer provider
+    path_provider = path.replace("__init__.py", "providers/aer/backends/aerbackend.py")
+
+    # with open(path_provider, 'r') as fid:
+    #     for line in fid.readlines():
+    #         if 'FIXED' in line:
+    #             break
+    #         else:
+    #             print(f'\n\n WARNING: The qiskit parameterization bug is not '
+    #                   f'fixed!\n\n'
+    #                   f'run python fix_qiskit_parameterization.py to fix it!'
+    #                   )
+    #             break

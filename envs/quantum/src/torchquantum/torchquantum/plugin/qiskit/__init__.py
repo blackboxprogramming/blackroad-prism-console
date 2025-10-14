@@ -22,8 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from .qiskit_macros import *
-from .qiskit_plugin import *
-from .qiskit_pulse import *
-from .qiskit_processor import *
-from .qiskit_unitary_gate import *
+import os
+
+if os.getenv("TORCHQUANTUM_USE_QISKIT", "0") == "1":
+    from .qiskit_macros import *  # type: ignore
+    from .qiskit_plugin import *  # type: ignore
+    from .qiskit_pulse import *  # type: ignore
+    from .qiskit_processor import *  # type: ignore
+    from .qiskit_unitary_gate import *  # type: ignore
+else:
+    QISKIT_INCOMPATIBLE_FUNC_NAMES = set()
+
+    __all__ = [
+        "QISKIT_INCOMPATIBLE_FUNC_NAMES",
+    ]

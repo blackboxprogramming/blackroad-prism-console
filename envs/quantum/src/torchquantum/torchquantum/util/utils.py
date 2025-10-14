@@ -23,6 +23,7 @@ SOFTWARE.
 """
 
 import copy
+import os
 from typing import Dict, Iterable, List, TYPE_CHECKING
 
 import numpy as np
@@ -30,11 +31,29 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from opt_einsum import contract
-from qiskit_ibm_runtime import QiskitRuntimeService
-from qiskit.exceptions import QiskitError
-from qiskit_aer.noise.device.parameters import gate_error_values
 from torchpack.utils.config import Config
 from torchpack.utils.logging import logger
+
+_USE_QISKIT_RUNTIME = os.getenv("TORCHQUANTUM_USE_QISKIT", "0") == "1"
+
+if _USE_QISKIT_RUNTIME:
+    from qiskit_ibm_runtime import QiskitRuntimeService  # type: ignore
+    from qiskit.exceptions import QiskitError  # type: ignore
+    from qiskit_aer.noise.device.parameters import gate_error_values  # type: ignore
+else:
+    class QiskitError(RuntimeError):
+        """Fallback error used when Qiskit is unavailable."""
+
+
+    class QiskitRuntimeService:  # type: ignore[override]
+        """Stub that matches the real API but always errors."""
+
+        def __init__(self, *args, **kwargs):
+            raise ImportError("Qiskit runtime is disabled in the vendored build")
+
+
+    def gate_error_values(*args, **kwargs):  # type: ignore[override]
+        raise ImportError("Qiskit Aer noise models are unavailable in this build")
 
 import torchquantum as tq
 from torchquantum.macro import C_DTYPE

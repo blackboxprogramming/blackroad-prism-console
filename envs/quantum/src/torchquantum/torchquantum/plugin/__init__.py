@@ -22,4 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from .qiskit import *
+import os
+
+if os.getenv("TORCHQUANTUM_USE_QISKIT", "0") == "1":
+    from .qiskit import *  # type: ignore
+else:
+    QISKIT_INCOMPATIBLE_FUNC_NAMES = set()
+
+    __all__ = [
+        "QISKIT_INCOMPATIBLE_FUNC_NAMES",
+    ]
