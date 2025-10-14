@@ -1,0 +1,14 @@
+name: Cost Monthly (Std Roll → Variance → GL Export)
+on:
+  schedule: [{ cron: "45 9 1 * *" }]
+  workflow_dispatch:
+jobs:
+  cost:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/cost/roll_standard.ts
+      - run: node scripts/cost/variance.ts
+      - run: node scripts/cost/export_gl.ts

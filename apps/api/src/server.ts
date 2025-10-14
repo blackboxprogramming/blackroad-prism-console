@@ -180,6 +180,13 @@ import clmEs from './routes/clm/esign.js';
 import clmAp from './routes/clm/approvals.js';
 import clmOb from './routes/clm/oblig.js';
 import clmRepo from './routes/clm/repo.js';
+import costItems from './routes/cost/items.js';
+import costRoll from './routes/cost/rollup.js';
+import invTxn from './routes/inv/txn.js';
+import costMO from './routes/cost/mo.js';
+import costVar from './routes/cost/variance.js';
+import invCount from './routes/inv/count.js';
+import costGL from './routes/cost/gl.js';
 
 dotenv.config();
 
@@ -307,6 +314,8 @@ app.use('/api/admin/webhooks', adminGuard, adminWebhooks);
 app.use('/api/partner', apiKeyAuth(), rateLimit(), deliver);
 app.use('/api/fac', facLS, facBK, facVB, facAM, facEHS);
 app.use('/api/clm', clmT, clmC, clmR, clmCt, clmEs, clmAp, clmOb, clmRepo);
+app.use('/api/cost', costItems, costRoll, costMO, costVar, costGL);
+app.use('/api/inv', invTxn, invCount);
 
 const port = process.env.PORT || 4000;
 
