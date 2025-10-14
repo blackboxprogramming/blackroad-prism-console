@@ -66,3 +66,11 @@ Red cards link straight to the exact Grafana panel and findings list.
 If a link feels off, ping here and we’ll fix the mapping JSON.
 
 Want me to wire PD “Create Incident” directly from a red card (one click opens a templated incident)?
+## #security — Monitoring stack go-live
+
+Monitoring stack added:
+- CloudWatch dashboard: ALB 5xx + WAF blocks
+- Alarms: >20 5xx in 5m, >50 blocked in 5m
+- Slack alerts via Chatbot to this channel
+
+Next: tune thresholds after baseline week.
