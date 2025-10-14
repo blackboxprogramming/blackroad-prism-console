@@ -9,19 +9,28 @@
     "ghcr.io/devcontainers/features/python:1": {},
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/node:1": { "version": "lts" },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/node:1": { "version": "20" },
     "ghcr.io/devcontainers/features/python:1": { "version": "3.11" },
+    "ghcr.io/devcontainers/features/postgres:1": {
+      "version": "16",
+      "password": "postgres",
+      "db": "appdb",
+      "user": "appuser"
+    },
+    "ghcr.io/devcontainers/features/redis:1": { "version": "7" },
     "ghcr.io/devcontainers/features/common-utils:2": {},
     "ghcr.io/devcontainers/features/pnpm:2": {}
   },
   "customizations": {
     "vscode": {
       "extensions": [
+        "ms-azuretools.vscode-docker",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-vscode.vscode-typescript-next",
-        "esbenp.prettier-vscode",
-        "ms-azuretools.vscode-docker",
         "github.vscode-pull-request-github"
       ],
       "settings": {
@@ -31,8 +40,13 @@
       }
     }
   },
-  "postCreateCommand": "python -m pip install -U pip && (pip install -r requirements.txt || true) && corepack enable pnpm && (pnpm install --frozen-lockfile || pnpm install || true) && (npm i || true)",
-  "forwardPorts": [3000, 4000, 5173, 8000],
+  "remoteEnv": {
+    "DATABASE_URL": "postgresql://appuser:postgres@localhost:5432/appdb",
+    "REDIS_URL": "redis://localhost:6379"
+  },
+  "postCreateCommand": "python -m pip install -U pip && (pip install -r requirements.txt || true) && npm i -g pnpm && (pnpm i --frozen-lockfile || npm ci || true)",
+  "updateContentCommand": "echo '✅ Dev container ready'",
+  "forwardPorts": [3000, 4000, 5173, 8000, 5432, 6379],
   "remoteUser": "vscode",
   "updateRemoteUserUID": true,
   "mounts": [
