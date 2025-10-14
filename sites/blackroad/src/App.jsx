@@ -73,6 +73,7 @@ const NAV_LINKS = [
   { path: "backroad", label: "Backroad" },
   { path: "agents", label: "Agents" },
   { path: "subscribe", label: "Subscribe" },
+  { path: "creator-lightpath", label: "Creator lightpath" },
   { path: "lucidia", label: "Lucidia" },
   {
     path: "math",
@@ -102,6 +103,7 @@ const LEGACY_ROUTES = [
   { path: "backroad", element: <Backroad /> },
   { path: "agents", element: <Agents /> },
   { path: "subscribe", element: <Subscribe /> },
+  { path: "creator-lightpath", element: <CreatorLightpath /> },
   { path: "lucidia", element: <Lucidia /> },
   { path: "math", element: <InfinityMath /> },
   { path: "ot", element: <OptimalTransportLab /> },
@@ -141,6 +143,7 @@ const legacyRoutes = [
   { path: "backroad", label: "Backroad", element: <Backroad /> },
   { path: "agents", label: "Agents", element: <Agents /> },
   { path: "subscribe", label: "Subscribe", element: <Subscribe /> },
+  { path: "creator-lightpath", label: "Creator lightpath", element: <CreatorLightpath /> },
   { path: "lucidia", label: "Lucidia", element: <Lucidia /> },
   { path: "math", label: "∞ Infinity Math", accent: true, element: <InfinityMath /> },
   { path: "ising", label: "Ising 2D Lab", element: <Ising2DLab /> },
@@ -172,6 +175,7 @@ const legacyRoutes = [
 ];
 import StableFluidsLab from "./pages/StableFluidsLab.jsx";
 import Subscribe from "./pages/Subscribe.jsx";
+import CreatorLightpath from "./pages/CreatorLightpath.jsx";
 import Terminal from "./pages/Terminal.jsx";
 import VorticityStreamLab from "./pages/VorticityStreamLab.jsx";
 import WaveletLab from "./pages/WaveletLab.jsx";
@@ -185,6 +189,7 @@ const PRIMARY_ROUTES = [
   { to: "/backroad", label: "Backroad", element: Backroad },
   { to: "/agents", label: "Agents", element: Agents },
   { to: "/subscribe", label: "Subscribe", element: Subscribe },
+  { to: "/creator-lightpath", label: "Creator lightpath", element: CreatorLightpath },
   { to: "/lucidia", label: "Lucidia", element: Lucidia },
   { to: "/math", label: "Infinity Math", element: InfinityMath, gradient: true },
 ];
