@@ -10,10 +10,13 @@
     "dev": "nodemon srv/blackroad-api/server_full.js",
     "seed": "node scripts/seed_admin.js",
     "prepare": "husky",
-    "lint": "eslint --config .eslintrc.cjs srv/blackroad-api/server_full.js tests/api_health.test.js tests/git_api.test.js",
-    "format": "prettier . --write",
+    "lint": "npm run lint:repo",
+    "lint:api": "eslint tests/api_health.test.js tests/git_api.test.js",
+    "lint:repo": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
+    "format": "prettier -w .",
     "format:check": "prettier package.json tests/api_health.test.js srv/lucidia-llm/test_app.py var/www/blackroad/.prettierrc.json .prettierrc.json RUNME.sh Makefile .github/workflows/ci.yml CLEANUP_PLAN.md CLEANUP_DECISIONS.md CLEANUP_RESULTS.md ROLLBACK.md CHANGELOG.md --check --ignore-unknown",
-    "test": "jest tests/api_health.test.js",
+    "test": "node tests/smoke.test.mjs && jest",
+    "test:api": "jest tests/api_health.test.js",
     "guard:dev-mode": "node scripts/security/dev_mode_guard.js",
     "debug:scan-logs": "node scripts/guardrails/log_scan_stub.js",
     "typecheck": "echo 'no typecheck'",
@@ -21,9 +24,6 @@
     "next:start": "next start",
     "next:dev": "next dev",
     "next:build": "next build && node scripts/build-codex-index.js",
-    "lint": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
-    "format": "prettier -w .",
-    "test": "node tests/smoke.test.mjs && jest",
     "dev:site": "npm --prefix sites/blackroad run dev",
     "build:site": "npm --prefix sites/blackroad run build",
     "frontend:dev": "npm run dev:site",
@@ -54,35 +54,31 @@
     "next": "^14.2.5",
     "pino": "^9.4.0",
     "pino-http": "^10.3.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "socket.io": "^4.7.5",
     "sqlite3": "^5.1.7",
     "stripe": "^12.18.0",
     "systeminformation": "^5.25.11",
     "uuid": "^9.0.1",
-    "better-sqlite3": "^9.4.3",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "stripe": "^12.18.0",
-    "ethers": "^6.10.0",
     "winston": "^3.17.0",
     "yaml": "^2.3.4"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
-    "eslint": "^9.12.0",
-    "husky": "^9.0.10",
-    "lint-staged": "^16.1.5",
-    "pino-pretty": "^11.2.2",
     "@types/node": "^20.14.9",
     "@types/node-fetch": "^2.6.11",
     "@types/react": "^18.2.64",
-    "typescript": "^5.6.3"
-    "lint-staged": "^15.2.7"
+    "cross-env": "^7.0.3",
+    "eslint": "^9.12.0",
+    "husky": "^9.0.10",
     "jest": "^29.7.0",
-    "lint-staged": "^15.2.7",
+    "@eslint/js": "^9.14.0",
+    "lint-staged": "^16.1.5",
     "nodemon": "^3.0.2",
+    "pino-pretty": "^11.2.2",
     "prettier": "^3.3.3",
-    "supertest": "^6.3.4"
+    "supertest": "^6.3.4",
+    "typescript": "^5.6.3"
   },
   "lint-staged": {
     "*.{js,jsx,mjs,cjs,ts,tsx}": [
@@ -90,7 +86,5 @@
       "prettier -w"
     ],
     "*": "prettier -w --ignore-unknown"
-    "nodemon": "^3.0.2",
-    "jest": "^29.7.0"
   }
 }
