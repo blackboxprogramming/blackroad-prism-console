@@ -220,6 +220,11 @@ import { meter } from './middleware/meter.js';
 import * as billing from './routes/billing/index.js';
 import licenses from './routes/admin/licenses.js';
 import { requireEntitlement } from './lib/entitlements.js';
+import dqSchemas from './routes/dq/schemas.js';
+import dqContracts from './routes/dq/contracts.js';
+import dqExpects from './routes/dq/expectations.js';
+import dqRun from './routes/dq/run.js';
+import dqSla from './routes/dq/sla.js';
 
 dotenv.config();
 
@@ -372,6 +377,7 @@ app.use('/api/admin/licenses', licenses);
 
 // Example entitlement gate for reco advanced
 app.get('/api/feature/reco-advanced', requireEntitlement('reco_advanced'), (_req,res)=> res.json({ ok:true }));
+app.use('/api/dq', dqSchemas, dqContracts, dqExpects, dqRun, dqSla);
 
 const port = process.env.PORT || 4000;
 
