@@ -41,6 +41,7 @@ change_management:
   runbooks:
     - README-DEPLOY.md
     - README-OPS.md
+    - runbooks/examples/release_rollback_forward.yaml
 observability:
   health_checks:
     - name: frontend

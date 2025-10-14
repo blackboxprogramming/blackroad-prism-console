@@ -21,6 +21,10 @@ in sync:
 - `change_management` — approvals or runbooks that must be followed.
 - `observability` — scripts or commands teams use to verify the environment.
 
+For deployment reversals or expedited fixes, the environments reference the
+`runbooks/examples/release_rollback_forward.yaml` playbook that pairs with the
+deployment and ops guides.
+
 Update the manifest whenever the environment changes (new workflow, Terraform
 module, domain, or approval requirement). These files should stay aligned with
 `br-infra-iac`, `.github/workflows/*`, and the documented runbooks.
