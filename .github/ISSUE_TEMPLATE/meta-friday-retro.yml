@@ -1,0 +1,45 @@
+name: "meta: friday retro"
+description: "Automate Friday retro issue creation with checklist and Asana sync."
+title: "meta: friday retro"
+labels:
+  - "prio/normal"
+  - "type/feature"
+assignees:
+  - "Operations"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Overview
+        Automate the weekly retro ritual so the team reflects every Friday at 16:00.
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Problem statement, solution outline, and any supporting notes.
+      value: |
+        **Problem**
+        Team has no weekly reflection ritual.
+
+        **Solution**
+        Automation: every Friday @ 16:00 create “Friday Retro” issue with checklist
+        • What worked?
+        • What drained time?
+        • What to cut?
+
+        **Notes**
+        • Tie to Asana → auto-move to Done after close.
+      render: markdown
+  - type: checkboxes
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      options:
+        - label: "Scheduled automation opens a Friday Retro issue each week at 16:00"
+        - label: "Issue checklist includes reflection prompts"
+        - label: "Asana task auto-moves to Done when issue closes"
+  - type: textarea
+    id: updates
+    attributes:
+      label: Status Updates
+      description: Capture workflow wiring details, approvals, and follow-ups.
