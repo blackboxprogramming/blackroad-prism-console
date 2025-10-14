@@ -1,125 +1,3 @@
-import { useEffect, useState } from "react";
-import Window from "../desktop/Window.jsx";
-import ApiAgent from "../desktop/apps/ApiAgent.jsx";
-import LlmAgent from "../desktop/apps/LlmAgent.jsx";
-import MathAgent from "../desktop/apps/MathAgent.jsx";
-import EchoAgent from "../desktop/apps/EchoAgent.jsx";
-import GuardianAgent from "../desktop/apps/GuardianAgent.jsx";
-import ExplorerAgent from "../desktop/apps/ExplorerAgent.jsx";
-import createId from "../desktop/createId.js";
-
-const APPS = {
-  api: { title: "API Agent", icon: "API", component: ApiAgent, size: { width: 420, height: 360 } },
-  llm: { title: "LLM Agent", icon: "LLM", component: LlmAgent, size: { width: 460, height: 440 } },
-  math: { title: "Math Agent", icon: "MATH", component: MathAgent, size: { width: 520, height: 480 } },
-  echo: { title: "Echo Agent", icon: "ECHO", component: EchoAgent, size: { width: 360, height: 320 } },
-  guardian: { title: "Guardian Agent", icon: "GUARD", component: GuardianAgent, size: { width: 380, height: 340 } },
-  explorer: { title: "Prism Explorer", icon: "FS", component: ExplorerAgent, size: { width: 460, height: 360 } },
-};
-
-function defaultWin(key) {
-  const layout = APPS[key] || {};
-  const size = layout.size || {};
-
-function defaultWindow(key) {
-  const layout = APPS[key];
-  const size = layout?.size || {};
-  return {
-    id: createId(),
-    app: key,
-    title: layout.title || key,
-    x: 80,
-    y: 80,
-    w: size.width || 400,
-    h: size.height || 320,
-    minimized: false,
-    maximized: false,
-  };
-}
-
-function hydrateWindow(win) {
-  if (!win || !win.app) {
-    return null;
-  }
-
-  const layout = APPS[win.app] || {};
-  const size = layout.size || {};
-
-  return {
-    ...defaultWin(win.app),
-    ...win,
-    title: win.title || layout.title || win.app,
-    w: win.w || size.width || 400,
-    h: win.h || size.height || 320,
-  };
-}
-
-function loadLayout() {
-  if (typeof indexedDB === "undefined") {
-    return Promise.resolve([]);
-  }
-
-  return new Promise((resolve) => {
-    const request = indexedDB.open("prism-desktop", 1);
-
-    request.onupgradeneeded = () => {
-      request.result.createObjectStore("layout");
-    };
-
-    if (!globalThis.indexedDB) {
-      resolve([]);
-      return;
-    }
-    const request = indexedDB.open("prism-desktop", 1);
-    request.onupgradeneeded = () => {
-      request.result.createObjectStore("layout");
-    };
-    request.onerror = () => resolve([]);
-    request.onsuccess = () => {
-      const db = request.result;
-      const tx = db.transaction("layout", "readonly");
-      const store = tx.objectStore("layout");
-      const getReq = store.get("windows");
-
-      getReq.onsuccess = () => {
-        const raw = Array.isArray(getReq.result) ? getReq.result : [];
-        resolve(raw.map(hydrateWindow).filter(Boolean));
-      };
-
-      getReq.onerror = () => resolve([]);
-    };
-
-    request.onerror = () => resolve([]);
-      getReq.onsuccess = () => resolve(Array.isArray(getReq.result) ? getReq.result : []);
-      getReq.onerror = () => resolve([]);
-    };
-  });
-}
-
-function saveLayout(windows) {
-  if (typeof indexedDB === "undefined") {
-    return;
-  }
-
-  const request = indexedDB.open("prism-desktop", 1);
-
-  request.onupgradeneeded = () => {
-    request.result.createObjectStore("layout");
-  };
-
-  if (!globalThis.indexedDB) {
-    return;
-  }
-  const request = indexedDB.open("prism-desktop", 1);
-  request.onupgradeneeded = () => {
-    request.result.createObjectStore("layout");
-  };
-  request.onsuccess = () => {
-    const db = request.result;
-    const tx = db.transaction("layout", "readwrite");
-    tx.objectStore("layout").put(windows, "windows");
-  };
-}
 const PATHWAYS = [
   {
     title: "Create",
@@ -153,6 +31,64 @@ const PATHWAYS = [
       "RoadCoin rewards for teaching, mentoring, and publishing research",
     ],
     cta: { label: "Enter the Academy", href: "/status" },
+  },
+];
+
+const AGENT_FLEET = [
+  {
+    name: "API Agent",
+    role: "Operations autopilot",
+    summary:
+      "Keeps production services healthy with intelligent monitors, synthetic probes, and auto-remediation playbooks.",
+    capabilities: [
+      "Observability desk with latency, error rate, and load clustering",
+      "Contextual runbooks suggested with every anomaly",
+      "PagerDuty, Slack, and email hooks for zero-friction escalation",
+    ],
+  },
+  {
+    name: "LLM Agent",
+    role: "Engineering copilot",
+    summary:
+      "Turns conversations into shipping code. Understands your repos, tests, and deployment rituals across every surface.",
+    capabilities: [
+      "Pair-programming canvas with inline previews and diff aware planning",
+      "Multi-branch orchestration with guardrails and automated reviews",
+      "Bridges Lucidia IDE, GitHub, and deployment pipelines in one loop",
+    ],
+  },
+  {
+    name: "Math Agent",
+    role: "Modeling + analytics",
+    summary:
+      "Explains complex systems in plain language while generating proofs, simulations, and parameter sweeps for your teams.",
+    capabilities: [
+      "Symbolic + numeric solver that collaborates with the visual labs",
+      "Scenario generator for finance, physics, and growth experiments",
+      "Exports structured notebooks straight into RoadView stories",
+    ],
+  },
+  {
+    name: "Guardian Agent",
+    role: "Compliance + trust",
+    summary:
+      "Governance guardian that watches prompts, assets, and payments so the ecosystem stays safe and accountable.",
+    capabilities: [
+      "Policy engine with explainable decisions and override workflows",
+      "Brand safety scanning for uploads, ad inventory, and marketplace listings",
+      "RoadCoin KYC, royalty splits, and contract management baked in",
+    ],
+  },
+  {
+    name: "Explorer Agent",
+    role: "Knowledge navigation",
+    summary:
+      "Prism Explorer maps your research, briefs, and production assets so every agent knows the full story before acting.",
+    capabilities: [
+      "Vectorized knowledge graph that merges docs, data, and experiments",
+      "Temporal memory so decisions reference past launches and learnings",
+      "Instant publishing to docs, blog, and internal portals from one view",
+    ],
   },
 ];
 
@@ -206,6 +142,49 @@ const DEEP_DIVES = [
   },
 ];
 
+const STACK_BLUEPRINT = [
+  {
+    title: "Conversation Core",
+    description:
+      "Intent router, long-term memory, and multi-turn orchestration that lets every agent understand your goals instantly.",
+    bullets: [
+      "Real-time voice, chat, and canvas interactions",
+      "Semantic session memory with privacy controls",
+      "Policy aware prompt compiler for safe execution",
+    ],
+  },
+  {
+    title: "Agent Mesh",
+    description:
+      "Dynamic swarms route tasks between creative, technical, and business specialists while sharing a single workspace.",
+    bullets: [
+      "Composable agent teams for productions, launches, and ops",
+      "Shared state transitions so hand-offs never lose context",
+      "Observability hooks for humans to intervene or learn",
+    ],
+  },
+  {
+    title: "Unified Data Layer",
+    description:
+      "Secure foundation for knowledge, assets, and telemetry powering creation, monetization, and learning loops.",
+    bullets: [
+      "RoadGraph unifies docs, media, code, and structured data",
+      "Fine-grained permissions for partners, cohorts, and agents",
+      "Exports to warehouse, notebooks, or partner APIs with one click",
+    ],
+  },
+  {
+    title: "RoadCoin Commerce",
+    description:
+      "Programmable economy that rewards creators instantly while keeping licensing, payouts, and compliance transparent.",
+    bullets: [
+      "Fiat and token rails with split management",
+      "Marketplace smart contracts with DRM hooks",
+      "Revenue analytics tied to campaigns and cohorts",
+    ],
+  },
+];
+
 const ECONOMY_FLOWS = [
   "Publish in RoadView and launch optional creator-run ad inventory.",
   "Offer assets, code, and templates in the marketplace with programmable royalties.",
@@ -218,11 +197,7 @@ const PRICING = [
     name: "Free",
     price: "$0",
     description: "Prototype with daily limits and access to core agents.",
-    perks: [
-      "Conversational onboarding",
-      "RoadView basic export",
-      "Community access",
-    ],
+    perks: ["Conversational onboarding", "RoadView basic export", "Community access"],
   },
   {
     name: "Creator",
@@ -305,26 +280,9 @@ const TESTIMONIALS = [
   },
 ];
 
-function renderApp(key) {
-  const entry = APPS[key];
-  if (!entry || !entry.component) {
-    return null;
-  }
-
-  const Component = entry.component;
-  return <Component />;
-}
-
-function renderApp(key) {
-  const entry = APPS[key];
-  if (!entry || !entry.component) {
-    return null;
-  }
-  const Component = entry.component;
-  return <Component />;
-}
-
 export default function Desktop() {
+  const currentYear = new Date().getFullYear();
+
   return (
     <div className="min-h-screen bg-[#05070F] text-white">
       <header className="relative overflow-hidden">
@@ -339,12 +297,11 @@ export default function Desktop() {
               BLACKROAD MASTER VISION
             </p>
             <h1 className="text-4xl font-extrabold leading-tight md:text-6xl">
-              Stop learning tools.<br className="hidden md:block" /> Start creating.
+              Stop learning tools.
+              <br className="hidden md:block" /> Start creating.
             </h1>
             <p className="max-w-xl text-lg text-slate-300">
-              Everything inside BlackRoad flows from one conversation. Ideate, prototype, launch,
-              and monetize without hopping between 14 different platforms. Cut setup time from 630
-              hours to under 30 minutes.
+              Everything inside BlackRoad flows from one conversation. Ideate, prototype, launch, and monetize without hopping between 14 different platforms. Cut setup time from 630 hours to under 30 minutes.
             </p>
             <div className="flex flex-wrap gap-3">
               <a className="btn" href="/chat">
@@ -382,9 +339,7 @@ export default function Desktop() {
               </div>
               <div className="rounded-xl border border-white/10 bg-black/40 p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-400">Primary principle</p>
-                <p className="mt-2 text-base font-semibold text-white">
-                  Natural language is the operating system.
-                </p>
+                <p className="mt-2 text-base font-semibold text-white">Natural language is the operating system.</p>
               </div>
             </div>
           </div>
@@ -424,13 +379,43 @@ export default function Desktop() {
 
         <section className="bg-[#05070F] py-20">
           <div className="mx-auto max-w-6xl px-6">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Agent Control Room</p>
+              <h2 className="mt-3 text-3xl font-bold">Specialized copilots that ship with the operating system</h2>
+              <p className="mt-4 max-w-2xl text-slate-300">
+                Each agent inherits your voice, goals, and guardrails. Mix and match them into swarms or deploy them individually to accelerate every workflow across creation, operations, and growth.
+              </p>
+            </div>
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
+              {AGENT_FLEET.map((agent) => (
+                <article key={agent.name} className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                  <header className="space-y-1">
+                    <p className="text-xs uppercase tracking-[0.3em] text-[#FF4FD8]">{agent.role}</p>
+                    <h3 className="text-2xl font-semibold">{agent.name}</h3>
+                    <p className="text-sm text-slate-300">{agent.summary}</p>
+                  </header>
+                  <ul className="mt-6 grid gap-2 text-sm text-slate-200">
+                    {agent.capabilities.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <span className="mt-1 h-2 w-2 rounded-full bg-[#FF4FD8]" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-[#05070F] py-20">
+          <div className="mx-auto max-w-6xl px-6">
             <div className="grid gap-8 md:grid-cols-[1.1fr_1fr] md:items-center">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Empathy Grid</p>
                 <h2 className="mt-3 text-3xl font-bold">Creators shouldn’t burn out just to ship</h2>
                 <p className="mt-4 max-w-xl text-slate-300">
-                  We mapped every bottleneck in the creator lifecycle. BlackRoad responds with guided
-                  AI agents, unified workspaces, and a native economy so momentum never stalls.
+                  We mapped every bottleneck in the creator lifecycle. BlackRoad responds with guided AI agents, unified workspaces, and a native economy so momentum never stalls.
                 </p>
               </div>
               <div className="grid gap-4 text-sm">
@@ -446,93 +431,6 @@ export default function Desktop() {
           </div>
         </section>
 
-  const open = (key) => {
-    setWins((windows) => {
-      const existing = windows.find((win) => win.app === key);
-      if (existing) {
-        const restored = { ...existing, minimized: false };
-        return [...windows.filter((win) => win.app !== key), restored];
-      }
-
-      const next = defaultWin(key);
-      return [...windows, next];
-    });
-  };
-
-  const update = (id, patch) =>
-    setWins((windows) => windows.map((win) => (win.id === id ? { ...win, ...patch } : win)));
-
-  return (
-    <div
-      className="w-screen h-screen relative overflow-hidden"
-  const [windows, setWindows] = useState([]);
-
-  useEffect(() => {
-    let ignore = false;
-    loadLayout().then((data) => {
-      if (!ignore) {
-        setWindows(data.map((win) => ({ ...defaultWindow(win.app), ...win, id: win.id || createId() })));
-      }
-    });
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    saveLayout(windows);
-  }, [windows]);
-
-  const openWindow = (key) => {
-    if (!APPS[key]) return;
-    setWindows((prev) => {
-      const existing = prev.find((win) => win.app === key);
-      if (existing) {
-        return prev.map((win) => (win.app === key ? { ...win, minimized: false } : win));
-      }
-      return [...prev, defaultWindow(key)];
-    });
-  };
-
-  const updateWindow = (id, patch) => {
-    setWindows((prev) => prev.map((win) => (win.id === id ? { ...win, ...patch } : win)));
-  };
-
-  return (
-    <div
-      className="relative h-screen w-screen overflow-hidden"
-      style={{ background: "linear-gradient(135deg,#FF4FD8,#0096FF,#FDBA2D)" }}
-    >
-      {windows.map((win) => (
-        <Window
-          key={win.id}
-          win={win}
-          onClose={() => setWins((windows) => windows.filter((w) => w.id !== win.id))}
-          onToggleMin={() => update(win.id, { minimized: !win.minimized })}
-          onToggleMax={() => update(win.id, { maximized: !win.maximized })}
-          onUpdate={(data) => update(win.id, data)}
-          onClose={() => setWindows((prev) => prev.filter((item) => item.id !== win.id))}
-          onToggleMin={() => updateWindow(win.id, { minimized: !win.minimized })}
-          onToggleMax={() => updateWindow(win.id, { maximized: !win.maximized })}
-          onUpdate={(patch) => updateWindow(win.id, patch)}
-        >
-          {renderApp(win.app)}
-        </Window>
-      ))}
-
-      <div className="absolute inset-x-0 bottom-0 flex items-center gap-3 bg-black/60 px-3 py-2 text-white">
-        {Object.entries(APPS).map(([key, app]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => openWindow(key)}
-            className="rounded bg-white/15 px-3 py-1 text-sm font-semibold tracking-wide hover:bg-white/25"
-            title={app.title}
-          >
-            {app.icon}
-          </button>
-        ))}
-      </div>
         <section className="border-y border-white/5 bg-[#070B18]/90 py-20">
           <div className="mx-auto max-w-6xl px-6">
             <div className="max-w-3xl">
@@ -547,11 +445,37 @@ export default function Desktop() {
                 >
                   <header className="flex items-baseline justify-between gap-4">
                     <h3 className="text-2xl font-semibold">{suite.title}</h3>
-                    <span className="text-xs font-semibold uppercase tracking-wide text-[#FDBA2D]">
-                      {suite.stat}
-                    </span>
+                    <span className="text-xs font-semibold uppercase tracking-wide text-[#FDBA2D]">{suite.stat}</span>
                   </header>
                   <p className="mt-3 text-sm text-slate-200">{suite.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-[#05070F] py-20">
+          <div className="mx-auto max-w-6xl px-6">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Architecture</p>
+              <h2 className="mt-3 text-3xl font-bold">The BlackRoad stack is opinionated by design</h2>
+              <p className="mt-4 max-w-2xl text-slate-300">
+                Every layer is tuned for human + AI co-creation. The result is a studio-grade operating system that you can run from a single conversation, whether you are shipping a music video or scaling a company.
+              </p>
+            </div>
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
+              {STACK_BLUEPRINT.map((item) => (
+                <article key={item.title} className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                  <h3 className="text-2xl font-semibold">{item.title}</h3>
+                  <p className="mt-3 text-sm text-slate-300">{item.description}</p>
+                  <ul className="mt-6 grid gap-2 text-sm text-slate-200">
+                    {item.bullets.map((bullet) => (
+                      <li key={bullet} className="flex items-start gap-3">
+                        <span className="mt-1 h-2 w-2 rounded-full bg-[#0096FF]" />
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </article>
               ))}
             </div>
@@ -565,9 +489,7 @@ export default function Desktop() {
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Economy</p>
                 <h2 className="mt-3 text-3xl font-bold">RoadCoin keeps value circulating with creators</h2>
                 <p className="mt-4 max-w-xl text-slate-300">
-                  Four native monetization streams compound into sustainable revenue. Instant
-                  settlement, transparent splits, and programmable royalties ensure you own the
-                  upside.
+                  Four native monetization streams compound into sustainable revenue. Instant settlement, transparent splits, and programmable royalties ensure you own the upside.
                 </p>
                 <ul className="mt-6 grid gap-3 text-sm text-slate-200">
                   {ECONOMY_FLOWS.map((step) => (
@@ -580,9 +502,7 @@ export default function Desktop() {
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-slate-200">
                 <h3 className="text-lg font-semibold text-white">Revenue Simulation</h3>
-                <p className="mt-2 text-slate-300">
-                  A single coffee-brewing tutorial with 10K monthly viewers yields $880:
-                </p>
+                <p className="mt-2 text-slate-300">A single coffee-brewing tutorial with 10K monthly viewers yields $880:</p>
                 <ul className="mt-4 space-y-2">
                   <li className="flex justify-between">
                     <span>Ad inventory (70%)</span>
@@ -598,12 +518,10 @@ export default function Desktop() {
                   </li>
                   <li className="flex justify-between">
                     <span>Course/API access</span>
-                    <span className="font-semibold text-white">$500</span>
+                    <span className="font-semibold text-white">$200</span>
                   </li>
                 </ul>
-                <p className="mt-4 text-xs uppercase tracking-wide text-slate-400">
-                  2.5× revenue retention vs. legacy platforms
-                </p>
+                <p className="mt-4 text-xs uppercase tracking-wide text-slate-400">2.5× revenue retention vs. legacy platforms</p>
               </div>
             </div>
           </div>
@@ -649,9 +567,7 @@ export default function Desktop() {
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Knowledge</p>
                 <h2 className="mt-3 text-3xl font-bold">BlackRoad Academy + Research Hub</h2>
                 <p className="mt-4 max-w-xl text-slate-300">
-                  5,000+ hours of guided curricula feed directly into hands-on projects. The research
-                  repository powers 30% of our platform intelligence — every whitepaper, dataset, and
-                  model becomes fuel for your agents.
+                  5,000+ hours of guided curricula feed directly into hands-on projects. The research repository powers 30% of our platform intelligence — every whitepaper, dataset, and model becomes fuel for your agents.
                 </p>
                 <ul className="mt-6 grid gap-3 text-sm text-slate-200">
                   <li>Interactive coursework with auto-graded labs and peer reviews.</li>
@@ -667,9 +583,7 @@ export default function Desktop() {
   /Creator-Economy → Monetization strategies, retention data
   /Design → Cognitive load studies powering predictive UI`}
                 </pre>
-                <p className="mt-3 text-xs uppercase tracking-wide text-slate-400">
-                  Theoretical rigor meets practical application.
-                </p>
+                <p className="mt-3 text-xs uppercase tracking-wide text-slate-400">Theoretical rigor meets practical application.</p>
               </div>
             </div>
           </div>
@@ -692,9 +606,7 @@ export default function Desktop() {
                     <p className="text-lg font-semibold text-white">{phase.phase}</p>
                   </div>
                   <p className="max-w-lg text-slate-300">{phase.focus}</p>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#FDBA2D]">
-                    {phase.kpi}
-                  </p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#FDBA2D]">{phase.kpi}</p>
                 </div>
               ))}
             </div>
@@ -711,9 +623,7 @@ export default function Desktop() {
               {TESTIMONIALS.map((item) => (
                 <blockquote key={item.name} className="rounded-2xl border border-white/10 bg-white/5 p-6">
                   <p className="text-base text-slate-100">{item.quote}</p>
-                  <footer className="mt-4 text-xs uppercase tracking-wide text-slate-400">
-                    {item.name}
-                  </footer>
+                  <footer className="mt-4 text-xs uppercase tracking-wide text-slate-400">{item.name}</footer>
                 </blockquote>
               ))}
             </div>
@@ -723,13 +633,9 @@ export default function Desktop() {
         <section className="border-y border-white/5 bg-[#070B18]/95 py-20">
           <div className="mx-auto max-w-4xl px-6 text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Next Steps</p>
-            <h2 className="mt-3 text-4xl font-bold">
-              Ready to help us build the creator operating system?
-            </h2>
+            <h2 className="mt-3 text-4xl font-bold">Ready to help us build the creator operating system?</h2>
             <p className="mx-auto mt-4 max-w-2xl text-slate-300">
-              Join the founding cohort, contribute research, or co-create the initial product suite.
-              BlackRoad is the master vision that unifies creation, monetization, and learning for the
-              next generation of builders.
+              Join the founding cohort, contribute research, or co-create the initial product suite. BlackRoad is the master vision that unifies creation, monetization, and learning for the next generation of builders.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <a className="btn" href="mailto:hello@blackroad.io">
@@ -763,7 +669,7 @@ export default function Desktop() {
               Support
             </a>
           </div>
-          <p className="text-xs text-slate-500">© {new Date().getFullYear()} BlackRoad Labs. All rights reserved.</p>
+          <p className="text-xs text-slate-500">© {currentYear} BlackRoad Labs. All rights reserved.</p>
         </div>
       </footer>
     </div>
