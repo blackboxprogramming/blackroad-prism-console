@@ -160,6 +160,13 @@ import arCredit from './routes/ar/credit.js';
 import arDunning from './routes/ar/dunning.js';
 import arDispute from './routes/ar/dispute.js';
 import arLockbox from './routes/ar/lockbox.js';
+import { apiKeyAuth } from './middleware/api_key.js';
+import { rateLimit } from './middleware/rate_limit.js';
+import { cookieParser, requireSession } from './middleware/session.js';
+import adminKeys from './routes/admin/keys.js';
+import adminWebhooks from './routes/admin/webhooks.js';
+import deliver from './routes/webhooks/deliver.js';
+import ping from './routes/public/ping.js';
 
 dotenv.config();
 
@@ -198,6 +205,7 @@ app.use((req: any, _res, next) => {
 });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(canaryMiddleware(Number(process.env.CANARY_PERCENT || 10)));
 app.use(regionMiddleware());
 app.use(localeMiddleware());
@@ -274,6 +282,16 @@ app.use('/api/portal', portalAnn, portalCh, portalPrefs, portalBan, portalI18n, 
 app.use('/api/ats', atsJC, atsAPP, atsINT, atsOF, atsOB, atsAR);
 app.use('/api/bcdr', bcdrPolicy, bcdrBackups, bcdrRestore, bcdrFailover, bcdrPlans, bcdrDrills);
 app.use('/api/ar', arInvoice, arPayment, arCash, arCredit, arDunning, arDispute, arLockbox);
+
+// Public
+app.use('/api/public/ping', ping);
+
+const adminGuard = requireSession();
+app.use('/api/admin/keys', adminGuard, adminKeys);
+app.use('/api/admin/webhooks', adminGuard, adminWebhooks);
+
+// Partner (API key + limit)
+app.use('/api/partner', apiKeyAuth(), rateLimit(), deliver);
 
 const port = process.env.PORT || 4000;
 
