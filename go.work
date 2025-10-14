@@ -1,0 +1,7 @@
+go 1.21
+
+use (
+    ./harness
+    ./cmd/metrics-proxy
+    ./compliance
+)

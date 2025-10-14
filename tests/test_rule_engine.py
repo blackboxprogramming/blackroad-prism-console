@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Mapping
 
 import pytest
 
@@ -90,11 +90,23 @@ def test_rule_definitions(_rule_path: Path, rule: Rule, case) -> None:
     runtime = RuleRuntime()
     result = runtime.apply(rule, event, ctx)
 
-    assert result.triggered is case.want, f"{rule.id}/{case.name} expected {case.want}, got {result.triggered}"
+    expected_outcome = case.want
+    expected_decision = None
+    expected_reason = None
+    if isinstance(expected_outcome, Mapping):
+        expected_decision = expected_outcome.get("decision")
+        expected_reason = expected_outcome.get("reason")
+        triggered_expectation = expected_decision not in (None, "", "allow", "pass", "ok")
+    else:
+        triggered_expectation = bool(expected_outcome)
+
+    assert (
+        result.triggered is triggered_expectation
+    ), f"{rule.id}/{case.name} expected {triggered_expectation}, got {result.triggered}"
 
     if rule.mode is RuleMode.ENFORCE:
-        assert result.blocked == case.want
-        if case.want:
+        assert result.blocked == triggered_expectation
+        if triggered_expectation:
             expected_message = rule.metadata.get("block_message") if isinstance(rule.metadata, dict) else None
             if expected_message:
                 expected_message = expected_message.format(**event)
@@ -105,7 +117,20 @@ def test_rule_definitions(_rule_path: Path, rule: Rule, case) -> None:
     if case.expect_details:
         assert _dict_contains(result.details, case.expect_details)
 
-    if case.want:
+    if isinstance(expected_outcome, Mapping):
+        if expected_decision:
+            assert result.details.get("decision") == expected_decision
+        else:
+            assert result.details.get("decision") in (None, "allow")
+        if expected_reason:
+            assert result.details.get("reason") == expected_reason
+    else:
+        if triggered_expectation:
+            assert result.details.get("decision") not in (None, "allow")
+        else:
+            assert result.details.get("decision") in (None, "allow")
+
+    if triggered_expectation:
         assert result.violation_id
         assert runtime.notifications, "violation should enqueue notification"
     else:
