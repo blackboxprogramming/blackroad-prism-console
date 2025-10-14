@@ -1,0 +1,1 @@
+"""AutoPal FastAPI service package."""
