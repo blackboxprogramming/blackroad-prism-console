@@ -1,0 +1,13 @@
+name: CLM Weekly (Obligations + Renewals)
+on:
+  schedule: [{ cron: "20 7 * * 1" }]
+  workflow_dispatch:
+jobs:
+  clm-weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/clm/obligation_digest.ts
+      - run: node scripts/clm/renewals_report.ts

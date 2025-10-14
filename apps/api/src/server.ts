@@ -172,6 +172,14 @@ import facBK from './routes/fac/bookings.js';
 import facVB from './routes/fac/visitors_badges.js';
 import facAM from './routes/fac/assets_maint.js';
 import facEHS from './routes/fac/ehs.js';
+import clmT from './routes/clm/templates.js';
+import clmC from './routes/clm/clauses.js';
+import clmR from './routes/clm/requests.js';
+import clmCt from './routes/clm/contracts.js';
+import clmEs from './routes/clm/esign.js';
+import clmAp from './routes/clm/approvals.js';
+import clmOb from './routes/clm/oblig.js';
+import clmRepo from './routes/clm/repo.js';
 
 dotenv.config();
 
@@ -298,6 +306,7 @@ app.use('/api/admin/webhooks', adminGuard, adminWebhooks);
 // Partner (API key + limit)
 app.use('/api/partner', apiKeyAuth(), rateLimit(), deliver);
 app.use('/api/fac', facLS, facBK, facVB, facAM, facEHS);
+app.use('/api/clm', clmT, clmC, clmR, clmCt, clmEs, clmAp, clmOb, clmRepo);
 
 const port = process.env.PORT || 4000;
 
