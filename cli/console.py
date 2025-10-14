@@ -523,6 +523,9 @@ def plm_bom_where_used(component: str = typer.Option(..., "--component")):
     rows = plm_bom.where_used(component)
     for item_id, rev in rows:
         typer.echo(f"{item_id}@{rev}")
+    used = plm_bom.where_used(component)
+    for item_id, rev in used:
+        typer.echo(f"{item_id}\t{rev}")
 
 
 @app.command("plm:eco:new")
@@ -563,8 +566,11 @@ def mfg_wc_load(file: Path = typer.Option(..., "--file", exists=True, dir_okay=F
 
 
 @app.command("mfg:routing:load")
-def mfg_routing_load(dir: Path = typer.Option(..., "--dir", exists=True, file_okay=False)):
-    mfg_routing.load_routings(str(dir))
+def mfg_routing_load(
+    dir: Path = typer.Option(..., "--dir", exists=True, file_okay=False),
+    strict: bool = typer.Option(False, "--strict"),
+):
+    mfg_routing.load_routings(str(dir), strict)
     typer.echo("ok")
 
 

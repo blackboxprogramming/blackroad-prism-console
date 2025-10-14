@@ -142,6 +142,15 @@
 ### Bug Fixes
 
 * **saga:** wire demo to core and add mesh stubs ([#1430](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1430)) ([6cad73b](https://github.com/blackboxprogramming/blackroad-prism-console/commit/6cad73be5ec5d5be33e5dbac3a8e5b75ca7045f1))
+## 2025-09-30
+
+### Features
+
+- wire up where-used CLI
+- scaffold Next.js site for Codex prompts with page, component, API, and sitemap
+- add deterministic artifact hashing with optional tag-based release workflow
+- document quickstart commands in README
+- allow optional strict schema validation for routing
 
 ## 1.0.0 (2025-09-12)
 
