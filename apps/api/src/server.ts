@@ -385,6 +385,7 @@ app.use('/api/admin/licenses', licenses);
 app.get('/api/feature/reco-advanced', requireEntitlement('reco_advanced'), (_req,res)=> res.json({ ok:true }));
 app.use('/api/dq', dqSchemas, dqContracts, dqExpects, dqRun, dqSla);
 app.use('/api/exp', expFS, expEX, expEV, expMT, expRG, expAP);
+app.use('/api/admin', adminAccess, adminLic, adminDev, adminVend, adminPO);
 
 const port = process.env.PORT || 4000;
 

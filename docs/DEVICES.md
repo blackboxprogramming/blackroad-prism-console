@@ -58,3 +58,5 @@ After provisioning:
   systemctl --user status pi-led.service
   ```
 - Confirm the account can reach the backplane API via `curl http://127.0.0.1:4000/api/health`.
+- Register devices and update posture via `/api/admin/devices/*`.
+- Intended to connect to MDM later; this is a registry stub with posture flags.
