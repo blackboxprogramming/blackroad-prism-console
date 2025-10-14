@@ -1,0 +1,8 @@
+{
+  "name": "ollama-bridge",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "BlackRoad Ollama bridge service",
+  "main": "server.js"
+}
