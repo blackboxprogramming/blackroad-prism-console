@@ -12,8 +12,6 @@
 const http = require('http');
 const os = require('os');
 const path = require('path');
-const fs = require('fs');
-
 const express = require('express');
 let compression;
 try { compression = require('compression'); } catch { compression = () => (req,res,next)=>next(); }
@@ -24,7 +22,6 @@ const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const cookieSession = require('cookie-session');
 const { body, validationResult } = require('express-validator');
-const Database = require('better-sqlite3');
 const { Server: SocketIOServer } = require('socket.io');
 const { exec } = require('child_process');
 const { randomUUID } = require('crypto');
@@ -46,11 +43,17 @@ const deploy = require('./lib/deploy');
 const notify = require('./lib/notify');
 const logger = require('./lib/log');
 const { fetchWithProbe } = require('./lib/fetch_probe');
+const { db, DB_PATH } = require('./lib/db');
+const { TernaryError } = require('./lib/ternaryError');
+const attachLlmRoutes = require('./routes/admin_llm');
+const gitRouter = require('./routes/git');
+const providersRouter = require('./routes/providers');
+const contradictionRoutes = require('./routes/contradictions');
+const { contradictionLogger } = require('./middleware/contradictionLogger');
 
 // --- Config
 const PORT = parseInt(process.env.PORT || '4000', 10);
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
-const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
 const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
 const ALLOW_SHELL =
   String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
@@ -174,9 +177,6 @@ const PLAN_ENTITLEMENTS = {
     },
   },
 };
-
-// Ensure DB dir exists
-fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 // --- App & server
 const app = express();
@@ -629,6 +629,7 @@ for (const row of qSeed) {
 // Git API
 app.use('/api/git', requireAuth, gitRouter);
 app.use('/v1/providers', providersRouter);
+app.use(contradictionRoutes);
 
 // Helpers
 function listRows(t) {
@@ -800,6 +801,40 @@ app.post('/api/subscribe/invoice-intent', (req, res) => {
     'INSERT INTO subscriptions (id, subscriber_id, plan, cycle, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, datetime("now"), datetime("now"))'
   ).run(subscriptionId, subscriberId, plan, cycle, 'pending_invoice');
   res.json({ ok: true, next: '/subscribe/thanks' });
+});
+
+app.post('/api/wallet/credit', (req, res, next) => {
+  try {
+    const amountRaw = req.body?.amount;
+    const amount = Number(amountRaw);
+    if (!Number.isFinite(amount)) {
+      throw new TernaryError('Amount must be a finite number', {
+        state: -1,
+        code: 'AMOUNT_INVALID',
+        severity: 'high',
+        hint: 'Provide a numeric amount to credit',
+      });
+    }
+    if (amount === 0) {
+      throw new TernaryError('Zero amount is neutral no-op', {
+        state: 0,
+        code: 'AMOUNT_ZERO',
+        hint: 'Skip write when amount is 0',
+      });
+    }
+    if (amount < 0) {
+      throw new TernaryError('Negative credit is contradiction', {
+        state: -1,
+        code: 'NEGATIVE_CREDIT',
+        severity: 'high',
+        hint: 'Use /api/wallet/debit for negative amounts',
+      });
+    }
+
+    res.json({ ok: true, state: 1, credited: amount });
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.get('/api/subscribe/status', (req, res) => {
@@ -1091,6 +1126,8 @@ app.post('/api/actions/mint', requireAuth, (req, res) => {
 require('./modules/yjs_callback')({ app });
 require('./modules/trust_curvature')({ app });
 require('./modules/truth_diff')({ app });
+
+app.use(contradictionLogger);
 
 // --- Socket.IO presence (metrics)
 io.on('connection', (socket) => {
