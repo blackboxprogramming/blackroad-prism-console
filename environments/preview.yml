@@ -1,0 +1,5 @@
+name: preview
+url: https://pr-<number>.dev.blackroad.io
+description: Ephemeral preview spun up per pull request via the ECS/Fargate module.
+reviewers:
+  - blackboxprogramming
