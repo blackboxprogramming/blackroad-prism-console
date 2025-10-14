@@ -6,6 +6,8 @@ description: >-
   Each PR receives a dedicated hostname under dev.blackroad.io and tears down
   automatically when the PR closes.
 contacts:
+  reviewers:
+    - blackboxprogramming
   slack: "#eng"
 domains:
   root: https://dev.blackroad.io
@@ -16,6 +18,7 @@ deployments:
     provider: aws-ecs-fargate
     workflow: .github/workflows/preview-env.yml
     terraform_directory: infra/preview-env
+    module: modules/preview-env
     domain_pattern: https://pr-<pr-number>.dev.blackroad.io
     health_check: https://pr-<pr-number>.dev.blackroad.io/health
     environment:
@@ -39,5 +42,8 @@ deployments:
 change_management:
   approvals: []
 observability:
+  health_checks:
+    - name: pr-web
+      url: https://pr-<pr-number>.dev.blackroad.io/health
   verification:
     - terraform output -raw preview_url
