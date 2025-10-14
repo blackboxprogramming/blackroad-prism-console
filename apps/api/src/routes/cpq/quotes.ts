@@ -31,6 +31,7 @@ r.post('/quote/price',(req,res)=>{
     return { ...l, unit, ext };
   });
   let discount=0;
+  // basic discount rules: global "promo_percent" if present
   if (rs.rules?.promo_percent?.percent) discount = Math.round(subtotal * (Number(rs.rules.promo_percent.percent)/100));
   const total = Math.max(0, subtotal - discount);
   const out = rows.map((x:any)=> x.id===id ? { ...x, lines: priced, subtotal, discount, total, pricedAt: Date.now() } : x);

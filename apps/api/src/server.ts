@@ -59,6 +59,7 @@ import { assignExperiment } from './middleware/experiment.js';
 import agentsCommand from './routes/agents/command.js';
 import agentsSlack from './routes/agents/slack.js';
 import agentsDiscord from './routes/agents/discord.js';
+import supEmail from './routes/support/email.js';
 import cpqCatalog from './routes/cpq/catalog.js';
 import cpqPricing from './routes/cpq/pricing.js';
 import cpqQuotes from './routes/cpq/quotes.js';
@@ -316,6 +317,7 @@ app.use('/api/fac', facLS, facBK, facVB, facAM, facEHS);
 app.use('/api/clm', clmT, clmC, clmR, clmCt, clmEs, clmAp, clmOb, clmRepo);
 app.use('/api/cost', costItems, costRoll, costMO, costVar, costGL);
 app.use('/api/inv', invTxn, invCount);
+app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 
 const port = process.env.PORT || 4000;
 

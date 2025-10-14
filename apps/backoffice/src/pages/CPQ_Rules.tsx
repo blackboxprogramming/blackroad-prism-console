@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 export default function CPQ_Rules(){
   const [yaml,setYaml]=useState('rules:\\n  promo_percent:\\n    percent: 10');
+  const [yaml,setYaml]=useState('rules:\n  promo_percent:\n    percent: 10');
   const [list,setList]=useState<any>({});
   const save=async()=>{ await fetch('/api/cpq/pricing/rule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:'promo_percent',yaml})}); await load(); };
   const load=async()=>{ const j=await (await fetch('/api/cpq/pricing/rules')).json(); setList(j||{}); };
