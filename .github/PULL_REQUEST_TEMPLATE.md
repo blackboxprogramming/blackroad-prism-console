@@ -5,6 +5,11 @@
 ## Summary
 
 Provide a short (1-2 line) summary of the change.
+## Checks
+- [ ] CI green
+- [ ] API /api/health returns 200
+- [ ] Updated docs/tests as needed
+- [ ] Does this change alter power distribution?
 
 ## Changes
 

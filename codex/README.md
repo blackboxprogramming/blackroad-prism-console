@@ -45,6 +45,14 @@ extension points for future integrations.
 | 038 | The Connection Creed   | Bridges Lucidia with open, respectful interoperability. |
 | 028 | The Custodianship Code | Custodians steward Lucidia with accountability and openness. |
 | 037 | The Continuity Pact    | Continuity designed through succession, archives, and resilience drills. |
+| ID  | Title                       | Description                                                 |
+| --- | --------------------------- | ----------------------------------------------------------- |
+| 001 | The First Principle         | Lucidia exists to protect and empower everyone.             |
+| 003 | The Workflow Circle         | Work runs in visible capture → adjust loops.                |
+| 004 | The Autonomy Manifest       | Data autonomy through consent, export, and wipe.            |
+| 022 | The Security Spine          | Security backbone with layered zero-trust defenses.         |
+| 028 | The Custodianship Code      | Stewardship keeps Lucidia healthy across generations.       |
+| 036 | The Transparency of Power   | Authority stays visible, auditable, and community revocable. |
 
 ## BlackRoad Pipeline
 
@@ -113,3 +121,4 @@ python3 codex/tools/codex_entries_audit.py
 
 Pass `--format json` if you need machine-readable output for downstream
 automation or dashboards.
+_Last updated on 2025-09-12_
