@@ -20,17 +20,17 @@
 | PR | Title | State | Impacts | Risks |
 |---|---|---|---|---|
 | #1016 | feat: wire nginx health and telemetry | open | api | conflicts with PR #1023; conflicts with PR #1020; conflicts with PR #1014; conflicts with PR #1027; conflicts with PR #1024; conflicts with PR #1021 |
-| #1015 | feat: add observability and readiness for ollama bridge | open | bridge | bridge missing package.json with type module; conflicts with PR #1014; conflicts with PR #1029; conflicts with PR #1026; conflicts with PR #1012 |
-| #1029 | feat: add observability and readiness for ollama bridge | merged | bridge | bridge missing package.json with type module; conflicts with PR #1015; conflicts with PR #1014; conflicts with PR #1026; conflicts with PR #1012 |
-| #1026 | feat: secure llm bridge with origin auth and model switcher | merged | bridge | bridge missing package.json with type module; conflicts with PR #1015; conflicts with PR #1014; conflicts with PR #1029; conflicts with PR #1012 |
+| #1015 | feat: add observability and readiness for ollama bridge | open | bridge | package.json with type module present; conflicts with PR #1014; conflicts with PR #1029; conflicts with PR #1026; conflicts with PR #1012 |
+| #1029 | feat: add observability and readiness for ollama bridge | merged | bridge | package.json with type module present; conflicts with PR #1015; conflicts with PR #1014; conflicts with PR #1026; conflicts with PR #1012 |
+| #1026 | feat: secure llm bridge with origin auth and model switcher | merged | bridge | package.json with type module present; conflicts with PR #1015; conflicts with PR #1014; conflicts with PR #1029; conflicts with PR #1012 |
 | #1021 | feat: add mtls partner relay | merged | api, nginx | conflicts with PR #1023; conflicts with PR #1020; conflicts with PR #1016; conflicts with PR #1014; conflicts with PR #1027; conflicts with PR #1024 |
 | #1023 | Add Yjs collaborative editing server and client | open | api, ui | conflicts with PR #1020; conflicts with PR #1016; conflicts with PR #1014; conflicts with PR #1027; conflicts with PR #1024; conflicts with PR #1021 |
 | #1022 | Add collaboration presence bus, LED webhooks, and voice room | open | ui | none |
 | #1020 | Add devices backplane with WebSocket endpoints and admin UI | open | api, ui | conflicts with PR #1023; conflicts with PR #1016; conflicts with PR #1027; conflicts with PR #1024; conflicts with PR #1021 |
-| #1014 | feat: secure llm bridge with origin auth and model switcher | open | bridge, ui | bridge missing package.json with type module; conflicts with PR #1023; conflicts with PR #1016; conflicts with PR #1015; conflicts with PR #1029; conflicts with PR #1026; conflicts with PR #1021; conflicts with PR #1012 |
+| #1014 | feat: secure llm bridge with origin auth and model switcher | open | bridge, ui | package.json with type module present; conflicts with PR #1023; conflicts with PR #1016; conflicts with PR #1015; conflicts with PR #1029; conflicts with PR #1026; conflicts with PR #1021; conflicts with PR #1012 |
 | #1027 | feat: add project rooms API and UI | merged | api, ui | conflicts with PR #1023; conflicts with PR #1020; conflicts with PR #1016; conflicts with PR #1024; conflicts with PR #1021 |
 | #1024 | Add devices backplane with WebSocket endpoints and admin UI | merged | api, ui | conflicts with PR #1023; conflicts with PR #1020; conflicts with PR #1016; conflicts with PR #1027; conflicts with PR #1021 |
-| #1012 | feat: identity beacon, streaming bridge, and snapshots | merged | bridge, ui, units | bridge missing package.json with type module; conflicts with PR #1015; conflicts with PR #1014; conflicts with PR #1029; conflicts with PR #1026 |
+| #1012 | feat: identity beacon, streaming bridge, and snapshots | merged | bridge, ui, units | package.json with type module present; conflicts with PR #1015; conflicts with PR #1014; conflicts with PR #1029; conflicts with PR #1026 |
 | #1017 | fix(webber): centralize prettier execution | open | none | conflicts with PR #1011; conflicts with PR #1007; conflicts with PR #1006; conflicts with PR #1013; conflicts with PR #1008 |
 | #1011 | feat(agents): add webber bot for web file editing | open | none | conflicts with PR #1017; conflicts with PR #1007; conflicts with PR #1006; conflicts with PR #1013; conflicts with PR #1008 |
 | #1010 | Enhance cleanup bot with summary and error handling | open | none | conflicts with PR #999; conflicts with PR #998 |
@@ -534,8 +534,4 @@ api,yjs,bridge,jsond -> nginx -> ui
 
 ## Fix-Forward Tasks
 
-- Add srv/ollama-bridge/package.json with {"type":"module"}
-- Add srv/ollama-bridge/package.json with {"type":"module"}
-- Add srv/ollama-bridge/package.json with {"type":"module"}
-- Add srv/ollama-bridge/package.json with {"type":"module"}
-- Add srv/ollama-bridge/package.json with {"type":"module"}
+- ✅ Added `srv/ollama-bridge/package.json` with `{ "type": "module" }` to support bridge ESM builds.

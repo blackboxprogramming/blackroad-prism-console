@@ -1,0 +1,7 @@
+{
+  "name": "ollama-bridge",
+  "private": true,
+  "type": "module",
+  "main": "server.js"
+}
+
