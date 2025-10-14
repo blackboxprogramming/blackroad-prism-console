@@ -43,6 +43,8 @@ extension points for future integrations.
 | 012 | The Creativity Pact    | Sandbox-first rituals keep experimentation safe and playful. |
 | 028 | The Custodianship Code | Custodians steward Lucidia as a shared trust.   |
 | 038 | The Connection Creed   | Bridges Lucidia with open, respectful interoperability. |
+| 028 | The Custodianship Code | Custodians steward Lucidia with accountability and openness. |
+| 037 | The Continuity Pact    | Continuity designed through succession, archives, and resilience drills. |
 
 ## BlackRoad Pipeline
 
