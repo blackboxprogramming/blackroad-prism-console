@@ -5,6 +5,8 @@ description: >-
   Pre-production environment for QA. Static assets publish to stage.blackroad.io
   while AWS infrastructure scaffolding mirrors production.
 contacts:
+  reviewers:
+    - blackboxprogramming
   slack: "#eng"
 domains:
   marketing: https://stage.blackroad.io
@@ -22,6 +24,7 @@ deployments:
     type: container-service
     provider: aws-ecs-fargate
     terraform_directory: br-infra-iac/envs/stg
+    module: modules/ecs-service-alb
     state: planned
     notes: >-
       Network, ECS, and RDS resources are defined; service wiring will follow the
@@ -29,7 +32,12 @@ deployments:
 change_management:
   approvals:
     - .github/workflows/change-approve.yml
+  runbooks:
+    - README-DEPLOY.md
+    - README-OPS.md
 observability:
   health_checks:
     - name: static-health
       url: https://stage.blackroad.io/health.json
+  verification:
+    - curl -sf https://stage.blackroad.io/health.json
