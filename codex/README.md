@@ -37,6 +37,7 @@ extension points for future integrations.
 | 020 | The Governance Charter | Transparent RFC-led decisions with recorded votes. |
 | 015 | The Trust Ledger       | Trust is tracked via a public reliability ledger. |
 | 007 | The Resilience Code    | Failure is expected; recovery keeps service live. |
+| 045 | The Compassion Rule    | Compassion guides every response to conflict.   |
 
 ## BlackRoad Pipeline
 
