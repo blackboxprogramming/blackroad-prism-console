@@ -10,12 +10,16 @@ dependencies = [
     "typer",
     "fastapi",
     "pydantic",
+    "fastapi",
+    "jinja2",
+    "typer",
     "uvicorn",
 ]
 
 [project.scripts]
 brc = "cli.console:main"
 blackroad-api = "agent.api:main"
+blackroad-dashboard = "agent.dashboard:main"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -33,3 +37,8 @@ profile = "black"
 line-length = 100
 extend-select = ["I"]
 
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+agent = ["templates/*.html"]

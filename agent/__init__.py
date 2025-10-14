@@ -7,3 +7,4 @@ __all__ = ["api", "config", "discover"]
 from .config import active_target, set_target
 
 __all__ = ["active_target", "set_target"]
+"""Utility modules for the BlackRoad dashboard service."""
