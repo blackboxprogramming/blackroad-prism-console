@@ -1,0 +1,196 @@
+name: PR Auto-Fill
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  populate-metadata:
+    name: Populate PR metadata from branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Derive PR metadata
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const core = require('@actions/core');
+
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.info('No pull request payload detected.');
+              return;
+            }
+
+            const branchRef = pr.head?.ref;
+            if (!branchRef) {
+              core.info('Missing head ref on pull request.');
+              return;
+            }
+
+            if (!branchRef.includes('/')) {
+              core.info(`Branch ${branchRef} does not contain a category prefix. Skipping auto-fill.`);
+              return;
+            }
+
+            const [category, ...rest] = branchRef.split('/');
+            if (!rest.length) {
+              core.info(`Branch ${branchRef} does not include a detail segment. Skipping auto-fill.`);
+              return;
+            }
+
+            // Determine work-in-progress / ready state from the last path token.
+            const tailSegments = [...rest];
+            const lastSegment = tailSegments[tailSegments.length - 1];
+            let prState = null; // "wip" | "ready" | null
+            if (lastSegment?.endsWith('-wip')) {
+              tailSegments[tailSegments.length - 1] = lastSegment.slice(0, -4);
+              prState = 'wip';
+            } else if (lastSegment?.endsWith('-ready')) {
+              tailSegments[tailSegments.length - 1] = lastSegment.slice(0, -6);
+              prState = 'ready';
+            }
+
+            const rawSlug = tailSegments.join('/');
+            const cleanSlug = rawSlug
+              .split('/')
+              .filter(segment => segment && segment !== '.')
+              .join('/');
+            if (!cleanSlug) {
+              core.info(`Branch ${branchRef} has no remaining slug after trimming the status suffix.`);
+              return;
+            }
+
+            const prettyWords = cleanSlug
+              .split(/[\/_-]+/)
+              .filter(Boolean)
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+
+            const emojiMap = {
+              tests: { emoji: '🧪' },
+              test: { emoji: '🧪' },
+              feat: { emoji: '✨' },
+              feature: { emoji: '✨' },
+              fix: { emoji: '🐛' },
+              bugfix: { emoji: '🐛' },
+              hotfix: { emoji: '🐛' },
+              docs: { emoji: '📚' },
+              doc: { emoji: '📚' },
+              ops: { emoji: '⚙️' },
+              infra: { emoji: '⚙️' },
+              chore: { emoji: '🧰' },
+              maintenance: { emoji: '🧰' },
+              refactor: { emoji: '♻️' },
+              deps: { emoji: '📦' },
+              dependency: { emoji: '📦' },
+              security: { emoji: '🛡️' },
+              perf: { emoji: '⚡️' },
+              performance: { emoji: '⚡️' }
+            };
+
+            const meta = emojiMap[category] ?? { emoji: '🔧' };
+            const desiredTitle = `${meta.emoji} ${prettyWords}`.trim();
+
+            const normalize = value => (value || '')
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '');
+
+            const normalizedTitle = normalize(pr.title);
+            const normalizedSlug = normalize(cleanSlug);
+            const normalizedBranch = normalize(branchRef);
+
+            const updates = {};
+            if (
+              pr.title?.startsWith(meta.emoji) !== true ||
+              normalizedTitle === normalizedSlug ||
+              normalizedTitle === normalizedBranch ||
+              pr.title === branchRef
+            ) {
+              if (pr.title !== desiredTitle) {
+                updates.title = desiredTitle;
+              }
+            }
+
+            const contextLine = `${category}/${cleanSlug}`;
+            let body = pr.body ?? '';
+            let bodyChanged = false;
+            if (!body.trim()) {
+              body = `## Quick pulse\n- [ ] Impact assessed (customer, ops, or security)\n- [ ] Risk call-out (low / medium / high)\n- [ ] Rollback or feature flag noted\n\n## Optional Ops\n- [ ] Added or updated dashboards / alerts\n- [ ] Announced in release notes or status channel\n- [ ] Coordinated with on-call / runbook owners\n\n## Next steps\n- [ ] Follow-up issue linked (if needed)\n- [ ] Docs updated or slated for update\n- [ ] Tests or benchmarks captured\n\n### Context\n- Branch context: ${contextLine}\n- Anything reviewers should focus on?\n`;
+              bodyChanged = true;
+            } else {
+              const lines = body.split('\n');
+              const contextIndex = lines.findIndex(line => line.trim() === '### Context');
+              if (contextIndex !== -1) {
+                let inserted = false;
+                for (let i = contextIndex + 1; i < lines.length; i += 1) {
+                  const trimmed = lines[i].trim();
+                  if (!trimmed) {
+                    continue;
+                  }
+                  if (trimmed.startsWith('### ')) {
+                    break;
+                  }
+                  if (trimmed.startsWith('- ')) {
+                    if (trimmed === '- What changed and why?' || trimmed.startsWith('- Branch context:')) {
+                      lines[i] = `- Branch context: ${contextLine}`;
+                      bodyChanged = true;
+                    }
+                    inserted = true;
+                  }
+                  break;
+                }
+                if (!inserted) {
+                  lines.splice(contextIndex + 1, 0, `- Branch context: ${contextLine}`);
+                  bodyChanged = true;
+                }
+                if (bodyChanged) {
+                  body = lines.join('\n');
+                }
+              }
+            }
+
+            if (bodyChanged) {
+              updates.body = body;
+            }
+
+            if (Object.keys(updates).length > 0) {
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                ...updates
+              });
+              core.info(`Updated PR #${pr.number} metadata: ${Object.keys(updates).join(', ')}`);
+            } else {
+              core.info('No PR title/body updates required.');
+            }
+
+            if (!pr.node_id) {
+              core.info('Pull request node_id missing; skipping draft toggle.');
+              return;
+            }
+
+            if (prState === 'wip' && !pr.draft) {
+              await github.graphql(
+                `mutation($id: ID!) {\n                  convertPullRequestToDraft(input: { pullRequestId: $id }) {\n                    pullRequest { number }\n                  }\n                }`,
+                { id: pr.node_id }
+              );
+              core.info(`Converted PR #${pr.number} to draft based on branch suffix.`);
+            } else if (prState === 'ready' && pr.draft) {
+              await github.graphql(
+                `mutation($id: ID!) {\n                  markPullRequestReadyForReview(input: { pullRequestId: $id }) {\n                    pullRequest { number }\n                  }\n                }`,
+                { id: pr.node_id }
+              );
+              core.info(`Marked PR #${pr.number} ready for review based on branch suffix.`);
+            } else {
+              core.info('No draft state adjustment required.');
+            }
