@@ -49,6 +49,10 @@ remote_bash() {
   # Run a bash -lc command on droplet (ensures login semantics for PATH)
   local cmd="$1"
   rsh "bash -lc '$cmd'"
+  # Run a bash command on the droplet using a login shell while avoiding
+  # complicated quote-escaping. We stream the payload over STDIN so single
+  # quotes inside the script do not conflict with the SSH wrapper.
+  printf '%s\n' "$1" | rsh bash --login -s
 }
 
 require_cmd() {
@@ -177,6 +181,7 @@ previous_release_dir() {
   remote_bash "
     cd '$RELEASES_DIR' || exit 0
     ls -1dt */ 2>/dev/null | sed -n '2p' | sed 's#\/\$##;s#\/\$##' || true
+    ls -1dt */ 2>/dev/null | sed -n '2p' | sed 's#/$##;s#/$##' || true
   "
 }
 
@@ -264,6 +269,7 @@ cmd_rollback() {
 
 usage() {
   cat <<EOF
+  cat <<USAGE
 Usage: $(basename "$0") <deploy|status|releases|rollback>
 
 Environment:
@@ -283,6 +289,9 @@ Examples:
   DRY_RUN=true $(basename "$0") deploy
   $(basename "$0") status
 EOF
+  $(basename "$0") releases
+  $(basename "$0") rollback   # reverts to the previous release and health-checks it
+USAGE
 }
 
 main() {
