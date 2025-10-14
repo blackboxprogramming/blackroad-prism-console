@@ -59,6 +59,10 @@ LLM stub on port **8000** if none is running.
 
 **On the server**
 
+## Recovery & cleanup runbook
+
+Need to investigate or recover from cleanup operations? Follow the consolidated triage→handoff flow in [`docs/mainline-cleanup.md`](docs/mainline-cleanup.md).
+
 **On your workstation**
 
 1. Unzip this at the **root of your working copy** (where your repo root lives).

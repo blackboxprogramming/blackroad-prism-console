@@ -62,6 +62,8 @@
 
 ## Operational Checklist
 
+Refer to [`docs/mainline-cleanup.md`](docs/mainline-cleanup.md) for the detailed triage→handoff flow that consolidates these steps with the cleanup findings and agent command palette.
+
 - [ ] **Security sweep:** confirm credentials, tokens, and secrets are not present in logs or configuration artifacts.
 - [ ] **Test verification:** rerun automated suites with emphasis on authentication, authorization, and timeout edge cases.
 - [ ] **Least-privilege review:** ensure all agents and services operate with minimally required scopes and permissions.
