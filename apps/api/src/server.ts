@@ -239,6 +239,11 @@ import scimGroups from './routes/scim/groups.js';
 import { dlpRedact } from './middleware/dlp.js';
 import edrHold from './routes/edr/legal_hold.js';
 import edrExport from './routes/edr/export_audit.js';
+import esgActivity from './routes/esg/activity.js';
+import esgCarbon from './routes/esg/carbon.js';
+import esgDei from './routes/esg/dei.js';
+import esgEthics from './routes/esg/ethics.js';
+import esgReports from './routes/esg/reports.js';
 
 dotenv.config();
 
@@ -406,6 +411,7 @@ app.use('/scim/v2', scimGroups);
 
 // eDiscovery / legal hold (admin scope in real deployment)
 app.use('/api/edr', edrHold, edrExport);
+app.use('/api/esg', esgActivity, esgCarbon, esgDei, esgEthics, esgReports);
 
 const port = process.env.PORT || 4000;
 
