@@ -1,5 +1,6 @@
 .RECIPEPREFIX = >
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy notify
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy mpm-core energy
 
 setup:
 >python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff
@@ -88,3 +89,9 @@ samples:
 
 goldens:
 >python scripts/update_goldens.py
+
+mpm-core:
+>python 20_bench_solid/taichi_mpm_core.py
+
+energy:
+>python 40_compare/plot_energy.py
