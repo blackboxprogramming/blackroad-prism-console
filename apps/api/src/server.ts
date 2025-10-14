@@ -412,6 +412,7 @@ app.use('/scim/v2', scimGroups);
 // eDiscovery / legal hold (admin scope in real deployment)
 app.use('/api/edr', edrHold, edrExport);
 app.use('/api/esg', esgActivity, esgCarbon, esgDei, esgEthics, esgReports);
+app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamTokens, iamSecrets, iamDevices);
 
 const port = process.env.PORT || 4000;
 

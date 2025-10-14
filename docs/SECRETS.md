@@ -117,3 +117,5 @@ The snippet only prints environment variable names containing `SECRET`, helping 
 
 Navigate to **Settings → Secrets and variables → Actions** in each repository. Verify that wallet secret names (for example, `ROBINHOOD_ETHEREUM`, `COINBASE_BITCOIN`, `VENMO_LITECOIN`) are present with recent update timestamps. GitHub never reveals stored values; only users with repository access can see the names.
 
+# Secrets Vault
+- Store and rotate secrets; monthly rotation workflow and audit reports.
