@@ -216,6 +216,10 @@ import pvDpia from './routes/privacy/dpia.js';
 import pvRetention from './routes/privacy/retention.js';
 import pvDlp from './routes/privacy/dlp.js';
 import pvTokens from './routes/privacy/tokens.js';
+import { meter } from './middleware/meter.js';
+import * as billing from './routes/billing/index.js';
+import licenses from './routes/admin/licenses.js';
+import { requireEntitlement } from './lib/entitlements.js';
 
 dotenv.config();
 
@@ -263,6 +267,7 @@ app.use(assignExperiment(['A','B']));
 
 // raw body for email signature verification
 app.use((req:any,res,next)=>{ if (req.url.startsWith('/api/support/email/ingest')) { const b:Buffer[]=[]; req.on('data',(c)=>b.push(c)); req.on('end',()=>{ req.rawBody = Buffer.concat(b).toString(); next(); }); } else next(); });
+app.use(meter());
 
 app.get('/api/health', cacheHeaders('health'), (_req,res)=> res.json({ ok:true, ts: Date.now() }));
 
@@ -354,6 +359,19 @@ app.use('/api/cs', csWeights, csSignals, csHealth, csPlay, csOnb, csQbr, csAlert
 app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
 app.use('/api/elt', eltConn, eltP, eltDag, eltLin, eltLake, eltQC);
 app.use('/api/privacy', pvPolicies, pvRopa, pvConsent, pvDsar, pvDpia, pvRetention, pvDlp, pvTokens);
+
+// Public billing catalog
+app.use('/api/billing/plans', billing.plans);
+
+// Partner-scoped routes (assuming apiKeyAuth + rateLimit already applied at /api/partner/* in Prompt 13)
+app.use('/api/partner/billing/usage', billing.usage);
+app.use('/api/partner/billing', billing.coupons);
+
+// Admin
+app.use('/api/admin/licenses', licenses);
+
+// Example entitlement gate for reco advanced
+app.get('/api/feature/reco-advanced', requireEntitlement('reco_advanced'), (_req,res)=> res.json({ ok:true }));
 
 const port = process.env.PORT || 4000;
 

@@ -1,0 +1,15 @@
+<!doctype html><html><head>
+<meta charset="utf-8"/><title>BlackRoad Status</title>
+<link rel="stylesheet" href="style.css"/>
+</head><body>
+<h1>BlackRoad Status</h1>
+<div id="uptime"></div>
+<script>
+fetch('feed.json').then(r=>r.json()).then(data=>{
+  const ok = data.filter(x=>x.code==200).length;
+  const total = data.length||1;
+  const pct = Math.round(ok/total*10000)/100;
+  document.getElementById('uptime').innerText = `Last samples: ${ok}/${total} OK — Uptime ~ ${pct}%`;
+});
+</script>
+</body></html>
