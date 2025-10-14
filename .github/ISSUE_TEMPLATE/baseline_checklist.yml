@@ -1,0 +1,85 @@
+name: Repository baseline checklist
+description: Track key tasks for a hardened, production-ready project
+title: "Baseline: <project>"
+labels: ["prio/normal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this issue to drive a repository toward the BlackRoad production baseline.
+        Link the repository, capture the owners, and check off items as they are completed.
+  - type: input
+    id: repository
+    attributes:
+      label: Repository
+      description: Link to the repository or provide the org/repo slug.
+      placeholder: blackroad/example-repo
+    validations:
+      required: true
+  - type: input
+    id: owners
+    attributes:
+      label: Owners
+      description: Who is accountable for driving this baseline effort?
+      placeholder: jane@example.com, @blackroad/platform
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope & notes
+      description: Capture any out-of-scope components, deadlines, or extra context.
+      placeholder: e.g. "Focusing on API service only; web assets tracked separately."
+  - type: checkboxes
+    id: foundational
+    attributes:
+      label: Foundational
+      options:
+        - label: LICENSE
+        - label: CODEOWNERS
+        - label: CONTRIBUTING.md & SECURITY.md
+        - label: Issue & PR templates
+        - label: README (quickstart/dev/arch/release)
+        - label: ADRs + system diagram
+        - label: OpenAPI + published docs (if API)
+        - label: DB migration strategy
+  - type: checkboxes
+    id: environment
+    attributes:
+      label: Environment & workflow
+      options:
+        - label: Dev environment (devcontainer or toolchain pinning)
+        - label: docker-compose.dev.yml (hot reload + seed)
+        - label: .env.example
+        - label: Makefile/Taskfile
+        - label: Lint/format config
+        - label: Unit tests + coverage gate
+        - label: E2E smoke tests
+        - label: Pre-commit hooks
+  - type: checkboxes
+    id: automation
+    attributes:
+      label: Automation & delivery
+      options:
+        - label: CI (lint/test/build artifacts)
+        - label: Release automation (tags/changelog/publish)
+        - label: SBOM on build
+        - label: Build-time version endpoint
+        - label: Branch protection rules
+        - label: Dependabot or Renovate
+  - type: checkboxes
+    id: security
+    attributes:
+      label: Security & resilience
+      options:
+        - label: CodeQL + secrets scanning
+        - label: Image scan (Trivy)
+        - label: Threat model lite
+        - label: Health/ready/metrics endpoints
+        - label: OpenTelemetry wiring
+  - type: textarea
+    id: next_steps
+    attributes:
+      label: Next steps
+      description: Document follow-up tasks or decisions once the checklist is complete.
+      placeholder: Remaining gaps, owners, or links to follow-up issues.
