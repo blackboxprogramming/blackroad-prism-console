@@ -1,6 +1,11 @@
 id: POLICY_DRIFT_REGRESSION
+name: Policy drift regression detector
 mode: observe
 severity: medium
+owners:
+  - "@policy-engineering"
+  - "policy@company.com"
+docs_url: https://your.docs/policies/policy_drift_regression
 metadata:
   product: Mirror Guard
   description: Compare deny rate to baseline after recent policy change.
