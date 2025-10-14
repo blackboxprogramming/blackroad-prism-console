@@ -2,14 +2,18 @@ PYTHON ?= python
 VENV ?= ~/agent-venv
 
 ASSET ?= logo.png
+AUDIO ?= clip.wav
 
-.PHONY: push-assets first-light install-mac-agent install-pi-services bootstrap-pi lint clean
+.PHONY: push-assets push-audio first-light install-mac-agent install-pi-services bootstrap-pi lint clean
 
 push-assets:
-	$(PYTHON) mac_agent.py push-assets --name $(ASSET)
+        $(PYTHON) mac_agent.py push-assets --name $(ASSET)
+
+push-audio:
+        $(PYTHON) mac_agent.py push-audio --name $(AUDIO)
 
 first-light:
-	$(PYTHON) first_light.py
+        $(PYTHON) first_light.py
 
 install-mac-agent:
 	./scripts/install_mac_agent.sh

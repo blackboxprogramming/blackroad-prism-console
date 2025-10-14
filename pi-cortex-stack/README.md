@@ -42,16 +42,18 @@ pi-cortex-stack/
    the Samba share used for collecting logs and assets. Follow the steps in the
    "Pi Ops bring-up" section below if you do not already have it running.
 
-3. **Populate the asset directory.** Drop a `logo.png` file into
-   `pi-cortex-stack/assets/`.
+3. **Populate the asset directory.** Drop a `logo.png` file and an optional
+   audio clip such as `clip.wav` into `pi-cortex-stack/assets/`.
 
-4. **Push assets to the broker.**
+4. **Push assets (and audio) to the broker.**
 
    ```bash
    make push-assets
+   make push-audio  # Optional if you want the demo audio clip
    ```
 
-5. **Run the first light smoke test.**
+5. **Run the first light smoke test.** This publishes the asset, audio clip (if
+   available), and demo text to verify the full pipeline end-to-end.
 
    ```bash
    make first-light
@@ -91,6 +93,13 @@ source ~/agent-venv/bin/activate
 python mac_agent.py run
 ```
 
+You can also publish assets or audio clips on demand:
+
+```bash
+python mac_agent.py push-assets --name logo.png
+python mac_agent.py push-audio --name clip.wav
+```
+
 ## Raspberry Pi bootstrap
 
 All Raspberry Pi components run under `systemd` and rely on a Python virtual
@@ -106,13 +115,15 @@ cd pi-cortex-stack
 The script will:
 
 1. Ensure the Raspberry Pi has the core Debian packages required by the stack
-   (Python tooling, OpenCV/Pillow libraries, etc.).
+   (Python tooling, OpenCV/Pillow libraries, ALSA utilities for audio playback,
+   etc.).
 2. Create (or reuse) the `~/agent-venv` virtual environment and install the
    dependencies listed in `requirements.txt`.
 3. Generate a default `.env` from `.env.example` if one does not already
    exist.
-4. Create the state and log directories under `/var/lib/pi-cortex` and
-   `/var/log/pi-cortex` with the correct permissions for the `pi` user.
+4. Create the state and log directories under `/var/lib/pi-cortex` (including
+   the new audio stash) and `/var/log/pi-cortex` with the correct permissions
+   for the `pi` user.
 5. Copy the `systemd` unit files into place (you may be prompted for your sudo
    password) and restart the services so that any configuration changes take
    effect immediately.
@@ -131,17 +142,21 @@ script `scripts/install_pi_services.sh` installs the unit files into
 
 ### Pi Holo Renderer
 
-`pi_holo_renderer.py` subscribes to the `pi/holo/text` and `pi/holo/image`
-topics. The renderer stores the current text payload and the most recent asset
-frame under `/var/lib/pi-cortex/holo`. If an HDMI display is connected it will
-also open a simple OpenCV window. On a headless system you can disable the
-window by setting the `PI_CORTEX_HEADLESS=1` environment variable.
+`pi_holo_renderer.py` subscribes to the `pi/holo/text`, `pi/holo/image`, and
+`pi/audio/clip` topics. The renderer stores the current text payload, the most
+recent asset frame, and any audio clips under `/var/lib/pi-cortex`. If an HDMI
+display is connected it will also open a simple OpenCV window. Audio playback is
+handled via `aplay` (or the player specified by `PI_CORTEX_AUDIO_PLAYER`) and
+can be disabled by setting `PI_CORTEX_AUDIO_AUTOPLAY=0`. On a headless system
+you can disable the window by setting the `PI_CORTEX_HEADLESS=1` environment
+variable.
 
 ### Pi Sim Panel
 
 `pi_sim_panel.py` runs a FastAPI server that exposes the most recent content the
-simulator received from MQTT. The service listens on port 8000 by default and
-serves a compact status dashboard at `/`.
+simulator received from MQTT, including the live audio clip. The service listens
+on port 8000 by default and serves a compact status dashboard at `/` that
+embeds the latest image and an in-browser audio player.
 
 ### Pi Ops Heartbeat (optional)
 
@@ -178,6 +193,11 @@ or use your shell's environment. The following variables are recognized:
 - `PI_CORTEX_HEARTBEAT_TOPIC` (default `pi/ops/heartbeat`)
 - `PI_CORTEX_HOLO_STATE_DIR` (default `/var/lib/pi-cortex/holo`)
 - `PI_CORTEX_PANEL_STATE_DIR` (default `/var/lib/pi-cortex/panel`)
+- `PI_CORTEX_AUDIO_TOPIC` (default `pi/audio/clip`)
+- `PI_CORTEX_AUDIO_ASSET` (default `clip.wav`)
+- `PI_CORTEX_AUDIO_STATE_DIR` (default `/var/lib/pi-cortex/audio`)
+- `PI_CORTEX_AUDIO_AUTOPLAY` (default `1` – set to `0` to disable playback)
+- `PI_CORTEX_AUDIO_PLAYER` (default `aplay`)
 
 ## Development tips
 

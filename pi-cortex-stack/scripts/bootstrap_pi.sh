@@ -5,7 +5,14 @@ STACK_DIR="$(cd "$(dirname "$0")"/.. && pwd)"
 VENV_DIR="${VENV_DIR:-$HOME/agent-venv}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 REQUIREMENTS_FILE="$STACK_DIR/requirements.txt"
-APT_PACKAGES=("python3-venv" "python3-pip" "libatlas-base-dev" "libjpeg-dev" "zlib1g-dev")
+APT_PACKAGES=(
+  "python3-venv"
+  "python3-pip"
+  "libatlas-base-dev"
+  "libjpeg-dev"
+  "zlib1g-dev"
+  "alsa-utils"
+)
 STATE_ROOT="/var/lib/pi-cortex"
 LOG_ROOT="/var/log/pi-cortex"
 
@@ -51,6 +58,7 @@ sudo install -d -m 775 -o "$USER" -g "$USER" \
   "$STATE_ROOT" \
   "$STATE_ROOT/holo" \
   "$STATE_ROOT/panel" \
+  "$STATE_ROOT/audio" \
   "$STATE_ROOT/shared"
 sudo install -d -m 775 -o "$USER" -g "$USER" "$LOG_ROOT"
 
