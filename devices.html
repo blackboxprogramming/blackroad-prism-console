@@ -28,7 +28,7 @@
       padding: 24px;
     }
     main {
-      width: min(480px, 100%);
+      width: min(520px, 100%);
       background: var(--panel);
       border-radius: var(--radius);
       padding: 28px;
@@ -77,6 +77,11 @@
       outline: 2px solid rgba(0, 150, 255, 0.35);
       outline-offset: 1px;
     }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
     .button-row {
       display: flex;
       flex-wrap: wrap;
@@ -86,7 +91,6 @@
       background: var(--accent-2);
       border: none;
       padding: 10px 20px;
-      margin: 0 6px;
       border-radius: var(--radius);
       color: #fff;
       font-size: 16px;
@@ -99,6 +103,11 @@
     }
     button.secondary {
       background: rgba(255, 255, 255, 0.08);
+    }
+    button:disabled {
+      opacity: 0.55;
+      cursor: progress;
+      transform: none;
     }
     .status {
       min-height: 24px;
@@ -130,38 +139,42 @@
     </header>
     <div class="field">
       <label for="key">API Key (optional)</label>
-      <input id="key" type="password" placeholder="X-BlackRoad-Key" />
-      <small class="hint">Stored locally in your browser.</small>
+      <input id="key" type="password" placeholder="X-BlackRoad-Key" autocomplete="off" />
+      <small class="hint">Stored locally in your browser when available.</small>
     </div>
     <div class="field">
       <label for="deviceId">Device ID</label>
       <input id="deviceId" placeholder="display-mini" />
     </div>
-    <div class="field inline">
-      <label for="target">Display target
-        <input id="target" placeholder="mini or main" />
-      </label>
-      <label for="mode">Mode
-        <select id="mode">
-          <option value="url">URL</option>
-          <option value="image">Image</option>
-        </select>
-      </label>
-    </div>
-    <div class="field">
-      <label for="src">Source
+    <form id="showForm" novalidate>
+      <div class="inline">
+        <div class="field">
+          <label for="target">Display target</label>
+          <input id="target" placeholder="mini or main" />
+        </div>
+        <div class="field">
+          <label for="mode">Mode</label>
+          <select id="mode">
+            <option value="url">URL</option>
+            <option value="image">Image</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="src">Source</label>
         <input id="src" placeholder="https://... or data URI" />
-      </label>
-    </div>
-    <div class="field inline">
-      <label for="ttl">TTL (seconds)
-        <input id="ttl" type="number" min="1" placeholder="120" />
-      </label>
-    </div>
-    <div class="button-row">
-      <button type="button" id="showBtn">Show content</button>
-      <button type="button" id="clearBtn" class="secondary">Clear</button>
-    </div>
+      </div>
+      <div class="inline">
+        <div class="field">
+          <label for="ttl">TTL (seconds)</label>
+          <input id="ttl" type="number" min="1" inputmode="numeric" placeholder="120" />
+        </div>
+      </div>
+      <div class="button-row">
+        <button type="submit" id="showBtn">Show content</button>
+        <button type="button" id="clearBtn" class="secondary">Clear</button>
+      </div>
+    </form>
     <div class="button-row">
       <button type="button" id="sleepBtn" class="secondary">Sleep</button>
       <button type="button" id="wakeBtn">Wake</button>
@@ -177,13 +190,46 @@
       const srcEl = document.getElementById('src');
       const ttlEl = document.getElementById('ttl');
       const statusEl = document.getElementById('status');
+      const showForm = document.getElementById('showForm');
 
-      const store = (key, value) => localStorage.setItem(key, value);
-      const load = (key, fallback = '') => localStorage.getItem(key) || fallback;
+      const storage = (() => {
+        try {
+          const { localStorage } = window;
+          const testKey = '__br_test__';
+          localStorage.setItem(testKey, '1');
+          localStorage.removeItem(testKey);
+          return localStorage;
+        } catch (err) {
+          console.warn('Local storage unavailable:', err);
+          return null;
+        }
+      })();
+
+      const store = (key, value) => {
+        if (!storage) return;
+        try {
+          storage.setItem(key, value);
+        } catch (err) {
+          console.warn('Failed to persist value for', key, err);
+        }
+      };
+      const load = (key, fallback = '') => {
+        if (!storage) return fallback;
+        try {
+          const value = storage.getItem(key);
+          return value == null ? fallback : value;
+        } catch (err) {
+          console.warn('Failed to read value for', key, err);
+          return fallback;
+        }
+      };
 
       keyEl.value = load('br-key', '');
       deviceEl.value = load('br-device-id', 'display-mini');
-      targetEl.value = load('br-device-target', deviceEl.value.includes('main') ? 'main' : 'mini');
+      targetEl.value = load(
+        'br-device-target',
+        deviceEl.value.includes('main') ? 'main' : 'mini'
+      );
       modeEl.value = load('br-device-mode', 'url');
       srcEl.value = load('br-device-src', '');
       ttlEl.value = load('br-device-ttl', '');
@@ -194,6 +240,7 @@
         if (!targetEl.value.trim()) {
           targetEl.value = deviceEl.value.includes('main') ? 'main' : 'mini';
         }
+        store('br-device-target', targetEl.value);
       });
       targetEl.addEventListener('input', () =>
         store('br-device-target', targetEl.value)
@@ -224,9 +271,18 @@
         return deviceEl.value.trim() || 'display-mini';
       }
 
+      function setPending(isPending) {
+        document
+          .querySelectorAll('button')
+          .forEach((btn) => {
+            btn.disabled = isPending;
+          });
+      }
+
       async function sendCommand(payload) {
         const deviceId = getDeviceId();
         setStatus(`Sending to ${deviceId}…`, 'pending');
+        setPending(true);
         try {
           const res = await fetch(
             `/api/devices/${encodeURIComponent(deviceId)}/command`,
@@ -241,8 +297,12 @@
             throw new Error(`HTTP ${res.status}${text ? ` — ${text}` : ''}`);
           }
           setStatus('Command sent.', 'success');
+          return true;
         } catch (err) {
           setStatus(String(err), 'error');
+          return false;
+        } finally {
+          setPending(false);
         }
       }
 
@@ -253,7 +313,8 @@
       document.getElementById('clearBtn').onclick = () =>
         sendCommand({ type: 'display.clear' });
 
-      document.getElementById('showBtn').onclick = () => {
+      showForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
         const target = targetEl.value.trim();
         const mode = modeEl.value;
         const src = srcEl.value.trim();
@@ -278,8 +339,16 @@
         if (!Number.isNaN(ttlNumber) && ttlNumber > 0) {
           payload.ttl_s = Math.floor(ttlNumber);
         }
-        sendCommand(payload);
-      };
+        const sent = await sendCommand(payload);
+        if (sent) {
+          store('br-device-target', target);
+          store('br-device-mode', mode);
+          store('br-device-src', src);
+          if (ttl) {
+            store('br-device-ttl', ttl);
+          }
+        }
+      });
     })();
   </script>
 </body>
