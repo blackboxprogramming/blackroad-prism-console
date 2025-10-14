@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import fs from 'fs';
+const r = Router();
+const A='fac/assets.json', W='data/fac/work_orders.jsonl', V='fac/vendors.json', M='fac/maintenance.json';
+const aread=()=> fs.existsSync(A)? JSON.parse(fs.readFileSync(A,'utf-8')):{ assets:{} };
+const awrite=(o:any)=>{ fs.mkdirSync('fac',{recursive:true}); fs.writeFileSync(A, JSON.stringify(o,null,2)); };
+const append=(row:any)=>{ fs.mkdirSync('data/fac',{recursive:true}); fs.appendFileSync(W, JSON.stringify(row)+'\n'); };
+const wlist=()=> fs.existsSync(W)? fs.readFileSync(W,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
+r.post('/assets/upsert',(req,res)=>{ const o=aread(); const v=req.body||{}; o.assets[v.assetId]=v; awrite(o); res.json({ ok:true }); });
+r.post('/workorders/create',(req,res)=>{ append({ ts:Date.now(), state:'open', ...req.body }); res.json({ ok:true }); });
+r.post('/workorders/state',(req,res)=>{ append({ ts:Date.now(), ...req.body }); res.json({ ok:true }); });
+r.get('/workorders/recent',(req,res)=>{ const aid=String(req.query.assetId||''); const items=wlist().reverse().filter((x:any)=>!aid||x.assetId===aid).slice(0,200); res.json({ items }); });
+export default r;

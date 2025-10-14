@@ -1,0 +1,12 @@
+import { Router } from 'express';
+import fs from 'fs';
+import { v4 as uuid } from 'uuid';
+const r = Router();
+const BK='data/fac/bookings.jsonl', OCC='data/fac/occupancy.jsonl';
+const append=(p:string,row:any)=>{ fs.mkdirSync('data/fac',{recursive:true}); fs.appendFileSync(p, JSON.stringify(row)+'\n'); };
+const recent=(p:string)=> fs.existsSync(p)? fs.readFileSync(p,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
+r.post('/bookings/create',(req,res)=>{ const id=req.body?.bookingId||`b_${uuid().slice(0,8)}`; append(BK,{ ts:Date.now(), bookingId:id, state:'active', ...req.body }); res.json({ ok:true, bookingId:id }); });
+r.post('/bookings/checkin',(req,res)=>{ append(OCC,{ ts:req.body?.ts||Date.now(), event:'checkin', ...req.body }); res.json({ ok:true }); });
+r.post('/bookings/state',(req,res)=>{ append(BK,{ ts:Date.now(), bookingId:req.body?.bookingId, state:req.body?.state||'active' }); res.json({ ok:true }); });
+r.get('/bookings/recent',(req,res)=>{ const sid=String(req.query.spaceId||''), uid=String(req.query.subjectId||''); const it=recent(BK).reverse().filter((x:any)=>(!sid||x.spaceId===sid)&&(!uid||x.subjectId===uid)).slice(0,200); res.json({ items: it }); });
+export default r;

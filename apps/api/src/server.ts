@@ -167,6 +167,11 @@ import adminKeys from './routes/admin/keys.js';
 import adminWebhooks from './routes/admin/webhooks.js';
 import deliver from './routes/webhooks/deliver.js';
 import ping from './routes/public/ping.js';
+import facLS from './routes/fac/locations_spaces.js';
+import facBK from './routes/fac/bookings.js';
+import facVB from './routes/fac/visitors_badges.js';
+import facAM from './routes/fac/assets_maint.js';
+import facEHS from './routes/fac/ehs.js';
 
 dotenv.config();
 
@@ -292,6 +297,7 @@ app.use('/api/admin/webhooks', adminGuard, adminWebhooks);
 
 // Partner (API key + limit)
 app.use('/api/partner', apiKeyAuth(), rateLimit(), deliver);
+app.use('/api/fac', facLS, facBK, facVB, facAM, facEHS);
 
 const port = process.env.PORT || 4000;
 
