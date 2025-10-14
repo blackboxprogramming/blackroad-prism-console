@@ -195,6 +195,7 @@ import costMO from './routes/cost/mo.js';
 import costVar from './routes/cost/variance.js';
 import invCount from './routes/inv/count.js';
 import costGL from './routes/cost/gl.js';
+import supEmail from './routes/support/email.js';
 
 dotenv.config();
 
@@ -239,6 +240,9 @@ app.use(regionMiddleware());
 app.use(localeMiddleware());
 app.use(cookieParser());
 app.use(assignExperiment(['A','B']));
+
+// raw body for email signature verification
+app.use((req:any,res,next)=>{ if (req.url.startsWith('/api/support/email/ingest')) { const b:Buffer[]=[]; req.on('data',(c)=>b.push(c)); req.on('end',()=>{ req.rawBody = Buffer.concat(b).toString(); next(); }); } else next(); });
 
 app.get('/api/health', cacheHeaders('health'), (_req,res)=> res.json({ ok:true, ts: Date.now() }));
 
@@ -326,6 +330,7 @@ app.use('/api/cost', costItems, costRoll, costMO, costVar, costGL);
 app.use('/api/inv', invTxn, invCount);
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
 app.use('/api/cs', csWeights, csSignals, csHealth, csPlay, csOnb, csQbr, csAlerts);
+app.use('/api/support', supTickets, supSla, supMacros, supKb, supChat, supEmail);
 
 const port = process.env.PORT || 4000;
 
