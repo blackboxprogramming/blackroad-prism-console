@@ -5,12 +5,18 @@ requires-python = ">=3.10"
 description = "Offline PLM & Manufacturing Ops (Phase 37) — deterministic, file-backed."
 readme = "README.md"
 authors = [{ name = "Blackroad", email = "eng@blackroadinc.us" }]
-dependencies = ["paho-mqtt", "typer"]
 dependencies = [
+    "paho-mqtt",
     "typer",
     "fastapi",
-    "pydantic",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
     "uvicorn",
+    "sqlalchemy[asyncio]>=2.0.0",
+    "asyncpg",
+    "redis>=4.6.0",
+    "stripe>=7.0.0",
+    "argon2-cffi>=21.0.0",
 ]
 
 [project.scripts]
@@ -20,6 +26,7 @@ blackroad-api = "agent.api:main"
 [tool.pytest.ini_options]
 pythonpath = ["."]
 addopts = "-q"
+testpaths = ["tests/core", "tests/fuzz", "tests/mining_ops_lab"]
 
 [tool.black]
 line-length = 100
@@ -31,9 +38,4 @@ profile = "black"
 [tool.ruff]
 line-length = 100
 extend-select = ["I"]
-
-[tool.pytest.ini_options]
-pythonpath = ["."]
-extend-select = ["I"]  # import sort
-testpaths = ["tests/core", "tests/fuzz"]
 
