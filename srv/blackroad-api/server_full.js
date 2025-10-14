@@ -48,6 +48,11 @@ const { TernaryError } = require('./lib/ternaryError');
 const attachLlmRoutes = require('./routes/admin_llm');
 const gitRouter = require('./routes/git');
 const providersRouter = require('./routes/providers');
+const { db, DB_PATH } = require('./lib/db');
+const { TernaryError } = require('./lib/ternaryError');
+const attachLlmRoutes = require('./routes/admin_llm');
+const gitRouter = require('./routes/git');
+const providersRouter = require('./routes/providers');
 const contradictionRoutes = require('./routes/contradictions');
 const { contradictionLogger } = require('./middleware/contradictionLogger');
 
