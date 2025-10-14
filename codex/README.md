@@ -53,6 +53,7 @@ extension points for future integrations.
 | 022 | The Security Spine          | Security backbone with layered zero-trust defenses.         |
 | 028 | The Custodianship Code      | Stewardship keeps Lucidia healthy across generations.       |
 | 036 | The Transparency of Power   | Authority stays visible, auditable, and community revocable. |
+| 050 | The Endurance Mandate  | Core systems survive disruption and recover fast. |
 
 ## BlackRoad Pipeline
 
