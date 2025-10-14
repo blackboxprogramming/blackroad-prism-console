@@ -90,6 +90,13 @@ import prSched from './routes/payroll/schedule.js';
 import prTime from './routes/payroll/time.js';
 import prRun from './routes/payroll/run.js';
 import prForms from './routes/payroll/forms.js';
+import csWeights from './routes/cs/weights.js';
+import csSignals from './routes/cs/signals.js';
+import csHealth from './routes/cs/health.js';
+import csPlay from './routes/cs/playbooks.js';
+import csOnb from './routes/cs/onboarding.js';
+import csQbr from './routes/cs/qbr.js';
+import csAlerts from './routes/cs/alerts.js';
 import p2pPay from './routes/p2p/payments.js';
 import foProv from './routes/finops/providers.js';
 import foCost from './routes/finops/cost.js';
@@ -318,6 +325,7 @@ app.use('/api/clm', clmT, clmC, clmR, clmCt, clmEs, clmAp, clmOb, clmRepo);
 app.use('/api/cost', costItems, costRoll, costMO, costVar, costGL);
 app.use('/api/inv', invTxn, invCount);
 app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, cpqSubs);
+app.use('/api/cs', csWeights, csSignals, csHealth, csPlay, csOnb, csQbr, csAlerts);
 
 const port = process.env.PORT || 4000;
 
