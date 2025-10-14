@@ -1,0 +1,13 @@
+name: Experimentation Daily (Analyze + Guardrails)
+on:
+  schedule: [{ cron: "8 6 * * *" }]
+  workflow_dispatch:
+jobs:
+  exp-daily:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/exp/analyze.ts
+      - run: node scripts/exp/guardrails.ts

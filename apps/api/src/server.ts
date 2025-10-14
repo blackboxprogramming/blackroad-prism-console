@@ -225,6 +225,12 @@ import dqContracts from './routes/dq/contracts.js';
 import dqExpects from './routes/dq/expectations.js';
 import dqRun from './routes/dq/run.js';
 import dqSla from './routes/dq/sla.js';
+import expFS from './routes/exp/flags_segments.js';
+import expEX from './routes/exp/experiments.js';
+import expEV from './routes/exp/events.js';
+import expMT from './routes/exp/metrics.js';
+import expRG from './routes/exp/ramps_guardrails.js';
+import expAP from './routes/exp/approvals.js';
 
 dotenv.config();
 
@@ -378,6 +384,7 @@ app.use('/api/admin/licenses', licenses);
 // Example entitlement gate for reco advanced
 app.get('/api/feature/reco-advanced', requireEntitlement('reco_advanced'), (_req,res)=> res.json({ ok:true }));
 app.use('/api/dq', dqSchemas, dqContracts, dqExpects, dqRun, dqSla);
+app.use('/api/exp', expFS, expEX, expEV, expMT, expRG, expAP);
 
 const port = process.env.PORT || 4000;
 
