@@ -16,6 +16,10 @@ deployments:
     provider: aws-ecs-fargate
     workflow: .github/workflows/preview-env.yml
     terraform_directory: infra/preview-env
+    terraform_backend:
+      bucket_secret: PREVIEW_ENV_TF_STATE_BUCKET
+      lock_table_secret: PREVIEW_ENV_TF_LOCK_TABLE
+      key_template: preview/pr-<pr-number>.tfstate
     domain_pattern: https://pr-<pr-number>.dev.blackroad.io
     health_check: https://pr-<pr-number>.dev.blackroad.io/health
     environment:
@@ -36,8 +40,13 @@ deployments:
       - PREVIEW_ENV_SECRETS_JSON
       - SLACK_PREVIEW_CHANNEL
       - SLACK_BOT_TOKEN
+    notifications:
+      slack:
+        channel_secret: SLACK_PREVIEW_CHANNEL
+        token_secret: SLACK_BOT_TOKEN
 change_management:
   approvals: []
 observability:
   verification:
     - terraform output -raw preview_url
+    - aws ecs describe-services --cluster <cluster-arn> --services pr-<pr-number> --region us-east-1

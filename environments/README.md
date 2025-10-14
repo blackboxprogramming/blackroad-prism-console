@@ -18,6 +18,8 @@ in sync:
 - `deployments` — per-service blocks describing workflow triggers, hosting
   providers, Terraform roots (when applicable), and health checks. Use
   `state` inside each block when a service is still being wired up.
+  - When Terraform manages the deployment, include `terraform_backend`
+    metadata so operators know where remote state and locks live.
 - `change_management` — approvals or runbooks that must be followed.
 - `observability` — scripts or commands teams use to verify the environment.
 
