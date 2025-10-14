@@ -1,5 +1,5 @@
 # --- base: python + node ---
-FROM mcr.microsoft.com/devcontainers/python:3.11 as base
+FROM mcr.microsoft.com/devcontainers/python:3.13 as base
 # Includes Debian, git, curl, common build tools
 
 # Node 20 (via NodeSource)
