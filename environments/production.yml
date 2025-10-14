@@ -14,6 +14,44 @@ domains:
   canonical: https://www.blackroad.io
   api: https://api.blackroad.io
   status: https://status.blackroad.io
+infrastructure:
+  cloud: aws
+  region: us-west-2
+  terraform:
+    root: br-infra-iac/envs/prod
+    backend:
+      bucket: br-tfstate-<unique>
+      key: prod/terraform.tfstate
+      region: us-west-2
+      lock_table: br-terraform-lock
+    modules:
+      - modules/network
+      - modules/ecs-cluster
+      - modules/ecr
+      - modules/rds-postgres
+    outputs:
+      - ecs_cluster
+      - private_subnets
+      - db_endpoint
+    repositories:
+      - br-api-gateway
+      - br-products-site
+automation:
+  workflows:
+    - name: BlackRoad • Deploy
+      file: .github/workflows/blackroad-deploy.yml
+      triggers:
+        - push (main)
+        - workflow_dispatch
+      summary: >-
+        Builds the SPA, packages the API, triggers the deploy webhook, verifies
+        health, and posts Slack status updates.
+      secrets:
+        - BR_DEPLOY_SECRET
+        - BR_DEPLOY_URL
+        - CF_ZONE_ID
+        - CF_API_TOKEN
+        - SLACK_WEBHOOK_URL
 deployments:
   - service: marketing-site
     type: static-site

@@ -20,8 +20,18 @@ in sync:
   `state` inside each block when a service is still being wired up.
   - When Terraform manages the deployment, include `terraform_backend`
     metadata so operators know where remote state and locks live.
+- `infrastructure` — cloud region, Terraform roots, and backend state files that
+  provision the footprint.
+- `automation` — deploy workflows, required secrets, and notification routes
+  that move new builds into the environment.
 - `change_management` — approvals or runbooks that must be followed.
 - `observability` — scripts or commands teams use to verify the environment.
+
+The additional `infrastructure` and `automation` sections make it easier for
+release tooling to wire GitHub Actions, Terraform state, and downstream
+dashboards together without trawling the monorepo. Update both sections whenever
+we add a new workflow, change Terraform backends, or swap regions so bots and
+humans stay aligned.
 
 Update the manifest whenever the environment changes (new workflow, Terraform
 module, domain, or approval requirement). These files should stay aligned with
