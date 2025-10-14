@@ -1,0 +1,43 @@
+name: "feat: creator upload + gallery"
+description: "Expose upload → publish → gallery loop for Cadillac Loop creators."
+title: "feat: creator upload + gallery"
+labels:
+  - "type/feature"
+  - "prio/normal"
+assignees:
+  - "Copilot"
+  - "Cecilia"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Overview
+        Build the creator-facing upload flow so testers can move content through the Cadillac Loop.
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Problem statement, solution outline, and any supporting notes.
+      value: |
+        **Problem**
+        No visible upload → publish → gallery flow for testers.
+
+        **Solution**
+        Add upload form, gallery view, and mock balance ticker. Wire to `/api/v1/uploads`.
+
+        **Notes**
+        • Assign @Copilot for API and @Cecilia for UI polish.
+      render: markdown
+  - type: checkboxes
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      options:
+        - label: "Upload form posts to `/api/v1/uploads`"
+        - label: "Uploaded items render in gallery view"
+        - label: "Mock balance ticker increments as views increase"
+  - type: textarea
+    id: updates
+    attributes:
+      label: Status Updates
+      description: Provide launch notes, QA results, and outstanding tasks.
