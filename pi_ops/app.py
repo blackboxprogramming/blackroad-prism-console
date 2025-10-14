@@ -50,6 +50,22 @@ class Message:
         }
 
 
+@dataclass(slots=True)
+class TopicStat:
+    """Aggregated view of message activity per topic."""
+
+    topic: str
+    count: int
+    last_seen: float
+
+    def asdict(self) -> Dict[str, Any]:
+        return {
+            "topic": self.topic,
+            "count": self.count,
+            "last_seen": self.last_seen,
+        }
+
+
 class MessageStore:
     """SQLite-backed ring buffer for MQTT messages."""
 
@@ -102,6 +118,22 @@ class MessageStore:
             )
             rows = cursor.fetchall()
         return [Message(id=row["id"], topic=row["topic"], payload=row["payload"], created_at=row["created_at"]) for row in rows]
+
+    def topic_stats(self, limit: int = 10) -> List[TopicStat]:
+        limit = max(1, limit)
+        with self._lock, closing(self._connection.cursor()) as cursor:
+            cursor.execute(
+                """
+                SELECT topic, COUNT(*) AS count, MAX(created_at) AS last_seen
+                FROM messages
+                GROUP BY topic
+                ORDER BY last_seen DESC
+                LIMIT ?
+                """,
+                (limit,),
+            )
+            rows = cursor.fetchall()
+        return [TopicStat(topic=row["topic"], count=row["count"], last_seen=row["last_seen"]) for row in rows]
 
     def close(self) -> None:
         with self._lock:
@@ -307,6 +339,13 @@ def create_app() -> FastAPI:
             "messages": [msg.asdict() for msg in store.recent(limit=limit)],
         }
 
+    @app.get("/api/stats")
+    async def api_stats(limit: int = 25, store: MessageStore = Depends(get_store)) -> Dict[str, Any]:
+        limit = max(1, min(limit, max_messages))
+        return {
+            "topics": [stat.asdict() for stat in store.topic_stats(limit=limit)],
+        }
+
     @app.post("/api/publish")
     async def api_publish(payload: Dict[str, Any]) -> JSONResponse:
         topic = payload.get("topic")
@@ -498,6 +537,40 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         background: #f87171;
         box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.18);
       }
+      .topic-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+      }
+      .topic-stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.65rem 0.75rem;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+      }
+      .topic-label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      .topic-label strong {
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+      .count-badge {
+        background: rgba(56, 189, 248, 0.18);
+        color: var(--accent);
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 0.2rem 0.65rem;
+        border-radius: 999px;
+        align-self: center;
+      }
       .heartbeat-list {
         display: grid;
         gap: 0.5rem;
@@ -559,6 +632,8 @@ DASHBOARD_HTML = """<!DOCTYPE html>
           <button type=\"submit\">Publish</button>
           <p id=\"publish-status\" class=\"muted\"></p>
         </form>
+        <h2 class=\"section-title\" style=\"margin-top:2rem;\">Topic Activity</h2>
+        <div id=\"topic-stats\" class=\"topic-stats\"></div>
         <h2 class=\"section-title\" style=\"margin-top:2rem;\">Heartbeats</h2>
         <div id=\"heartbeat-list\" class=\"heartbeat-list\"></div>
       </section>
@@ -570,10 +645,12 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     <script>
       const messagesContainer = document.getElementById('messages');
       const heartbeatList = document.getElementById('heartbeat-list');
+      const topicStatsContainer = document.getElementById('topic-stats');
       const publishForm = document.getElementById('publish-form');
       const publishStatus = document.getElementById('publish-status');
 
       const heartbeatState = new Map();
+      const topicStats = new Map();
 
       function iso(ts) {
         try {
@@ -613,6 +690,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
           while (messagesContainer.children.length > 200) {
             messagesContainer.removeChild(messagesContainer.lastChild);
           }
+          updateTopicStats(entry);
           if (entry.topic.startsWith('system/heartbeat')) {
             heartbeatState.set(entry.topic, {
               payload: text,
@@ -646,6 +724,79 @@ DASHBOARD_HTML = """<!DOCTYPE html>
           placeholder.className = 'muted';
           placeholder.textContent = 'No heartbeats received yet.';
           heartbeatList.appendChild(placeholder);
+        }
+      }
+
+      function renderTopicStats() {
+        topicStatsContainer.textContent = '';
+        const items = Array.from(topicStats.entries())
+          .sort((a, b) => b[1].last_seen - a[1].last_seen)
+          .slice(0, 25);
+        if (!items.length) {
+          const placeholder = document.createElement('p');
+          placeholder.className = 'muted';
+          placeholder.textContent = 'No topics observed yet.';
+          topicStatsContainer.appendChild(placeholder);
+          return;
+        }
+        for (const [topic, info] of items) {
+          const item = document.createElement('div');
+          item.className = 'topic-stat';
+          const label = document.createElement('div');
+          label.className = 'topic-label';
+          const title = document.createElement('strong');
+          title.textContent = topic;
+          label.appendChild(title);
+          const meta = document.createElement('span');
+          meta.className = 'timestamp muted';
+          const last = iso(Number(info.last_seen));
+          meta.textContent = last ? `Last ${last}` : 'Last seen —';
+          label.appendChild(meta);
+          const badge = document.createElement('span');
+          badge.className = 'count-badge';
+          badge.textContent = info.count;
+          item.appendChild(label);
+          item.appendChild(badge);
+          topicStatsContainer.appendChild(item);
+        }
+      }
+
+      function updateTopicStats(entry) {
+        if (!entry || !entry.topic) {
+          return;
+        }
+        const createdAt = Number(entry.created_at) || 0;
+        const existing = topicStats.get(entry.topic);
+        if (existing) {
+          if (createdAt > existing.last_seen) {
+            existing.last_seen = createdAt;
+            existing.count += 1;
+            topicStats.set(entry.topic, existing);
+            renderTopicStats();
+          }
+        } else {
+          topicStats.set(entry.topic, { count: 1, last_seen: createdAt });
+          renderTopicStats();
+        }
+      }
+
+      async function loadStats() {
+        try {
+          const res = await fetch('/api/stats?limit=50');
+          const data = await res.json();
+          topicStats.clear();
+          const entries = data.topics || [];
+          for (const stat of entries) {
+            topicStats.set(stat.topic, { count: stat.count, last_seen: stat.last_seen });
+          }
+          renderTopicStats();
+        } catch (err) {
+          console.error('stats load error', err);
+          topicStatsContainer.textContent = '';
+          const placeholder = document.createElement('p');
+          placeholder.className = 'muted';
+          placeholder.textContent = 'Unable to load topic stats.';
+          topicStatsContainer.appendChild(placeholder);
         }
       }
 
@@ -702,9 +853,15 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         }
       });
 
-      loadRecent();
-      setupSSE();
-      renderHeartbeats();
+      async function init() {
+        renderTopicStats();
+        await loadStats();
+        await loadRecent();
+        setupSSE();
+        renderHeartbeats();
+      }
+
+      init();
     </script>
   </body>
 </html>
