@@ -32,7 +32,7 @@ def test_integration_bot_runs_with_mention() -> None:
     assert response.artifacts[0].endswith("slack-handoff.json")
 
 
-def test_integration_bot_awaits_mention() -> None:
+def test_integration_bot_ready_without_mention() -> None:
     registry = available_bots()
     airtable_bot_cls = registry["Airtable-BOT"]
     bot = airtable_bot_cls()
@@ -46,7 +46,8 @@ def test_integration_bot_awaits_mention() -> None:
 
     response = bot.run(task)
 
-    assert response.ok is False
-    assert "Queued" in response.summary
-    assert any("Watch for @blackboxprogramming" in action for action in response.next_actions)
+    assert response.ok is True
+    assert "Ready" in response.summary
+    assert response.data["linear_payload"]["status"] == "ready"
+    assert any("Open the Linear draft proactively" in action for action in response.next_actions)
 
