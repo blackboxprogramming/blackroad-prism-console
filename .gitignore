@@ -51,6 +51,8 @@ __pycache__/
 **/*.egg-info/
 codex/runtime/
 benchmarks/
+*.egg-info/
+
 
 # Lucidia artifacts
 secrets/*
