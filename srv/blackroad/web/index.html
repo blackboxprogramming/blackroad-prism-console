@@ -184,6 +184,105 @@ function BackRoadPage({agents,setAgents,streamOn,setStreamOn,wallet,setWallet,no
 
   useEffect(()=>()=>stopCaptions(true),[stopCaptions]);
   useEffect(()=>{if(capLogRef.current) capLogRef.current.scrollTop = capLogRef.current.scrollHeight;},[capLog]);
+  const audioRef = useRef(null);
+  const wsRef = useRef(null);
+  const [whisperLog,setWhisperLog] = useState('');
+  const [whisperSession,setWhisperSession] = useState('');
+  const [whisperBusy,setWhisperBusy] = useState(false);
+
+  const closeWs = () => {
+    if(wsRef.current){
+      try{ wsRef.current.close(); }catch(_){/* noop */}
+      wsRef.current = null;
+    }
+  };
+
+  useEffect(()=>{
+    return ()=>closeWs();
+  },[]);
+
+  const appendLog = line => setWhisperLog(prev => prev ? `${prev}\n${line}` : line);
+
+  function startStream(path, token){
+    closeWs();
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${proto}://${location.host}${path}`);
+    wsRef.current = ws;
+    ws.onopen = () => {
+      const payload = { token, lang:'en', model:'base', beam:5 };
+      ws.send(JSON.stringify(payload));
+    };
+    ws.onmessage = ev => {
+      const data = typeof ev.data === 'string' ? ev.data : '';
+      if(!data) return;
+      if(data.startsWith('[[BLACKROAD_SESSION:')){
+        const id = data.replace('[[BLACKROAD_SESSION:','').replace(']]','');
+        setWhisperSession(id);
+        return;
+      }
+      if(data === '[[BLACKROAD_WHISPER_DONE]]'){
+        appendLog('[done]');
+        setWhisperBusy(false);
+        ws.close();
+        return;
+      }
+      appendLog(data);
+    };
+    ws.onerror = () => {
+      appendLog('[error] stream error');
+      setWhisperBusy(false);
+    };
+    ws.onclose = () => {
+      wsRef.current = null;
+      setWhisperBusy(false);
+    };
+  }
+
+  async function uploadAndStream(mode){
+    const file = audioRef.current?.files?.[0];
+    if(!file){
+      setWhisperLog('Pick an audio file.');
+      setWhisperSession('');
+      return;
+    }
+    setWhisperLog('Uploading audio…');
+    setWhisperSession('');
+    setWhisperBusy(true);
+    try{
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/transcribe/upload',{method:'POST',body:fd});
+      if(!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      if(!data?.token) throw new Error('Upload failed');
+      appendLog(mode==='gpu' ? 'Starting Jetson stream…' : 'Starting local stream…');
+      startStream(mode==='gpu'?'/ws/transcribe/run_gpu':'/ws/transcribe/run', data.token);
+    }catch(err){
+      setWhisperBusy(false);
+      appendLog(`[error] ${err?.message || err}`);
+    }
+  }
+
+  async function downloadTranscript(){
+    if(!whisperSession) return;
+    try{
+      const res = await fetch(`/transcripts/${encodeURIComponent(whisperSession)}`);
+      if(!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      if(!data?.text) throw new Error(data?.error || 'Transcript empty');
+      const blob = new Blob([data.text],{type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${whisperSession}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }catch(err){
+      appendLog(`[error] transcript download failed: ${err?.message || err}`);
+    }
+  }
 
   return(
     <div style={{display:'grid',gap:10}}>
@@ -199,6 +298,8 @@ function BackRoadPage({agents,setAgents,streamOn,setStreamOn,wallet,setWallet,no
         <input type="checkbox" checked={streamOn} onChange={()=>setStreamOn(s=>!s)}/>
         <span>Stream</span>
       </label>
+      <div style={{display:'flex',gap:8}}>{Object.keys(agents).map(k=>(<label key={k} class="chip" style={{cursor:'pointer'}}><input type="checkbox" checked={agents[k]} onChange={()=>setAgents(a=>({...a,[k]:!a[k]}))}/> {k}</label>))}</div>
+      <label style={{display:'inline-flex',alignItems:'center',gap:8}}><input type="checkbox" checked={streamOn} onChange={()=>setStreamOn(s=>!s)}/><span>Stream</span></label>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
         <div>
           <div style={{fontWeight:700}}>Wallet</div>
@@ -219,6 +320,21 @@ function BackRoadPage({agents,setAgents,streamOn,setStreamOn,wallet,setWallet,no
       </div>
       <div style={{fontWeight:700}}>Session Notes</div>
       <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Type notes…" style={{minHeight:140,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:10}}/>
+      <div style={{fontWeight:700}}>Session Notes</div>
+      <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Type notes…" style={{minHeight:140,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:10}}/>
+      <div style={{marginTop:6,padding:12,border:'1px solid var(--border)',borderRadius:12,background:'#0b1324',display:'grid',gap:10}}>
+        <div style={{fontWeight:700}}>Whisper (Streaming)</div>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+          <input type="file" accept="audio/*" ref={audioRef} disabled={whisperBusy}/>
+          <button class="btn small" disabled={whisperBusy} onClick={()=>uploadAndStream('cpu')}>Transcribe (stream)</button>
+          <button class="btn small" disabled={whisperBusy} onClick={()=>uploadAndStream('gpu')}>Transcribe on Jetson (GPU)</button>
+        </div>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+          <button class="btn small" disabled={!whisperSession} onClick={downloadTranscript}>Download transcript</button>
+          {whisperSession && <div class="chip">Session: {whisperSession}</div>}
+        </div>
+        <pre style={{minHeight:140,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#e2e8f0',padding:10,whiteSpace:'pre-wrap'}}>{whisperLog || 'Pick an audio file and start a run.'}</pre>
+      </div>
     </div>
   )
 }
