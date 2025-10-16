@@ -253,6 +253,10 @@ import DrumWaveLab from "./pages/DrumWaveLab.jsx";
 import PendulumLab from "./pages/PendulumLab.jsx";
 import PowerJuliaLab from "./pages/PowerJuliaLab.jsx";
 import PenroseToyLab from "./pages/PenroseToyLab.jsx";
+import DLALab from "./pages/DLALab.jsx";
+import SIRLab from "./pages/SIRLab.jsx";
+import BezierBSplineLab from "./pages/BezierBSplineLab.jsx";
+import SpectralClusteringLab from "./pages/SpectralClusteringLab.jsx";
 
   return state;
 }
@@ -347,6 +351,10 @@ function LegacyApp() {
             <Route path="/pendulum" element={<PendulumLab/>} />
             <Route path="/pzoo" element={<PowerJuliaLab/>} />
             <Route path="/penrose" element={<PenroseToyLab/>} />
+            <Route path="/dla" element={<DLALab/>} />
+            <Route path="/sir" element={<SIRLab/>} />
+            <Route path="/curves" element={<BezierBSplineLab/>} />
+            <Route path="/spec" element={<SpectralClusteringLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -379,6 +387,10 @@ function LegacyApp() {
             <Route path="pendulum" element={<PendulumLab/>} />
             <Route path="pzoo" element={<PowerJuliaLab/>} />
             <Route path="penrose" element={<PenroseToyLab/>} />
+            <Route path="dla" element={<DLALab/>} />
+            <Route path="sir" element={<SIRLab/>} />
+            <Route path="curves" element={<BezierBSplineLab/>} />
+            <Route path="spec" element={<SpectralClusteringLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
