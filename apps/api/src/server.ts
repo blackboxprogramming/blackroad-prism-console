@@ -244,6 +244,13 @@ import esgCarbon from './routes/esg/carbon.js';
 import esgDei from './routes/esg/dei.js';
 import esgEthics from './routes/esg/ethics.js';
 import esgReports from './routes/esg/reports.js';
+import faPolicy from './routes/fa/policy.js';
+import faAssets from './routes/fa/assets.js';
+import faDepr from './routes/fa/depr.js';
+import faGL from './routes/fa/gl.js';
+import leaseContracts from './routes/leases/contracts.js';
+import leaseSchedule from './routes/leases/schedule.js';
+import leaseJournal from './routes/leases/journal.js';
 
 dotenv.config();
 import express from "express";
@@ -439,6 +446,8 @@ app.use('/api/esg', esgActivity, esgCarbon, esgDei, esgEthics, esgReports);
 app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamTokens, iamSecrets, iamDevices);
 app.use("/", classifyRouter);
 app.use("/", exceptionsRouter);
+app.use('/api/fa', faPolicy, faAssets, faDepr, faGL);
+app.use('/api/leases', leaseContracts, leaseSchedule, leaseJournal);
 
 const port = process.env.PORT || 4000;
 
