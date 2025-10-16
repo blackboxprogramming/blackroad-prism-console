@@ -1,0 +1,93 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/blackroad/autopal
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: autopal.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: null
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+config:
+  enabled: true
+  path: /app/config/autopal.config.json
+  mountPath: /app/config
+
+appConfig:
+  global_enabled: true
+  dual_control_timeout_seconds: 900
+  endpoints: {}
+
+redis:
+  url: ""
+  secret:
+    name: ""
+    key: REDIS_URL
+
+secrets:
+  breakGlass:
+    secretName: ""
+    key: AUTOPAL_BREAK_GLASS_SECRET
+    value: ""
+
+env:
+  extra: []
+
+livenessProbe:
+  enabled: true
+  path: /health/live
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  enabled: true
+  path: /health/ready
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+serviceMonitor:
+  enabled: false
+  additionalLabels: {}
+  interval: 30s
+  scrapeTimeout: 10s
