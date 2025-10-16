@@ -1,0 +1,124 @@
+import { useMemo, useState } from "react";
+import ActiveReflection from "./ActiveReflection.jsx";
+
+function rng(seed){ let s=seed|0||2025; return ()=> (s=(1664525*s+1013904223)>>>0)/2**32; }
+function randn(r){ const u=Math.max(r(),1e-12), v=Math.max(r(),1e-12); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+
+function makeData(n, k, sep, seed){
+  const r=rng(seed);
+  const centers = Array.from({length:k},()=>[sep*(r()-0.5), sep*(r()-0.5)]);
+  const pts=[];
+  for(let i=0;i<n;i++){
+    const c=centers[i%k];
+    pts.push([ c[0] + 0.35*randn(r), c[1] + 0.35*randn(r) ]);
+  }
+  return pts;
+}
+function kmeans(X, k, iters=50){
+  const n=X.length; const idx=Array(n).fill(0);
+  let C=X.slice(0,k).map(p=>p.slice());
+  for(let it=0; it<iters; it++){
+    // assign
+    for(let i=0;i<n;i++){
+      let best=0, bd=Infinity; for(let c=0;c<k;c++){ const d=(X[i][0]-C[c][0])**2+(X[i][1]-C[c][1])**2; if(d<bd){bd=d; best=c;} }
+      idx[i]=best;
+    }
+    // update
+    const sum=Array.from({length:k},()=>[0,0]); const cnt=Array(k).fill(0);
+    for(let i=0;i<n;i++){ sum[idx[i]][0]+=X[i][0]; sum[idx[i]][1]+=X[i][1]; cnt[idx[i]]++; }
+    for(let c=0;c<k;c++){ if(cnt[c]){ C[c][0]=sum[c][0]/cnt[c]; C[c][1]=sum[c][1]/cnt[c]; } }
+  }
+  return {labels:idx, centers:C};
+}
+function spectral(X, k, sigma=0.8){
+  const n=X.length;
+  const W=Array.from({length:n},()=>Array(n).fill(0));
+  for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
+    const d=(X[i][0]-X[j][0])**2+(X[i][1]-X[j][1])**2;
+    const w=Math.exp(-d/(2*sigma*sigma)); W[i][j]=W[j][i]=w;
+  }
+  const D=Array(n).fill(0); for(let i=0;i<n;i++) D[i]=W[i].reduce((a,b)=>a+b,0);
+  // normalized Laplacian Lsym = I - D^{-1/2} W D^{-1/2}; power iteration to get first k eigenvectors (skip trivial)
+  // We'll build a simple embedding by (I - αL)^(T) * random, then k-means in embedding.
+  const alpha=1/(Math.max(...D)+1e-9);
+  const M=(v)=>{
+    // (I - αL) v
+    const y=Array(n).fill(0);
+    for(let i=0;i<n;i++){
+      let sum=0; for(let j=0;j<n;j++) sum += (i===j?D[i]:-W[i][j]) * v[j];
+      y[i] = v[i] - alpha*sum;
+    }
+    // center & normalize
+    const mean=y.reduce((a,b)=>a+b,0)/n; for(let i=0;i<n;i++) y[i]-=mean;
+    const norm=Math.sqrt(y.reduce((a,b)=>a+b*b,0))||1; for(let i=0;i<n;i++) y[i]/=norm;
+    return y;
+  };
+  // build k-dim features by iterating from k random seeds
+  const r=()=>Array(n).fill(0).map(_=>Math.random()*2-1);
+  const feats=Array.from({length:k},()=>{ let v=r(); for(let t=0;t<80;t++) v=M(v); return v; });
+  const F=Array.from({length:n},(_,i)=> feats.map(f=>f[i]));
+  return kmeans(F, k, 50).labels;
+}
+
+export default function ClusteringCompareLab(){
+  const [n,setN]=useState(300);
+  const [k,setK]=useState(3);
+  const [sep,setSep]=useState(3.2);
+  const [seed,setSeed]=useState(7);
+
+  const data = useMemo(()=> makeData(n,k,sep,seed),[n,k,sep,seed]);
+  const km = useMemo(()=> kmeans(data, k),[data,k]);
+  const sp = useMemo(()=> spectral(data, k),[data,k]);
+
+  return (
+    <div className="p-4 space-y-3">
+      <h2 className="text-xl font-semibold">K-Means vs Spectral — side-by-side</h2>
+      <div className="grid" style={{gridTemplateColumns:"1fr 1fr", gap:16}}>
+        <Scatter title="K-Means" pts={data} labels={km.labels}/>
+        <Scatter title="Spectral" pts={data} labels={sp}/>
+      </div>
+      <div className="grid" style={{gridTemplateColumns:"1fr 320px", gap:16}}>
+        <div />
+        <section className="p-3 rounded-lg bg-white/5 border border-white/10">
+          <Slider label="points" v={n} set={setN} min={80} max={1000} step={20}/>
+          <Slider label="clusters k" v={k} set={setK} min={2} max={5} step={1}/>
+          <Slider label="separation" v={sep} set={setSep} min={1.2} max={5.0} step={0.1}/>
+          <Slider label="seed" v={seed} set={setSeed} min={1} max={9999} step={1}/>
+          <ActiveReflection
+            title="Active Reflection — Clustering"
+            storageKey="reflect_cluster_compare"
+            prompts={[
+              "Where does k-means fail (non-convex clusters) but spectral succeeds?",
+              "How does increasing separation affect agreement between methods?",
+              "Try k=2–4: when do both pick the same boundaries?"
+            ]}
+          />
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function Scatter({title, pts, labels}){
+  const W=640,H=360,pad=20;
+  const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]);
+  const minX=Math.min(...xs), maxX=Math.max(...xs);
+  const minY=Math.min(...ys), maxY=Math.max(...ys);
+  const X=x=> pad+(x-minX)/(maxX-minX+1e-9)*(W-2*pad);
+  const Y=y=> H-pad-(y-minY)/(maxY-minY+1e-9)*(H-2*pad);
+  return (
+    <section className="p-3 rounded-lg bg-white/5 border border-white/10">
+      <h3 className="font-semibold mb-2">{title}</h3>
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
+        {pts.map((p,i)=><circle key={i} cx={X(p[0])} cy={Y(p[1])} r="3"/>)}
+      </svg>
+    </section>
+  );
+}
+function Slider({label,v,set,min,max,step}){
+  const show=(typeof v==='number'&&v.toFixed)?v.toFixed(2):v;
+  return (<div className="mb-2"><label className="text-sm opacity-80">{label}: <b>{show}</b></label>
+    <input className="w-full" type="range" min={min} max={max} step={step}
+           value={v} onChange={e=>set(parseFloat(e.target.value))}/></div>);
+}
+

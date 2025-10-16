@@ -233,6 +233,12 @@ function useApiHealth() {
       cancelled = true;
     };
   }, []);
+import AutoDiffLab from "./pages/AutoDiffLab.jsx";
+import ConformalGridLab from "./pages/ConformalGridLab.jsx";
+import MaxFlowLab from "./pages/MaxFlowLab.jsx";
+import BezierSurfaceLab from "./pages/BezierSurfaceLab.jsx";
+import ClusteringCompareLab from "./pages/ClusteringCompareLab.jsx";
+import MarchingSquaresLab from "./pages/MarchingSquaresLab.jsx";
 
   return state;
 }
@@ -293,6 +299,49 @@ function LegacyApp() {
               <Route key={path} path={path} element={<Component />} />
             ))}
             <Route path="*" element={<NotFound />} />
+            <Route path="/" element={<Chat/>} />
+            <Route path="/chat" element={<Chat/>} />
+            <Route path="/canvas" element={<Canvas/>} />
+            <Route path="/editor" element={<Editor/>} />
+            <Route path="/terminal" element={<Terminal/>} />
+            <Route path="/roadview" element={<RoadView/>} />
+            <Route path="/backroad" element={<Backroad/>} />
+            <Route path="/agents" element={<Agents/>} />
+            <Route path="/subscribe" element={<Subscribe/>} />
+            <Route path="/lucidia" element={<Lucidia/>} />
+            <Route path="/math" element={<InfinityMath/>} />
+            <Route path="/ot" element={<OptimalTransportLab/>} />
+            <Route path="/bifurcate" element={<BifurcationLab/>} />
+            <Route path="/cfrac" element={<ContinuedFractionsLab/>} />
+            <Route path="/qjulia" element={<QuatJuliaLab/>} />
+            <Route path="/fluids" element={<StableFluidsLab/>} />
+            <Route path="/autodiff" element={<AutoDiffLab/>} />
+            <Route path="/conformal" element={<ConformalGridLab/>} />
+            <Route path="/maxflow" element={<MaxFlowLab/>} />
+            <Route path="/bezier3d" element={<BezierSurfaceLab/>} />
+            <Route path="/cluster2" element={<ClusteringCompareLab/>} />
+            <Route path="/implicit" element={<MarchingSquaresLab/>} />
+            <Route path="chat" element={<Chat/>} />
+            <Route path="canvas" element={<Canvas/>} />
+            <Route path="editor" element={<Editor/>} />
+            <Route path="terminal" element={<Terminal/>} />
+            <Route path="roadview" element={<RoadView/>} />
+            <Route path="backroad" element={<Backroad/>} />
+            <Route path="subscribe" element={<Subscribe/>} />
+            <Route path="lucidia" element={<Lucidia/>} />
+            <Route path="math" element={<InfinityMath/>} />
+            <Route path="ot" element={<OptimalTransportLab/>} />
+            <Route path="bifurcate" element={<BifurcationLab/>} />
+            <Route path="cfrac" element={<ContinuedFractionsLab/>} />
+            <Route path="qjulia" element={<QuatJuliaLab/>} />
+            <Route path="fluids" element={<StableFluidsLab/>} />
+            <Route path="autodiff" element={<AutoDiffLab/>} />
+            <Route path="conformal" element={<ConformalGridLab/>} />
+            <Route path="maxflow" element={<MaxFlowLab/>} />
+            <Route path="bezier3d" element={<BezierSurfaceLab/>} />
+            <Route path="cluster2" element={<ClusteringCompareLab/>} />
+            <Route path="implicit" element={<MarchingSquaresLab/>} />
+            <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
       </main>
