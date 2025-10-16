@@ -247,6 +247,12 @@ import RRTStarLab from "./pages/RRTStarLab.jsx";
 import FourierPainterLab from "./pages/FourierPainterLab.jsx";
 import HilbertMortonLab from "./pages/HilbertMortonLab.jsx";
 import IsingMaxCutLab from "./pages/IsingMaxCutLab.jsx";
+import BifurcationLab from "./pages/BifurcationLab.jsx";
+import ContinuedFractionsLab from "./pages/ContinuedFractionsLab.jsx";
+import DrumWaveLab from "./pages/DrumWaveLab.jsx";
+import PendulumLab from "./pages/PendulumLab.jsx";
+import PowerJuliaLab from "./pages/PowerJuliaLab.jsx";
+import PenroseToyLab from "./pages/PenroseToyLab.jsx";
 
   return state;
 }
@@ -337,6 +343,10 @@ function LegacyApp() {
             <Route path="/epicycles" element={<FourierPainterLab/>} />
             <Route path="/hilbert" element={<HilbertMortonLab/>} />
             <Route path="/maxcut" element={<IsingMaxCutLab/>} />
+            <Route path="/drum" element={<DrumWaveLab/>} />
+            <Route path="/pendulum" element={<PendulumLab/>} />
+            <Route path="/pzoo" element={<PowerJuliaLab/>} />
+            <Route path="/penrose" element={<PenroseToyLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -365,6 +375,10 @@ function LegacyApp() {
             <Route path="epicycles" element={<FourierPainterLab/>} />
             <Route path="hilbert" element={<HilbertMortonLab/>} />
             <Route path="maxcut" element={<IsingMaxCutLab/>} />
+            <Route path="drum" element={<DrumWaveLab/>} />
+            <Route path="pendulum" element={<PendulumLab/>} />
+            <Route path="pzoo" element={<PowerJuliaLab/>} />
+            <Route path="penrose" element={<PenroseToyLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
