@@ -1,0 +1,69 @@
+{
+  "alexa_louise": {
+    "display": "Alexa Louise",
+    "slug": "alexa-louise",
+    "aliases": [
+      "Alexa L.",
+      "A. Louise"
+    ],
+    "quirks": {
+      "preserve_space_between": true,
+      "no_autocorrect": true,
+      "case_sensitive_display": true
+    },
+    "meta": {
+      "notes": "Use two-word display with space; slug keeps lowercase hyphenation.",
+      "created_at": "2025-02-18"
+    }
+  },
+  "blackroad": {
+    "display": "BlackRoad",
+    "slug": "blackroad",
+    "aliases": [
+      "Black Road",
+      "BR"
+    ],
+    "quirks": {
+      "case_sensitive_display": true,
+      "preserve_space_between": false,
+      "no_autocorrect": true
+    },
+    "meta": {
+      "notes": "Brand name prefers camel-case display without a space; allow space alias for search.",
+      "created_at": "2025-02-18"
+    }
+  },
+  "lucidia": {
+    "display": "Lucidia",
+    "slug": "lucidia",
+    "aliases": [
+      "Lucidia AI",
+      "Project Lucidia"
+    ],
+    "quirks": {
+      "case_sensitive_display": true,
+      "no_autocorrect": true
+    },
+    "meta": {
+      "notes": "Default display is single word; aliases cover marketing references.",
+      "created_at": "2025-02-18"
+    }
+  },
+  "tosha_lastname": {
+    "display": "Tosha LastName",
+    "slug": "tosha-lastname",
+    "aliases": [
+      "Tosha L",
+      "T LastName"
+    ],
+    "quirks": {
+      "preserve_space_between": true,
+      "no_autocorrect": true,
+      "case_sensitive_display": true
+    },
+    "meta": {
+      "notes": "Display keeps space between given and surname; slug uses hyphen.",
+      "created_at": "2025-02-18"
+    }
+  }
+}
