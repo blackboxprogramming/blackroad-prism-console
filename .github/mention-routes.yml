@@ -45,4 +45,7 @@ routes:
       - "infra/**"
       - ".github/workflows/**"
     mention: "@blackboxprogramming/platform"
+    mention: "@your-handle"   # swap with your GH username
+
+# Always mention these on every PR (optional)
 always: []
