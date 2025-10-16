@@ -34,4 +34,16 @@ We’ll demo connect→data→dashboard in one motion Friday.
 ## #security — Token handling
 ```
 Tokens are never stored in DB; only SSM SecureString refs are. Rotate by overwriting the same param; revoke at provider any time.
+## #products-prism — GitHub connector live
+```
+GitHub connector is live end-to-end:
+- PAT connect + repo list
+- Ingest worker (watermark + rate limits)
+- Metrics API for opened/closed/open bugs
+- Tiles wired; visible on dashboard + /healthz/ui
+```
+
+## #security — GitHub PAT handling
+```
+PATs never hit the DB; SSM SecureString only. Rotate by overwriting the SSM param.
 ```

@@ -13,13 +13,19 @@ async function fetchSeries(path: string) {
 export default async function UIHealth() {
   let events: any[] = [];
   let errors: any[] = [];
+  let ghOpened: any[] = [];
+  let ghClosed: any[] = [];
+  let ghBugs: any[] = [];
   let ok = true;
   let msg = 'OK';
 
   try {
-    [events, errors] = await Promise.all([
+    [events, errors, ghOpened, ghClosed, ghBugs] = await Promise.all([
       fetchSeries('/v1/metrics/events?from=-P2D'),
       fetchSeries('/v1/metrics/errors?from=-P2D'),
+      fetchSeries('/v1/metrics/github/issues_opened?from=-P7D'),
+      fetchSeries('/v1/metrics/github/issues_closed?from=-P7D'),
+      fetchSeries('/v1/metrics/github/open_bugs'),
     ]);
   } catch (e: any) {
     ok = false;
@@ -47,6 +53,9 @@ export default async function UIHealth() {
       <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
         <Tile title="Events (2d)" series={events} rangeLabel="2d" />
         <Tile title="Errors (2d)" series={errors} rangeLabel="2d" />
+        <Tile title="GH Issues Opened (7d)" series={ghOpened} rangeLabel="7d" />
+        <Tile title="GH Issues Closed (7d)" series={ghClosed} rangeLabel="7d" />
+        <Tile title="Open Bugs (now)" series={ghBugs} rangeLabel="now" />
       </div>
       <p style={{ fontSize: 12, color: '#666', marginTop: 16 }}>
         This page checks API reachability, auth header, JSON shape, and rendering. Good for quick sanity before demos.
