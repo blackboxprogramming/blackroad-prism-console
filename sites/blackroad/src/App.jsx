@@ -262,6 +262,28 @@ import SpectralPoissonLab from "./pages/SpectralPoissonLab.jsx";
 import EllipsoidGeodesicLab from "./pages/EllipsoidGeodesicLab.jsx";
 import QuasiConformalEggLab from "./pages/QuasiConformalEggLab.jsx";
 
+import FastMarchTreeLab from "./pages/FastMarchTreeLab.jsx";
+import HungarianLab from "./pages/HungarianLab.jsx";
+import QuaternionRotLab from "./pages/QuaternionRotLab.jsx";
+import ComplexBarycentricLab from "./pages/ComplexBarycentricLab.jsx";
+
+function useApiHealth(){
+  const [state,setState]=useState({ok:null, info:""});
+  useEffect(()=>{ let dead=false;
+    (async()=>{
+      const probe = async (path)=>{
+        try{
+          const r = await fetch(path,{cache:"no-store"});
+          const t = await r.text();
+          let info=""; try{ const j=JSON.parse(t); info=`${j.status||"ok"} • ${j.time||""}`; }catch{}
+          return {ok:r.ok, info};
+        }catch{ return {ok:false, info:""} }
+      };
+      let res = await probe("/api/health");
+      if(!res.ok) res = await probe("/api/health.json");
+      if(!dead) setState(res);
+    })(); return ()=>{dead=true};
+  },[]);
   return state;
 }
 
@@ -363,6 +385,10 @@ function LegacyApp() {
             <Route path="/poisson" element={<SpectralPoissonLab/>} />
             <Route path="/ellipsoid" element={<EllipsoidGeodesicLab/>} />
             <Route path="/qc-egg" element={<QuasiConformalEggLab/>} />
+            <Route path="/fmm-tree" element={<FastMarchTreeLab/>} />
+            <Route path="/hungarian" element={<HungarianLab/>} />
+            <Route path="/quat" element={<QuaternionRotLab/>} />
+            <Route path="/bary" element={<ComplexBarycentricLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -403,6 +429,10 @@ function LegacyApp() {
             <Route path="poisson" element={<SpectralPoissonLab/>} />
             <Route path="ellipsoid" element={<EllipsoidGeodesicLab/>} />
             <Route path="qc-egg" element={<QuasiConformalEggLab/>} />
+            <Route path="fmm-tree" element={<FastMarchTreeLab/>} />
+            <Route path="hungarian" element={<HungarianLab/>} />
+            <Route path="quat" element={<QuaternionRotLab/>} />
+            <Route path="bary" element={<ComplexBarycentricLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
