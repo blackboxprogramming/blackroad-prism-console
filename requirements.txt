@@ -42,3 +42,4 @@ requests==2.32.2
 streamlit==1.35.0
 torch
 whisper
+reportlab==4.1.0
