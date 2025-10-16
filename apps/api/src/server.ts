@@ -251,6 +251,17 @@ import faGL from './routes/fa/gl.js';
 import leaseContracts from './routes/leases/contracts.js';
 import leaseSchedule from './routes/leases/schedule.js';
 import leaseJournal from './routes/leases/journal.js';
+import partnersOnboard from './routes/partners/onboard.js';
+import partnersApps from './routes/partners/apps.js';
+import marketList from './routes/marketplace/list.js';
+import marketInstall from './routes/marketplace/install.js';
+import marketUninstall from './routes/marketplace/uninstall.js';
+import partnerRev from './routes/partners/revshare.js';
+import sandboxEcho from './routes/sandbox/echo.js';
+import oauthAuthorize from './routes/oauth/authorize.js';
+import oauthToken from './routes/oauth/token.js';
+import oauthRevoke from './routes/oauth/revoke.js';
+import oauthRotate from './routes/oauth/rotate.js';
 
 dotenv.config();
 import express from "express";
@@ -448,6 +459,12 @@ app.use("/", classifyRouter);
 app.use("/", exceptionsRouter);
 app.use('/api/fa', faPolicy, faAssets, faDepr, faGL);
 app.use('/api/leases', leaseContracts, leaseSchedule, leaseJournal);
+app.use('/api/partners', partnersOnboard);
+app.use('/api/partners', partnersApps);
+app.use('/api/marketplace', marketList, marketInstall, marketUninstall);
+app.use('/api/partners', partnerRev);
+app.use('/api/sandbox', sandboxEcho);
+app.use('/oauth', oauthAuthorize, oauthToken, oauthRevoke, oauthRotate);
 
 const port = process.env.PORT || 4000;
 
