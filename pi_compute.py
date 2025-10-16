@@ -3,6 +3,7 @@
 # Usage examples:
 #   python3 pi_compute.py --digits 2000                  # Chudnovsky (default)
 #   python3 pi_compute.py --digits 2000 --method chud
+#   python3 pi_compute.py --digits 2000 --method gauss
 #   python3 pi_compute.py --terms 2_000_000 --method leibniz
 #   python3 pi_compute.py --samples 50_000_000 --method montecarlo
 #   python3 pi_compute.py --digits 5000 --out pi.txt
@@ -123,6 +124,38 @@ def monte_carlo_pi(samples: int, seed: int = 42) -> str:
     return f"{est:.10f} (±{sigma:.10f} @1σ)"
 
 
+def gauss_legendre_pi(digits: int, max_iterations: int = 10) -> str:
+    """
+    Compute pi via the Gauss–Legendre algorithm.
+
+    Converges quadratically (doubles digits per iteration) and is well-suited
+    for moderate precision targets on resource-constrained hardware.
+    """
+
+    prec = digits + 15
+    getcontext().prec = prec
+
+    a = Decimal(1)
+    b = Decimal(1) / Decimal(2).sqrt()
+    t = Decimal(0.25)
+    p = Decimal(1)
+    epsilon = Decimal(10) ** (-(digits + 5))
+
+    for _ in range(max_iterations):
+        a_next = (a + b) / 2
+        b_next = (a * b).sqrt()
+        diff = a - a_next
+        t -= p * diff * diff
+        a = a_next
+        b = b_next
+        p *= 2
+        if abs(a - b) < epsilon:
+            break
+
+    pi = ((a + b) ** 2) / (4 * t)
+    return f"{pi:.{digits}f}"
+
+
 def verify_prefix(s: str) -> str:
     """
     Return a short check comparing the first known digits.
@@ -136,9 +169,12 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Compute π on a Raspberry Pi (several methods).")
     ap.add_argument(
         "--method",
-        choices=["chud", "leibniz", "montecarlo"],
+        choices=["chud", "gauss", "leibniz", "montecarlo"],
         default="chud",
-        help="chud = Chudnovsky (fast), leibniz = slow series, montecarlo = random estimate",
+        help=(
+            "chud = Chudnovsky (fast), gauss = Gauss-Legendre, "
+            "leibniz = slow series, montecarlo = random estimate"
+        ),
     )
     ap.add_argument("--digits", type=int, default=2000, help="decimal digits for chudnovsky")
     ap.add_argument("--terms", type=int, default=2_000_000, help="terms for leibniz")
@@ -167,6 +203,23 @@ def main() -> None:
             head = res[:80]
             tail = res[-80:] if len(res) > 160 else ""
             print(f"π (head 80): {head}{'…' if tail else ''}")
+            if tail:
+                print(f"π (tail 80): {tail}")
+
+    elif args.method == "gauss":
+        res = gauss_legendre_pi(args.digits)
+        elapsed = time.time() - t0
+        print(f"[method=gauss-legendre digits={args.digits}]")
+        print(verify_prefix(res))
+        print(f"time_sec={elapsed:.2f}")
+        if args.out:
+            with open(args.out, "w") as f:
+                f.write(res + "\n")
+            print(f"wrote: {args.out}")
+        else:
+            preview = res[:80]
+            tail = res[-80:] if len(res) > 160 else ""
+            print(f"π (head 80): {preview}{'…' if tail else ''}")
             if tail:
                 print(f"π (tail 80): {tail}")
 

@@ -2,7 +2,10 @@
 
 Date: 2025-08-22
 
-Requires Node.js 20 or later.
+Requires Node.js 20 or later. If you're bootstrapping a Red Hat Enterprise Linux
+(or CentOS Stream) host, follow the step-by-step guide in
+[`docs/rhel-node-web-console.md`](docs/rhel-node-web-console.md) to enable the
+Cockpit web console and install Node.js 20 with `dnf`.
 
 This bundle is a **drop-in helper** to resolve “missing dependencies etc.” without requiring
 connector access. Push it into your working copy, then run one script on the server to scan
