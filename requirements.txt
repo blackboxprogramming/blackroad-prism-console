@@ -4,6 +4,7 @@ fastapi
 httpx
 PyJWT[crypto]
 cryptography
+faster-whisper
 matplotlib==3.9.4
 mpmath
 notion-client

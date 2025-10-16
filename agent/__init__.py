@@ -8,3 +8,7 @@ from .config import active_target, set_target
 
 __all__ = ["active_target", "set_target"]
 """Utility modules for the BlackRoad dashboard service."""
+"""Utilities for the BlackRoad Pi voice pipeline."""
+
+__all__ = ["config", "store", "transcribe"]
+
