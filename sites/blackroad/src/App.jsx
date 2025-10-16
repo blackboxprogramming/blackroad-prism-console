@@ -257,6 +257,10 @@ import DLALab from "./pages/DLALab.jsx";
 import SIRLab from "./pages/SIRLab.jsx";
 import BezierBSplineLab from "./pages/BezierBSplineLab.jsx";
 import SpectralClusteringLab from "./pages/SpectralClusteringLab.jsx";
+import BeltramiTorusLab from "./pages/BeltramiTorusLab.jsx";
+import SpectralPoissonLab from "./pages/SpectralPoissonLab.jsx";
+import EllipsoidGeodesicLab from "./pages/EllipsoidGeodesicLab.jsx";
+import QuasiConformalEggLab from "./pages/QuasiConformalEggLab.jsx";
 
   return state;
 }
@@ -355,6 +359,10 @@ function LegacyApp() {
             <Route path="/sir" element={<SIRLab/>} />
             <Route path="/curves" element={<BezierBSplineLab/>} />
             <Route path="/spec" element={<SpectralClusteringLab/>} />
+            <Route path="/beltrami" element={<BeltramiTorusLab/>} />
+            <Route path="/poisson" element={<SpectralPoissonLab/>} />
+            <Route path="/ellipsoid" element={<EllipsoidGeodesicLab/>} />
+            <Route path="/qc-egg" element={<QuasiConformalEggLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -391,6 +399,10 @@ function LegacyApp() {
             <Route path="sir" element={<SIRLab/>} />
             <Route path="curves" element={<BezierBSplineLab/>} />
             <Route path="spec" element={<SpectralClusteringLab/>} />
+            <Route path="beltrami" element={<BeltramiTorusLab/>} />
+            <Route path="poisson" element={<SpectralPoissonLab/>} />
+            <Route path="ellipsoid" element={<EllipsoidGeodesicLab/>} />
+            <Route path="qc-egg" element={<QuasiConformalEggLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
