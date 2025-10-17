@@ -25,18 +25,87 @@ button { background:var(--accent); color:#fff; border:none; padding:0.5rem 1rem;
     <input id="rollbackId" placeholder="Release ID" />
     <button onclick="rollback()">Rollback</button>
   </div>
-  <table id="jobs"></table>
-  <pre id="log"></pre>
+  <div style="margin:1rem 0;display:flex;gap:1rem;align-items:center;">
+    <button id="refreshJobs">Refresh Jobs</button>
+  </div>
+  <table id="jobsTbl" style="width:100%;border-collapse:collapse;">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Command</th>
+        <th>Status</th>
+        <th>Started</th>
+        <th>Ended</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <pre id="jobOut" style="margin-top:1rem;background:#000;color:#0f0;padding:1rem;height:200px;overflow:auto;"></pre>
 </div>
 <script>
 let token='';
 async function login(){ token=document.getElementById('token').value; document.getElementById('login').style.display='none'; document.getElementById('app').style.display='block'; load(); }
-async function load(){ const h=await fetch('/api/health').then(r=>r.json()); document.getElementById('health').innerText='API OK: '+h.ok; refreshJobs(); }
-async function refreshJobs(){ const j=await fetch('/api/jobs').then(r=>r.json()); const tbl=document.getElementById('jobs'); tbl.innerHTML='<tr><th>ID</th><th>Type</th><th>Status</th></tr>'; j.forEach(job=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${job.id}</td><td>${job.type}</td><td>${job.status}</td>`; tr.onclick=()=>watch(job.id); tbl.appendChild(tr); }); }
-function watch(id){ const log=document.getElementById('log'); log.textContent=''; const es=new EventSource(`/api/jobs/${id}/log`); es.onmessage=e=>{log.textContent+=e.data+'\n'; log.scrollTop=log.scrollHeight;}; es.addEventListener('end',()=>es.close()); }
+async function load(){ const h=await fetch('/api/health').then(r=>r.json()); document.getElementById('health').innerText='API OK: '+h.ok; loadJobs(); }
 async function dryRun(){ await fetch('/api/deploy/plan',{method:'POST',headers:{'X-Internal-Token':token}}).then(r=>r.json()).then(alert); }
-async function deploy(){ await fetch('/api/deploy/execute',{method:'POST',headers:{'Content-Type':'application/json','X-Internal-Token':token},body:JSON.stringify({})}).then(r=>r.json()).then(()=>refreshJobs()); }
-async function rollback(){ const id=document.getElementById('rollbackId').value; await fetch('/api/rollback/'+id,{method:'POST',headers:{'X-Internal-Token':token}}).then(r=>r.json()).then(()=>refreshJobs()); }
+async function deploy(){ await fetch('/api/deploy/execute',{method:'POST',headers:{'Content-Type':'application/json','X-Internal-Token':token},body:JSON.stringify({})}).then(r=>r.json()).then(()=>loadJobs()); }
+async function rollback(){ const id=document.getElementById('rollbackId').value; await fetch('/api/rollback/'+id,{method:'POST',headers:{'X-Internal-Token':token}}).then(r=>r.json()).then(()=>loadJobs()); }
+
+const jobsTbl = document.querySelector('#jobsTbl tbody');
+const jobOut  = document.getElementById('jobOut');
+
+function pill(status, exitCode){
+  const color = status === 'ok' ? '#0f0' :
+                status === 'failed' ? '#f55' :
+                status === 'running' ? '#ff0' :
+                '#aaa';
+  const ec = (exitCode === null || exitCode === undefined) ? '' : ` (exit ${exitCode})`;
+  return `<span style="background:${color};color:#000;padding:2px 6px;border-radius:12px;">${status}${ec}</span>`;
+}
+
+async function loadJobs(){
+  const r = await fetch('/jobs'); const j = await r.json();
+  jobsTbl.innerHTML = '';
+  (j.jobs||[]).forEach(row=>{
+    const tr = document.createElement('tr');
+    const t = (ts)=> ts? new Date(ts*1000).toLocaleTimeString() : '-';
+    tr.innerHTML = `
+      <td>${row.id}</td>
+      <td style="max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.cmd}">${row.cmd}</td>
+      <td>${pill(row.status, row.exit_code)}</td>
+      <td>${t(row.started)}</td>
+      <td>${t(row.ended)}</td>
+      <td>
+        <button data-id="${row.id}" class="open">Open</button>
+        <a href="/jobs/${row.id}/download" target="_blank">Download</a>
+      </td>`;
+    tr.querySelector('button.open').onclick = async (ev)=>{
+      const id = ev.target.dataset.id;
+      const r = await fetch('/jobs/'+id); const j = await r.json();
+      jobOut.textContent = j.output || JSON.stringify(j,null,2);
+      jobOut.scrollTop = jobOut.scrollHeight;
+    };
+    jobsTbl.appendChild(tr);
+  });
+}
+document.getElementById('refreshJobs').onclick = loadJobs;
+document.addEventListener('DOMContentLoaded', loadJobs);
+
+(function(){
+  const origWS = window.WebSocket;
+  window.WebSocket = function(url){
+    const ws = new origWS(url);
+    ws.addEventListener('message', (ev)=>{
+      const m = String(ev.data||'');
+      if(m.startsWith('[[BLACKROAD_JOB_ID:')) {
+        loadJobs();
+      } else if (m.startsWith('[[BLACKROAD_EXIT:')) {
+        setTimeout(loadJobs, 500);
+      }
+    });
+    return ws;
+  };
+})();
 </script>
 </body>
 </html>
