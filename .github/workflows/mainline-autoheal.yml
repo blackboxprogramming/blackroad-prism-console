@@ -1,0 +1,78 @@
+name: Mainline Auto-Heal
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Capture base revision
+        id: base
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Create cleanup branch
+        run: git checkout -B automation/mainline-cleanup
+
+      - name: Run fix-everything.sh
+        run: bash fix-everything.sh
+
+      - name: Detect script changes
+        id: detect
+        env:
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+        run: |
+          if [ "$(git rev-parse HEAD)" = "$BASE_SHA" ]; then
+            echo "changed=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=1" >> "$GITHUB_OUTPUT"
+            {
+              echo "message<<EOF"
+              git log -1 --pretty=%B
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Restore working tree for PR commit
+        if: steps.detect.outputs.changed == '1'
+        env:
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+        run: git reset --mixed "$BASE_SHA"
+
+      - name: Upload cleanup summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mainline-autoheal-summary
+          path: .justfix-summary.md
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Create or update Mainline Cleanup PR
+        if: steps.detect.outputs.changed == '1'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.BOT_TOKEN || github.token }}
+          branch: automation/mainline-cleanup
+          title: Mainline Cleanup
+          body: |
+            ## Summary
+            - Automated cleanup via `fix-everything.sh`.
+
+            ## Details
+            Review `.justfix-summary.md` (available as a workflow artifact) for the full report.
+          commit-message: ${{ steps.detect.outputs.message || 'chore(justfix): create/fix configs & workflows; format & lint-fix' }}
+          author: ${{ secrets.BOT_USER && format('{0} <{0}@users.noreply.github.com>', secrets.BOT_USER) || 'blackroad-bot <blackroad-bot@users.noreply.github.com>' }}
+          committer: ${{ secrets.BOT_USER && format('{0} <{0}@users.noreply.github.com>', secrets.BOT_USER) || 'blackroad-bot <blackroad-bot@users.noreply.github.com>' }}
+          delete-branch: false
