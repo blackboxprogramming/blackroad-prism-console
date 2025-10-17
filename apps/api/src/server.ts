@@ -377,6 +377,17 @@ import metrics from './routes/metrics.js';
 import okta from './routes/okta.js';
 import predict from './routes/predict.js';
 import reco from './routes/reco.js';
+
+app.get('/api/health', cacheHeaders('health'), (_req,res)=> res.json({ ok:true, ts: Date.now() }));
+
+// Search
+app.post('/api/search/reindex', reindex);
+app.get('/api/search', cacheHeaders('search'), query);
+
+// Notifications
+app.use('/api/notify', notifySend);
+app.use('/api/notify/webpush', webpush);
+
 app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
