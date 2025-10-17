@@ -57,6 +57,8 @@ extension points for future integrations.
 | 057 | The Mutual Aid Protocol | Mutual aid infrastructure lends support in crises. |
 | 052 | The Reverence Clause   | Ground every build in ecological responsibility. |
 | 008 | The Identity Guard     | Identity stays layered, minimal, and observable. |
+| 028 | The Custodianship Code | Custodians steward Lucidia with shared accountability. |
+| 035 | The Joy Mandate        | Joy keeps Lucidia warm with optional daily sparks. |
 
 ## BlackRoad Pipeline
 
