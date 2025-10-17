@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
+from uuid import uuid4
 
 import yaml
 
@@ -105,7 +106,9 @@ class SOPEngine:
             # Placeholder: integrate with Lucidia memory / triggers
             self._notify_lucidia(record)
 
-        output = self.records_dir / f"{name}-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.json"
+        run_id = uuid4().hex
+        timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        output = self.records_dir / f"{name}-{timestamp}-{run_id}.json"
         output.write_text(json.dumps([json.loads(r.to_json()) for r in records], indent=2))
         return output
 
