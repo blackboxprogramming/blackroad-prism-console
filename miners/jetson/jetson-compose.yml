@@ -13,6 +13,7 @@ services:
       - COOL_SEC=60
       - MAX_TEMP_C=70
     cpus: 0.50           # Jetson small GPU + half a CPU core for orchestration
+    cpus: 0.50
     mem_limit: 512m
     restart: unless-stopped
     security_opt: [no-new-privileges:true]

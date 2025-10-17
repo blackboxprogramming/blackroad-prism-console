@@ -7,6 +7,17 @@ on:
 
 permissions:
   contents: read
+name: "Miners • Validate"
+
+on:
+  push:
+    paths:
+      - 'miners/**'
+      - '.github/workflows/miners-ci.yml'
+  pull_request:
+    paths:
+      - 'miners/**'
+      - '.github/workflows/miners-ci.yml'
 
 jobs:
   validate:
@@ -28,3 +39,8 @@ jobs:
           test -f miners/xmrig/run-throttled.sh
           test -f miners/xmrig/watch-temp.mjs
           test -f miners/common/power-math.mjs
+      - name: Validate Jetson pack (no run)
+        run: |
+          test -f miners/jetson/Dockerfile
+          test -f miners/jetson/jetson-compose.yml
+          docker compose -f miners/jetson/jetson-compose.yml config >/dev/null
