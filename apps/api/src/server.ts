@@ -271,6 +271,11 @@ import knIndex from './routes/kn/index.js';
 import knSearch from './routes/kn/search.js';
 import knKG from './routes/kn/kg.js';
 import knRag from './routes/kn/rag.js';
+import lmsCatalog from './routes/lms/catalog_paths.js';
+import lmsEnroll from './routes/lms/enroll_progress.js';
+import lmsQuiz from './routes/lms/quizzes.js';
+import lmsCerts from './routes/lms/certs_policies.js';
+import lmsRC from './routes/lms/reminders_compliance.js';
 
 dotenv.config();
 import express from "express";
@@ -487,6 +492,7 @@ app.use('/api/sandbox', sandboxEcho);
 app.use('/oauth', oauthAuthorize, oauthToken, oauthRevoke, oauthRotate);
 app.use('/api/itsm', itsmOncall, itsmIncidents);
 app.use('/api/kn', knConn, knAcl, knIngest, knIndex, knSearch, knKG, knRag);
+app.use('/api/lms', lmsCatalog, lmsEnroll, lmsQuiz, lmsCerts, lmsRC);
 
 const port = process.env.PORT || 4000;
 
