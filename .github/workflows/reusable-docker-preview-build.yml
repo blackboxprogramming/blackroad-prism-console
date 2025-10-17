@@ -1,0 +1,128 @@
+name: Reusable Docker Preview Build
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: 'Fully qualified image name (e.g., ghcr.io/org/repo)'
+        required: true
+        type: string
+      tag:
+        description: 'Tag suffix to append to the image (e.g., pr-123)'
+        required: true
+        type: string
+      extra-tags:
+        description: 'Optional newline-separated list of additional tag suffixes'
+        required: false
+        type: string
+      context:
+        description: 'Build context path'
+        required: false
+        type: string
+        default: .
+      file:
+        description: 'Dockerfile path relative to the repository root'
+        required: false
+        type: string
+        default: ./Dockerfile
+      build-args:
+        description: 'Optional multiline string of build args (KEY=VALUE)'
+        required: false
+        type: string
+      labels:
+        description: 'Optional multiline string of image labels'
+        required: false
+        type: string
+
+    secrets:
+      registry-username:
+        description: 'Optional registry username. Defaults to github.actor when omitted.'
+        required: false
+      registry-password:
+        description: 'Optional registry password/token. Defaults to secrets.GITHUB_TOKEN when omitted.'
+        required: false
+
+    outputs:
+      image-ref:
+        description: 'Primary image reference that was published'
+        value: ${{ jobs.build.outputs.image-ref }}
+      digest:
+        description: 'Digest produced by the build'
+        value: ${{ jobs.build.outputs.digest }}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    name: Build container image
+    runs-on: ubuntu-latest
+    outputs:
+      image-ref: ${{ steps.meta.outputs.primary-tag }}
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.registry-username || github.actor }}
+          password: ${{ secrets.registry-password || secrets.GITHUB_TOKEN }}
+
+      - name: Prepare image metadata
+        id: meta
+        env:
+          IMAGE: ${{ inputs.image }}
+          TAG: ${{ inputs.tag }}
+          EXTRA: ${{ inputs['extra-tags'] }}
+        run: |
+          PRIMARY_TAG="${IMAGE}:${TAG}"
+          echo "primary-tag=${PRIMARY_TAG}" >> "$GITHUB_OUTPUT"
+
+          if [ -n "${EXTRA}" ]; then
+            mapfile -t EXTRA_LINES <<'EOF_INPUT'
+${EXTRA}
+EOF_INPUT
+            TAG_LIST=()
+            for suffix in "${EXTRA_LINES[@]}"; do
+              if [ -n "$suffix" ]; then
+                TAG_LIST+=("${IMAGE}:${suffix}")
+              fi
+            done
+            if [ "${#TAG_LIST[@]}" -gt 0 ]; then
+              printf '%s\n' "${TAG_LIST[@]}" > tags.txt
+              {
+                echo "additional-tags<<EOF"
+                cat tags.txt
+                echo "EOF"
+              } >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+          echo "::group::Image tags"
+          echo "${PRIMARY_TAG}"
+          if [ -f tags.txt ]; then
+            cat tags.txt
+          fi
+          echo "::endgroup::"
+
+      - name: Build and push image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.file }}
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.primary-tag }}
+            ${{ steps.meta.outputs.additional-tags || '' }}
+          provenance: false
+          sbom: false
+          labels: ${{ inputs.labels }}
+          build-args: ${{ inputs['build-args'] }}
