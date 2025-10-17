@@ -11,6 +11,13 @@ Bridge runs on :4000; nginx routes `/api` and `/ws`. Static web artifacts publis
 
 Reference the manifests whenever DNS, workflow, or Terraform parameters change so automation and runbooks stay aligned.
 
+Infrastructure pushes now run through the codified policy gate in
+`runbooks/examples/infra_release_policy.yaml`. The runbook checks that the
+Change Advisory Board workflow has approved the change, triggers the
+`.github/workflows/blackroad-deploy.yml` release, and falls back to
+`infra_release_rollback` so `scripts/rollback.sh` is exercised when health
+checks fail. Keep both runbooks handy during CAB reviews.
+
 ## Deployment workflows
 
 ### Preview (per PR)
