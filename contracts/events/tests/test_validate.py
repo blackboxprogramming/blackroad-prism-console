@@ -21,6 +21,10 @@ def test_github_push():
 def test_github_pr_merged():
     _check("github.pr.merged")
 
+
+def test_github_branch_deleted():
+    _check("github.branch.deleted")
+
 def test_sre_incident_opened():
     _check("sre.incident.opened")
 

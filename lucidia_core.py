@@ -18,7 +18,16 @@ import json
 import os
 import time
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
+
+def _normalize_branch_name(ref: Optional[str]) -> Optional[str]:
+    if not ref:
+        return None
+    if ref.startswith("refs/heads/"):
+        return ref.split("/", 2)[-1]
+    return ref
+
 
 # ---------------------------
 # Core Intelligence (placeholder)
@@ -217,6 +226,33 @@ class UnifiedPortalSystem:
 
     def notify(self, channel: str, message: str) -> Dict[str, Any]:
         return self.connectors["notify"].execute("send", channel=channel, message=message)
+
+    def record_branch_deletion(
+        self,
+        *,
+        repo: str,
+        branch: str | None,
+        actor: str | None,
+        ref: str | None = None,
+        ref_type: str | None = None,
+        deleted_at: str | None = None,
+    ) -> Dict[str, Any]:
+        """Persist metadata about a deleted branch for later auditing."""
+
+        normalized = _normalize_branch_name(branch or ref)
+        entry = {
+            "repo": repo,
+            "branch": normalized,
+            "ref": ref or branch or normalized,
+            "ref_type": ref_type or "branch",
+            "actor": actor or "unknown",
+            "deleted_at": deleted_at or datetime.now(timezone.utc).isoformat(),
+        }
+
+        history = list(self.memory.retrieve("deleted_branches", []))
+        history.append(entry)
+        self.memory.save("deleted_branches", history)
+        return entry
 
 
 # ---------------------------
