@@ -1,0 +1,264 @@
+
+          /\      |‾‾| /‾‾/   /‾‾/   
+     /\  /  \     |  |/  /   /  /    
+    /  \/    \    |     (   /   ‾‾\  
+   /          \   |  |\  \ |  (‾)  | 
+  / __________ \  |__| \__\ \_____/ .io
+
+     execution: local
+        script: load/k6_prism_console.js
+        output: -
+
+     scenarios: (100.00%) 3 scenarios, 27 max VUs, 2m30s max duration (incl. graceful stop):
+              * materialsJobs: 5 iterations for each of 6 VUs (maxDuration: 2m0s, exec: materialsFlow, gracefulStop: 30s)
+              * quantumApi: Up to 6.00 iterations/s for 40s over 3 stages (maxVUs: 8-16, exec: quantumFlow, gracefulStop: 30s)
+              * uiSmoke: 5 looping VUs for 40s (exec: uiFlow, gracefulStop: 30s)
+
+
+running (0m01.0s), 13/19 VUs, 0 complete and 0 interrupted iterations
+materialsJobs   [   0% ] 6 VUs      0m01.0s/2m0s  00/30 iters, 5 per VU
+quantumApi      [   2% ] 02/08 VUs  01.0s/40s     2.45 iters/s
+uiSmoke         [   2% ] 5 VUs      01.0s/40s    
+
+running (0m02.0s), 12/19 VUs, 14 complete and 0 interrupted iterations
+materialsJobs   [  20% ] 6 VUs      0m02.0s/2m0s  06/30 iters, 5 per VU
+quantumApi      [   5% ] 01/08 VUs  02.0s/40s     2.76 iters/s
+uiSmoke         [   5% ] 5 VUs      02.0s/40s    
+
+running (0m03.0s), 12/19 VUs, 22 complete and 0 interrupted iterations
+materialsJobs   [  20% ] 6 VUs      0m03.0s/2m0s  06/30 iters, 5 per VU
+quantumApi      [   7% ] 01/08 VUs  03.0s/40s     3.16 iters/s
+uiSmoke         [   7% ] 5 VUs      03.0s/40s    
+
+running (0m04.0s), 13/19 VUs, 36 complete and 0 interrupted iterations
+materialsJobs   [  40% ] 6 VUs      0m04.0s/2m0s  12/30 iters, 5 per VU
+quantumApi      [  10% ] 02/08 VUs  04.0s/40s     3.63 iters/s
+uiSmoke         [  10% ] 5 VUs      04.0s/40s    
+
+running (0m05.0s), 13/19 VUs, 50 complete and 0 interrupted iterations
+materialsJobs   [  60% ] 6 VUs      0m05.0s/2m0s  18/30 iters, 5 per VU
+quantumApi      [  12% ] 02/08 VUs  05.0s/40s     3.95 iters/s
+uiSmoke         [  12% ] 5 VUs      05.0s/40s    
+
+running (0m06.0s), 14/19 VUs, 59 complete and 0 interrupted iterations
+materialsJobs   [  60% ] 6 VUs      0m06.0s/2m0s  18/30 iters, 5 per VU
+quantumApi      [  15% ] 03/08 VUs  06.0s/40s     4.43 iters/s
+uiSmoke         [  15% ] 5 VUs      06.0s/40s    
+
+running (0m07.0s), 13/19 VUs, 75 complete and 0 interrupted iterations
+materialsJobs   [  80% ] 6 VUs      0m07.0s/2m0s  24/30 iters, 5 per VU
+quantumApi      [  17% ] 02/08 VUs  07.0s/40s     4.77 iters/s
+uiSmoke         [  17% ] 5 VUs      07.0s/40s    
+
+running (0m08.0s), 07/19 VUs, 91 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  20% ] 02/08 VUs  08.0s/40s     5.18 iters/s
+uiSmoke         [  20% ] 5 VUs      08.0s/40s    
+
+running (0m09.0s), 08/19 VUs, 101 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  22% ] 03/08 VUs  09.0s/40s     5.62 iters/s
+uiSmoke         [  22% ] 5 VUs      09.0s/40s    
+
+running (0m10.0s), 08/19 VUs, 111 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  25% ] 03/08 VUs  10.0s/40s     5.97 iters/s
+uiSmoke         [  25% ] 5 VUs      10.0s/40s    
+
+running (0m11.0s), 08/19 VUs, 122 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  27% ] 03/08 VUs  11.0s/40s     6.00 iters/s
+uiSmoke         [  27% ] 5 VUs      11.0s/40s    
+
+running (0m12.0s), 08/19 VUs, 133 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  30% ] 03/08 VUs  12.0s/40s     6.00 iters/s
+uiSmoke         [  30% ] 5 VUs      12.0s/40s    
+
+running (0m13.0s), 08/19 VUs, 144 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  32% ] 03/08 VUs  13.0s/40s     6.00 iters/s
+uiSmoke         [  32% ] 5 VUs      13.0s/40s    
+
+running (0m14.0s), 08/19 VUs, 155 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  35% ] 03/08 VUs  14.0s/40s     6.00 iters/s
+uiSmoke         [  35% ] 5 VUs      14.0s/40s    
+
+running (0m15.0s), 08/19 VUs, 166 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  37% ] 03/08 VUs  15.0s/40s     6.00 iters/s
+uiSmoke         [  37% ] 5 VUs      15.0s/40s    
+
+running (0m16.0s), 08/19 VUs, 177 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  40% ] 03/08 VUs  16.0s/40s     6.00 iters/s
+uiSmoke         [  40% ] 5 VUs      16.0s/40s    
+
+running (0m17.0s), 08/19 VUs, 188 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  42% ] 03/08 VUs  17.0s/40s     6.00 iters/s
+uiSmoke         [  42% ] 5 VUs      17.0s/40s    
+
+running (0m18.0s), 08/19 VUs, 199 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  45% ] 03/08 VUs  18.0s/40s     6.00 iters/s
+uiSmoke         [  45% ] 5 VUs      18.0s/40s    
+
+running (0m19.0s), 08/19 VUs, 210 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  47% ] 03/08 VUs  19.0s/40s     6.00 iters/s
+uiSmoke         [  47% ] 5 VUs      19.0s/40s    
+
+running (0m20.0s), 08/19 VUs, 221 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  50% ] 03/08 VUs  20.0s/40s     6.00 iters/s
+uiSmoke         [  50% ] 5 VUs      20.0s/40s    
+
+running (0m21.0s), 08/19 VUs, 232 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  52% ] 03/08 VUs  21.0s/40s     6.00 iters/s
+uiSmoke         [  52% ] 5 VUs      21.0s/40s    
+
+running (0m22.0s), 08/19 VUs, 243 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  55% ] 03/08 VUs  22.0s/40s     6.00 iters/s
+uiSmoke         [  55% ] 5 VUs      22.0s/40s    
+
+running (0m23.0s), 08/19 VUs, 254 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  57% ] 03/08 VUs  23.0s/40s     6.00 iters/s
+uiSmoke         [  57% ] 5 VUs      23.0s/40s    
+
+running (0m24.0s), 08/19 VUs, 265 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  60% ] 03/08 VUs  24.0s/40s     6.00 iters/s
+uiSmoke         [  60% ] 5 VUs      24.0s/40s    
+
+running (0m25.0s), 08/19 VUs, 276 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  62% ] 03/08 VUs  25.0s/40s     6.00 iters/s
+uiSmoke         [  62% ] 5 VUs      25.0s/40s    
+
+running (0m26.0s), 08/19 VUs, 287 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  65% ] 03/08 VUs  26.0s/40s     6.00 iters/s
+uiSmoke         [  65% ] 5 VUs      26.0s/40s    
+
+running (0m27.0s), 08/19 VUs, 298 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  67% ] 03/08 VUs  27.0s/40s     6.00 iters/s
+uiSmoke         [  67% ] 5 VUs      27.0s/40s    
+
+running (0m28.0s), 08/19 VUs, 309 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  70% ] 03/08 VUs  28.0s/40s     6.00 iters/s
+uiSmoke         [  70% ] 5 VUs      28.0s/40s    
+
+running (0m29.0s), 08/19 VUs, 320 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  72% ] 03/08 VUs  29.0s/40s     6.00 iters/s
+uiSmoke         [  72% ] 5 VUs      29.0s/40s    
+
+running (0m30.0s), 08/19 VUs, 331 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  75% ] 03/08 VUs  30.0s/40s     6.00 iters/s
+uiSmoke         [  75% ] 5 VUs      30.0s/40s    
+
+running (0m31.0s), 08/19 VUs, 342 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  77% ] 03/08 VUs  31.0s/40s     5.42 iters/s
+uiSmoke         [  77% ] 5 VUs      31.0s/40s    
+
+running (0m32.0s), 07/19 VUs, 353 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  80% ] 02/08 VUs  32.0s/40s     4.84 iters/s
+uiSmoke         [  80% ] 5 VUs      32.0s/40s    
+
+running (0m33.0s), 08/19 VUs, 362 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  82% ] 03/08 VUs  33.0s/40s     4.17 iters/s
+uiSmoke         [  82% ] 5 VUs      33.0s/40s    
+
+running (0m34.0s), 07/19 VUs, 372 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  85% ] 02/08 VUs  34.0s/40s     3.55 iters/s
+uiSmoke         [  85% ] 5 VUs      34.0s/40s    
+
+running (0m35.0s), 07/19 VUs, 380 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  87% ] 02/08 VUs  35.0s/40s     3.00 iters/s
+uiSmoke         [  87% ] 5 VUs      35.0s/40s    
+
+running (0m36.0s), 07/19 VUs, 388 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  90% ] 02/08 VUs  36.0s/40s     2.32 iters/s
+uiSmoke         [  90% ] 5 VUs      36.0s/40s    
+
+running (0m37.0s), 06/19 VUs, 396 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  92% ] 01/08 VUs  37.0s/40s     1.72 iters/s
+uiSmoke         [  92% ] 5 VUs      37.0s/40s    
+
+running (0m38.0s), 05/19 VUs, 403 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  95% ] 00/08 VUs  38.0s/40s     1.32 iters/s
+uiSmoke         [  95% ] 5 VUs      38.0s/40s    
+
+running (0m39.0s), 05/19 VUs, 409 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [  97% ] 00/08 VUs  39.0s/40s     0.55 iters/s
+uiSmoke         [  97% ] 5 VUs      39.0s/40s    
+
+running (0m40.0s), 05/19 VUs, 414 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi      [ 100% ] 00/08 VUs  40.0s/40s     0.55 iters/s
+uiSmoke         [ 100% ] 5 VUs      40.0s/40s    
+
+     ✓ job created
+     ✓ job id present
+     ✓ login 200
+     ✓ session id issued
+     ✓ simulation 200
+     ✓ has estimate
+     ✓ status 200
+     ✓ status valid
+
+     █ landing
+
+       ✓ landing 200
+       ✓ serves html
+
+     █ dashboard bundle
+
+       ✓ dashboard module ok
+
+     checks..............................: 100.00% ✓ 1480      ✗ 0   
+     data_received.......................: 1.8 MB  43 kB/s
+     data_sent...........................: 128 kB  3.2 kB/s
+     group_duration......................: avg=2.37ms   min=747.41µs med=2.06ms  max=14.85ms  p(90)=3.87ms   p(95)=4.28ms  
+     http_req_blocked....................: avg=131.22µs min=1.21µs   med=25.39µs max=2.19ms   p(90)=358.93µs p(95)=527.15µs
+     http_req_connecting.................: avg=97.35µs  min=0s       med=0s      max=2.03ms   p(90)=282.55µs p(95)=407.13µs
+     http_req_duration...................: avg=8.57ms   min=375.31µs med=1.76ms  max=189.5ms  p(90)=28.77ms  p(95)=31.3ms  
+     ✓ { component:frontend }............: avg=2ms      min=375.31µs med=1.76ms  max=14.65ms  p(90)=3.38ms   p(95)=3.94ms  
+     ✓ { component:materials-service }...: avg=2.57ms   min=506.81µs med=1.55ms  max=10.19ms  p(90)=4.72ms   p(95)=9.92ms  
+     ✓ { component:quantum-lab }.........: avg=16.43ms  min=743.81µs med=20.12ms max=189.5ms  p(90)=31.73ms  p(95)=36.69ms 
+       { expected_response:true }........: avg=8.57ms   min=375.31µs med=1.76ms  max=189.5ms  p(90)=28.77ms  p(95)=31.3ms  
+     http_req_failed.....................: 0.00%   ✓ 0         ✗ 840 
+     ✓ { component:frontend }............: 0.00%   ✓ 0         ✗ 400 
+     ✓ { component:quantum-lab }.........: 0.00%   ✓ 0         ✗ 380 
+     http_req_receiving..................: avg=165.02µs min=12.82µs  med=84.79µs max=1.93ms   p(90)=396.14µs p(95)=642.8µs 
+     http_req_sending....................: avg=33.77µs  min=5.76µs   med=25.21µs max=904.74µs p(90)=58.45µs  p(95)=80.77µs 
+     http_req_tls_handshaking............: avg=0s       min=0s       med=0s      max=0s       p(90)=0s       p(95)=0s      
+     http_req_waiting....................: avg=8.37ms   min=257µs    med=1.47ms  max=189.4ms  p(90)=28.62ms  p(95)=31.19ms 
+     http_reqs...........................: 840     20.72409/s
+     iteration_duration..................: avg=828.02ms min=527.55ms med=1s      max=1.51s    p(90)=1s       p(95)=1.5s    
+     iterations..........................: 420     10.362045/s
+     vus.................................: 5       min=5       max=14
+     vus_max.............................: 19      min=19      max=19
+
+
+running (0m40.5s), 00/19 VUs, 420 complete and 0 interrupted iterations
+materialsJobs ✓ [ 100% ] 6 VUs      0m07.5s/2m0s  30/30 iters, 5 per VU
+quantumApi    ✓ [ 100% ] 00/08 VUs  40s           0.55 iters/s
+uiSmoke       ✓ [ 100% ] 5 VUs      40s          
