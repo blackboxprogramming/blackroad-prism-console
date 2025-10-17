@@ -32,3 +32,6 @@ export async function diffRoutes(fastify: FastifyInstance) {
 }
 
 export default diffRoutes;
+// TODO: diffs API handlers
+
+export {};
