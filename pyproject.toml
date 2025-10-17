@@ -22,6 +22,11 @@ blackroad-api = "agent.api:main"
 blackroad-dashboard = "agent.dashboard:main"
 blackroad = "cli.console:main"
 blackroad-agent = "agent.daemon:main"
+dependencies = ["typer", "click"]
+
+[project.scripts]
+brc = "cli.console:main"
+blackroad = "cli.blackroad:cli"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

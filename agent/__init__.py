@@ -22,3 +22,6 @@ __all__ = ["config", "store", "transcribe"]
 from . import telemetry as telemetry
 
 __all__ = ["telemetry"]
+"""Agent utilities for BlackRoad."""
+
+__all__ = ["jobs", "telemetry"]
