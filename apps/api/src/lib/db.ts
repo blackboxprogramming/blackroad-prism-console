@@ -17,3 +17,5 @@ export const prisma: any = {
     delete: async () => ({})
   }
 };
+import { PrismaClient } from '@prisma/client';
+export const prisma = new PrismaClient();

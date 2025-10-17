@@ -276,6 +276,13 @@ import lmsEnroll from './routes/lms/enroll_progress.js';
 import lmsQuiz from './routes/lms/quizzes.js';
 import lmsCerts from './routes/lms/certs_policies.js';
 import lmsRC from './routes/lms/reminders_compliance.js';
+import { orgResolver, requireOrg } from './middleware/org.js';
+import { requireRole } from './middleware/rbac.js';
+import orgCreate from './routes/orgs/create.js';
+import orgInvite from './routes/orgs/invite.js';
+import orgAccept from './routes/orgs/accept_invite.js';
+import orgKeys from './routes/admin/org_apikeys.js';
+import orgAudit from './routes/admin/auditlog.js';
 
 dotenv.config();
 import express from "express";
@@ -356,6 +363,8 @@ app.get('/api/health', cacheHeaders('health'), (_req,res)=> res.json({ ok:true, 
 // Search
 app.post('/api/search/reindex', reindex);
 app.get('/api/search', cacheHeaders('search'), query);
+// resolve org from header or session
+app.use(orgResolver());
 
 // Notifications
 app.use('/api/notify', notifySend);
@@ -493,6 +502,14 @@ app.use('/oauth', oauthAuthorize, oauthToken, oauthRevoke, oauthRotate);
 app.use('/api/itsm', itsmOncall, itsmIncidents);
 app.use('/api/kn', knConn, knAcl, knIngest, knIndex, knSearch, knKG, knRag);
 app.use('/api/lms', lmsCatalog, lmsEnroll, lmsQuiz, lmsCerts, lmsRC);
+// org lifecycle
+app.use('/api/orgs/create', orgCreate);
+app.use('/api/orgs/invite', requireOrg(), requireRole('admin'), orgInvite);
+app.use('/api/orgs/accept-invite', orgAccept);
+
+// per-org admin
+app.use('/api/admin/org/keys', requireOrg(), requireRole('admin'), orgKeys);
+app.use('/api/admin/org/audit', requireOrg(), requireRole('admin'), orgAudit);
 
 const port = process.env.PORT || 4000;
 
