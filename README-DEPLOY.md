@@ -69,6 +69,40 @@ left blank, the workflow checks `https://blackroad.io/health` and
 `https://blackroad.io/api/health` respectively. Provide alternate URLs if you
 are targeting a different host.
 
+## Ollama bridge (Fly.io)
+
+The Ollama bridge now deploys via Fly.io using
+`.github/workflows/ollama-bridge-deploy.yml`. The workflow builds the container
+image from `srv/ollama-bridge/Dockerfile`, pushes it with the current commit SHA
+label, and performs a health probe against
+`https://blackroad-ollama-bridge.fly.dev/api/llm/health` before finishing.
+
+### Required configuration
+
+Add a Fly API token under repository secrets:
+
+- `FLY_API_TOKEN` — generated with `fly auth token`. Required to deploy via the
+  workflow.
+
+Provision runtime configuration directly in Fly secrets:
+
+- `OLLAMA_BASE_URL` — base URL for the upstream Ollama runtime (e.g.,
+  `https://ollama.internal:11434`).
+- Optional overrides like `MODEL_DEFAULT` can be supplied the same way.
+
+### Manual rollbacks
+
+If a release needs to be reverted, run the following locally with a valid Fly
+token:
+
+```bash
+flyctl releases --app blackroad-ollama-bridge        # inspect recent releases
+flyctl deploy --config deploy/fly/ollama-bridge/fly.toml --image <previous>
+```
+
+Alternatively, run the GitHub workflow manually and provide the `image_label`
+input matching a previous release image tag.
+
 ## Related documentation
 
 - [`DEPLOYMENT.md`](DEPLOYMENT.md) — GitHub App setup, branch policy, and

@@ -1,0 +1,60 @@
+name: Deploy Ollama Bridge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'srv/ollama-bridge/**'
+      - 'deploy/fly/ollama-bridge/**'
+      - '.github/workflows/ollama-bridge-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment (default: production)'
+        default: production
+        required: false
+      image_label:
+        description: 'Optional image label override'
+        required: false
+
+jobs:
+  deploy:
+    name: Fly.io rollout
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: https://blackroad-ollama-bridge.fly.dev/api/llm/health
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@v1.5
+
+      - name: Deploy service
+        id: deploy
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          if [ -z "${FLY_API_TOKEN}" ]; then
+            echo "::error::FLY_API_TOKEN secret is required" >&2
+            exit 1
+          fi
+          IMAGE_LABEL="${{ github.event.inputs.image_label || github.sha }}"
+          flyctl deploy \
+            --config deploy/fly/ollama-bridge/fly.toml \
+            --image-label "$IMAGE_LABEL" \
+            --remote-only
+
+      - name: Verify health endpoint
+        run: |
+          curl --fail --retry 5 --retry-all-errors --retry-delay 5 \
+            https://blackroad-ollama-bridge.fly.dev/api/llm/health
+
+      - name: Show recent release info
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl releases --app blackroad-ollama-bridge --limit 5

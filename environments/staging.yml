@@ -62,6 +62,13 @@ deployments:
     notes: >-
       Network, ECS, and RDS resources are defined; service wiring will follow the
       production module once ready.
+  - service: ollama-bridge
+    type: container-service
+    provider: fly-io
+    state: planned
+    notes: >-
+      Mirrors the production Fly deployment once a staging tenant is provisioned
+      and connected to a non-production Ollama backend.
 change_management:
   approvals:
     - .github/workflows/change-approve.yml

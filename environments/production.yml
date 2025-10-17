@@ -73,17 +73,36 @@ deployments:
       behind an ALB-backed Fargate service.
     health_check: https://api.blackroad.io/health
     workflow: .github/workflows/blackroad-deploy.yml
+  - service: ollama-bridge
+    type: container-service
+    provider: fly-io
+    app: blackroad-ollama-bridge
+    workflow: .github/workflows/ollama-bridge-deploy.yml
+    domain: https://blackroad-ollama-bridge.fly.dev
+    health_check: https://blackroad-ollama-bridge.fly.dev/api/llm/health
+    environment:
+      MODEL_DEFAULT: qwen2:1.5b
+    secrets:
+      - FLY_API_TOKEN
+      - OLLAMA_BASE_URL
+    notes: >-
+      Runs the lightweight bridge between the Prism console and remote Ollama
+      instances. Deployed via Fly.io using the dedicated GitHub Actions workflow
+      with health verification.
 change_management:
   approvals:
     - .github/workflows/change-approve.yml
   runbooks:
     - README-DEPLOY.md
     - README-OPS.md
+    - RUNBOOKS/01_ollama_bridge_rollforward.md
 observability:
   health_checks:
     - name: frontend
       url: https://blackroad.io/healthz
     - name: api
       url: https://api.blackroad.io/health
+    - name: ollama-bridge
+      url: https://blackroad-ollama-bridge.fly.dev/api/llm/health
   scripts:
     - scripts/blackroad-autoheal.sh
