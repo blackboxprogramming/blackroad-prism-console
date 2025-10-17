@@ -1,0 +1,12 @@
+name: Knowledge Weekly (KG Build + Report)
+on:
+  schedule: [{ cron: "35 4 * * 1" }]
+  workflow_dispatch:
+jobs:
+  kn-weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/kn/kg_build.ts

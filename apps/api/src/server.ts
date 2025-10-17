@@ -264,6 +264,13 @@ import oauthRevoke from './routes/oauth/revoke.js';
 import oauthRotate from './routes/oauth/rotate.js';
 import itsmOncall from './routes/itsm/oncall.js';
 import itsmIncidents from './routes/itsm/incidents.js';
+import knConn from './routes/kn/connectors.js';
+import knAcl from './routes/kn/acl.js';
+import knIngest from './routes/kn/ingest.js';
+import knIndex from './routes/kn/index.js';
+import knSearch from './routes/kn/search.js';
+import knKG from './routes/kn/kg.js';
+import knRag from './routes/kn/rag.js';
 
 dotenv.config();
 import express from "express";
@@ -468,6 +475,7 @@ app.use('/api/partners', partnerRev);
 app.use('/api/sandbox', sandboxEcho);
 app.use('/oauth', oauthAuthorize, oauthToken, oauthRevoke, oauthRotate);
 app.use('/api/itsm', itsmOncall, itsmIncidents);
+app.use('/api/kn', knConn, knAcl, knIngest, knIndex, knSearch, knKG, knRag);
 
 const port = process.env.PORT || 4000;
 

@@ -1,0 +1,13 @@
+name: Knowledge Nightly (Index + RAG Report)
+on:
+  schedule: [{ cron: "30 4 * * *" }]
+  workflow_dispatch:
+jobs:
+  kn-nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/kn/index.ts
+      - run: node scripts/kn/rag_report.ts
