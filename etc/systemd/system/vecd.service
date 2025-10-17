@@ -1,0 +1,13 @@
+[Unit]
+Description=BlackRoad Vector Memory Daemon
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/env python3 /srv/blackroad/vecd.py
+User=root
+Restart=always
+RestartSec=1
+RuntimeDirectory=vecd
+
+[Install]
+WantedBy=multi-user.target
