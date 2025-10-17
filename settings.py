@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 RANDOM_SEED = 1337
 RANDOM_SEED = 1234
 STRICT_DQ = False
-from __future__ import annotations
 
 import os
 from typing import List
