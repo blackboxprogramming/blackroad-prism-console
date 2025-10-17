@@ -1,0 +1,16 @@
+name: SOC Weekly Posture
+on:
+  schedule: [{ cron: "0 12 * * 1" }]
+  workflow_dispatch:
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/soc/weekly_posture.ts
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(soc): weekly posture report"
+          file_pattern: "soc/reports/SOC_*.md"
