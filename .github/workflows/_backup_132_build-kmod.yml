@@ -16,7 +16,7 @@ jobs:
     env:
       DRIVER_VERSION: 580.76.05
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
@@ -41,7 +41,7 @@ jobs:
         with:
           sbom: sbom/modules.spdx.json
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: dist
           path: |

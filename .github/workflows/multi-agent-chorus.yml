@@ -60,7 +60,7 @@ jobs:
           else
             echo "create_run_job=false" >> "$GITHUB_OUTPUT"
           fi
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         if: steps.intent.outputs.perform_tests == 'true'
         with:
           repository: ${{ steps.pr.outputs.head_repo }}
