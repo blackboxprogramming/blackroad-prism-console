@@ -78,6 +78,10 @@
     "yaml": "^2.3.4",
     "lucide-react": "^0.460.0",
     "swr": "^2.2.4"
+    "stripe": "^12.18.0",
+    "bs58": "^5.0.0",
+    "ipfs-http-client": "^66.0.1",
+    "json-canonicalize": "^1.0.6"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

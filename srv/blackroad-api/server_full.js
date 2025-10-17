@@ -221,6 +221,8 @@ require('./modules/jsonify_proxy')({ app });
 // ensure express.raw({ type: 'application/json' }) (or equivalent) runs before
 // the billing webhook route so Stripe receives the exact payload.
 require('./modules/requestGuard')(app);
+require('./modules/truth_identity')({ app });
+require('./modules/truth_api')({ app });
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   path: '/socket.io',
