@@ -711,6 +711,7 @@ if (planCount === 0) {
 // Quantum AI table seed
 db.prepare(
   `
+db.prepare(`
   CREATE TABLE IF NOT EXISTS quantum_ai (
     topic TEXT PRIMARY KEY,
     summary TEXT NOT NULL
@@ -718,6 +719,8 @@ db.prepare(
 `
 ).run();
 const qSeed = [
+`).run();
+const quantumSeed = [
   {
     topic: 'reasoning',
     summary:
@@ -744,6 +747,13 @@ for (const row of qSeed) {
 app.use('/api/git', requireAuth, gitRouter);
 app.use('/v1/providers', providersRouter);
 app.use(contradictionRoutes);
+
+const upsertQuantum = db.prepare(
+  'INSERT OR IGNORE INTO quantum_ai (topic, summary) VALUES (?, ?)',
+);
+for (const row of quantumSeed) {
+  upsertQuantum.run(row.topic, row.summary);
+}
 
 // Helpers
 function listRows(t) {
@@ -1224,6 +1234,20 @@ app.get('/api/connectors/status', async (_req, res) => {
   try { if (process.env.LINEAR_API_KEY) status.linear = true; } catch {}
   try { if (process.env.SF_USERNAME) status.salesforce = true; } catch {}
   res.json(status);
+});
+
+// --- Quantum AI summaries
+app.get('/api/quantum', (_req, res) => {
+  const topics = db
+    .prepare('SELECT topic, summary FROM quantum_ai ORDER BY topic ASC')
+    .all();
+  res.json({ topics });
+});
+app.get('/api/quantum/:topic', (req, res) => {
+  const { topic } = req.params;
+  const row = db.prepare('SELECT summary FROM quantum_ai WHERE topic = ?').get(topic);
+  if (!row) return res.status(404).json({ error: 'not_found' });
+  res.json({ topic, summary: row.summary });
 });
 
 // --- Actions (stubs)

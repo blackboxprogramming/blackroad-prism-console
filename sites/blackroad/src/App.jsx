@@ -266,6 +266,11 @@ import FastMarchTreeLab from "./pages/FastMarchTreeLab.jsx";
 import HungarianLab from "./pages/HungarianLab.jsx";
 import QuaternionRotLab from "./pages/QuaternionRotLab.jsx";
 import ComplexBarycentricLab from "./pages/ComplexBarycentricLab.jsx";
+import Lucidia from "./pages/Lucidia.jsx";
+import InfinityMath from "./pages/InfinityMath.jsx";
+import Agents from "./pages/Agents.jsx";
+import Desktop from "./pages/Desktop.jsx";
+import QuantumConsciousness from "./pages/QuantumConsciousness.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -293,6 +298,14 @@ function StatusPill() {
   const label = ok == null ? "Checking API…" : ok ? "API healthy" : "API error";
 
   return <span className={`text-xs uppercase tracking-wide ${tone}`}>{info ? `${label} — ${info}` : label}</span>;
+export default function App(){
+  return (
+    <Routes>
+      <Route path="/" element={<Desktop/>} />
+      <Route path="/quantum-consciousness" element={<QuantumConsciousness/>} />
+      <Route path="/*" element={<LegacyApp/>} />
+    </Routes>
+  );
 }
 
 function LegacyApp() {
@@ -319,6 +332,34 @@ function LegacyApp() {
               {label}
             </NavLink>
           ))}
+    <div className="min-h-screen grid md:grid-cols-[240px_1fr] gap-4 p-4">
+      <aside className="sidebar p-3">
+        <div className="brand-logo text-2xl mb-4">BlackRoad.io</div>
+        <nav className="flex flex-col gap-2">
+          <NavLink className="nav-link" to="/chat">Chat</NavLink>
+          <NavLink className="nav-link" to="/canvas">Canvas</NavLink>
+          <NavLink className="nav-link" to="/editor">Editor</NavLink>
+          <NavLink className="nav-link" to="/terminal">Terminal</NavLink>
+          <NavLink className="nav-link" to="/roadview">RoadView</NavLink>
+          <NavLink className="nav-link" to="/backroad">Backroad</NavLink>
+          <NavLink className="nav-link" to="/agents">Agents</NavLink>
+          <NavLink className="nav-link" to="/subscribe">Subscribe</NavLink>
+          <NavLink className="nav-link" to="/lucidia">Lucidia</NavLink>
+          <NavLink className="nav-link" to="/math">
+            <span
+              style={{
+                background: "linear-gradient(90deg,#FF4FD8,#0096FF,#FDBA2D)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              ∞
+            </span>{" "}
+            Infinity Math
+          </NavLink>
+          <NavLink className="nav-link" to="/quantum-consciousness">
+            Quantum Consciousness
+          </NavLink>
         </nav>
         <div className="mt-8">
           <StatusPill />
