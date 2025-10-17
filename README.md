@@ -31,36 +31,12 @@ controlled by the Copilot service (not repo files). See `COPILOT_SETUP.md` and
 - `srv/lucidia-llm/` — minimal FastAPI echo stub (only used if you don’t already run an LLM on 8000)
 - `srv/lucia-llm/` — same stub (duplicate dir name for compatibility with earlier scripts)
 
-Date: 2025-08-22
-
-This bundle is a **drop-in helper** to resolve “missing dependencies etc.” without requiring
-connector access. Push it into your working copy, then run one script on the server to scan
-your API, install missing npm packages, set up env defaults, and (optionally) boot a local
-LLM stub on port **8000** if none is running.
-
-**What’s included**
-
-- `ops/install.sh` — one-shot setup for `/srv/blackroad-api` (or detected API path)
-- `tools/dep-scan.js` — scans JS/TS for `require()`/`import` usage and installs missing packages
-- `tools/verify-runtime.sh` — quick health checks (API on 4000, LLM on 8000)
-- `srv/blackroad-api/.env.example` — sample env for your Express API
-- `srv/blackroad-api/package.json.sample` — a safe starter if your API has no package.json
-- `srv/lucidia-llm/` — minimal FastAPI echo stub (only used if you don’t already run an LLM on 8000)
-- `srv/lucia-llm/` — same stub (duplicate dir name for compatibility with earlier scripts)
-
 > Nothing here overwrites your existing code. The scripts are defensive: they detect paths,
 > **merge** deps, and only generate files if missing.
 
 ---
 
 ## Quick start
-
-**On your workstation**
-
-1. Unzip this at the **root of your working copy** (where your repo root lives).
-2. Commit and push.
-
-**On the server**
 
 **On your workstation**
 
@@ -144,38 +120,6 @@ python -m cli.console slo:gate --fail-on regressions
 
 ---
 
-## Notes & assumptions
-
-- Stack recorded in memory (Aug 2025): SPA on `/var/www/blackroad/index.html`, Express API on port **4000**
-  at `/srv/blackroad-api` with SQLite; LLM service on **127.0.0.1:8000**; NGINX proxies `/api` and `/ws`.
-- This bundle does **not** ship `node_modules/` (native builds vary by machine). Instead, it generates
-  and installs what’s actually needed by **scanning your sources**.
-- If your API already has `package.json`, nothing is overwritten; missing deps are added.
-- If you maintain your API directly under a different path, run the scanner manually, e.g.:
-  ```bash
-  node tools/dep-scan.js --dir /path/to/api --save
-  ```
-
-If anything looks off, run `bash tools/verify-runtime.sh` and share the output.
-
-## Subscribe API
-
-Environment variables for Stripe integration:
-
-- `STRIPE_PUBLIC_KEY`
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `STRIPE_PRICE_STARTER_MONTHLY`
-- `STRIPE_PRICE_PRO_MONTHLY`
-- `STRIPE_PRICE_INFINITY_MONTHLY`
-- `STRIPE_PRICE_STARTER_YEARLY`
-- `STRIPE_PRICE_PRO_YEARLY`
-- `STRIPE_PRICE_INFINITY_YEARLY`
-- `STRIPE_PORTAL_RETURN_URL` (optional)
-
-Example calls:
-
-```bash
 ## Notes & assumptions
 
 - Stack recorded in memory (Aug 2025): SPA on `/var/www/blackroad/index.html`, Express API on port **4000**
