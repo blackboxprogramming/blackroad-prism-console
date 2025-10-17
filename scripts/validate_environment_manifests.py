@@ -36,7 +36,7 @@ def iter_manifests(paths: Iterable[Path]) -> Iterable[Path]:
     """Yield manifest paths from the provided iterable, filtering by extension."""
     for path in paths:
         if path.is_file() and path.suffix in {".yml", ".yaml"}:
-            yield path
+            yield path.resolve()
 
 
 def validate_manifest(path: Path, validator: Draft202012Validator) -> Tuple[bool, str]:
@@ -73,10 +73,11 @@ def main(argv: Iterable[str] | None = None) -> int:
     if args.paths:
         expanded: list[Path] = []
         for input_path in args.paths:
-            if input_path.is_dir():
-                expanded.extend(sorted(iter_manifests(input_path.glob("**/*"))))
+            resolved_input = input_path.expanduser().resolve()
+            if resolved_input.is_dir():
+                expanded.extend(sorted(iter_manifests(resolved_input.glob("**/*"))))
             else:
-                expanded.append(input_path)
+                expanded.append(resolved_input)
         candidates = expanded
     else:
         candidates = sorted(iter_manifests(MANIFEST_DIR.glob("*.yml")))
@@ -87,9 +88,14 @@ def main(argv: Iterable[str] | None = None) -> int:
 
     success = True
     for manifest_path in candidates:
-        is_valid, message = validate_manifest(manifest_path, validator)
+        resolved_path = manifest_path.resolve()
+        is_valid, message = validate_manifest(resolved_path, validator)
         status = "OK" if is_valid else "FAIL"
-        print(f"[{status}] {manifest_path.relative_to(REPO_ROOT)} :: {message}")
+        try:
+            display_path = resolved_path.relative_to(REPO_ROOT)
+        except ValueError:
+            display_path = resolved_path
+        print(f"[{status}] {display_path} :: {message}")
         if not is_valid:
             success = False
 
