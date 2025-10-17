@@ -40,8 +40,9 @@ Every command passes through the Pydantic validators before it hits MQTT. Any ma
 
 ## Quick Start
 
-1. Copy `scripts/install_pi_ops.sh` and `pis/pi-ops/hb_log.py` to the Pi-Ops host and run the installer.
-2. Execute `scripts/push_pi_holo.sh` and `scripts/push_pi_sim.sh` from your workstation to deploy heartbeat publishers.
-3. Activate the agent virtualenv on macOS and start `agent/mac/api.py` (FastAPI + Uvicorn) to drive `/holo/text` and `/sim/panel` endpoints.
+1. Configure the Pi 400 admin console with `scripts/configure_pi_400.sh` (see `docs/pi/pi-400-admin-console.md` for details).
+2. Copy `scripts/install_pi_ops.sh` and `pis/pi-ops/hb_log.py` to the Pi-Ops host and run the installer.
+3. Execute `scripts/push_pi_holo.sh` and `scripts/push_pi_sim.sh` from your workstation to deploy heartbeat publishers.
+4. Activate the agent virtualenv on macOS and start `agent/mac/api.py` (FastAPI + Uvicorn) to drive `/holo/text` and `/sim/panel` endpoints.
 
 This aligns with the "fast path" checklist in the release notes.
