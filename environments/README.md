@@ -37,6 +37,21 @@ Update the manifest whenever the environment changes (new workflow, Terraform
 module, domain, or approval requirement). These files should stay aligned with
 `br-infra-iac`, `.github/workflows/*`, and the documented runbooks.
 
+## CLI helper
+
+Generate a quick summary for release tooling (or manual spot checks) with the
+environment summary script:
+
+```bash
+python tools/environments_summary.py --format text
+```
+
+Filter to a single environment by slug when wiring automation:
+
+```bash
+python tools/environments_summary.py --env stg
+```
+
 ## Current coverage
 
 - `production.yml` — customer-facing blackroad.io footprint.
