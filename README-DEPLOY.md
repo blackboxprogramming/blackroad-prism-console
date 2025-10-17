@@ -75,3 +75,22 @@ are targeting a different host.
   rollback tooling.
 - [`environments/production.yml`](environments/production.yml) — source-of-truth
   manifest for production infrastructure and automation.
+- [`environments/preview.yml`](environments/preview.yml) — captures preview
+  environment automation, including the PR container image pipeline.
+
+## PR preview container builds
+
+Preview review flows now publish a GHCR image for each pull request through
+`.github/workflows/preview-containers.yml`. The job shares the same triggers as
+the Terraform-backed preview environment and:
+
+1. Builds the current branch into a container tagged
+   `ghcr.io/<owner>/blackroad-prism-console:pr-<pr-number>-<short-sha>`.
+2. Uploads a Syft-generated SBOM artifact named `pr-<pr-number>-sbom`.
+3. Runs Grype and uploads the SARIF report to the repository’s code scanning
+   dashboard.
+4. Comments pull instructions on the PR so reviewers can run the container
+   locally.
+
+The job uses `GITHUB_TOKEN` for registry access by default. Supply `GHCR_PAT`
+when a fine-grained token is required for downstream automations.
