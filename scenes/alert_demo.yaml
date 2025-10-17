@@ -1,0 +1,42 @@
+name: Alert Demo
+description: Simulated critical alert flow for demos and testing.
+defaults:
+  wait: 1.0
+steps:
+  - label: Pre-alert banner
+    topic: sim/panel
+    payload:
+      panel_id: status
+      duration_ms: 4000
+      accent: "#F97316"
+      lines:
+        - text: Monitoring active
+          icon: activity
+        - text: Awaiting telemetry
+  - label: Raise hologram alert
+    topic: holo/text
+    delay: 0.5
+    payload:
+      text: "⚠  Network anomaly detected"
+      duration_ms: 4500
+      size: 60
+      effect: pulse
+  - label: Panel escalation
+    topic: sim/panel
+    wait: 3.0
+    payload:
+      panel_id: status
+      duration_ms: 6000
+      accent: "#DC2626"
+      lines:
+        - text: ALERT · Response team paged
+          icon: alert
+        - text: Containment protocol running
+  - label: Resolution message
+    topic: holo/text
+    wait: 4.0
+    payload:
+      text: "Incident resolved"
+      duration_ms: 3800
+      size: 52
+      effect: fade-out

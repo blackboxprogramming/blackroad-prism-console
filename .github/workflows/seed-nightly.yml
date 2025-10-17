@@ -1,0 +1,25 @@
+name: seed-nightly
+on:
+  schedule:
+    - cron: "12 6 * * *"   # 06:12 UTC daily (~12:12am America/Chicago)
+  workflow_dispatch: {}
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    env:
+      PG_URL: ${{ secrets.PG_URL_DEV }}
+      DAYS: "14"
+      USERS: "500"
+      EVENTS: "15000"
+      PURCHASE_RATE: "0.04"
+      SIGNUP_RATE: "0.15"
+      SESSIONS_PER_USER: "3"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20", cache: "npm" }
+      - run: npm ci
+      - name: Apply schema (idempotent)
+        run: npm run schema
+      - name: Seed dev data
+        run: npm run seed

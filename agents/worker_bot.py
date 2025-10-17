@@ -20,9 +20,13 @@ class WorkerBot:
         self.name = name
 
     def work(self) -> str:
-        """Return the task the bot will work on or ``"idle"``."""
+        """Assign the next available task and return its description.
+
+        If no tasks remain, ``"idle"`` is returned.
+        """
+
         board = JobBoard()
-        task: Optional[str] = board.next_task()
+        task: Optional[str] = board.assign_next_task(self.name)
         return task or "idle"
 
 

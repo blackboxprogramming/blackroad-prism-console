@@ -1,0 +1,16 @@
+{
+  "coolest_block_mode": "highest_fees",
+  "energy_target_kwh": 38.5,
+  "generated_at": "2025-09-28T03:32:59.051402+00:00",
+  "highlights": {
+    "coolest_block": null,
+    "energy_saver": null,
+    "fee_hunter": null
+  },
+  "leaderboard": {},
+  "trophies": {
+    "coolest_block": "\ud83c\udfc6 Coolest Block",
+    "energy_saver": "\ud83d\udfe2 Energy Saver",
+    "fee_hunter": "\ud83d\udd25 Fee Hunter"
+  }
+}

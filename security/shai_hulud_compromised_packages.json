@@ -1,0 +1,12 @@
+{
+  "packages": [
+    {
+      "name": "@blackroad/example-infected",
+      "versions": ["*"]
+    },
+    {
+      "name": "fast-tools",
+      "versions": ["2.4.1", "2.4.2"]
+    }
+  ]
+}

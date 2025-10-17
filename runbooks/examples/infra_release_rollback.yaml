@@ -1,0 +1,19 @@
+name: infra_release_rollback
+steps:
+  - action: notify
+    params:
+      channel: "#eng"
+      message: "Rolling back infrastructure release for {{ env }} / {{ service }}"
+  - action: run_script
+    params:
+      path: "scripts/rollback.sh"
+      args:
+        - "latest"
+  - action: gate
+    params:
+      when: "last_exit_code == 0"
+      on_fail: "abort:rollback_failed"
+  - action: notify
+    params:
+      channel: "#eng"
+      message: "Rollback complete for {{ env }} / {{ service }}"

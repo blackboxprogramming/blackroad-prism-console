@@ -1,0 +1,5 @@
+#!/bin/sh
+if command -v openbox-session >/dev/null 2>&1; then
+  openbox-session &
+fi
+exec /usr/local/bin/pi_ops_kiosk_session.sh

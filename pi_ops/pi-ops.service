@@ -1,0 +1,17 @@
+[Unit]
+Description=Pi-Ops Dashboard (FastAPI + MQTT)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/pi_ops
+Environment=PI_OPS_MQTT_HOST=localhost
+ExecStart=/home/pi/pi_ops/run.sh
+Restart=on-failure
+RestartSec=5
+TimeoutSec=30
+
+[Install]
+WantedBy=multi-user.target

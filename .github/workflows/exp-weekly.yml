@@ -1,0 +1,13 @@
+name: Experimentation Weekly (Ramp Scheduler + Report)
+on:
+  schedule: [{ cron: "12 6 * * 1" }]
+  workflow_dispatch:
+jobs:
+  exp-weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/exp/ramp_scheduler.ts
+      - run: node scripts/exp/analyze.ts

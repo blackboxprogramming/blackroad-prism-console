@@ -1,0 +1,16 @@
+version: 2
+models:
+  - name: stg_app__events
+    description: "Normalized application events from BR_RAW.APP.EVENTS"
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: occurred_at
+        tests: [not_null]
+      - name: event_name
+        tests:
+          - accepted_values:
+              values: ['LOGIN','LOGOUT','SIGNUP','PAGEVIEW','CLICK','PURCHASE']
+              quote: true
+              config:
+                severity: warn

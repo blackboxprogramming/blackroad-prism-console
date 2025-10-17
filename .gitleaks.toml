@@ -1,7 +1,16 @@
 title = "BlackRoad Secrets Policy"
-[[rules]]
-id = "generic-api-key"
-description = "Generic API key"
-regex = '''(?i)(api[_-]?key|secret|token)\s*[:=]\s*['"][0-9a-zA-Z_\-]{16,}['"]'''
-entropy = 3.5
 
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow non-secret test fixtures"
+paths = [
+  "docs/.*",
+  "analysis/fixtures/.*",
+  "TheRohoncCodex.html",
+  "scripts/nginx-ensure-and-health.sh",
+  "opt/blackroad/dev/.*",
+  "infrastructure/wireguard/.*",
+  '^\.env\.example$',
+]

@@ -164,7 +164,9 @@ def build_git_env(cfg):
             "-o StrictHostKeyChecking=yes"
         )
     else:
-        env["GIT_SSH_COMMAND"] = f"ssh -i {shlex.quote(key)} -o StrictHostKeyChecking=accept-new"
+        env["GIT_SSH_COMMAND"] = (
+            f"ssh -i {shlex.quote(key)} -o StrictHostKeyChecking=accept-new"
+        )
     return env
 
 

@@ -1,0 +1,17 @@
+[Unit]
+Description=BlackRoad Pi-Holo audio listener
+After=network-online.target sound.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi
+ExecStart=/usr/bin/env python3 /home/pi/audio_player.py
+Restart=on-failure
+RestartSec=2
+Environment=AUDIO_MQTT_HOST=pi-ops.local
+Environment=AUDIO_SOUNDS_DIR=/home/pi/sounds
+
+[Install]
+WantedBy=multi-user.target

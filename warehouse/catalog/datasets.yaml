@@ -1,0 +1,5 @@
+datasets:
+  finance_arr: { owner: Finance, classification: internal, sla_hours: 24 }
+  support_sla: { owner: Support, classification: internal, sla_hours: 12 }
+  growth_funnel: { owner: Growth, classification: internal, sla_hours: 24 }
+  product_usage: { owner: Product, classification: internal, sla_hours: 24 }

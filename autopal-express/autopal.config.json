@@ -1,0 +1,25 @@
+{
+  "port": 8080,
+  "issuer": "http://localhost:8081/realms/autopal",
+  "jwks_url": "http://localhost:8081/realms/autopal/protocol/openid-connect/certs",
+  "audiences": [
+    "gha:org/repo@refs/heads/main"
+  ],
+  "break_glass": {
+    "enabled": true,
+    "header": "X-Break-Glass"
+  },
+  "global_switch": {
+    "enabled": true
+  },
+  "step_up": {
+    "header": "X-Step-Up-Approved"
+  },
+  "dual_control": {
+    "approver_header": "X-Dual-Control-Approver"
+  },
+  "rate_limit": {
+    "points": 10,
+    "duration": 60
+  }
+}

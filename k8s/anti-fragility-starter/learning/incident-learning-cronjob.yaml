@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: incident-learning-nightly
+spec:
+  schedule: "30 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: incident-learning
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: incident-learning
+          containers:
+            - name: feature-builder
+              image: ghcr.io/blackroad/incident-learning:latest
+              imagePullPolicy: IfNotPresent
+              args:
+                - "--since"
+                - "24h"
+                - "--incident-api=https://incident-api.internal.example.com/v1"
+                - "--feature-store=postgresql://feature-writer:5432/observability"
+                - "--embedding-model=text-embedding-3-small"
+              env:
+                - name: INCIDENT_API_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: incident-writer
+                      key: token
+                - name: FEATURE_STORE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: feature-store
+                      key: password
+              volumeMounts:
+                - name: runbook-cache
+                  mountPath: /var/runbooks
+          volumes:
+            - name: runbook-cache
+              emptyDir: {}

@@ -44,6 +44,7 @@ class SimulatorAgent:
         self.cache[key] = value
         self.cache.move_to_end(key)
         while len(self.cache) > self.cache_size:
+        if len(self.cache) > CACHE_SIZE:
             self.cache.popitem(last=False)
 
     def run(

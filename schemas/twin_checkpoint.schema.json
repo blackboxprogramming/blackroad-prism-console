@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["name", "created_at", "manifest"],
+  "properties": {
+    "name": {"type": "string"},
+    "created_at": {"type": "string"},
+    "settings_digest": {"type": "string"},
+    "manifest": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file", "hash", "size"],
+        "properties": {
+          "file": {"type": "string"},
+          "hash": {"type": "string"},
+          "size": {"type": "integer"}
+        }
+      }
+    }
+  }
+}

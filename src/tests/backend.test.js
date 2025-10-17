@@ -137,6 +137,20 @@ describe('Logs and Contradictions', () => {
     const cRes = await request(app)
       .post('/api/contradictions')
       .set('Cookie', userCookie)
+      .send({
+        topic: 'test:integration',
+        statement: 'background worker failed to start',
+        polarity: -1,
+        confidence: 0.85,
+        note: 'observed worker crash during boot',
+        source: { kind: 'log', label: 'jest-suite' }
+      });
+    expect(cRes.status).toBe(200);
+    expect(cRes.body.observation).toBeDefined();
+    expect(cRes.body.observation.status).toBe('open');
+    expect(cRes.body.claim).toBeDefined();
+    expect(cRes.body.claim.claim_id).toBe(cRes.body.observation.claim_id);
+    contradictionId = cRes.body.observation.id;
       .send({ description: 'issue' });
     expect(cRes.status).toBe(200);
     contradictionId = cRes.body.id;
@@ -148,6 +162,11 @@ describe('Logs and Contradictions', () => {
 
     const resolve = await request(app)
       .post(`/api/contradictions/${contradictionId}/resolve`)
+      .set('Cookie', adminCookie)
+      .send({ note: 'restart worker and verified stable state' });
+    expect(resolve.status).toBe(200);
+    expect(resolve.body.observation.status).toBe('resolved');
+    expect(resolve.body.observation.note).toBe('restart worker and verified stable state');
       .set('Cookie', adminCookie);
     expect(resolve.status).toBe(200);
   });

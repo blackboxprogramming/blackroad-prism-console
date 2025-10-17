@@ -45,7 +45,7 @@
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const {useState,useEffect,useMemo,useRef} = React; const styled = window.styled;
+const {useState,useEffect,useMemo,useRef,useCallback} = React; const styled = window.styled;
 /* ------------ API helpers ------------- */
 async function apiGet(p){const r=await fetch(p,{credentials:"include"});if(!r.ok)throw new Error(await r.text());return r.json()}
 async function apiPost(p,b={}){const r=await fetch(p,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify(b)});if(!r.ok)throw new Error(await r.text());return r.json()}
@@ -113,7 +113,231 @@ function CanvasPage(){const ref=useRef(null);const[draw,setDraw]=useState(false)
 function EditorPage({onRun,onCommit,code,setCode}){return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',justify-content:'space-between'}}><strong>Editor</strong><div style={{display:'flex',gap:8}}><button class="btn small" onClick={onRun}>Run</button><button class="btn small" onClick={onCommit}>Commit</button></div></div><div onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>setCode(String(r.result));r.readAsText(f)}}><CodeEditor value={code} onChange={setCode}/></div></div>)}
 function TerminalPage({onCommand}){return <Terminal onCommand={onCommand}/>}
 function RoadViewPage({timeline,filteredTimeline,filter,setFilter,modal,setModal,itemAction,build,cpu,mem,gpu}){return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',alignItems:'center',gap:8}}><input value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Search timeline…" style={{flex:1,background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'var(--text)',padding:'8px 10px'}}/></div><div style={{display:'grid',gap:10}}>{filteredTimeline.map(item=><ActivityItem key={item.id} item={{...item,onAction:itemAction}} onOpen={setModal}/>)}</div><div style={{display:'grid',gap:10}}><div style={{fontWeight:700}}>Build</div><div style={{height:10,background:'#0b1324',border:'1px solid var(--border)',borderRadius:10,overflow:'hidden'}}><div style={{height:'100%',width:build+'%',background:'linear-gradient(90deg,var(--accent),var(--accent-2))',transition:'width .6s'}}></div></div><div style={{display:'grid',gap:6}}><div style={{display:'flex',justifyContent:'space-between'}}><span>CPU</span><span>{Math.round(cpu.at(-1))}%</span></div><Sparkline data={cpu} color={theme.colors.accent2}/><div style={{display:'flex',justifyContent:'space-between'}}><span>Memory</span><span>{Math.round(mem.at(-1))}%</span></div><Sparkline data={mem} color={theme.colors.accent}/><div style={{display:'flex',justifyContent:'space-between'}}><span>GPU</span><span>{Math.round(gpu.at(-1))}%</span></div><Sparkline data={gpu} color={theme.colors.accent3}/></div></div>)}
-function BackRoadPage({agents,setAgents,streamOn,setStreamOn,wallet,setWallet,notes,setNotes}){return(<div style={{display:'grid',gap:10}}><div style={{fontWeight:700}}>Agent Stack</div><div style={{display:'flex',gap:8}}>{Object.keys(agents).map(k=>(<label key={k} class="chip" style={{cursor:'pointer'}}><input type="checkbox" checked={agents[k]} onChange={()=>setAgents(a=>({...a,[k]:!a[k]}))}/> {k}</label>))}</div><label style={{display:'inline-flex',alignItems:'center',gap:8}}><input type="checkbox" checked={streamOn} onChange={()=>setStreamOn(s=>!s)}/><span>Stream</span></label><div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><div><div style={{fontWeight:700}}>Wallet</div><div class="chip">{wallet} RC</div></div><div style={{display:'flex',gap:8}}><button class="btn small" onClick={()=>setWallet(w=>(parseFloat(w)+0.1).toFixed(2))}>Stake</button><button class="btn small" onClick={()=>setWallet(w=>(Math.max(0,parseFloat(w)-0.1)).toFixed(2))}>Unstake</button></div></div><div style={{fontWeight:700}}>Session Notes</div><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Type notes…" style={{minHeight:140,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:10}}/></div>)}
+function BackRoadPage({agents,setAgents,streamOn,setStreamOn,wallet,setWallet,notes,setNotes}){
+  const capLogRef = useRef(null);
+  const capChunks = useRef([]);
+  const capRecorder = useRef(null);
+  const capStreamRef = useRef(null);
+  const capTimer = useRef(null);
+  const [capRunning,setCapRunning] = useState(false);
+  const [capLog,setCapLog] = useState('Captions idle…\n');
+
+  const stopCaptions = useCallback((silent=false)=>{
+    if(capTimer.current){clearInterval(capTimer.current);capTimer.current=null;}
+    if(capRecorder.current && capRecorder.current.state!=='inactive'){capRecorder.current.stop();}
+    if(capStreamRef.current){capStreamRef.current.getTracks().forEach(t=>t.stop());capStreamRef.current=null;}
+    capChunks.current=[];
+    capRecorder.current=null;
+    if(capRunning){
+      if(!silent){setCapLog(log=>log+'\n[stopped]\n');}
+      setCapRunning(false);
+    }
+  },[capRunning]);
+
+  const startCaptions = useCallback(async()=>{
+    if(capRunning) return;
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      setCapLog(prev=>prev+'[mic error] media devices unavailable\n');
+      return;
+    }
+    if(typeof MediaRecorder==='undefined'){
+      setCapLog(prev=>prev+'[mic error] MediaRecorder unsupported\n');
+      return;
+    }
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      capStreamRef.current = stream;
+      const recorder = new MediaRecorder(stream,{mimeType:'audio/webm'});
+      capRecorder.current = recorder;
+      capChunks.current=[];
+      recorder.ondataavailable = e=>{if(e.data && e.data.size>0) capChunks.current.push(e.data);};
+      recorder.start();
+      setCapRunning(true);
+      setCapLog('Captions started…\n');
+      capTimer.current = setInterval(async()=>{
+        if(!capChunks.current.length) return;
+        const blob = new Blob(capChunks.current,{type:'audio/webm'});
+        capChunks.current=[];
+        const fd = new FormData();
+        fd.append('file',blob,'chunk.webm');
+        try{
+          const up = await fetch('/transcribe/upload',{method:'POST',body:fd});
+          if(!up.ok) throw new Error('upload failed');
+          const data = await up.json();
+          if(!data.token) throw new Error('missing token');
+          const proto = location.protocol==='https:'?'wss':'ws';
+          const ws = new WebSocket(`${proto}://${location.host}/ws/transcribe/run`);
+          ws.onopen = ()=>ws.send(JSON.stringify({token:data.token,lang:'en'}));
+          ws.onmessage = ev=>{
+            if(ev.data==='[[BLACKROAD_WHISPER_DONE]]'){ws.close();return;}
+            setCapLog(prev=>prev+ev.data+'\n');
+          };
+          ws.onerror = ()=>ws.close();
+        }catch(err){
+          setCapLog(prev=>prev+`[error] ${err.message}\n`);
+        }
+      },4000);
+    }catch(err){
+      setCapLog(prev=>prev+`[mic error] ${err.message}\n`);
+    }
+  },[capRunning]);
+
+  useEffect(()=>()=>stopCaptions(true),[stopCaptions]);
+  useEffect(()=>{if(capLogRef.current) capLogRef.current.scrollTop = capLogRef.current.scrollHeight;},[capLog]);
+  const audioRef = useRef(null);
+  const wsRef = useRef(null);
+  const [whisperLog,setWhisperLog] = useState('');
+  const [whisperSession,setWhisperSession] = useState('');
+  const [whisperBusy,setWhisperBusy] = useState(false);
+
+  const closeWs = () => {
+    if(wsRef.current){
+      try{ wsRef.current.close(); }catch(_){/* noop */}
+      wsRef.current = null;
+    }
+  };
+
+  useEffect(()=>{
+    return ()=>closeWs();
+  },[]);
+
+  const appendLog = line => setWhisperLog(prev => prev ? `${prev}\n${line}` : line);
+
+  function startStream(path, token){
+    closeWs();
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${proto}://${location.host}${path}`);
+    wsRef.current = ws;
+    ws.onopen = () => {
+      const payload = { token, lang:'en', model:'base', beam:5 };
+      ws.send(JSON.stringify(payload));
+    };
+    ws.onmessage = ev => {
+      const data = typeof ev.data === 'string' ? ev.data : '';
+      if(!data) return;
+      if(data.startsWith('[[BLACKROAD_SESSION:')){
+        const id = data.replace('[[BLACKROAD_SESSION:','').replace(']]','');
+        setWhisperSession(id);
+        return;
+      }
+      if(data === '[[BLACKROAD_WHISPER_DONE]]'){
+        appendLog('[done]');
+        setWhisperBusy(false);
+        ws.close();
+        return;
+      }
+      appendLog(data);
+    };
+    ws.onerror = () => {
+      appendLog('[error] stream error');
+      setWhisperBusy(false);
+    };
+    ws.onclose = () => {
+      wsRef.current = null;
+      setWhisperBusy(false);
+    };
+  }
+
+  async function uploadAndStream(mode){
+    const file = audioRef.current?.files?.[0];
+    if(!file){
+      setWhisperLog('Pick an audio file.');
+      setWhisperSession('');
+      return;
+    }
+    setWhisperLog('Uploading audio…');
+    setWhisperSession('');
+    setWhisperBusy(true);
+    try{
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/transcribe/upload',{method:'POST',body:fd});
+      if(!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      if(!data?.token) throw new Error('Upload failed');
+      appendLog(mode==='gpu' ? 'Starting Jetson stream…' : 'Starting local stream…');
+      startStream(mode==='gpu'?'/ws/transcribe/run_gpu':'/ws/transcribe/run', data.token);
+    }catch(err){
+      setWhisperBusy(false);
+      appendLog(`[error] ${err?.message || err}`);
+    }
+  }
+
+  async function downloadTranscript(){
+    if(!whisperSession) return;
+    try{
+      const res = await fetch(`/transcripts/${encodeURIComponent(whisperSession)}`);
+      if(!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      if(!data?.text) throw new Error(data?.error || 'Transcript empty');
+      const blob = new Blob([data.text],{type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${whisperSession}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }catch(err){
+      appendLog(`[error] transcript download failed: ${err?.message || err}`);
+    }
+  }
+
+  return(
+    <div style={{display:'grid',gap:10}}>
+      <div style={{fontWeight:700}}>Agent Stack</div>
+      <div style={{display:'flex',gap:8}}>
+        {Object.keys(agents).map(k=>(
+          <label key={k} class="chip" style={{cursor:'pointer'}}>
+            <input type="checkbox" checked={agents[k]} onChange={()=>setAgents(a=>({...a,[k]:!a[k]}))}/> {k}
+          </label>
+        ))}
+      </div>
+      <label style={{display:'inline-flex',alignItems:'center',gap:8}}>
+        <input type="checkbox" checked={streamOn} onChange={()=>setStreamOn(s=>!s)}/>
+        <span>Stream</span>
+      </label>
+      <div style={{display:'flex',gap:8}}>{Object.keys(agents).map(k=>(<label key={k} class="chip" style={{cursor:'pointer'}}><input type="checkbox" checked={agents[k]} onChange={()=>setAgents(a=>({...a,[k]:!a[k]}))}/> {k}</label>))}</div>
+      <label style={{display:'inline-flex',alignItems:'center',gap:8}}><input type="checkbox" checked={streamOn} onChange={()=>setStreamOn(s=>!s)}/><span>Stream</span></label>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div>
+          <div style={{fontWeight:700}}>Wallet</div>
+          <div class="chip">{wallet} RC</div>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <button class="btn small" onClick={()=>setWallet(w=>(parseFloat(w)+0.1).toFixed(2))}>Stake</button>
+          <button class="btn small" onClick={()=>setWallet(w=>(Math.max(0,parseFloat(w)-0.1)).toFixed(2))}>Unstake</button>
+        </div>
+      </div>
+      <div style={{background:'var(--subpanel)',border:'1px solid var(--border)',borderRadius:12,padding:14,display:'flex',flexDirection:'column',gap:10}}>
+        <div style={{fontWeight:700}}>Live Captions</div>
+        <div style={{display:'flex',gap:8}}>
+          <button class="btn small" onClick={startCaptions} disabled={capRunning} style={{opacity:capRunning?0.5:1,cursor:capRunning?'not-allowed':'pointer'}}>Start Captions</button>
+          <button class="btn small" onClick={()=>stopCaptions()} disabled={!capRunning} style={{opacity:!capRunning?0.5:1,cursor:!capRunning?'not-allowed':'pointer'}}>Stop</button>
+        </div>
+        <pre ref={capLogRef} style={{background:'#000',color:'#0f0',padding:'1em',height:220,overflow:'auto',borderRadius:6,margin:0,fontSize:12,lineHeight:'1.4em'}}>{capLog}</pre>
+      </div>
+      <div style={{fontWeight:700}}>Session Notes</div>
+      <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Type notes…" style={{minHeight:140,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:10}}/>
+      <div style={{fontWeight:700}}>Session Notes</div>
+      <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Type notes…" style={{minHeight:140,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:10}}/>
+      <div style={{marginTop:6,padding:12,border:'1px solid var(--border)',borderRadius:12,background:'#0b1324',display:'grid',gap:10}}>
+        <div style={{fontWeight:700}}>Whisper (Streaming)</div>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+          <input type="file" accept="audio/*" ref={audioRef} disabled={whisperBusy}/>
+          <button class="btn small" disabled={whisperBusy} onClick={()=>uploadAndStream('cpu')}>Transcribe (stream)</button>
+          <button class="btn small" disabled={whisperBusy} onClick={()=>uploadAndStream('gpu')}>Transcribe on Jetson (GPU)</button>
+        </div>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+          <button class="btn small" disabled={!whisperSession} onClick={downloadTranscript}>Download transcript</button>
+          {whisperSession && <div class="chip">Session: {whisperSession}</div>}
+        </div>
+        <pre style={{minHeight:140,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#e2e8f0',padding:10,whiteSpace:'pre-wrap'}}>{whisperLog || 'Pick an audio file and start a run.'}</pre>
+      </div>
+    </div>
+  )
+}
 function CrudPage({kind,title,fields}){const[list,setList]=useState([]);const[loading,setLoading]=useState(true);const[modalOpen,setModalOpen]=useState(false);const[item,setItem]=useState({});const[query,setQuery]=useState('');async function load(){try{const d=await apiGet(`/api/${kind}`);setList(d)}catch{setList([])}finally{setLoading(false)}}useEffect(()=>{load()},[kind]);function edit(x){setItem(x||{});setModalOpen(true)}async function save(){const body={...item};if(item.id){await apiPut(`/api/${kind}/${item.id}`,body)}else{await apiPost(`/api/${kind}`,body)}setModalOpen(false);load()}async function del(id){if(!confirm('Delete?'))return;await apiDel(`/api/${kind}/${id}`);load()}const cols=fields.map(f=>f.name);const filtered=list.filter(r=>JSON.stringify(r).toLowerCase().includes(query.toLowerCase()));return(<div style={{display:'grid',gap:10}}><div style={{display:'flex',justify-content:'space-between',alignItems:'center'}}><strong>{title}</strong><div style={{display:'flex',gap:8}}><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search…" style={{background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'#fff',padding:'8px 10px'}}/><button class="btn small" onClick={()=>edit({})}>New</button></div></div><div style={{overflow:'auto',border:'1px solid var(--border)',borderRadius:12}}><table style={{width:'100%',borderCollapse:'collapse'}}><thead><tr>{cols.map(c=><th key={c} style={{textAlign:'left',padding:'10px 12px',borderBottom:'1px solid var(--border)',color:'var(--muted)'}}>{c}</th>)}<th style={{padding:'10px 12px',borderBottom:'1px solid var(--border)'}}></th></tr></thead><tbody>{loading?<tr><td colSpan={cols.length+1} style={{padding:12}}>Loading…</td></tr>:filtered.map(row=>(<tr key={row.id}><>{cols.map(c=><td key={c} style={{padding:'10px 12px',borderBottom:'1px solid var(--border)'}}>{String(row[c]??'')}</td>)}</><td style={{padding:'10px 12px',borderBottom:'1px solid var(--border)'}}><button class="btn small" onClick={()=>edit(row)}>Edit</button> <button class="btn small" onClick={()=>del(row.id)}>Delete</button></td></tr>))}</tbody></table></div><Modal open={modalOpen} onClose={()=>setModalOpen(false)} title={item.id?'Edit':'New'}><div style={{display:'grid',gap:8}}>{fields.map(f=>(<div key={f.name} style={{display:'grid',gap:6}}><label style={{color:'var(--muted)'}}>{f.name}</label><input value={item[f.name]||''} onChange={e=>setItem({...item,[f.name]:e.target.value})} placeholder={f.placeholder||''} style={{background:'#09122a',border:'1px solid var(--border)',borderRadius:10,color:'#fff',padding:'8px 10px'}}/></div>))}<div style={{display:'flex',gap:8,justifyContent:'flex-end',marginTop:6}}><button class="btn" onClick={()=>setModalOpen(false)}>Cancel</button><button class="btn primary" onClick={save}>Save</button></div></div></Modal></div>)}
 function S3Uploader(){
   const [file,setFile]=useState(null);
@@ -148,13 +372,25 @@ function Dashboard({route}) {
   const [mem,setMEM]=useState(Array.from({length:40},()=>Math.random()*70+20));
   const [gpu,setGPU]=useState(Array.from({length:40},()=>Math.random()*90));
   const [build,setBuild]=useState(63); const [timeline,setTimeline]=useState([]); const [commits,setCommits]=useState([]); const [tasks,setTasks]=useState([]);
+  const [jobs,setJobs]=useState([]);
+  const [jobOutput,setJobOutput]=useState('');
+  const jobOutRef=useRef(null);
+  const activeJobRef=useRef(null);
+
+  const loadJobs=useCallback(async()=>{try{const res=await fetch('/jobs');const data=await res.json();setJobs(Array.isArray(data.jobs)?data.jobs:[]);}catch(err){console.error('jobs load failed',err);}},[]);
+  const openJob=useCallback(async(id)=>{activeJobRef.current=id;try{const res=await fetch(`/jobs/${id}`);const data=await res.json();const text=data.output||JSON.stringify(data,null,2);setJobOutput(text);setTimeout(()=>{if(jobOutRef.current){jobOutRef.current.scrollTop=jobOutRef.current.scrollHeight;}},0);}catch(err){setJobOutput(String(err));}},[]);
 
   useEffect(()=>{Promise.allSettled([apiGet('/api/timeline'),apiGet('/api/tasks'),apiGet('/api/commits'),apiGet('/api/state')]).then(([tl,ts,cs,st])=>{
     if(tl.value)setTimeline(tl.value); if(ts.value)setTasks(ts.value); if(cs.value)setCommits(cs.value);
-    if(st.value){setWallet(st.value.wallet); setAgents(st.value.agents); setBuild(st.value.build)}
-  }); const proto=location.protocol==='https:'?'wss':'ws'; const ws=new WebSocket(`${proto}://${location.host}/ws`);
-  ws.onmessage=e=>{try{const m=JSON.parse(e.data); if(m.type==='activity') setTimeline(t=>[m.item,...t].slice(0,80)); if(m.type==='metrics'){setCPU(x=>[...x.slice(1),m.cpu]); setMEM(x=>[...x.slice(1),m.mem]); setGPU(x=>[...x.slice(1),m.gpu]);} if(m.type==='build') setBuild(m.progress); if(m.type==='wallet') setWallet(m.balance.toFixed(2)); }catch(_){} };
-  return ()=>ws.close();},[]);
+    if(st.value){setWallet(st.value.wallet); setAgents(st.value.agents); setBuild(st.value.build);}
+  }); loadJobs(); const proto=location.protocol==='https:'?'wss':'ws'; const ws=new WebSocket(`${proto}://${location.host}/ws`);
+  ws.onmessage=e=>{const raw=typeof e.data==='string'?e.data:''; try{const m=JSON.parse(raw); if(m.type==='activity') setTimeline(t=>[m.item,...t].slice(0,80)); if(m.type==='metrics'){setCPU(x=>[...x.slice(1),m.cpu]); setMEM(x=>[...x.slice(1),m.mem]); setGPU(x=>[...x.slice(1),m.gpu]);} if(m.type==='build') setBuild(m.progress); if(m.type==='wallet') setWallet(m.balance.toFixed(2)); }catch(err){}};
+  return ()=>ws.close();},[loadJobs]);
+
+  useEffect(()=>{const origWS=window.WebSocket; const patched=function(url,protocols){const ws=protocols!==undefined?new origWS(url,protocols):new origWS(url); const handler=(event)=>{const raw=String(event.data??''); if(raw.startsWith('[[BLACKROAD_JOB_ID:')){const match=raw.match(/\d+/); const id=match?Number(match[0]):null; if(id){activeJobRef.current=id; setJobOutput(''); loadJobs().then(()=>openJob(id)).catch(()=>{});} return;} if(raw==='[[BLACKROAD_DONE]]'){const id=activeJobRef.current; loadJobs().then(()=>{if(id) openJob(id);}).catch(()=>{}); return;} if(raw.startsWith('[error]')){setJobOutput(prev=>prev?`${prev}\n${raw}`:raw); setTimeout(()=>{if(jobOutRef.current){jobOutRef.current.scrollTop=jobOutRef.current.scrollHeight;}},0); loadJobs().then(()=>{const id=activeJobRef.current; if(id) openJob(id);}).catch(()=>{});} }; ws.addEventListener('message',handler); return ws;};
+  Object.assign(patched,origWS); patched.prototype=origWS.prototype; window.WebSocket=patched; return()=>{window.WebSocket=origWS;};},[loadJobs,openJob]);
+
+  const formatTs=ts=>ts?new Date(ts*1000).toLocaleTimeString():'-';
 
   const filteredTimeline=useMemo(()=>timeline.filter(x=>(x.title||'').toLowerCase().includes(filter.toLowerCase())||(x.desc||'').toLowerCase().includes(filter.toLowerCase())),[timeline,filter]);
   const [code,setCode]=useState(`// Example code\nconsole.log('BlackRoad online');`);
@@ -227,6 +463,29 @@ function Dashboard({route}) {
             <div style={{display:'flex',justifyContent:'space-between'}}><span>GPU</span><span>{Math.round(gpu.at(-1))}%</span></div>
             <Sparkline data={gpu} color={theme.colors.accent3}/>
           </div>
+        </Card>
+        <Card>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div style={{fontWeight:700}}>Jobs</div>
+            <button className="btn small" onClick={loadJobs}>Refresh</button>
+          </div>
+          <table style={{width:'100%',marginTop:8,fontSize:12,borderCollapse:'collapse'}}>
+            <thead><tr><th>ID</th><th>Cmd</th><th>Status</th><th>Started</th><th>Ended</th><th>View</th></tr></thead>
+            <tbody>
+              {jobs.map(job=>(
+                <tr key={job.id}>
+                  <td>{job.id}</td>
+                  <td style={{maxWidth:360,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={job.cmd}>{job.cmd}</td>
+                  <td>{job.status}</td>
+                  <td>{formatTs(job.started)}</td>
+                  <td>{formatTs(job.ended)}</td>
+                  <td><button className="btn small" onClick={()=>openJob(job.id)}>Open</button></td>
+                </tr>
+              ))}
+              {!jobs.length && <tr><td colSpan="6" style={{padding:'8px 4px',color:'var(--muted)'}}>No jobs yet</td></tr>}
+            </tbody>
+          </table>
+          <pre ref={jobOutRef} style={{background:'#000',color:'#0f0',padding:'1em',height:220,overflow:'auto',borderRadius:6,marginTop:8}}>{jobOutput}</pre>
         </Card>
         <Card>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>

@@ -44,6 +44,14 @@ const Terminal: React.FC<Props> = ({ kernel, onChange }) => {
         case 'ls':
           print(kernel.ls(parts[1]).join(' '));
           break;
+        case 'cat': {
+          const content = kernel.cat(parts[1]);
+          if (content) {
+            // Split by newlines to display each line separately
+            content.split('\n').forEach(line => print(line));
+          }
+          break;
+        }
         case 'cat':
           print(kernel.cat(parts[1]) ?? '');
           break;

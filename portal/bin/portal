@@ -1,0 +1,342 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DEFAULT_ROOT="/home/pi/portal"
+ROOT="${PORTAL_ROOT:-$DEFAULT_ROOT}"
+ROOT="${ROOT%/}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ ! -d "$ROOT" ]]; then
+  ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+fi
+
+WALLET="watchonly_main"
+AUDIT_FILE="$ROOT/audits/portal.log"
+FREEZE_FILE="$ROOT/configs/frozen.txt"
+POLICY_SCHEMA="$ROOT/configs/policy.schema.json"
+
+mkdir -p "$ROOT/audits" "$ROOT/configs/approvals"
+touch "$FREEZE_FILE"
+
+usage() {
+  cat <<'H'
+portal <cmd> [args]
+
+Commands:
+  proof <raw.descriptor>                 Create aura-proof.json & sha256
+  psbt:new <label> <outputs.json> <fee>  Build unsigned PSBT (multi-dest)
+  psbt:verify <label>.signed.psbt        Analyze signed PSBT
+  psbt:broadcast <label>.signed.psbt     Finalize & broadcast (requires CONFIRM-BROADCAST)
+  policy:request <file.json>             Validate & hash a policy request (unsigned)
+  policy:collect <label> <sigfile>       Record an offline signature for a request
+  policy:status <label>                  Show collected sigs / threshold status
+  utxo:freeze <txid:vout>                Mark UTXO as frozen (local forbids funding)
+  utxo:thaw <txid:vout>                  Unfreeze
+  help                                   This help
+
+Notes:
+  - Watch-only wallet is created if missing.
+  - outputs.json format: [{ "address": "...", "amount_btc": "0.01000000" }, ...]
+H
+}
+
+log_json() {
+  local label="$1" info="$2"
+  local tip="" tiphash=""
+  if command -v bitcoin-cli >/dev/null 2>&1; then
+    if tip=$(bitcoin-cli getblockcount 2>/dev/null); then
+      tiphash=$(bitcoin-cli getblockhash "$tip" 2>/dev/null || true)
+    fi
+  fi
+  jq -n --arg utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --arg cmd "${CMD}" \
+        --arg label "$label" \
+        --arg info "$info" \
+        --arg tip "$tip" \
+        --arg tiphash "$tiphash" \
+        '{utc:$utc,cmd:$cmd,label:$label,info:$info,tip:($tip|select(. != "")),tiphash:($tiphash|select(. != ""))}' \
+        >> "$AUDIT_FILE"
+}
+
+ensure_wallet() {
+  if ! bitcoin-cli -rpcwallet="$WALLET" getwalletinfo >/dev/null 2>&1; then
+    bitcoin-cli -named createwallet wallet_name="$WALLET" disable_private_keys=true descriptors=true blank=true >/dev/null
+    if [[ ! -f "$ROOT/configs/raw.descriptor" ]]; then
+      echo "Missing $ROOT/configs/raw.descriptor" >&2
+      exit 12
+    fi
+    local raw desc
+    raw="$(cat "$ROOT/configs/raw.descriptor")"
+    desc="$(bitcoin-cli getdescriptorinfo "$raw" | jq -r .descriptor)"
+    bitcoin-cli -rpcwallet="$WALLET" importdescriptors "[{\"desc\":\"$desc\",\"active\":true,\"range\":10000,\"timestamp\":\"now\"}]" >/dev/null
+  fi
+}
+
+lock_frozen_utxos() {
+  local data="$1"
+  mapfile -t froz < <(grep -v '^[[:space:]]*$' "$FREEZE_FILE" 2>/dev/null || true)
+  if [[ -n "$data" ]]; then
+    while IFS= read -r line; do
+      [[ -n "$line" ]] || continue
+      froz+=("$line")
+    done <<< "$data"
+  fi
+  if ((${#froz[@]})); then
+    local arr
+    arr=$(printf '%s\n' "${froz[@]}" | sort -u | jq -R 'split(":") | select(length == 2) | {txid:.[0], vout:(.[1]|tonumber)}' | jq -s '.')
+    if [[ "$arr" != "[]" ]]; then
+      bitcoin-cli -rpcwallet="$WALLET" lockunspent false "$arr" >/dev/null || true
+    fi
+  fi
+}
+
+unlock_all_frozen() {
+  if [[ -s "$FREEZE_FILE" ]]; then
+    local arr
+    arr=$(grep -v '^[[:space:]]*$' "$FREEZE_FILE" | sort -u | jq -R 'split(":") | select(length == 2) | {txid:.[0], vout:(.[1]|tonumber)}' | jq -s '.')
+    if [[ "$arr" != "[]" ]]; then
+      bitcoin-cli -rpcwallet="$WALLET" lockunspent true "$arr" >/dev/null || true
+    fi
+  fi
+}
+
+require_policy_schema() {
+  if [[ ! -f "$POLICY_SCHEMA" ]]; then
+    echo "Policy schema missing at $POLICY_SCHEMA" >&2
+    exit 11
+  fi
+}
+
+CMD="${1:-}"
+case "$CMD" in
+  help|"")
+    usage
+    ;;
+
+  proof)
+    shift
+    [[ $# -eq 1 ]] || { echo "Usage: portal proof <raw.descriptor>" >&2; exit 1; }
+    ensure_wallet
+    local desc tip tiphash res
+    desc="$(bitcoin-cli getdescriptorinfo "$(cat "$1")" | jq -r .descriptor)"
+    tip="$(bitcoin-cli getblockcount)"
+    tiphash="$(bitcoin-cli getblockhash "$tip")"
+    res="$(bitcoin-cli scantxoutset start "[{\"desc\":\"$desc\",\"range\":10000}]")"
+    mkdir -p "$ROOT/proofs"
+    jq -n --arg chain "bitcoin" --arg tip "$tip" --arg tiphash "$tiphash" --argjson res "$res" \
+      '{chain:$chain,tip:($tip|tonumber),tiphash:$tiphash,scantxoutset:$res}' \
+      > "$ROOT/proofs/aura-proof.json"
+    sha256sum "$ROOT/proofs/aura-proof.json" > "$ROOT/proofs/aura-proof.sha256"
+    echo "BALANCE: $(echo "$res" | jq -r .total_amount) BTC — PROOF: $ROOT/proofs/aura-proof.json"
+    log_json "" "proof"
+    ;;
+
+  psbt:new)
+    shift
+    [[ $# -eq 3 ]] || { echo "Usage: portal psbt:new <label> <outputs.json> <fee>" >&2; exit 1; }
+    local label="$1" outs="$2" fee="$3" coin_file inputs frozen_extra options_json
+    if [[ ! -f "$outs" ]]; then
+      echo "Outputs file not found: $outs" >&2
+      exit 1
+    fi
+    if [[ ! "$fee" =~ ^[0-9]+$ ]]; then
+      echo "Fee must be integer sat/vB" >&2
+      exit 1
+    fi
+    ensure_wallet
+    require_policy_schema
+    coin_file="$ROOT/configs/${label}.coin_control.json"
+    inputs='[]'
+    frozen_extra=""
+    if [[ -f "$coin_file" ]]; then
+      mapfile -t include_utxos < <(jq -r '.include_utxos[]?' "$coin_file")
+      if ((${#include_utxos[@]})); then
+        inputs=$(printf '%s\n' "${include_utxos[@]}" | jq -R 'split(":") | select(length == 2) | {txid:.[0], vout:(.[1]|tonumber)}' | jq -s '.')
+      fi
+      frozen_extra=$(jq -r '.exclude_utxos[]?' "$coin_file" | tr '\n' '\n')
+    fi
+    lock_frozen_utxos "$frozen_extra"
+    local out_json
+    out_json=$(jq -c 'reduce .[] as $o ({}; . + {($o.address): ($o.amount_btc|tonumber)})' "$outs")
+    options_json="{\"fee_rate\":$fee,\"replaceable\":true}"
+    local subtract
+    subtract=$(jq -r '.[0].address? // empty' "$outs")
+    if [[ -n "$subtract" ]]; then
+      options_json="{\"fee_rate\":$fee,\"replaceable\":true,\"subtractFeeFromOutputs\":[0]}"
+    fi
+    local psbt_json
+    psbt_json=$(bitcoin-cli -rpcwallet="$WALLET" -named walletcreatefundedpsbt inputs="$inputs" outputs="$out_json" locktime=0 options="$options_json")
+    mkdir -p "$ROOT/psbts" "$ROOT/audits"
+    echo -n "$(echo "$psbt_json" | jq -r .psbt)" > "$ROOT/psbts/${label}.psbt"
+    echo "$psbt_json" | jq '{fee,.changepos,psbt:"<redacted>",outputs_count:(.decoded.tx.vout|length),inputs_count:(.decoded.tx.vin|length)}' > "$ROOT/psbts/${label}.meta.json"
+    sha256sum "$ROOT/psbts/${label}.psbt" > "$ROOT/psbts/${label}.psbt.sha256"
+    echo "PSBT created: $ROOT/psbts/${label}.psbt  (sign offline)"
+    log_json "$label" "psbt:new"
+    ;;
+
+  psbt:verify)
+    shift
+    [[ $# -eq 1 ]] || { echo "Usage: portal psbt:verify <label>.signed.psbt" >&2; exit 1; }
+    local file="$1"
+    local base
+    base="$(basename "$file" .signed.psbt)"
+    local ver
+    ver=$(bitcoin-cli analyzepsbt "$(cat "$file")")
+    echo "$ver" > "$ROOT/psbts/${base}.verified.json"
+    echo "Verified -> $ROOT/psbts/${base}.verified.json"
+    log_json "$base" "psbt:verify"
+    ;;
+
+  psbt:broadcast)
+    shift
+    [[ $# -eq 1 ]] || { echo "Usage: portal psbt:broadcast <label>.signed.psbt" >&2; exit 1; }
+    if [[ "${CONFIRM_BROADCAST:-}" != "1" ]]; then
+      echo "Refuse: set CONFIRM_BROADCAST=1 to allow broadcast" >&2
+      exit 2
+    fi
+    if [[ -f "$ROOT/configs/BROADCAST_DISABLED" ]]; then
+      echo "Panic: broadcasting disabled" >&2
+      exit 9
+    fi
+    local file="$1"
+    local fin txid
+    fin=$(bitcoin-cli finalizepsbt "$(cat "$file")" true)
+    txid=$(echo "$fin" | jq -r '.txid // empty')
+    if [[ -z "$txid" ]]; then
+      echo "ERROR finalizepsbt" >&2
+      exit 3
+    fi
+    echo "BROADCAST: $txid"
+    log_json "$(basename "$file" .signed.psbt)" "psbt:broadcast"
+    ;;
+
+  policy:request)
+    shift
+    [[ $# -eq 1 ]] || { echo "Usage: portal policy:request <file.json>" >&2; exit 1; }
+    require_policy_schema
+    local req="$1"
+    local label hash
+    label="$(jq -r '.label // empty' "$req")"
+    if [[ -z "$label" ]]; then
+      echo "Missing label in $req" >&2
+      exit 4
+    fi
+      if command -v python3 >/dev/null 2>&1; then
+      python3 - "$req" "$POLICY_SCHEMA" <<'PY'
+import json, sys
+from pathlib import Path
+req_path, schema_path = Path(sys.argv[1]), Path(sys.argv[2])
+with req_path.open() as f:
+    data = json.load(f)
+with schema_path.open() as f:
+    schema = json.load(f)
+missing = []
+for field in ("utc", "action", "label", "chain", "policy", "payload"):
+    if field not in data:
+        missing.append(field)
+if missing:
+    print(f"Missing required fields: {', '.join(missing)}", file=sys.stderr)
+    sys.exit(5)
+if data.get("chain") not in schema["properties"]["chain"]["enum"]:
+    print("Invalid chain", file=sys.stderr)
+    sys.exit(6)
+if data.get("action") not in schema["properties"]["action"]["enum"]:
+    print("Invalid action", file=sys.stderr)
+    sys.exit(7)
+policy = data.get("policy", {})
+if policy.get("version") != "1":
+    print("Unsupported policy version", file=sys.stderr)
+    sys.exit(8)
+threshold = policy.get("threshold")
+members = policy.get("members") or []
+if not isinstance(threshold, int) or threshold < 1 or threshold > 15:
+    print("Threshold out of range", file=sys.stderr)
+    sys.exit(9)
+if not isinstance(members, list) or len(members) < threshold:
+    print("Members list must be >= threshold", file=sys.stderr)
+    sys.exit(10)
+payload = data.get("payload", {})
+outputs = payload.get("outputs")
+if not isinstance(outputs, list) or not outputs:
+    print("Payload.outputs must be a non-empty list", file=sys.stderr)
+    sys.exit(11)
+for item in outputs:
+    if not isinstance(item, dict) or not item.get("address") or not item.get("amount_btc"):
+        print("Each output requires address and amount_btc", file=sys.stderr)
+        sys.exit(12)
+fee_rate = payload.get("fee_rate_sat_vb")
+if not isinstance(fee_rate, int) or fee_rate < 1:
+    print("fee_rate_sat_vb must be >= 1", file=sys.stderr)
+    sys.exit(13)
+coin_control = payload.get("coin_control", {}) or {}
+for key in ("include_utxos", "exclude_utxos"):
+    items = coin_control.get(key, [])
+    if items and not all(isinstance(entry, str) for entry in items):
+        print(f"coin_control.{key} entries must be strings", file=sys.stderr)
+        sys.exit(14)
+PY
+      fi
+    mkdir -p "$ROOT/configs/approvals/$label"
+    hash="$(sha256sum "$req" | awk '{print $1}')"
+    echo "$hash" > "$ROOT/configs/approvals/$label/request.sha256"
+    cp "$req" "$ROOT/configs/${label}.request.json"
+    jq -r '.payload.coin_control // {}' "$req" > "$ROOT/configs/${label}.coin_control.json"
+    jq -r '.payload.outputs' "$req" > "$ROOT/configs/${label}.outputs.json"
+    echo "REQUEST HASH: $hash  (collect offline signatures under $ROOT/configs/approvals/$label/)"
+    log_json "$label" "policy:request"
+    ;;
+
+  policy:collect)
+    shift
+    [[ $# -eq 2 ]] || { echo "Usage: portal policy:collect <label> <sigfile>" >&2; exit 1; }
+    local label="$1" sig="$2" dest
+    dest="$ROOT/configs/approvals/$label/$(basename "$sig")"
+    mkdir -p "$(dirname "$dest")"
+    cp "$sig" "$dest"
+    echo "collected $(basename "$sig") for $label"
+    log_json "$label" "policy:collect"
+    ;;
+
+  policy:status)
+    shift
+    [[ $# -eq 1 ]] || { echo "Usage: portal policy:status <label>" >&2; exit 1; }
+    local label="$1" req_file="$ROOT/configs/${label}.request.json" thresh collected
+    if [[ ! -f "$req_file" ]]; then
+      echo "Missing request file for $label at $req_file" >&2
+      exit 4
+    fi
+    mkdir -p "$ROOT/configs/approvals/$label"
+    thresh="$(jq -r '.policy.threshold' "$req_file")"
+    collected=$(find "$ROOT/configs/approvals/$label" -type f ! -name 'request.sha256' 2>/dev/null | wc -l | tr -d ' ')
+    echo "threshold: $thresh  collected: $collected"
+    log_json "$label" "policy:status"
+    ;;
+
+  utxo:freeze)
+    shift
+    [[ $# -eq 1 ]] || { echo "Usage: portal utxo:freeze <txid:vout>" >&2; exit 1; }
+    local utxo="$1"
+    if ! grep -qx "$utxo" "$FREEZE_FILE" 2>/dev/null; then
+      echo "$utxo" >> "$FREEZE_FILE"
+    fi
+    echo "frozen $utxo"
+    log_json "$utxo" "utxo:freeze"
+    ;;
+
+  utxo:thaw)
+    shift
+    [[ $# -eq 1 ]] || { echo "Usage: portal utxo:thaw <txid:vout>" >&2; exit 1; }
+    local utxo="$1"
+    if [[ -f "$FREEZE_FILE" ]]; then
+      sed -i "\|^$utxo$|d" "$FREEZE_FILE"
+    fi
+    unlock_all_frozen
+    lock_frozen_utxos ""
+    echo "thawed $utxo"
+    log_json "$utxo" "utxo:thaw"
+    ;;
+
+  *)
+    usage
+    exit 1
+    ;;
+esac

@@ -1,0 +1,8 @@
+Task Name,Description,Assignee Email,Section,Due Date
+Snowflake baseline,Create roles/users/DBs/warehouses; store creds in 1Password.,amundsonalexa@gmail.com,Today,2025-10-11
+Repo: br-dbt,Create dbt project + CI + staging/marts skeleton.,amundsonalexa@gmail.com,Today,2025-10-11
+Repo: br-ingest-airtable,Worker to sync Airtable->Postgres incrementally; nightly schedule.,amundsonalexa@gmail.com,This Week,2025-10-12
+Repo: br-ingest-snowpipe,EL pipeline Postgres->Snowflake (S3 stage + COPY INTO).,amundsonalexa@gmail.com,This Week,2025-10-13
+Read-only BI user,Create BR_READONLY + Metabase connection; seed "Ops Overview" dashboard.,amundsonalexa@gmail.com,This Week,2025-10-13
+dbt docs site,Publish dbt docs artifact as GitHub Pages or S3; link in Notion.,amundsonalexa@gmail.com,This Week,2025-10-13
+Data SLAs,Freshness tests + owners for each mart model; document in Notion.,amundsonalexa@gmail.com,This Week,2025-10-14

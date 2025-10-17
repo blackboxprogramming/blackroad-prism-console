@@ -1,0 +1,7 @@
+{
+  "window": "5m",
+  "series": [
+    { "action": "mirror", "resource_provider": "github", "user_role": "viewer", "event_id": "evt-1" },
+    { "action": "mirror", "resource_provider": "gitlab", "user_role": "viewer", "event_id": "evt-2" }
+  ]
+}

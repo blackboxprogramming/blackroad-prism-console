@@ -1,0 +1,42 @@
+name: "chore: tracking + Slack hook"
+description: "Emit analytics events and post Cadillac Loop summaries to Slack."
+title: "chore: tracking + Slack hook"
+labels:
+  - "prio/normal"
+  - "type/feature"
+assignees:
+  - "Copilot"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Overview
+        Instrument Cadillac Loop milestones and surface a Slack digest for visibility.
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Problem statement, solution outline, and any supporting notes.
+      value: |
+        **Problem**
+        No visibility on key loop events.
+
+        **Solution**
+        Emit analytics events for onboarding, upload, and payout. Post summary to `#cadillac-loop` via existing webhook.
+
+        **Notes**
+        • Reuse `docs/prism/SlackPosts_v0_1.md` copy.
+      render: markdown
+  - type: checkboxes
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      options:
+        - label: "Analytics events fire for onboarding, upload, and payout milestones"
+        - label: "Slack webhook posts to `#cadillac-loop` with summary copy"
+        - label: "Copy aligns with `docs/prism/SlackPosts_v0_1.md`"
+  - type: textarea
+    id: updates
+    attributes:
+      label: Status Updates
+      description: Capture wiring notes, approvals, and rollout tasks.

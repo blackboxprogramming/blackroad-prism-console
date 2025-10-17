@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+R="/home/pi/portal"
+LOG="$R/logs/nightly.$(date -u +%Y%m%d).log"
+{
+  echo "== nightly start $(date -u +%FT%TZ) =="
+  if [ ! -s "$R/configs/raw.descriptor" ]; then
+    echo "no raw.descriptor; skipping"
+    exit 0
+  fi
+  "$R/bin/portal" proof "$R/configs/raw.descriptor"
+  "$R/bin/portal-health" || true
+  "$R/bin/portal-checklist" || true
+  echo "== nightly done $(date -u +%FT%TZ) =="
+} >> "$LOG" 2>&1

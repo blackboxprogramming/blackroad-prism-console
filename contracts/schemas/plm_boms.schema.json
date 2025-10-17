@@ -1,4 +1,27 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "array"
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["item_id", "rev", "lines"],
+    "properties": {
+      "item_id": {"type": "string"},
+      "rev": {"type": "string"},
+      "lines": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["component_id", "qty", "refdes", "scrap_pct"],
+          "properties": {
+            "component_id": {"type": "string"},
+            "qty": {"type": "number"},
+            "refdes": {"type": "string"},
+            "scrap_pct": {"type": "number"}
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "additionalProperties": false
+  }
 }

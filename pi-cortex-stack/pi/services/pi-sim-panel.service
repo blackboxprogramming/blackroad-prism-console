@@ -1,0 +1,14 @@
+[Unit]
+Description=Pi Cortex Simulator Panel
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/pi-cortex-stack
+ExecStart=/home/pi/agent-venv/bin/python -m uvicorn pi.pi_sim_panel:app --host 0.0.0.0 --port 8000
+Restart=on-failure
+EnvironmentFile=/home/pi/pi-cortex-stack/.env
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+# Merge review – 13 Oct 2025
+
+## Merge d1fa3f55 – Add toy MPM energy logging workflow
+- The merge left two independent scripts inside `20_bench_solid/taichi_mpm_core.py`. The original MPM driver defines `main()` and `run_simulation(params: SimulationParams, …)` near the top of the file, but a second mass–spring demo redefines both `main()` and `run_simulation(config: SimulationConfig)` later in the file, overwriting the original entry points at import time.【F:20_bench_solid/taichi_mpm_core.py†L218-L238】【F:20_bench_solid/taichi_mpm_core.py†L259-L472】
+- Because of the duplicate definitions, invoking `python 20_bench_solid/taichi_mpm_core.py` now executes the mass–spring toy instead of the intended benchmark solver, and external imports would receive the wrong `run_simulation` signature. The fix is to split the toy workflow into its own module or rename the second entry points so both implementations can coexist without shadowing each other.【F:20_bench_solid/taichi_mpm_core.py†L89-L137】【F:20_bench_solid/taichi_mpm_core.py†L421-L468】
+
+## Merge 12021f9a – Add dev container service features
+- `.devcontainer/devcontainer.json` is no longer valid JSON: the merge duplicated several top-level keys (`name`, `customizations`, `remoteEnv`, `forwardPorts`, `remoteUser`, `postCreateCommand`) and even repeats feature identifiers, while also missing the comma between the `mounts` array and the following key. Editors and tooling will refuse to parse this file until the conflicting sections are reconciled and the comma restored.【F:.devcontainer/devcontainer.json†L1-L72】
+- Only one of `build.dockerfile` or `image` can be used in a dev container definition; the merged file includes both, so even after the syntax issues are fixed the container build would be ambiguous. Choose one strategy (Dockerfile build or published image) and remove the other to avoid VS Code errors.【F:.devcontainer/devcontainer.json†L2-L8】

@@ -62,6 +62,13 @@ def run_connector_jobs():
         print("[connectors] created JIRA issue")
     except Exception as exc:  # pragma: no cover - best effort
         print(f"[connectors] JIRA integration unavailable: {exc}")
+    """Placeholder for connector sync logic.
+
+    Implement OAuth flows and webhook listeners for services such as
+    Salesforce, Airtable, Slack and Linear.  This function simply notifies the
+    user that connector jobs should run here.
+    """
+    print("[connectors] run background sync jobs here …")
 
 # ---------------------------------------------------------------------------
 # Working Copy automation

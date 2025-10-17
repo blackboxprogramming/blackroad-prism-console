@@ -10,6 +10,9 @@
       --panel: #12161d;
       --text: #e7ecf3;
       --accent-2: #0096ff;
+      --accent-3: #4ad295;
+      --accent-warn: #ffb347;
+      --accent-err: #ff7a7a;
       --radius: 10px;
     }
     body {
@@ -19,85 +22,545 @@
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
         'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      gap: 20px;
+      min-height: 100vh;
+      padding: 24px;
     }
-    label {
+    main {
+      width: min(560px, 100%);
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: 0 24px 40px rgba(0, 0, 0, 0.35);
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      gap: 20px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    p.subtitle {
+      margin: 0;
+      color: rgba(231, 236, 243, 0.7);
+      font-size: 14px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
       gap: 6px;
     }
-    input {
-      padding: 8px;
+    .inline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+    }
+    label {
+      font-size: 14px;
+    }
+    input,
+    select {
+      padding: 10px;
       border-radius: var(--radius);
-      border: 1px solid #444;
-      background: var(--panel);
+      border: 1px solid #2a2f39;
+      background: #0f131a;
       color: var(--text);
+      font-size: 15px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    input:focus,
+    select:focus {
+      outline: 2px solid rgba(0, 150, 255, 0.35);
+      outline-offset: 1px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    section h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    section p {
+      margin: 0;
+      font-size: 13px;
+      color: rgba(231, 236, 243, 0.6);
+    }
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
     }
     button {
       background: var(--accent-2);
       border: none;
       padding: 10px 20px;
-      margin: 0 6px;
       border-radius: var(--radius);
       color: #fff;
       font-size: 16px;
       cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.12s ease;
     }
     button:hover {
       opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    button.secondary {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    button:disabled {
+      opacity: 0.55;
+      cursor: progress;
+      transform: none;
+    }
+    .status {
+      min-height: 24px;
+      font-size: 14px;
+      color: rgba(231, 236, 243, 0.85);
+    }
+    .status[data-state='success'] {
+      color: var(--accent-3);
+    }
+    .status[data-state='error'] {
+      color: var(--accent-err);
+    }
+    .status[data-state='pending'] {
+      color: var(--accent-warn);
+    }
+    small.hint {
+      color: rgba(231, 236, 243, 0.55);
+      font-size: 13px;
+    }
+    .history {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 16px;
+    }
+    .history header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .history-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .history-item h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .history-item small {
+      color: rgba(231, 236, 243, 0.6);
+      font-size: 12px;
+    }
+    .history-item button {
+      align-self: center;
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+    .history-empty {
+      font-size: 13px;
+      color: rgba(231, 236, 243, 0.55);
     }
   </style>
 </head>
 <body>
-  <h1>Display Control</h1>
-  <label>API Key (optional)
-    <input id="key" type="password" placeholder="X-BlackRoad-Key" />
-  </label>
-  <div>
-    <button id="sleepBtn">Sleep</button>
-    <button id="wakeBtn">Wake</button>
-  </div>
+  <main>
+    <header>
+      <h1>Display Control</h1>
+      <p class="subtitle">
+        Send quick commands to the BlackRoad display backplane.
+      </p>
+    </header>
+    <div class="field">
+      <label for="key">API Key (optional)</label>
+      <input id="key" type="password" placeholder="X-BlackRoad-Key" autocomplete="off" />
+      <small class="hint">Stored locally in your browser when available.</small>
+    </div>
+    <div class="field">
+      <label for="deviceId">Device ID</label>
+      <input id="deviceId" placeholder="display-mini" />
+    </div>
+    <form id="showForm" novalidate>
+      <div class="inline">
+        <div class="field">
+          <label for="target">Display target</label>
+          <input id="target" placeholder="mini or main" />
+        </div>
+        <div class="field">
+          <label for="mode">Mode</label>
+          <select id="mode">
+            <option value="url">URL</option>
+            <option value="image">Image</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="src">Source</label>
+        <input id="src" placeholder="https://... or data URI" />
+      </div>
+      <div class="inline">
+        <div class="field">
+          <label for="ttl">TTL (seconds)</label>
+          <input id="ttl" type="number" min="1" inputmode="numeric" placeholder="120" />
+        </div>
+      </div>
+      <div class="button-row">
+        <button type="submit" id="showBtn">Show content</button>
+        <button type="button" id="clearBtn" class="secondary">Clear</button>
+      </div>
+    </form>
+    <div class="button-row">
+      <button type="button" id="sleepBtn" class="secondary">Sleep</button>
+      <button type="button" id="wakeBtn">Wake</button>
+    </div>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+    <section class="history" aria-live="polite" aria-relevant="additions removals">
+      <header>
+        <h2>Recent commands</h2>
+        <button type="button" id="clearHistory" class="secondary">Clear history</button>
+      </header>
+      <p>Reload a prior submission or review what was sent to the device.</p>
+      <div id="historyList" class="history-list" role="list"></div>
+    </section>
+  </main>
   <script>
     (function () {
       const keyEl = document.getElementById('key');
-      keyEl.value = localStorage.getItem('br-key') || '';
-      keyEl.addEventListener('input', () =>
-        localStorage.setItem('br-key', keyEl.value)
-      );
+      const deviceEl = document.getElementById('deviceId');
+      const targetEl = document.getElementById('target');
+      const modeEl = document.getElementById('mode');
+      const srcEl = document.getElementById('src');
+      const ttlEl = document.getElementById('ttl');
+      const statusEl = document.getElementById('status');
+      const showForm = document.getElementById('showForm');
+      const historyListEl = document.getElementById('historyList');
+      const clearHistoryBtn = document.getElementById('clearHistory');
 
-      async function send(type) {
+      const storage = (() => {
+        try {
+          const { localStorage } = window;
+          const testKey = '__br_test__';
+          localStorage.setItem(testKey, '1');
+          localStorage.removeItem(testKey);
+          return localStorage;
+        } catch (err) {
+          console.warn('Local storage unavailable:', err);
+          return null;
+        }
+      })();
+
+      const store = (key, value) => {
+        if (!storage) return;
+        try {
+          storage.setItem(key, value);
+        } catch (err) {
+          console.warn('Failed to persist value for', key, err);
+        }
+      };
+      const load = (key, fallback = '') => {
+        if (!storage) return fallback;
+        try {
+          const value = storage.getItem(key);
+          return value == null ? fallback : value;
+        } catch (err) {
+          console.warn('Failed to read value for', key, err);
+          return fallback;
+        }
+      };
+      const loadJson = (key, fallback = []) => {
+        const text = load(key, '');
+        if (!text) return fallback;
+        try {
+          const parsed = JSON.parse(text);
+          return Array.isArray(parsed) ? parsed : fallback;
+        } catch (err) {
+          console.warn('Failed to parse JSON for', key, err);
+          return fallback;
+        }
+      };
+      const storeJson = (key, value) => {
+        try {
+          store(key, JSON.stringify(value));
+        } catch (err) {
+          console.warn('Failed to serialise JSON for', key, err);
+        }
+      };
+
+      const HISTORY_KEY = 'br-device-history';
+      let history = loadJson(HISTORY_KEY);
+
+      const summarisePayload = (payload) => {
+        if (!payload || typeof payload !== 'object') return '';
+        if (payload.type === 'display.show') {
+          const bits = [`${payload.mode || 'url'} mode`];
+          if (payload.target) bits.push(`target ${payload.target}`);
+          if (payload.ttl_s) bits.push(`TTL ${payload.ttl_s}s`);
+          return bits.join(' · ');
+        }
+        return '';
+      };
+
+      const renderHistory = () => {
+        if (!historyListEl) return;
+        historyListEl.innerHTML = '';
+        if (!history.length) {
+          const empty = document.createElement('div');
+          empty.className = 'history-empty';
+          empty.setAttribute('role', 'listitem');
+          empty.textContent = 'No commands sent yet.';
+          historyListEl.append(empty);
+          if (clearHistoryBtn) clearHistoryBtn.disabled = true;
+          return;
+        }
+        if (clearHistoryBtn) clearHistoryBtn.disabled = false;
+        history.forEach((entry) => {
+          const summary = summarisePayload(entry.payload);
+          const ts = new Date(entry.timestamp).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          });
+          const status = entry.success ? 'Success' : 'Failed';
+          const subtitleParts = [`${status} · ${ts}`];
+          if (entry.deviceId) subtitleParts.push(entry.deviceId);
+          if (summary) subtitleParts.push(summary);
+
+          const article = document.createElement('article');
+          article.className = 'history-item';
+          article.dataset.id = entry.id;
+          article.setAttribute('role', 'listitem');
+
+          const info = document.createElement('div');
+          const title = document.createElement('h3');
+          title.textContent = entry.payload.type;
+          const subtitle = document.createElement('small');
+          subtitle.textContent = subtitleParts.join(' · ');
+
+          info.append(title, subtitle);
+
+          const reuseButton = document.createElement('button');
+          reuseButton.type = 'button';
+          reuseButton.className = 'secondary';
+          reuseButton.dataset.action = 'reuse';
+          reuseButton.dataset.id = entry.id;
+          reuseButton.textContent = 'Reuse';
+
+          article.append(info, reuseButton);
+          historyListEl.append(article);
+        });
+      };
+
+      const pushHistory = (deviceId, payload, success) => {
+        let payloadCopy = payload;
+        try {
+          payloadCopy = JSON.parse(JSON.stringify(payload));
+        } catch (err) {
+          console.warn('Failed to clone payload for history entry.', err);
+        }
+        const entry = {
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+          timestamp: Date.now(),
+          deviceId,
+          payload: payloadCopy,
+          success,
+        };
+        history = [entry, ...history].slice(0, 5);
+        storeJson(HISTORY_KEY, history);
+        renderHistory();
+      };
+
+      const applyHistoryEntry = (entry) => {
+        if (!entry) return;
+        deviceEl.value = entry.deviceId || '';
+        if (entry.payload) {
+          targetEl.value = entry.payload.target || '';
+          modeEl.value = entry.payload.mode || 'url';
+          srcEl.value = entry.payload.src || '';
+          ttlEl.value =
+            entry.payload.ttl_s != null ? String(entry.payload.ttl_s) : '';
+        }
+        store('br-device-id', deviceEl.value);
+        store('br-device-target', targetEl.value);
+        store('br-device-mode', modeEl.value);
+        store('br-device-src', srcEl.value);
+        store('br-device-ttl', ttlEl.value);
+      };
+
+      renderHistory();
+
+      keyEl.value = load('br-key', '');
+      deviceEl.value = load('br-device-id', 'display-mini');
+      targetEl.value = load(
+        'br-device-target',
+        deviceEl.value.includes('main') ? 'main' : 'mini'
+      );
+      modeEl.value = load('br-device-mode', 'url');
+      srcEl.value = load('br-device-src', '');
+      ttlEl.value = load('br-device-ttl', '');
+
+      keyEl.addEventListener('input', () => store('br-key', keyEl.value));
+      deviceEl.addEventListener('input', () => {
+        store('br-device-id', deviceEl.value);
+        if (!targetEl.value.trim()) {
+          targetEl.value = deviceEl.value.includes('main') ? 'main' : 'mini';
+        }
+        store('br-device-target', targetEl.value);
+      });
+      targetEl.addEventListener('input', () =>
+        store('br-device-target', targetEl.value)
+      );
+      modeEl.addEventListener('change', () =>
+        store('br-device-mode', modeEl.value)
+      );
+      srcEl.addEventListener('input', () => store('br-device-src', srcEl.value));
+      ttlEl.addEventListener('input', () => store('br-device-ttl', ttlEl.value));
+      if (clearHistoryBtn) {
+        clearHistoryBtn.addEventListener('click', () => {
+          history = [];
+          storeJson(HISTORY_KEY, history);
+          renderHistory();
+          setStatus('History cleared.', 'success');
+        });
+      }
+      if (historyListEl) {
+        historyListEl.addEventListener('click', (event) => {
+          const source = event.target;
+          if (!(source instanceof Element)) return;
+          const target = source.closest('[data-action]');
+          if (!target) return;
+          const action = target.dataset.action;
+          if (action !== 'reuse') return;
+          const id = target.dataset.id;
+          const entry = history.find((item) => item.id === id);
+          applyHistoryEntry(entry);
+          setStatus('Fields restored from history. Review before sending.', 'pending');
+        });
+      }
+
+      function setStatus(message, state = '') {
+        statusEl.textContent = message;
+        if (state) {
+          statusEl.dataset.state = state;
+        } else {
+          delete statusEl.dataset.state;
+        }
+      }
+
+      function getHeaders() {
         const headers = { 'Content-Type': 'application/json' };
         const key = keyEl.value.trim();
         if (key) headers['X-BlackRoad-Key'] = key;
+        return headers;
+      }
+
+      function getDeviceId() {
+        return deviceEl.value.trim() || 'display-mini';
+      }
+
+      function setPending(isPending) {
+        document
+          .querySelectorAll('button')
+          .forEach((btn) => {
+            btn.disabled = isPending;
+          });
+      }
+
+      async function sendCommand(payload) {
+        const deviceId = getDeviceId();
+        setStatus(`Sending to ${deviceId}…`, 'pending');
+        setPending(true);
         try {
           const res = await fetch(
-            '/api/devices/display-mini/command',
+            `/api/devices/${encodeURIComponent(deviceId)}/command`,
             {
               method: 'POST',
-              headers,
-              body: JSON.stringify({ type }),
+              headers: getHeaders(),
+              body: JSON.stringify(payload),
             }
           );
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          alert(
-            type === 'display.sleep'
-              ? 'Sleep command sent'
-              : 'Wake command sent'
-          );
-        } catch (e) {
-          alert('Request failed: ' + e.message);
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`HTTP ${res.status}${text ? ` — ${text}` : ''}`);
+          }
+          setStatus('Command sent.', 'success');
+          pushHistory(deviceId, payload, true);
+          return true;
+        } catch (err) {
+          setStatus(String(err), 'error');
+          pushHistory(deviceId, payload, false);
+          return false;
+        } finally {
+          setPending(false);
         }
       }
 
       document.getElementById('sleepBtn').onclick = () =>
-        send('display.sleep');
+        sendCommand({ type: 'display.sleep' });
       document.getElementById('wakeBtn').onclick = () =>
-        send('display.wake');
+        sendCommand({ type: 'display.wake' });
+      document.getElementById('clearBtn').onclick = () =>
+        sendCommand({ type: 'display.clear' });
+
+      showForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const target = targetEl.value.trim();
+        const mode = modeEl.value;
+        const src = srcEl.value.trim();
+        if (!target) {
+          setStatus('Target is required for display.show.', 'error');
+          targetEl.focus();
+          return;
+        }
+        if (!src) {
+          setStatus('Provide a source URL or data URI.', 'error');
+          srcEl.focus();
+          return;
+        }
+        const ttl = ttlEl.value.trim();
+        const payload = {
+          type: 'display.show',
+          target,
+          mode,
+          src,
+        };
+        const ttlNumber = ttl ? Number(ttl) : NaN;
+        if (!Number.isNaN(ttlNumber) && ttlNumber > 0) {
+          payload.ttl_s = Math.floor(ttlNumber);
+        }
+        const sent = await sendCommand(payload);
+        if (sent) {
+          store('br-device-target', target);
+          store('br-device-mode', mode);
+          store('br-device-src', src);
+          if (ttl) {
+            store('br-device-ttl', ttl);
+          }
+        }
+      });
     })();
   </script>
 </body>

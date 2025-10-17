@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ST="$ROOT/state/ledger.json"
+mkdir -p "$(dirname "$ST")"
+[ -f "$ST" ] || echo '{}' > "$ST"
+
+usage(){ cat <<'H'
+rdc <cmd> [args]
+
+Commands:
+  balance <address>           Print RDC balance for address
+  credit  <address> <amount>  (MOCK) add amount (requires POLICY_OK=1)
+  debit   <address> <amount>  (MOCK) subtract (requires POLICY_OK=1)
+  export                      Dump JSON state
+Notes:
+  - This is a MOCK. It never touches Bitcoin. It exists so demos can show flows.
+  - credit/debit require POLICY_OK=1 to emphasize policy-gating even in mocks.
+H
+}
+
+jq_edit() {
+  local tmp
+  tmp=$(mktemp)
+  jq "$@" "$ST" > "$tmp"
+  mv "$tmp" "$ST"
+}
+
+case "${1:-}" in
+  balance)
+    ADDR="${2:?addr}"
+    jq -r --arg a "$ADDR" '(.[$a] // 0)' "$ST"
+    ;;
+  credit)
+    [ "${POLICY_OK:-0}" = "1" ] || { echo "Refuse: POLICY_OK=1 required" >&2; exit 2; }
+    ADDR="${2:?addr}"; AMT="${3:?amt}"
+    jq_edit --arg a "$ADDR" --argjson x "$AMT" '.[$a] = ((.[$a] // 0) + $x)'
+    echo "CREDITED $AMT to $ADDR"
+    ;;
+  debit)
+    [ "${POLICY_OK:-0}" = "1" ] || { echo "Refuse: POLICY_OK=1 required" >&2; exit 2; }
+    ADDR="${2:?addr}"; AMT="${3:?amt}"
+    jq_edit --arg a "$ADDR" --argjson x "$AMT" '(.[$a] // 0) as $b | if $b >= $x then .[$a]=($b - $x) else error("insufficient funds") end'
+    echo "DEBITED $AMT from $ADDR"
+    ;;
+  export)
+    cat "$ST"
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac

@@ -1,0 +1,182 @@
+name: Deploy AutoPal (Helm)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        required: true
+        type: choice
+        options:
+          - staging
+          - prod
+      image:
+        description: "Container image repository (e.g. ghcr.io/org/autopal)"
+        required: true
+        type: string
+      tag:
+        description: "Container image tag"
+        required: true
+        type: string
+      namespace:
+        description: "Kubernetes namespace to deploy into"
+        required: true
+        type: string
+      ingress_host:
+        description: "Optional ingress host"
+        required: false
+        type: string
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        env:
+          KUBE_CONFIG_B64: ${{ secrets.KUBE_CONFIG_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${KUBE_CONFIG_B64:-}" ]; then
+            echo "KUBE_CONFIG_B64 secret is required" >&2
+            exit 1
+          fi
+          mkdir -p "$HOME/.kube"
+          echo "$KUBE_CONFIG_B64" | base64 -d > "$HOME/.kube/config"
+
+      - name: Resolve deployment settings
+        id: vars
+        run: |
+          set -euo pipefail
+          release="autopal-${{ inputs.environment }}"
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+          echo "namespace=${{ inputs.namespace }}" >> "$GITHUB_OUTPUT"
+          values_file="autopal-helm/values-${{ inputs.environment }}.yaml"
+          if [ ! -f "$values_file" ]; then
+            echo "Expected values file $values_file to exist" >&2
+            exit 1
+          fi
+          echo "values_file=$values_file" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure namespace exists
+        env:
+          NAMESPACE: ${{ steps.vars.outputs.namespace }}
+        run: |
+          set -euo pipefail
+          if ! kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
+            kubectl create namespace "$NAMESPACE"
+          fi
+
+      - name: Build optional Helm arguments
+        id: helmargs
+        env:
+          INGRESS_HOST: ${{ inputs.ingress_host }}
+        run: |
+          set -euo pipefail
+          args=()
+          if [ -n "${INGRESS_HOST:-}" ]; then
+            args+=("--set" "ingress.enabled=true")
+            args+=("--set" "ingress.hosts[0].host=${INGRESS_HOST}")
+          fi
+          {
+            echo "args<<'EOF'"
+            for arg in "${args[@]}"; do
+              echo "$arg"
+            done
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Deploy with Helm
+        env:
+          RELEASE_NAME: ${{ steps.vars.outputs.release }}
+          NAMESPACE: ${{ steps.vars.outputs.namespace }}
+          VALUES_FILE: ${{ steps.vars.outputs.values_file }}
+          IMAGE_REPOSITORY: ${{ inputs.image }}
+          IMAGE_TAG: ${{ inputs.tag }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          BREAK_GLASS_SECRET: ${{ secrets.AUTOPAL_BREAK_GLASS_SECRET }}
+          HELM_EXTRA_ARGS: ${{ steps.helmargs.outputs.args }}
+        run: |
+          set -euo pipefail
+          helm dependency update autopal-helm >/dev/null 2>&1 || true
+          args=(
+            upgrade --install "$RELEASE_NAME" autopal-helm
+            --namespace "$NAMESPACE"
+            --create-namespace
+            --values "$VALUES_FILE"
+            --wait
+            --timeout 5m
+            --history-max 5
+            --set "image.repository=$IMAGE_REPOSITORY"
+            --set "image.tag=$IMAGE_TAG"
+          )
+          if [ -n "${REDIS_URL:-}" ]; then
+            args+=(--set-string "redis.url=$REDIS_URL")
+          fi
+          if [ -n "${BREAK_GLASS_SECRET:-}" ]; then
+            args+=(--set-string "secrets.breakGlass.value=$BREAK_GLASS_SECRET")
+          fi
+          if [ -n "${HELM_EXTRA_ARGS:-}" ]; then
+            while IFS= read -r line; do
+              [ -z "$line" ] && continue
+              args+=("$line")
+            done <<< "$HELM_EXTRA_ARGS"
+          fi
+          helm "${args[@]}"
+
+      - name: Wait for rollout
+        env:
+          RELEASE_NAME: ${{ steps.vars.outputs.release }}
+          NAMESPACE: ${{ steps.vars.outputs.namespace }}
+        run: |
+          set -euo pipefail
+          kubectl rollout status deployment/"$RELEASE_NAME" -n "$NAMESPACE" --timeout=180s
+
+      - name: Run in-cluster smoke tests
+        env:
+          RELEASE_NAME: ${{ steps.vars.outputs.release }}
+          NAMESPACE: ${{ steps.vars.outputs.namespace }}
+        run: |
+          set -euo pipefail
+          service_port=$(kubectl get svc "$RELEASE_NAME" -n "$NAMESPACE" -o jsonpath='{.spec.ports[0].port}')
+          base_url="http://${RELEASE_NAME}.${NAMESPACE}.svc.cluster.local:${service_port}"
+          kubectl run "$RELEASE_NAME-smoke" \
+            --namespace "$NAMESPACE" \
+            --image=curlimages/curl:8.7.1 \
+            --restart=Never \
+            --attach \
+            --rm \
+            -- sh -eu -c "\
+              curl -sfS \"${base_url}/health/live\" >/dev/null; \
+              status_code=$(curl -s -o /dev/null -w '%{http_code}' \"${base_url}/secrets/materialize\"); \
+              if [ \"$status_code\" -ne 401 ]; then \
+                echo 'Expected /secrets/materialize to return 401 until controls are satisfied' >&2; \
+                exit 1; \
+              fi"
+
+      - name: Show service and ingress endpoints
+        env:
+          RELEASE_NAME: ${{ steps.vars.outputs.release }}
+          NAMESPACE: ${{ steps.vars.outputs.namespace }}
+        run: |
+          set -euo pipefail
+          echo "Service endpoints"
+          kubectl get svc "$RELEASE_NAME" -n "$NAMESPACE" -o wide
+          echo "\nIngress endpoints"
+          if ! kubectl get ingress -n "$NAMESPACE" --selector app.kubernetes.io/instance="$RELEASE_NAME" >/dev/null 2>&1; then
+            echo "No ingress resources found for release $RELEASE_NAME"
+          else
+            kubectl get ingress -n "$NAMESPACE" --selector app.kubernetes.io/instance="$RELEASE_NAME"
+          fi

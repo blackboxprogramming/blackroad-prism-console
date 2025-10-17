@@ -1,0 +1,6 @@
+region            = "us-west-2"
+state_bucket_name = "br-tfstate-<unique>"
+lock_table_name   = "br-terraform-lock"
+github_org        = "blackboxprogramming"
+github_repo       = "br-infra-iac"
+github_role_name  = "github-terraform"

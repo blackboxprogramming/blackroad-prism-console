@@ -1,0 +1,10 @@
+policies:
+  - intent: deploy
+    approvers: ["owner","admin"]
+    method: "workflow:change-approve.yml"
+  - intent: schema:migrate
+    approvers: ["owner","admin"]
+    method: "workflow:change-approve.yml"
+  - intent: rotate:secrets
+    approvers: ["owner"]
+    method: "workflow:change-approve.yml"

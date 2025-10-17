@@ -1,0 +1,44 @@
+name: PR Title Guard
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - ready_for_review
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  lint:
+    name: Validate pull request title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce conventional PR titles
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.info('No pull request payload detected.');
+              return;
+            }
+
+            const title = pr.title ?? '';
+            const pattern = /^(feat|fix|chore|docs|refactor|ci|build|perf|test|ops)(\([a-z0-9\-\/]+\))?!?: .{5,}/i;
+            if (pattern.test(title)) {
+              core.info(`Title "${title}" matches the required convention.`);
+              return;
+            }
+
+            const message = [
+              'Pull request titles must follow conventional commit style.',
+              'Example: `feat(api): expose bulk import endpoint`',
+              'Allowed types: feat, fix, chore, docs, refactor, ci, build, perf, test, ops.',
+              'Provide a short description of at least five characters after the colon.'
+            ].join('\n');
+            core.setFailed(message);

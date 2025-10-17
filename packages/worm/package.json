@@ -1,0 +1,18 @@
+{
+  "name": "@blackroad/worm",
+  "version": "0.1.0",
+  "description": "Append-only WORM archive for FeeForge evidence.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^5.4.5"
+  }
+}

@@ -1,0 +1,11 @@
+import { Router } from 'express';
+import fs from 'fs';
+const r = Router(); const CFG='bcdr/backups.json', REP='data/bcdr/backup_reports.jsonl';
+const read=()=> fs.existsSync(CFG)? JSON.parse(fs.readFileSync(CFG,'utf-8')):{ items:{} };
+const write=(o:any)=>{ fs.mkdirSync('bcdr',{recursive:true}); fs.writeFileSync(CFG, JSON.stringify(o,null,2)); };
+const append=(row:any)=>{ fs.mkdirSync('data/bcdr',{recursive:true}); fs.appendFileSync(REP, JSON.stringify(row)+'\n'); };
+const list=()=> fs.existsSync(REP)? fs.readFileSync(REP,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[];
+r.post('/backups/register',(req,res)=>{ const o=read(); const b=req.body||{}; o.items[b.id]=b; write(o); res.json({ ok:true }); });
+r.post('/backups/report',(req,res)=>{ append({ ts:Date.now(), ...req.body }); res.json({ ok:true }); });
+r.get('/backups/recent',(req,res)=>{ const id=String(req.query.id||''); const items=list().reverse().filter((x:any)=>!id||x.id===id).slice(0,50); res.json({ items }); });
+export default r;

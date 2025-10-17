@@ -1,0 +1,12 @@
+Hi {{HIRING_MANAGER_NAME}},
+
+I’m excited about the {{ROLE_TITLE}} opportunity at {{COMPANY}} because {{ROLE_MOTIVATION}}. In my current work at {{CURRENT_COMPANY}}, I {{PROOF_POINT_1}} that produced {{PROOF_RESULT_1}}. Previously, at {{PREVIOUS_COMPANY}}, I {{PROOF_POINT_2}} and delivered {{PROOF_RESULT_2}}, which mirrors your goals for {{TEAM_OR_PRODUCT}}.
+
+If we move forward, I’d spend the first 30 days {{THIRTY_DAY_PLAN}}, while partnering with {{KEY_PARTNERS}} to ship quick wins and validate the roadmap. I’m especially drawn to {{COMPANY_MISSION_OR_VALUE}} and would love to bring my experience with {{SIGNATURE_SKILL}} to accelerate it.
+
+Thanks for the consideration—looking forward to connecting.
+
+Best,
+{{CANDIDATE_NAME}}
+{{PHONE}}
+{{LINK}}

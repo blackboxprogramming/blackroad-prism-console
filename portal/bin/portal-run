@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DEFAULT_ROOT="/home/pi/portal"
+ROOT="${PORTAL_ROOT:-$DEFAULT_ROOT}"
+ROOT="${ROOT%/}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ ! -d "$ROOT" ]]; then
+  ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+fi
+
+DESC_FILE="$ROOT/configs/raw.descriptor"
+
+"$ROOT/bin/portal-env" || { echo "fix env first"; exit 2; }
+
+if [[ ! -f "$ROOT/bin/portal" ]]; then
+  echo "missing portal CLI at $ROOT/bin/portal" >&2
+  exit 3
+fi
+
+OUT="$("$ROOT/bin/portal" proof "$DESC_FILE" | sed -e 's/^BALANCE: //')"
+BAL="$(echo "$OUT" | awk '{print $1}')"
+echo "BTC balance: ${BAL:-unknown}"
+
+if [[ -n "${PRICE_BTC:-}" && -x "$ROOT/bin/price" ]]; then
+  "$ROOT/bin/price" set btc "$PRICE_BTC" >/dev/null || true
+fi
+
+if [[ -x "$ROOT/bin/portal-health" ]]; then
+  "$ROOT/bin/portal-health" >/dev/null
+fi
+if [[ -x "$ROOT/bin/portal-checklist" ]]; then
+  "$ROOT/bin/portal-checklist" >/dev/null
+fi
+
+echo "Health:     $ROOT/reports/health.html"
+echo "Checklist:  $ROOT/reports/ops-checklist.html"

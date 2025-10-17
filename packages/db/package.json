@@ -1,0 +1,23 @@
+{
+  "name": "@blackroad/db",
+  "version": "0.1.0",
+  "description": "Prisma schema and helpers for FeeForge billing records.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist", "prisma"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "prisma:generate": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.18.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.18.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.4.5"
+  }
+}

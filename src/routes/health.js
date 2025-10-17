@@ -1,9 +1,9 @@
+// FILE: /srv/blackroad-api/src/routes/health.js
 'use strict';
 
 const express = require('express');
 const os = require('os');
 const fs = require('fs');
-const path = require('path');
 const { DB_PATH } = require('../config');
 
 const router = express.Router();

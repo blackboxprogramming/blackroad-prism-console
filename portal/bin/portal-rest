@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+import base64
+import json
+import os
+import subprocess
+from glob import glob
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import urlparse
+
+ROOT = "/home/pi/portal"
+HOST, PORT = "127.0.0.1", 8787
+TOKEN_PATH = os.path.join(ROOT, "configs", "api.token")
+if not os.path.exists(TOKEN_PATH):
+    os.makedirs(os.path.dirname(TOKEN_PATH), exist_ok=True)
+    token_bytes = base64.b64encode(os.urandom(24)).decode("ascii")
+    with open(TOKEN_PATH, "w", encoding="utf-8") as fh:
+        fh.write(token_bytes)
+with open(TOKEN_PATH, "r", encoding="utf-8") as fh:
+    TOKEN = fh.read().strip()
+ENABLE_PSBT_API = os.environ.get("ENABLE_PSBT_API", "0") == "1"
+
+
+def run(cmd):
+    proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
+    return proc.returncode, proc.stdout, proc.stderr
+
+
+def json_response(handler, status, obj):
+    data = json.dumps(obj).encode()
+    handler.send_response(status)
+    handler.send_header("Content-Type", "application/json")
+    handler.send_header("Content-Length", str(len(data)))
+    handler.end_headers()
+    handler.wfile.write(data)
+
+
+class Handler(BaseHTTPRequestHandler):
+    def _authed(self):
+        auth = self.headers.get("Authorization", "")
+        return auth == f"Bearer {TOKEN}"
+
+    def _load_json_field(self, path, selector=None):
+        if not os.path.exists(path):
+            return None
+        try:
+            with open(path, "r", encoding="utf-8") as fp:
+                data = json.load(fp)
+        except Exception:  # pylint: disable=broad-except
+            return None
+        if not selector:
+            return data
+        for key in selector.split("."):
+            if isinstance(data, dict):
+                data = data.get(key)
+            else:
+                return None
+            if data is None:
+                return None
+        return data
+
+    def do_GET(self):
+        if not self._authed():
+            return json_response(self, 401, {"error": "unauthorized"})
+        parsed = urlparse(self.path)
+        if parsed.path == "/health":
+            btc = os.path.join(ROOT, "proofs", "aura-proof.json")
+            ltc = os.path.join(ROOT, "proofs", "ltc-proof.json")
+            res = {
+                "btc": self._load_json_field(btc, "scantxoutset.total_amount"),
+                "ltc": self._load_json_field(ltc, "scantxoutset.total_amount"),
+            }
+            return json_response(self, 200, res)
+        if parsed.path == "/balances":
+            btc = os.path.join(ROOT, "proofs", "aura-proof.json")
+            ltc = os.path.join(ROOT, "proofs", "ltc-proof.json")
+            eth_path = os.path.join(ROOT, "proofs", "eth_balance.json")
+            balances = {
+                "btc": self._load_json_field(btc, "scantxoutset.total_amount"),
+                "ltc": self._load_json_field(ltc, "scantxoutset.total_amount"),
+                "eth": None,
+            }
+            eth_payload = self._load_json_field(eth_path)
+            if isinstance(eth_payload, dict):
+                balances["eth"] = eth_payload.get("eth")
+            return json_response(self, 200, balances)
+        if parsed.path == "/proof":
+            rc, _out, err = run([os.path.join(ROOT, "bin", "portal"), "proof", os.path.join(ROOT, "configs", "raw.descriptor")])
+            if rc != 0:
+                return json_response(self, 500, {"error": "proof failed", "stderr": err})
+            try:
+                with open(os.path.join(ROOT, "proofs", "aura-proof.json"), "r", encoding="utf-8") as fh:
+                    return json_response(self, 200, json.load(fh))
+            except Exception as exc:  # pylint: disable=broad-except
+                return json_response(self, 500, {"error": str(exc)})
+        if parsed.path == "/doctor":
+            rc, _out, err = run([os.path.join(ROOT, "bin", "descriptor-doctor-run")])
+            if rc != 0:
+                detail = err.strip() or _out.strip()
+                return json_response(self, 500, {"error": "doctor failed", "stderr": detail})
+            try:
+                pattern = os.path.join(ROOT, "proofs", "doctor-*.json")
+                latest = max(glob(pattern), key=os.path.getmtime)
+            except ValueError:
+                return json_response(self, 500, {"error": "no doctor proofs found"})
+            except Exception as exc:  # pylint: disable=broad-except
+                return json_response(self, 500, {"error": str(exc)})
+            try:
+                with open(latest, "r", encoding="utf-8") as fh:
+                    payload = json.load(fh)
+            except Exception as exc:  # pylint: disable=broad-except
+                return json_response(self, 500, {"error": str(exc)})
+            return json_response(self, 200, payload)
+        return json_response(self, 404, {"error": "not found"})
+
+    def do_POST(self):
+        if not self._authed():
+            return json_response(self, 401, {"error": "unauthorized"})
+        parsed = urlparse(self.path)
+        length = int(self.headers.get("Content-Length", "0") or 0)
+        body = self.rfile.read(length).decode() if length else ""
+        try:
+            payload = json.loads(body) if body else {}
+        except json.JSONDecodeError:
+            payload = {}
+        if parsed.path == "/psbt/new":
+            if not ENABLE_PSBT_API:
+                return json_response(self, 403, {"error": "psbt api disabled"})
+            label = payload.get("label", "api_tx")
+            outputs = payload.get("outputs", [])
+            fee = int(payload.get("fee", 3))
+            outspath = os.path.join(ROOT, "configs", f"{label}.outputs.json")
+            with open(outspath, "w", encoding="utf-8") as fh:
+                json.dump(outputs, fh)
+            rc, _out, err = run([os.path.join(ROOT, "bin", "portal"), "psbt:new", label, outspath, str(fee)])
+            if rc != 0:
+                return json_response(self, 500, {"error": "psbt failed", "stderr": err})
+            return json_response(self, 200, {"psbt": os.path.join(ROOT, "psbts", f"{label}.psbt")})
+        return json_response(self, 404, {"error": "not found"})
+
+    def log_message(self, fmt, *args):  # pylint: disable=unused-argument
+        return
+
+
+if __name__ == "__main__":
+    httpd = HTTPServer((HOST, PORT), Handler)
+    print(f"portal-rest listening on http://{HOST}:{PORT} (token in {TOKEN_PATH})")
+    httpd.serve_forever()

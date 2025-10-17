@@ -1,0 +1,11 @@
+Task Name,Description,Assignee Email,Section,Due Date
+Repo template,Create br-repo-template with Next.js/Fastify + CI + security.,amundsonalexa@gmail.com,Today,2025-10-10
+PR previews,Terraform module + GH Action to spin ECS Fargate per PR under pr-###.dev.blackroad.io.,amundsonalexa@gmail.com,This Week,2025-10-11
+Commit linting,Add commitlint + PR template to all repos.,amundsonalexa@gmail.com,Today,2025-10-10
+Pre-commit hooks,Add Husky/lefthook for lint/test/secret-scan.,amundsonalexa@gmail.com,This Week,2025-10-11
+Dev containers,Standardize .devcontainer for Node/Terraform/AWS.,amundsonalexa@gmail.com,This Week,2025-10-11
+Makefile baseline,Add build/test/lint/run/deploy targets across repos.,amundsonalexa@gmail.com,Today,2025-10-10
+Repo br-ingest-github,Create worker with PAT ingest + watermark; build & push to ECR.,amundsonalexa@gmail.com,Today,2025-10-19
+API metrics (GH),Add /v1/metrics/github endpoints for opened, closed, open bugs.,amundsonalexa@gmail.com,Today,2025-10-19
+Tiles (GH),Add three dashboard tiles; smoke via /healthz/ui.,amundsonalexa@gmail.com,Today,2025-10-19
+Webhook (optional),Add /webhooks/github, verify HMAC, upsert one issue on events.,amundsonalexa@gmail.com,This Week,2025-10-20

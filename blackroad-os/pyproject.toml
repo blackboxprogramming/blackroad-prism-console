@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blackroad-agent"
+version = "0.1.0"
+description = "Local-first automation agent for BlackRoad OS"
+authors = [{ name = "BlackRoad" }]
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+dependencies = [
+    "typer>=0.9,<1.0",
+    "pydantic>=2.6,<3.0",
+    "pyyaml>=6.0",
+    "anyio>=4.0",
+]
+
+[project.optional-dependencies]
+runtime-cpu = ["llama-cpp-python>=0.2" ]
+runtime-gpu = ["tensorrt"]
+transport = ["httpx", "asyncssh", "gmqtt"]
+
+[project.scripts]
+blackroad-agent = "blackroad_agent.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]

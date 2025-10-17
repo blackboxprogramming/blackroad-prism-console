@@ -1,0 +1,23 @@
+agent:
+  node_name: dev-node
+  data_dir: ~/.blackroad
+  transports:
+    - type: http
+      listen: 0.0.0.0:8080
+    - type: mqtt
+      broker: mqtt://localhost:1883
+  plugins:
+    - name: telemetry
+      module: blackroad_agent.plugins.telemetry
+      options:
+        interval_seconds: 10
+    - name: flasher
+      module: blackroad_agent.plugins.flasher
+      options:
+        workspace: /tmp/blackroad-flasher
+    - name: model_runtime
+      module: blackroad_agent.plugins.model_runtime
+      options:
+        backend: local-cpu
+manifests:
+  actions: manifests/actions.yaml

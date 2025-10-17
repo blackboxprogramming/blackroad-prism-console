@@ -52,6 +52,7 @@ Working Copy refreshes, and droplet deployment behind a chat-style CLI.
 - `AIRTABLE_WEBHOOK` – hook to trigger Airtable jobs
 - `SLACK_WEBHOOK` – Slack Incoming Webhook for status updates
 - `WORKING_COPY_SSH` and `WORKING_COPY_PATH` – remote path for iOS Working Copy
+- `WORKING_COPY_DEVICES` – comma-separated Working Copy mirrors (`host:path` or local paths)
 - `WORKING_COPY_CMD` – optional command to refresh a Working Copy client
 - `DROPLET_SSH` – SSH target for the deployment server
 
@@ -73,6 +74,7 @@ Without an argument the script will prompt for a command.
 - `BLACKROAD_REMOTE_PATH` – path on droplet to update (`/srv/blackroad`)
 - `BLACKROAD_BRANCH` – git branch to push/pull (`main`)
 - `WORKING_COPY_CMD` – command to refresh iOS Working Copy (optional)
+- `WORKING_COPY_DEVICES` – comma-separated Working Copy mirrors when refreshing multiple devices
 - `SLACK_WEBHOOK_URL` – post deployment status to Slack (optional)
 
 The script is a starting point; expand the connector and deployment steps

@@ -1,0 +1,8 @@
+Task Name,Description,Assignee Email,Section,Due Date
+DB: Linear tables,Create raw_linear_issues + linear_team_sync.,amundsonalexa@gmail.com,Today,2025-10-21
+API: Linear connect,Validate key via viewer; store SSM; seed team sync rows.,amundsonalexa@gmail.com,Today,2025-10-21
+Worker: br-ingest-linear,GraphQL pagination by team + watermark; upsert issues.,amundsonalexa@gmail.com,This Week,2025-10-22
+Metrics endpoints,Add issues_created, issues_completed, burndown endpoints.,amundsonalexa@gmail.com,This Week,2025-10-22
+dbt models,stg_linear__issues + fct_linear_issues_daily.,amundsonalexa@gmail.com,This Week,2025-10-23
+Tiles (Linear),Add 3 tiles to PRISM dashboard; smoke via /healthz/ui.,amundsonalexa@gmail.com,This Week,2025-10-23
+Webhook (optional),Enable Linear webhook + HMAC verify; upsert on change.,amundsonalexa@gmail.com,This Week,2025-10-24

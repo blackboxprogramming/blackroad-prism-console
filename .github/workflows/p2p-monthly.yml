@@ -1,0 +1,13 @@
+name: P2P Monthly (AP Aging + Spend)
+on:
+  schedule: [{ cron: "22 8 1 * *" }]
+  workflow_dispatch:
+jobs:
+  p2p:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/p2p/aging_payables.ts
+      - run: node scripts/p2p/spend_analytics.ts

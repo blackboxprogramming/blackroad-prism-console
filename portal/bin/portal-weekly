@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+BACKUP_DIR="$ROOT/backups"
+BACKUP_BIN="$ROOT/bin/portal-backup"
+
+if [[ ! -x "$BACKUP_BIN" ]]; then
+  echo "missing portal-backup at $BACKUP_BIN" >&2
+  exit 1
+fi
+
+mkdir -p "$BACKUP_DIR"
+STAMP="$(date -u +%Y%m%d)"
+DEST="$BACKUP_DIR/portal.${STAMP}.tgz"
+
+"$BACKUP_BIN" "$DEST"
+
+ls -1t "$BACKUP_DIR"/portal.*.tgz 2>/dev/null | sed -n '9,$p' | xargs -r rm -f
+
+echo "BACKUP: $DEST"

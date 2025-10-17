@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "item_id",
+    "from_rev",
+    "to_rev",
+    "reason",
+    "risk",
+    "status",
+    "effects",
+    "approvals"
+  ],
+  "properties": {
+    "id": {"type": "string"},
+    "type": {"enum": ["ECR", "ECO"]},
+    "item_id": {"type": "string"},
+    "from_rev": {"type": "string"},
+    "to_rev": {"type": "string"},
+    "reason": {"type": "string"},
+    "risk": {"enum": ["low", "medium", "high"]},
+    "status": {
+      "enum": ["draft", "review", "approved", "released", "rejected"]
+    },
+    "effects": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "approvals": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "additionalProperties": false
+}

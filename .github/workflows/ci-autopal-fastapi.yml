@@ -1,0 +1,163 @@
+name: Autopal FastAPI CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+  pull_request:
+
+concurrency:
+  group: ci-autopal-fastapi-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: '3.11'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  FASTAPI_COMPOSE_FILE: docker-compose.ci.yml
+  FASTAPI_FALLBACK_COMPOSE_FILE: docker-compose.yml
+  FASTAPI_HEALTH_URL: http://127.0.0.1:8000/health
+  FASTAPI_OIDC_URL: http://127.0.0.1:8080/.well-known/openid-configuration
+  FASTAPI_STEP_UP_URL: http://127.0.0.1:8000/step-up/health
+  COMPOSE_PROJECT_NAME: autopal-ci
+
+jobs:
+  pytest:
+    name: Unit tests (pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          if [ -f pyproject.toml ] && grep -q "\[tool.poetry\]" pyproject.toml; then
+            pip install poetry
+            poetry install --no-interaction --no-root
+          fi
+
+      - name: Run pytest
+        run: |
+          if [ -d tests ]; then
+            pytest -q
+          else
+            echo "No tests directory detected. Skipping pytest run."
+          fi
+
+  smoke:
+    name: Docker compose smoke
+    runs-on: ubuntu-latest
+    needs: pytest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve compose file
+        id: compose
+        run: |
+          if [ -n "${{ env.FASTAPI_COMPOSE_FILE }}" ] && [ -f "${{ env.FASTAPI_COMPOSE_FILE }}" ]; then
+            echo "file=${{ env.FASTAPI_COMPOSE_FILE }}" >>"$GITHUB_OUTPUT"
+          elif [ -n "${{ env.FASTAPI_FALLBACK_COMPOSE_FILE }}" ] && [ -f "${{ env.FASTAPI_FALLBACK_COMPOSE_FILE }}" ]; then
+            echo "file=${{ env.FASTAPI_FALLBACK_COMPOSE_FILE }}" >>"$GITHUB_OUTPUT"
+          else
+            echo "::error::No docker-compose file found for smoke test" >&2
+            exit 1
+          fi
+
+      - name: Build services
+        run: |
+          docker compose -f "${{ steps.compose.outputs.file }}" build
+
+      - name: Bring up stack
+        run: |
+          docker compose -f "${{ steps.compose.outputs.file }}" up -d
+
+      - name: Wait for FastAPI health
+        run: |
+          if [ -n "${{ env.FASTAPI_HEALTH_URL }}" ]; then
+            timeout 90 bash -c 'until curl -fsS "$0"; do sleep 3; done' "${{ env.FASTAPI_HEALTH_URL }}"
+          else
+            echo "FASTAPI_HEALTH_URL not set; skipping health probe"
+          fi
+
+      - name: Verify OIDC discovery
+        run: |
+          if [ -n "${{ env.FASTAPI_OIDC_URL }}" ]; then
+            timeout 90 bash -c 'until curl -fsS "$0" | jq -e ".issuer" >/dev/null; do sleep 3; done' "${{ env.FASTAPI_OIDC_URL }}"
+          else
+            echo "FASTAPI_OIDC_URL not set; skipping OIDC smoke"
+          fi
+
+      - name: Step-up smoke check
+        run: |
+          if [ -n "${{ env.FASTAPI_STEP_UP_URL }}" ]; then
+            timeout 90 bash -c 'until curl -fsS "$0"; do sleep 3; done' "${{ env.FASTAPI_STEP_UP_URL }}"
+          else
+            echo "FASTAPI_STEP_UP_URL not set; skipping step-up smoke"
+          fi
+
+      - name: Docker compose logs (failure)
+        if: failure()
+        run: |
+          docker compose -f "${{ steps.compose.outputs.file }}" logs
+
+      - name: Tear down
+        if: always()
+        run: |
+          docker compose -f "${{ steps.compose.outputs.file }}" down -v
+
+  publish:
+    name: Publish image
+    runs-on: ubuntu-latest
+    needs:
+      - pytest
+      - smoke
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

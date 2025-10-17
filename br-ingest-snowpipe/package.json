@@ -1,0 +1,29 @@
+{
+  "name": "br-ingest-snowpipe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p .",
+    "start": "node dist/index.js",
+    "migrate": "psql \"$PG_URL\" -f src/schema.sql",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "pg": "^8.11.3",
+    "@aws-sdk/client-s3": "^3.635.0",
+    "@aws-sdk/lib-storage": "^3.635.0",
+    "snowflake-sdk": "^1.11.0",
+    "zlib": "^1.0.5",
+    "fast-csv": "^5.0.1",
+    "date-fns": "^3.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/pg": "^8.11.6",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.4",
+    "vitest": "^1.6.0"
+  }
+}

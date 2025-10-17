@@ -1,0 +1,29 @@
+[Unit]
+Description=XMRig-CUDA (Jetson learn-mode, throttled)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/miners/jetson
+# ensure NVIDIA runtime is default OR provide full docker run line:
+ExecStart=/usr/bin/docker run --rm --name xmrig-cuda \
+  --runtime nvidia --gpus all \
+  --cpus=0.5 --memory=512m --read-only --security-opt no-new-privileges:true \
+  -e NVIDIA_VISIBLE_DEVICES=all -e NVIDIA_DRIVER_CAPABILITIES=utility,compute \
+  -e POOL=POOL_HOST:PORT -e ADDR=YOUR_ADDRESS -e THREADS=1 \
+  -e BURST_SEC=90 -e COOL_SEC=60 -e MAX_TEMP_C=70 \
+  xmrig-cuda-arm64
+ExecStop=/usr/bin/docker stop xmrig-cuda
+Restart=on-failure
+RestartSec=10
+
+# hardening
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

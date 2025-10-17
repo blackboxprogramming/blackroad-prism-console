@@ -14,16 +14,23 @@ const Console: React.FC<{ client: Client }> = ({ client }) => {
   useEffect(() => {
     if (!runId) return;
     const es = new EventSource('/events');
+    const extract = (message: MessageEvent): any => {
+      const parsed = JSON.parse(message.data);
+      if (parsed && typeof parsed === 'object' && 'data' in parsed) {
+        return (parsed as any).data;
+      }
+      return parsed;
+    };
     es.addEventListener('run.out', (e) => {
-      const data = JSON.parse((e as MessageEvent).data);
+      const data = extract(e as MessageEvent);
       if (data.runId === runId) setLines((l) => [...l, data.chunk]);
     });
     es.addEventListener('run.err', (e) => {
-      const data = JSON.parse((e as MessageEvent).data);
+      const data = extract(e as MessageEvent);
       if (data.runId === runId) setLines((l) => [...l, data.chunk]);
     });
     es.addEventListener('run.end', (e) => {
-      const data = JSON.parse((e as MessageEvent).data);
+      const data = extract(e as MessageEvent);
       if (data.runId === runId) {
         setStatus(data.exitCode === 0 ? 'ok' : data.exitCode === null ? 'cancelled' : 'error');
         es.close();

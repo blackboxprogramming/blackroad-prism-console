@@ -77,7 +77,11 @@ def detect_risks(pr_files: List[dict], impacts: Set[str]) -> List[str]:
     paths = {f["filename"] for f in pr_files}
     # Bridge ESM check
     if "bridge" in impacts:
-        if any(f["filename"].startswith("srv/ollama-bridge/") and f["filename"].endswith(".js") for f in pr_files):
+        bridge_pkg_exists = Path("srv/ollama-bridge/package.json").exists()
+        if not bridge_pkg_exists and any(
+            f["filename"].startswith("srv/ollama-bridge/") and f["filename"].endswith(".js")
+            for f in pr_files
+        ):
             if not any(f["filename"] == "srv/ollama-bridge/package.json" for f in pr_files):
                 risks.append("bridge missing package.json with type module")
     # CSP checks

@@ -1,0 +1,16 @@
+1. Get the application URL by running these commands:
+{{- if .Values.ingress.enabled }}
+  kubectl get ingress {{ include "autopal.fullname" . }} -n {{ .Release.Namespace }}
+{{- else }}
+  kubectl get svc {{ include "autopal.fullname" . }} -n {{ .Release.Namespace }}
+Thank you for installing Autopal!
+
+1. Get the application URL by running these commands:
+{{- if .Values.ingress.enabled }}
+  {{- range $host := .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ (index $host.paths 0).path }}
+  {{- end }}
+{{- else }}
+  export SERVICE_IP=$(kubectl get svc {{ include "autopal.fullname" . }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo "Visit http://$SERVICE_IP:{{ .Values.service.port }}"
+{{- end }}

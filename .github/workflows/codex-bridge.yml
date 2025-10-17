@@ -3,6 +3,17 @@ on: { issue_comment: { types: [created] } }
 permissions: { contents: write, pull-requests: write, issues: write }
 jobs:
   apply:
+    if: |
+      startsWith(github.event.comment.body, '/codex ')
+      || startsWith(github.event.comment.body, '@codex')
+      || startsWith(github.event.comment.body, '@cadillac')
+      || startsWith(github.event.comment.body, '@Cadillac')
+      || startsWith(github.event.comment.body, '@lucidia')
+      || startsWith(github.event.comment.body, '@Lucidia')
+      || startsWith(github.event.comment.body, '@bbpteam')
+      || startsWith(github.event.comment.body, '@BBPTeam')
+      || startsWith(github.event.comment.body, '@blackboxprogramming')
+      || startsWith(github.event.comment.body, '@Blackboxprogramming')
     if: startsWith(github.event.comment.body, '/codex ') || startsWith(github.event.comment.body, '@codex ')
     runs-on: ubuntu-latest
     env:
@@ -10,6 +21,8 @@ jobs:
       BOT_USER: ${{ secrets.BOT_USER || 'blackroad-bot' }}
       CODEX_BODY: ${{ github.event.comment.body }}
       CODEX_PERMISSION: ${{ github.event.comment.author_association }}
+      CODEx_BODY: ${{ github.event.comment.body }}
+      CODEx_PERMISSION: ${{ github.event.comment.author_association }}
     steps:
       - uses: actions/checkout@v4
         with: { persist-credentials: false, fetch-depth: 0 }

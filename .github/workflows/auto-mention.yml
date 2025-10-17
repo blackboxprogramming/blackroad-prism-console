@@ -1,0 +1,841 @@
+name: Auto mention teams
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pull_number:
+        description: 'Pull request number to reroute'
+        required: true
+        type: string
+name: Auto mention on PRs
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  route:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Resolve pull request context
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          pull_number: ${{ github.event.inputs.pull_number }}
+          script: |
+            const {owner, repo} = context.repo
+            let number = context.payload?.pull_request?.number
+            const provided = core.getInput('pull_number') || ''
+            if (!number && provided) {
+              number = Number(provided)
+            }
+            if (!number) {
+              throw new Error('A pull request number is required.')
+      - name: Calculate mentions
+        id: calc
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const fs = require('fs');
+
+            function loadConfig() {
+              let raw;
+              try {
+                raw = fs.readFileSync('.github/mention-routes.yml', 'utf8').trim();
+              } catch (error) {
+                if (error && error.code === 'ENOENT') {
+                  return { routes: [], always: [] };
+                }
+                throw error;
+              }
+              if (!raw) {
+                return { routes: [], always: [] };
+              }
+              const config = parseConfig(raw);
+              if (!config || typeof config !== 'object') {
+                throw new Error('Failed to parse .github/mention-routes.yml: invalid structure');
+              }
+              return config;
+            }
+
+            function parseConfig(raw) {
+              try {
+                return JSON.parse(raw);
+              } catch (jsonError) {
+                return parseSimpleYAML(raw);
+              }
+            }
+
+            function parseSimpleYAML(raw) {
+              const lines = raw.split(/\r?\n/);
+              const root = {};
+              const stack = [{ indent: -1, type: 'object', value: root }];
+
+              const pendingContext = key => ({
+                indent: key.indent,
+                type: 'pending',
+                container: key.container,
+                key: key.key,
+                value: null
+              });
+
+              function ensureContainer(context, indent, line) {
+                if (context.type !== 'pending') {
+                  return context;
+                }
+                const isArray = line.trim().startsWith('- ');
+                const nextValue = isArray ? [] : {};
+                context.container[context.key] = nextValue;
+                context.type = isArray ? 'array' : 'object';
+                context.value = nextValue;
+                return context;
+              }
+
+              function parseScalar(value) {
+                if (value === undefined || value === null) return null;
+                if (value === '') return null;
+                if (value === '[]') return [];
+                if (value === '{}') return {};
+                if (value === 'true') return true;
+                if (value === 'false') return false;
+                if (value === 'null') return null;
+                if (/^[+-]?\d+(\.\d+)?$/.test(value)) {
+                  return Number(value);
+                }
+                const first = value[0];
+                const last = value[value.length - 1];
+                if ((first === '"' && last === '"') || first === '[' || first === '{') {
+                  return JSON.parse(value);
+                }
+                return value;
+              }
+
+              for (const rawLine of lines) {
+                if (!rawLine.trim() || rawLine.trim().startsWith('#')) {
+                  continue;
+                }
+                const indent = rawLine.match(/^\s*/)[0].length;
+                while (stack.length > 1 && indent <= stack[stack.length - 1].indent) {
+                  stack.pop();
+                }
+                if (!stack.length) {
+                  throw new Error('Invalid YAML structure in .github/mention-routes.yml');
+                }
+                let parent = stack[stack.length - 1];
+                parent = ensureContainer(parent, indent, rawLine);
+                stack[stack.length - 1] = parent;
+
+                const line = rawLine.trim();
+                if (line.startsWith('- ')) {
+                  if (parent.type !== 'array') {
+                    throw new Error('YAML array item without array context');
+                  }
+                  const content = line.slice(2).trim();
+                  if (!content) {
+                    const obj = {};
+                    parent.value.push(obj);
+                    stack.push({ indent, type: 'object', value: obj });
+                    continue;
+                  }
+                  const colonIndex = content.indexOf(':');
+                  if (colonIndex === -1) {
+                    parent.value.push(parseScalar(content));
+                    continue;
+                  }
+                  const key = content.slice(0, colonIndex).trim();
+                  const valuePart = content.slice(colonIndex + 1).trim();
+                  const obj = {};
+                  if (valuePart) {
+                    obj[key] = parseScalar(valuePart);
+                  } else {
+                    obj[key] = null;
+                  }
+                  parent.value.push(obj);
+                  stack.push({ indent, type: 'object', value: obj });
+                  if (!valuePart) {
+                    stack.push(pendingContext({ indent, container: obj, key }));
+                  }
+                  continue;
+                }
+
+                const colonIndex = line.indexOf(':');
+                if (colonIndex === -1) {
+                  throw new Error('Invalid YAML line: ' + line);
+                }
+                const key = line.slice(0, colonIndex).trim();
+                const valuePart = line.slice(colonIndex + 1).trim();
+                const target = parent.type === 'array' ? parent.value[parent.value.length - 1] : parent.value;
+                if (parent.type === 'array' && (!target || typeof target !== 'object')) {
+                  throw new Error('Cannot assign property to non-object array item');
+                }
+                const container = parent.type === 'array' ? target : parent.value;
+                if (valuePart) {
+                  container[key] = parseScalar(valuePart);
+                } else {
+                  const pending = { indent, container, key };
+                  container[key] = null;
+                  stack.push(pendingContext(pending));
+                }
+              }
+
+              return root;
+            }
+            const {data: pr} = await github.rest.pulls.get({owner, repo, pull_number: number})
+            core.setOutput('number', String(pr.number))
+            core.setOutput('login', pr.user?.login || '')
+            core.setOutput('draft', pr.draft ? 'true' : 'false')
+            core.setOutput('labels', JSON.stringify(pr.labels || []))
+
+      - name: Check for opt-out label
+        id: optout
+        uses: actions/github-script@v7
+        env:
+          PR_LABELS: ${{ steps.pr.outputs.labels }}
+          PR_DRAFT: ${{ steps.pr.outputs.draft }}
+        with:
+          result-encoding: string
+          script: |
+            const labels = JSON.parse(process.env.PR_LABELS || '[]')
+            const hasNoMentions = labels.some(label => (label?.name || '').toLowerCase() === 'no-mentions')
+            const skip = hasNoMentions || process.env.PR_DRAFT === 'true'
+            core.setOutput('skip', skip ? 'true' : 'false')
+
+      - name: Load mention routes config
+        if: steps.optout.outputs.skip != 'true'
+        id: cfg
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const fs = require('fs')
+            try {
+              const raw = fs.readFileSync('.github/mention-routes.yml', 'utf8')
+              core.setOutput('cfg', raw)
+            } catch (error) {
+              if (error && error.code === 'ENOENT') {
+                core.setOutput('cfg', '')
+                return
+              }
+              throw error
+            }
+
+      - name: Validate config
+        if: steps.optout.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const yaml = require('js-yaml')
+            const cfg = yaml.load(process.env.CFG || '') || {}
+            const routes = Array.isArray(cfg.routes) ? cfg.routes : []
+            const bad = routes.filter(r => !r?.mention || !Array.isArray(r.patterns) || r.patterns.length === 0)
+            if (bad.length) {
+              core.setFailed(`Invalid mention-routes entries: ${JSON.stringify(bad)}`)
+            }
+        env:
+          CFG: ${{ steps.cfg.outputs.cfg }}
+
+      - name: Collect changed files
+        if: steps.optout.outputs.skip != 'true'
+        id: changed
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        with:
+          result-encoding: string
+          script: |
+            const {owner, repo} = context.repo
+            const number = Number(process.env.PR_NUMBER)
+            if (!number) {
+              throw new Error('Missing pull request number.')
+            }
+              try {
+                return JSON.parse(raw);
+              } catch (err) {
+                throw new Error(`Failed to parse .github/mention-routes.yml: ${err.message}`);
+              }
+            }
+
+            function matches(pattern, file) {
+              if (pattern === '**') return true;
+              if (pattern.endsWith('/**')) {
+                const prefix = pattern.slice(0, -3);
+                return file.startsWith(prefix);
+              }
+              if (pattern.startsWith('**/')) {
+                const suffix = pattern.slice(3);
+                return file.endsWith(suffix);
+              }
+              if (pattern.includes('*')) {
+                const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp('^' + escaped.replace(/\*+/g, '.*') + '$');
+                return regex.test(file);
+              }
+              return file === pattern;
+            }
+
+            const config = loadConfig();
+            const routes = Array.isArray(config.routes) ? config.routes : [];
+            const always = Array.isArray(config.always)
+              ? config.always.map(value => String(value).trim()).filter(Boolean)
+              : [];
+            const { owner, repo } = context.repo;
+            const number = context.payload.pull_request.number;
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number: number,
+              per_page: 100
+            })
+            const filenames = files.map(file => file.filename)
+            core.setOutput('all_changed_files', JSON.stringify(filenames))
+
+      - name: Compute mentions from paths
+        if: steps.optout.outputs.skip != 'true'
+        id: paths
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const yaml = require('js-yaml')
+            const mm = require('minimatch')
+            const config = yaml.load(process.env.CFG || '') || {}
+            const files = JSON.parse(process.env.CHANGED || '[]')
+            const routes = Array.isArray(config.routes) ? config.routes : []
+            const always = Array.isArray(config.always)
+              ? config.always.map(value => String(value).trim()).filter(Boolean)
+              : []
+            const alwaysAssign = Array.isArray(config.always_assign)
+              ? config.always_assign.map(value => String(value).trim()).filter(Boolean)
+              : []
+            const mentions = new Set(always)
+            const assignees = new Set(alwaysAssign)
+            const teamSlugs = new Set()
+
+            for (const route of routes) {
+              if (!route) continue
+              const mentionValue = String(route.mention || '').trim()
+              const patterns = Array.isArray(route.patterns) ? route.patterns : [route.patterns]
+              const normalizedPatterns = patterns
+                .map(pattern => String(pattern || '').trim())
+                .filter(Boolean)
+              if (!mentionValue || !normalizedPatterns.length) continue
+              const hit = files.some(file => normalizedPatterns.some(pattern => mm(file, pattern)))
+              if (!hit) continue
+              mentions.add(mentionValue)
+              const assigneeList = Array.isArray(route.assignees) ? route.assignees : []
+              for (const candidate of assigneeList) {
+                const login = String(candidate || '').replace(/^@/, '').trim()
+                if (login) assignees.add(login)
+              }
+              if (mentionValue.startsWith('@') && !mentionValue.includes('/')) {
+                assignees.add(mentionValue.slice(1))
+              }
+              if (mentionValue.startsWith('@')) {
+                const parts = mentionValue.slice(1).split('/')
+                if (parts.length === 2 && parts[1]) {
+                  teamSlugs.add(parts[1].trim())
+            });
+
+            const filenames = files.map(file => file.filename);
+            const mentions = new Set(always);
+            const teamSlugs = new Set();
+
+            for (const route of routes) {
+              if (!route || !route.patterns || !route.mention) continue;
+              const patterns = (Array.isArray(route.patterns) ? route.patterns : [route.patterns])
+                .map(pattern => String(pattern).trim())
+                .filter(Boolean);
+              if (!patterns.length) continue;
+              const hit = filenames.some(file => patterns.some(pattern => matches(pattern, file)));
+              if (hit) {
+                const mentionValue = String(route.mention).trim();
+                if (mentionValue) {
+                  mentions.add(mentionValue);
+                }
+              }
+            }
+
+            for (const mention of mentions) {
+              if (mention.startsWith('@')) {
+                const parts = mention.slice(1).split('/')
+                if (parts.length === 2 && parts[1]) {
+                  teamSlugs.add(parts[1].trim())
+                }
+              }
+            }
+
+            core.setOutput('MENTIONS', Array.from(mentions).join(' '))
+            core.setOutput('TEAM_REVIEWERS', Array.from(teamSlugs).join(','))
+            core.setOutput('ASSIGNEES', Array.from(assignees).join(' '))
+        env:
+          CFG: ${{ steps.cfg.outputs.cfg }}
+          CHANGED: ${{ steps.changed.outputs.all_changed_files }}
+
+      - name: Merge mentions
+        if: steps.optout.outputs.skip != 'true'
+        id: merge
+        run: |
+          PATHS="$(echo "${{ steps.paths.outputs.MENTIONS }}" | xargs)"
+          ASSIGNEES="$(echo "${{ steps.paths.outputs.ASSIGNEES }}" | xargs)"
+          echo "ALL=$PATHS" >> $GITHUB_OUTPUT
+          echo "ASSIGNEES=$ASSIGNEES" >> $GITHUB_OUTPUT
+
+      - name: Load CODEOWNERS (optional)
+        if: steps.optout.outputs.skip != 'true'
+        id: owners
+        run: |
+          for f in .github/CODEOWNERS CODEOWNERS docs/CODEOWNERS; do
+            if [ -f "$f" ]; then echo "path=$f" >> $GITHUB_OUTPUT; break; fi
+          done
+
+      - name: Compute mentions from CODEOWNERS
+        if: steps.optout.outputs.skip != 'true' && steps.owners.outputs.path != ''
+        id: co
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs')
+            const path = process.env.CO_PATH
+            const txt = fs.readFileSync(path, 'utf8')
+            const rules = txt.split(/\r?\n/).filter(l => l && !l.startsWith('#'))
+            core.setOutput('rules', JSON.stringify(rules))
+        env:
+          CO_PATH: ${{ steps.owners.outputs.path }}
+
+      - name: Match changed files to CODEOWNERS
+        if: steps.optout.outputs.skip != 'true' && steps.co.outputs.rules != ''
+        id: co_mentions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const mm = require('minimatch')
+            const rules = JSON.parse(process.env.RULES)
+            const files = JSON.parse(process.env.CHANGED)
+            const hits = new Set()
+            for (const line of rules) {
+              const [pattern, ...owners] = line.trim().split(/\s+/)
+              if (!pattern || owners.length === 0) continue
+              if (files.some(f => mm(f, pattern))) owners.forEach(o => hits.add(o))
+            }
+            core.setOutput('mentions', Array.from(hits).join(' '))
+        env:
+          RULES: ${{ steps.co.outputs.rules }}
+          CHANGED: ${{ steps.changed.outputs.all_changed_files }}
+
+      - name: Merge CODEOWNERS mentions
+        if: steps.optout.outputs.skip != 'true'
+        id: merge_co
+        uses: actions/github-script@v7
+        env:
+          PATHS: ${{ steps.merge.outputs.ALL }}
+          PATHS_ASSIGNEES: ${{ steps.merge.outputs.ASSIGNEES }}
+          CO: ${{ steps.co_mentions.outputs.mentions }}
+        with:
+          script: |
+            const mentions = new Set()
+            const assignees = new Set()
+            const teamSlugs = new Set()
+
+            const appendMention = (value) => {
+              const mention = String(value || '').trim()
+              if (!mention) return
+              mentions.add(mention)
+              if (mention.startsWith('@')) {
+                const body = mention.slice(1)
+                if (body && !body.includes('/')) {
+                  assignees.add(body)
+                }
+                const parts = body.split('/')
+                if (parts.length === 2 && parts[1]) {
+                  teamSlugs.add(parts[1].trim())
+            const ordered = Array.from(mentions).filter(Boolean);
+            const mentionLine = ordered.join(' ');
+
+            for (const mention of ordered) {
+              if (mention.startsWith('@')) {
+                const parts = mention.slice(1).split('/');
+                if (parts.length === 2 && parts[1]) {
+                  teamSlugs.add(parts[1].trim());
+                }
+              }
+            }
+
+            const appendAssignee = (value) => {
+              const login = String(value || '').replace(/^@/, '').trim()
+              if (login) assignees.add(login)
+            }
+
+            String(process.env.PATHS || '')
+              .split(/\s+/)
+              .filter(Boolean)
+              .forEach(appendMention)
+
+            String(process.env.CO || '')
+              .split(/\s+/)
+              .filter(Boolean)
+              .forEach(appendMention)
+
+            String(process.env.PATHS_ASSIGNEES || '')
+              .split(/\s+/)
+              .filter(Boolean)
+              .forEach(appendAssignee)
+
+            core.setOutput('ALL', Array.from(mentions).join(' '))
+            core.setOutput('ASSIGNEES', Array.from(assignees).join(' '))
+            core.setOutput('TEAM_REVIEWERS', Array.from(teamSlugs).join(','))
+
+      - name: Cooldown guard
+        if: steps.optout.outputs.skip != 'true'
+        id: cd
+        uses: actions/github-script@v7
+        env:
+          ALL: ${{ steps.merge_co.outputs.ALL }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        with:
+          script: |
+            const teams = String(process.env.ALL)
+              .split(/\s+/)
+              .filter(Boolean)
+            if (!teams.length) {
+              core.setOutput('fresh', '')
+              return
+            }
+            const {owner, repo} = context.repo
+            const number = Number(process.env.PR_NUMBER)
+            const since = new Date(Date.now() - 24*60*60*1000).toISOString()
+
+            const {data: comments} = await github.rest.issues.listComments({owner, repo, issue_number: number, per_page: 100, since})
+            const recent = new Set()
+            for (const c of comments) {
+              if (c.user?.type !== 'Bot') continue
+              for (const t of teams) {
+                if (c.body?.includes(t)) recent.add(t)
+              }
+            }
+            const fresh = teams.filter(t => !recent.has(t))
+            core.setOutput('fresh', fresh.join(' '))
+
+      - name: Auto-assign
+        if: steps.optout.outputs.skip != 'true'
+        uses: actions/github-script@v7
+        env:
+          ALL: ${{ steps.merge_co.outputs.ALL }}
+          EXTRA: ${{ steps.merge_co.outputs.ASSIGNEES }}
+          PR_LOGIN: ${{ steps.pr.outputs.login }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        with:
+          script: |
+            const {owner, repo} = context.repo
+            const number = Number(process.env.PR_NUMBER)
+            const login = (process.env.PR_LOGIN || '').trim()
+            const mentions = String(process.env.ALL || '')
+              .split(/\s+/)
+              .filter(Boolean)
+            const extra = String(process.env.EXTRA || '')
+              .split(/\s+/)
+              .filter(Boolean)
+            const assignees = new Set()
+            if (login) assignees.add(login)
+            for (const mention of mentions) {
+              if (mention.startsWith('@') && !mention.includes('/')) {
+                assignees.add(mention.slice(1))
+              }
+            }
+            for (const candidate of extra) {
+              const value = candidate.replace(/^@/, '').trim()
+              if (value) assignees.add(value)
+            }
+            const finalAssignees = Array.from(assignees).filter(Boolean)
+            if (!finalAssignees.length) return
+            try {
+              await github.rest.issues.addAssignees({owner, repo, issue_number: number, assignees: finalAssignees})
+            } catch (error) {
+            }
+
+      - name: Add mention comment
+        if: steps.optout.outputs.skip != 'true' && steps.cd.outputs.fresh != ''
+        uses: actions/github-script@v7
+        env:
+          ALL: ${{ steps.cd.outputs.fresh }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        with:
+          script: |
+            const mentions = (process.env.ALL || '').trim()
+            if (!mentions) return
+            const marker = '<!-- auto-mention -->'
+            const isRFR = context.payload.action === 'ready_for_review'
+            const lines = [marker, `Routing to: ${mentions}`]
+            const reason = isRFR ? 'Reason: moved from draft → ready.' : ''
+            if (reason) {
+              lines.push('', reason)
+            } else {
+              lines.push('')
+            }
+            lines.push('(Automated based on changed paths/keywords.)')
+            const body = lines.join('\n')
+
+            const {owner, repo} = context.repo
+            const number = Number(process.env.PR_NUMBER)
+            const {data: comments} = await github.rest.issues.listComments({owner, repo, issue_number: number, per_page: 100})
+            const existing = comments.find(comment => comment.body && comment.body.includes(marker))
+            if (existing) {
+              await github.rest.issues.updateComment({owner, repo, comment_id: existing.id, body})
+            } else {
+              await github.rest.issues.createComment({owner, repo, issue_number: number, body})
+            }
+
+      - name: Request team reviewers
+        if: steps.optout.outputs.skip != 'true' && steps.merge_co.outputs.TEAM_REVIEWERS != ''
+        uses: actions/github-script@v7
+        env:
+          TEAM_REVIEWERS: ${{ steps.merge_co.outputs.TEAM_REVIEWERS }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+            core.setOutput('MENTIONS', mentionLine);
+            core.setOutput('TEAM_REVIEWERS', Array.from(teamSlugs).join(','));
+
+      - name: Add mention comment
+        if: ${{ steps.calc.outputs.MENTIONS != '' }}
+        uses: actions/github-script@v7
+        env:
+          MENTIONS: ${{ steps.calc.outputs.MENTIONS }}
+        with:
+          script: |
+            const mentions = (process.env.MENTIONS || '').trim();
+            if (!mentions) return;
+            const { owner, repo } = context.repo;
+            const number = context.payload.pull_request.number;
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
+              body: `Routing ${mentions} based on changed files.`
+            });
+
+      - name: Request team reviewers
+        if: ${{ steps.calc.outputs.MENTIONS != '' && steps.calc.outputs.TEAM_REVIEWERS != '' }}
+        uses: actions/github-script@v7
+        env:
+          TEAM_REVIEWERS: ${{ steps.calc.outputs.TEAM_REVIEWERS }}
+        with:
+          script: |
+            const teams = (process.env.TEAM_REVIEWERS || '')
+              .split(',')
+              .map(t => t.trim())
+              .filter(Boolean)
+            if (!teams.length) return
+            const { owner, repo } = context.repo
+            const number = Number(process.env.PR_NUMBER)
+              .filter(Boolean);
+            if (!teams.length) return;
+            const { owner, repo } = context.repo;
+            const number = context.payload.pull_request.number;
+            await github.rest.pulls.requestReviewers({
+              owner,
+              repo,
+              pull_number: number,
+              team_reviewers: teams
+            })
+  mention:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load mention routes
+        id: cfg
+        run: |
+          FILE=".github/mention-routes.yml"
+          if [ ! -f "$FILE" ]; then echo "cfg=" >> $GITHUB_OUTPUT; exit 0; fi
+      - name: Load config
+        id: cfg
+        run: |
+          FILE=".github/mention-routes.yml"
+          if [ ! -f "$FILE" ]; then
+            echo "cfg=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "cfg<<EOF" >> $GITHUB_OUTPUT
+          cat "$FILE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Get changed files (JSON)
+      - name: Get changed files
+        id: changed
+        uses: tj-actions/changed-files@v45
+        with:
+          json: "true"
+
+      - name: Install dependencies
+        run: python -m pip install --quiet pyyaml
+
+      - name: Compute mentions
+      - name: Install PyYAML
+        run: python3 -m pip install --quiet PyYAML
+
+      - name: Compute mentions from routes
+        id: calc
+        shell: bash
+        run: |
+          python - << 'PY'
+import json, os, fnmatch, yaml
+cfg_text = os.environ.get('CFG_TEXT','')
+if not cfg_text:
+    print("MENTIONS="); raise SystemExit(0)
+cfg = yaml.safe_load(cfg_text) or {}
+routes = cfg.get('routes', []) or []
+always = cfg.get('always', []) or []
+changed = json.loads(os.environ['CHANGED_JSON'])
+files = changed.get('all_changed_files', [])
+hits = set(always)
+for r in routes:
+  pats = r.get('patterns', []) or []
+  who = r.get('mention')
+  if who and any(any(fnmatch.fnmatch(f, p) for p in pats) for f in files):
+    hits.add(who)
+print("MENTIONS=" + " ".join(sorted(hits)))
+import json, os, sys, ast, fnmatch
+
+def parse_cfg(text: str):
+    data = {"routes": [], "always": []}
+    current = None
+    for raw in text.splitlines():
+        line = raw.split('#', 1)[0].rstrip()
+        if not line.strip():
+            continue
+        if line.startswith('routes:'):
+            current = None
+            continue
+        if line.startswith('always:'):
+            _, val = line.split(':', 1)
+            val = val.strip() or '[]'
+            try:
+                data['always'] = ast.literal_eval(val)
+            except Exception:
+                data['always'] = []
+            current = None
+            continue
+        if line.lstrip().startswith('- '):
+            line = line.strip()[2:]
+            entry = {}
+            if line:
+                key, val = line.split(':', 1)
+                entry[key.strip()] = ast.literal_eval(val.strip())
+            data['routes'].append(entry)
+            current = entry
+            continue
+        if current is not None:
+            key, val = line.strip().split(':', 1)
+            try:
+                current[key.strip()] = ast.literal_eval(val.strip())
+            except Exception:
+                current[key.strip()] = val.strip()
+    return data
+
+cfg_text = os.environ.get('CFG_TEXT', '')
+if not cfg_text:
+    print('MENTIONS=')
+    sys.exit(0)
+
+cfg = parse_cfg(cfg_text)
+routes = cfg.get('routes') or []
+always = cfg.get('always') or []
+changed = json.loads(os.environ['CHANGED_JSON'])
+files = set(changed.get('all_changed_files', []))
+
+hits = []
+for route in routes:
+    patterns = route.get('patterns') or []
+    mention = route.get('mention')
+    if not mention:
+        continue
+    if isinstance(patterns, str):
+        patterns = [patterns]
+    for path in files:
+        if any(fnmatch.fnmatch(path, pattern) for pattern in patterns):
+            hits.append(mention)
+            break
+
+mentions = sorted(set(always + hits))
+print('MENTIONS=' + ' '.join(mentions))
+PY
+        env:
+          CFG_TEXT: ${{ steps.cfg.outputs.cfg }}
+          CHANGED_JSON: ${{ steps.changed.outputs.all_changed_files }}
+
+      - name: Create or update a single comment
+          mentions=$(python - <<'PY'
+import json, os, fnmatch, yaml
+cfg_text = os.environ.get('CFG_TEXT', '')
+changed_text = os.environ.get('CHANGED_FILES', '[]')
+if not cfg_text:
+    raise SystemExit(0)
+
+cfg = yaml.safe_load(cfg_text) or {}
+routes = cfg.get('routes', []) or []
+always = cfg.get('always', []) or []
+files = json.loads(changed_text)
+
+hits = set(always)
+for route in routes:
+    pats = route.get('patterns', []) or []
+    who = route.get('mention')
+    if not who:
+        continue
+    if any(any(fnmatch.fnmatch(f, p) for p in pats) for f in files):
+        hits.add(who)
+
+print(" ".join(sorted(hits)))
+PY
+)
+          echo "MENTIONS=$mentions" >> $GITHUB_OUTPUT
+        env:
+          CFG_TEXT: ${{ steps.cfg.outputs.cfg }}
+          CHANGED_FILES: ${{ steps.changed.outputs.all_changed_files }}
+
+      - name: Comment with mentions
+        if: ${{ steps.calc.outputs.MENTIONS != '' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo
+            const number = context.payload.pull_request.number
+            const body = `Routing to: ${process.env.MENTIONS}\n\n(Automated based on changed paths.)`
+
+            // find existing bot comment
+            const {data: comments} = await github.rest.issues.listComments({owner, repo, issue_number: number, per_page: 100})
+            const mine = comments.find(c =>
+              c.user.type === "Bot" &&
+              c.user.login.endsWith("[bot]") &&
+              c.body?.includes("(Automated based on changed paths.)")
+            )
+
+            if (mine) {
+              await github.rest.issues.updateComment({owner, repo, comment_id: mine.id, body})
+            } else {
+              await github.rest.issues.createComment({owner, repo, issue_number: number, body})
+            }
+            const mentions = process.env.MENTIONS;
+            const body = `Routing to: ${mentions}\n\n(Automated based on changed paths.)`;
+            const body = `Routing to: ${process.env.MENTIONS}\n\n(Automated based on changed paths.)`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body
+            })
+        env:
+          MENTIONS: ${{ steps.calc.outputs.MENTIONS }}
+            });

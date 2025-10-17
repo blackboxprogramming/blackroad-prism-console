@@ -1,0 +1,15 @@
+name: KMS Rotation (Dry Run)
+on:
+  workflow_dispatch:
+jobs:
+  rotate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dry-run envelope re-encryption
+        run: |
+          echo "Would rotate ${KMS_KEY_ID} in ${KMS_REGION} (provider=${KMS_PROVIDER})"
+        env:
+          KMS_PROVIDER: ${{ vars.KMS_PROVIDER }}
+          KMS_KEY_ID: ${{ vars.KMS_KEY_ID }}
+          KMS_REGION: ${{ vars.KMS_REGION }}

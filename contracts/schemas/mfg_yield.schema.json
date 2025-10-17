@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["period", "fpy", "rty", "stations", "pareto"],
+  "properties": {
+    "period": {"type": "string"},
+    "fpy": {"type": "number"},
+    "rty": {"type": "number"},
+    "stations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["station", "total", "defects", "yield_pct"],
+        "properties": {
+          "station": {"type": "string"},
+          "total": {"type": "integer", "minimum": 0},
+          "defects": {"type": "integer", "minimum": 0},
+          "yield_pct": {"type": "number"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "pareto": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["station", "defects"],
+        "properties": {
+          "station": {"type": "string"},
+          "defects": {"type": "integer", "minimum": 0}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

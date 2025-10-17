@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Trust Viz</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+<input id="lens" placeholder="lens id" />
+<button id="reload">Reload</button>
+<button id="curv">Curvature</button>
+<svg id="viz" width="800" height="600"></svg>
+<script>
+// placeholder selection; in real deployment S.linkSel is populated after graph load
+const S = { linkSel: null };
+const svg = d3.select('#viz');
+S.linkSel = svg.selectAll('line');
+
+document.getElementById('curv').onclick = async ()=>{
+  const lid = document.getElementById('lens').value || '';
+  const r = await fetch('/api/trust/curvature'+(lid?`?lid=${encodeURIComponent(lid)}`:'')+'&top=500');
+  const arr = await r.json();
+  const key = (a,b)=> a+'→'+b;
+  const cmap = new Map(arr.map(e=>[key(e.u,e.v), e.kappa]));
+  if (!S.linkSel) return;
+  S.linkSel.attr('stroke', d=>{
+    const k = cmap.get(key(d.source.id||d.source, d.target.id||d.target));
+    if (k==null) return d.weight>=0? '#1db954' : '#e64545';
+    return k < 0 ? '#f97316' : '#22c55e';
+  }).attr('stroke-width', d=>{
+    const k = cmap.get(key(d.source.id||d.source, d.target.id||d.target));
+    return Math.max(1.5, 2 + (k!=null? Math.abs(k)*4 : Math.abs(d.weight)*2));
+  });
+};
+</script>
+</body>
+</html>

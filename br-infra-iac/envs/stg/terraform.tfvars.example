@@ -1,0 +1,9 @@
+region   = "us-west-2"
+vpc_cidr = "10.30.0.0/16"
+azs      = ["us-west-2a","us-west-2b"]
+ecr_repositories = ["br-api-gateway", "br-products-site"]
+db_allowed_cidr_blocks = ["10.30.0.0/16"]
+rds_instance_class = "db.t4g.small"
+rds_multi_az = false
+rds_backup_retention_days = 14
+tags = { app = "blackroad", owner = "ops", cost-center = "core" }

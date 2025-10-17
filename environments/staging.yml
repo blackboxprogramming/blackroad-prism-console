@@ -1,0 +1,85 @@
+name: staging
+slug: stg
+state: provisioning
+description: >-
+  Pre-production environment for QA. Static assets publish to stage.blackroad.io
+  while AWS infrastructure scaffolding mirrors production.
+contacts:
+  slack: "#eng"
+domains:
+  marketing: https://stage.blackroad.io
+infrastructure:
+  cloud: aws
+  region: us-west-2
+  terraform:
+    root: br-infra-iac/envs/stg
+    backend:
+      bucket: br-tfstate-<unique>
+      key: stg/terraform.tfstate
+      region: us-west-2
+      lock_table: br-terraform-lock
+    modules:
+      - modules/network
+      - modules/ecs-cluster
+      - modules/ecr
+      - modules/rds-postgres
+    outputs:
+      - vpc_id
+      - private_subnets
+      - ecs_cluster
+      - db_endpoint
+    repositories:
+      - br-api-gateway
+      - br-products-site
+automation:
+  workflows:
+    - name: Stage Proof Artifact
+      file: .github/workflows/pages-stage.yml
+      triggers:
+        - push (main, blackroad-stage/**)
+        - schedule (daily 06:05 UTC)
+        - workflow_dispatch
+      summary: >-
+        Generates a proof payload, bakes stage assets, and archives the build
+        without publishing DNS changes.
+      secrets:
+        - AWAKEN_SEED
+    - name: AWS ECS deploy (reusable)
+      file: .github/workflows/reusable-aws-ecs-deploy.yml
+      triggers:
+        - workflow_call
+      summary: >-
+        Registers a new task definition revision and forces an ECS deployment
+        for staging services when invoked by API or bridge pipelines.
+      secrets:
+        - AWS_STAGING_DEPLOY_ROLE_ARN
+        - AWS_STAGING_EXTERNAL_ID
+deployments:
+  - service: marketing-site
+    type: static-site
+    provider: github-pages
+    repo: blackboxprogramming/blackroad-prism-console
+    workflow: .github/workflows/pages-stage.yml
+    artifacts:
+      path: blackroad-stage
+    domain: https://stage.blackroad.io
+    health_check: https://stage.blackroad.io/health.json
+  - service: api-gateway
+    type: container-service
+    provider: aws-ecs-fargate
+    terraform_directory: br-infra-iac/envs/stg
+    state: planned
+    notes: >-
+      Network, ECS, and RDS resources are defined; service wiring will follow the
+      production module once ready.
+change_management:
+  approvals:
+    - .github/workflows/change-approve.yml
+  policy_gates:
+    - name: release-runbook
+      description: Run the infra release policy to coordinate verification and fast rollback while staging matures.
+      runbook: runbooks/examples/infra_release_policy.yaml
+observability:
+  health_checks:
+    - name: static-health
+      url: https://stage.blackroad.io/health.json

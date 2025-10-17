@@ -1,0 +1,10 @@
+name: AIOps Release (Canary → Promote)
+on:
+  workflow_dispatch:
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -s -X POST -H 'Content-Type: application/json' -d '{"modelId":"demo","version":"1.0.0","percent":'"${{ vars.AIOPS_CANARY_PERCENT || 10 }}"',"env":"prod"}' http://localhost:4000/api/aiops/deploy/canary || true
+      - run: curl -s -X POST -H 'Content-Type: application/json' -d '{"modelId":"demo","version":"1.0.0","env":"prod"}' http://localhost:4000/api/aiops/deploy/promote || true

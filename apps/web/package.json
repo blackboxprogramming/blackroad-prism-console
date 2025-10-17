@@ -1,0 +1,25 @@
+{
+  "name": "@lucidia/web",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Lucidia Auto-Box paste-to-preview experience.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@lucidia/core": "^0.0.1",
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "recharts": "^2.12.7"
+  },
+  "devDependencies": {
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.74",
+    "@types/react-dom": "18.2.22",
+    "typescript": "5.4.5"
+  }
+}

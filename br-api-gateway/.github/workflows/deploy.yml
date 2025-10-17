@@ -1,0 +1,66 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPO:   ${{ vars.ECR_REPO }}
+  CLUSTER:    ${{ vars.ECS_CLUSTER }}
+  SERVICE:    ${{ vars.ECS_SERVICE }}
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci && npm test -- --ci && npm run build
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push image
+        run: |
+          IMAGE="$ECR_REPO:${{ github.sha }}"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      - name: Get current task def
+        id: taskdef
+        run: |
+          FAMILY=$(aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" \
+            --query 'services[0].taskDefinition' --output text | awk -F'/' '{print $2}' | awk -F':' '{print $1}')
+          aws ecs describe-task-definition --task-definition "$FAMILY" --query 'taskDefinition' > taskdef.json
+
+      - name: Render new task def with new image
+        run: |
+          jq --arg IMAGE "$IMAGE" '.containerDefinitions[0].image=$IMAGE' taskdef.json > taskdef.new.json
+
+      - name: Register new task def
+        id: register
+        run: |
+          ARN=$(aws ecs register-task-definition --cli-input-json file://taskdef.new.json --query 'taskDefinition.taskDefinitionArn' --output text)
+          echo "TD=$ARN" >> $GITHUB_ENV
+
+      - name: Update service
+        run: |
+          aws ecs update-service --cluster "$CLUSTER" --service "$SERVICE" --task-definition "$TD" --force-new-deployment
+          aws ecs wait services-stable --cluster "$CLUSTER" --services "$SERVICE"

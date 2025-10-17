@@ -1,0 +1,15 @@
+[Unit]
+Description=Pi Cortex Ops Heartbeat Publisher
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/pi-cortex-stack
+ExecStart=/home/pi/agent-venv/bin/python /home/pi/pi-cortex-stack/pi/pi_ops_heartbeat.py
+Restart=on-failure
+EnvironmentFile=/home/pi/pi-cortex-stack/.env
+
+[Install]
+WantedBy=multi-user.target

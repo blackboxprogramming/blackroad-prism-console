@@ -1,0 +1,42 @@
+name: Quick Pulse PR Welcome
+
+on:
+  pull_request_target:
+    types:
+      - opened
+
+permissions:
+  pull-requests: write
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Drop Quick Pulse comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const table = `| Field | Value |\n| --- | --- |\n| Author | @${pr.user.login} |\n| Branch | ${pr.head.ref} |\n| Draft? | ${pr.draft ? 'Yes' : 'No'} |`;
+            const checklist = [
+              'python3 scripts/dry-run-csv.py prs-200.csv',
+              'bash scripts/make-branches.sh prs-200.csv',
+              'bash scripts/bulk-create-prs.sh prs-200.csv'
+            ];
+            const body = [
+              '## Quick Pulse',
+              '',
+              table,
+              '',
+              '**Automation wave checklist**',
+              ...checklist.map((cmd) => `- [ ] $ ${cmd}`),
+              '',
+              'Tip: set DRY_RUN_LIMIT or pass --limit to preview additional CSV entries.',
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body,
+            });

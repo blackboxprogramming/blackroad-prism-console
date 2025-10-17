@@ -1,0 +1,10 @@
+services:
+  - name: api
+    owner: platform@blackroad.io
+    endpoints: [/api/health, /api/public/ping]
+    slo: 99.9
+    runbooks: [docs/OBSERVABILITY.md, docs/SLO.md]
+  - name: webhooks
+    owner: platform@blackroad.io
+    endpoints: [/api/partner/enqueue]
+    slo: 99.9

@@ -1,0 +1,27 @@
+version: 0.1
+kind: action_catalog
+actions:
+  - id: telemetry.snapshot
+    summary: Collect a point-in-time snapshot of system metrics.
+    inputs: {}
+    plugin: telemetry
+  - id: flash.image
+    summary: Flash a system image onto attached storage.
+    inputs:
+      image_path:
+        type: path
+        required: true
+      target_device:
+        type: string
+        required: true
+    plugin: flasher
+  - id: model.run
+    summary: Execute a local inference job on the configured runtime backend.
+    inputs:
+      prompt:
+        type: string
+        required: true
+      parameters:
+        type: object
+        required: false
+    plugin: model_runtime

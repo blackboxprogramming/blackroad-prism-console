@@ -1,4 +1,117 @@
 name: production
-url: https://blackroad.io
-reviewers:
-  - blackboxprogramming
+slug: prod
+state: active
+description: >-
+  Primary public environment exposed to customers via blackroad.io. Static
+  assets publish through GitHub Pages while the API gateway deploys via the
+  `BlackRoad • Deploy` workflow.
+contacts:
+  reviewers:
+    - blackboxprogramming
+  slack: "#eng"
+domains:
+  marketing: https://blackroad.io
+  canonical: https://www.blackroad.io
+  api: https://api.blackroad.io
+  status: https://status.blackroad.io
+infrastructure:
+  cloud: aws
+  region: us-west-2
+  terraform:
+    root: br-infra-iac/envs/prod
+    backend:
+      bucket: br-tfstate-<unique>
+      key: prod/terraform.tfstate
+      region: us-west-2
+      lock_table: br-terraform-lock
+    modules:
+      - modules/network
+      - modules/ecs-cluster
+      - modules/ecr
+      - modules/rds-postgres
+    outputs:
+      - ecs_cluster
+      - private_subnets
+      - db_endpoint
+    repositories:
+      - br-api-gateway
+      - br-products-site
+automation:
+  workflows:
+    - name: BlackRoad • Deploy
+      file: .github/workflows/blackroad-deploy.yml
+      triggers:
+        - push (main)
+        - workflow_dispatch
+      summary: >-
+        Builds the SPA, packages the API, triggers the deploy webhook, verifies
+        health, and posts Slack status updates.
+      secrets:
+        - BR_DEPLOY_SECRET
+        - BR_DEPLOY_URL
+        - CF_ZONE_ID
+        - CF_API_TOKEN
+        - SLACK_WEBHOOK_URL
+    - name: Fly.io deploy (reusable)
+      file: .github/workflows/reusable-fly-deploy.yml
+      triggers:
+        - workflow_call
+      summary: >-
+        Provides a shared Fly.io deploy harness so edge and bridge services can
+        push fresh images or configs using the same release guardrails.
+      secrets:
+        - FLY_API_TOKEN
+    - name: AWS ECS deploy (reusable)
+      file: .github/workflows/reusable-aws-ecs-deploy.yml
+      triggers:
+        - workflow_call
+      summary: >-
+        Registers a new task definition revision and forces an ECS deployment
+        for production services when invoked by release workflows.
+      secrets:
+        - AWS_PROD_DEPLOY_ROLE_ARN
+        - AWS_PROD_EXTERNAL_ID
+deployments:
+  - service: marketing-site
+    type: static-site
+    provider: github-pages
+    repo: blackboxprogramming/blackroad-prism-console
+    workflow: .github/workflows/blackroad-deploy.yml
+    artifacts:
+      path: sites/blackroad
+    domain: https://blackroad.io
+    health_check: https://blackroad.io/healthz
+  - service: api-gateway
+    type: container-service
+    provider: aws-ecs-fargate
+    terraform_directory: br-infra-iac/envs/prod
+    module: modules/ecs-service-alb
+    state: planned
+    notes: >-
+      Production wiring follows the dev module that provisions api.blackroad.io
+      behind an ALB-backed Fargate service.
+    health_check: https://api.blackroad.io/health
+    workflow: .github/workflows/blackroad-deploy.yml
+change_management:
+  approvals:
+    - .github/workflows/change-approve.yml
+  policy_gates:
+    - name: cab-approval
+      description: Change Advisory Board approval must clear via the change-approve workflow before promoting builds.
+      workflow: .github/workflows/change-approve.yml
+    - name: release-runbook
+      description: Execute the infra release runbook so rollbacks and notifications stay coordinated across teams.
+      runbook: runbooks/examples/infra_release_policy.yaml
+  runbooks:
+    - README-DEPLOY.md
+    - README-OPS.md
+    - runbooks/examples/infra_release_policy.yaml
+    - runbooks/examples/infra_release_rollback.yaml
+observability:
+  health_checks:
+    - name: frontend
+      url: https://blackroad.io/healthz
+    - name: api
+      url: https://api.blackroad.io/health
+  scripts:
+    - scripts/blackroad-autoheal.sh

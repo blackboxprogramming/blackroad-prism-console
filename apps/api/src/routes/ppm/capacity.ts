@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import fs from 'fs';
+const r = Router(); const C='data/ppm/capacity.jsonl';
+const append=(row:any)=>{ fs.mkdirSync('data/ppm',{recursive:true}); fs.appendFileSync(C, JSON.stringify(row)+'\n'); };
+const lines=()=> fs.existsSync(C)? fs.readFileSync(C,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[];
+r.post('/capacity/set',(req,res)=>{ append({ ts:Date.now(), ...req.body }); res.json({ ok:true }); });
+r.get('/capacity/summary',(req,res)=>{ const p=String(req.query.period||''); const rows=lines().filter((x:any)=>x.period===p); const teams:Record<string,number>={}, alloc:Record<string,number>={};
+  rows.forEach(rw=>{ (rw.teams||[]).forEach((t:any)=>teams[t.team]=(teams[t.team]||0)+Number(t.capacity_pts||0)); (rw.allocations||[]).forEach((a:any)=>alloc[a.team]=(alloc[a.team]||0)+Number(a.pts||0)); });
+  const summary=Object.keys(teams).map(t=>({team:t,capacity:teams[t],allocated:alloc[t]||0,remaining:(teams[t]-(alloc[t]||0))})); res.json({ period:p, summary }); });
+export default r;

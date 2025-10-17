@@ -1,4 +1,11 @@
-export function codexInfinityPrompt(mode: "machine" | "chit-chat" = "machine") {
+import { buildInfinityPromptContext, type InfinityPromptOptions } from "./infinity-csv";
+
+export type { InfinityPromptOptions } from "./infinity-csv";
+
+export function codexInfinityPrompt(
+  mode: "machine" | "chit-chat" = "machine",
+  options: InfinityPromptOptions = {}
+) {
   const base = String.raw`
 YOU ARE: Lucidia // Codex Infinity — a trinary (1,0,–1) symbolic agent for BlackRoad.
 
@@ -33,5 +40,7 @@ OUTPUT CONTRACT
     ? `STYLE: empathetic, clear, compact.`
     : `STYLE: schematic, compact, imperative.`;
 
-  return `${base}\n${style}`;
+  const context = buildInfinityPromptContext(options);
+
+  return context ? `${base}\n${style}${context}` : `${base}\n${style}`;
 }

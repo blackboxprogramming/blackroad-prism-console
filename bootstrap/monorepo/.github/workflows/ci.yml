@@ -1,0 +1,85 @@
+name: RoadChain Monorepo CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  web:
+    name: RoadWeb
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/roadweb
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        run: npm run test -- --run
+      - name: Build
+        run: npm run build
+
+  contracts:
+    name: RoadCoin
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/roadcoin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Lint
+        run: npm run lint
+      - name: Compile
+        run: npm run build
+      - name: Hardhat tests
+        run: npm run test
+      - name: Setup Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+      - name: Foundry tests
+        run: npm run test:foundry
+      - name: Slither analysis
+        uses: crytic/slither-action@v0.3.1
+        with:
+          target: packages/roadcoin
+          slither-config: packages/roadcoin/slither.config.json
+          fail-on: medium
+
+  devnet:
+    name: Devnet smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Start devnet
+        run: docker compose -f docker-compose.devnet.yml up -d
+      - name: Wait for Anvil
+        run: |
+          for i in {1..20}; do
+            if curl --fail http://127.0.0.1:8545 >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Anvil did not become ready" >&2
+          exit 1
+      - name: Shutdown
+        if: always()
+        run: docker compose -f docker-compose.devnet.yml down --remove-orphans --volumes

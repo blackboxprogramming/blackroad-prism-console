@@ -1,0 +1,34 @@
+[
+  {
+    "name": "boot-sequence",
+    "title": "Boot Sequence Kernel",
+    "state": "running",
+    "path": "kernel/boot_sequence",
+    "summary": "Core initialization logic for the idea operating system.",
+    "run": "echo 'Bootstrapping Lucidia kernel'"
+  },
+  {
+    "name": "dreamer",
+    "title": "Dreamer Simulation Suite",
+    "state": "paused",
+    "path": "apps/dreamer",
+    "summary": "Generative dreaming routines awaiting the next iteration cycle.",
+    "run": "echo 'Resuming Dreamer simulations'"
+  },
+  {
+    "name": "finance-2008",
+    "title": "2008 Financial Stress Test Replay",
+    "state": "running",
+    "path": "sandbox/finance/2008_analysis",
+    "summary": "Stress scenarios replayed safely in the sandbox environment.",
+    "run": "echo 'Launching 2008 crisis replay suite'"
+  },
+  {
+    "name": "atlas",
+    "title": "Atlas Memory Vault",
+    "state": "beautiful",
+    "path": "archive/atlas",
+    "summary": "Retired experiments preserved for inspiration and resurrection.",
+    "run": "echo 'Cataloging Atlas archives'"
+  }
+]

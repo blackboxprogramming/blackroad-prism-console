@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+FILE="${1:?usage: psbt-to-qr <psbt_file> [out.png]}"
+OUT="${2:-${1}.png}"
+# base64 PSBTs are usually linesafe; ensure single line
+B64="$(tr -d '\n\r' < "$FILE")"
+# chunk if needed: very large PSBTs may exceed QR size; we auto-split to segments
+# simple heuristic: 2500 chars per QR (v40-Q)
+SEG=2500
+len=${#B64}
+if (( len <= SEG )); then
+  qrencode -o "$OUT" "$B64"
+  echo "QR written: $OUT"
+else
+  parts=$(( (len + SEG - 1) / SEG ))
+  base="${OUT%.png}"
+  for i in $(seq 1 $parts); do
+    s=$(( (i-1)*SEG ))
+    chunk="${B64:$s:SEG}"
+    qrencode -o "${base}.part${i}_of_${parts}.png" "PSBT_PART:${i}/${parts}:${chunk}"
+    echo "QR part ${i}/${parts}: ${base}.part${i}_of_${parts}.png"
+  done
+  echo "NOTE: multi-part; scan in order and reassemble with qr-to-psbt."
+fi

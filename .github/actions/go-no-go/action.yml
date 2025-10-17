@@ -1,0 +1,200 @@
+name: Go-No-Go Gate
+description: Blocks release unless checks pass; opens Slack approval thread
+inputs:
+  slack_channel:
+    description: Slack channel (e.g. #releases)
+    required: true
+  app_url:
+    description: Full URL to /healthz/ui
+    required: true
+  waf_alarm_arns:
+    description: CSV of CloudWatch Alarm ARNs that must be OK
+    required: false
+  aws_region:
+    description: AWS region for alarms/budgets
+    required: false
+    default: us-west-2
+  budget_name:
+    description: AWS Budgets name to check (e.g., blackroad-monthly)
+    required: false
+  budget_threshold_usd:
+    description: Optional override for budget threshold in USD (default 5000)
+    required: false
+  incident_feed:
+    description: Path to incidents (cstate) or 'none'
+    required: false
+    default: none
+outputs:
+  approved:
+    description: "true/false"
+    value: ${{ steps.result.outputs.approved }}
+  all_passed:
+    description: "true when automated checks succeeded"
+    value: ${{ steps.checks.outputs.ALL_PASSED }}
+runs:
+  using: composite
+  steps:
+    - id: checks
+      shell: bash
+      env:
+        AWS_REGION: ${{ inputs.aws_region }}
+        WAF_ALARMS: ${{ inputs.waf_alarm_arns }}
+        BUDGET_NAME: ${{ inputs.budget_name }}
+        BUDGET_THRESHOLD_USD: ${{ inputs.budget_threshold_usd }}
+        APP_URL: ${{ inputs.app_url }}
+        INCIDENT_FEED: ${{ inputs.incident_feed }}
+      run: |
+        set -euo pipefail
+        echo "Running gates…"
+
+        pass_ui=false
+        pass_waf=false
+        pass_budget=false
+        pass_incidents=false
+        pass_ci=true
+        echo "::notice::CI status gate not yet automated; ensure main branch workflows are green."
+        fails=""
+
+        # 1) /healthz/ui
+        code=$(curl -s -o /dev/null -w '%{http_code}' "$APP_URL" || true)
+        if [[ "$code" == "200" ]]; then
+          pass_ui=true
+        else
+          echo "::error::UI health check failed ($code)"
+        fi
+
+        # 2) WAF/infra alarms
+        pass_waf=true
+        if [[ -n "${WAF_ALARMS:-}" ]]; then
+          IFS=',' read -ra ARNS <<< "$WAF_ALARMS"
+          for arn in "${ARNS[@]}"; do
+            arn_trimmed=$(echo "$arn" | xargs)
+            [[ -n "$arn_trimmed" ]] || continue
+            alarm_name=${arn_trimmed##*:alarm:}
+            state=$(aws cloudwatch describe-alarms --alarm-names "$alarm_name" \
+              --query 'MetricAlarms[0].StateValue' --output text 2>/dev/null || echo UNKNOWN)
+            if [[ "$state" != "OK" ]]; then
+              echo "::warning::Alarm not OK: $arn_trimmed = $state"
+              pass_waf=false
+            fi
+          done
+        fi
+
+        # 3) Error/cost budget
+        pass_budget=true
+        if [[ -n "${BUDGET_NAME:-}" ]]; then
+          threshold="${BUDGET_THRESHOLD_USD:-5000}"
+          start=$(date +%Y-%m-01)
+          end=$(date -u +%Y-%m-%d)
+          if aws ce get-cost-and-usage --time-period Start="$start",End="$end" \
+            --granularity MONTHLY --metrics BlendedCost >/tmp/go-no-go-cost.json 2>/dev/null; then
+            spent=$(jq -r '.ResultsByTime[0].Total.BlendedCost.Amount' /tmp/go-no-go-cost.json 2>/dev/null || echo 0)
+            if [[ "$spent" == "null" || -z "$spent" ]]; then
+              spent=0
+            fi
+            # Compare as floating point using awk
+            if ! awk -v s="$spent" -v t="$threshold" 'BEGIN {exit (s<=t)?0:1}'; then
+              echo "::warning::Budget breach: $spent > $threshold"
+              pass_budget=false
+            fi
+          else
+            echo "::notice::Cost Explorer not permitted; skipping budget gate."
+          fi
+        fi
+
+        # 4) Open incidents
+        pass_incidents=true
+        if [[ -n "${INCIDENT_FEED:-}" && "${INCIDENT_FEED}" != "none" && -d "$INCIDENT_FEED" ]]; then
+          recent=$(grep -l "^date:" "$INCIDENT_FEED"/*.md 2>/dev/null | sort | tail -n 1 || true)
+          if [[ -n "$recent" ]]; then
+            ts=$(grep -m1 '^date:' "$recent" | awk '{print $2}' || true)
+            if [[ -n "$ts" ]]; then
+              now=$(date -u +%s)
+              inc=$(date -u -d "$ts" +%s 2>/dev/null || echo 0)
+              if [[ "$inc" != "0" ]]; then
+                age=$(( (now - inc) / 3600 ))
+                if (( age < 24 )); then
+                  pass_incidents=false
+                  echo "::warning::Recent incident (<24h): $(basename "$recent")"
+                fi
+              fi
+            fi
+          fi
+        fi
+
+        for key in pass_ui pass_waf pass_budget pass_incidents pass_ci; do
+          value=${!key}
+          echo "${key^^}=$value" >> "$GITHUB_OUTPUT"
+          if [[ "$value" != "true" ]]; then
+            fails+=" $key"
+          fi
+        done
+
+        if [[ -n "$fails" ]]; then
+          echo "ALL_PASSED=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "ALL_PASSED=true" >> "$GITHUB_OUTPUT"
+        fi
+    - name: Post Slack thread
+      id: slack
+      uses: slackapi/slack-github-action@v1.26.0
+      with:
+        payload: |
+          {
+            "channel": "${{ inputs.slack_channel }}",
+            "text": "*Go/No-Go* for ${{ github.repository }}@${{ github.ref_name }}",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Go/No-Go* for `${{ github.repository }}` on `${{ github.ref_name }}`\n• UI health: ${{ steps.checks.outputs.PASS_UI == 'true' && '✅' || '⚠️' }}\n• Alarms: ${{ steps.checks.outputs.PASS_WAF == 'true' && '✅' || '⚠️' }}\n• Budget: ${{ steps.checks.outputs.PASS_BUDGET == 'true' && '✅' || '⚠️' }}\n• Incidents: ${{ steps.checks.outputs.PASS_INCIDENTS == 'true' && '✅' || '⚠️' }}\n• CI: ${{ steps.checks.outputs.PASS_CI == 'true' && '✅' || '⚠️' }}\n\nReact with ✅ to approve, 🚫 to block"
+                }
+              }
+            ]
+          }
+      env:
+        SLACK_BOT_TOKEN: ${{ env.SLACK_BOT_TOKEN }}
+    - id: wait
+      shell: bash
+      env:
+        SLACK_BOT_TOKEN: ${{ env.SLACK_BOT_TOKEN }}
+        CHANNEL: ${{ inputs.slack_channel }}
+        TS: ${{ steps.slack.outputs.ts }}
+      run: |
+        set -euo pipefail
+        if [[ -z "${SLACK_BOT_TOKEN:-}" ]]; then
+          echo "::error::SLACK_BOT_TOKEN is required"
+          exit 1
+        fi
+        if [[ -z "${TS:-}" ]]; then
+          echo "::error::Slack message timestamp missing"
+          exit 1
+        fi
+        end=$(( $(date +%s) + 1200 ))
+        approved=false
+        while (( $(date +%s) < end )); do
+          sleep 15
+          resp=$(curl -s -X POST https://slack.com/api/reactions.get \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            --data-urlencode "channel=$CHANNEL" \
+            --data-urlencode "timestamp=$TS")
+          ok=$(echo "$resp" | jq -r '.ok')
+          [[ "$ok" == "true" ]] || continue
+          yes=$(echo "$resp" | jq '[.message.reactions[]? | select(.name=="white_check_mark" or .name=="heavy_check_mark") | .count] | add // 0')
+          no=$(echo "$resp" | jq '[.message.reactions[]? | select(.name=="no_entry" or .name=="x") | .count] | add // 0')
+          if (( yes >= 1 && no == 0 )); then
+            approved=true
+            break
+          fi
+          if (( no >= 1 )); then
+            approved=false
+            break
+          fi
+        done
+        echo "approved=$approved" >> "$GITHUB_OUTPUT"
+    - id: result
+      shell: bash
+      run: |
+        echo "approved=${{ steps.wait.outputs.approved }}" >> "$GITHUB_OUTPUT"

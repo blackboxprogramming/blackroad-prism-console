@@ -1,0 +1,149 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/blackroad/autopal
+  tag: ""
+  repository: ghcr.io/example/autopal-fastapi
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 8080
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: autopal.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: null
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+config:
+  enabled: true
+  path: /app/config/autopal.config.json
+  mountPath: /app/config
+
+appConfig:
+  global_enabled: true
+  dual_control_timeout_seconds: 900
+  endpoints: {}
+
+redis:
+  url: ""
+  secret:
+    name: ""
+    key: REDIS_URL
+
+secrets:
+  breakGlass:
+    secretName: ""
+    key: AUTOPAL_BREAK_GLASS_SECRET
+    value: ""
+
+env:
+  extra: []
+
+livenessProbe:
+  enabled: true
+  path: /health/live
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  enabled: true
+  path: /health/ready
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+serviceMonitor:
+  enabled: false
+  additionalLabels: {}
+  interval: 30s
+  scrapeTimeout: 10s
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+env: {}
+
+envFrom: []
+
+extraVolumeMounts: []
+
+extraVolumes: []
+
+config:
+  global_enabled: true
+  dual_control_timeout_seconds: 900
+  endpoints:
+    "/secrets/materialize":
+      required_audience:
+        - "gha:org/repo@refs/heads/main"
+      step_up_required: true
+      dual_control_required: true
+      rate_limit:
+        limit: 5
+        window_seconds: 60
+
+breakGlassSecret:
+  enabled: false
+  create: true
+  name: ""
+  key: secret
+  value: ""
+  existingSecretName: ""
+
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: "7.2"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 6379
+  resources: {}
+  persistence:
+    enabled: false
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
+    storageClass: ""

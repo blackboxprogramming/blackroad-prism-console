@@ -1,6 +1,7 @@
 # Python 3.9 environment for Lucidia quantum engine
 # PyTorch build should match system CUDA; use CPU if CUDA unavailable
 torch==2.8.0
+# TorchQuantum vendored from commit e1f3a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2
 # TorchQuantum pinned to a commit for reproducibility
 # noqa: E501
--e git+https://github.com/mit-han-lab/torchquantum@e1f3a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2#egg=torchquantum
+-e ./src/torchquantum

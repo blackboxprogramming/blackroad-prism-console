@@ -1,0 +1,43 @@
+name: "feat: onboarding shell"
+description: "Guide new creators through the Cadillac Loop onboarding shell."
+title: "feat: onboarding shell"
+labels:
+  - "type/feature"
+  - "prio/normal"
+assignees:
+  - "Lucidia"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Overview
+        Spin up the onboarding scaffold for Cadillac Loop creators. Use the copy in [`docs/prism-onboarding-ux.md`](../../docs/prism-onboarding-ux.md) for the welcome, checklist, and dashboard stub screens.
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Problem statement, solution outline, and any supporting notes.
+      value: |
+        **Problem**
+        New creators need a guided first-run: welcome screen → checklist → dashboard stub.
+
+        **Solution**
+        Add pages under `apps/web/app/prism/(onboarding)` with progress tracking and analytics events (`PRISM Checklist Completed`).
+
+        **Notes**
+        • Use doc copy from `prism-onboarding-ux.md`.
+        • Assign @Lucidia for UX review.
+      render: markdown
+  - type: checkboxes
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      options:
+        - label: "Welcome, checklist, and dashboard routes are reachable under `/prism/(onboarding)`"
+        - label: "Checklist progress persists between steps"
+        - label: "`PRISM Checklist Completed` analytics event fires"
+  - type: textarea
+    id: updates
+    attributes:
+      label: Status Updates
+      description: Provide implementation notes, blockers, or launch checklist progress.

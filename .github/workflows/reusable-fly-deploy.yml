@@ -1,0 +1,126 @@
+name: Reusable Fly Deploy
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        description: 'Fly.io application name'
+        required: true
+        type: string
+      image:
+        description: 'Optional image reference to deploy (skips local build when provided)'
+        required: false
+        type: string
+      config:
+        description: 'fly.toml path to use when building from the repository'
+        required: false
+        type: string
+        default: fly.toml
+      secrets:
+        description: 'Optional newline-separated KEY=VALUE secrets to stage before deploy'
+        required: false
+        type: string
+      strategy:
+        description: 'Deployment strategy passed to flyctl deploy'
+        required: false
+        type: string
+        default: rolling
+      release-command:
+        description: 'Optional release command executed after the deploy'
+        required: false
+        type: string
+      environment:
+        description: 'Environment name to associate with the deployment run'
+        required: false
+        type: string
+      detach:
+        description: 'Run deploy in detached mode so the workflow can continue once rollout starts'
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      fly-api-token:
+        required: true
+        description: 'Personal access token or deploy token for the Fly.io organization'
+    outputs:
+      release-version:
+        description: 'Latest release version reported by Fly.io after the deploy'
+        value: ${{ jobs.deploy.outputs.release-version }}
+      app:
+        description: 'Fly.io application name that was deployed'
+        value: ${{ jobs.deploy.outputs.app }}
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to Fly.io
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment != '' && inputs.environment || format('fly-{0}', inputs.app) }}
+    env:
+      FLY_API_TOKEN: ${{ secrets.fly-api-token }}
+    outputs:
+      release-version: ${{ steps.capture-release.outputs.release || '' }}
+      app: ${{ inputs.app }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        if: ${{ inputs.image == '' }}
+
+      - name: Set up flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@v1
+
+      - name: Stage secrets
+        if: ${{ inputs.secrets != '' }}
+        env:
+          APP: ${{ inputs.app }}
+          RAW_SECRETS: ${{ inputs.secrets }}
+        run: |
+          set -euo pipefail
+          mapfile -t secrets <<<"${RAW_SECRETS}"
+          args=()
+          for entry in "${secrets[@]}"; do
+            entry="${entry%%$'\r'}"
+            if [ -n "$entry" ]; then
+              args+=("$entry")
+            fi
+          done
+          if [ "${#args[@]}" -gt 0 ]; then
+            flyctl secrets set --app "$APP" --stage "${args[@]}"
+          fi
+
+      - name: Deploy application
+        id: deploy
+        env:
+          APP: ${{ inputs.app }}
+          IMAGE: ${{ inputs.image }}
+          CONFIG: ${{ inputs.config }}
+          STRATEGY: ${{ inputs.strategy }}
+          RELEASE_COMMAND: ${{ inputs['release-command'] }}
+          DETACH: ${{ inputs.detach }}
+        run: |
+          set -euo pipefail
+          cmd=(flyctl deploy --app "$APP" --strategy "$STRATEGY")
+          if [ -n "$IMAGE" ]; then
+            cmd+=(--image "$IMAGE")
+          else
+            cmd+=(--config "$CONFIG")
+          fi
+          if [ -n "$RELEASE_COMMAND" ]; then
+            cmd+=(--release-command "$RELEASE_COMMAND")
+          fi
+          if [ "$DETACH" = "true" ]; then
+            cmd+=(--detach)
+          fi
+          "${cmd[@]}"
+
+      - name: Capture latest release
+        id: capture-release
+        env:
+          APP: ${{ inputs.app }}
+        run: |
+          set -euo pipefail
+          release=$(flyctl releases list --app "$APP" --json | jq -r '.[0].Version' 2>/dev/null || true)
+          echo "release=${release}" >> "$GITHUB_OUTPUT"

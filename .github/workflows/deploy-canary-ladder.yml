@@ -1,0 +1,160 @@
+name: deploy-canary-ladder
+on:
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: "Percents to roll through"
+        default: "1,50,100"
+      soak_seconds:
+        description: "Soak per step (seconds)"
+        default: "300"
+permissions:
+  id-token: write
+  contents: read
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPO:   ${{ vars.ECR_REPO }}
+  CLUSTER:    ${{ vars.ECS_CLUSTER }}
+  SERVICE:    ${{ vars.ECS_SERVICE }}
+  TG_BLUE:    ${{ vars.TG_BLUE_ARN }}
+  TG_GREEN:   ${{ vars.TG_GREEN_ARN }}
+  LISTENER_ARN: ${{ vars.HTTPS_LISTENER_ARN }}
+  APP_URL:    ${{ vars.APP_URL }}
+  ALB_METRIC_LB: ${{ vars.ALB_ARN_SUFFIX }}
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci && npm test -- --ci && npm run build
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: aws-actions/amazon-ecr-login@v2
+      - name: Build & push
+        id: img
+        run: |
+          IMAGE="$ECR_REPO:${{ github.sha }}"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+  ladder:
+    needs: build-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Register task def
+        id: td
+        run: |
+          FAMILY=$(aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" \
+            --query 'services[0].taskDefinition' --output text | awk -F'/' '{print $2}' | cut -d: -f1)
+          aws ecs describe-task-definition --task-definition "$FAMILY" --query 'taskDefinition' > td.json
+          jq --arg IMG "${{ needs.build-push.outputs.image }}" '.containerDefinitions[0].image=$IMG' td.json > td.new.json
+          NEW_TD=$(aws ecs register-task-definition --cli-input-json file://td.new.json --query 'taskDefinition.taskDefinitionArn' --output text)
+          echo "new_td=$NEW_TD" >> $GITHUB_OUTPUT
+          echo "family=$FAMILY" >> $GITHUB_OUTPUT
+
+      - name: Update service to new task def
+        run: aws ecs update-service --cluster "$CLUSTER" --service "$SERVICE" --task-definition "${{ steps.td.outputs.new_td }}"
+
+      - name: Ladder roll
+        id: ladder
+        env:
+          STEPS: ${{ github.event.inputs.steps || '1,50,100' }}
+          SOAK:  ${{ github.event.inputs.soak_seconds || '300' }}
+        run: |
+          set -euo pipefail
+          IFS=, read -ra PCTS <<< "$STEPS"
+          for P in "${PCTS[@]}"; do
+            echo "==> Shifting traffic: $P% GREEN"
+            aws elbv2 modify-listener --listener-arn "$LISTENER_ARN" --default-actions "Type=forward,ForwardConfig={
+              TargetGroups=[{TargetGroupArn=\"$TG_BLUE\",Weight=$((100 - P))},{TargetGroupArn=\"$TG_GREEN\",Weight=$P}],
+              TargetGroupStickinessConfig={Enabled=false}}"
+
+            echo "==> Soak $SOAKs @ $APP_URL"
+            end=$(( $(date +%s) + SOAK ))
+            while (( $(date +%s) < end )); do
+              code=$(curl -s -o /dev/null -w '%{http_code}' "$APP_URL" || true)
+              [[ "$code" == "200" ]] || { echo "Health failed ($code)"; exit 1; }
+              sleep 5
+            done
+
+            echo "==> Verify ALB 5xx + p95 vs prev hour"
+            NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            AGO15=$(date -u -d '15 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
+            AGO75=$(date -u -d '75 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
+            AGO15L=$(date -u -d '15 minutes ago' +%s)
+
+            fivexx_now=$(aws cloudwatch get-metric-statistics --namespace AWS/ApplicationELB \
+              --metric-name HTTPCode_ELB_5XX_Count --dimensions Name=LoadBalancer,Value=$ALB_METRIC_LB \
+              --start-time $AGO15 --end-time $NOW --period 300 --statistics Sum \
+              --query 'Datapoints[].Sum' --output text | awk '{s+=$1} END{print s+0}')
+
+            p95_now=$(aws cloudwatch get-metric-statistics --namespace AWS/ApplicationELB \
+              --metric-name TargetResponseTime --dimensions Name=LoadBalancer,Value=$ALB_METRIC_LB \
+              --start-time $AGO15 --end-time $NOW --period 300 --statistics p95 \
+              --query 'Datapoints[].p95' --output text | sort -n | tail -1)
+
+            fivexx_base=$(aws cloudwatch get-metric-statistics --namespace AWS/ApplicationELB \
+              --metric-name HTTPCode_ELB_5XX_Count --dimensions Name=LoadBalancer,Value=$ALB_METRIC_LB \
+              --start-time $AGO75 --end-time $AGO15 --period 300 --statistics Sum \
+              --query 'Datapoints[].Sum' --output text | awk '{s+=$1} END{print s+0}')
+
+            p95_base=$(aws cloudwatch get-metric-statistics --namespace AWS/ApplicationELB \
+              --metric-name TargetResponseTime --dimensions Name=LoadBalancer,Value=$ALB_METRIC_LB \
+              --start-time $AGO75 --end-time $AGO15 --period 300 --statistics p95 \
+              --query 'Datapoints[].p95' --output text | sort -n | tail -1)
+
+            fivexx_allowed=$(awk -v b="${fivexx_base:-0}" 'BEGIN{print (b*1.5)+5}')
+            p95_allowed=$(awk -v b="${p95_base:-0.5}" 'BEGIN{print (b*1.25)+0.1}')
+
+            echo "5xx now=$fivexx_now base=$fivexx_base allowed=$fivexx_allowed"
+            echo "p95  now=$p95_now  base=$p95_base  allowed=$p95_allowed"
+
+            awk -v n="$fivexx_now" -v a="$fivexx_allowed" 'BEGIN{exit !(n<=a)}' || exit 1
+            awk -v n="$p95_now"    -v a="$p95_allowed"    'BEGIN{exit !(n<=a)}' || exit 1
+          done
+
+      - name: k6 lightload (ladder)
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: k6/lightload.js
+        env:
+          TARGET_URL: ${{ env.APP_URL }}
+          API_URL:    ${{ vars.API_URL }}
+          API_KEY:    ${{ secrets.PUBLIC_API_KEY }}
+
+      - name: Promote to 100% (ensure final)
+        run: |
+          aws elbv2 modify-listener --listener-arn "$LISTENER_ARN" --default-actions "Type=forward,ForwardConfig={
+            TargetGroups=[{TargetGroupArn=\"$TG_BLUE\",Weight=0},{TargetGroupArn=\"$TG_GREEN\",Weight=100}],
+            TargetGroupStickinessConfig={Enabled=false}}"
+
+      - name: Success
+        run: echo "Canary ladder complete ✅"
+
+  rollback-on-failure:
+    needs: ladder
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Roll back
+        run: |
+          aws elbv2 modify-listener --listener-arn "$LISTENER_ARN" --default-actions "Type=forward,ForwardConfig={
+            TargetGroups=[{TargetGroupArn=\"$TG_BLUE\",Weight=100},{TargetGroupArn=\"$TG_GREEN\",Weight=0}],
+            TargetGroupStickinessConfig={Enabled=false}}"
+          echo "Rolled back to BLUE ❌"
+          exit 1

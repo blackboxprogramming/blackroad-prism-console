@@ -1,0 +1,222 @@
+name: AutoPal Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Base URL of the AutoPal deployment (e.g., https://autopal.example.com)
+        required: true
+        type: string
+      audience:
+        description: GitHub OIDC audience value allowed by AutoPal (e.g., gha:org/repo@refs/heads/main)
+        required: true
+        type: string
+
+jobs:
+  smoke:
+    name: Exercise AutoPal endpoints
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ inputs.base_url }}
+      AUDIENCE: ${{ inputs.audience }}
+    steps:
+      - name: Prepare environment
+        id: prep
+        run: |
+          set -euo pipefail
+
+          if [ -z "${BASE_URL}" ]; then
+            echo "::error::The base_url input is required." >&2
+            exit 1
+          fi
+
+          if [ -z "${AUDIENCE}" ]; then
+            echo "::error::The audience input is required." >&2
+            exit 1
+          fi
+
+          BASE_URL_NO_SLASH="${BASE_URL%/}"
+          echo "base_url=${BASE_URL_NO_SLASH}" >> "$GITHUB_OUTPUT"
+
+          python - <<'PY'
+import os
+from urllib.parse import quote
+
+aud = os.environ["AUDIENCE"]
+print(f"encoded_audience={quote(aud, safe='')}")
+PY
+          | tee -a "$GITHUB_OUTPUT"
+
+      - name: Ping live health endpoint
+        env:
+          BASE_URL: ${{ steps.prep.outputs.base_url }}
+        run: |
+          set -euo pipefail
+          echo "Checking ${BASE_URL}/health/live"
+          curl -sS -o /tmp/health.json -w '%{http_code}' "${BASE_URL}/health/live" | {
+            read -r status
+            echo "HTTP ${status}"
+            if [ "${status}" != "200" ]; then
+              echo "::error::/health/live returned status ${status}" >&2
+              cat /tmp/health.json >&2 || true
+              exit 1
+            fi
+          }
+          echo "Health check response:" >&2
+          cat /tmp/health.json >&2
+
+      - name: Request GitHub OIDC token
+        id: oidc
+        env:
+          ENCODED_AUDIENCE: ${{ steps.prep.outputs.encoded_audience }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}" ] || [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+            echo "::error::OIDC environment variables are not available in this context." >&2
+            exit 1
+          fi
+
+          if [[ "${ACTIONS_ID_TOKEN_REQUEST_URL}" == *"audience="* ]]; then
+            OIDC_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}${ENCODED_AUDIENCE}"
+          elif [[ "${ACTIONS_ID_TOKEN_REQUEST_URL}" == *"?"* ]]; then
+            OIDC_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${ENCODED_AUDIENCE}"
+          else
+            OIDC_URL="${ACTIONS_ID_TOKEN_REQUEST_URL}?audience=${ENCODED_AUDIENCE}"
+          fi
+
+          echo "Requesting OIDC token for audience '${AUDIENCE}'" >&2
+          RESPONSE=$(curl -sS -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${OIDC_URL}")
+          TOKEN=$(printf '%s' "${RESPONSE}" | jq -r '.value // empty')
+
+          if [ -z "${TOKEN}" ] || [ "${TOKEN}" = "null" ]; then
+            echo "::error::Failed to obtain OIDC token. Response:" >&2
+            printf '%s\n' "${RESPONSE}" >&2
+            exit 1
+          fi
+
+          echo "token=${TOKEN}" >> "$GITHUB_OUTPUT"
+
+      - name: Attempt to materialize secrets (expect step-up)
+        id: first_materialize
+        env:
+          BASE_URL: ${{ steps.prep.outputs.base_url }}
+          TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          http_status=$(curl -sS -o /tmp/first_materialize.json -w '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -d '{}' \
+            "${BASE_URL}/secrets/materialize")
+
+          echo "HTTP ${http_status}" >&2
+          cat /tmp/first_materialize.json >&2
+
+          if [ "${http_status}" != "401" ]; then
+            echo "::error::Expected 401 step_up_required from initial materialize attempt." >&2
+            exit 1
+          fi
+
+          if ! jq -e '.error == "step_up_required"' /tmp/first_materialize.json > /dev/null 2>&1; then
+            echo "::error::Response did not indicate step_up_required." >&2
+            exit 1
+          fi
+
+      - name: Materialize secrets with step-up approval
+        id: second_materialize
+        env:
+          BASE_URL: ${{ steps.prep.outputs.base_url }}
+          TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          http_status=$(curl -sS -o /tmp/second_materialize.json -w '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -H 'X-Step-Up-Approved: true' \
+            -d '{"reason":"AutoPal smoke test"}' \
+            "${BASE_URL}/secrets/materialize")
+
+          echo "HTTP ${http_status}" >&2
+          cat /tmp/second_materialize.json >&2
+
+          if [ "${http_status}" != "200" ]; then
+            echo "::error::Expected successful materialize after step-up." >&2
+            exit 1
+          fi
+
+      - name: Create dual-control override request
+        id: create_override
+        env:
+          BASE_URL: ${{ steps.prep.outputs.base_url }}
+          TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          payload='{"reason":"AutoPal smoke dual-control", "scope":"smoke-test", "expires_in_seconds":300}'
+
+          http_status=$(curl -sS -o /tmp/override_create.json -w '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -H 'X-Step-Up-Approved: true' \
+            -d "${payload}" \
+            "${BASE_URL}/fossil/override")
+
+          echo "HTTP ${http_status}" >&2
+          cat /tmp/override_create.json >&2
+
+          case "${http_status}" in
+            200|201|202) ;;
+            *)
+              echo "::error::Unexpected status when creating override: ${http_status}" >&2
+              exit 1
+              ;;
+          esac
+
+          override_id=$(jq -r '.id // .override_id // empty' /tmp/override_create.json)
+
+          if [ -z "${override_id}" ]; then
+            echo "::error::Override identifier missing from response." >&2
+            exit 1
+          fi
+
+          echo "override_id=${override_id}" >> "$GITHUB_OUTPUT"
+
+      - name: Approve dual-control override
+        env:
+          BASE_URL: ${{ steps.prep.outputs.base_url }}
+          TOKEN: ${{ steps.oidc.outputs.token }}
+          OVERRIDE_ID: ${{ steps.create_override.outputs.override_id }}
+        run: |
+          set -euo pipefail
+
+          http_status=$(curl -sS -o /tmp/override_approve.json -w '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -H 'X-Step-Up-Approved: true' \
+            -d '{"approver":"github-actions"}' \
+            "${BASE_URL}/fossil/override/${OVERRIDE_ID}/approve")
+
+          echo "HTTP ${http_status}" >&2
+          cat /tmp/override_approve.json >&2
+
+          case "${http_status}" in
+            200|204) ;;
+            *)
+              echo "::error::Unexpected status when approving override: ${http_status}" >&2
+              exit 1
+              ;;
+          esac
+
+          if ! jq -e '.status // "" | test("approved"; "i")' /tmp/override_approve.json > /dev/null 2>&1; then
+            echo "::warning::Override approval response did not explicitly confirm approval; check server logs." >&2
+          fi
+
+      - name: Smoke test completed
+        run: echo "AutoPal smoke workflow finished successfully."

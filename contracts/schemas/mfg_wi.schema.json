@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "required": ["item", "rev", "steps", "markdown", "html"],
+    "properties": {
+      "item": {"type": "string"},
+      "rev": {"type": "string"},
+      "steps": {"type": "integer", "minimum": 0},
+      "markdown": {"type": "string"},
+      "html": {"type": "string"}
+    },
+    "additionalProperties": false
+  }
+}

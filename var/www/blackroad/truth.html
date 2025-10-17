@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Truth</title>
+</head>
+<body>
+<div class="card">
+  <h3>Feed</h3>
+  <ul id="feed"></ul>
+</div>
+<div class="card">
+  <h3>Compare (CTD)</h3>
+  <input id="cidA" placeholder="cid A"><br><br>
+  <input id="cidB" placeholder="cid B"><br><br>
+  <button onclick="cmp()">Compare</button>
+  <pre id="cmpout" style="white-space:pre-wrap;margin-top:8px"></pre>
+</div>
+<script>
+async function cmp(){
+  const a = document.getElementById('cidA').value.trim();
+  const b = document.getElementById('cidB').value.trim();
+  if(!a||!b) return;
+  const r = await fetch('/api/truth/diff?cid='+encodeURIComponent(a)+'&cid2='+encodeURIComponent(b));
+  const j = await r.json();
+  document.getElementById('cmpout').textContent =
+    'CTD='+(j.ctd?.toFixed? j.ctd.toFixed(3): j.ctd)+'  proof_mismatch='+(j.proof_mismatch?'yes':'no')+
+    (j.aPublisher||j.bPublisher? `\nA:${j.aPublisher||'-'}  B:${j.bPublisher||'-'}`:'')+
+    '\nops (first 20):\n'+ (j.edit_ops||[]).slice(0,20).map(o=>`${o.op} ${o.path}`).join('\n');
+}
+</script>
+</body>
+</html>
+<!doctype html><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Truth Garden</title>
+<style>
+  body{margin:0;background:#0b0b10;color:#e9e9f1;font:14px system-ui}
+  header{display:flex;gap:8px;align-items:center;padding:10px;background:#0f0f1a;border-bottom:1px solid #1e1e2f}
+  .pill{border:1px solid #24244a;border-radius:999px;padding:4px 10px;background:#141428}
+  main{max-width:1100px;margin:12px auto;padding:0 12px;display:grid;grid-template-columns:360px 1fr;gap:12px}
+  .card{background:#131320;border:1px solid #24244a;border-radius:12px;padding:10px}
+  input,textarea,button{border-radius:10px;border:1px solid #24244a;background:#10102a;color:#e9e9f1;padding:8px}
+  button{cursor:pointer}
+  ul{list-style:none;margin:0;padding:0}
+  li{padding:8px;border-bottom:1px dashed #24244a}
+  a{color:#0096FF;text-decoration:none}
+</style>
+<header>
+  <div class="pill">Truth Garden</div>
+  <a class="pill" href="/project.html">Projects</a>
+</header>
+<main>
+  <div class="card">
+    <h3>Publish</h3>
+    <input id="title" placeholder="title"><br><br>
+    <textarea id="content" rows="8" placeholder="content..."></textarea><br><br>
+    <input id="evidence" placeholder="evidence CIDs (comma sep)"><br><br>
+    <button onclick="publish()">Publish</button>
+    <pre id="out" style="white-space:pre-wrap;margin-top:8px"></pre>
+  </div>
+  <div class="card">
+    <h3>Feed</h3>
+    <ul id="feed"></ul>
+  </div>
+</main>
+<script>
+async function publish(){
+  const o={
+    type:'Note',
+    title:document.getElementById('title').value,
+    content:document.getElementById('content').value,
+    evidence:document.getElementById('evidence').value.split(',').map(s=>s.trim()).filter(Boolean)
+  };
+  const r=await fetch('/api/truth/publish',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(o)});
+  document.getElementById('out').textContent=await r.text();
+  load();
+}
+async function load(){
+  const ul=document.getElementById('feed'); ul.innerHTML='';
+  const r=await fetch('/api/truth/feed'); const arr=await r.json();
+  for(const x of arr){
+    const li=document.createElement('li');
+    li.innerHTML=`<b>${x.cid}</b><br><small>${new Date(x.ts).toLocaleString()} • ${x.did}${x.kind?' • '+x.kind:''}</small>`;
+    ul.appendChild(li);
+  }
+}
+load();
+</script>

@@ -1,0 +1,29 @@
+{
+  "name": "blackroad-feeforge-cli",
+  "version": "0.1.0",
+  "description": "CLI for managing FeeForge billing operations.",
+  "type": "module",
+  "bin": {
+    "blackroad-feeforge": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@lucidia/core": "workspace:*",
+    "@blackroad/policies": "workspace:*",
+    "@blackroad/integrations": "workspace:*",
+    "@blackroad/worm": "workspace:*",
+    "@blackroad/db": "workspace:*",
+    "commander": "^11.1.0",
+    "yaml": "^2.5.1"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.15.7",
+    "typescript": "^5.4.5"
+  }
+}

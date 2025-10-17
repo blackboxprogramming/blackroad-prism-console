@@ -1,0 +1,201 @@
+id,branch,title,labels,summary
+playwright-001,automation/playwright/checkout-sca-fallback-smoke,test(playwright): add smoke assertions for checkout SCA fallback,automation;playwright,Playwright checkout SCA fallback needs to extend smoke assertions
+playwright-002,automation/playwright/checkout-multi-currency-smoke,test(playwright): add smoke assertions for checkout multi currency routing,automation;playwright,Playwright checkout multi currency routing needs to extend smoke assertions
+playwright-003,automation/playwright/analytics-consent-smoke,test(playwright): add smoke assertions for analytics consent banner,automation;playwright,Playwright analytics consent banner needs to extend smoke assertions
+playwright-004,automation/playwright/workspace-role-switch-smoke,test(playwright): add smoke assertions for workspace role switch,automation;playwright,Playwright workspace role switch needs to extend smoke assertions
+playwright-005,automation/playwright/billing-upgrade-smoke,test(playwright): add smoke assertions for billing upgrade flow,automation;playwright,Playwright billing upgrade flow needs to extend smoke assertions
+playwright-006,automation/playwright/project-archive-smoke,test(playwright): add smoke assertions for project archive restore,automation;playwright,Playwright project archive restore needs to extend smoke assertions
+playwright-007,automation/playwright/incident-handoff-smoke,test(playwright): add smoke assertions for incident handoff form,automation;playwright,Playwright incident handoff form needs to extend smoke assertions
+playwright-008,automation/playwright/alert-threshold-smoke,test(playwright): add smoke assertions for alert threshold editor,automation;playwright,Playwright alert threshold editor needs to extend smoke assertions
+playwright-009,automation/playwright/workspace-theme-smoke,test(playwright): add smoke assertions for workspace theme selector,automation;playwright,Playwright workspace theme selector needs to extend smoke assertions
+playwright-010,automation/playwright/reporting-export-smoke,test(playwright): add smoke assertions for reporting export wizard,automation;playwright,Playwright reporting export wizard needs to extend smoke assertions
+playwright-011,automation/playwright/checkout-sca-fallback-retry-hardening,test(playwright): harden retry logic for checkout SCA fallback,automation;playwright,Playwright checkout SCA fallback needs to stabilize retries
+playwright-012,automation/playwright/checkout-multi-currency-retry-hardening,test(playwright): harden retry logic for checkout multi currency routing,automation;playwright,Playwright checkout multi currency routing needs to stabilize retries
+playwright-013,automation/playwright/analytics-consent-retry-hardening,test(playwright): harden retry logic for analytics consent banner,automation;playwright,Playwright analytics consent banner needs to stabilize retries
+playwright-014,automation/playwright/workspace-role-switch-retry-hardening,test(playwright): harden retry logic for workspace role switch,automation;playwright,Playwright workspace role switch needs to stabilize retries
+playwright-015,automation/playwright/billing-upgrade-retry-hardening,test(playwright): harden retry logic for billing upgrade flow,automation;playwright,Playwright billing upgrade flow needs to stabilize retries
+playwright-016,automation/playwright/project-archive-retry-hardening,test(playwright): harden retry logic for project archive restore,automation;playwright,Playwright project archive restore needs to stabilize retries
+playwright-017,automation/playwright/incident-handoff-retry-hardening,test(playwright): harden retry logic for incident handoff form,automation;playwright,Playwright incident handoff form needs to stabilize retries
+playwright-018,automation/playwright/alert-threshold-retry-hardening,test(playwright): harden retry logic for alert threshold editor,automation;playwright,Playwright alert threshold editor needs to stabilize retries
+playwright-019,automation/playwright/workspace-theme-retry-hardening,test(playwright): harden retry logic for workspace theme selector,automation;playwright,Playwright workspace theme selector needs to stabilize retries
+playwright-020,automation/playwright/reporting-export-retry-hardening,test(playwright): harden retry logic for reporting export wizard,automation;playwright,Playwright reporting export wizard needs to stabilize retries
+playwright-021,automation/playwright/checkout-sca-fallback-visual-baseline,test(playwright): refresh visual baseline for checkout SCA fallback,automation;playwright,Playwright checkout SCA fallback needs to refresh visual baselines
+playwright-022,automation/playwright/checkout-multi-currency-visual-baseline,test(playwright): refresh visual baseline for checkout multi currency routing,automation;playwright,Playwright checkout multi currency routing needs to refresh visual baselines
+playwright-023,automation/playwright/analytics-consent-visual-baseline,test(playwright): refresh visual baseline for analytics consent banner,automation;playwright,Playwright analytics consent banner needs to refresh visual baselines
+playwright-024,automation/playwright/workspace-role-switch-visual-baseline,test(playwright): refresh visual baseline for workspace role switch,automation;playwright,Playwright workspace role switch needs to refresh visual baselines
+playwright-025,automation/playwright/billing-upgrade-visual-baseline,test(playwright): refresh visual baseline for billing upgrade flow,automation;playwright,Playwright billing upgrade flow needs to refresh visual baselines
+playwright-026,automation/playwright/project-archive-visual-baseline,test(playwright): refresh visual baseline for project archive restore,automation;playwright,Playwright project archive restore needs to refresh visual baselines
+playwright-027,automation/playwright/incident-handoff-visual-baseline,test(playwright): refresh visual baseline for incident handoff form,automation;playwright,Playwright incident handoff form needs to refresh visual baselines
+playwright-028,automation/playwright/alert-threshold-visual-baseline,test(playwright): refresh visual baseline for alert threshold editor,automation;playwright,Playwright alert threshold editor needs to refresh visual baselines
+playwright-029,automation/playwright/workspace-theme-visual-baseline,test(playwright): refresh visual baseline for workspace theme selector,automation;playwright,Playwright workspace theme selector needs to refresh visual baselines
+playwright-030,automation/playwright/reporting-export-visual-baseline,test(playwright): refresh visual baseline for reporting export wizard,automation;playwright,Playwright reporting export wizard needs to refresh visual baselines
+mcp-001,automation/mcp/session-memory-schema,feat(mcp): publish schema upgrade for session memory envelope,automation;mcp,Model Context Protocol session memory envelope needs to ship schema upgrade
+mcp-002,automation/mcp/prompt-registry-schema,feat(mcp): publish schema upgrade for prompt registry sync,automation;mcp,Model Context Protocol prompt registry sync needs to ship schema upgrade
+mcp-003,automation/mcp/safety-deescalation-schema,feat(mcp): publish schema upgrade for safety de escalation guard,automation;mcp,Model Context Protocol safety de escalation guard needs to ship schema upgrade
+mcp-004,automation/mcp/extension-handshake-schema,feat(mcp): publish schema upgrade for extension handshake,automation;mcp,Model Context Protocol extension handshake needs to ship schema upgrade
+mcp-005,automation/mcp/anchor-context-schema,feat(mcp): publish schema upgrade for anchor context hydration,automation;mcp,Model Context Protocol anchor context hydration needs to ship schema upgrade
+mcp-006,automation/mcp/tool-availability-schema,feat(mcp): publish schema upgrade for tool availability matrix,automation;mcp,Model Context Protocol tool availability matrix needs to ship schema upgrade
+mcp-007,automation/mcp/channel-failover-schema,feat(mcp): publish schema upgrade for channel failover handshake,automation;mcp,Model Context Protocol channel failover handshake needs to ship schema upgrade
+mcp-008,automation/mcp/telemetry-contract-schema,feat(mcp): publish schema upgrade for telemetry contract,automation;mcp,Model Context Protocol telemetry contract needs to ship schema upgrade
+mcp-009,automation/mcp/session-memory-router,feat(mcp): tune router heuristics for session memory envelope,automation;mcp,Model Context Protocol session memory envelope needs to tune router heuristics
+mcp-010,automation/mcp/prompt-registry-router,feat(mcp): tune router heuristics for prompt registry sync,automation;mcp,Model Context Protocol prompt registry sync needs to tune router heuristics
+mcp-011,automation/mcp/safety-deescalation-router,feat(mcp): tune router heuristics for safety de escalation guard,automation;mcp,Model Context Protocol safety de escalation guard needs to tune router heuristics
+mcp-012,automation/mcp/extension-handshake-router,feat(mcp): tune router heuristics for extension handshake,automation;mcp,Model Context Protocol extension handshake needs to tune router heuristics
+mcp-013,automation/mcp/anchor-context-router,feat(mcp): tune router heuristics for anchor context hydration,automation;mcp,Model Context Protocol anchor context hydration needs to tune router heuristics
+mcp-014,automation/mcp/tool-availability-router,feat(mcp): tune router heuristics for tool availability matrix,automation;mcp,Model Context Protocol tool availability matrix needs to tune router heuristics
+mcp-015,automation/mcp/channel-failover-router,feat(mcp): tune router heuristics for channel failover handshake,automation;mcp,Model Context Protocol channel failover handshake needs to tune router heuristics
+mcp-016,automation/mcp/telemetry-contract-router,feat(mcp): tune router heuristics for telemetry contract,automation;mcp,Model Context Protocol telemetry contract needs to tune router heuristics
+mcp-017,automation/mcp/session-memory-tooling,feat(mcp): add tooling coverage for session memory envelope,automation;mcp,Model Context Protocol session memory envelope needs to add tooling coverage
+mcp-018,automation/mcp/prompt-registry-tooling,feat(mcp): add tooling coverage for prompt registry sync,automation;mcp,Model Context Protocol prompt registry sync needs to add tooling coverage
+mcp-019,automation/mcp/safety-deescalation-tooling,feat(mcp): add tooling coverage for safety de escalation guard,automation;mcp,Model Context Protocol safety de escalation guard needs to add tooling coverage
+mcp-020,automation/mcp/extension-handshake-tooling,feat(mcp): add tooling coverage for extension handshake,automation;mcp,Model Context Protocol extension handshake needs to add tooling coverage
+mcp-021,automation/mcp/anchor-context-tooling,feat(mcp): add tooling coverage for anchor context hydration,automation;mcp,Model Context Protocol anchor context hydration needs to add tooling coverage
+mcp-022,automation/mcp/tool-availability-tooling,feat(mcp): add tooling coverage for tool availability matrix,automation;mcp,Model Context Protocol tool availability matrix needs to add tooling coverage
+mcp-023,automation/mcp/channel-failover-tooling,feat(mcp): add tooling coverage for channel failover handshake,automation;mcp,Model Context Protocol channel failover handshake needs to add tooling coverage
+mcp-024,automation/mcp/telemetry-contract-tooling,feat(mcp): add tooling coverage for telemetry contract,automation;mcp,Model Context Protocol telemetry contract needs to add tooling coverage
+hf-001,automation/hf/agentic-rag-dataset-sync,feat(hf): expand dataset sync for agentic RAG stack,automation;huggingface,HuggingFace integration agentic RAG stack needs to expand dataset sync
+hf-002,automation/hf/vision-encoder-dataset-sync,feat(hf): expand dataset sync for vision encoder stage,automation;huggingface,HuggingFace integration vision encoder stage needs to expand dataset sync
+hf-003,automation/hf/audio-command-dataset-sync,feat(hf): expand dataset sync for audio command model,automation;huggingface,HuggingFace integration audio command model needs to expand dataset sync
+hf-004,automation/hf/evaluation-suite-dataset-sync,feat(hf): expand dataset sync for evaluation suite,automation;huggingface,HuggingFace integration evaluation suite needs to expand dataset sync
+hf-005,automation/hf/secure-endpoint-dataset-sync,feat(hf): expand dataset sync for secure endpoint,automation;huggingface,HuggingFace integration secure endpoint needs to expand dataset sync
+hf-006,automation/hf/agentic-rag-inference-profile,feat(hf): tune inference profile for agentic RAG stack,automation;huggingface,HuggingFace integration agentic RAG stack needs to tune inference profile
+hf-007,automation/hf/vision-encoder-inference-profile,feat(hf): tune inference profile for vision encoder stage,automation;huggingface,HuggingFace integration vision encoder stage needs to tune inference profile
+hf-008,automation/hf/audio-command-inference-profile,feat(hf): tune inference profile for audio command model,automation;huggingface,HuggingFace integration audio command model needs to tune inference profile
+hf-009,automation/hf/evaluation-suite-inference-profile,feat(hf): tune inference profile for evaluation suite,automation;huggingface,HuggingFace integration evaluation suite needs to tune inference profile
+hf-010,automation/hf/secure-endpoint-inference-profile,feat(hf): tune inference profile for secure endpoint,automation;huggingface,HuggingFace integration secure endpoint needs to tune inference profile
+hf-011,automation/hf/agentic-rag-safety-filter,feat(hf): wire safety filter for agentic RAG stack,automation;huggingface,HuggingFace integration agentic RAG stack needs to wire safety filter
+hf-012,automation/hf/vision-encoder-safety-filter,feat(hf): wire safety filter for vision encoder stage,automation;huggingface,HuggingFace integration vision encoder stage needs to wire safety filter
+hf-013,automation/hf/audio-command-safety-filter,feat(hf): wire safety filter for audio command model,automation;huggingface,HuggingFace integration audio command model needs to wire safety filter
+hf-014,automation/hf/evaluation-suite-safety-filter,feat(hf): wire safety filter for evaluation suite,automation;huggingface,HuggingFace integration evaluation suite needs to wire safety filter
+hf-015,automation/hf/secure-endpoint-safety-filter,feat(hf): wire safety filter for secure endpoint,automation;huggingface,HuggingFace integration secure endpoint needs to wire safety filter
+hf-016,automation/hf/agentic-rag-deployment,feat(hf): streamline deployment for agentic RAG stack,automation;huggingface,HuggingFace integration agentic RAG stack needs to streamline deployment
+hf-017,automation/hf/vision-encoder-deployment,feat(hf): streamline deployment for vision encoder stage,automation;huggingface,HuggingFace integration vision encoder stage needs to streamline deployment
+hf-018,automation/hf/audio-command-deployment,feat(hf): streamline deployment for audio command model,automation;huggingface,HuggingFace integration audio command model needs to streamline deployment
+hf-019,automation/hf/evaluation-suite-deployment,feat(hf): streamline deployment for evaluation suite,automation;huggingface,HuggingFace integration evaluation suite needs to streamline deployment
+hf-020,automation/hf/secure-endpoint-deployment,feat(hf): streamline deployment for secure endpoint,automation;huggingface,HuggingFace integration secure endpoint needs to streamline deployment
+agents-001,automation/agents/dsl-support-planner,feat(agent): upgrade planner loop for domain DSL support,automation;agents,Coding agent domain DSL support needs to upgrade planner loop
+agents-002,automation/agents/multi-repo-planner,feat(agent): upgrade planner loop for multi repo reasoning,automation;agents,Coding agent multi repo reasoning needs to upgrade planner loop
+agents-003,automation/agents/context-cache-planner,feat(agent): upgrade planner loop for context cache hydrator,automation;agents,Coding agent context cache hydrator needs to upgrade planner loop
+agents-004,automation/agents/orchestration-ledger-planner,feat(agent): upgrade planner loop for orchestration ledger,automation;agents,Coding agent orchestration ledger needs to upgrade planner loop
+agents-005,automation/agents/cursor-ux-planner,feat(agent): upgrade planner loop for cursor UX guidance,automation;agents,Coding agent cursor UX guidance needs to upgrade planner loop
+agents-006,automation/agents/fallback-agent-planner,feat(agent): upgrade planner loop for fallback agent routing,automation;agents,Coding agent fallback agent routing needs to upgrade planner loop
+agents-007,automation/agents/executor-sandbox-planner,feat(agent): upgrade planner loop for executor sandboxing,automation;agents,Coding agent executor sandboxing needs to upgrade planner loop
+agents-008,automation/agents/pydantic-bridge-planner,feat(agent): upgrade planner loop for pydantic bridge,automation;agents,Coding agent pydantic bridge needs to upgrade planner loop
+agents-009,automation/agents/branch-reviewer-planner,feat(agent): upgrade planner loop for branch reviewer handshake,automation;agents,Coding agent branch reviewer handshake needs to upgrade planner loop
+agents-010,automation/agents/github-mcp-planner,feat(agent): upgrade planner loop for GitHub MCP adapter,automation;agents,Coding agent GitHub MCP adapter needs to upgrade planner loop
+agents-011,automation/agents/self-heal-planner,feat(agent): upgrade planner loop for self heal protocol,automation;agents,Coding agent self heal protocol needs to upgrade planner loop
+agents-012,automation/agents/telemetry-probe-planner,feat(agent): upgrade planner loop for telemetry probe,automation;agents,Coding agent telemetry probe needs to upgrade planner loop
+agents-013,automation/agents/dsl-support-memory,feat(agent): extend memory window for domain DSL support,automation;agents,Coding agent domain DSL support needs to extend memory window
+agents-014,automation/agents/multi-repo-memory,feat(agent): extend memory window for multi repo reasoning,automation;agents,Coding agent multi repo reasoning needs to extend memory window
+agents-015,automation/agents/context-cache-memory,feat(agent): extend memory window for context cache hydrator,automation;agents,Coding agent context cache hydrator needs to extend memory window
+agents-016,automation/agents/orchestration-ledger-memory,feat(agent): extend memory window for orchestration ledger,automation;agents,Coding agent orchestration ledger needs to extend memory window
+agents-017,automation/agents/cursor-ux-memory,feat(agent): extend memory window for cursor UX guidance,automation;agents,Coding agent cursor UX guidance needs to extend memory window
+agents-018,automation/agents/fallback-agent-memory,feat(agent): extend memory window for fallback agent routing,automation;agents,Coding agent fallback agent routing needs to extend memory window
+agents-019,automation/agents/executor-sandbox-memory,feat(agent): extend memory window for executor sandboxing,automation;agents,Coding agent executor sandboxing needs to extend memory window
+agents-020,automation/agents/pydantic-bridge-memory,feat(agent): extend memory window for pydantic bridge,automation;agents,Coding agent pydantic bridge needs to extend memory window
+agents-021,automation/agents/branch-reviewer-memory,feat(agent): extend memory window for branch reviewer handshake,automation;agents,Coding agent branch reviewer handshake needs to extend memory window
+agents-022,automation/agents/github-mcp-memory,feat(agent): extend memory window for GitHub MCP adapter,automation;agents,Coding agent GitHub MCP adapter needs to extend memory window
+agents-023,automation/agents/self-heal-memory,feat(agent): extend memory window for self heal protocol,automation;agents,Coding agent self heal protocol needs to extend memory window
+agents-024,automation/agents/telemetry-probe-memory,feat(agent): extend memory window for telemetry probe,automation;agents,Coding agent telemetry probe needs to extend memory window
+agents-025,automation/agents/dsl-support-toolbelt,feat(agent): enrich toolbelt for domain DSL support,automation;agents,Coding agent domain DSL support needs to enrich toolbelt
+agents-026,automation/agents/multi-repo-toolbelt,feat(agent): enrich toolbelt for multi repo reasoning,automation;agents,Coding agent multi repo reasoning needs to enrich toolbelt
+agents-027,automation/agents/context-cache-toolbelt,feat(agent): enrich toolbelt for context cache hydrator,automation;agents,Coding agent context cache hydrator needs to enrich toolbelt
+agents-028,automation/agents/orchestration-ledger-toolbelt,feat(agent): enrich toolbelt for orchestration ledger,automation;agents,Coding agent orchestration ledger needs to enrich toolbelt
+agents-029,automation/agents/cursor-ux-toolbelt,feat(agent): enrich toolbelt for cursor UX guidance,automation;agents,Coding agent cursor UX guidance needs to enrich toolbelt
+agents-030,automation/agents/fallback-agent-toolbelt,feat(agent): enrich toolbelt for fallback agent routing,automation;agents,Coding agent fallback agent routing needs to enrich toolbelt
+agents-031,automation/agents/executor-sandbox-toolbelt,feat(agent): enrich toolbelt for executor sandboxing,automation;agents,Coding agent executor sandboxing needs to enrich toolbelt
+agents-032,automation/agents/pydantic-bridge-toolbelt,feat(agent): enrich toolbelt for pydantic bridge,automation;agents,Coding agent pydantic bridge needs to enrich toolbelt
+agents-033,automation/agents/branch-reviewer-toolbelt,feat(agent): enrich toolbelt for branch reviewer handshake,automation;agents,Coding agent branch reviewer handshake needs to enrich toolbelt
+agents-034,automation/agents/github-mcp-toolbelt,feat(agent): enrich toolbelt for GitHub MCP adapter,automation;agents,Coding agent GitHub MCP adapter needs to enrich toolbelt
+agents-035,automation/agents/self-heal-toolbelt,feat(agent): enrich toolbelt for self heal protocol,automation;agents,Coding agent self heal protocol needs to enrich toolbelt
+agents-036,automation/agents/telemetry-probe-toolbelt,feat(agent): enrich toolbelt for telemetry probe,automation;agents,Coding agent telemetry probe needs to enrich toolbelt
+ci-001,automation/ci/playwright-grid-matrix,chore(ci): expand matrix for playwright grid,automation;ci,CI pipeline playwright grid needs to expand matrix
+ci-002,automation/ci/llm-safety-matrix,chore(ci): expand matrix for LLM safety gate,automation;ci,CI pipeline LLM safety gate needs to expand matrix
+ci-003,automation/ci/cache-prime-matrix,chore(ci): expand matrix for cache prime job,automation;ci,CI pipeline cache prime job needs to expand matrix
+ci-004,automation/ci/coverage-report-matrix,chore(ci): expand matrix for coverage report publishing,automation;ci,CI pipeline coverage report publishing needs to expand matrix
+ci-005,automation/ci/lint-workflows-matrix,chore(ci): expand matrix for workflow linting,automation;ci,CI pipeline workflow linting needs to expand matrix
+ci-006,automation/ci/mcp-contract-matrix,chore(ci): expand matrix for MCP contract validation,automation;ci,CI pipeline MCP contract validation needs to expand matrix
+ci-007,automation/ci/infra-scan-matrix,chore(ci): expand matrix for infra scan aggregator,automation;ci,CI pipeline infra scan aggregator needs to expand matrix
+ci-008,automation/ci/container-harden-matrix,chore(ci): expand matrix for container harden stage,automation;ci,CI pipeline container harden stage needs to expand matrix
+ci-009,automation/ci/playwright-grid-artifact,chore(ci): tighten artifact handling for playwright grid,automation;ci,CI pipeline playwright grid needs to tighten artifact handling
+ci-010,automation/ci/llm-safety-artifact,chore(ci): tighten artifact handling for LLM safety gate,automation;ci,CI pipeline LLM safety gate needs to tighten artifact handling
+ci-011,automation/ci/cache-prime-artifact,chore(ci): tighten artifact handling for cache prime job,automation;ci,CI pipeline cache prime job needs to tighten artifact handling
+ci-012,automation/ci/coverage-report-artifact,chore(ci): tighten artifact handling for coverage report publishing,automation;ci,CI pipeline coverage report publishing needs to tighten artifact handling
+ci-013,automation/ci/lint-workflows-artifact,chore(ci): tighten artifact handling for workflow linting,automation;ci,CI pipeline workflow linting needs to tighten artifact handling
+ci-014,automation/ci/mcp-contract-artifact,chore(ci): tighten artifact handling for MCP contract validation,automation;ci,CI pipeline MCP contract validation needs to tighten artifact handling
+ci-015,automation/ci/infra-scan-artifact,chore(ci): tighten artifact handling for infra scan aggregator,automation;ci,CI pipeline infra scan aggregator needs to tighten artifact handling
+ci-016,automation/ci/container-harden-artifact,chore(ci): tighten artifact handling for container harden stage,automation;ci,CI pipeline container harden stage needs to tighten artifact handling
+ci-017,automation/ci/playwright-grid-notification,chore(ci): refine notification for playwright grid,automation;ci,CI pipeline playwright grid needs to refine notification
+ci-018,automation/ci/llm-safety-notification,chore(ci): refine notification for LLM safety gate,automation;ci,CI pipeline LLM safety gate needs to refine notification
+ci-019,automation/ci/cache-prime-notification,chore(ci): refine notification for cache prime job,automation;ci,CI pipeline cache prime job needs to refine notification
+ci-020,automation/ci/coverage-report-notification,chore(ci): refine notification for coverage report publishing,automation;ci,CI pipeline coverage report publishing needs to refine notification
+ci-021,automation/ci/lint-workflows-notification,chore(ci): refine notification for workflow linting,automation;ci,CI pipeline workflow linting needs to refine notification
+ci-022,automation/ci/mcp-contract-notification,chore(ci): refine notification for MCP contract validation,automation;ci,CI pipeline MCP contract validation needs to refine notification
+ci-023,automation/ci/infra-scan-notification,chore(ci): refine notification for infra scan aggregator,automation;ci,CI pipeline infra scan aggregator needs to refine notification
+ci-024,automation/ci/container-harden-notification,chore(ci): refine notification for container harden stage,automation;ci,CI pipeline container harden stage needs to refine notification
+security-001,automation/security/secret-rotation-policy,chore(security): refresh policy for secret rotation schedule,automation;security,Security secret rotation schedule needs to refresh policy
+security-002,automation/security/threat-lookup-policy,chore(security): refresh policy for threat lookup bridge,automation;security,Security threat lookup bridge needs to refresh policy
+security-003,automation/security/sast-gate-policy,chore(security): refresh policy for SAST gate,automation;security,Security SAST gate needs to refresh policy
+security-004,automation/security/sbom-watch-policy,chore(security): refresh policy for SBOM watch,automation;security,Security SBOM watch needs to refresh policy
+security-005,automation/security/runtime-shield-policy,chore(security): refresh policy for runtime shield,automation;security,Security runtime shield needs to refresh policy
+security-006,automation/security/gitleaks-policy,chore(security): refresh policy for gitleaks enforcement,automation;security,Security gitleaks enforcement needs to refresh policy
+security-007,automation/security/secret-rotation-scan,chore(security): expand scanner for secret rotation schedule,automation;security,Security secret rotation schedule needs to expand scanner
+security-008,automation/security/threat-lookup-scan,chore(security): expand scanner for threat lookup bridge,automation;security,Security threat lookup bridge needs to expand scanner
+security-009,automation/security/sast-gate-scan,chore(security): expand scanner for SAST gate,automation;security,Security SAST gate needs to expand scanner
+security-010,automation/security/sbom-watch-scan,chore(security): expand scanner for SBOM watch,automation;security,Security SBOM watch needs to expand scanner
+security-011,automation/security/runtime-shield-scan,chore(security): expand scanner for runtime shield,automation;security,Security runtime shield needs to expand scanner
+security-012,automation/security/gitleaks-scan,chore(security): expand scanner for gitleaks enforcement,automation;security,Security gitleaks enforcement needs to expand scanner
+security-013,automation/security/secret-rotation-alerting,chore(security): tighten alerting for secret rotation schedule,automation;security,Security secret rotation schedule needs to tighten alerting
+security-014,automation/security/threat-lookup-alerting,chore(security): tighten alerting for threat lookup bridge,automation;security,Security threat lookup bridge needs to tighten alerting
+security-015,automation/security/sast-gate-alerting,chore(security): tighten alerting for SAST gate,automation;security,Security SAST gate needs to tighten alerting
+security-016,automation/security/sbom-watch-alerting,chore(security): tighten alerting for SBOM watch,automation;security,Security SBOM watch needs to tighten alerting
+security-017,automation/security/runtime-shield-alerting,chore(security): tighten alerting for runtime shield,automation;security,Security runtime shield needs to tighten alerting
+security-018,automation/security/gitleaks-alerting,chore(security): tighten alerting for gitleaks enforcement,automation;security,Security gitleaks enforcement needs to tighten alerting
+infra-001,automation/infra/edge-cache-scaling,chore(infra): tune scaling profile for edge cache tier,automation;infra,Infrastructure edge cache tier needs to tune scaling profile
+infra-002,automation/infra/multi-region-scaling,chore(infra): tune scaling profile for multi region failover,automation;infra,Infrastructure multi region failover needs to tune scaling profile
+infra-003,automation/infra/cost-guardrail-scaling,chore(infra): tune scaling profile for cost guardrail,automation;infra,Infrastructure cost guardrail needs to tune scaling profile
+infra-004,automation/infra/stateful-upgrade-scaling,chore(infra): tune scaling profile for stateful upgrade story,automation;infra,Infrastructure stateful upgrade story needs to tune scaling profile
+infra-005,automation/infra/traffic-mirror-scaling,chore(infra): tune scaling profile for traffic mirror lane,automation;infra,Infrastructure traffic mirror lane needs to tune scaling profile
+infra-006,automation/infra/backup-retention-scaling,chore(infra): tune scaling profile for backup retention sweep,automation;infra,Infrastructure backup retention sweep needs to tune scaling profile
+infra-007,automation/infra/edge-cache-observability,chore(infra): extend observability for edge cache tier,automation;infra,Infrastructure edge cache tier needs to extend observability
+infra-008,automation/infra/multi-region-observability,chore(infra): extend observability for multi region failover,automation;infra,Infrastructure multi region failover needs to extend observability
+infra-009,automation/infra/cost-guardrail-observability,chore(infra): extend observability for cost guardrail,automation;infra,Infrastructure cost guardrail needs to extend observability
+infra-010,automation/infra/stateful-upgrade-observability,chore(infra): extend observability for stateful upgrade story,automation;infra,Infrastructure stateful upgrade story needs to extend observability
+infra-011,automation/infra/traffic-mirror-observability,chore(infra): extend observability for traffic mirror lane,automation;infra,Infrastructure traffic mirror lane needs to extend observability
+infra-012,automation/infra/backup-retention-observability,chore(infra): extend observability for backup retention sweep,automation;infra,Infrastructure backup retention sweep needs to extend observability
+infra-013,automation/infra/edge-cache-resilience,chore(infra): add resilience hook for edge cache tier,automation;infra,Infrastructure edge cache tier needs to add resilience hook
+infra-014,automation/infra/multi-region-resilience,chore(infra): add resilience hook for multi region failover,automation;infra,Infrastructure multi region failover needs to add resilience hook
+infra-015,automation/infra/cost-guardrail-resilience,chore(infra): add resilience hook for cost guardrail,automation;infra,Infrastructure cost guardrail needs to add resilience hook
+infra-016,automation/infra/stateful-upgrade-resilience,chore(infra): add resilience hook for stateful upgrade story,automation;infra,Infrastructure stateful upgrade story needs to add resilience hook
+infra-017,automation/infra/traffic-mirror-resilience,chore(infra): add resilience hook for traffic mirror lane,automation;infra,Infrastructure traffic mirror lane needs to add resilience hook
+infra-018,automation/infra/backup-retention-resilience,chore(infra): add resilience hook for backup retention sweep,automation;infra,Infrastructure backup retention sweep needs to add resilience hook
+workspaces-001,automation/workspaces/project-blueprints-template,feat(workspaces): ship template for project blueprints,automation;workspaces,Workspace project blueprints needs to ship template
+workspaces-002,automation/workspaces/runtime-policies-template,feat(workspaces): ship template for runtime policies,automation;workspaces,Workspace runtime policies needs to ship template
+workspaces-003,automation/workspaces/workspace-diff-template,feat(workspaces): ship template for workspace diff view,automation;workspaces,Workspace workspace diff view needs to ship template
+workspaces-004,automation/workspaces/catalog-template,feat(workspaces): ship template for workspace catalog,automation;workspaces,Workspace workspace catalog needs to ship template
+workspaces-005,automation/workspaces/project-blueprints-governance,feat(workspaces): tighten governance for project blueprints,automation;workspaces,Workspace project blueprints needs to tighten governance
+workspaces-006,automation/workspaces/runtime-policies-governance,feat(workspaces): tighten governance for runtime policies,automation;workspaces,Workspace runtime policies needs to tighten governance
+workspaces-007,automation/workspaces/workspace-diff-governance,feat(workspaces): tighten governance for workspace diff view,automation;workspaces,Workspace workspace diff view needs to tighten governance
+workspaces-008,automation/workspaces/catalog-governance,feat(workspaces): tighten governance for workspace catalog,automation;workspaces,Workspace workspace catalog needs to tighten governance
+workspaces-009,automation/workspaces/project-blueprints-telemetry,feat(workspaces): instrument telemetry for project blueprints,automation;workspaces,Workspace project blueprints needs to instrument telemetry
+workspaces-010,automation/workspaces/runtime-policies-telemetry,feat(workspaces): instrument telemetry for runtime policies,automation;workspaces,Workspace runtime policies needs to instrument telemetry
+workspaces-011,automation/workspaces/workspace-diff-telemetry,feat(workspaces): instrument telemetry for workspace diff view,automation;workspaces,Workspace workspace diff view needs to instrument telemetry
+workspaces-012,automation/workspaces/catalog-telemetry,feat(workspaces): instrument telemetry for workspace catalog,automation;workspaces,Workspace workspace catalog needs to instrument telemetry
+debug-001,automation/debug/agent-session-trace,feat(debug): add trace capture for agent session timeline,automation;debug,Debug agent session timeline needs to add trace capture
+debug-002,automation/debug/edge-diagnostics-trace,feat(debug): add trace capture for edge diagnostics surface,automation;debug,Debug edge diagnostics surface needs to add trace capture
+debug-003,automation/debug/workflow-profiler-trace,feat(debug): add trace capture for workflow profiler,automation;debug,Debug workflow profiler needs to add trace capture
+debug-004,automation/debug/console-logbook-trace,feat(debug): add trace capture for console logbook,automation;debug,Debug console logbook needs to add trace capture
+debug-005,automation/debug/agent-session-replay,feat(debug): improve replay tooling for agent session timeline,automation;debug,Debug agent session timeline needs to improve replay tooling
+debug-006,automation/debug/edge-diagnostics-replay,feat(debug): improve replay tooling for edge diagnostics surface,automation;debug,Debug edge diagnostics surface needs to improve replay tooling
+debug-007,automation/debug/workflow-profiler-replay,feat(debug): improve replay tooling for workflow profiler,automation;debug,Debug workflow profiler needs to improve replay tooling
+debug-008,automation/debug/console-logbook-replay,feat(debug): improve replay tooling for console logbook,automation;debug,Debug console logbook needs to improve replay tooling
+docs-001,automation/docs/quickstart-playbook,docs: refresh playbook for quickstart guide,automation;docs,Docs quickstart guide needs to refresh playbook
+docs-002,automation/docs/incident-playbook,docs: refresh playbook for incident response deck,automation;docs,Docs incident response deck needs to refresh playbook
+docs-003,automation/docs/quickstart-tutorial,docs: add tutorial for quickstart guide,automation;docs,Docs quickstart guide needs to add tutorial
+docs-004,automation/docs/incident-tutorial,docs: add tutorial for incident response deck,automation;docs,Docs incident response deck needs to add tutorial
+docs-005,automation/docs/quickstart-api,docs: update API for quickstart guide,automation;docs,Docs quickstart guide needs to update API
+docs-006,automation/docs/incident-api,docs: update API for incident response deck,automation;docs,Docs incident response deck needs to update API
+deps-001,automation/deps/playwright-upgrade,chore(deps): upgrade package for Playwright stack,automation;deps,Dependencies Playwright stack needs to upgrade package
+deps-002,automation/deps/huggingface-upgrade,chore(deps): upgrade package for HuggingFace toolkit,automation;deps,Dependencies HuggingFace toolkit needs to upgrade package
+deps-003,automation/deps/playwright-pin,chore(deps): pin transitive for Playwright stack,automation;deps,Dependencies Playwright stack needs to pin transitive
+deps-004,automation/deps/huggingface-pin,chore(deps): pin transitive for HuggingFace toolkit,automation;deps,Dependencies HuggingFace toolkit needs to pin transitive

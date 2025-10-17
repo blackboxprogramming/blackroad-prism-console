@@ -1,0 +1,54 @@
+name: Rollback Tests
+
+on:
+  pull_request:
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Start services
+        run: docker compose -f docker-compose.prism.yml up -d api
+      - name: Prepare database
+        run: |
+          mkdir -p srv/blackroad-api
+          sqlite3 srv/blackroad-api/blackroad.db 'CREATE TABLE t(id INTEGER); INSERT INTO t VALUES(1);'
+      - name: Snapshot database
+        id: snap
+        run: |
+          DB_PATH=srv/blackroad-api/blackroad.db SNAPSHOT_DIR=tmp/snapshots scripts/snapshot.sh > snap.txt
+          echo "file=$(cat snap.txt)" >> "$GITHUB_OUTPUT"
+      - name: Verify snapshot
+        run: test -f "${{ steps.snap.outputs.file }}"
+      - name: Simulate failure
+        run: rm srv/blackroad-api/blackroad.db
+      - name: Rollback
+        id: rollback
+        run: DB_PATH=srv/blackroad-api/blackroad.db SNAPSHOT_DIR=tmp/snapshots scripts/rollback.sh
+      - name: Verify rollback
+        run: test -f srv/blackroad-api/blackroad.db
+      - name: Upload snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: latest-snapshot
+          path: ${{ steps.snap.outputs.file }}
+          retention-days: 7
+      - name: Backend health check
+        id: health
+        run: |
+          if curl -fsS http://localhost:4000/api/health >/dev/null; then echo "api=OK" >> "$GITHUB_OUTPUT"; else echo "api=FAIL" >> "$GITHUB_OUTPUT"; fi
+      - name: Run tests
+        run: npm test
+      - name: Summary
+        if: always()
+        run: |
+          ts=$(date -u +"%Y-%m-%dT%H:%MZ")
+          summary=$(jq -n --argjson sc "${{ steps.snap.outcome == 'success' }}" --argjson rs "${{ steps.rollback.outcome == 'success' }}" --arg api "${{ steps.health.outputs.api }}" --arg ts "$ts" '{snapshot_created:$sc, rollback_successful:$rs, api_health:$api, timestamp:$ts}')
+          echo "$summary" | tee summary.json
+          curl -sS -X POST -H 'Content-Type: application/json' -d "$summary" http://localhost:4000/logs || true

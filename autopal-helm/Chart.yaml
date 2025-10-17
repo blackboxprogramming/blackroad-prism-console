@@ -1,0 +1,7 @@
+apiVersion: v2
+name: autopal
+description: Helm chart for deploying the Autopal console service.
+description: Helm chart for deploying the Autopal FastAPI console with optional Redis.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

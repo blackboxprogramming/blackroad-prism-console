@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DEFAULT_ROOT="/home/pi/portal"
+ROOT="${PORTAL_ROOT:-$DEFAULT_ROOT}"
+ROOT="${ROOT%/}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ ! -d "$ROOT" ]]; then
+  ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+fi
+
+ok=1
+require() {
+  local cmd="$1"
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "missing: $cmd" >&2
+    ok=0
+  fi
+}
+
+echo "== portal env check =="
+require bitcoin-cli
+require jq
+require python3
+if [[ ! -s "$ROOT/configs/raw.descriptor" ]]; then
+  echo "missing: $ROOT/configs/raw.descriptor" >&2
+  ok=0
+fi
+
+echo "optional (nice to have): litecoin-cli, curl (for ETH RPC), qrencode, zbarimg, gum/whiptail, tor, caddy"
+
+if (( ok )); then
+  exit 0
+else
+  exit 1
+fi

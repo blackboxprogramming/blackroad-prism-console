@@ -1,0 +1,15 @@
+{
+  "roles": {
+    "ADMIN": ["ADMIN", "TASK_CREATE", "TASK_ROUTE", "TASK_VIEW", "TASK_EXPORT", "PROGRAM_EDIT", "SCHEDULE_RUN", "APPROVAL_REQUEST", "APPROVAL_DECIDE"],
+    "CFO": ["TASK_VIEW", "APPROVAL_DECIDE"],
+    "APPROVER": ["APPROVAL_DECIDE"],
+    "Engineer": ["TASK_CREATE", "TASK_ROUTE", "TASK_VIEW"],
+    "PM": ["TASK_CREATE", "TASK_VIEW", "APPROVAL_REQUEST", "TASK_ROUTE"]
+  },
+  "users": [
+    {"id": "U_SYS", "name": "system", "roles": ["ADMIN"]},
+    {"id": "U_CFO", "name": "CFO", "roles": ["CFO"]},
+    {"id": "U_ENG", "name": "Engineer", "roles": ["Engineer"]},
+    {"id": "U_PM", "name": "PM", "roles": ["PM"]}
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "name": "@blackroad/regdesk-core",
+  "version": "0.1.0",
+  "description": "Core services for the BlackRoad RegDesk platform.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@blackroad/regdesk-db": "^0.1.0",
+    "@blackroad/regdesk-integrations": "^0.1.0",
+    "@blackroad/regdesk-rules": "^0.1.0",
+    "@blackroad/regdesk-worm": "^0.1.0",
+    "bullmq": "^5.7.4",
+    "date-fns": "^3.6.0",
+    "redis": "^4.6.13",
+    "pino": "^9.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^5.4.5",
+    "vitest": "^1.5.0"
+  }
+}

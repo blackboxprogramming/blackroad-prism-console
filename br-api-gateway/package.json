@@ -1,0 +1,43 @@
+{
+  "name": "br-api-gateway",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p .",
+    "start": "node dist/index.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ecs": "^3.637.0",
+    "@aws-sdk/client-ssm": "^3.637.0",
+    "@fastify/swagger": "^8.14.0",
+    "@fastify/swagger-ui": "^1.10.2",
+    "fastify": "^4.28.1",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.11.5",
+    "@aws-sdk/client-ssm": "^3.614.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.12.0",
+    "date-fns": "^3.6.0",
+    "pg": "^8.11.3",
+    "pino": "^9.4.0"
+    "pino": "^9.4.0",
+    "pg": "^8.12.0",
+    "node-fetch": "^3.3.2",
+    "@aws-sdk/client-ssm": "^3.645.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/pg": "^8.15.5",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+    "vitest": "^2.0.5",
+    "@types/node": "^20.11.30",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/pg": "^8.11.6"
+    "@types/pg": "^8.15.5"
+  }
+}

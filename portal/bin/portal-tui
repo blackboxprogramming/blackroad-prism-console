@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BIN="$ROOT/bin/portal"
+
+pick() {
+  if command -v gum >/dev/null 2>&1; then
+    gum choose "$@"
+  else
+    whiptail --title "Portal" --menu "Choose" 20 78 10 "$@" 3>&2 2>&1 1>&3
+  fi
+}
+
+prompt() {
+  local label="$1"
+  if command -v gum >/dev/null 2>&1; then
+    gum input --placeholder "$label"
+  else
+    whiptail --inputbox "$label" 10 70 3>&1 1>&2 2>&3
+  fi
+}
+
+notice() {
+  if command -v gum >/dev/null 2>&1; then
+    gum format -- "✅ $*"
+  else
+    whiptail --msgbox "$*" 10 70
+  fi
+}
+
+while true; do
+  CHOICE=$(pick \
+    "Balance Proof" "Create aura-proof.json at tip" \
+    "New PSBT" "Build unsigned PSBT (multi-dest)" \
+    "Verify PSBT" "Analyze signed PSBT" \
+    "Broadcast PSBT" "Finalize + broadcast (needs confirm)" \
+    "Policy Status" "Check approvals vs threshold" \
+    "Exit" "Quit")
+  case "$CHOICE" in
+    "Balance Proof")
+      DESCFILE=$(prompt "Path to raw.descriptor")
+      OUT=$("$BIN" proof "$DESCFILE"); notice "$OUT"
+      ;;
+    "New PSBT")
+      LABEL=$(prompt "Label (e.g., pay001)")
+      OUTS=$(prompt "Path to outputs.json")
+      FEE=$(prompt "Fee rate (sat/vB)")
+      OUT=$("$BIN" psbt:new "$LABEL" "$OUTS" "$FEE"); notice "$OUT"
+      ;;
+    "Verify PSBT")
+      FILE=$(prompt "Path to <label>.signed.psbt")
+      OUT=$("$BIN" psbt:verify "$FILE"); notice "$OUT"
+      ;;
+    "Broadcast PSBT")
+      FILE=$(prompt "Path to <label>.signed.psbt")
+      CONFIRM_BROADCAST=1 "$BIN" psbt:broadcast "$FILE"
+      ;;
+    "Policy Status")
+      LABEL=$(prompt "Request label")
+      OUT=$("$BIN" policy:status "$LABEL"); notice "$OUT"
+      ;;
+    "Exit") exit 0 ;;
+  esac
+done

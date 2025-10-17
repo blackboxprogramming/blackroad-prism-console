@@ -1,0 +1,51 @@
+{
+  "routes": [
+    {
+      "patterns": ["blackroad/**", "apps/blackroad/**"],
+      "mention": "@blackboxprogramming/blackroad"
+    },
+    {
+      "patterns": ["prism/**", "apps/prism/**"],
+      "mention": "@blackboxprogramming/prism"
+    },
+    {
+      "patterns": ["infra/**", ".github/workflows/**"],
+      "mention": "@blackboxprogramming/platform"
+    }
+  ],
+  "always": []
+}
+# Globs → who to @
+routes:
+  - patterns: ["frontend/**", "apps/web/**"]
+    mention: "@your-org/frontend-team"
+  - patterns: ["api/**", "services/**"]
+    mention: "@your-org/api-team"
+  - patterns: ["infra/**", ".github/workflows/**"]
+    mention: "@your-org/platform-team"
+  - patterns: ["db/migrations/**"]
+    mention: "@your-org/data-team"
+  - patterns: ["docs/**"]
+    mention: "@your-handle"
+  - patterns: ["docs/**"]
+    mention: "@alexalouise"
+
+# Optional: always add these mentions on every PR
+routes:
+  - patterns:
+      - "blackroad/**"
+      - "BlackRoad/**"
+      - "apps/blackroad/**"
+    mention: "@blackboxprogramming/blackroad"
+  - patterns:
+      - "prism/**"
+      - "apps/prism/**"
+    mention: "@blackboxprogramming/prism"
+  - patterns:
+      - "infra/**"
+      - ".github/workflows/**"
+    mention: "@blackboxprogramming/platform"
+    mention: "@your-handle"   # swap with your GH username
+
+# Always mention these on every PR (optional)
+always: []

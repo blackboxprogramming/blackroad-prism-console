@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+OUT="${1:?usage: qr-to-psbt <out.psbt> <img1.png> [img2.png ...] }"; shift
+TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
+declare -A map; single=""
+for img in "$@"; do
+  txt="$(zbarimg --raw "$img" 2>/dev/null | tr -d '\r')"
+  if [[ "$txt" =~ ^PSBT_PART:([0-9]+)/([0-9]+):(.*)$ ]]; then
+    idx="${BASH_REMATCH[1]}"; total="${BASH_REMATCH[2]}"; payload="${BASH_REMATCH[3]}"
+    map["$idx"]="$payload"; echo "part $idx/$total read"
+  else
+    single="$txt"
+  fi
+done
+if [[ -n "$single" && ${#map[@]} -eq 0 ]]; then
+  echo -n "$single" > "$OUT"
+  echo "PSBT restored: $OUT"
+  exit 0
+fi
+# multi-part path
+if [[ ${#map[@]} -eq 0 ]]; then
+  echo "no QR payloads detected" >&2; exit 2
+fi
+# order parts 1..total
+full=""
+for ((i=1;i<=total;i++)); do
+  [[ -n "${map[$i]:-}" ]] || { echo "missing part $i/$total" >&2; exit 3; }
+  full+="${map[$i]}"
+done
+echo -n "$full" > "$OUT"
+echo "PSBT restored: $OUT"

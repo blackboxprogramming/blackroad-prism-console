@@ -29,6 +29,14 @@ Thanks for taking the time to contribute to BlackRoad Prism Console!
 2. Push your branch and open a Pull Request.
 3. Ensure CI checks pass and respond to review feedback.
 
+## PR Automation Bundle
+
+To streamline large review waves we ship a GitHub automation bundle in this repository:
+
+- Run `scripts/seed-labels.ts` (via `pnpm tsx`) to bootstrap labels referenced by the workflows and CSV helpers.
+- Use `scripts/bulk-create-prs.sh prs.csv --dry-run` to preview draft PR creation before sending them live.
+- Keep the `prs.csv` catalog up to date so the automation can map branches to the correct reviewers and labels.
+
 We appreciate your contributions!
 Thank you for your interest in contributing to this project!
 

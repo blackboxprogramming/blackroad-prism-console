@@ -1,0 +1,145 @@
+name: preview-frontend-host
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+permissions:
+  id-token: write
+  contents: read
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPO: ${{ vars.ECR_REPO }}
+  ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+  VPC_ID: ${{ vars.VPC_ID }}
+  SUBNETS: ${{ vars.SUBNETS }}
+  SERVICE_SG: ${{ vars.SERVICE_SG }}
+  ALB_ARN: ${{ vars.ALB_ARN }}
+  HTTPS_LISTENER_ARN: ${{ vars.HTTPS_LISTENER_ARN }}
+  ALB_ZONE_ID: ${{ vars.ALB_ZONE_ID }}
+  ALB_DNS: ${{ vars.ALB_DNS }}
+  HOSTED_ZONE_ID: ${{ vars.HOSTED_ZONE_ID }}
+  CONTAINER_PORT: ${{ vars.CONTAINER_PORT }}
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set vars
+        run: |
+          set -euo pipefail
+          echo "PR=${{ github.event.pull_request.number }}" >> "$GITHUB_ENV"
+          echo "REF=${{ github.sha }}" >> "$GITHUB_ENV"
+          echo "NAME=br-web-pr-${{ github.event.pull_request.number }}" >> "$GITHUB_ENV"
+          echo "HOST=pr-${{ github.event.pull_request.number }}.web.dev.blackroad.io" >> "$GITHUB_ENV"
+          echo "SUBNET_JSON=[\"${SUBNETS//,/\",\"}\"]" >> "$GITHUB_ENV"
+          ACCOUNT_ID=$(echo "$ECR_REPO" | cut -d. -f1)
+          echo "ACCOUNT_ID=${ACCOUNT_ID}" >> "$GITHUB_ENV"
+
+      - name: Tear down if closed
+        if: github.event.action == 'closed'
+        run: |
+          set -euo pipefail
+          RULE_ARN=$(aws elbv2 describe-rules --listener-arn "$HTTPS_LISTENER_ARN" \
+            --query "Rules[?contains(JSON.stringify(Conditions),'$HOST')].RuleArn" --output text || true)
+          [ -n "$RULE_ARN" ] && [ "$RULE_ARN" != "None" ] && aws elbv2 delete-rule --rule-arn "$RULE_ARN" || true
+          aws ecs update-service --cluster "$ECS_CLUSTER" --service "$NAME" --desired-count 0 >/dev/null 2>&1 || true
+          aws ecs delete-service --cluster "$ECS_CLUSTER" --service "$NAME" --force >/dev/null 2>&1 || true
+          TG_ARN=$(aws elbv2 describe-target-groups --names "$NAME" --query 'TargetGroups[0].TargetGroupArn' --output text 2>/dev/null || true)
+          [ -n "$TG_ARN" ] && [ "$TG_ARN" != "None" ] && aws elbv2 delete-target-group --target-group-arn "$TG_ARN" || true
+          CHANGE=$(cat <<JSON
+          {"Comment":"del","Changes":[{"Action":"DELETE","ResourceRecordSet":{
+            "Name":"$HOST","Type":"A",
+            "AliasTarget":{"HostedZoneId":"$ALB_ZONE_ID","DNSName":"$ALB_DNS","EvaluateTargetHealth":false}}}]}
+          JSON
+          )
+          aws route53 change-resource-record-sets --hosted-zone-id "$HOSTED_ZONE_ID" --change-batch "$CHANGE" || true
+
+      - name: Build & push image
+        if: github.event.action != 'closed'
+        run: |
+          set -euo pipefail
+          IMAGE="$ECR_REPO:pr-${PR}-${REF}"
+          aws ecr get-login-password | docker login --username AWS --password-stdin "$(echo "$ECR_REPO" | awk -F/ '{print $1}')"
+          npm ci
+          npm run build
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: Register task def
+        if: github.event.action != 'closed'
+        run: |
+          cat > taskdef.json <<JSON
+          { "family":"${NAME}", "networkMode":"awsvpc","requiresCompatibilities":["FARGATE"],"cpu":"256","memory":"512",
+            "executionRoleArn":"arn:aws:iam::${ACCOUNT_ID}:role/github-terraform",
+            "taskRoleArn":"arn:aws:iam::${ACCOUNT_ID}:role/github-terraform",
+            "containerDefinitions":[{ "name":"${NAME}","image":"${IMAGE}",
+              "portMappings":[{ "containerPort": ${CONTAINER_PORT}, "hostPort": ${CONTAINER_PORT}, "protocol":"tcp" }],
+              "environment":[{ "name":"PORT","value":"${CONTAINER_PORT}" }],
+              "logConfiguration":{"logDriver":"awslogs","options":{"awslogs-group":"/blackroad/${NAME}","awslogs-region":"${AWS_REGION}","awslogs-stream-prefix":"web"}}
+            }]
+          }
+          JSON
+          aws logs create-log-group --log-group-name "/blackroad/${NAME}" 2>/dev/null || true
+          echo "TD_ARN=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query 'taskDefinition.taskDefinitionArn' --output text)" >> "$GITHUB_ENV"
+
+      - name: Create TG
+        if: github.event.action != 'closed'
+        run: |
+          set -euo pipefail
+          if aws elbv2 describe-target-groups --names "$NAME" --query 'TargetGroups[0].TargetGroupArn' --output text >/tmp/tg_arn 2>/dev/null; then
+            TG_ARN=$(cat /tmp/tg_arn)
+          else
+            TG_ARN=$(aws elbv2 create-target-group --name "${NAME}" --protocol HTTP --port ${CONTAINER_PORT} --vpc-id "$VPC_ID" --target-type ip --health-check-path "/health" --query 'TargetGroups[0].TargetGroupArn' --output text)
+          fi
+          echo "TG_ARN=$TG_ARN" >> "$GITHUB_ENV"
+
+      - name: Listener rule (host header)
+        if: github.event.action != 'closed'
+        run: |
+          set -euo pipefail
+          EXISTING_RULE=$(aws elbv2 describe-rules --listener-arn "$HTTPS_LISTENER_ARN" \
+            --query "Rules[?contains(JSON.stringify(Conditions),'$HOST')].RuleArn" --output text || true)
+          if [ -n "$EXISTING_RULE" ] && [ "$EXISTING_RULE" != "None" ]; then
+            aws elbv2 delete-rule --rule-arn "$EXISTING_RULE"
+          fi
+          aws elbv2 create-rule --listener-arn "$HTTPS_LISTENER_ARN" --priority $(( 9000 - PR % 3000 )) \
+            --conditions "Field=host-header,Values=${HOST}" \
+            --actions "Type=forward,TargetGroupArn=${TG_ARN}"
+
+      - name: DNS record
+        if: github.event.action != 'closed'
+        run: |
+          CHANGE=$(cat <<JSON
+          {"Comment":"upsert","Changes":[{"Action":"UPSERT","ResourceRecordSet":{
+            "Name":"$HOST","Type":"A",
+            "AliasTarget":{"HostedZoneId":"$ALB_ZONE_ID","DNSName":"$ALB_DNS","EvaluateTargetHealth":false}}}]}
+          JSON
+          )
+          aws route53 change-resource-record-sets --hosted-zone-id "$HOSTED_ZONE_ID" --change-batch "$CHANGE"
+
+      - name: ECS service
+        if: github.event.action != 'closed'
+        run: |
+          set -euo pipefail
+          if aws ecs describe-services --cluster "$ECS_CLUSTER" --services "$NAME" --query 'services[0].status' --output text 2>/dev/null | grep -q ACTIVE; then
+            aws ecs update-service --cluster "$ECS_CLUSTER" --service "$NAME" --task-definition "$TD_ARN" --desired-count 1
+          else
+            aws ecs create-service --cluster "$ECS_CLUSTER" --service-name "$NAME" --task-definition "$TD_ARN" \
+              --desired-count 1 --launch-type FARGATE \
+              --network-configuration "awsvpcConfiguration={subnets=${SUBNET_JSON},securityGroups=[\"$SERVICE_SG\"],assignPublicIp=DISABLED}" \
+              --load-balancers "targetGroupArn=${TG_ARN},containerName=${NAME},containerPort=${CONTAINER_PORT}"
+          fi
+          aws ecs wait services-stable --cluster "$ECS_CLUSTER" --services "$NAME"
+          echo "PREVIEW_URL=https://${HOST}" >> "$GITHUB_ENV"
+
+      - name: Comment PR
+        if: github.event.action != 'closed'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          message: "🧪 Frontend preview: **${{ env.PREVIEW_URL }}** (auto-updates, tears down on close)"

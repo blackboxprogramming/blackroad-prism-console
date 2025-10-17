@@ -1,0 +1,13 @@
+{
+  "energy_target_kwh": 38.5,
+  "coolest_block_mode": "highest_fees",
+  "trophies": {
+    "coolest_block": "🏆 Coolest Block",
+    "energy_saver": "🟢 Energy Saver",
+    "fee_hunter": "🔥 Fee Hunter"
+  },
+  "output": {
+    "markdown_path": "leaderboard.md",
+    "json_path": "leaderboard_snapshot.json"
+  }
+}

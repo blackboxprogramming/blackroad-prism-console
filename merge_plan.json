@@ -37,7 +37,6 @@
         "bridge"
       ],
       "risks": [
-        "bridge missing package.json with type module",
         "conflicts with PR #1014",
         "conflicts with PR #1029",
         "conflicts with PR #1026",
@@ -64,7 +63,6 @@
         "bridge"
       ],
       "risks": [
-        "bridge missing package.json with type module",
         "conflicts with PR #1015",
         "conflicts with PR #1014",
         "conflicts with PR #1026",
@@ -91,7 +89,6 @@
         "bridge"
       ],
       "risks": [
-        "bridge missing package.json with type module",
         "conflicts with PR #1015",
         "conflicts with PR #1014",
         "conflicts with PR #1029",
@@ -225,7 +222,6 @@
         "ui"
       ],
       "risks": [
-        "bridge missing package.json with type module",
         "conflicts with PR #1023",
         "conflicts with PR #1016",
         "conflicts with PR #1015",
@@ -313,7 +309,6 @@
         "units"
       ],
       "risks": [
-        "bridge missing package.json with type module",
         "conflicts with PR #1015",
         "conflicts with PR #1014",
         "conflicts with PR #1029",
@@ -879,11 +874,5 @@
       ]
     }
   ],
-  "fix_forward": [
-    "Add srv/ollama-bridge/package.json with {\"type\":\"module\"}",
-    "Add srv/ollama-bridge/package.json with {\"type\":\"module\"}",
-    "Add srv/ollama-bridge/package.json with {\"type\":\"module\"}",
-    "Add srv/ollama-bridge/package.json with {\"type\":\"module\"}",
-    "Add srv/ollama-bridge/package.json with {\"type\":\"module\"}"
-  ]
+  "fix_forward": []
 }

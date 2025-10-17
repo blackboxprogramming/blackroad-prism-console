@@ -1,0 +1,42 @@
+name: "feat: test payout flow"
+description: "Enable Cadillac Loop creators to complete a $5 Stripe test payout."
+title: "feat: test payout flow"
+labels:
+  - "type/feature"
+  - "prio/normal"
+assignees:
+  - "Copilot"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Overview
+        Hook up the Stripe test payout loop and Slack alert so creators can experience the full reward flow.
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Problem statement, solution outline, and any supporting notes.
+      value: |
+        **Problem**
+        Creators can’t complete payout loop.
+
+        **Solution**
+        Integrate Stripe test mode. Trigger `$5` payout when balance ≥ 5. Emit Slack “First Payout” message on success.
+
+        **Notes**
+        • Finance test account lives in secrets → `STRIPE_TEST_KEY`.
+      render: markdown
+  - type: checkboxes
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      options:
+        - label: "Balance threshold of $5 unlocks payout action"
+        - label: "Stripe test charge succeeds using `STRIPE_TEST_KEY`"
+        - label: "Slack #cadillac-loop receives a First Payout message"
+  - type: textarea
+    id: updates
+    attributes:
+      label: Status Updates
+      description: Track integration steps, QA results, and rollout details.

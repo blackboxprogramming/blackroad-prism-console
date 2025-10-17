@@ -155,19 +155,205 @@ paths:
           description: Invalid request
   /api/contradictions:
     get:
-      summary: List logged contradictions
+      summary: List contradictory claims
       responses:
         '200':
-          description: Recent contradictions
+          description: Contradiction summary
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   contradictions:
-                    type: array
-                    items:
-                      type: object
+                    type: object
+                    properties:
+                      issues:
+                        type: integer
+                      summary:
+                        type: object
+                        properties:
+                          total_claims:
+                            type: integer
+                          contradictory_claims:
+                            type: integer
+                          unresolved_observations:
+                            type: integer
+                      records:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            claim_id:
+                              type: string
+                            topic:
+                              type: string
+                            statement:
+                              type: string
+                            support:
+                              type: number
+                            refute:
+                              type: number
+                            unknown:
+                              type: number
+                            observation_count:
+                              type: integer
+                            open_observations:
+                              type: integer
+                            last_observed_at:
+                              type: string
+                              format: date-time
+                            observations:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                  claim_id:
+                                    type: string
+                                  polarity:
+                                    type: integer
+                                  confidence:
+                                    type: number
+                                  note:
+                                    type: string
+                                  observed_at:
+                                    type: string
+                                    format: date-time
+                                  status:
+                                    type: string
+                                  source_kind:
+                                    type: string
+                                  source_label:
+                                    type: string
+                                  source_uri:
+                                    type: string
+    post:
+      summary: Record an observation for a claim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                claim_id:
+                  type: string
+                topic:
+                  type: string
+                statement:
+                  type: string
+                polarity:
+                  type: integer
+                  enum: [-1, 0, 1]
+                confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                note:
+                  type: string
+                source:
+                  type: object
+                  properties:
+                    kind:
+                      type: string
+                    label:
+                      type: string
+                    uri:
+                      type: string
+              required:
+                - topic
+                - statement
+      responses:
+        '200':
+          description: Observation recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  observation:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      claim_id:
+                        type: string
+                      polarity:
+                        type: integer
+                      confidence:
+                        type: number
+                      note:
+                        type: string
+                      observed_at:
+                        type: string
+                        format: date-time
+                      status:
+                        type: string
+                      source_kind:
+                        type: string
+                      source_label:
+                        type: string
+                      source_uri:
+                        type: string
+                  claim:
+                    type: object
+                    properties:
+                      claim_id:
+                        type: string
+                      topic:
+                        type: string
+                      statement:
+                        type: string
+                      support:
+                        type: number
+                      refute:
+                        type: number
+                      unknown:
+                        type: number
+                      observation_count:
+                        type: integer
+                      open_observations:
+                        type: integer
+                      last_observed_at:
+                        type: string
+                        format: date-time
+  /api/contradictions/{observationId}/resolve:
+    post:
+      summary: Update the status of an observation
+      parameters:
+        - in: path
+          name: observationId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [open, investigating, resolved]
+                note:
+                  type: string
+      responses:
+        '200':
+          description: Updated observation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  observation:
+                    type: object
+                  claim:
+                    type: object
   /api/events:
     get:
       summary: List recent events

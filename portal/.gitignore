@@ -1,0 +1,10 @@
+audits/*
+!audits/.gitkeep
+psbts/*
+!psbts/.gitkeep
+proofs/*
+!proofs/.gitkeep
+configs/approvals/*
+!configs/approvals/.gitkeep
+configs/*.outputs.json
+configs/*.coin_control.json

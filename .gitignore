@@ -5,9 +5,21 @@ publicssh.sh
 
 # Node
 **/node_modules/
+node_modules/
+**/node_modules/
+services/*/node_modules/
 dist/
 .cache/
 .env
+*.egg-info/
+*.egg-info
+!tools/tools-adapter/.env
+artifacts.sha256
+public/artifacts.sha256
+
+# Local data
+srv/blackroad-api/blackroad.db
+_trash/
 artifacts.sha256
 public/artifacts.sha256
 
@@ -21,6 +33,7 @@ yarn-debug.log*
 pr_autopilot.log
 pnpm-debug.log*
 blackroad_deploy.log
+prism/logs/
 
 # OS
 .DS_Store
@@ -29,11 +42,13 @@ Thumbs.db
 # Artifacts
 artifacts/
 coverage/
+cmd/slack/slack
 
 # Project-specific
 repos/
 runtime/
 __pycache__/
+**/*.egg-info/
 codex/runtime/
 benchmarks/
 
@@ -41,6 +56,8 @@ benchmarks/
 secrets/*
 datasets/
 models/
+!br-dbt/models/
+!br-dbt/models/**
 checkpoints/
 outputs/
 rag/index/*.faiss
@@ -68,6 +85,7 @@ target/
 **/target/
 *.db
 *.sqlite
+*.tsbuildinfo
 
 # Never commit SSH private keys
 id_ed25519

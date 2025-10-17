@@ -1,0 +1,12 @@
+{{- if .Values.config.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "autopal.fullname" . }}-config
+  labels:
+    {{- include "autopal.labels" . | nindent 4 }}
+data:
+  autopal.config.json: |
+    {{- toPrettyJson .Values.appConfig | nindent 4 }}
+{{- end }}
+    {{- toPrettyJson .Values.config | nindent 4 }}

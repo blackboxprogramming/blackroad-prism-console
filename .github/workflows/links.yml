@@ -5,6 +5,8 @@ on:
     - cron: '0 2 * * *'
 permissions:
   contents: read
+on: { pull_request: {}, schedule: [ { cron: "0 2 * * *" } ] }
+permissions: { contents: read }
 jobs:
   lychee:
     runs-on: ubuntu-latest
@@ -18,5 +20,9 @@ jobs:
           args: --verbose --no-progress --timeout 20s "apps/quantum/ternary_consciousness_v3.html"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: lycheeverse/lychee-action@v2
+        if: steps.chk.outputs.ok == '1'
+        with: { args: --verbose --no-progress --timeout 20s "apps/quantum/ternary_consciousness_v3.html" }
+        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
       - if: steps.chk.outputs.ok != '1'
         run: echo "ℹ️ Link check skipped (no HTML)." >> $GITHUB_STEP_SUMMARY

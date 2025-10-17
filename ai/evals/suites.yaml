@@ -1,0 +1,6 @@
+suites:
+  default:
+    quality: {}
+    cost: {}
+    latency: {}
+    safety: {}

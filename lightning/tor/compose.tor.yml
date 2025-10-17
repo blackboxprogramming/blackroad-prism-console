@@ -1,0 +1,17 @@
+services:
+  tor:
+    image: alpine/tor:latest
+    container_name: tor
+    restart: unless-stopped
+    volumes:
+      - ./lightning/tor/torrc:/etc/tor/torrc:ro
+      - tor-state:/var/lib/tor
+    command: ["-f", "/etc/tor/torrc"]
+    healthcheck:
+      test: ["CMD", "sh", "-lc", "test -f /var/lib/tor/lightning/hostname"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+volumes:
+  tor-state:
+    name: tor-state

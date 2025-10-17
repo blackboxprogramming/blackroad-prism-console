@@ -1,0 +1,15 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "idea_id", "status"],
+    "properties": {
+      "id": {"type": "string"},
+      "idea_id": {"type": "string"},
+      "hypothesis": {"type": "string"},
+      "method": {"type": "string"},
+      "status": {"type": "string"},
+      "decision": {"type": ["string", "null"]}
+    }
+  }
+}

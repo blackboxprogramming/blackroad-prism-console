@@ -1,0 +1,21 @@
+{
+  "feature_flags": {
+    "global_enabled": true
+  },
+  "maintenance_mode": {
+    "allowlist_endpoints": [
+      "GET /health/live",
+      "GET /health/ready"
+    ],
+    "status_code": 503,
+    "retry_after_seconds": 60,
+    "message": "AutoPal is paused by ops.",
+    "hint": "Try again later or use runbooks.",
+    "runbook": "https://runbooks/autopal/maintenance",
+    "break_glass": {
+      "enabled": false,
+      "header": "X-Break-Glass",
+      "tokens": []
+    }
+  }
+}

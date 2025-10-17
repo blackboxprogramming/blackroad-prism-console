@@ -101,6 +101,7 @@ def fp_of_line(line):
     parts = p.stdout.strip().split()
     # ssh-keygen -lf output: "<bits> SHA256:<fingerprint> <comment> [type]"
     return parts[1] if len(parts) >= 2 else None
+    return parts[1] if len(parts) >= 2 else None  # Example: "256 SHA256:abcdef... host (ED25519)"
 
 def pin_known_hosts(host_map):
     ensure_dir(KNOWN_HOSTS_PATH.parent)

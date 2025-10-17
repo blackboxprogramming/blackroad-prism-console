@@ -1,0 +1,34 @@
+{
+  "name": "autopal-express",
+  "version": "1.0.0",
+  "description": "Autopal control plane implemented with Express, mirroring security rails from the FastAPI service.",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "test": "npm run lint",
+    "lint": "node ./scripts/run-lint.js"
+  },
+  "keywords": [
+    "autopal",
+    "express",
+    "security"
+  ],
+  "author": "Blackroad Engineering",
+  "license": "Apache-2.0",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.12.2",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.8.0",
+    "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.2.0",
+    "morgan": "^1.10.1",
+    "rate-limiter-flexible": "^8.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

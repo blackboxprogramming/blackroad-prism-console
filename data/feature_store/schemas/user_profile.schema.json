@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "user_profile_v1",
+  "type": "object",
+  "properties": {
+    "user_id": { "type": "string" },
+    "last_seen": { "type": "string", "format": "date-time" },
+    "sessions_30d": { "type": "number" },
+    "purchases_30d": { "type": "number" }
+  },
+  "required": ["user_id", "last_seen", "sessions_30d", "purchases_30d"]
+}

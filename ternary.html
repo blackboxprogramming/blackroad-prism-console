@@ -10,6 +10,7 @@
 
     <script>
     // --- Console-only runtime self-checks ---
+    // --- Console-only runtime sanity checks ---
     (function(){
       const log = console.log.bind(console, '[runtime]');
       const warn = console.warn.bind(console, '[runtime]');
@@ -22,6 +23,7 @@
         if (!window.math || !math.expm) error('math.js missing or no expm');
         else {
           // quick unitary check
+          // quick unitary sanity
           const H = math.matrix([[1,0.1,0],[0.1,0,-0.2],[0,-0.2,-0.9]]);
           const U  = math.expm(math.multiply(math.complex(0,-1), H));
           const Ud = math.ctranspose(U);
@@ -31,6 +33,7 @@
         }
 
         // density check
+        // density sanity
         if (window.math) {
           const psi = math.divide(math.matrix([1,1,1]), Math.sqrt(3));
           const rho = math.multiply(math.reshape(psi,[3,1]), math.ctranspose(math.reshape(psi,[3,1])));
@@ -1481,6 +1484,7 @@
           }
 
           // 2) math.js expm check + unitary verification
+          // 2) math.js expm sanity + unitary check
           if (window.math && math.expm) {
             const H = math.matrix([
               [1, 0.2, 0],
@@ -1506,6 +1510,7 @@
           }
 
           // 3) Density matrix check (trace≈1, 1/3≤Tr(ρ²)≤1)
+          // 3) Density matrix sanity (trace≈1, 1/3≤Tr(ρ²)≤1)
           if (window.math) {
             const psi = math.divide(math.matrix([1, 1, 1]), Math.sqrt(3)); // balanced
             const rho = math.multiply(
@@ -1555,6 +1560,7 @@
           }
 
           // 5) Frame loop / timing check
+          // 5) Frame loop / timing sanity
           let rafHit = false;
           const p1 = new Promise((res) =>
             requestAnimationFrame(() => {

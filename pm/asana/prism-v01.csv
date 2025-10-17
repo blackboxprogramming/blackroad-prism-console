@@ -1,0 +1,12 @@
+Task Name,Description,Assignee Email,Section,Due Date
+Create PRISM PRD in Notion,Paste PRD and link to Jira board + repos.,amundsonalexa@gmail.com,Today,2025-10-14
+Figma file: PRISM v0.1,Create frames for Sign-in, Onboarding, Dashboard, Sources.,amundsonalexa@gmail.com,Today,2025-10-14
+Kickoff post,#products-prism kickoff message (scope, cadence, demo date).,amundsonalexa@gmail.com,Today,2025-10-14
+Seed demo data,Ensure seeded events/errors so dashboard tiles render.,amundsonalexa@gmail.com,This Week,2025-10-15
+Friday demo script,Draft 5-min script; link to zoom recording & feedback doc.,amundsonalexa@gmail.com,This Week,2025-10-17
+DB: sources tables,Create tables (sources, source_secrets, source_syncs, raw_source_x_events).,amundsonalexa@gmail.com,Today,2025-10-17
+API: connect + status,POST /v1/sources with token validation; GET /v1/sources; GET /v1/sources/:id/status.,amundsonalexa@gmail.com,Today,2025-10-17
+Ingest worker,Create br-ingest-source-x; pulls token from SSM; upsert raw events; writes syncs.,amundsonalexa@gmail.com,This Week,2025-10-18
+Trigger first sync,API → ECS RunTask override (SOURCE_ID) after connect.,amundsonalexa@gmail.com,This Week,2025-10-18
+UI: Sources page,Table + Connect modal + status badges.,amundsonalexa@gmail.com,Today,2025-10-17
+dbt models,stg_source_x__events + fct_source_x_events_daily with tests.,amundsonalexa@gmail.com,This Week,2025-10-19

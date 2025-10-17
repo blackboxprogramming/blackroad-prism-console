@@ -1,0 +1,10 @@
+[Unit]
+Description=Run BlackRoad mirror updater every 5 minutes
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+Unit=blackroad-mirror.service
+
+[Install]
+WantedBy=timers.target

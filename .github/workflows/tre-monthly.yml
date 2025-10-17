@@ -1,0 +1,13 @@
+name: Treasury Monthly (Interest + Forecast)
+on:
+  schedule: [{ cron: "10 11 1 * *" }]
+  workflow_dispatch:
+jobs:
+  tre-monthly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/tre/interest_report.ts
+      - run: node scripts/tre/forecast_report.ts

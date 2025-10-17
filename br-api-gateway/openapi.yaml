@@ -1,0 +1,113 @@
+openapi: 3.0.3
+info: { title: BlackRoad PRISM API, version: 0.1.0 }
+servers: [{ url: https://api.blackroad.io }]
+components:
+  securitySchemes:
+    ApiKey: { type: apiKey, in: header, name: X-API-Key }
+  schemas:
+    Health: { type: object, properties: { ok: { type: boolean }, ts: { type: integer } } }
+    TimeseriesPoint: { type: object, properties: { t: { type: string, format: date-time }, v: { type: number } }, required: [t, v] }
+    Timeseries: { type: array, items: { $ref: '#/components/schemas/TimeseriesPoint' } }
+    ErrorResponse: { type: object, properties: { error: { type: string } } }
+security: [{ ApiKey: [] }]
+paths:
+  /health:
+    get: { summary: Liveness, responses: { "200": { description: OK, content: { application/json: { schema: { $ref: "#/components/schemas/Health" } } } } } }
+  /v1/org:
+    get:
+      summary: Current org
+      responses: { "200": { description: OK, content: { application/json: { schema: { type: object, properties: { id: {type: string}, name: {type: string} } } } } } }
+  /v1/sources:
+    get:
+      summary: List data sources
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string }
+                    type: { type: string }
+                    status: { type: string }
+    post:
+      summary: Connect Linear via API key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kind: { type: string, enum: [linear_key] }
+                token: { type: string }
+                teams:
+                  type: array
+                  items: { type: string }
+              required: [kind, token, teams]
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  kind: { type: string }
+                  status: { type: string }
+                  teams: { type: array, items: { type: string } }
+                  viewer:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      name: { type: string }
+                  tokenParameter: { type: string }
+  /v1/metrics/events:
+    get:
+      summary: Events timeseries
+      parameters:
+        - in: query; name: from; schema: { type: string, format: date-time }
+        - in: query; name: to;   schema: { type: string, format: date-time }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Timeseries' } } } }
+        "400": { description: Bad Request, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }
+  /v1/metrics/errors:
+    get:
+      summary: Errors timeseries
+      parameters:
+        - in: query; name: from; schema: { type: string, format: date-time }
+        - in: query; name: to;   schema: { type: string, format: date-time }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Timeseries' } } } }
+  /v1/metrics/linear/issues_created:
+    get:
+      summary: Linear issues created by day
+      parameters:
+        - in: query; name: from; schema: { type: string }
+        - in: query; name: to;   schema: { type: string }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Timeseries' } } } }
+        "400": { description: Bad Request, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }
+  /v1/metrics/linear/issues_completed:
+    get:
+      summary: Linear issues completed by day
+      parameters:
+        - in: query; name: from; schema: { type: string }
+        - in: query; name: to;   schema: { type: string }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Timeseries' } } } }
+        "400": { description: Bad Request, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }
+  /v1/metrics/linear/burndown:
+    get:
+      summary: Linear burndown for a cycle
+      parameters:
+        - in: query; name: team; schema: { type: string }
+        - in: query; name: cycleStart; schema: { type: string }
+        - in: query; name: cycleEnd; schema: { type: string }
+      responses:
+        "200": { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Timeseries' } } } }
+        "400": { description: Bad Request, content: { application/json: { schema: { $ref: '#/components/schemas/ErrorResponse' } } } }

@@ -2,16 +2,25 @@ from __future__ import annotations
 
 import csv
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Dict, List
 
 import yaml
 
-from tools import storage
+from orchestrator import metrics
+from tools import artifacts, storage
+
+try:  # optional strict validation
+    import jsonschema
+except Exception:  # pragma: no cover
+    jsonschema = None
 
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "mfg"
+SCHEMA_DIR = ROOT / "contracts" / "schemas"
+WC_SCHEMA = SCHEMA_DIR / "mfg_work_centers.schema.json"
+ROUTING_SCHEMA = SCHEMA_DIR / "mfg_routings.schema.json"
 
 
 @dataclass
@@ -58,25 +67,45 @@ def load_work_centers(file: str) -> Dict[str, WorkCenter]:
     global WORK_CENTERS
     WORK_CENTERS = wcs
     ART_DIR.mkdir(parents=True, exist_ok=True)
-    storage.write(str(ART_DIR / "work_centers.json"), json.dumps([asdict(w) for w in wcs.values()], indent=2))
+    artifacts.validate_and_write(
+        str(ART_DIR / "work_centers.json"),
+        [asdict(w) for w in wcs.values()],
+        str(WC_SCHEMA),
+    )
+    metrics.inc("mfg_work_centers_loaded", len(wcs) or 1)
     return wcs
 
 
-def load_routings(directory: str) -> Dict[str, Routing]:
+def load_routings(directory: str, strict: bool = False) -> Dict[str, Routing]:
     rts: Dict[str, Routing] = {}
+    schema = None
+    if strict and jsonschema:
+        schema_path = ROOT / "schemas" / "routing.schema.json"
+        try:
+            schema = json.loads(storage.read(str(schema_path)))
+        except Exception:
+            schema = None
     for path in Path(directory).glob("*.yaml"):
         data = yaml.safe_load(path.read_text())
+        if schema and jsonschema:
+            jsonschema.validate(data, schema)
         steps = [RoutingStep(**s) for s in data.get("steps", [])]
         rt = Routing(item_rev=data["item_rev"], steps=steps)
         rts[rt.item_rev] = rt
     global ROUTINGS
     ROUTINGS = rts
     ART_DIR.mkdir(parents=True, exist_ok=True)
-    storage.write(str(ART_DIR / "routings.json"), json.dumps([{"item_rev": r.item_rev, "steps": [asdict(s) for s in r.steps]} for r in rts.values()], indent=2))
+    artifacts.validate_and_write(
+        str(ART_DIR / "routings.json"),
+        [{"item_rev": r.item_rev, "steps": [asdict(s) for s in r.steps]} for r in rts.values()],
+        str(ROUTING_SCHEMA),
+    )
+    metrics.inc("mfg_routings_loaded", len(rts) or 1)
     return rts
 
 
 def capacity_check(item: str, rev: str, qty: int):
+    _ensure_loaded()
     key = f"{item}_{rev}"
     rt = ROUTINGS.get(key)
     if not rt:
@@ -85,7 +114,7 @@ def capacity_check(item: str, rev: str, qty: int):
     for step in rt.steps:
         mins = qty * step.std_time_min / (step.yield_pct or 1)
         totals[step.wc] = totals.get(step.wc, 0.0) + mins
-    results = {}
+    results: Dict[str, Dict[str, float]] = {}
     labor_cost = 0.0
     for wc_id, req in totals.items():
         wc = WORK_CENTERS.get(wc_id)
@@ -94,4 +123,30 @@ def capacity_check(item: str, rev: str, qty: int):
         if wc:
             labor_cost += (req / 60) * wc.cost_rate
     results["labor_cost"] = labor_cost
+    metrics.inc("routing_cap_checked")
     return results
+
+
+def _ensure_loaded() -> None:
+    global WORK_CENTERS, ROUTINGS
+    if not WORK_CENTERS:
+        data = storage.read(str(ART_DIR / "work_centers.json"))
+        if data:
+            rows = json.loads(data)
+            WORK_CENTERS = {row["id"]: WorkCenter(**row) for row in rows}
+    if not ROUTINGS:
+        data = storage.read(str(ART_DIR / "routings.json"))
+        if data:
+            rows = json.loads(data)
+            ROUTINGS = {
+                row["item_rev"]: Routing(
+                    item_rev=row["item_rev"],
+                    steps=[RoutingStep(**s) for s in row.get("steps", [])],
+                )
+                for row in rows
+            }
+
+
+def get_routing(item: str, rev: str) -> Routing | None:
+    _ensure_loaded()
+    return ROUTINGS.get(f"{item}_{rev}")

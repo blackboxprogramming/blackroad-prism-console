@@ -1,0 +1,61 @@
+key: US-RIA-BASE
+version: 1
+sourceUrls:
+  - https://www.sec.gov/iard
+rules:
+  - key: RIA-ADV-ANNUAL-AMEND
+    track: RIA
+    schedule:
+      freq: ANNUAL
+      offsetFrom: FISCAL_YEAR_END
+      offsetDays: 120
+    filing:
+      type: IARD
+      formKeys: ["ADV-PART1", "ADV-PART2A", "ADV-PART2B"]
+      feePolicy: CALCULATED
+      artifactsRequired: ["PDF", "ATTESTATION"]
+    delivery:
+      docKind: ADV_2A
+      trigger: ANNUAL
+      methodsAllowed: [EMAIL, PORTAL]
+      proofRequired: [EVIDENCE]
+    gates:
+      blockActions: [advise, market, open_account]
+      graceDays: 0
+  - key: FORM-CRS-ANNUAL-DELIVERY
+    track: RIA
+    schedule:
+      freq: ANNUAL
+      offsetFrom: FISCAL_YEAR_END
+      offsetDays: 120
+    delivery:
+      docKind: FORM_CRS
+      trigger: ANNUAL
+      methodsAllowed: [EMAIL, PORTAL, MAIL]
+      proofRequired: [EVIDENCE, ACK]
+    gates:
+      blockActions: [advise, open_account]
+      graceDays: 0
+  - key: PRIVACY-NOTICE-ANNUAL
+    track: RIA
+    schedule:
+      freq: ANNUAL
+      dueMonth: 6
+      dueDay: 30
+    delivery:
+      docKind: PRIVACY
+      trigger: ANNUAL
+      methodsAllowed: [EMAIL, PORTAL, MAIL]
+      proofRequired: [EVIDENCE]
+  - key: BCP-NOTICE-ONBOARDING
+    track: RIA
+    schedule:
+      freq: WINDOW
+      windowDays: 30
+      offsetFrom: ANNIVERSARY
+      offsetDays: 0
+    delivery:
+      docKind: BCP
+      trigger: INITIAL
+      methodsAllowed: [EMAIL, PORTAL]
+      proofRequired: [EVIDENCE]

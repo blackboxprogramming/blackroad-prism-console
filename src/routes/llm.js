@@ -1,3 +1,4 @@
+// FILE: /srv/blackroad-api/src/routes/llm.js
 'use strict';
 
 const express = require('express');
@@ -8,7 +9,7 @@ const router = express.Router();
 
 router.post('/chat', requireAuth, async (req, res) => {
   try {
-    const { messages, stream } = req.body || {};
+    const { messages } = req.body || {};
     if (!Array.isArray(messages)) {
       return res.status(400).json({ ok: false, error: 'invalid_messages' });
     }

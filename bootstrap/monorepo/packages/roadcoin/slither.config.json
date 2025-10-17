@@ -1,0 +1,12 @@
+{
+  "filter-paths": [
+    "lib",
+    "node_modules"
+  ],
+  "solc-remaps": [
+    "@openzeppelin/=node_modules/@openzeppelin/"
+  ],
+  "detectors": {
+    "max-iterations": 256
+  }
+}

@@ -1,0 +1,191 @@
+name: Multi-agent chorus
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  orchestrate:
+    if: >
+      github.event.issue.pull_request
+      && contains(toLower(github.event.comment.body), '@codex')
+      && contains(toLower(github.event.comment.body), '@copilot')
+      && contains(toLower(github.event.comment.body), '@chatgpt')
+      && contains(toLower(github.event.comment.body), '@claude')
+      && contains(toLower(github.event.comment.body), '@lucidia')
+      && contains(toLower(github.event.comment.body), '@cadillac')
+      && contains(toLower(github.event.comment.body), '@blackroad')
+      && (
+        contains(toLower(github.event.comment.body), 'perform tests')
+        || contains(toLower(github.event.comment.body), 'create run job workflow')
+      )
+    runs-on: ubuntu-latest
+    env:
+      COMMENT_BODY: ${{ github.event.comment.body }}
+    steps:
+      - name: Load pull request details
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const number = context.payload.issue?.number;
+            if (!number) {
+              core.setFailed('No pull request number available for comment.');
+              return;
+            }
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: number,
+            });
+            core.setOutput('head_ref', pr.head.ref);
+            core.setOutput('head_sha', pr.head.sha);
+            core.setOutput('head_repo', pr.head.repo.full_name);
+      - name: Determine requested actions
+        id: intent
+        run: |
+          body="${COMMENT_BODY,,}"
+          if [[ "$body" == *"perform tests"* ]]; then
+            echo "perform_tests=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "perform_tests=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [[ "$body" == *"create run job workflow"* ]]; then
+            echo "create_run_job=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "create_run_job=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.intent.outputs.perform_tests == 'true'
+        with:
+          repository: ${{ steps.pr.outputs.head_repo }}
+          ref: ${{ steps.pr.outputs.head_sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        if: steps.intent.outputs.perform_tests == 'true'
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-python@v5
+        if: steps.intent.outputs.perform_tests == 'true'
+        with:
+          python-version: '3.11'
+      - name: Install Python dependencies
+        if: steps.intent.outputs.perform_tests == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements-dev.txt ]; then
+            pip install -r requirements-dev.txt
+          else
+            pip install pytest
+          fi
+      - name: Install Node dependencies
+        if: steps.intent.outputs.perform_tests == 'true'
+        run: npm ci --omit=optional || npm install
+      - name: Run npm tests
+        if: steps.intent.outputs.perform_tests == 'true'
+        id: npm_tests
+        continue-on-error: true
+        run: npm test -- --watch=false
+      - name: Run pytest
+        if: steps.intent.outputs.perform_tests == 'true'
+        id: pytest
+        continue-on-error: true
+        run: pytest -q
+      - name: Evaluate test status
+        if: steps.intent.outputs.perform_tests == 'true'
+        id: test_status
+        run: |
+          npm_outcome='${{ steps.npm_tests.outcome }}'
+          pytest_outcome='${{ steps.pytest.outcome }}'
+          status='success'
+          summary='Tests executed successfully.'
+          if [ "$npm_outcome" != "success" ] || [ "$pytest_outcome" != "success" ]; then
+            status='failure'
+            summary='One or more requested test suites failed.'
+          fi
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          echo "summary=$summary" >> "$GITHUB_OUTPUT"
+          echo "npm=$npm_outcome" >> "$GITHUB_OUTPUT"
+          echo "pytest=$pytest_outcome" >> "$GITHUB_OUTPUT"
+      - name: Trigger run-job workflow
+        if: steps.intent.outputs.create_run_job == 'true'
+        id: trigger_run_job
+        uses: actions/github-script@v7
+        env:
+          HEAD_REF: ${{ steps.pr.outputs.head_ref }}
+          HEAD_REPO: ${{ steps.pr.outputs.head_repo }}
+        with:
+          script: |
+            const headRef = process.env.HEAD_REF;
+            const headRepo = process.env.HEAD_REPO;
+            const currentRepo = `${context.repo.owner}/${context.repo.repo}`;
+            if (!headRef) {
+              core.warning('Unable to determine branch to dispatch run-job workflow.');
+              core.setOutput('status', 'failed');
+              core.setOutput('message', 'Missing head ref for workflow dispatch.');
+              return;
+            }
+            if (headRepo !== currentRepo) {
+              core.warning(`Run-job workflow dispatch skipped: branch belongs to ${headRepo}.`);
+              core.setOutput('status', 'skipped');
+              core.setOutput('message', `Run-job workflow can only be triggered for branches in ${currentRepo}.`);
+              return;
+            }
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'run-job.yml',
+              ref: headRef,
+              inputs: { task: 'tests' },
+            });
+            core.setOutput('status', 'success');
+            core.setOutput('message', `Triggered run-job workflow on ${headRef}.`);
+      - name: Summarise response
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          PERFORM_TESTS: ${{ steps.intent.outputs.perform_tests }}
+          TEST_STATUS: ${{ steps.test_status.outputs.status }}
+          NPM_OUTCOME: ${{ steps.npm_tests.outcome }}
+          PYTEST_OUTCOME: ${{ steps.pytest.outcome }}
+          CREATE_RUN_JOB: ${{ steps.intent.outputs.create_run_job }}
+          RUN_JOB_STATUS: ${{ steps.trigger_run_job.outputs.status }}
+          RUN_JOB_MESSAGE: ${{ steps.trigger_run_job.outputs.message }}
+        with:
+          script: |
+            const lines = ['### 🤖 Multi-agent chorus update'];
+            const performTests = process.env.PERFORM_TESTS === 'true';
+            const createRunJob = process.env.CREATE_RUN_JOB === 'true';
+            if (performTests) {
+              const status = process.env.TEST_STATUS || 'skipped';
+              const npm = process.env.NPM_OUTCOME || 'skipped';
+              const pytest = process.env.PYTEST_OUTCOME || 'skipped';
+              const emoji = status === 'success' ? '✅' : status === 'failure' ? '❌' : '⚪️';
+              lines.push(`${emoji} **Tests request** (npm: ${npm}, pytest: ${pytest})`);
+            }
+            if (createRunJob) {
+              const status = process.env.RUN_JOB_STATUS || 'skipped';
+              const message = process.env.RUN_JOB_MESSAGE || 'No additional context.';
+              let emoji = '⚪️';
+              if (status === 'success') emoji = '✅';
+              else if (status === 'failed') emoji = '❌';
+              lines.push(`${emoji} **Run job workflow** — ${message}`);
+            }
+            if (!performTests && !createRunJob) {
+              lines.push('⚪️ No actionable directives detected.');
+            }
+            await github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: lines.join('\n'),
+            });
+      - name: Fail on test failures
+        if: steps.intent.outputs.perform_tests == 'true' && steps.test_status.outputs.status == 'failure'
+        run: exit 1

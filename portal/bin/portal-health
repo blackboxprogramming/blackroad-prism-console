@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+CONFIG_DIR="$ROOT/configs"
+PROOF_DIR="$ROOT/proofs"
+REPORT_DIR="$ROOT/reports"
+
+mkdir -p "$CONFIG_DIR" "$PROOF_DIR" "$REPORT_DIR"
+
+PRICE_FILE="$CONFIG_DIR/prices.json"
+if [ ! -f "$PRICE_FILE" ]; then
+  echo '{}' > "$PRICE_FILE"
+fi
+
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "$1 is required" >&2
+    exit 1
+  fi
+}
+
+require_cmd jq
+require_cmd sha256sum
+
+read_price() {
+  local asset="$1"
+  jq -r --arg asset "$asset" '.[$asset] // empty' "$PRICE_FILE" 2>/dev/null || true
+}
+
+latest_file() {
+  local latest=""
+  local latest_mtime=0
+  for path in "$@"; do
+    [ -f "$path" ] || continue
+    local mtime
+    mtime="$(stat -c %Y "$path")"
+    if [ "$mtime" -gt "$latest_mtime" ]; then
+      latest_mtime="$mtime"
+      latest="$path"
+    fi
+  done
+  printf '%s' "$latest"
+}
+
+shopt -s nullglob
+btc_candidates=("$PROOF_DIR"/doctor-*.json "$PROOF_DIR"/aura-proof.json)
+ltc_candidates=("$PROOF_DIR"/ltc-proof.json "$PROOF_DIR"/ltc-*.json)
+eth_candidates=("$PROOF_DIR"/eth_balance.json "$PROOF_DIR"/eth-*.json)
+shopt -u nullglob
+
+BTC_PROOF="$(latest_file "${btc_candidates[@]:-}")"
+LTC_PROOF="$(latest_file "${ltc_candidates[@]:-}")"
+ETH_PROOF="$(latest_file "${eth_candidates[@]:-}")"
+
+extract_amount() {
+  local file="$1"
+  local query="$2"
+  if [ -f "$file" ]; then
+    jq -r "$query // empty" "$file" 2>/dev/null || true
+  else
+    printf ''
+  fi
+}
+
+BTC_AMOUNT="$(extract_amount "$BTC_PROOF" '.btc // .scantxoutset.total_amount // .balance')"
+LTC_AMOUNT="$(extract_amount "$LTC_PROOF" '.ltc // .scantxoutset.total_amount // .balance')"
+ETH_AMOUNT="$(extract_amount "$ETH_PROOF" '.eth // .balance // .total')"
+
+price_btc="$(read_price btc)"
+price_ltc="$(read_price ltc)"
+price_eth="$(read_price eth)"
+
+to_usd() {
+  local amount="$1"
+  local price="$2"
+  if [ -z "$amount" ] || [ -z "$price" ]; then
+    printf ''
+    return
+  fi
+  python3 - "$amount" "$price" <<'PY'
+from decimal import Decimal, ROUND_HALF_UP, getcontext
+import sys
+getcontext().prec = 60
+value = Decimal(sys.argv[1])
+price = Decimal(sys.argv[2])
+print((value * price).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
+PY
+}
+
+BTC_USD="$(to_usd "$BTC_AMOUNT" "$price_btc")"
+LTC_USD="$(to_usd "$LTC_AMOUNT" "$price_ltc")"
+ETH_USD="$(to_usd "$ETH_AMOUNT" "$price_eth")"
+
+hash_or_empty() {
+  local file="$1"
+  if [ -f "$file" ]; then
+    sha256sum "$file" | awk '{print $1}'
+  else
+    printf ''
+  fi
+}
+
+BTC_HASH="$(hash_or_empty "$BTC_PROOF")"
+LTC_HASH="$(hash_or_empty "$LTC_PROOF")"
+ETH_HASH="$(hash_or_empty "$ETH_PROOF")"
+
+html_escape() {
+  python3 - "$1" <<'PY'
+import html
+import sys
+value = sys.argv[1] if len(sys.argv) > 1 else ''
+print(html.escape(value, quote=True))
+PY
+}
+
+ts="$(date -u +%FT%TZ)"
+output="$REPORT_DIR/health.html"
+
+cat > "$output" <<HTML
+<!doctype html>
+<meta charset="utf-8">
+<title>Portal Health</title>
+<style>
+body{font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:24px;background:#0b0f14;color:#e6edf3}
+.card{background:#111827;border:1px solid #22303d;border-radius:12px;padding:16px;margin:10px 0;min-width:280px}
+.row{display:flex;gap:16px;flex-wrap:wrap}
+.kv{display:flex;justify-content:space-between;margin:4px 0}
+label{opacity:.7}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+small{opacity:.6}
+</style>
+<h1>Portal Health <small class="mono">$(html_escape "$ts")</small></h1>
+<div class="row">
+  <div class="card">
+    <h2>Bitcoin</h2>
+    <div class="kv"><label>Balance</label><div>$(html_escape "${BTC_AMOUNT:-N/A}") BTC</div></div>
+    <div class="kv"><label>USD (local)</label><div>$(html_escape "${BTC_USD:-N/A}")</div></div>
+    <div class="kv"><label>Proof</label><div class="mono">$(html_escape "${BTC_PROOF:-N/A}")</div></div>
+    <div class="kv"><label>Audit SHA-256</label><div class="mono">$(html_escape "${BTC_HASH:-N/A}")</div></div>
+  </div>
+  <div class="card">
+    <h2>Litecoin</h2>
+    <div class="kv"><label>Balance</label><div>$(html_escape "${LTC_AMOUNT:-N/A}") LTC</div></div>
+    <div class="kv"><label>USD (local)</label><div>$(html_escape "${LTC_USD:-N/A}")</div></div>
+    <div class="kv"><label>Proof</label><div class="mono">$(html_escape "${LTC_PROOF:-N/A}")</div></div>
+    <div class="kv"><label>Audit SHA-256</label><div class="mono">$(html_escape "${LTC_HASH:-N/A}")</div></div>
+  </div>
+  <div class="card">
+    <h2>Ethereum</h2>
+    <div class="kv"><label>Balance</label><div>$(html_escape "${ETH_AMOUNT:-N/A}") ETH</div></div>
+    <div class="kv"><label>USD (local)</label><div>$(html_escape "${ETH_USD:-N/A}")</div></div>
+    <div class="kv"><label>Proof</label><div class="mono">$(html_escape "${ETH_PROOF:-N/A}")</div></div>
+    <div class="kv"><label>Audit SHA-256</label><div class="mono">$(html_escape "${ETH_HASH:-N/A}")</div></div>
+  </div>
+</div>
+<p class="mono"><small>USD values use locally configured prices via <code>portal/bin/price</code>; no network calls performed.</small></p>
+HTML
+
+echo "HEALTH: $output"

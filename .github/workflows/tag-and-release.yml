@@ -17,8 +17,10 @@ jobs:
       - run: |
           echo "## v${{ github.event.inputs.version }}" > CHANGELOG.md
           git log --pretty=format:'* %s' $(git describe --tags --abbrev=0)..HEAD >> CHANGELOG.md
-      - uses: actions/create-release@v1
-        with:
-          tag_name: v${{ github.event.inputs.version }}
-          release_name: v${{ github.event.inputs.version }}
-          body_path: CHANGELOG.md
+      - name: Publish GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ github.event.inputs.version }}" \
+            --title "v${{ github.event.inputs.version }}" \
+            --notes-file CHANGELOG.md

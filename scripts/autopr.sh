@@ -59,6 +59,7 @@ curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd
 if [[ "${AUTO_MERGE:-true}" == "true" ]]; then
   curl -s -H "Authorization: Bearer $GH_TOKEN" -H "Content-Type: application/json" \
     -d '{ "query": "mutation($pr:ID!){ enablePullRequestAutoMerge(input:{pullRequestId:$pr, mergeMethod:SQUASH}){ clientMutationId }}", "variables": { "pr": "'$NODE_ID'" } }' \
+    -d '{ "query": "mutation($pr:ID!){ enablePullRequestAutoMerge(input:{pullRequestId:$pr, mergeMethod:SQUASH}){ clientMutationId }}", "variables": { "pr": "'"$NODE_ID"'" } }' \
     https://api.github.com/graphql >/dev/null || true
 fi
 

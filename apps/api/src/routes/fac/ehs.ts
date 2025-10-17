@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import fs from 'fs';
+const r = Router();
+const E='fac/ehs.json', IN='data/fac/ehs_incidents.jsonl', IS='data/fac/inspections.jsonl';
+const eread=()=> fs.existsSync(E)? JSON.parse(fs.readFileSync(E,'utf-8')):{ actions:{} };
+const ewrite=(o:any)=>{ fs.mkdirSync('fac',{recursive:true}); fs.writeFileSync(E, JSON.stringify(o,null,2)); };
+const append=(p:string,row:any)=>{ fs.mkdirSync('data/fac',{recursive:true}); fs.appendFileSync(p, JSON.stringify(row)+'\n'); };
+const list=(p:string)=> fs.existsSync(p)? fs.readFileSync(p,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
+r.post('/ehs/incident',(req,res)=>{ append(IN,{ ts:Date.now(), ...req.body }); res.json({ ok:true }); });
+r.post('/ehs/inspection',(req,res)=>{ append(IS,{ ts:Date.now(), ...req.body }); res.json({ ok:true }); });
+r.post('/ehs/action',(req,res)=>{ const o=eread(); const a=req.body||{}; const k=`${a.incidentId}:${a.actionId}`; o.actions[k]=a; ewrite(o); res.json({ ok:true }); });
+r.get('/ehs/recent',(req,res)=>{ const loc=String(req.query.locationId||''); const incidents=list(IN).reverse().filter((x:any)=>!loc||x.locationId===loc).slice(0,200); const inspections=list(IS).reverse().filter((x:any)=>!loc||x.locationId===loc).slice(0,200); res.json({ incidents, inspections }); });
+export default r;

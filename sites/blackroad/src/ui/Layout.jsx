@@ -44,6 +44,7 @@ export default function Layout() {
               <Tab to="/status">{t('navStatus')}</Tab>
               <Tab to="/snapshot">{t('navSnapshot')}</Tab>
               <Tab to="/portal">{t('navPortal')}</Tab>
+              <Tab to="/quantum-consciousness">{t('navQuantumConsciousness')}</Tab>
               <Tab to="/playground">{t('navPlayground')}</Tab>
               <Tab to="/tutorials">{t('navTutorials')}</Tab>
               <Tab to="/roadmap">{t('navRoadmap')}</Tab>

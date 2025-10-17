@@ -1,0 +1,11 @@
+version: 2
+models:
+  - name: fct_events_daily
+    description: "Daily event rollups with DAU and key event counts"
+    columns:
+      - name: day
+        tests: [not_null, unique]
+      - name: events_total
+        tests: [not_null]
+      - name: dau
+        tests: [not_null]

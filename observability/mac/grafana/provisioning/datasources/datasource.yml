@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  - name: Pi Cortex Telemetry
+    type: influxdb
+    access: proxy
+    isDefault: true
+    uid: pi_cortex_telemetry
+    url: http://influxdb:8086
+    jsonData:
+      httpMode: POST
+      organization: pi-cortex
+      defaultBucket: telemetry
+      version: Flux
+    secureJsonData:
+      token: ${GF_INFLUX_TOKEN}
+    editable: false

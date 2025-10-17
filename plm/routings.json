@@ -1,0 +1,18 @@
+{
+  "work_centers": [
+    {"id": "CUT", "description": "Cutting station"},
+    {"id": "ASM", "description": "Assembly line"},
+    {"id": "TEST", "description": "Functional test"}
+  ],
+  "routings": [
+    {
+      "id": "WIDGET-R1",
+      "item": "WIDGET",
+      "operations": [
+        {"seq": 10, "work_center": "CUT", "cycle_time_min": 2.5},
+        {"seq": 20, "work_center": "ASM", "cycle_time_min": 5.0},
+        {"seq": 30, "work_center": "TEST", "cycle_time_min": 1.5}
+      ]
+    }
+  ]
+}

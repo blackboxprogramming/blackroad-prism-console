@@ -1,0 +1,14 @@
+[Unit]
+Description=Portal REST (localhost, token-gated)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=pi
+ExecStart=/home/pi/portal/bin/portal-rest
+WorkingDirectory=/home/pi/portal
+Restart=on-failure
+Environment=ENABLE_PSBT_API=0
+
+[Install]
+WantedBy=multi-user.target

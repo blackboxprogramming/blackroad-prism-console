@@ -1,0 +1,8 @@
+models:
+  - name: support_sla
+    description: SLA compliance summary
+    sources: [ tickets, sla_targets ]
+    sql: |
+      SELECT 'first_response_overdue' as metric, 0 as value
+    owner: Support
+    sla_hours: 12

@@ -1,0 +1,6 @@
+[Unit]
+Description=Nightly stack heartbeat (journalctl p3 + failed units)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/stack-heartbeat.sh

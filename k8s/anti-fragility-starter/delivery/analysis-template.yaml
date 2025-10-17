@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: demo-api-canary-checks
+spec:
+  args:
+    - name: service
+      value: demo-api
+  metrics:
+    - name: error-rate
+      interval: 1m
+      count: 5
+      successCondition: result < 0.02
+      failureCondition: result >= 0.02
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(http_requests_total{service="{{args.service}}",status=~"5.."}[1m]))
+            /
+            sum(rate(http_requests_total{service="{{args.service}}"}[1m]))
+    - name: slo-burn
+      interval: 1m
+      count: 5
+      failureCondition: result > 1
+      successCondition: result <= 1
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            slo_error_budget_burn_rate{service="{{args.service}}",window="5m"}

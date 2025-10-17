@@ -1,7 +1,10 @@
 from __future__ import annotations
 from typing import Dict, Any
+from datetime import datetime, timezone
 import yaml
 from pathlib import Path
+
+from .exceptions import is_excepted
 
 
 class PolicyKernel:
@@ -35,16 +38,37 @@ class PolicyKernel:
         return min(r, 10)
 
     def evaluate(self, envelope: Dict[str, Any]) -> Dict[str, Any]:
+        now = datetime.now(timezone.utc)
+        subject = envelope.get("subject") or {}
+        subject_type = envelope.get("subject_type") or subject.get("type")
+        subject_id = envelope.get("subject_id") or subject.get("id")
+        typ = envelope.get("type", "")
+        rule_id = envelope.get("rule_id") or typ
         if self.kill_switch:
+            allowed, exc_id = is_excepted(rule_id, subject_type, subject_id, now)
+            if allowed:
+                return {
+                    "decision": "ALLOW",
+                    "risk": 10,
+                    "reason": "Global kill-switch active_exception",
+                    "exception_id": exc_id,
+                }
             return {"decision": "DENY", "risk": 10, "reason": "Global kill-switch active"}
 
-        typ = envelope.get("type", "")
         src = envelope.get("source", "")
         policy = self.policies.get(typ, {"mode": "review", "max_risk": 5, "compensations": True})
         risk = self._risk(src, typ, envelope.get("payload", {}))
         self.usage[typ] = self.usage.get(typ, 0) + risk
         mode = policy.get("mode", "review")
         if mode == "deny":
+            allowed, exc_id = is_excepted(rule_id, subject_type, subject_id, now)
+            if allowed:
+                return {
+                    "decision": "ALLOW",
+                    "risk": risk,
+                    "reason": "Policy deny_exception",
+                    "exception_id": exc_id,
+                }
             return {"decision": "DENY", "risk": risk, "reason": "Policy deny"}
         if risk <= policy.get("max_risk", 0) and mode == "auto":
             return {"decision": "ALLOW", "risk": risk, "reason": "Within auto risk budget"}

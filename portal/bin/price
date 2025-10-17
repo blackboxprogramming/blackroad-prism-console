@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+STORE="$ROOT/configs/prices.json"
+
+mkdir -p "$(dirname "$STORE")"
+if [ ! -f "$STORE" ]; then
+  echo '{}' > "$STORE"
+fi
+
+usage() {
+  cat <<USAGE
+usage: price set <asset> <value> | price get <asset> | price btc2usd <btc> | price usd2btc <usd>
+USAGE
+}
+
+require_jq() {
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "jq is required" >&2
+    exit 1
+  fi
+}
+
+jqset() {
+  require_jq
+  tmp_file="${STORE}.tmp"
+  jq "$@" "$STORE" > "$tmp_file"
+  mv "$tmp_file" "$STORE"
+}
+
+ensure_decimal() {
+  local value="$1"
+  python3 - "$value" <<'PY'
+import sys
+from decimal import Decimal, InvalidOperation
+try:
+    Decimal(sys.argv[1])
+except (InvalidOperation, ValueError):
+    sys.exit(1)
+PY
+}
+
+[ $# -gt 0 ] || { usage >&2; exit 1; }
+
+case "$1" in
+  set)
+    [ $# -eq 3 ] || { usage >&2; exit 1; }
+    asset="$2"
+    value="$3"
+    ensure_decimal "$value" || { echo "invalid decimal value: $value" >&2; exit 1; }
+    jqset --arg asset "$asset" --arg value "$value" '.[$asset] = ($value | tonumber)'
+    stored="$(jq -r --arg asset "$asset" '.[$asset]' "$STORE")"
+    printf 'set %s = %s\n' "$asset" "$stored"
+    ;;
+  get)
+    [ $# -eq 2 ] || { usage >&2; exit 1; }
+    require_jq
+    jq -r --arg asset "$2" '.[$asset] // empty' "$STORE"
+    ;;
+  btc2usd)
+    [ $# -eq 2 ] || { usage >&2; exit 1; }
+    require_jq
+    amount="$2"
+    ensure_decimal "$amount" || { echo "invalid decimal value: $amount" >&2; exit 1; }
+    price="$(jq -r '.btc // empty' "$STORE")"
+    [ -n "$price" ] || { echo "no btc price set" >&2; exit 2; }
+    python3 - "$amount" "$price" <<'PY'
+from decimal import Decimal, ROUND_HALF_UP, getcontext
+import sys
+getcontext().prec = 60
+btc = Decimal(sys.argv[1])
+price = Decimal(sys.argv[2])
+print((btc * price).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
+PY
+    ;;
+  usd2btc)
+    [ $# -eq 2 ] || { usage >&2; exit 1; }
+    require_jq
+    usd="$2"
+    ensure_decimal "$usd" || { echo "invalid decimal value: $usd" >&2; exit 1; }
+    price="$(jq -r '.btc // empty' "$STORE")"
+    [ -n "$price" ] || { echo "no btc price set" >&2; exit 2; }
+    python3 - "$usd" "$price" <<'PY'
+from decimal import Decimal, ROUND_HALF_UP, getcontext
+import sys
+getcontext().prec = 60
+usd = Decimal(sys.argv[1])
+price = Decimal(sys.argv[2])
+print((usd / price).quantize(Decimal('0.00000001'), rounding=ROUND_HALF_UP))
+PY
+    ;;
+  *)
+    usage >&2
+    exit 1
+    ;;
+esac

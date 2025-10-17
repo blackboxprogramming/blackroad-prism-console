@@ -1,0 +1,50 @@
+# Production overrides for the Autopal chart.
+replicaCount: 3
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: autopal.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - autopal.example.com
+      secretName: autopal-tls
+
+redis:
+  url: ""
+
+secrets:
+  breakGlass:
+    secretName: ""
+    value: ""
+
+appConfig:
+  global_enabled: true
+  dual_control_timeout_seconds: 900
+  endpoints:
+    "/secrets/materialize":
+      required_audience:
+        - "gha:org/repo@refs/heads/main"
+      step_up_required: true
+      dual_control_required: true
+      rate_limit:
+        limit: 3
+        window_seconds: 60

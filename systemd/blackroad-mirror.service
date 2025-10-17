@@ -1,0 +1,7 @@
+[Unit]
+Description=BlackRoad mirror updater
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /srv/blackroad/health/mirror_sync.sh
+User=root

@@ -3,7 +3,40 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const MAX = 200 * 1024;
+const mentionAliases = [
+  '@codex',
+  '@cadillac',
+  '@lucidia',
+  '@bbpteam',
+  '@blackboxprogramming',
+];
+const escapeForRegex = (value) =>
+  value.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
+const aliasPattern = mentionAliases
+  .map((alias) => escapeForRegex(alias))
+  .join('|');
+const leadingAliasPattern = new RegExp(
+  `^(?:${aliasPattern})(?:\\s+(?:${aliasPattern}))*`,
+  'i'
+);
+const fixCommentsPattern = new RegExp(
+  `^(?:${aliasPattern})(?:\\s+(?:${aliasPattern}))*\\s+fix comments`,
+  'i'
+);
+
 let body = (process.env.CODEX_BODY || '').replace(/\r/g, '');
+if (leadingAliasPattern.test(body)) {
+  if (fixCommentsPattern.test(body)) {
+    body = body.replace(
+      fixCommentsPattern,
+      '/codex apply .github/prompts/codex-fix-comments.md'
+    );
+  } else {
+    body = body.replace(leadingAliasPattern, '/codex');
+  }
+}
+const perm = process.env.CODEX_PERMISSION || '';
+let body = (process.env.CODEx_BODY || '').replace(/\r/g, '');
 if (body.startsWith('@codex')) {
   if (/^@codex\s+fix comments/i.test(body)) {
     body = body.replace(
@@ -14,7 +47,34 @@ if (body.startsWith('@codex')) {
     body = body.replace(/^@codex/, '/codex');
   }
 }
-const perm = process.env.CODEX_PERMISSION || '';
+const perm = process.env.CODEx_PERMISSION || '';
+if (!/(write|admin|maintain|triage)/.test(perm)) {
+  console.log('not collaborator');
+  process.exit(0);
+}
+const repo =
+  (body.match(
+    /\/codex\s+repo\s+([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)(?:\s+([A-Za-z0-9._\/-]+))?/
+  ) || [])[1] || '';
+const branch =
+  (body.match(/\/codex\s+repo\s+[^\s]+\s+([A-Za-z0-9._\/-]+)/) || [])[1] || '';
+const apply = /\/codex\s+apply\b/.test(body),
+  patch = /\/codex\s+patch\b/.test(body);
+function run(cmd) {
+  return sh(cmd, { stdio: 'pipe', encoding: 'utf8' });
+}
+let body = (process.env.CODEx_BODY || '').replace(/\r/g, '');
+if (body.startsWith('@codex')) {
+  if (/^@codex\s+fix comments/i.test(body)) {
+    body = body.replace(
+      /^@codex\s+fix comments/i,
+      '/codex apply .github/prompts/codex-fix-comments.md'
+    );
+  } else {
+    body = body.replace(/^@codex/, '/codex');
+  }
+}
+const perm = process.env.CODEx_PERMISSION || '';
 if (!/(write|admin|maintain|triage)/.test(perm)) {
   console.log('not collaborator');
   process.exit(0);
@@ -111,6 +171,11 @@ function polish() {
   while ((m = rePath.exec(body)) && apply) {
     addfile(m[1].trim(), m[2]);
     w++;
+  }
+  while ((m = reDiff.exec(body)) && patch) {
+    applydiff(m[1]);
+    p++;
+  }
   }
   while ((m = reDiff.exec(body)) && patch) {
     applydiff(m[1]);

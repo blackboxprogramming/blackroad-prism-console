@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+mkdir -p "$ROOT/audits"
+log_file="$ROOT/audits/portal.log"
+
+jq -n --arg utc "$(date -u +%FT%TZ)" --arg cmd "$*" '{utc:$utc, cmd:$cmd}' >> "$log_file"

@@ -1,0 +1,13 @@
+name: ATS Weekly (Pipeline + DEI)
+on:
+  schedule: [{ cron: "10 10 * * 1" }]
+  workflow_dispatch:
+jobs:
+  ats-weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/ats/pipeline_report.ts
+      - run: node scripts/ats/diversity_report.ts

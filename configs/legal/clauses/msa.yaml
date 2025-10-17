@@ -1,0 +1,16 @@
+- id: CLAUSE_CONF
+  title: Confidentiality
+  variants:
+    standard: "Confidentiality standard."
+    tight: "Confidentiality tight."
+    loose: "Confidentiality loose."
+  risk: med
+  tags: [nda]
+- id: CLAUSE_LIAB
+  title: Liability
+  variants:
+    standard: "Liability standard."
+    tight: "Liability tight."
+    loose: "Liability loose."
+  risk: high
+  tags: [liability]

@@ -1,0 +1,153 @@
+// Prisma schema for BlackRoad RegDesk
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RegEventStatus {
+  Open
+  Filed
+  Accepted
+  Rejected
+  Waived
+}
+
+enum FilingStatus {
+  Draft
+  Submitted
+  Accepted
+  Rejected
+}
+
+enum DeliveryDocKind {
+  FORM_CRS
+  ADV_2A
+  ADV_2B
+  PRIVACY
+  BCP
+  OTHER
+}
+
+enum DeliveryMethod {
+  EMAIL
+  PORTAL
+  IN_PERSON
+  MAIL
+}
+
+enum DocEvidenceRequirement {
+  EVIDENCE
+  ACK
+}
+
+enum GateAction {
+  advise
+  market
+  open_account
+  trade_bd
+  sell_insurance
+}
+
+enum FilingType {
+  IARD
+  STATE_INS
+  REAL_ESTATE
+  CRD
+  ADHOC
+}
+
+enum TrackType {
+  RIA
+  BD
+  INSURANCE
+  REALESTATE
+}
+
+enum FrequencyType {
+  ANNUAL
+  QUARTERLY
+  MONTHLY
+  WINDOW
+  ADHOC
+}
+
+model RegEvent {
+  id        String          @id @default(cuid())
+  key       String
+  track     TrackType
+  stateCode String?
+  frequency FrequencyType
+  due       DateTime
+  opensAt   DateTime?
+  closesAt  DateTime?
+  status    RegEventStatus  @default(Open)
+  blockers  String[]        @default([])
+  filings   Filing[]
+  createdAt DateTime        @default(now())
+
+  @@index([key, due])
+}
+
+model Filing {
+  id           String       @id @default(cuid())
+  regEventId   String
+  regEvent     RegEvent     @relation(fields: [regEventId], references: [id], onDelete: Cascade)
+  type         FilingType
+  payload      Json
+  artifacts    Json
+  feeCents     Int?
+  status       FilingStatus @default(Draft)
+  submittedAt  DateTime?
+  receiptPath  String?
+  createdAt    DateTime     @default(now())
+}
+
+model DeliveryLog {
+  id              String           @id @default(cuid())
+  clientId        String?
+  docKind         DeliveryDocKind
+  version         String
+  method          DeliveryMethod
+  target          String
+  sentAt          DateTime
+  acknowledgedAt  DateTime?
+  evidencePath    String?
+  meta            Json
+  createdAt       DateTime        @default(now())
+}
+
+model Rulepack {
+  id         String   @id @default(cuid())
+  key        String
+  version    Int
+  rules      Json
+  sourceUrls String[]
+  updatedAt  DateTime @default(now())
+
+  @@unique([key, version])
+}
+
+model Gate {
+  id        String     @id @default(cuid())
+  action    GateAction
+  context   Json
+  allowed   Boolean
+  reason    String?
+  createdAt DateTime   @default(now())
+
+  @@index([action, allowed])
+}
+
+model WormBlock {
+  id      String   @id @default(cuid())
+  idx     Int      @unique
+  ts      DateTime @default(now())
+  payload Json
+  prevHash String
+  hash    String
+}

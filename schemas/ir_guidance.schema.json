@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "revenue": {"$ref": "#/definitions/range"},
+    "gm_pct": {"$ref": "#/definitions/range"},
+    "opinc": {"$ref": "#/definitions/range"},
+    "assumptions": {"type": "object"}
+  },
+  "required": ["revenue", "gm_pct", "opinc", "assumptions"],
+  "definitions": {
+    "range": {
+      "type": "object",
+      "properties": {
+        "downside": {"type": "array", "items": {"type": "number"}},
+        "base": {"type": "array", "items": {"type": "number"}},
+        "upside": {"type": "array", "items": {"type": "number"}}
+      },
+      "required": ["downside", "base", "upside"]
+    }
+  }
+}

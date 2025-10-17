@@ -1,0 +1,76 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: demo-api
+spec:
+  replicas: 4
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: demo-api
+  strategy:
+    canary:
+      canaryService: demo-api-canary
+      stableService: demo-api-stable
+      trafficRouting:
+        istio:
+          virtualService:
+            name: demo-api
+            routes:
+              - http-route
+      steps:
+        - setWeight: 10
+        - pause: {duration: 2m}
+        - analysis:
+            templates:
+              - templateName: demo-api-canary-checks
+        - setWeight: 25
+        - pause: {duration: 2m}
+        - analysis:
+            templates:
+              - templateName: demo-api-canary-checks
+        - setWeight: 50
+        - pause: {duration: 5m}
+        - analysis:
+            templates:
+              - templateName: demo-api-canary-checks
+      maxSurge: 1
+      maxUnavailable: 0
+      abort:
+        enabled: true
+  template:
+    metadata:
+      labels:
+        app: demo-api
+    spec:
+      containers:
+        - name: demo-api
+          image: ghcr.io/blackroad/demo-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          env:
+            - name: DEPLOY_SHA
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['rollouts-pod-template-hash']
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

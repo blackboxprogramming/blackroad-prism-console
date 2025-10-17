@@ -1,0 +1,7 @@
+Task Name,Description,Assignee Email,Section,Due Date
+DB: GitHub raw tables,Create raw_github_issues + github_repo_sync.,amundsonalexa@gmail.com,Today,2025-10-17
+API: GitHub connect (PAT),POST /v1/sources kind=github_pat; validate token; store SSM; seed repos.,amundsonalexa@gmail.com,Today,2025-10-17
+Worker: br-ingest-github,Poll by repo since last_updated_at; upsert issues; rate-limit aware.,amundsonalexa@gmail.com,This Week,2025-10-18
+Webhook: /webhooks/github,Verify HMAC; upsert single issue on events; optional for freshness.,amundsonalexa@gmail.com,This Week,2025-10-18
+dbt: stg + marts,Add stg_github__issues, fct_github_issues_daily, fct_github_open_bugs.,amundsonalexa@gmail.com,This Week,2025-10-19
+Tiles: Issues/Bugs,Add 2 tiles to PRISM dashboard pulling new endpoints.,amundsonalexa@gmail.com,This Week,2025-10-19

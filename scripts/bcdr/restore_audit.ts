@@ -1,0 +1,10 @@
+import fs from 'fs';
+const TEST='data/bcdr/restore_tests.jsonl'; if(!fs.existsSync(TEST)) process.exit(0);
+const rows=fs.readFileSync(TEST,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l));
+const ym=new Date().toISOString().slice(0,7).replace('-','');
+const done=rows.filter((r:any)=>r.state==='completed');
+const pass=done.filter((r:any)=>r.status==='pass').length;
+const fail=done.filter((r:any)=>r.status==='fail').length;
+const md = `# Restore Audit ${ym}\n\n- Completed: ${done.length}\n- Pass: ${pass}\n- Fail: ${fail}\n`;
+fs.mkdirSync('bcdr/reports',{recursive:true}); fs.writeFileSync(`bcdr/reports/RESTORE_${ym}.md`, md);
+console.log('restore audit written');

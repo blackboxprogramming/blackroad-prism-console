@@ -1,0 +1,6 @@
+Task Name,Description,Assignee Email,Section,Due Date
+Provision CUR to S3,"Deploy cost-usage module; verify reports land.",amundsonalexa@gmail.com,Today,2025-10-09
+Glue/Athena query,"Confirm table loads; run test SELECT SUM(line_item_unblended_cost).",amundsonalexa@gmail.com,Today,2025-10-09
+Set AWS budget alert,"Monthly budget $5k; SNS → Slack #finance.",amundsonalexa@gmail.com,Today,2025-10-09
+Create Airtable Spend base,"Table Vendors with cost/owner/renewal; seed top 5 SaaS.",amundsonalexa@gmail.com,This Week,2025-10-10
+Notion Spend dashboard,"Embed Airtable + Athena results; add summary.",amundsonalexa@gmail.com,This Week,2025-10-10

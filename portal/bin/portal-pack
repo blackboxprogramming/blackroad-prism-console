@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+VER="${1:?usage: portal-pack <version>}"
+ROOT="/home/pi/portal"
+BLD="$ROOT/.build/portal_$VER"
+PKG="$ROOT/.dist"
+mkdir -p "$BLD/DEBIAN" "$BLD/home/pi/portal" "$PKG"
+
+# Control file
+cat > "$BLD/DEBIAN/control" <<CTRL
+Package: portal
+Version: $VER
+Section: utils
+Priority: optional
+Architecture: armhf
+Maintainer: pi <pi@localhost>
+Description: Key-safe crypto portal (watch-only proofs, PSBT prep, audits)
+CTRL
+
+# Post-install: set perms; don't auto-start anything
+cat > "$BLD/DEBIAN/postinst" <<'POST'
+#!/bin/sh
+set -e
+chown -R pi:pi /home/pi/portal || true
+chmod 700 /home/pi/portal
+chmod -R go-rwx /home/pi/portal/configs /home/pi/portal/proofs /home/pi/portal/psbts /home/pi/portal/audits /home/pi/portal/logs /home/pi/portal/reports || true
+exit 0
+POST
+chmod 0755 "$BLD/DEBIAN/postinst"
+
+# Copy portal tree (exclude wallets/backups/torr dirs if any)
+rsync -a --delete \
+  --exclude '.build' --exclude '.dist' --exclude 'backups' \
+  /home/pi/portal/ "$BLD/home/pi/portal/"
+
+# Build .deb
+dpkg-deb --build "$BLD" "$PKG/portal_${VER}_armhf.deb"
+echo "PACKAGE: $PKG/portal_${VER}_armhf.deb"

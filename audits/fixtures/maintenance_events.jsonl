@@ -1,0 +1,2 @@
+{"timestamp": "2024-05-01T03:15:00Z", "event": "maintenance.block", "system": "prism-console", "reason": "security patch window", "duration_minutes": 45}
+{"timestamp": "2024-05-11T18:42:00Z", "event": "maintenance.window", "system": "prism-console", "duration_minutes": 30}

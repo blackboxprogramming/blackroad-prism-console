@@ -1,0 +1,14 @@
+Task Name,Description,Assignee Email,Section,Due Date
+Create Okta tenant + MFA,Spin up org, MFA (WebAuthn+TOTP), groups, custom domain.,amundsonalexa@gmail.com,Today,2025-10-03
+Integrate Slack with Okta (SCIM),SSO+SCIM; test joiner/mover/leaver.,amundsonalexa@gmail.com,Today,2025-10-03
+Integrate Asana with Okta (SCIM),Assign by groups; document rollback.,amundsonalexa@gmail.com,This Week,2025-10-04
+Integrate Jira (Atlassian Access),SSO; map groups; verify imports.,amundsonalexa@gmail.com,This Week,2025-10-04
+Integrate GitHub SSO/OIDC,Enforce org SSO; test PAT scopes.,amundsonalexa@gmail.com,This Week,2025-10-04
+Integrate Notion SSO,Enable SSO; test deprovision.,amundsonalexa@gmail.com,This Week,2025-10-04
+Create 1Password vaults + policy,Team vaults; sharing; break-glass account.,amundsonalexa@gmail.com,Today,2025-10-03
+Enable Snyk + Dependabot org-wide,Block on high severity; add PR checks.,amundsonalexa@gmail.com,This Week,2025-10-04
+Document “SSO & Access” in Notion,Screenshots, SOP, rollback, break-glass.,amundsonalexa@gmail.com,This Week,2025-10-04
+Create CloudWatch dashboard,Add ALB requests/5xx + WAF allowed/blocked widgets.,amundsonalexa@gmail.com,Today,2025-10-07
+Wire Slack to AWS Chatbot,Connect Slack workspace, add #security channel, get SNS topic ARN.,amundsonalexa@gmail.com,Today,2025-10-07
+Deploy alarms to SNS,Apply Terraform for alb_5xx and waf_blocks alarms with Slack SNS.,amundsonalexa@gmail.com,This Week,2025-10-08
+Tune thresholds,Review 1 week data, adjust 5xx threshold and block rate.,amundsonalexa@gmail.com,Next Week,2025-10-14

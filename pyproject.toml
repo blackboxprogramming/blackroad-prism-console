@@ -5,14 +5,46 @@ requires-python = ">=3.10"
 description = "Offline PLM & Manufacturing Ops (Phase 37) — deterministic, file-backed."
 readme = "README.md"
 authors = [{ name = "Blackroad", email = "eng@blackroadinc.us" }]
-dependencies = ["typer"]
+dependencies = [
+    "paho-mqtt",
+    "typer",
+    "fastapi",
+    "pydantic",
+    "fastapi",
+    "jinja2",
+    "typer",
+    "uvicorn",
+]
 
 [project.scripts]
 brc = "cli.console:main"
+blackroad-api = "agent.api:main"
+blackroad-dashboard = "agent.dashboard:main"
+blackroad = "cli.console:main"
+blackroad-agent = "agent.daemon:main"
+dependencies = ["typer", "click"]
+
+[project.scripts]
+brc = "cli.console:main"
+blackroad = "cli.blackroad:cli"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
 addopts = "-q"
+testpaths = ["tests"]
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blackroad-prism-console"
+version = "0.1.0"
+description = "BlackRoad Prism console CLI"
+authors = [{ name = "BlackRoad" }]
+dependencies = ["typer>=0.9.0"]
+
+[tool.setuptools]
+packages = ["cli"]
 
 [tool.black]
 line-length = 100
@@ -24,3 +56,9 @@ profile = "black"
 [tool.ruff]
 line-length = 100
 extend-select = ["I"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+agent = ["templates/*.html"]

@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BlackRoad Dashboard</title>
+    <style>
+      body { font-family: sans-serif; margin: 0; background: #0f172a; color: #e2e8f0; }
+      header { padding: 1.5rem 2rem; background: #111827; border-bottom: 1px solid #1f2937; }
+      main { padding: 2rem; display: grid; gap: 1.5rem; }
+      .card { background: #1f2937; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.15); }
+      .title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; }
+      input[type="password"], input[type="text"] { padding: 0.6rem 0.75rem; border-radius: 0.6rem; border: 1px solid #334155; background: #0f172a; color: inherit; }
+      button { margin-left: 0.75rem; padding: 0.55rem 1.2rem; border-radius: 0.6rem; border: none; background: #2563eb; color: white; font-weight: 600; cursor: pointer; }
+      button:hover { background: #1d4ed8; }
+      small { display: block; margin-top: 0.5rem; color: #94a3b8; }
+      pre { background: #0f172a; padding: 1rem; border-radius: 0.75rem; overflow: auto; border: 1px solid #334155; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>BlackRoad Control Plane</h1>
+    </header>
+    <main>
+      <div class="card">
+        <div class="title">Security</div>
+        <input id="brToken" type="password" placeholder="Set or paste BlackRoad token" style="width:60%;" />
+        <button id="saveToken">Save Token</button>
+        <small id="tokHelp">Token applies immediately; keep it safe.</small>
+      </div>
+      <div class="card">
+        <div class="title">Configuration Snapshot</div>
+        <pre id="cfgDump">{}</pre>
+      </div>
+    </main>
+    <script>
+      let BR_TOKEN = localStorage.getItem('BLACKROAD_TOKEN') || "";
+
+      const tokenInput = document.getElementById('brToken');
+      if (BR_TOKEN) {
+        tokenInput.value = BR_TOKEN;
+      }
+
+      function authHeaders(h = {}) {
+        const headers = { ...h };
+        if (BR_TOKEN) {
+          headers['Authorization'] = 'Bearer ' + BR_TOKEN;
+        }
+        return headers;
+      }
+
+      function authedFetch(url, opts = {}) {
+        const options = { ...opts };
+        options.headers = authHeaders(options.headers || {});
+        return fetch(url, options);
+      }
+
+      function wsUrl(path) {
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+        const qp = BR_TOKEN ? `?token=${encodeURIComponent(BR_TOKEN)}` : '';
+        return `${proto}://${location.host}${path}${qp}`;
+      }
+
+      async function refreshConfig() {
+        try {
+          const response = await authedFetch('/settings');
+          if (!response.ok) throw new Error('Request failed');
+          const data = await response.json();
+          document.getElementById('cfgDump').textContent = JSON.stringify(data, null, 2);
+        } catch (err) {
+          document.getElementById('cfgDump').textContent = 'Unable to fetch settings. ' + err.message;
+        }
+      }
+
+      document.getElementById('saveToken').onclick = async () => {
+        const t = (tokenInput.value || '').trim();
+        const res = await authedFetch('/settings/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: t })
+        });
+        if (res.ok) {
+          BR_TOKEN = t;
+          localStorage.setItem('BLACKROAD_TOKEN', BR_TOKEN);
+          alert('Token saved.');
+          await refreshConfig();
+        } else {
+          alert('Failed to save token.');
+        }
+      };
+
+      const API = {
+        loadSettings: () => authedFetch('/settings'),
+        updateJetson: (payload) => authedFetch('/settings/jetson', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload || {})
+        }),
+        testConnection: (payload) => authedFetch('/connect/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload || {})
+        }),
+        installKey: (payload) => authedFetch('/connect/install-key', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload || {})
+        }),
+        listFlashDevices: () => authedFetch('/flash/devices'),
+        listFlashImages: () => authedFetch('/flash/images'),
+        flashSocket: () => new WebSocket(wsUrl('/ws/flash')),
+        listJobs: () => authedFetch('/jobs'),
+        getJob: (id) => authedFetch(`/jobs/${encodeURIComponent(id)}`),
+        downloadJob: (id) => authedFetch(`/jobs/${encodeURIComponent(id)}/download`),
+        killJob: (id) => authedFetch(`/jobs/${encodeURIComponent(id)}/kill`, { method: 'POST' }),
+        listModels: () => authedFetch('/models'),
+        runModel: (payload) => authedFetch('/models/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload || {})
+        }),
+        modelSocket: () => new WebSocket(wsUrl('/ws/model')),
+        uploadTranscribe: (formData) => authedFetch('/transcribe/upload', {
+          method: 'POST',
+          body: formData
+        }),
+        transcribeSocket: () => new WebSocket(wsUrl('/ws/transcribe/run')),
+        transcribeGpuSocket: () => new WebSocket(wsUrl('/ws/transcribe/run_gpu')),
+        flashRunSocket: () => new WebSocket(wsUrl('/ws/run'))
+      };
+
+      window.BlackRoadAPI = API;
+      refreshConfig();
+    </script>
+  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>BlackRoad Device Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #0f172a; color: #e2e8f0; }
+    h1 { margin-bottom: 16px; }
+    .status { margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+    .status button { padding: 6px 12px; background: #22d3ee; border: none; border-radius: 4px; cursor: pointer; color: #0f172a; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+    .card { background: #1e293b; border-radius: 12px; padding: 16px; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.4); }
+    .title { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+    button { cursor: pointer; padding: 8px 12px; background: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: 600; }
+    button:hover { background: #0ea5e9; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border-bottom: 1px solid rgba(148, 163, 184, 0.2); padding: 6px 4px; }
+    th { text-transform: uppercase; font-size: 12px; color: #94a3b8; }
+    tbody tr:hover { background: rgba(148, 163, 184, 0.12); }
+    small { color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <h1>BlackRoad Device Dashboard</h1>
+  <div class="status">
+    <strong>Active Target:</strong>
+    <span id="targetInfo">
+      {% if target %}
+        {{ target.host }} ({{ target.user }})
+      {% else %}
+        None configured
+      {% endif %}
+    </span>
+    <button id="refreshTarget">Refresh</button>
+  </div>
+
+  <div class="grid">
+  <title>BlackRoad Agent Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.45);
+    }
+    .title {
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    button {
+      background: #38bdf8;
+      color: #0f172a;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover {
+      background: #0ea5e9;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    th {
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+    td button {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+    #scanLog {
+      margin-top: 12px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>BlackRoad Agent Control</h1>
+    <p>Active target: <strong id="activeTarget">{{ target.get('host', 'unset') }}</strong></p>
+
+    <div class="card">
+      <div class="title">Discover Devices</div>
+      <button id="scanBtn">Scan LAN</button>
+      <div id="scanLog"><small>Finds hosts on your subnet via ping + mDNS, then probes for SSH and Jetson.</small></div>
+      <table id="scanTable" style="width:100%; margin-top:8px;">
+        <thead><tr><th align="left">IP</th><th align="left">Name</th><th align="left">Kind</th><th align="left">SSH</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card" id="flasherCard">
+      <div class="title">Flasher</div>
+      <p><small>Firmware flashing controls coming soon.</small></p>
+    <div class="card" id="flasher">
+      <div class="title">Flasher</div>
+      <p>Firmware flashing controls coming soon.</p>
+    </div>
+  </div>
+
+  <script>
+  const scanBtn = document.getElementById('scanBtn');
+  const scanLog = document.getElementById('scanLog');
+  const scanBody = document.querySelector('#scanTable tbody');
+  const targetInfo = document.getElementById('targetInfo');
+  const refreshBtn = document.getElementById('refreshTarget');
+
+  const initialTarget = {{ target | tojson | safe }};
+
+  function updateTargetDisplay(target) {
+    if (target && target.host) {
+      targetInfo.textContent = `${target.host} (${target.user || 'jetson'})`;
+    } else {
+      targetInfo.textContent = 'None configured';
+    }
+  }
+
+  async function refreshTarget() {
+    try {
+      const r = await fetch('/discover/target');
+      const j = await r.json();
+      if (j.ok && j.jetson) {
+        updateTargetDisplay(j.jetson);
+      } else {
+        updateTargetDisplay(null);
+  const activeTargetEl = document.getElementById('activeTarget');
+
+  async function refreshTarget() {
+    try {
+      const resp = await fetch('/discover/target');
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (data.ok && data.jetson) {
+        activeTargetEl.textContent = `${data.jetson.host} (${data.jetson.user})`;
+      }
+    } catch (err) {
+      console.error('Failed to refresh target', err);
+    }
+  }
+
+  scanBtn.onclick = async () => {
+    scanLog.textContent = 'Scanning… (takes ~15–45s)';
+    const r = await fetch('/discover/scan'); const j = await r.json();
+    scanLog.textContent = `Network: ${j.network || 'unknown'} • Found: ${(j.hosts||[]).length}`;
+    scanBody.innerHTML = '';
+    (j.hosts||[]).forEach(h=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${h.ip}</td>
+        <td>${h.name || '-'}</td>
+        <td>${h.kind}</td>
+        <td>${h.ssh ? 'yes' : 'no'}</td>
+        <td><button data-ip="${h.ip}">Set as target</button></td>`;
+      tr.querySelector('button').onclick = async (ev)=>{
+        const ip = ev.target.dataset.ip;
+        const r = await fetch('/discover/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({host:ip,user:'jetson'})});
+        const t = await r.json();
+        if (t.ok) {
+          alert(`Target set to ${ip}`);
+          updateTargetDisplay(t.jetson);
+        } else {
+          alert(`Failed: ${t.error || 'unknown'}`);
+        }
+      };
+      scanBody.appendChild(tr);
+    });
+  };
+
+  refreshBtn.onclick = refreshTarget;
+  updateTargetDisplay(initialTarget);
+    scanBtn.disabled = true;
+    try {
+      const r = await fetch('/discover/scan'); const j = await r.json();
+      scanLog.textContent = `Network: ${j.network || 'unknown'} • Found: ${(j.hosts||[]).length}`;
+      scanBody.textContent = '';
+      (j.hosts||[]).forEach(h=>{
+        const tr = document.createElement('tr');
+
+        const ipTd = document.createElement('td');
+        ipTd.textContent = h.ip;
+        tr.appendChild(ipTd);
+
+        const nameTd = document.createElement('td');
+        nameTd.textContent = h.name || '-';
+        tr.appendChild(nameTd);
+
+        const kindTd = document.createElement('td');
+        kindTd.textContent = h.kind;
+        tr.appendChild(kindTd);
+
+        const sshTd = document.createElement('td');
+        sshTd.textContent = h.ssh ? 'yes' : 'no';
+        tr.appendChild(sshTd);
+
+        const actionTd = document.createElement('td');
+        const btn = document.createElement('button');
+        btn.dataset.ip = h.ip;
+        btn.textContent = 'Set as target';
+        btn.onclick = async (ev)=>{
+          const ip = ev.target.dataset.ip;
+          const r = await fetch('/discover/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({host:ip,user:'jetson'})});
+          const t = await r.json();
+          alert(t.ok ? `Target set to ${ip}` : `Failed: ${t.error || 'unknown'}`);
+          if (t.ok) {
+            activeTargetEl.textContent = `${ip} (jetson)`;
+          }
+        };
+        actionTd.appendChild(btn);
+        tr.appendChild(actionTd);
+
+        scanBody.appendChild(tr);
+      });
+    } catch (err) {
+      console.error('Scan failed', err);
+      scanLog.textContent = 'Scan failed. Check server logs.';
+    } finally {
+      scanBtn.disabled = false;
+    }
+  };
+
+  refreshTarget();
+  </script>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BlackRoad Dashboard</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; background: #111; color: #eee; }
+    h1 { color: #0f0; }
+    .card { background: #222; padding: 1em; margin-bottom: 1em; border-radius: 8px; }
+    .title { font-weight: bold; margin-bottom: 0.5em; }
+    input[type=text] { width: 70%; padding: 0.5em; }
+    button { padding: 0.5em 1em; margin-left: .5em; cursor: pointer; }
+    #log { background:#000; color:#0f0; padding:1em; height:280px; overflow:auto; border-radius:6px; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+  </style>
+</head>
+<body>
+  <h1>BlackRoad Dashboard</h1>
+
+  <div class="card">
+    <div class="title">Pi</div>
+    <pre>{{ pi | tojson(indent=2) }}</pre>
+  </div>
+
+  <div class="card">
+    <div class="title">Jetson</div>
+    <pre>{{ jetson | tojson(indent=2) }}</pre>
+  </div>
+
+
+    <form id="runForm" onsubmit="return false;">
+      <input type="text" id="cmd" placeholder="Enter command (e.g. nvidia-smi)" />
+      <button id="runBtn">Run (stream)</button>
+      <button id="stopBtn" type="button">Stop</button>
+    </form>
+
+    <div id="log"></div>
+  </div>
+
+<script>
+let ws = null;
+const logEl = document.getElementById('log');
+const cmdEl = document.getElementById('cmd');
+const runBtn = document.getElementById('runBtn');
+const stopBtn = document.getElementById('stopBtn');
+
+function append(line){
+  logEl.textContent += line + "\n";
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+runBtn.addEventListener('click', () => {
+  if (ws) { ws.close(); ws = null; }
+  logEl.textContent = "";
+  const cmd = cmdEl.value.trim() || "nvidia-smi";
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/ws/run`);
+  ws.onopen = () => ws.send(cmd);
+  ws.onmessage = (ev) => {
+    if (ev.data === "[[BLACKROAD_DONE]]") { ws.close(); ws = null; append("--- done ---"); }
+    else { append(ev.data); }
+  };
+  ws.onerror = () => append("[error]");
+  ws.onclose = () => { /* noop */ };
+});
+
+stopBtn.addEventListener('click', () => {
+  if (ws) { ws.close(); ws = null; append("--- stopped ---"); }
+});
+</script>
+</body>
+</html>

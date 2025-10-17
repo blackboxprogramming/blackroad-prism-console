@@ -1,0 +1,46 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: demo-api-routing
+  labels:
+    alertmanagerConfig: main
+spec:
+  route:
+    receiver: sre-chat
+    groupBy: ['alertname', 'service']
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 2h
+    matchers:
+      - name: service
+        value: demo-api
+      - name: severity
+        value: critical
+    continue: true
+  receivers:
+    - name: sre-chat
+      slackConfigs:
+        - channel: '#sre-incidents'
+          sendResolved: true
+          title: '{{ .CommonLabels.alertname }} :: {{ .CommonLabels.service }}'
+          text: |
+            *SLO burn:* {{ .CommonAnnotations.burn_rate }}x
+            *Runbook:* {{ .CommonAnnotations.runbook }}
+            *Deploy SHA:* {{ .CommonAnnotations.deploy_sha }}
+            *Recent changes:* {{ .CommonAnnotations.change_summary }}
+    - name: incident-ticket
+      webhookConfigs:
+        - url: https://incident-api.internal.example.com/v1/incidents
+          sendResolved: true
+          httpConfig:
+            bearerTokenSecret:
+              name: incident-writer
+              key: token
+  inhibitRules:
+    - sourceMatch:
+        - name: severity
+          value: critical
+      targetMatch:
+        - name: severity
+          value: warning
+      equal: ['alertname', 'service']

@@ -14,6 +14,14 @@ What it does
 4.Opens a PR, applies labels, requests review, optionally enables auto-merge.
 5.Prints the PR link.
 
+For alias- and consent-focused wrapper configuration snippets that pair with the automation prompts, see
+[`docs/WRAPPER_ALIAS_CONFIG.md`](docs/WRAPPER_ALIAS_CONFIG.md).
+1. Creates a timestamped branch.
+2. Syncs generator artifacts (hook in scripts/sync_artifacts.sh).
+3. Writes an evidence bundle to /evidence/<ts>_bootstrap/.
+4. Opens a PR, applies labels, requests review, optionally enables auto-merge.
+5. Prints the PR link.
+
 ---
 
 ## 3) Optional: GitLab variant (MR)
@@ -141,3 +149,19 @@ autopr.sh already invokes this if present. To use an external dump directory:
 OWNER=BlackRoad REPO=masterpack GH_TOKEN=*** \
   ./scripts/autopr.sh && ./scripts/sync_artifacts.sh --from ./generated
 ```
+
+---
+
+## 6) Integration checklist
+
+Track the Slack, Asana Auth Bot, and GitLab mirroring setup in
+[`docs/PR_BUNDLE_INTEGRATIONS.md`](docs/PR_BUNDLE_INTEGRATIONS.md). Update the integration status
+matrix in this file once each service is configured in the target environment. When you are ready to
+validate the live wiring, follow the runbook in
+[`docs/VALIDATION_SPRINT.md`](docs/VALIDATION_SPRINT.md) to exercise every workflow end to end.
+
+For the broader operations rollout—including the `blackroad.io` product surface, the
+`blackroadinc.us` operations hub, and the multi-system integration backlog—work from the
+[`docs/BLACKROAD_OPS_INTEGRATION_PLAN.md`](docs/BLACKROAD_OPS_INTEGRATION_PLAN.md) playbook. It
+describes how to generate batches of Codex prompts (10–20 at a time), assign owners across the tool
+stack, and record evidence in the shared ops hub.

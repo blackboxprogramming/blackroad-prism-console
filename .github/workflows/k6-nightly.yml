@@ -1,0 +1,23 @@
+name: k6-nightly
+on:
+  schedule:
+    - cron: '7 6 * * *'
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: k6 smoke
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: k6/smoke.js
+        env:
+          TARGET_URL: ${{ vars.APP_URL }}
+      - name: k6 lightload
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: k6/lightload.js
+        env:
+          TARGET_URL: ${{ vars.APP_URL }}
+          API_URL:    ${{ vars.API_URL }}
+          API_KEY:    ${{ secrets.PUBLIC_API_KEY }}

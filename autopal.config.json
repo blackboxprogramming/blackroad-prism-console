@@ -1,0 +1,47 @@
+{
+  "version": "1.0",
+  "feature_flags": {
+    "global_enabled": true
+  },
+  "maintenance_mode": {
+    "allowlist_endpoints": ["GET /health/live", "GET /health/ready"],
+    "status_code": 503,
+    "retry_after_seconds": 60
+  },
+  "step_up": {
+    "rules": [
+      {
+        "match": { "endpoint": "POST /secrets/materialize" },
+        "required": true,
+        "mechanisms": ["mfa-approval"]
+      },
+      {
+        "match": { "endpoint": "POST /fossil/override" },
+        "required": true,
+        "mechanisms": ["dual-control"]
+      }
+    ]
+  },
+  "endpoints": {}
+  "feature_flags": {
+    "global_enabled": true,
+    "require_step_up": true
+  },
+  "break_glass": {
+    "enabled": true,
+    "alg": "HS256",
+    "hmac_secret_env": "AUTOPAL_BREAK_GLASS_SECRET",
+    "ttl_seconds": 600,
+    "allowlist_endpoints": [
+      "POST /secrets/materialize",
+      "POST /fossil/override",
+      "POST /approvals/{rid}/approve"
+    ],
+    "allowed_subjects": ["ops-oncall", "sre-lead"]
+  },
+  "audit": {
+    "enabled": true,
+    "sink": "stdout",
+    "redact_values": true
+  }
+}

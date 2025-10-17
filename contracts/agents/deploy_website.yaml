@@ -1,0 +1,39 @@
+name: deploy_blackroad_site
+version: 1.0.0
+inputs:
+  - id: deploy_command
+    type: array[string]
+    required: false
+    default: ["/deploy", "blackroad", "pages"]
+  - id: build_exit_code
+    type: integer
+    required: true
+    description: Exit code from the build step; must be zero to proceed.
+  - id: purge_cache
+    type: boolean
+    required: false
+    default: true
+  - id: warm_cache
+    type: boolean
+    required: false
+    default: true
+outputs:
+  - id: deployment_summary
+    type: object
+    description: Status flags for deploy, purge, and warm operations.
+side_effects:
+  - type: process
+    resource: deployment_cli
+    ops: [deploy]
+  - type: process
+    resource: cache_cli
+    ops: [purge, warm]
+failure_modes:
+  - id: DEPLOY_FAILED
+    retryable: true
+  - id: CACHE_PURGE_FAILED
+    retryable: true
+  - id: CACHE_WARM_FAILED
+    retryable: true
+  - id: BUILD_NOT_READY
+    retryable: false

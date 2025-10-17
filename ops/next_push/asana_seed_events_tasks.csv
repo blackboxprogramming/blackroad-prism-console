@@ -1,0 +1,6 @@
+Task Name,Description,Assignee Email,Section,Due Date
+ECS scheduled task for seeder,Deploy ecs-scheduled-task module with daily cron @ 12:12am CT.,amundsonalexa@gmail.com,Today,2025-10-13
+SSM secret for PG_URL,Create /blackroad/dev/pg/url SecureString; wire to task.,amundsonalexa@gmail.com,Today,2025-10-13
+Security group to RDS,Ensure ECS task SG can reach RDS:5432 (SG→SG preferred).,amundsonalexa@gmail.com,Today,2025-10-13
+Push seeder image,Add GH Action to build/push br-seed-events to ECR; verify tag :latest.,amundsonalexa@gmail.com,Today,2025-10-13
+Smoke run now,Run EventBridge rule once (Console → “Run now”); confirm logs + rows inserted.,amundsonalexa@gmail.com,Today,2025-10-13
