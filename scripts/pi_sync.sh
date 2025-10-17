@@ -24,6 +24,33 @@ Any arguments after `--` are passed directly to rsync.
 USAGE
 }
 
+join_remote_path() {
+  local base="$1"
+  local sub="$2"
+
+  if [[ -z "$sub" ]]; then
+    printf '%s' "$base"
+    return
+  fi
+
+  case "$base" in
+    .)
+      printf '%s' "$sub"
+      return
+      ;;
+    /)
+      printf '/%s' "$sub"
+      return
+      ;;
+  esac
+
+  while [[ "$base" == */ && "$base" != "/" && "$base" != "~" ]]; do
+    base=${base%/}
+  done
+
+  printf '%s/%s' "$base" "$sub"
+}
+
 if [[ ${1:-} == "--help" || ${1:-} == "-h" ]]; then
   usage
   exit 0
@@ -36,6 +63,7 @@ repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 local_path="$repo_root"
 exclude_file=${PI_SYNC_EXCLUDE:-"$repo_root/scripts/pi_sync_exclude.txt"}
 extra_rsync_args=()
+subdir_specified=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -59,6 +87,7 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       local_path="$2"
+      subdir_specified=true
       shift 2
       ;;
     -x)
@@ -116,11 +145,31 @@ if [[ ! -d "$local_path" ]]; then
 fi
 
 local_path=$(cd "$local_path" && pwd)
+remote_effective_path="$remote_path"
+disable_delete=false
+
+if [[ "$subdir_specified" == true ]]; then
+  if [[ "$local_path" == "$repo_root" ]]; then
+    :
+  else
+    repo_root_with_slash="$repo_root/"
+    if [[ "$local_path" == "$repo_root_with_slash"* ]]; then
+      remote_subpath=${local_path#"$repo_root_with_slash"}
+      remote_effective_path=$(join_remote_path "$remote_path" "$remote_subpath")
+    else
+      echo "[WARN] Local path '$local_path' is outside the repository; disabling --delete for safety" >&2
+      disable_delete=true
+    fi
+  fi
+fi
+
+remote_spec="$remote_host:$remote_effective_path"
+
 if [[ "$direction" == "push" ]]; then
   source_arg="$local_path/"
-  dest_arg="$remote"
+  dest_arg="$remote_spec"
 else
-  source_arg="$remote"
+  source_arg="$remote_spec"
   dest_arg="$local_path/"
 fi
 
@@ -135,7 +184,7 @@ if ! command -v ssh >/dev/null 2>&1; then
 fi
 
 rsync_opts=(-az --info=stats2,progress2 --filter=':- .gitignore')
-if [[ "$direction" == "push" ]]; then
+if [[ "$direction" == "push" && "$disable_delete" == false ]]; then
   rsync_opts+=(--delete)
 fi
 
@@ -157,9 +206,9 @@ rsync_cmd+=("$source_arg" "$dest_arg")
 
 echo "[INFO] Direction: $direction"
 if [[ "$direction" == "push" ]]; then
-  echo "[INFO] Syncing $source_arg to $remote"
+  echo "[INFO] Syncing $source_arg to $remote_spec"
 else
-  echo "[INFO] Syncing $remote to $dest_arg"
+  echo "[INFO] Syncing $remote_spec to $dest_arg"
 fi
 "${rsync_cmd[@]}"
 
