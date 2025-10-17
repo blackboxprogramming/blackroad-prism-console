@@ -5,11 +5,30 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 
 from agent import models
 
 app = FastAPI(title="BlackRoad Agent API")
+
+_DASHBOARD_PATH = Path(__file__).resolve().parent.parent / "dashboard.html"
+
+
+def _load_dashboard() -> str:
+    """Load the dashboard HTML from disk."""
+
+    try:
+        return _DASHBOARD_PATH.read_text(encoding="utf-8")
+    except OSError as exc:  # pragma: no cover - protects startup failures
+        raise HTTPException(status_code=500, detail="dashboard unavailable") from exc
+
+
+@app.get("/", response_class=HTMLResponse)
+def dashboard() -> str:
+    """Serve the static dashboard UI."""
+
+    return _load_dashboard()
 
 
 @app.get("/models")
