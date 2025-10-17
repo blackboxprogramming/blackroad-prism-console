@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "version": "2024-05-01",
+    "steps": 7,
+    "description": "Paste-ready prompts for the BlackRoad JD-to-deliverables workflow."
+  },
+  "prompts": [
+    {
+      "step": 1,
+      "name": "JD Parser",
+      "goal": "Extract structure, must-have skills, and non-negotiables from the raw JD.",
+      "prompt": "You are the JD parser. Return company, role, location policy, salary data, must-have skills, preferred skills, and compliance notes. Mark clearly if the JD violates the remote-only lane."
+    },
+    {
+      "step": 2,
+      "name": "Signal Classifier",
+      "goal": "Tag the JD with sales/finance signals for later bullet matching.",
+      "prompt": "Evaluate the parsed JD and output tags for function, industry, tooling, and Ameriprise alignment. Only use tags present in SnapIns_Library.json."
+    },
+    {
+      "step": 3,
+      "name": "Gap Mapper",
+      "goal": "Find resume gaps or missing proof points versus the JD requirements.",
+      "prompt": "Compare JD must-haves with the resume baseline. Highlight each gap with severity (high/med/low) and cite which SnapIns bullet families can close it."
+    },
+    {
+      "step": 4,
+      "name": "Bullet Composer",
+      "goal": "Draft six tailored bullets using the SnapIns templates and gap map.",
+      "prompt": "Use the gap map and tags to select SnapIns. Rewrite them with company-specific nouns, quant results, and remote-first framing. Output exactly six bullets."
+    },
+    {
+      "step": 5,
+      "name": "Summary Writer",
+      "goal": "Produce a 55-word, high-signal summary for the cover note.",
+      "prompt": "Synthesize JD highlights and the strongest wins from the drafted bullets. Output one paragraph capped at 55 words, no fluff, highlight MN/remote strength."
+    },
+    {
+      "step": 6,
+      "name": "Micro Note",
+      "goal": "Generate a 1-2 sentence note that signals cultural fit and remote cadence.",
+      "prompt": "Draft a short note referencing Ameriprise-style client care, automation comfort, and remote collaboration norms. 2 sentences max."
+    },
+    {
+      "step": 7,
+      "name": "Q&A Pack",
+      "goal": "Create JSON Q&A pairs for interview prep.",
+      "prompt": "Return JSON with keys: question, answer, proof_point, automation_hook. Provide at least four entries tuned to the JD and remote expectations."
+    }
+  ]
+}
