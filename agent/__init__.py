@@ -17,3 +17,8 @@ __all__ = ["config", "store", "transcribe"]
 from . import config, store, transcribe  # re-export for convenience
 
 __all__ = ["config", "store", "transcribe"]
+"""BlackRoad device agent package."""
+
+from . import telemetry as telemetry
+
+__all__ = ["telemetry"]
