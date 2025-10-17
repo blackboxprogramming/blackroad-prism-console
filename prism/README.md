@@ -8,7 +8,7 @@ contradiction reports, snapshots, and collaborative symphonies.
 - `ipc/` – IPC message buffers
 - `logs/` – rolling log files per agent
 - `contradictions/` – contradiction reports
-- `snapshots/` – memory dumps for resilience
+- `snapshots/` – memory dumps for resilience (e.g. `mathematica/complex_rotation_recurrence.{yaml,json}` captures the core rotation recurrence for the Mathematica branch)
 - `symphonies/` – collaborative compositions
 
 _Last updated on 2025-09-11_

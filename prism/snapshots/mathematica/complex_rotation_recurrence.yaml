@@ -1,0 +1,24 @@
+equations:
+  - name: Main recurrence
+    expression: "z_(n+1) = i*z_n + c"
+  - name: Initial condition
+    expression: "z_0 = 0"
+  - name: Fixed point
+    expression: "z* = c / (1 - i)"
+  - name: Shifted variable
+    expression: "w_n = z_n - z*"
+  - name: Simplified recurrence
+    expression: "w_(n+1) = i*w_n"
+  - name: General solution
+    expression: "w_n = i^n * w_0; z_n = z* + i^n * (z_0 - z*)"
+  - name: Cycle property
+    expression: "z_(n+4) = z_n"
+
+legend:
+  z_n: "Complex state variable at step n"
+  i: "Imaginary unit (i^2 = -1); represents a 90° rotation"
+  c: "Constant complex shift per iteration"
+  z*: "Fixed point (equilibrium of the system)"
+  w_n: "Displacement from fixed point"
+  n: "Iteration index"
+  i^n: "Rotation operator (repeats every 4 steps: 1, i, -1, -i, ...)"
