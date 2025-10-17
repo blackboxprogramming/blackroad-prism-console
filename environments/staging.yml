@@ -44,6 +44,16 @@ automation:
         without publishing DNS changes.
       secrets:
         - AWAKEN_SEED
+    - name: AWS ECS deploy (reusable)
+      file: .github/workflows/reusable-aws-ecs-deploy.yml
+      triggers:
+        - workflow_call
+      summary: >-
+        Registers a new task definition revision and forces an ECS deployment
+        for staging services when invoked by API or bridge pipelines.
+      secrets:
+        - AWS_STAGING_DEPLOY_ROLE_ARN
+        - AWS_STAGING_EXTERNAL_ID
 deployments:
   - service: marketing-site
     type: static-site

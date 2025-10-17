@@ -69,6 +69,55 @@ left blank, the workflow checks `https://blackroad.io/health` and
 `https://blackroad.io/api/health` respectively. Provide alternate URLs if you
 are targeting a different host.
 
+## Reusable deployment workflows
+
+Smaller service-specific pipelines can now delegate platform rollouts to
+reusable GitHub workflows. The harnesses line up with the environment manifests
+under `environments/` so every deploy path shares the same guardrails.
+
+### `.github/workflows/reusable-aws-ecs-deploy.yml`
+
+Call this workflow with `uses: ./.github/workflows/reusable-aws-ecs-deploy.yml`
+to register a new task definition revision and trigger a deployment for an ECS
+service. Required inputs include the cluster, service, and container image. Pass
+`secrets.aws-role-to-assume` (or static access keys) so the job can assume the
+appropriate deploy role. Optional inputs let you override the desired count and
+wait for stability before exiting.
+
+```
+jobs:
+  publish-api:
+    uses: ./.github/workflows/reusable-aws-ecs-deploy.yml
+    with:
+      cluster: prism-prod
+      service: api-gateway
+      image: ${{ needs.build.outputs.image-ref }}
+      container-name: api
+      region: us-west-2
+    secrets:
+      aws-role-to-assume: ${{ secrets.AWS_PROD_DEPLOY_ROLE_ARN }}
+      aws-external-id: ${{ secrets.AWS_PROD_EXTERNAL_ID }}
+```
+
+### `.github/workflows/reusable-fly-deploy.yml`
+
+Use this workflow when a service ships via Fly.io. It accepts an app name and
+either a Docker image reference or falls back to the checked-in `fly.toml`. You
+can stage secret updates by providing newline-separated `KEY=VALUE` pairs and
+optionally pass a `release-command` to run post-deploy migrations.
+
+```
+jobs:
+  deploy-bridge:
+    uses: ./.github/workflows/reusable-fly-deploy.yml
+    with:
+      app: blackroad-bridge-prod
+      image: ${{ needs.build.outputs.image-ref }}
+      strategy: rolling
+    secrets:
+      fly-api-token: ${{ secrets.FLY_API_TOKEN }}
+```
+
 ## Related documentation
 
 - [`DEPLOYMENT.md`](DEPLOYMENT.md) — GitHub App setup, branch policy, and

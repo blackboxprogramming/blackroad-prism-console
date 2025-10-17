@@ -1,0 +1,158 @@
+name: Reusable AWS ECS Deploy
+
+on:
+  workflow_call:
+    inputs:
+      cluster:
+        description: 'ECS cluster name or ARN'
+        required: true
+        type: string
+      service:
+        description: 'ECS service name'
+        required: true
+        type: string
+      image:
+        description: 'Container image to roll out (e.g., 123456789012.dkr.ecr.us-west-2.amazonaws.com/app:sha)'
+        required: true
+        type: string
+      container-name:
+        description: 'Container definition name inside the task definition to update'
+        required: false
+        type: string
+        default: app
+      region:
+        description: 'AWS region where the ECS service runs'
+        required: false
+        type: string
+        default: us-west-2
+      desired-count:
+        description: 'Optional desired count override applied during the update'
+        required: false
+        type: string
+      wait-for-stable:
+        description: 'Wait for the service to reach a stable state before completing'
+        required: false
+        type: boolean
+        default: true
+      environment:
+        description: 'Environment name to associate with this deployment run'
+        required: false
+        type: string
+    secrets:
+      aws-role-to-assume:
+        required: false
+        description: 'IAM role ARN assumed for deployment (preferred)'
+      aws-external-id:
+        required: false
+        description: 'External ID required when assuming the IAM role'
+      aws-access-key-id:
+        required: false
+        description: 'Static access key used when no role is supplied'
+      aws-secret-access-key:
+        required: false
+        description: 'Static secret key used when no role is supplied'
+      aws-session-token:
+        required: false
+        description: 'Session token used when assuming STS credentials directly'
+    outputs:
+      task-definition:
+        description: 'ARN of the registered task definition revision'
+        value: ${{ jobs.deploy.outputs.task-definition }}
+      service-arn:
+        description: 'ARN of the ECS service that was updated'
+        value: ${{ jobs.deploy.outputs.service-arn }}
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to AWS ECS
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment != '' && inputs.environment || format('ecs-{0}', inputs.service) }}
+    outputs:
+      task-definition: ${{ steps.register.outputs.task-def-arn }}
+      service-arn: ${{ steps.update.outputs.service-arn }}
+    steps:
+      - name: Configure AWS credentials (assume role)
+        if: ${{ secrets.aws-role-to-assume != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.aws-role-to-assume }}
+          role-session-name: GitHubActionsECSDeploy
+          aws-region: ${{ inputs.region }}
+          role-duration-seconds: 3600
+          role-external-id: ${{ secrets.aws-external-id }}
+
+      - name: Configure AWS credentials (static keys)
+        if: ${{ secrets.aws-role-to-assume == '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-session-token: ${{ secrets.aws-session-token }}
+          aws-region: ${{ inputs.region }}
+
+      - name: Fetch current task definition
+        id: describe
+        env:
+          CLUSTER: ${{ inputs.cluster }}
+          SERVICE: ${{ inputs.service }}
+        run: |
+          set -euo pipefail
+          task_def=$(aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" --query 'services[0].taskDefinition' --output text)
+          if [ -z "$task_def" ] || [ "$task_def" = "None" ]; then
+            echo "::error::Failed to resolve task definition for service $SERVICE in cluster $CLUSTER" >&2
+            exit 1
+          fi
+          aws ecs describe-task-definition --task-definition "$task_def" --query 'taskDefinition' > taskdef.json
+          echo "current-task-def=${task_def}" >> "$GITHUB_OUTPUT"
+
+      - name: Register new task definition revision
+        id: register
+        env:
+          IMAGE: ${{ inputs.image }}
+          CONTAINER: ${{ inputs['container-name'] }}
+        run: |
+          set -euo pipefail
+          jq --arg image "$IMAGE" --arg container "$CONTAINER" '
+            del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy, .deregisteredAt, .deregisteredBy, .inferenceAccelerators, .proxyConfiguration?.containerName, .tags, .createdAt) |
+            .containerDefinitions |= map(if .name == $container then .image = $image else . end)
+          ' taskdef.json > taskdef-processed.json
+          if ! jq -e --arg container "$CONTAINER" --arg image "$IMAGE" '.containerDefinitions[] | select(.name == $container and .image == $image)' taskdef-processed.json >/dev/null; then
+            echo "::error::Container definition $CONTAINER not found when preparing task definition" >&2
+            exit 1
+          fi
+          new_task=$(aws ecs register-task-definition --cli-input-json file://taskdef-processed.json --query 'taskDefinition.taskDefinitionArn' --output text)
+          if [ -z "$new_task" ] || [ "$new_task" = "None" ]; then
+            echo "::error::Failed to register new task definition revision" >&2
+            exit 1
+          fi
+          echo "task-def-arn=${new_task}" >> "$GITHUB_OUTPUT"
+
+      - name: Update service
+        id: update
+        env:
+          CLUSTER: ${{ inputs.cluster }}
+          SERVICE: ${{ inputs.service }}
+          DESIRED: ${{ inputs['desired-count'] }}
+          WAIT: ${{ inputs['wait-for-stable'] }}
+        run: |
+          set -euo pipefail
+          task_def="${{ steps.register.outputs.task-def-arn }}"
+          if [ -z "$task_def" ]; then
+            echo "::error::Task definition ARN missing" >&2
+            exit 1
+          fi
+          args=(aws ecs update-service --cluster "$CLUSTER" --service "$SERVICE" --task-definition "$task_def" --force-new-deployment)
+          if [ -n "$DESIRED" ]; then
+            args+=(--desired-count "$DESIRED")
+          fi
+          update_output=$("${args[@]}")
+          echo "$update_output" > update.json
+          service_arn=$(jq -r '.service.serviceArn' update.json)
+          echo "service-arn=${service_arn}" >> "$GITHUB_OUTPUT"
+          if [ "$WAIT" = "true" ]; then
+            aws ecs wait services-stable --cluster "$CLUSTER" --services "$SERVICE"
+          fi

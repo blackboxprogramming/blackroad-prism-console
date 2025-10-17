@@ -52,6 +52,25 @@ automation:
         - CF_ZONE_ID
         - CF_API_TOKEN
         - SLACK_WEBHOOK_URL
+    - name: Fly.io deploy (reusable)
+      file: .github/workflows/reusable-fly-deploy.yml
+      triggers:
+        - workflow_call
+      summary: >-
+        Provides a shared Fly.io deploy harness so edge and bridge services can
+        push fresh images or configs using the same release guardrails.
+      secrets:
+        - FLY_API_TOKEN
+    - name: AWS ECS deploy (reusable)
+      file: .github/workflows/reusable-aws-ecs-deploy.yml
+      triggers:
+        - workflow_call
+      summary: >-
+        Registers a new task definition revision and forces an ECS deployment
+        for production services when invoked by release workflows.
+      secrets:
+        - AWS_PROD_DEPLOY_ROLE_ARN
+        - AWS_PROD_EXTERNAL_ID
 deployments:
   - service: marketing-site
     type: static-site

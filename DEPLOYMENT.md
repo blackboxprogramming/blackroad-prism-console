@@ -22,6 +22,23 @@ If not using a GitHub App, create a classic webhook pointing to `/api/webhooks/g
 - `main` → production
 - `staging` → staging
 
+## CI/CD workflows
+
+Release automation now leans on reusable GitHub workflows so service-specific
+pipelines stay small while still targeting the managed infrastructure footprint:
+
+- `.github/workflows/reusable-aws-ecs-deploy.yml` registers a fresh task
+  definition revision and forces an ECS deployment. Supply the ECS cluster,
+  service, and image along with credentials (preferably an IAM role) to push new
+  backend builds.
+- `.github/workflows/reusable-fly-deploy.yml` handles Fly.io rollouts. Provide
+  the Fly app name plus an image reference (or rely on `fly.toml`) and the
+  workflow will stage secrets and kick off the deploy.
+
+These workflows are referenced from the environment manifests in
+`environments/` so bots and humans alike know which automation path owns each
+target.
+
 ## Admin UI
 
 Serve `var/www/blackroad/admin/index.html` and access it. Enter the internal token to use deployment actions.
