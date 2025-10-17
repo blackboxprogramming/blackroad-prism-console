@@ -1,0 +1,130 @@
+environment: staging
+description: Stable integration environment mirroring production controls for release candidates.
+owner:
+  team: Platform Engineering
+  contact: platform@blackroad.io
+  pagerduty_service: plat-staging
+regions:
+  - provider: aws
+    name: us-east-1
+    accounts:
+      - alias: staging-shared
+        id: "000000000001"
+        role: staging-deployer
+  - provider: fly.io
+    name: iad
+    apps:
+      - prism-staging
+repositories:
+  - name: blackroad-prism-console
+    path: github.com/blackroad-labs/blackroad-prism-console
+    artifact: web
+  - name: blackroad-api
+    path: github.com/blackroad-labs/blackroad-api
+    artifact: api
+  - name: ollama-bridge
+    path: github.com/blackroad-labs/ollama-bridge
+    artifact: bridge
+deployments:
+  - name: prism-console
+    platform: ecs
+    cluster: br-staging
+    service: prism-console
+    runtime: nodejs18
+    image: ghcr.io/blackroad/prism-console:staging
+    scaling:
+      min_count: 2
+      max_count: 4
+      cpu: 512
+      memory: 1024
+    ingress:
+      url: https://staging.blackroad.io
+      healthcheck: https://staging.blackroad.io/healthz
+      public: true
+    observability:
+      logs: cloudwatch
+      traces: otel-staging
+      dashboards:
+        - grafana/staging/prism-console
+      alerts:
+        - pagerduty:plat-staging
+  - name: api
+    platform: ecs
+    cluster: br-staging
+    service: api
+    runtime: nodejs18
+    image: ghcr.io/blackroad/api:staging
+    scaling:
+      min_count: 2
+      max_count: 4
+      cpu: 1024
+      memory: 2048
+    ingress:
+      url: https://staging.blackroad.io/api
+      healthcheck: https://staging.blackroad.io/api/health
+      public: true
+    observability:
+      logs: cloudwatch
+      traces: otel-staging
+      dashboards:
+        - grafana/staging/api
+      alerts:
+        - pagerduty:plat-staging
+  - name: ollama-bridge
+    platform: ecs
+    cluster: br-staging
+    service: ollama-bridge
+    runtime: nodejs18
+    image: ghcr.io/blackroad/ollama-bridge:staging
+    scaling:
+      min_count: 1
+      max_count: 2
+      cpu: 512
+      memory: 1024
+    ingress:
+      url: https://staging.blackroad.io/api/llm
+      healthcheck: https://staging.blackroad.io/api/llm/health
+      public: false
+    observability:
+      logs: cloudwatch
+      traces: otel-staging
+      dashboards:
+        - grafana/staging/bridge
+      alerts:
+        - pagerduty:plat-staging
+dependencies:
+  databases:
+    - name: prism-staging
+      engine: aurora-postgresql
+      size: medium
+      notes: Restored nightly from production snapshots with scrubbed data.
+  caches:
+    - name: prism-staging-redis
+      engine: elasticache-redis
+      size: cache.m4.large
+  messaging:
+    - name: prism-events-staging
+      type: sqs
+      notes: Dedicated queue namespace for staging workloads.
+  third_party:
+    - name: BlackRoad Auth
+      purpose: OAuth + SSO staging tenant
+      notes: Mirrors production config; tokens limited to staging roles.
+    - name: Stripe Test
+      purpose: Billing and subscription testing
+      notes: Uses Stripe test keys with nightly reconciliation.
+release_process:
+  cadence: Daily (Monday–Thursday) after automated checks pass
+  approvals:
+    required: true
+    approvers:
+      - platform-lead
+      - product-ops
+  rollout:
+    strategy: Rolling ECS deploy with 25% batches and health alarms
+    health_gates:
+      - curl -sf https://staging.blackroad.io/healthz
+      - npm run health -- --env=staging
+  rollback:
+    strategy: Automated revert via GitHub Actions workflow
+    notes: Re-deploy prior container image tag and re-run smoke tests.
