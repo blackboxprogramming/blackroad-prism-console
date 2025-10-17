@@ -531,9 +531,6 @@ def plm_bom_explode(
 def plm_bom_where_used(component: str = typer.Option(..., "--component")):
     rows = plm_bom.where_used(component)
     for item_id, rev in rows:
-        typer.echo(f"{item_id}@{rev}")
-    used = plm_bom.where_used(component)
-    for item_id, rev in used:
         typer.echo(f"{item_id}\t{rev}")
 
 
@@ -603,8 +600,11 @@ def mfg_wi_render(item: str = typer.Option(..., "--item"), rev: str = typer.Opti
 def mfg_spc_analyze(
     op: str = typer.Option(..., "--op"), window: int = typer.Option(50, "--window")
 ):
-    findings = mfg_spc.analyze(op, window)
-    typer.echo(" ".join(findings))
+    report = mfg_spc.analyze(op, window)
+    if report["findings"]:
+        typer.echo(" ".join(report["findings"]))
+    else:
+        typer.echo("OK")
 
 
 @app.command("mfg:yield")

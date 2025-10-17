@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["item_rev", "steps"],
+    "properties": {
+      "item_rev": {"type": "string"},
+      "steps": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["wc", "op", "std_time_min", "yield_pct"],
+          "properties": {
+            "wc": {"type": "string"},
+            "op": {"type": "string"},
+            "std_time_min": {"type": "number", "minimum": 0},
+            "yield_pct": {"type": "number"},
+            "instructions_path": {"type": ["string", "null"]}
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "additionalProperties": false
+  }
+}

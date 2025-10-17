@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "name", "capacity_per_shift", "skills", "cost_rate"],
+    "properties": {
+      "id": {"type": "string"},
+      "name": {"type": "string"},
+      "capacity_per_shift": {"type": "integer", "minimum": 0},
+      "skills": {"type": "string"},
+      "cost_rate": {"type": "number", "minimum": 0}
+    },
+    "additionalProperties": false
+  }
+}
