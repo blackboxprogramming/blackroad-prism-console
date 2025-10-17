@@ -9,7 +9,6 @@
   - Extend release runbooks with rollback/forward procedures and policy gates for infra changes.
 
 ## To Do
-- [ ] Deploy site (`WebsiteBot`)
 - [ ] Build site (`BuildBlackRoadSiteAgent`)
 - [ ] Clean up merged branches (`CleanupBot`)
 - [ ] Format/validate web files (`WebberBot`)
@@ -24,6 +23,7 @@
 ## In Progress
 <!-- Agents move tasks here when running -->
 
+- [ ] Deploy site (`WebsiteBot`) (owner: WorkerBot)
 ## Blocked
 <!-- Agents move tasks here if they fail, with error info -->
 
