@@ -1,67 +1,77 @@
+# BlackRoad deployment workflows
 
-## Auto-deploy secrets (GitHub → Settings → Secrets and variables → Actions)
-- `BR_DEPLOY_SECRET` — shared bearer token for `/api/deploy/hook` and `/api/deploy/trigger`
-- `BR_DEPLOY_URL` — optional override of the deploy webhook URL
-- `CF_ZONE_ID` / `CF_API_TOKEN` — optional Cloudflare purge credentials
-- `SLACK_WEBHOOK_URL` — optional Slack notification URL
+This repository exposes two deployment paths that now live inside a single
+GitHub Actions workflow (`.github/workflows/blackroad-deploy.yml`). The default
+"modern" path is triggered automatically on pushes to `main` and talks to the
+BlackRoad deploy webhook. A manual "legacy" path remains available for the
+historic SSH-based rollout and can be triggered on demand from the Actions tab.
 
-## Legacy SSH deploy secrets
-## Secrets (GitHub → Settings → Secrets and variables → Actions)
-- `SERVER_HOST` — your server or domain (e.g., blackroad.io)
-- `SERVER_USER` — SSH user with permission to write to `/opt/blackroad` and restart `blackroad-api`
-- `SSH_KEY` — private key **text** (RSA/ED25519). Use `SSH_KEY_PATH` instead if you prefer a file path.
-- `SSH_PORT` — optional (defaults to 22)
+## Modern webhook deploy (default)
 
-## Paths (already set in workflow)
-- `DEPLOY_ROOT=/opt/blackroad/releases`
-- `WEB_PATH=/var/www/blackroad`
-- `API_PATH=/srv/blackroad-api`
+Pushes to `main` execute the **Modern webhook deploy** job. The workflow builds
+in place, calls `POST /api/deploy/hook`, and performs progressive verification
+with cache purges and Slack notifications when configured.
 
-## Health endpoints (external)
-- `HEALTH_URL=https://blackroad.io/health`
-- `API_HEALTH_URL=https://blackroad.io/api/health`
+### Required configuration
 
-## What happens on push to `main`
-1. Install deps, lint, test, build.
-2. Assemble `release.tar.gz` with:
-   - `web/` → built assets from `web/dist` or `web/build` (or `web/public` fallback).
-   - `api/` → your API source (no `node_modules`).
-3. Upload artifact, then deploy:
-   - Upload tarball → extract to `/opt/blackroad/releases/<SHA>/`
-   - Point `/var/www/blackroad` and `/srv/blackroad-api` at the new release (symlinks)
-   - `npm ci --omit=dev` for API, restart `blackroad-api`
-   - Keep last 3 releases
-   - Check `/health` and `/api/health`
-   - Rollback automatically if either fails.
+Add the following Action secrets/variables under
+**Settings → Secrets and variables → Actions**:
 
-## One-time server prep (optional)
-SSH to the server and run:
-```sh
-bash -lc 'curl -fsSL https://raw.githubusercontent.com/<your-org>/<your-repo>/main/scripts/bootstrap_server.sh | sh'
+- `BR_DEPLOY_SECRET` — bearer token accepted by `/api/deploy/hook` and
+  `/api/deploy/trigger`.
+- `BR_DEPLOY_URL` — optional override if the webhook lives somewhere other than
+  `https://blackroad.io/api/deploy/hook`.
+- `CF_ZONE_ID` / `CF_API_TOKEN` — optional Cloudflare purge credentials used
+  when the version check fails.
+- `SLACK_WEBHOOK_URL` — optional Slack notification target.
+- `SITE_URL` / `API_URL` (Repository **variables**) — optional overrides when the
+  canonical domains differ from `https://blackroad.io`.
 
-Or copy scripts/bootstrap_server.sh and run it.
-```
+### What the job does
 
-Local dry run of deploy script
+1. Installs dependencies and builds the Prism console.
+2. Calls the deploy webhook with the current SHA, branch, and actor.
+3. Waits for the API to report the new build SHA, purging Cloudflare or forcing a
+   rebuild if necessary.
+4. Revalidates `/healthz` and `/api/version` before marking the run successful.
+5. Posts a Slack summary when `SLACK_WEBHOOK_URL` is available.
 
-If you have the tarball locally:
+## Legacy SSH fallback
 
-SERVER_HOST=blackroad.io SERVER_USER=ubuntu SSH_KEY_PATH=~/.ssh/id_ed25519 \
-DEPLOY_ROOT=/opt/blackroad/releases WEB_PATH=/var/www/blackroad API_PATH=/srv/blackroad-api \
-./scripts/deploy.sh release.tar.gz
+The historical SSH pipeline still exists as a manual job. Trigger it from the
+workflow's **Run workflow** dialog and choose `legacy-ssh` for the `target`
+input. Optional inputs let you deploy another ref or override the health check
+endpoints used during verification.
 
-Rollback notes
+### Legacy-specific secrets and variables
 
-The script auto-selects the previous directory in /opt/blackroad/releases/ and switches symlinks back, then restarts blackroad-api.
+Configure these secrets if you rely on the fallback path:
 
-Monorepo notes
-•If your SPA is at web/, it will be built and packaged automatically.
-•If your API is at api/, its source is packaged (prod deps installed on the server).
-•If you keep everything at root, the workflow still attempts sensible fallbacks.
+- `DEPLOY_HOST` — target server hostname.
+- `DEPLOY_USER` — SSH user that can write to `/var/www/blackroad` and
+  `/srv/blackroad-api`.
+- `DEPLOY_KEY` — private SSH key with access to the host.
+- `DEPLOY_PORT` — optional port (set as a secret or variable) if SSH does not
+  run on 22.
 
----
+### Workflow behaviour
 
-### That’s it
-This **one** pipeline handles **build → artifact → SSH deploy → atomic switch → health → auto‑rollback** and retains the **last 3** releases. If you want me to tailor it to a specific repo layout (e.g., exact web/api paths, extra build steps, Prisma migrations, PM2 instead of systemd), say the word and I’ll adapt the files accordingly.
+1. Checks out the requested ref (defaults to the workflow ref).
+2. Builds `sites/blackroad` and packages the API into tarballs.
+3. Uploads both archives to the host via SCP.
+4. Extracts the artifacts, restarts `blackroad-api` and `lucidia-llm`, and checks
+   the supplied health endpoints before finishing.
 
-_Last updated on 2025-09-11_
+### Health overrides
+
+The manual dispatch form accepts `health_url` and `api_health_url` inputs. When
+left blank, the workflow checks `https://blackroad.io/health` and
+`https://blackroad.io/api/health` respectively. Provide alternate URLs if you
+are targeting a different host.
+
+## Related documentation
+
+- [`DEPLOYMENT.md`](DEPLOYMENT.md) — GitHub App setup, branch policy, and
+  rollback tooling.
+- [`environments/production.yml`](environments/production.yml) — source-of-truth
+  manifest for production infrastructure and automation.

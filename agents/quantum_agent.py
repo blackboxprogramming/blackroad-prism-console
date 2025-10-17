@@ -24,7 +24,7 @@ from __future__ import annotations
 import json
 import math
 from pathlib import Path
-from typing import Iterable, List
+from typing import Any, Iterable, List
 
 import numpy as np
 
@@ -43,6 +43,7 @@ except Exception:  # pragma: no cover - dependency missing
     _HAS_PENNYLANE = False
 
 LOG_FILE = Path("contradiction_log.json")
+ROAD_SKIP_LOG_FILE = Path("road_skip_log.json")
 
 
 _DEF_MAPPING = {
@@ -52,6 +53,26 @@ _DEF_MAPPING = {
 }
 
 
+_ENGLISH_MAPPING = {
+    "0": "Zero / False state (|0⟩)",
+    "1": "One / True state (|1⟩)",
+    "\u03a8": "Superposition / Maybe state (|+⟩)",
+}
+
+
+def _safe_read_json_array(log_file: Path) -> List[Any]:
+    """Return a JSON array stored at ``log_file`` or ``[]`` when missing."""
+
+    if log_file.exists():
+        try:
+            data = json.loads(log_file.read_text())
+            if isinstance(data, list):
+                return data
+        except json.JSONDecodeError:
+            return []
+    return []
+
+
 def _load_contradictions(log_file: Path = LOG_FILE) -> List[str]:
     """Load contradiction entries from ``log_file``.
 
@@ -59,18 +80,21 @@ def _load_contradictions(log_file: Path = LOG_FILE) -> List[str]:
     to contain a JSON array of symbols.
     """
 
-    if log_file.exists():
-        try:
-            return json.loads(log_file.read_text())
-        except json.JSONDecodeError:
-            return []
-    return []
+    data = _safe_read_json_array(log_file)
+    return [str(item) for item in data if isinstance(item, str)]
 
 
-def _log_road_skip(event: dict, log_file: Path = LOG_FILE) -> None:
-    """Append a "Road Skip" tunnelling event to ``log_file``."""
+def _load_road_skips(log_file: Path = ROAD_SKIP_LOG_FILE) -> List[dict]:
+    """Load stored "Road Skip" events."""
 
-    data = _load_contradictions(log_file)
+    data = _safe_read_json_array(log_file)
+    return [item for item in data if isinstance(item, dict)]
+
+
+def _log_road_skip(event: dict, log_file: Path = ROAD_SKIP_LOG_FILE) -> None:
+    """Append a "Road Skip" tunnelling event to the dedicated log file."""
+
+    data = _load_road_skips(log_file)
     data.append(event)
     log_file.write_text(json.dumps(data, indent=2))
 
@@ -162,4 +186,14 @@ def invoke_quantum(max_iter: int = 10) -> List[List[int]]:
     return trace
 
 
-__all__ = ["invoke_quantum"]
+def describe_symbols(states: Iterable[str]) -> List[str]:
+    """Translate contradiction symbols into human-readable English labels."""
+
+    descriptions: List[str] = []
+    for sym in states:
+        sym_str = str(sym)
+        descriptions.append(_ENGLISH_MAPPING.get(sym_str, f"Unknown symbol {sym_str!r}"))
+    return descriptions
+
+
+__all__ = ["invoke_quantum", "describe_symbols"]
