@@ -15,7 +15,7 @@ async function chat(messages) {
       const json = await rsp.json();
       return { provider: 'lucidia-llm', ...json };
     }
-  } catch (e) {
+  } catch {
     // fall through to stub
   }
   // Fallback stub

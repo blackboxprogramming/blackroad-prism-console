@@ -4,7 +4,6 @@
 const express = require('express');
 const os = require('os');
 const fs = require('fs');
-const path = require('path');
 const { DB_PATH } = require('../config');
 
 const router = express.Router();

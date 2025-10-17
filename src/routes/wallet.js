@@ -90,7 +90,7 @@ router.post('/pay', strictLimiter, requireAuth, (req, res) => {
        VALUES (?, ?, ?, ?, ?, 'roadcoin', 'succeeded', ?, ?)`
     ).run(cryptoRandomId(), userId, subId, price, planRow.currency, cryptoRandomId(), now);
     db.exec('COMMIT');
-  } catch (e) {
+  } catch (_err) {
     db.exec('ROLLBACK');
     return res.status(500).json({ error: 'db_error' });
   }

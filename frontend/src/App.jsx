@@ -74,6 +74,7 @@ import Orchestrator from './Orchestrator.jsx'
 import Manifesto from './components/Manifesto.jsx'
 import AutoHeal from './pages/AutoHeal.jsx'
 import GitPage from './pages/GitPage.jsx'
+import ControlPanel from './pages/ControlPanel.jsx'
 
 export default function App(){
   const location = useLocation()
@@ -365,6 +366,11 @@ export default function App(){
               <NavItem icon={<Rocket size={18} />} text="Manifesto" href="/manifesto" />
             </nav>
           </aside>
+                <NavItem to="/roadview" icon={<LayoutGrid size={18} />} text="RoadView" />
+                <NavItem to="/control" icon={<Settings size={18} />} text="Control Panel" />
+                <NavItem icon={<Rocket size={18} />} text="Orchestrator" to="/orchestrator" />
+              </nav>
+            </aside>
 
           {/* Main */}
           <main className="flex-1 px-6 py-4 grid grid-cols-12 gap-6">
@@ -445,6 +451,7 @@ export default function App(){
               <Route path="/roadview" element={<RoadView agents={agents} stream={stream} setStream={setStream} system={system} wallet={wallet} contradictions={contradictions} notes={notes} setNotes={async (v)=>{ setNotesState(v); await setNotes(v); }} />} />
               <Route path="/autoheal" element={<AutoHeal />} />
               <Route path="/git" element={<GitPage />} />
+              <Route path="/control" element={<ControlPanel />} />
             </Routes>
           </main>
         </>

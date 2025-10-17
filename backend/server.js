@@ -22,6 +22,19 @@ const securitySpotlights = {
     lastFailsafe: '2025-03-08T11:24:00.000Z',
     killSwitchEngaged: false,
     manualOverride: false,
+const { Server } = require('socket.io');
+const { signToken, authMiddleware, nowISO, requireAdmin } = require('./utils');
+const { store, addTimeline } = require('./data');
+const autoheal = require('./autoheal');
+const { exec } = require('child_process');
+const { v4: uuidv4 } = require('uuid');
+
+// Sample Roadbook data
+const roadbookChapters = [
+  {
+    id: '1',
+    title: 'Introduction',
+    content: 'Welcome to the Roadbook. This chapter introduces the journey.'
   },
   dpAccountant: {
     epsilonCap: 3.5,
@@ -427,5 +440,18 @@ if (require.main === module) {
   app.listen(PORT, HOST, () => {
     // eslint-disable-next-line no-console
     console.log(`Backend listening on http://${HOST}:${PORT}`);
+// Manual control panel
+app.post('/api/autoheal/restart/:service', authMiddleware(JWT_SECRET), requireAdmin, autoheal.restart);
+app.post('/api/rollback/latest', authMiddleware(JWT_SECRET), requireAdmin, autoheal.rollbackLatest);
+app.post('/api/rollback/:id', authMiddleware(JWT_SECRET), requireAdmin, autoheal.rollbackTo);
+app.delete('/api/contradictions/all', authMiddleware(JWT_SECRET), requireAdmin, autoheal.purgeContradictions);
+app.post('/api/contradictions/test', authMiddleware(JWT_SECRET), requireAdmin, autoheal.injectContradictionTest);
+
+// Optional shell exec (guarded)
+app.post('/api/exec', authMiddleware(JWT_SECRET), (req, res)=>{
+  if (!ALLOW_SHELL) return res.status(403).json({ error: 'shell disabled' });
+  const cmd = String(req.body?.cmd || '').slice(0, 256);
+  exec(cmd, { timeout: 5000 }, (err, stdout, stderr)=>{
+    res.json({ ok: !err, stdout, stderr, error: err?.message || null });
   });
 }
