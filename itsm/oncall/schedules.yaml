@@ -1,0 +1,10 @@
+teams:
+  platform:
+    rotation:
+      - "alice@example.com"
+      - "bob@example.com"
+      - "carol@example.com"
+    escalation:
+      - slack:#incidents
+      - sms:+15551234567
+      - email:sre@blackroad.io

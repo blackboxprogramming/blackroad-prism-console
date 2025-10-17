@@ -1,0 +1,17 @@
+name: Postmortem Publish
+on:
+  workflow_dispatch:
+    inputs:
+      incident_id: { description: 'Incident ID', required: true }
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/itsm/postmortem_from_incident.ts "${{ inputs.incident_id }}"
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs(postmortem): IM-${{ inputs.incident_id }}"
+          file_pattern: "itsm/postmortems/IM-${{ inputs.incident_id }}.md"

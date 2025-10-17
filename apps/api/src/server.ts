@@ -262,6 +262,8 @@ import oauthAuthorize from './routes/oauth/authorize.js';
 import oauthToken from './routes/oauth/token.js';
 import oauthRevoke from './routes/oauth/revoke.js';
 import oauthRotate from './routes/oauth/rotate.js';
+import itsmOncall from './routes/itsm/oncall.js';
+import itsmIncidents from './routes/itsm/incidents.js';
 
 dotenv.config();
 import express from "express";
@@ -465,6 +467,7 @@ app.use('/api/marketplace', marketList, marketInstall, marketUninstall);
 app.use('/api/partners', partnerRev);
 app.use('/api/sandbox', sandboxEcho);
 app.use('/oauth', oauthAuthorize, oauthToken, oauthRevoke, oauthRotate);
+app.use('/api/itsm', itsmOncall, itsmIncidents);
 
 const port = process.env.PORT || 4000;
 
