@@ -342,9 +342,11 @@ import policyRoutes from './policy';
 import diffRoutes from './routes/diffs';
 import runRoutes from './routes/run';
 import graphRoutes from './routes/graph';
+import { observabilityPlugin } from './observability';
 
 export function buildServer() {
-  const app = Fastify();
+  const app = Fastify({ logger: true });
+  app.register(observabilityPlugin);
   app.register(intelRoutes);
   app.register(policyRoutes);
   app.register(diffRoutes);

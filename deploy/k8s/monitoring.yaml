@@ -27,6 +27,10 @@ data:
       - job_name: 'lucidia-math'
         static_configs:
           - targets: ['lucidia-math.lucidia.svc.cluster.local:9000']
+      - job_name: 'prism-server'
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['prism-server.prism.svc.cluster.local:3000']
       - job_name: 'nginx-ingress'
         static_configs:
           - targets: ['nginx-ingress-controller-metrics.prism-monitoring.svc.cluster.local:10254']
@@ -72,6 +76,30 @@ data:
             annotations:
               summary: 'Contradiction spike'
               description: 'More than 10 contradictions in 10m'
+          - alert: PrismHighErrorRate
+            expr: (sum(rate(prism_http_requests_total{status=~"5.."}[5m])) / (sum(rate(prism_http_requests_total[5m])) + 1e-9)) > 0.05
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: 'Prism server error rate above 5%'
+              description: 'Prism HTTP error rate is {{ printf "%.2f" $value }} over the last 5m'
+          - alert: PrismSlowRequests
+            expr: histogram_quantile(0.95, sum by (le) (rate(prism_http_request_duration_seconds_bucket[5m]))) > 1
+            for: 10m
+            labels:
+              severity: critical
+            annotations:
+              summary: 'Prism p95 latency above 1s'
+              description: 'Request latency exceeded SLO for more than 10m'
+          - alert: PrismForbiddenDecisionSpike
+            expr: increase(prism_capability_decisions_total{decision="forbid"}[15m]) > 5
+            for: 1m
+            labels:
+              severity: warning
+            annotations:
+              summary: 'Prism capability forbids spiking'
+              description: 'More than 5 forbidden capability checks were issued in the last 15m'
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -397,14 +425,121 @@ metadata:
   name: grafana-dashboards
   namespace: prism-monitoring
 data:
-  api-latency.json: |
-    {"title":"API request latency & error rate","schemaVersion":27,"panels":[]}
-  llm-response.json: |
-    {"title":"LLM response times","schemaVersion":27,"panels":[]}
-  math-contradictions.json: |
-    {"title":"Math service contradictions","schemaVersion":27,"panels":[]}
-  system-resources.json: |
-    {"title":"System resource usage","schemaVersion":27,"panels":[]}
+  prism-overview.json: |
+    {
+      "id": null,
+      "uid": "prism-overview",
+      "title": "Prism Server Overview",
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "panels": [
+        {
+          "type": "timeseries",
+          "title": "HTTP Requests per Route",
+          "gridPos": {"h": 9, "w": 12, "x": 0, "y": 0},
+          "datasource": {"type": "prometheus", "uid": "Prometheus"},
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (route) (rate(prism_http_requests_total[5m]))",
+              "legendFormat": "{{route}}"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "p95 Request Duration",
+          "gridPos": {"h": 9, "w": 12, "x": 12, "y": 0},
+          "datasource": {"type": "prometheus", "uid": "Prometheus"},
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "histogram_quantile(0.95, sum by (le) (rate(prism_http_request_duration_seconds_bucket[5m])))",
+              "legendFormat": "p95"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Requests In Flight",
+          "gridPos": {"h": 6, "w": 6, "x": 0, "y": 9},
+          "datasource": {"type": "prometheus", "uid": "Prometheus"},
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "prism_http_requests_in_flight"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Capability Decisions",
+          "gridPos": {"h": 9, "w": 9, "x": 6, "y": 9},
+          "datasource": {"type": "prometheus", "uid": "Prometheus"},
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (capability,decision) (rate(prism_capability_decisions_total[15m]))",
+              "legendFormat": "{{capability}}/{{decision}}"
+            }
+          ]
+        },
+        {
+          "type": "timeseries",
+          "title": "Workflow Events",
+          "gridPos": {"h": 9, "w": 9, "x": 15, "y": 9},
+          "datasource": {"type": "prometheus", "uid": "Prometheus"},
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (event) (rate(prism_workflow_events_total[15m]))",
+              "legendFormat": "{{event}}"
+            }
+          ]
+        }
+      ]
+    }
+  prism-alerts.json: |
+    {
+      "id": null,
+      "uid": "prism-alerts",
+      "title": "Prism Alerts",
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "panels": [
+        {
+          "type": "table",
+          "title": "Firing Alerts",
+          "gridPos": {"h": 9, "w": 24, "x": 0, "y": 0},
+          "datasource": {"type": "prometheus", "uid": "Prometheus"},
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "ALERTS{alertstate=\"firing\"}",
+              "format": "table"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "hidden": false
+              }
+            },
+            "overrides": []
+          }
+        }
+      ]
+    }
 ---
 apiVersion: apps/v1
 kind: Deployment

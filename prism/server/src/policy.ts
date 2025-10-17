@@ -3,6 +3,7 @@ import path from 'path';
 import YAML from 'yaml';
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { recordCapabilityDecision, recordWorkflowEvent } from './observability';
 
 export type Capability = 'write' | 'exec' | 'net' | 'secrets' | 'dns' | 'deploy' | 'read';
 export type Mode = 'playground' | 'dev' | 'trusted' | 'prod';
@@ -39,7 +40,9 @@ let overrides: Partial<Record<Capability, Decision>> = loadConfig().overrides ||
 
 export function checkCapability(cap: Capability): Decision {
   const preset = presets[currentMode][cap];
-  return overrides[cap] || preset;
+  const decision = overrides[cap] || preset;
+  recordCapabilityDecision(cap, decision, currentMode);
+  return decision;
 }
 
 export default async function policyRoutes(app: FastifyInstance) {
@@ -50,6 +53,8 @@ export default async function policyRoutes(app: FastifyInstance) {
     const body = z.object({ mode: z.enum(['playground','dev','trusted','prod']) }).parse(req.body);
     currentMode = body.mode;
     saveConfig({ mode: currentMode, overrides });
+    recordWorkflowEvent(`policy.mode.${currentMode}`);
+    req.log.info({ mode: currentMode }, 'policy mode updated');
     reply.send({ currentMode });
   });
 }
@@ -57,6 +62,7 @@ export default async function policyRoutes(app: FastifyInstance) {
 export function setMode(mode: Mode) {
   currentMode = mode;
   saveConfig({ mode: currentMode, overrides });
+  recordWorkflowEvent(`policy.mode.${currentMode}`);
 }
 
 export function getMode(): Mode {
