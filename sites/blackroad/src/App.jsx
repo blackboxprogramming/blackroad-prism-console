@@ -271,6 +271,14 @@ import InfinityMath from "./pages/InfinityMath.jsx";
 import Agents from "./pages/Agents.jsx";
 import Desktop from "./pages/Desktop.jsx";
 import QuantumConsciousness from "./pages/QuantumConsciousness.jsx";
+import EigenmapsLab from "./pages/EigenmapsLab.jsx";
+import PoissonBlendLab from "./pages/PoissonBlendLab.jsx";
+import NBodyLab from "./pages/NBodyLab.jsx";
+import WaveletLab from "./pages/WaveletLab.jsx";
+import AStarLab from "./pages/AStarLab.jsx";
+import TSPLab from "./pages/TSPLab.jsx";
+import GrayScottGalleryLab from "./pages/GrayScottGalleryLab.jsx";
+import RansacPlane3DLab from "./pages/RansacPlane3DLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -430,6 +438,14 @@ function LegacyApp() {
             <Route path="/hungarian" element={<HungarianLab/>} />
             <Route path="/quat" element={<QuaternionRotLab/>} />
             <Route path="/bary" element={<ComplexBarycentricLab/>} />
+            <Route path="/eigenmaps" element={<EigenmapsLab/>} />
+            <Route path="/blend" element={<PoissonBlendLab/>} />
+            <Route path="/nbody" element={<NBodyLab/>} />
+            <Route path="/wavelet" element={<WaveletLab/>} />
+            <Route path="/astar" element={<AStarLab/>} />
+            <Route path="/tsp" element={<TSPLab/>} />
+            <Route path="/gs-gallery" element={<GrayScottGalleryLab/>} />
+            <Route path="/plane3d" element={<RansacPlane3DLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -474,6 +490,14 @@ function LegacyApp() {
             <Route path="hungarian" element={<HungarianLab/>} />
             <Route path="quat" element={<QuaternionRotLab/>} />
             <Route path="bary" element={<ComplexBarycentricLab/>} />
+            <Route path="eigenmaps" element={<EigenmapsLab/>} />
+            <Route path="blend" element={<PoissonBlendLab/>} />
+            <Route path="nbody" element={<NBodyLab/>} />
+            <Route path="wavelet" element={<WaveletLab/>} />
+            <Route path="astar" element={<AStarLab/>} />
+            <Route path="tsp" element={<TSPLab/>} />
+            <Route path="gs-gallery" element={<GrayScottGalleryLab/>} />
+            <Route path="plane3d" element={<RansacPlane3DLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
