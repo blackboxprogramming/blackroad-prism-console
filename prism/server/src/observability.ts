@@ -48,6 +48,7 @@ const workflowEvents = new Counter({
 const durationSymbol = Symbol('durationTimer');
 const labelSymbol = Symbol('metricLabels');
 const inflightSymbol = Symbol('inflight');
+const completedSymbol = Symbol('metricsCompleted');
 
 function routeLabel(req: FastifyRequest): string {
   return req.routerPath ?? req.url ?? 'unknown';
@@ -75,6 +76,9 @@ export async function observabilityPlugin(app: FastifyInstance) {
       httpRequestsInFlight.dec();
       (req as any)[inflightSymbol] = false;
     }
+    if ((req as any)[completedSymbol]) {
+      return;
+    }
     const status = reply.statusCode.toString();
     const labels = { ...((req as any)[labelSymbol] ?? { method: req.method, route: routeLabel(req) }), status };
     httpRequestsTotal.inc(labels);
@@ -82,6 +86,7 @@ export async function observabilityPlugin(app: FastifyInstance) {
     if (typeof timer === 'function') {
       timer({ status });
     }
+    (req as any)[completedSymbol] = true;
   });
 
   app.addHook('onError', async (req, reply, error) => {
@@ -89,6 +94,7 @@ export async function observabilityPlugin(app: FastifyInstance) {
       httpRequestsInFlight.dec();
       (req as any)[inflightSymbol] = false;
     }
+    (req as any)[completedSymbol] = true;
     const status = reply.statusCode ? reply.statusCode.toString() : 'error';
     const labels = { method: req.method, route: routeLabel(req), status };
     httpRequestsTotal.inc(labels);
