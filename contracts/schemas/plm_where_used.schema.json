@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["component_id", "parent_id", "parent_rev"],
+    "properties": {
+      "component_id": {"type": "string"},
+      "parent_id": {"type": "string"},
+      "parent_rev": {"type": "string"}
+    },
+    "additionalProperties": false
+  }
+}

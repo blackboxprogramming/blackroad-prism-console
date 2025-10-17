@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import csv
-import json
 from dataclasses import dataclass, asdict
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any, Dict, Iterable, List, Tuple
 
 from tools import storage
+from tools import artifacts
+from orchestrator import metrics
 
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "plm"
+LAKE_DIR = ART_DIR / "lake"
+SCHEMA_DIR = ROOT / "contracts" / "schemas"
 
 
 @dataclass
@@ -42,8 +45,17 @@ ITEMS: Dict[Tuple[str, str], Item] = {}
 BOMS: Dict[Tuple[str, str], BOM] = {}
 
 
-def _write_json(path: Path, data) -> None:
-    storage.write(str(path), json.dumps(data, indent=2))
+def _schema(name: str) -> str:
+    return str(SCHEMA_DIR / name)
+
+
+def _rewrite_jsonl(filename: str, rows: Iterable[Dict[str, Any]]) -> None:
+    LAKE_DIR.mkdir(parents=True, exist_ok=True)
+    path = LAKE_DIR / filename
+    if path.exists():
+        path.unlink()
+    for row in rows:
+        storage.write(str(path), row)
 
 
 def load_items(directory: str) -> Dict[Tuple[str, str], Item]:
@@ -65,7 +77,10 @@ def load_items(directory: str) -> Dict[Tuple[str, str], Item]:
     global ITEMS
     ITEMS = items
     ART_DIR.mkdir(parents=True, exist_ok=True)
-    _write_json(ART_DIR / "items.json", [asdict(i) for i in items.values()])
+    payload = sorted([asdict(i) for i in items.values()], key=lambda r: (r["id"], r["rev"]))
+    artifacts.validate_and_write(str(ART_DIR / "items.json"), payload, _schema("plm_items.schema.json"))
+    _rewrite_jsonl("plm_items.jsonl", payload)
+    metrics.inc("plm_items_written", len(payload))
     return items
 
 
@@ -88,10 +103,34 @@ def load_boms(directory: str) -> Dict[Tuple[str, str], BOM]:
     global BOMS
     BOMS = boms
     ART_DIR.mkdir(parents=True, exist_ok=True)
-    _write_json(ART_DIR / "boms.json", [
+    payload = [
         {"item_id": b.item_id, "rev": b.rev, "lines": [asdict(l) for l in b.lines]}
         for b in boms.values()
-    ])
+    ]
+    payload.sort(key=lambda r: (r["item_id"], r["rev"]))
+    artifacts.validate_and_write(str(ART_DIR / "boms.json"), payload, _schema("plm_boms.schema.json"))
+    _rewrite_jsonl("plm_boms.jsonl", payload)
+
+    where_records = []
+    seen: set[Tuple[str, str, str]] = set()
+    for (parent_id, rev), bom_obj in boms.items():
+        for line in bom_obj.lines:
+            key = (line.component_id, parent_id, rev)
+            if key in seen:
+                continue
+            seen.add(key)
+            where_records.append({
+                "component_id": line.component_id,
+                "parent_id": parent_id,
+                "parent_rev": rev,
+            })
+    where_records.sort(key=lambda r: (r["component_id"], r["parent_id"], r["parent_rev"]))
+    artifacts.validate_and_write(
+        str(ART_DIR / "where_used.json"),
+        where_records,
+        _schema("plm_where_used.schema.json"),
+    )
+    _rewrite_jsonl("plm_where_used.jsonl", where_records)
     return boms
 
 

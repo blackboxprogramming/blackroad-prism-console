@@ -7,9 +7,14 @@ from typing import List
 
 from tools import storage
 from . import bom
+from tools import artifacts
+from orchestrator import metrics
 
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "plm" / "changes"
+LAKE_DIR = ROOT / "artifacts" / "plm" / "lake"
+SCHEMA_DIR = ROOT / "contracts" / "schemas"
+INDEX_PATH = ART_DIR / "index.json"
 
 
 @dataclass
@@ -43,11 +48,35 @@ def _load(id: str) -> Change:
     return Change(**data)
 
 
+def _schema(name: str) -> str:
+    return str(SCHEMA_DIR / name)
+
+
+def _rewrite_lake(records: List[dict]) -> None:
+    LAKE_DIR.mkdir(parents=True, exist_ok=True)
+    path = LAKE_DIR / "plm_changes.jsonl"
+    if path.exists():
+        path.unlink()
+    for rec in records:
+        storage.write(str(path), rec)
+
+
+def _update_index(ch: Change) -> None:
+    raw = storage.read(str(INDEX_PATH))
+    data = json.loads(raw) if raw else []
+    data = [row for row in data if row.get("id") != ch.id]
+    data.append(asdict(ch))
+    data.sort(key=lambda r: r["id"])
+    artifacts.validate_and_write(str(INDEX_PATH), data, _schema("plm_changes.schema.json"))
+    _rewrite_lake(data)
+
+
 def _save(ch: Change) -> None:
     ART_DIR.mkdir(parents=True, exist_ok=True)
-    storage.write(str(_path(ch.id)), json.dumps(asdict(ch)))
+    storage.write(str(_path(ch.id)), json.dumps(asdict(ch), indent=2))
     # simple markdown log
     storage.write(str(ART_DIR / f"eco_{ch.id}.md"), f"# {ch.id}\nstatus: {ch.status}\nreason: {ch.reason}\n")
+    _update_index(ch)
 
 
 def new_change(item_id: str, from_rev: str, to_rev: str, reason: str, risk: str = "low") -> Change:
@@ -104,4 +133,5 @@ def release(change_id: str) -> Change:
         raise RuntimeError("DUTY_SPC_UNSTABLE")
     ch.status = "released"
     _save(ch)
+    metrics.inc("plm_changes_released")
     return ch

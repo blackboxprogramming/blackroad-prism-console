@@ -8,7 +8,8 @@ from typing import Dict, List
 
 import yaml
 
-from tools import storage
+from tools import storage, artifacts
+from orchestrator import metrics
 
 try:  # optional strict validation
     import jsonschema
@@ -17,6 +18,8 @@ except Exception:  # pragma: no cover
 
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "mfg"
+LAKE_DIR = ART_DIR / "lake"
+SCHEMA_DIR = ROOT / "contracts" / "schemas"
 
 
 @dataclass
@@ -63,7 +66,12 @@ def load_work_centers(file: str) -> Dict[str, WorkCenter]:
     global WORK_CENTERS
     WORK_CENTERS = wcs
     ART_DIR.mkdir(parents=True, exist_ok=True)
-    storage.write(str(ART_DIR / "work_centers.json"), json.dumps([asdict(w) for w in wcs.values()], indent=2))
+    centers_payload = [asdict(w) for w in wcs.values()]
+    artifacts.validate_and_write(
+        str(ART_DIR / "work_centers.json"),
+        centers_payload,
+        str(SCHEMA_DIR / "mfg_work_centers.schema.json") if (SCHEMA_DIR / "mfg_work_centers.schema.json").exists() else None,
+    )
     return wcs
 
 
@@ -86,7 +94,19 @@ def load_routings(directory: str, strict: bool = False) -> Dict[str, Routing]:
     global ROUTINGS
     ROUTINGS = rts
     ART_DIR.mkdir(parents=True, exist_ok=True)
-    storage.write(str(ART_DIR / "routings.json"), json.dumps([{"item_rev": r.item_rev, "steps": [asdict(s) for s in r.steps]} for r in rts.values()], indent=2))
+    payload = [{"item_rev": r.item_rev, "steps": [asdict(s) for s in r.steps]} for r in rts.values()]
+    payload.sort(key=lambda r: r["item_rev"])
+    artifacts.validate_and_write(
+        str(ART_DIR / "routings.json"),
+        payload,
+        str(SCHEMA_DIR / "mfg_routings.schema.json"),
+    )
+    LAKE_DIR.mkdir(parents=True, exist_ok=True)
+    lake_path = LAKE_DIR / "mfg_routings.jsonl"
+    if lake_path.exists():
+        lake_path.unlink()
+    for row in payload:
+        storage.write(str(lake_path), row)
     return rts
 
 
@@ -108,4 +128,5 @@ def capacity_check(item: str, rev: str, qty: int):
         if wc:
             labor_cost += (req / 60) * wc.cost_rate
     results["labor_cost"] = labor_cost
+    metrics.inc("routing_cap_checked")
     return results

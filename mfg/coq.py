@@ -4,11 +4,14 @@ import csv
 from pathlib import Path
 from typing import Dict
 
-from tools import storage
+from tools import storage, artifacts
+from orchestrator import metrics
 
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "mfg" / "coq"
 FIXTURES = ROOT / "fixtures" / "mfg"
+LAKE_DIR = ROOT / "artifacts" / "mfg" / "lake"
+SCHEMA_DIR = ROOT / "contracts" / "schemas"
 
 
 def build(period: str):
@@ -28,4 +31,15 @@ def build(period: str):
         str(ART_DIR / "coq.md"),
         "\n".join(f"{k}: {v}" for k, v in totals.items()),
     )
+    artifacts.validate_and_write(
+        str(ART_DIR / "coq.json"),
+        totals,
+        str(SCHEMA_DIR / "mfg_coq.schema.json"),
+    )
+    LAKE_DIR.mkdir(parents=True, exist_ok=True)
+    lake_path = LAKE_DIR / "mfg_coq.jsonl"
+    if lake_path.exists():
+        lake_path.unlink()
+    storage.write(str(lake_path), totals)
+    metrics.inc("coq_built")
     return totals

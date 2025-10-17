@@ -1,15 +1,20 @@
 from __future__ import annotations
 
+import json
 import os
+from dataclasses import asdict
 from pathlib import Path
-from typing import Optional
 
-from tools import storage
+from tools import storage, artifacts
 from . import routing
 from plm import bom
+from orchestrator import metrics
 
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "mfg" / "wi"
+LAKE_DIR = ROOT / "artifacts" / "mfg" / "lake"
+SCHEMA_DIR = ROOT / "contracts" / "schemas"
+INDEX_PATH = ROOT / "artifacts" / "mfg" / "wi_index.json"
 
 
 def render(item: str, rev: str) -> Path:
@@ -35,4 +40,32 @@ def render(item: str, rev: str) -> Path:
     html_path = ART_DIR / f"{item}_{rev}.html"
     html = "<html><body><pre>" + "\n".join(lines) + "</pre></body></html>"
     storage.write(str(html_path), html)
+
+    record = {
+        "item": item,
+        "rev": rev,
+        "steps": [asdict(step) for step in rt.steps],
+        "markdown": str(md_path.relative_to(ROOT)),
+        "html": str(html_path.relative_to(ROOT)),
+    }
+
+    raw = storage.read(str(INDEX_PATH))
+    index = json.loads(raw) if raw else []
+    index = [row for row in index if row.get("item") != item or row.get("rev") != rev]
+    index.append(record)
+    index.sort(key=lambda r: (r["item"], r["rev"]))
+    artifacts.validate_and_write(
+        str(INDEX_PATH),
+        index,
+        str(SCHEMA_DIR / "mfg_wi.schema.json"),
+    )
+
+    LAKE_DIR.mkdir(parents=True, exist_ok=True)
+    lake_path = LAKE_DIR / "mfg_wi.jsonl"
+    if lake_path.exists():
+        lake_path.unlink()
+    for row in index:
+        storage.write(str(lake_path), row)
+
+    metrics.inc("wi_rendered")
     return md_path
