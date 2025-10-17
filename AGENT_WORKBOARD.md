@@ -35,6 +35,10 @@
 ## Last Status Report
 <!-- Agents append latest status, error, or notifications here -->
 
+### 2025-10-06
+- Added reusable Fly.io and AWS ECS deployment workflows so CI jobs can hand off
+  releases to managed infrastructure targets directly.
+
 ### 2025-10-05
 - Reconciled "next" track selection: prioritizing deployment integrations so shipping work can land on managed infra with the current automation stack.
 - Drafted objectives covering environment manifests, multi-target deploy hooks, and infra-aware release guardrails to guide upcoming branch work.
