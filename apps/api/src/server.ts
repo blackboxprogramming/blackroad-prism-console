@@ -297,6 +297,11 @@ import treSG from './routes/tre/signatories.js';
 import treFX from './routes/tre/fx.js';
 import treDB from './routes/tre/debt.js';
 import trePL from './routes/tre/pooling.js';
+import mktAJ from './routes/mkt/audiences_journeys.js';
+import mktCC from './routes/mkt/campaigns_creatives.js';
+import mktCS from './routes/mkt/channels_sends.js';
+import mktAT from './routes/mkt/attribution.js';
+import mktConsent from './routes/mkt/consent.js';
 
 dotenv.config();
 import express from "express";
@@ -525,6 +530,7 @@ app.use('/api/orgs/accept-invite', orgAccept);
 app.use('/api/admin/org/keys', requireOrg(), requireRole('admin'), orgKeys);
 app.use('/api/admin/org/audit', requireOrg(), requireRole('admin'), orgAudit);
 app.use('/api/tre', treBA, treSR, trePF, trePY, treSG, treFX, treDB, trePL);
+app.use('/api/mkt', mktAJ, mktCC, mktCS, mktAT, mktConsent);
 
 const port = process.env.PORT || 4000;
 
