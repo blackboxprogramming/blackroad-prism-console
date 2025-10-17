@@ -50,6 +50,42 @@ automation:
         - PREVIEW_ENV_TF_LOCK_TABLE
         - SLACK_PREVIEW_CHANNEL
         - SLACK_BOT_TOKEN
+    - name: PR Preview Containers
+      file: .github/workflows/preview-containers.yml
+      triggers:
+        - pull_request (opened, reopened, synchronize, ready_for_review)
+      summary: >-
+        Builds and publishes GHCR container images for each PR, generating SBOMs
+        and vulnerability reports plus a sticky comment with pull instructions.
+    - name: Cleanup Preview Containers
+      file: .github/workflows/preview-containers-cleanup.yml
+      triggers:
+        - pull_request (closed)
+      summary: >-
+        Removes the GHCR image tags created for preview containers once the pull
+        request closes to avoid stale registries and unnecessary storage costs.
+    - name: preview-frontend-host
+      file: .github/workflows/preview-frontend-host.yml
+      triggers:
+        - pull_request (opened, reopened, synchronize, closed)
+      summary: >-
+        Provisions or tears down ECS services behind the dev.blackroad.io ALB for
+        frontend-only previews, wiring Route53 records and listener rules per PR.
+      secrets:
+        - AWS_ROLE_TO_ASSUME
+      variables:
+        - AWS_REGION
+        - ECR_REPO
+        - ECS_CLUSTER
+        - VPC_ID
+        - SUBNETS
+        - SERVICE_SG
+        - ALB_ARN
+        - HTTPS_LISTENER_ARN
+        - ALB_ZONE_ID
+        - ALB_DNS
+        - HOSTED_ZONE_ID
+        - CONTAINER_PORT
 deployments:
   - service: web-console
     type: container-service

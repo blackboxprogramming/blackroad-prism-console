@@ -44,6 +44,18 @@ automation:
         without publishing DNS changes.
       secrets:
         - AWAKEN_SEED
+    - name: Stage Stress (safe)
+      file: .github/workflows/stage-stress.yml
+      triggers:
+        - workflow_dispatch (with STRESS toggle)
+        - push (stage, paths: blackroad-stage/**)
+      summary: >-
+        Runs guarded load tests against stage.blackroad.io using autocannon to
+        validate that recent deploys and infrastructure wiring hold up under
+        concurrent traffic.
+      notes: >-
+        Requires operators to explicitly opt in via the STRESS input so casual
+        pushes do not overload the environment.
 deployments:
   - service: marketing-site
     type: static-site
@@ -58,6 +70,11 @@ deployments:
     type: container-service
     provider: aws-ecs-fargate
     terraform_directory: br-infra-iac/envs/stg
+    terraform_backend:
+      bucket: br-tfstate-<unique>
+      key: stg/terraform.tfstate
+      region: us-west-2
+      lock_table: br-terraform-lock
     state: planned
     notes: >-
       Network, ECS, and RDS resources are defined; service wiring will follow the
@@ -69,3 +86,8 @@ observability:
   health_checks:
     - name: static-health
       url: https://stage.blackroad.io/health.json
+  verification:
+    - curl -fsS https://stage.blackroad.io/ >/dev/null
+    - curl -fsS https://stage.blackroad.io/health.json >/dev/null
+    - aws ecs describe-clusters --cluster $(terraform output -raw ecs_cluster) \
+        --region us-west-2
