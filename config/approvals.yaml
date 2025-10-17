@@ -1,0 +1,5 @@
+rules:
+  - match: {bot: "Treasury-BOT", intent: "hedging_plan"}
+    approver_roles: ["CFO", "Treasury-Lead"]
+  - match: {bot: "Change/Release-BOT"}
+    approver_roles: ["CAB"]
