@@ -52,3 +52,6 @@ def _host_user(host: str | None = None, user: str | None = None) -> Tuple[str, s
 from . import jobs, telemetry, store
 
 __all__ = ["jobs", "telemetry", "store"]
+"""Agent package for BlackRoad dashboard utilities."""
+
+__all__ = ["dashboard", "jobs", "telemetry"]
