@@ -114,3 +114,10 @@ ops:
 
 docs:
 >cd compliance && go run ./cmd/ruledocs ../rules ../docs/rules
+.PHONY: release-patch release-minor release-major
+release-patch:
+>python scripts/bump_version.py patch
+release-minor:
+>python scripts/bump_version.py minor
+release-major:
+>python scripts/bump_version.py major
