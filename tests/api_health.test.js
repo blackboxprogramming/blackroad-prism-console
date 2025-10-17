@@ -73,6 +73,7 @@ describe('API security and health', () => {
 
   it('responds to /health', async () => {
     const res = await request(app).get('/health').set(originHeaders);
+process.env.MATH_ENGINE_URL = '';
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
 
@@ -183,5 +184,15 @@ describe('API security and health', () => {
       }),
     );
     expect(detail.body.summary).toMatch(/Quantum/i);
+  it('reports math engine unavailable when not configured', async () => {
+    const res = await request(app).get('/api/math/health');
+    expect(res.status).toBe(503);
+    expect(res.body).toEqual({ ok: false, error: 'engine_unavailable' });
+  });
+
+  it('blocks math evaluation when engine is unavailable', async () => {
+    const res = await request(app).post('/api/math/eval').send({ expr: '2+2' });
+    expect(res.status).toBe(503);
+    expect(res.body).toEqual({ error: 'engine_unavailable' });
   });
 });

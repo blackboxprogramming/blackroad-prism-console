@@ -6,6 +6,7 @@
      SESSION_SECRET=change_me
      DB_PATH=/srv/blackroad-api/blackroad.db
      LLM_URL=http://127.0.0.1:8000/chat
+     MATH_ENGINE_URL=http://127.0.0.1:8100
      ALLOW_SHELL=false
 */
 
@@ -74,6 +75,7 @@ const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
 const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
   ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
   : [];
+const MATH_ENGINE_URL = process.env.MATH_ENGINE_URL || '';
 const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
@@ -1248,6 +1250,37 @@ app.get('/api/quantum/:topic', (req, res) => {
   const row = db.prepare('SELECT summary FROM quantum_ai WHERE topic = ?').get(topic);
   if (!row) return res.status(404).json({ error: 'not_found' });
   res.json({ topic, summary: row.summary });
+// --- Math (forwarder)
+app.get('/api/math/health', async (_req, res) => {
+  if (MATH_ENGINE_URL) {
+    try {
+      const r = await fetch(`${MATH_ENGINE_URL}/health`);
+      const data = await r.json();
+      return res.json(data);
+    } catch {
+      return res.status(503).json({ ok: false, error: 'engine_unreachable' });
+    }
+  }
+  return res.status(503).json({ ok: false, error: 'engine_unavailable' });
+});
+
+app.post('/api/math/eval', async (req, res) => {
+  const { expr } = req.body || {};
+  if (typeof expr !== 'string') return res.status(400).json({ error: 'expr_required' });
+  if (MATH_ENGINE_URL) {
+    try {
+      const r = await fetch(`${MATH_ENGINE_URL}/eval`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expr }),
+      });
+      const data = await r.json();
+      return res.json(data);
+    } catch {
+      return res.status(503).json({ error: 'engine_unreachable' });
+    }
+  }
+  return res.status(503).json({ error: 'engine_unavailable' });
 });
 
 // --- Actions (stubs)
