@@ -22,14 +22,15 @@ update_block() {
   local file="$1" marker="$2" content="$3"
   local start="# >>> ${marker} >>>"
   local end="# <<< ${marker} <<<"
-  python3 - "$file" "$start" "$end" <<'PY' <<<"$content"
+  CONTENT="$content" python3 - "$file" "$start" "$end" <<'PY'
 import sys
+import os
 from pathlib import Path
 
 path = Path(sys.argv[1])
 start = sys.argv[2]
 end = sys.argv[3]
-body = sys.stdin.read().rstrip("\n")
+body = os.environ["CONTENT"].rstrip("\n")
 block = f"{start}\n{body}\n{end}\n"
 if path.exists():
     text = path.read_text()
