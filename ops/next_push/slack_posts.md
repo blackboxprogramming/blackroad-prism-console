@@ -74,3 +74,14 @@ Monitoring stack added:
 - Slack alerts via Chatbot to this channel
 
 Next: tune thresholds after baseline week.
+## #products-prism — Linear connector (v1)
+
+Linear connector (v1) added:
+- Connect with API key, pick teams
+- Ingest issues + metadata via GraphQL
+- Tiles: Created 7d, Completed 7d, simple Burndown
+Webhook optional for near-real-time.
+
+## #security — Linear token handling
+
+Linear API keys stored only in SSM SecureString. No plaintext in DB or logs.

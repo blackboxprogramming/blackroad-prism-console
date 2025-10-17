@@ -18,6 +18,12 @@ export default async function PrismDashboard() {
     fetchSeries('/v1/metrics/github/issues_opened?from=-P7D'),
     fetchSeries('/v1/metrics/github/issues_closed?from=-P7D'),
     fetchSeries('/v1/metrics/github/open_bugs'),
+  const [events, errors, linCreated, linCompleted, linBurndown] = await Promise.all([
+    fetchSeries('/v1/metrics/events?from=-P7D'),
+    fetchSeries('/v1/metrics/errors?from=-P7D'),
+    fetchSeries('/v1/metrics/linear/issues_created?from=-P7D'),
+    fetchSeries('/v1/metrics/linear/issues_completed?from=-P7D'),
+    fetchSeries(`/v1/metrics/linear/burndown?team=ENG&cycleStart=${encodeURIComponent('2025-10-01')}&cycleEnd=${encodeURIComponent('2025-10-14')}`),
   ]);
 
   return (
@@ -29,6 +35,9 @@ export default async function PrismDashboard() {
         <Tile title="GH Issues Opened (7d)" series={ghOpened} />
         <Tile title="GH Issues Closed (7d)" series={ghClosed} />
         <Tile title="Open Bugs (now)" series={ghBugs} />
+        <Tile title="Linear Created (7d)" series={linCreated} />
+        <Tile title="Linear Completed (7d)" series={linCompleted} />
+        <Tile title="Linear Burndown (cycle)" series={linBurndown} />
       </div>
     </main>
   );
