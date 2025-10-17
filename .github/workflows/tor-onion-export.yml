@@ -27,7 +27,7 @@ jobs:
     # Runs ON the Pi so it can read the real tor hostname from the container
     runs-on: [self-hosted, linux, blackroad-pi]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: Ensure tor is up (no-op if already running)
         shell: bash

@@ -6,7 +6,7 @@ jobs:
   train:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
       - name: Install deps
@@ -29,5 +29,5 @@ jobs:
           else
             echo "Quality gate failed"; exit 0
           fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with: { name: ml-artifacts, path: ml/artifacts }

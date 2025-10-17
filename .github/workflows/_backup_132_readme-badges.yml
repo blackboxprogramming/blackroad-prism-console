@@ -8,7 +8,7 @@ jobs:
   badges:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - run: |
           BADGES="![Build](https://github.com/${{ github.repository }}/actions/workflows/monorepo-matrix.yml/badge.svg) ![E2E](https://github.com/${{ github.repository }}/actions/workflows/playwright.yml/badge.svg) ![Deploy](https://github.com/${{ github.repository }}/actions/workflows/deploy-blackroad.yml/badge.svg)"
           awk -v b="$BADGES" 'NR==1{ if($0 !~ /actions\/workflows/) print b; } { print }' README.md > README.tmp && mv README.tmp README.md

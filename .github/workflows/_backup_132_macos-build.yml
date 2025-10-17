@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - name: Build
         run: xcodebuild -scheme DropletManager -configuration Release build
       - name: Archive
@@ -27,7 +27,7 @@ jobs:
           artifact-name: droplet-manager-sbom
       # TODO: Integrate Sparkle for auto-updates when signing keys are ready
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: droplet-manager
           path: artifacts

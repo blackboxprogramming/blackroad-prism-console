@@ -16,7 +16,7 @@ jobs:
       IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/blackroad-api
       CTX: services/api
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:

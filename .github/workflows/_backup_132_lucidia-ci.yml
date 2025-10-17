@@ -16,7 +16,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       # ❗️ Your real build/test steps go here
       - run: echo "Run Lucidia build/tests here"
@@ -48,7 +48,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       # ❗️ Your real build/test steps go here
       - run: echo "Run Lucidia build/tests here"
@@ -85,7 +85,7 @@ concurrency:
       url: https://staging.blackroad.io
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - name: Deploy
         run: |
           echo "Deploying to staging..."
@@ -117,7 +117,7 @@ concurrency:
       contents: read
       id-token: write  # for OIDC to AWS
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
         with:
@@ -151,7 +151,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       # ❗️ Your real build/test steps go here
       - run: echo "Run Lucidia build/tests here"
