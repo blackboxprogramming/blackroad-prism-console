@@ -2,28 +2,49 @@ name: BlackRoad • Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
+    inputs:
+      target:
+        description: "Select the deploy path"
+        required: true
+        default: modern
+        type: choice
+        options:
+          - modern
+          - legacy-ssh
+      ref:
+        description: "Git ref to deploy when using the legacy path"
+        required: false
+      health_url:
+        description: "Override the site health URL for the legacy path"
+        required: false
+      api_health_url:
+        description: "Override the API health URL for the legacy path"
+        required: false
 
 jobs:
-  build-and-deploy:
+  modern-deploy:
+    name: Modern webhook deploy
+    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'modern' }}
     runs-on: ubuntu-latest
     env:
       SITE_URL: ${{ vars.SITE_URL || 'https://blackroad.io' }}
-      API_URL:  ${{ vars.API_URL  || 'https://blackroad.io' }}
+      API_URL: ${{ vars.API_URL || 'https://blackroad.io' }}
       DEPLOY_URL: ${{ secrets.BR_DEPLOY_URL || 'https://blackroad.io/api/deploy/hook' }}
       DEPLOY_BEARER: ${{ secrets.BR_DEPLOY_SECRET }}
       CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
       CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Node 20
         uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'npm' }
+        with:
+          node-version: 20
+          cache: npm
 
       - name: Build SPA
         run: |
@@ -105,19 +126,19 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
-name: BlackRoad Deploy
 
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  deploy:
+  legacy-ssh-deploy:
+    name: Legacy SSH deploy
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'legacy-ssh' }}
     runs-on: ubuntu-latest
+    env:
+      HEALTH_URL: ${{ github.event.inputs.health_url || 'https://blackroad.io/health' }}
+      API_HEALTH_URL: ${{ github.event.inputs.api_health_url || 'https://blackroad.io/api/health' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -141,6 +162,7 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || vars.DEPLOY_PORT || '22' }}
           source: |
             sites/blackroad/blackroad-site.tar.gz
             blackroad-api.tar.gz
@@ -152,11 +174,14 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || vars.DEPLOY_PORT || '22' }}
           script: |
+            set -euo pipefail
             sudo tar -xzf /tmp/blackroad-site.tar.gz -C /var/www/blackroad --strip-components=1
             sudo tar -xzf /tmp/blackroad-api.tar.gz -C /srv/blackroad-api --strip-components=1
             sudo systemctl restart blackroad-api
             sudo systemctl restart lucidia-llm
             sudo systemctl status blackroad-api
             sudo systemctl status lucidia-llm
-            curl -f https://blackroad.io/health
+            curl -f "${HEALTH_URL}"
+            curl -f "${API_HEALTH_URL}"
