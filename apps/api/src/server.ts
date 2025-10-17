@@ -283,6 +283,20 @@ import orgInvite from './routes/orgs/invite.js';
 import orgAccept from './routes/orgs/accept_invite.js';
 import orgKeys from './routes/admin/org_apikeys.js';
 import orgAudit from './routes/admin/auditlog.js';
+import okrOK from './routes/okr/objectives_krs.js';
+import okrCK from './routes/okr/checkins.js';
+import ppmIN from './routes/ppm/initiatives.js';
+import ppmRM from './routes/ppm/roadmaps.js';
+import ppmCP from './routes/ppm/capacity.js';
+import ppmST from './routes/ppm/status_raid.js';
+import treBA from './routes/tre/banks_accounts.js';
+import treSR from './routes/tre/statements_recon.js';
+import trePF from './routes/tre/position_forecast.js';
+import trePY from './routes/tre/payments.js';
+import treSG from './routes/tre/signatories.js';
+import treFX from './routes/tre/fx.js';
+import treDB from './routes/tre/debt.js';
+import trePL from './routes/tre/pooling.js';
 
 dotenv.config();
 import express from "express";
@@ -510,6 +524,7 @@ app.use('/api/orgs/accept-invite', orgAccept);
 // per-org admin
 app.use('/api/admin/org/keys', requireOrg(), requireRole('admin'), orgKeys);
 app.use('/api/admin/org/audit', requireOrg(), requireRole('admin'), orgAudit);
+app.use('/api/tre', treBA, treSR, trePF, trePY, treSG, treFX, treDB, trePL);
 
 const port = process.env.PORT || 4000;
 
