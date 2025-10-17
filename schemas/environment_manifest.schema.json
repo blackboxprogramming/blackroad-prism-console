@@ -1,0 +1,396 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.io/schemas/environment-manifest.json",
+  "title": "EnvironmentManifest",
+  "type": "object",
+  "required": [
+    "name",
+    "slug",
+    "state",
+    "description",
+    "contacts",
+    "domains"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "active",
+        "provisioning",
+        "planned"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contacts": {
+      "type": "object",
+      "properties": {
+        "slack": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reviewers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        }
+      }
+    },
+    "domains": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "infrastructure": {
+      "type": "object",
+      "properties": {
+        "cloud": {
+          "type": "string",
+          "minLength": 1
+        },
+        "region": {
+          "type": "string",
+          "minLength": 1
+        },
+        "terraform": {
+          "type": "object",
+          "properties": {
+            "root": {
+              "type": "string",
+              "minLength": 1
+            },
+            "module": {
+              "type": "string",
+              "minLength": 1
+            },
+            "modules": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "backend": {
+              "type": "object",
+              "properties": {
+                "bucket": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "bucket_secret": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "key": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "key_pattern": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "lock_table": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "lock_table_secret": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "region": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "additionalProperties": true
+            },
+            "outputs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "repositories": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "automation": {
+      "type": "object",
+      "properties": {
+        "workflows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "file"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "file": {
+                "type": "string",
+                "minLength": 1
+              },
+              "triggers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "summary": {
+                "type": "string",
+                "minLength": 1
+              },
+              "secrets": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "deployments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "service",
+          "type",
+          "provider"
+        ],
+        "properties": {
+          "service": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "provider": {
+            "type": "string",
+            "minLength": 1
+          },
+          "workflow": {
+            "type": "string",
+            "minLength": 1
+          },
+          "repo": {
+            "type": "string",
+            "minLength": 1
+          },
+          "artifacts": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": true
+          },
+          "terraform_directory": {
+            "type": "string",
+            "minLength": 1
+          },
+          "module": {
+            "type": "string",
+            "minLength": 1
+          },
+          "terraform_backend": {
+            "type": "object",
+            "properties": {
+              "bucket_secret": {
+                "type": "string",
+                "minLength": 1
+              },
+              "lock_table_secret": {
+                "type": "string",
+                "minLength": 1
+              },
+              "bucket": {
+                "type": "string",
+                "minLength": 1
+              },
+              "lock_table": {
+                "type": "string",
+                "minLength": 1
+              },
+              "key": {
+                "type": "string",
+                "minLength": 1
+              },
+              "key_template": {
+                "type": "string",
+                "minLength": 1
+              },
+              "key_pattern": {
+                "type": "string",
+                "minLength": 1
+              },
+              "region": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": true
+          },
+          "domain": {
+            "type": "string",
+            "minLength": 1
+          },
+          "domain_pattern": {
+            "type": "string",
+            "minLength": 1
+          },
+          "health_check": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state": {
+            "type": "string",
+            "minLength": 1
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 1
+          },
+          "environment": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "secrets": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "notifications": {
+            "type": "object",
+            "properties": {
+              "slack": {
+                "type": "object",
+                "properties": {
+                  "channel_secret": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "token_secret": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "change_management": {
+      "type": "object",
+      "properties": {
+        "approvals": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "runbooks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "observability": {
+      "type": "object",
+      "properties": {
+        "health_checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "url": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "scripts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "verification": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

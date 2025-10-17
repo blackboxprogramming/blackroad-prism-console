@@ -37,6 +37,17 @@ Update the manifest whenever the environment changes (new workflow, Terraform
 module, domain, or approval requirement). These files should stay aligned with
 `br-infra-iac`, `.github/workflows/*`, and the documented runbooks.
 
+## Validating changes
+
+Run the schema validator to confirm manifests stay consistent:
+
+```bash
+./scripts/validate_environment_manifests.py
+```
+
+The command exits non-zero when a manifest fails validation and prints the
+specific path and schema error to help with debugging.
+
 ## Current coverage
 
 - `production.yml` — customer-facing blackroad.io footprint.
