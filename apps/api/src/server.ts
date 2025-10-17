@@ -16,17 +16,15 @@ import { sessionMiddleware } from './middleware/session.js';
 dotenv.config();
 const app = express();
 
-// Slack verification needs raw body for signature
-app.use((req: any, res, next) => {
-  if (req.url.startsWith('/api/slack/commands')) {
-    const data: Buffer[] = [];
-    req.on('data', (c: Buffer) => data.push(c));
-    req.on('end', () => { req.rawBody = Buffer.concat(data); next(); });
-  } else { next(); }
-});
-
 app.use(cors());
-app.use(express.urlencoded({ extended: true })); // for Slack form payloads
+app.use(express.urlencoded({
+  extended: true,
+  verify: (req: express.Request, _res, buf) => {
+    if (req.originalUrl.startsWith('/api/slack/commands')) {
+      (req as any).rawBody = Buffer.from(buf);
+    }
+  },
+})); // for Slack form payloads
 app.use(express.json());
 app.use(morgan('combined'));
 app.use(sessionMiddleware(process.env.SESSION_SECRET || ''));
