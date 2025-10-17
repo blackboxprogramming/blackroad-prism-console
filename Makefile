@@ -1,6 +1,7 @@
 .RECIPEPREFIX = >
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy notify
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy mpm-core energy
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy docs
 
 setup:
 >python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff
@@ -110,3 +111,6 @@ ops:
 	curl -fsS http://localhost/health && echo OK || (echo FAIL && exit 1)
 	curl -fsS http://localhost/api/health && echo OK || true
 	curl -fsS http://localhost/api/ops || true
+
+docs:
+>cd compliance && go run ./cmd/ruledocs ../rules ../docs/rules
