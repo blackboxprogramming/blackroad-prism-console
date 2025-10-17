@@ -6,6 +6,7 @@ const QUANTUM_BASE = __ENV.QUANTUM_BASE_URL || 'http://127.0.0.1:8020';
 const MATERIALS_BASE = __ENV.MATERIALS_BASE_URL || 'http://127.0.0.1:8030';
 const QUANTUM_TOKEN = __ENV.QUANTUM_TOKEN || 'dev-quantum';
 const MATERIALS_POLL_DELAY = Number(__ENV.MATERIALS_POLL_DELAY || 0.5);
+const MATERIALS_MAX_POLLS = Math.max(Number(__ENV.MATERIALS_MAX_POLLS || 5), 1);
 
 export const options = {
   scenarios: {
@@ -104,10 +105,29 @@ export function materialsFlow() {
   const jobId = create.json('id');
   sleep(MATERIALS_POLL_DELAY);
 
-  const status = http.get(`${MATERIALS_BASE}/jobs/${jobId}`);
-  const jobStatus = status.json('status');
-  check(status, {
-    'status 200': (r) => r.status === 200,
+  let statusResponse = null;
+  let jobStatus = 'pending';
+  let pollAttempt = 0;
+
+  while (pollAttempt < MATERIALS_MAX_POLLS) {
+    statusResponse = http.get(`${MATERIALS_BASE}/jobs/${jobId}`);
+
+    check(statusResponse, {
+      'status 200': (r) => r.status === 200
+    });
+
+    jobStatus = statusResponse.json('status');
+    if (jobStatus !== 'pending') {
+      break;
+    }
+
+    pollAttempt += 1;
+    if (pollAttempt < MATERIALS_MAX_POLLS) {
+      sleep(MATERIALS_POLL_DELAY);
+    }
+  }
+
+  check(statusResponse, {
     'job succeeded': () => jobStatus === 'succeeded'
   });
 
