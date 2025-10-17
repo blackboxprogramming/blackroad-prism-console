@@ -1,14 +1,13 @@
 # Pull Request Preview Environments
 
-Preview environments are provisioned per pull request using ECS Fargate. The Terraform module under `modules/preview-env` creates an application load balancer, task definition, ECS service, and Route53 alias record (`pr-###.dev.blackroad.io`).
+Preview environments are provisioned per pull request using ECS Fargate. The Terraform module under `modules/preview-env` creates an application load balancer, task definition, ECS service, and Route53 alias record (`pr-###.dev.blackroad.io`). A companion container pipeline publishes GHCR preview images (plus SBOM and vulnerability scan results) so reviewers can pull the image locally before AWS wiring completes.
 
 ## GitHub Action flow
 
-1. `preview-environment` workflow triggers on PR open/reopen/update.
-2. Docker image is built and pushed to the preview ECR repository with tag `pr<NUMBER>`.
-3. Terraform runs from `infra/preview-env` using the pull request number to namespace resources and state.
-4. A PR comment and Slack notification share the preview URL.
-5. When the PR closes, Terraform destroys the resources and posts a teardown message to Slack.
+Two workflows cooperate on every pull request:
+
+- `preview-containers.yml` runs first, builds a GHCR image tagged `pr-<NUMBER>-<SHORT_SHA>`, uploads an SPDX SBOM artifact, scans the digest with Anchore Grype (publishing SARIF to code scanning), and posts docker pull/run instructions back to the PR.
+- `preview-env.yml` (job name `preview-environment`) runs in parallel, builds/pushes the AWS ECR image, applies the Terraform stack under `infra/preview-env`, provisions the ECS service + ALB host rule, and comments/Slacks the preview URL. Closing the PR triggers the destroy path.
 
 ### Required secrets
 
@@ -31,6 +30,13 @@ Preview environments are provisioned per pull request using ECS Fargate. The Ter
 | `SLACK_BOT_TOKEN` | Slack bot token with permission to post to `#eng`. |
 | `SLACK_PREVIEW_CHANNEL` | Channel ID (e.g. `C1234567890`) for preview announcements. |
 
+The container workflow relies only on the built-in `GITHUB_TOKEN` to authenticate with GHCR.
+
+### Cleanup
+
+- `preview-containers-cleanup.yml` fires when the PR closes and removes `pr-<NUMBER>-*` tags from GHCR to keep the registry lean.
+- `preview-env.yml` destroy job removes the ECS service, target group, ALB rule, Route53 record, and Terraform state entry.
+
 ### Local operations
 
 Use the helper script to apply or destroy previews from your workstation:
@@ -41,3 +47,5 @@ PR=128 make preview-destroy
 ```
 
 Set the appropriate environment variables (cluster, VPC, hosted zone, etc.) before running the commands so Terraform can connect to AWS.
+
+To exercise the container locally, pull the GHCR image advertised in the PR comment and run it with `docker run --rm ghcr.io/blackboxprogramming/blackroad-prism-console:pr-<NUMBER>-<SHORT_SHA>`.

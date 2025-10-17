@@ -5,7 +5,7 @@ Bridge runs on :4000; nginx routes `/api` and `/ws`. Static web artifacts publis
 
 | Environment | Domains | Primary workflow | Notes |
 | --- | --- | --- | --- |
-| Preview (`pr`) | `https://dev.blackroad.io`, `https://pr-<n>.dev.blackroad.io` | `.github/workflows/preview.yml` | Spins up ephemeral ECS services + ALB rules per pull request. Terraform config lives in `infra/preview-env/` and the manifest is documented in `environments/preview.yml`. |
+| Preview (`pr`) | `https://dev.blackroad.io`, `https://pr-<n>.dev.blackroad.io` | `.github/workflows/preview.yml`, `.github/workflows/preview-containers.yml` | Spins up ephemeral ECS services + ALB rules per pull request and publishes GHCR preview images with SBOM + Grype reports. Terraform config lives in `infra/preview-env/`; see `environments/preview.yml` for the full manifest. |
 | Staging (`stg`) | `https://stage.blackroad.io` | `.github/workflows/pages-stage.yml` | Builds and archives the static site proof artifact. API wiring is planned; see `environments/staging.yml` for current status. |
 | Production (`prod`) | `https://blackroad.io`, `https://www.blackroad.io`, `https://api.blackroad.io` | `.github/workflows/blackroad-deploy.yml` | GitHub Pages publishes the marketing site; API gateway will promote via the same workflow once the ECS module is enabled. Full manifest: `environments/production.yml`. |
 
@@ -14,9 +14,10 @@ Reference the manifests whenever DNS, workflow, or Terraform parameters change s
 ## Deployment workflows
 
 ### Preview (per PR)
-- Triggered automatically on pull request open/update via `preview.yml`.
-- Builds the image, applies Terraform (`infra/preview-env`), and comments with the preview URL.
-- Closing the PR or re-running the `destroy` job removes ALB rules, target groups, ECS services, and Route53 aliases.
+- Triggered automatically on pull request open/update via `preview.yml` and `preview-containers.yml`.
+- Container pipeline builds and pushes a GHCR image, uploads an SPDX SBOM, runs Anchore Grype (Code Scanning), and posts docker run instructions on the PR.
+- Infrastructure pipeline applies Terraform (`infra/preview-env`), creates ALB rules + ECS services, and comments with the preview URL.
+- Closing the PR or re-running the `destroy` job removes ALB rules, target groups, ECS services, Route53 aliases, and deletes the GHCR preview tags.
 - Smoke test: `curl -sSfL https://pr-<n>.dev.blackroad.io/healthz/ui` (already executed in the workflow).
 
 ### Staging

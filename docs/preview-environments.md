@@ -1,6 +1,6 @@
 # Preview Environments on ECS + ALB
 
-Short-lived preview environments spin up for every pull request. GitHub Actions builds the console image, pushes it to Amazon ECR, and applies the Terraform stack in [`infra/preview-env`](../infra/preview-env) to provision the ECS/Fargate service, ALB listener rule, target group, and Route53 DNS record. When the pull request closes the workflow destroys the same resources so AWS stays tidy.
+Short-lived preview environments spin up for every pull request. GitHub Actions now performs two coordinated stages: a GHCR packaging pipeline produces a tagged container image (plus SBOM and vulnerability scan) while the AWS workflow pushes to ECR and applies the Terraform stack in [`infra/preview-env`](../infra/preview-env) to provision the ECS/Fargate service, ALB listener rule, target group, and Route53 DNS record. When the pull request closes the workflows destroy the same resources and prune the container tags so AWS and GHCR stay tidy.
 
 ## Required repository configuration
 
@@ -30,7 +30,21 @@ The workflow relies on a small set of repository **variables** and **secrets**. 
 
 ## Workflow behaviour
 
-`.github/workflows/preview-env.yml` reacts to pull request events:
+Two workflows respond to preview lifecycle events:
+
+### Container packaging (`.github/workflows/preview-containers.yml`)
+
+- **Opened / Reopened / Synchronize / Ready for review**
+  1. Computes the GHCR image reference `ghcr.io/<owner>/<repo>:pr-<PR_NUMBER>-<SHORT_SHA>`.
+  2. Builds and pushes the image via the reusable builder.
+  3. Generates an SPDX SBOM artifact and uploads it as `pr-<PR_NUMBER>-sbom`.
+  4. Scans the digest with Anchore Grype and uploads the SARIF to GitHub code scanning.
+  5. Posts a sticky PR comment with docker pull/run instructions.
+
+- **Closed**
+  - `preview-containers-cleanup.yml` deletes the `pr-<PR_NUMBER>-*` GHCR tags.
+
+### Infrastructure apply (`.github/workflows/preview-env.yml`)
 
 - **Opened / Reopened / Synchronize**
   1. Builds a Docker image tagged `pr<PR_NUMBER>` using the repository root as build context.
