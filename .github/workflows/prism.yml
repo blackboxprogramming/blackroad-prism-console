@@ -1,0 +1,46 @@
+name: prism-service
+
+on:
+  push:
+    paths:
+      - 'services/prism/**'
+      - 'docker-compose.prism.yml'
+      - '.github/workflows/prism.yml'
+  pull_request:
+    paths:
+      - 'services/prism/**'
+      - 'docker-compose.prism.yml'
+      - '.github/workflows/prism.yml'
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      - name: Run unit tests
+        working-directory: services/prism
+        env:
+          GOWORK: off
+        run: go test ./...
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      - name: Start API dependencies
+        run: docker compose -f docker-compose.prism.yml up -d api
+      - name: Run integration tests
+        working-directory: services/prism
+        env:
+          GOWORK: off
+        run: go test ./test -count=1
+      - name: Tear down environment
+        if: always()
+        run: docker compose -f docker-compose.prism.yml down -v
