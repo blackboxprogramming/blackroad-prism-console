@@ -15,12 +15,15 @@
         --accent2: #0096ff;
         --accent3: #fdba2d;
       }
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
-        background: radial-gradient(circle at top, rgba(255,79,216,0.18), transparent 55%),
-                    radial-gradient(circle at bottom, rgba(0,150,255,0.12), transparent 60%),
-                    var(--bg);
+        background:
+          radial-gradient(circle at top, rgba(255, 79, 216, 0.18), transparent 55%),
+          radial-gradient(circle at bottom, rgba(0, 150, 255, 0.12), transparent 60%),
+          var(--bg);
         color: var(--text);
         font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         min-height: 100vh;
@@ -37,7 +40,7 @@
         margin: 0.35rem 0 0;
         color: var(--muted);
       }
-      .grid {
+      main {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 1.1rem;
@@ -55,9 +58,10 @@
         flex-direction: column;
         gap: 0.75rem;
       }
-      .title {
-        font-weight: 600;
+      .card h2 {
+        margin: 0;
         font-size: 1.1rem;
+        font-weight: 600;
       }
       button {
         background: linear-gradient(120deg, var(--accent), var(--accent2));
@@ -88,7 +92,11 @@
         max-height: 240px;
         overflow: auto;
       }
-      textarea, select, input[type="text"], input[type="number"], input[type="file"] {
+      textarea,
+      select,
+      input[type="text"],
+      input[type="number"],
+      input[type="file"] {
         background: rgba(255, 255, 255, 0.02);
         color: var(--text);
         border: 1px solid var(--border);
@@ -131,65 +139,84 @@
       <h1>BlackRoad Prism Console</h1>
       <p>Device snapshots, jobs, flashing, history, and local models in one pane.</p>
     </header>
-    <main class="grid">
-      <div class="card">
-        <div class="title">Telemetry</div>
+    <main>
+      <section class="card">
+        <h2>Telemetry</h2>
         <button id="refreshTelemetry" class="secondary">Refresh</button>
         <pre id="telemetryOut">Press refresh to load telemetry…</pre>
-      </div>
+      </section>
 
-      <div class="card" id="jobsCard">
-        <div class="title">Jobs</div>
+      <section class="card" id="jobsCard">
+        <h2>Jobs</h2>
         <button id="loadJobs" class="secondary">Load Jobs</button>
         <ul id="jobsList"></ul>
-      </div>
+      </section>
 
-      <div class="card">
-        <div class="title">Firmware Flasher</div>
+      <section class="card">
+        <h2>Firmware Flasher</h2>
         <input type="file" id="firmwareFile" accept=".bin,.hex,.uf2" />
         <button id="flash" class="secondary">Flash</button>
         <pre id="flashOut">Select firmware to flash.</pre>
-      </div>
+      </section>
 
-      <div class="card">
-        <div class="title">History</div>
+      <section class="card">
+        <h2>History</h2>
         <button id="loadHistory" class="secondary">Load History</button>
         <pre id="historyOut">History will appear here.</pre>
-      </div>
+      </section>
 
-      <div class="card">
-        <div class="title">Local Models</div>
+      <section class="card">
+        <h2>Local Models</h2>
         <button id="loadModels">Load Models</button>
         <select id="modelSel"></select>
-        <textarea id="prompt" style="width:100%;height:80px;margin-top:8px;" placeholder="Enter prompt..."></textarea>
+        <textarea
+          id="prompt"
+          placeholder="Enter prompt..."
+          style="width: 100%; height: 80px; margin-top: 8px;"
+        ></textarea>
         <button id="runModel">Run</button>
-        <pre id="modelOut" style="background:#000;color:#0f0;padding:1em;height:220px;overflow:auto;border-radius:6px;"></pre>
-      </div>
+        <pre id="modelOut" style="background: #000; color: #0f0; padding: 1em; height: 220px; overflow: auto; border-radius: 6px;"></pre>
+      </section>
     </main>
 
     <script>
-      const telemetryOut = document.getElementById('telemetryOut');
-      const jobsList = document.getElementById('jobsList');
-      const flashOut = document.getElementById('flashOut');
-      const historyOut = document.getElementById('historyOut');
+      function select(id) {
+        const el = document.getElementById(id);
+        if (!el) {
+          throw new Error(`Missing element: ${id}`);
+        }
+        return el;
+      }
+
+      const telemetryOut = select('telemetryOut');
+      const jobsList = select('jobsList');
+      const flashOut = select('flashOut');
+      const historyOut = select('historyOut');
+      const modelSel = select('modelSel');
+      const promptEl = select('prompt');
+      const modelOut = select('modelOut');
 
       async function safeFetch(url, opts) {
         try {
           const res = await fetch(url, opts);
-          if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+          if (!res.ok) {
+            throw new Error(`${res.status} ${res.statusText}`);
+          }
           return await res.json();
         } catch (err) {
           return { error: err.message };
         }
       }
 
-      document.getElementById('refreshTelemetry').onclick = async () => {
+      select('refreshTelemetry').addEventListener('click', async () => {
         telemetryOut.textContent = 'Loading…';
         const payload = await safeFetch('/telemetry/latest');
-        telemetryOut.textContent = payload.error ? payload.error : JSON.stringify(payload, null, 2);
-      };
+        telemetryOut.textContent = payload.error
+          ? payload.error
+          : JSON.stringify(payload, null, 2);
+      });
 
-      document.getElementById('loadJobs').onclick = async () => {
+      select('loadJobs').addEventListener('click', async () => {
         jobsList.innerHTML = '';
         const payload = await safeFetch('/jobs');
         if (payload.error) {
@@ -203,10 +230,10 @@
           li.innerHTML = `<span class="tag">${job.status || 'pending'}</span><div>${job.name || job.id}</div>`;
           jobsList.appendChild(li);
         });
-      };
+      });
 
-      document.getElementById('flash').onclick = async () => {
-        const file = document.getElementById('firmwareFile').files[0];
+      select('flash').addEventListener('click', async () => {
+        const file = select('firmwareFile').files[0];
         if (!file) {
           flashOut.textContent = 'Select a firmware file (.bin/.hex/.uf2).';
           return;
@@ -216,39 +243,49 @@
         body.append('firmware', file);
         const res = await safeFetch('/flasher', { method: 'POST', body });
         flashOut.textContent = res.error ? res.error : JSON.stringify(res, null, 2);
-      };
+      });
 
-      document.getElementById('loadHistory').onclick = async () => {
+      select('loadHistory').addEventListener('click', async () => {
         historyOut.textContent = 'Loading…';
         const payload = await safeFetch('/history');
-        historyOut.textContent = payload.error ? payload.error : JSON.stringify(payload, null, 2);
-      };
+        historyOut.textContent = payload.error
+          ? payload.error
+          : JSON.stringify(payload, null, 2);
+      });
 
-      const modelSel = document.getElementById('modelSel');
-      const promptEl = document.getElementById('prompt');
-      const modelOut = document.getElementById('modelOut');
-
-      document.getElementById('loadModels').onclick = async ()=>{
-        const r = await fetch('/models'); const j = await r.json();
+      select('loadModels').addEventListener('click', async () => {
         modelSel.innerHTML = '';
-        (j.models||[]).forEach(m=>{
-          const o = document.createElement('option');
-          o.value = m.path; o.text = m.name; modelSel.appendChild(o);
+        const payload = await safeFetch('/models');
+        if (payload.error) {
+          modelOut.textContent = payload.error;
+          return;
+        }
+        (payload.models || []).forEach((model) => {
+          const option = document.createElement('option');
+          option.value = model.path;
+          option.text = model.name;
+          modelSel.appendChild(option);
         });
-      };
+        if (!modelSel.value) {
+          const option = document.createElement('option');
+          option.disabled = true;
+          option.selected = true;
+          option.text = 'No models found';
+          modelSel.appendChild(option);
+        }
+      });
 
-      document.getElementById('runModel').onclick = async ()=>{
+      select('runModel').addEventListener('click', async () => {
         const model = modelSel.value;
         const prompt = promptEl.value;
-        modelOut.textContent = "Running…";
-        const r = await fetch('/models/run',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({model,prompt,n:128})
+        modelOut.textContent = 'Running…';
+        const res = await safeFetch('/models/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model, prompt, n: 128 })
         });
-        const j = await r.json();
-        modelOut.textContent = j.result || j.error || JSON.stringify(j,null,2);
-      };
+        modelOut.textContent = res.result || res.error || JSON.stringify(res, null, 2);
+      });
     </script>
   </body>
 </html>
