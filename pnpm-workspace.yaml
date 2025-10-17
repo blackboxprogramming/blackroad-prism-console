@@ -1,5 +1,7 @@
 packages:
   - "apps/*"
+  - "apps/prism/*"
+  - "apps/prism/apps/*"
   - "packages/*"
   - "lucidia/autobox/apps/*"
   - "lucidia/autobox/packages/*"
