@@ -1,61 +1,43 @@
-"""BlackRoad agent package."""
-
-from .config import load, save, auth_token  # noqa: F401
-"""BlackRoad device agent package."""
-
-__all__ = ["api", "config", "discover"]
-from .config import active_target, set_target
-
-__all__ = ["active_target", "set_target"]
-"""Utility modules for the BlackRoad dashboard service."""
-"""Utilities for the BlackRoad Pi voice pipeline."""
-
-__all__ = ["config", "store", "transcribe"]
-
-"""Core helpers for the Pi transcription pipeline."""
-
-from . import config, store, transcribe  # re-export for convenience
-
-__all__ = ["config", "store", "transcribe"]
-"""BlackRoad device agent package."""
-
-from . import telemetry as telemetry
-
-__all__ = ["telemetry"]
-"""Agent utilities for BlackRoad."""
-
-__all__ = ["jobs", "telemetry"]
-"""Utility helpers for the lightweight BlackRoad job runner."""
+"""Public interface for the BlackRoad agent package."""
 
 from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Tuple
 
-__all__ = ["DEFAULT_REMOTE_HOST", "DEFAULT_REMOTE_USER", "DEFAULT_DB_PATH", "_host_user"]
+from . import discover, jobs, models, store, telemetry, transcribe
+from .config import active_target, auth_token, load, save, set_target
+
+__all__ = [
+    "DEFAULT_REMOTE_HOST",
+    "DEFAULT_REMOTE_USER",
+    "DEFAULT_DB_PATH",
+    "_host_user",
+    "auth_token",
+    "active_target",
+    "set_target",
+    "load",
+    "save",
+    "discover",
+    "jobs",
+    "models",
+    "store",
+    "telemetry",
+    "transcribe",
+    "__version__",
+]
 
 DEFAULT_REMOTE_HOST = os.getenv("BLACKROAD_REMOTE_HOST", "jetson-01")
 DEFAULT_REMOTE_USER = os.getenv("BLACKROAD_REMOTE_USER", "pi")
 DEFAULT_DB_PATH = Path(os.getenv("BLACKROAD_JOBS_DB", "/var/lib/blackroad/jobs.db"))
 
 
-def _host_user(host: str | None = None, user: str | None = None) -> Tuple[str, str]:
+def _host_user(host: str | None = None, user: str | None = None) -> tuple[str, str]:
     """Resolve the remote host/user pair for SSH operations."""
 
     resolved_host = host or DEFAULT_REMOTE_HOST
     resolved_user = user or DEFAULT_REMOTE_USER
     return resolved_host, resolved_user
-"""BlackRoad flashing agent package."""
-"""BlackRoad backend helper modules."""
 
-from . import jobs, telemetry, store
 
-__all__ = ["jobs", "telemetry", "store"]
-"""Agent package for BlackRoad dashboard utilities."""
-
-__all__ = ["dashboard", "jobs", "telemetry"]
-"""BlackRoad local agent package."""
-
-__all__ = ["__version__"]
 __version__ = "0.1.0"
