@@ -7,7 +7,8 @@
     "build": "tsc -p .",
     "start": "node dist/index.js",
     "lint": "eslint . --ext .ts",
-    "migrate": "psql \"$PG_URL\" -f src/schema.sql"
+    "migrate": "psql \"$PG_URL\" -f src/schema.sql",
+    "test": "vitest run"
   },
   "dependencies": {
     "airtable": "^0.12.2",
@@ -20,6 +21,7 @@
     "@types/pg": "^8.15.5",
     "eslint": "^9.10.0",
     "tsx": "^4.16.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "^1.6.0"
   }
 }
