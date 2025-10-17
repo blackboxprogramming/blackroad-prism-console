@@ -8,6 +8,7 @@ manifest="$DIR/snapshot-$ts.manifest.json"
 
 tar -czf "$file" \
   /var/www/blackroad/llm.html \
+  /srv/ollama-bridge/package.json \
   /srv/ollama-bridge/server.js \
   /etc/systemd/system/ollama-bridge.service \
   /etc/nginx/* 2>/dev/null \
