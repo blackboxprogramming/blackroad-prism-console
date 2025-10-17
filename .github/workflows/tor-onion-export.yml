@@ -1,0 +1,73 @@
+name: Tor • Onion Export (Pi)
+
+on:
+  workflow_dispatch:
+    inputs:
+      redact:
+        description: "Redact onion (show head/tail only)?"
+        type: boolean
+        required: true
+        default: true
+      compose_main:
+        description: "Path to main compose (on Pi)"
+        type: string
+        required: true
+        default: "~/btc-compose.yml"
+      compose_tor:
+        description: "Path to Tor compose fragment (in repo)"
+        type: string
+        required: true
+        default: "lightning/tor/compose.tor.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    # Runs ON the Pi so it can read the real tor hostname from the container
+    runs-on: [self-hosted, linux, blackroad-pi]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure tor is up (no-op if already running)
+        shell: bash
+        run: |
+          set -euo pipefail
+          MAIN="${{ inputs.compose_main }}"
+          TOR="${{ inputs.compose_tor }}"
+          docker compose -f "$MAIN" -f "$TOR" up -d tor
+          docker compose -f "$MAIN" -f "$TOR" ps tor
+
+      - name: Read onion hostname from tor sidecar
+        id: onion
+        shell: bash
+        run: |
+          set -euo pipefail
+          MAIN="${{ inputs.compose_main }}"
+          TOR="${{ inputs.compose_tor }}"
+          host=$(docker compose -f "$MAIN" -f "$TOR" exec -T tor sh -lc 'cat /var/lib/tor/lightning/hostname' 2>/dev/null || true)
+          if [ -z "$host" ]; then
+            echo "No onion hostname found (tor not ready?)" >&2
+            exit 1
+          fi
+          echo "full=$host" >> $GITHUB_OUTPUT
+          # redact in logs by default
+          if [ "${{ inputs.redact }}" = "true" ]; then
+            echo "mask=on" >> $GITHUB_OUTPUT
+            echo "::notice title=Tor Onion (redacted)::${host:0:10}…${host: -10}"
+          else
+            echo "mask=off" >> $GITHUB_OUTPUT
+            echo "::notice title=Tor Onion::${host}"
+          fi
+
+      - name: Job Summary
+        shell: bash
+        run: |
+          if [ "${{ steps.onion.outputs.mask }}" = "on" ]; then
+            red="${{ steps.onion.outputs.full }}"
+            echo "### Tor Onion (redacted)" >> $GITHUB_STEP_SUMMARY
+            echo "\`${red:0:10}…${red: -10}\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### Tor Onion" >> $GITHUB_STEP_SUMMARY
+            echo "\`${{ steps.onion.outputs.full }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
