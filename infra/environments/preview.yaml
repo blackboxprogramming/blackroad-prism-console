@@ -104,7 +104,7 @@ release_process:
   rollout:
     strategy: Blue/green using ECS task sets managed by GitHub Actions.
     health_gates:
-      - curl -sf ${ingress.healthcheck}
+      - curl -sf https://pr-${pull_request}.preview.blackroad.io/healthz
       - npm run health --if-present
   rollback:
     strategy: Destroy workspace and close PR.
