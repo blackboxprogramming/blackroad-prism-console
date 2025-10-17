@@ -64,10 +64,10 @@ When it is time to rebuild the node, decrypt the descriptor set and import it in
 gpg -o /tmp/descriptors.json -d /path/to/btc_descriptors_<WALLET>.json.gpg
    ```
 
-2. Create a descriptor wallet and import the JSON:
+2. Create a descriptor wallet and import the JSON (leave private keys enabled so the wallet can sign after the restore):
 
    ```bash
-   bitcoin-cli createwallet "<WALLET>" true true "" true
+   bitcoin-cli createwallet "<WALLET>" false true "" false true
    bitcoin-cli -rpcwallet="<WALLET>" importdescriptors "$(cat /tmp/descriptors.json)"
    ```
 
