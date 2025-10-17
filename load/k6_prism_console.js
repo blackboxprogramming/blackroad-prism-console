@@ -105,9 +105,10 @@ export function materialsFlow() {
   sleep(MATERIALS_POLL_DELAY);
 
   const status = http.get(`${MATERIALS_BASE}/jobs/${jobId}`);
+  const jobStatus = status.json('status');
   check(status, {
     'status 200': (r) => r.status === 200,
-    'status valid': (r) => ['pending', 'succeeded', 'failed'].includes(r.json('status'))
+    'job succeeded': () => jobStatus === 'succeeded'
   });
 
   sleep(0.5);
