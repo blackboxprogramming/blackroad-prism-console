@@ -16,7 +16,7 @@ jobs:
       approved: ${{ steps.gate.outputs.approved }}
       all_passed: ${{ steps.gate.outputs.all_passed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -40,6 +40,6 @@ jobs:
     if: needs.gate.outputs.approved == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - run: |
           echo "Release job unlocked. Replace this step with build/deploy logic."
