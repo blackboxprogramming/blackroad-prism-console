@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import csv
-import json
 from pathlib import Path
 from typing import List
 
-from tools import storage
+from tools import storage, artifacts
+from orchestrator import metrics
 
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "mfg" / "spc"
 FIXTURES = ROOT / "fixtures" / "mfg" / "spc"
+LAKE_DIR = ROOT / "artifacts" / "mfg" / "lake"
+SCHEMA_DIR = ROOT / "contracts" / "schemas"
 
 
 def _read_values(op: str) -> List[float]:
@@ -60,7 +62,33 @@ def analyze(op: str, window: int = 50):
             findings.append("SPC_RUN_8_ONE_SIDE")
             break
     ART_DIR.mkdir(parents=True, exist_ok=True)
-    storage.write(str(ART_DIR / "findings.json"), json.dumps(findings, indent=2))
+    artifacts.validate_and_write(
+        str(ART_DIR / "findings.json"),
+        findings,
+        str(SCHEMA_DIR / "mfg_spc.schema.json"),
+    )
     chart_lines = ["index,value"] + [f"{i},{v}" for i, v in enumerate(vals, 1)]
     storage.write(str(ART_DIR / "charts.md"), "\n".join(chart_lines))
+
+    flag = ART_DIR / "blocking.flag"
+    if findings:
+        flag.write_text("unstable", encoding="utf-8")
+    elif flag.exists():
+        flag.unlink()
+
+    LAKE_DIR.mkdir(parents=True, exist_ok=True)
+    lake_path = LAKE_DIR / "mfg_spc.jsonl"
+    record = {
+        "operation": op,
+        "window": window,
+        "mean": mean,
+        "sigma": sigma,
+        "points": len(vals),
+        "findings": findings,
+    }
+    if lake_path.exists():
+        lake_path.unlink()
+    storage.write(str(lake_path), record)
+
+    metrics.inc("spc_findings", len(findings))
     return findings
