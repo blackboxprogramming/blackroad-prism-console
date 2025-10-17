@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 import csv
-import json
 from pathlib import Path
 from typing import Dict, List
 
-from tools import storage
+from orchestrator import metrics
 from plm import bom
+from tools import artifacts
 
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "mfg" / "mrp"
+SCHEMA = ROOT / "contracts" / "schemas" / "mfg_mrp_plan.schema.json"
 
 
 def _read_csv(path: str) -> List[Dict[str, str]]:
@@ -34,7 +35,13 @@ def plan(demand_file: str, inventory_file: str, pos_file: str):
         for _, comp, comp_qty in bom.explode(item, d.get("rev", "A"), level=2):
             plan[comp] = plan.get(comp, 0) + comp_qty * net
     ART_DIR.mkdir(parents=True, exist_ok=True)
-    storage.write(str(ART_DIR / "plan.json"), json.dumps(plan, indent=2))
+    report = {
+        "demand_source": demand_file,
+        "inventory_source": inventory_file,
+        "pos_source": pos_file,
+        "planned": plan,
+    }
+    artifacts.validate_and_write(str(ART_DIR / "plan.json"), report, str(SCHEMA))
     # kitting lists
     for d in demand:
         item = d["item_id"]
@@ -42,5 +49,6 @@ def plan(demand_file: str, inventory_file: str, pos_file: str):
         lines = ["component,qty"]
         for _, comp, comp_qty in bom.explode(item, rev, level=1):
             lines.append(f"{comp},{comp_qty * float(d['qty'])}")
-        storage.write(str(ART_DIR / f"kitting_{item}.csv"), "\n".join(lines))
-    return plan
+        artifacts.validate_and_write(str(ART_DIR / f"kitting_{item}.csv"), "\n".join(lines))
+    metrics.inc("mrp_planned")
+    return report

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["demand_source", "inventory_source", "pos_source", "planned"],
+  "properties": {
+    "demand_source": {"type": "string"},
+    "inventory_source": {"type": "string"},
+    "pos_source": {"type": "string"},
+    "planned": {
+      "type": "object",
+      "additionalProperties": {"type": "number"}
+    }
+  },
+  "additionalProperties": false
+}

@@ -5,11 +5,13 @@ import json
 from pathlib import Path
 from typing import List
 
-from tools import storage
+from orchestrator import metrics
+from tools import artifacts
 
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "mfg" / "spc"
 FIXTURES = ROOT / "fixtures" / "mfg" / "spc"
+SCHEMA = ROOT / "contracts" / "schemas" / "mfg_spc.schema.json"
 
 
 def _read_values(op: str) -> List[float]:
@@ -60,7 +62,26 @@ def analyze(op: str, window: int = 50):
             findings.append("SPC_RUN_8_ONE_SIDE")
             break
     ART_DIR.mkdir(parents=True, exist_ok=True)
-    storage.write(str(ART_DIR / "findings.json"), json.dumps(findings, indent=2))
-    chart_lines = ["index,value"] + [f"{i},{v}" for i, v in enumerate(vals, 1)]
-    storage.write(str(ART_DIR / "charts.md"), "\n".join(chart_lines))
-    return findings
+    report = {
+        "op": op,
+        "sample_size": len(vals),
+        "mean": mean,
+        "sigma": sigma,
+        "findings": findings,
+        "series": [{"index": i, "value": v} for i, v in enumerate(vals, 1)],
+        "unstable": bool(findings),
+    }
+    artifacts.validate_and_write(str(ART_DIR / "report.json"), report, str(SCHEMA))
+    chart_lines = ["index,value"] + [f"{pt['index']},{pt['value']}" for pt in report["series"]]
+    artifacts.validate_and_write(str(ART_DIR / "charts.md"), "\n".join(chart_lines))
+    if report["unstable"]:
+        artifacts.validate_and_write(str(ART_DIR / "blocking.flag"), "1")
+    else:
+        flag = ART_DIR / "blocking.flag"
+        if flag.exists():
+            flag.unlink()
+        sig = ART_DIR / "blocking.flag.sig"
+        if sig.exists():
+            sig.unlink()
+    metrics.inc("spc_findings", len(findings) or 1)
+    return report
