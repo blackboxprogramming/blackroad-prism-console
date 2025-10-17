@@ -2,6 +2,7 @@
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy notify
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy mpm-core energy
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy docs
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy dummy check view
 
 setup:
 >python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff
@@ -126,3 +127,12 @@ build:
 
 run:
 >docker run --rm -it -v $(pwd)/data:/app/data prism-console:local bot:list
+
+dummy:
+>python 10_genesis/dummy_generate.py
+
+check:
+>python 40_compare/check_thresholds.py
+
+view:
+>python 40_compare/view_quick.py
