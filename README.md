@@ -995,3 +995,14 @@ python -m tools.artifacts artifacts/data.json --schema schemas/routing.schema.js
 ```
 
 Generates a deterministic hash for the artifact and optionally tags the current commit.
+## Digital Twin
+
+Deterministic offline tooling for operations.
+
+Mini tour:
+
+1. `python -m cli.console twin:checkpoint --name demo`
+2. `python -m cli.console twin:list`
+3. `python -m cli.console twin:replay --from "2025-01-01" --to "2025-01-02" --mode verify`
+4. `python -m cli.console twin:stress --profile default --duration 10`
+5. `python -m cli.console twin:compare --left artifacts/runA --right artifacts/runB`
