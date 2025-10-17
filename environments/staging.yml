@@ -44,6 +44,19 @@ automation:
         without publishing DNS changes.
       secrets:
         - AWAKEN_SEED
+    - name: BlackRoad API • ECS Deploy
+      file: .github/workflows/blackroad-api-ecs.yml
+      triggers:
+        - workflow_dispatch
+        - workflow_call
+      summary: >-
+        Promotes a container image to the staging ECS service using the reusable
+        deployment workflow and waits for service stability by default.
+      secrets:
+        - STAGING_AWS_DEPLOY_ROLE_ARN
+        - STAGING_ECS_CLUSTER
+        - STAGING_ECS_SERVICE
+        - STAGING_ECS_CONTAINER
 deployments:
   - service: marketing-site
     type: static-site

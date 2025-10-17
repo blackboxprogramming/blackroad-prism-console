@@ -1,0 +1,82 @@
+name: BlackRoad API • ECS Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment to deploy
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      image:
+        description: Optional container image reference (defaults to ghcr.io/blackboxprogramming/blackroad-api:<sha>)
+        required: false
+        type: string
+      wait-for-service-stability:
+        description: Wait for the ECS service to report healthy
+        required: false
+        type: boolean
+        default: true
+  workflow_call:
+    inputs:
+      environment:
+        description: Target environment to deploy
+        required: true
+        type: string
+      image:
+        description: Optional container image reference
+        required: false
+        type: string
+      wait-for-service-stability:
+        description: Wait for the ECS service to report healthy
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      AWS_ROLE_TO_ASSUME:
+        description: Optional role ARN to assume during deployment
+        required: false
+      ECS_CLUSTER:
+        description: Optional override for the target ECS cluster
+        required: false
+      ECS_SERVICE:
+        description: Optional override for the target ECS service
+        required: false
+      ECS_CONTAINER:
+        description: Optional override for the ECS container name
+        required: false
+
+permissions:
+  contents: read
+
+env:
+  DEFAULT_IMAGE: ghcr.io/blackboxprogramming/blackroad-api
+
+jobs:
+  staging:
+    if: ${{ inputs.environment == 'staging' }}
+    uses: ./.github/workflows/reusable-ecs-service-deploy.yml
+    with:
+      aws-region: us-west-2
+      image: ${{ inputs.image || format('%s:%s', env.DEFAULT_IMAGE, github.sha) }}
+      wait-for-service-stability: ${{ inputs['wait-for-service-stability'] }}
+    secrets:
+      aws-role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME || secrets.STAGING_AWS_DEPLOY_ROLE_ARN }}
+      ECS_CLUSTER: ${{ secrets.ECS_CLUSTER || secrets.STAGING_ECS_CLUSTER }}
+      ECS_SERVICE: ${{ secrets.ECS_SERVICE || secrets.STAGING_ECS_SERVICE }}
+      ECS_CONTAINER: ${{ secrets.ECS_CONTAINER || secrets.STAGING_ECS_CONTAINER }}
+
+  production:
+    if: ${{ inputs.environment == 'production' }}
+    uses: ./.github/workflows/reusable-ecs-service-deploy.yml
+    with:
+      aws-region: us-west-2
+      image: ${{ inputs.image || format('%s:%s', env.DEFAULT_IMAGE, github.sha) }}
+      wait-for-service-stability: ${{ inputs['wait-for-service-stability'] }}
+    secrets:
+      aws-role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME || secrets.PROD_AWS_DEPLOY_ROLE_ARN }}
+      ECS_CLUSTER: ${{ secrets.ECS_CLUSTER || secrets.PROD_ECS_CLUSTER }}
+      ECS_SERVICE: ${{ secrets.ECS_SERVICE || secrets.PROD_ECS_SERVICE }}
+      ECS_CONTAINER: ${{ secrets.ECS_CONTAINER || secrets.PROD_ECS_CONTAINER }}

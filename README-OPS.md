@@ -6,8 +6,8 @@ Bridge runs on :4000; nginx routes `/api` and `/ws`. Static web artifacts publis
 | Environment | Domains | Primary workflow | Notes |
 | --- | --- | --- | --- |
 | Preview (`pr`) | `https://dev.blackroad.io`, `https://pr-<n>.dev.blackroad.io` | `.github/workflows/preview.yml` | Spins up ephemeral ECS services + ALB rules per pull request. Terraform config lives in `infra/preview-env/` and the manifest is documented in `environments/preview.yml`. |
-| Staging (`stg`) | `https://stage.blackroad.io` | `.github/workflows/pages-stage.yml` | Builds and archives the static site proof artifact. API wiring is planned; see `environments/staging.yml` for current status. |
-| Production (`prod`) | `https://blackroad.io`, `https://www.blackroad.io`, `https://api.blackroad.io` | `.github/workflows/blackroad-deploy.yml` | GitHub Pages publishes the marketing site; API gateway will promote via the same workflow once the ECS module is enabled. Full manifest: `environments/production.yml`. |
+| Staging (`stg`) | `https://stage.blackroad.io` | `.github/workflows/pages-stage.yml` | Builds and archives the static site proof artifact. API images promote through `.github/workflows/blackroad-api-ecs.yml`; see `environments/staging.yml` for secrets and current ECS status. |
+| Production (`prod`) | `https://blackroad.io`, `https://www.blackroad.io`, `https://api.blackroad.io` | `.github/workflows/blackroad-deploy.yml` | GitHub Pages publishes the marketing site. The API gateway promotes via `.github/workflows/blackroad-api-ecs.yml` once the ECS module is enabled. Full manifest: `environments/production.yml`. |
 
 Reference the manifests whenever DNS, workflow, or Terraform parameters change so automation and runbooks stay aligned.
 
@@ -23,6 +23,11 @@ Reference the manifests whenever DNS, workflow, or Terraform parameters change s
 - Pushes to `main` touching `blackroad-stage/**` or manual dispatch run `pages-stage.yml`.
 - Generates a daily proof + `health.json` for `stage.blackroad.io` and uploads the artifact (no automatic publish step yet).
 - Use the artifact for QA sign-off or handoff to downstream deploy automation.
+
+### API ECS (staging & production)
+- Run `.github/workflows/blackroad-api-ecs.yml` to promote the API container image to ECS.
+- The workflow selects `staging` or `production` secrets based on the dispatch input, waits for `aws ecs wait services-stable`, and exposes a `workflow_call` interface for composition inside CI pipelines.
+- Required secrets are documented in `README-DEPLOY.md` and mirrored in `environments/*.yml` manifests.
 
 ### Production
 - `blackroad-deploy.yml` runs on every `main` push and exposes a `workflow_dispatch` entry for manual redeploys.

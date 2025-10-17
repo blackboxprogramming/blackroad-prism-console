@@ -36,6 +36,39 @@ Add the following Action secrets/variables under
 4. Revalidates `/healthz` and `/api/version` before marking the run successful.
 5. Posts a Slack summary when `SLACK_WEBHOOK_URL` is available.
 
+## API ECS deployments
+
+Use `.github/workflows/blackroad-api-ecs.yml` when you need to roll out the API
+service onto AWS ECS. The workflow wraps the reusable
+`reusable-ecs-service-deploy.yml` helper so other pipelines can call it with
+`workflow_call`, while the manual dispatch path provides an operator-friendly
+form in the Actions UI.
+
+### Required secrets and variables
+
+Configure the following repository secrets for each environment:
+
+- `STAGING_AWS_DEPLOY_ROLE_ARN` / `PROD_AWS_DEPLOY_ROLE_ARN` — IAM roles that
+  grant the workflow permission to register task definitions and update the
+  service.
+- `STAGING_ECS_CLUSTER` / `PROD_ECS_CLUSTER` — ECS cluster names or ARNs.
+- `STAGING_ECS_SERVICE` / `PROD_ECS_SERVICE` — Service identifiers to update.
+- `STAGING_ECS_CONTAINER` / `PROD_ECS_CONTAINER` — Container names within the
+  task definition whose image should be replaced.
+
+If another workflow invokes `blackroad-api-ecs.yml` with its own
+`workflow_call` block, it can pass alternative credentials or ECS identifiers by
+providing the optional secrets `AWS_ROLE_TO_ASSUME`, `ECS_CLUSTER`,
+`ECS_SERVICE`, and `ECS_CONTAINER`.
+
+### Dispatch inputs
+
+- `environment` — `staging` or `production` to select the secret set.
+- `image` — Optional image reference. Defaults to
+  `ghcr.io/blackboxprogramming/blackroad-api:<sha>` when left blank.
+- `wait-for-service-stability` — Defaults to `true`. Set to `false` to skip the
+  `aws ecs wait services-stable` step when running parallel smoke tests.
+
 ## Legacy SSH fallback
 
 The historical SSH pipeline still exists as a manual job. Trigger it from the

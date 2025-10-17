@@ -1,0 +1,135 @@
+name: Reusable ECS Service Deploy
+
+on:
+  workflow_call:
+    inputs:
+      aws-region:
+        description: AWS region for ECS operations
+        required: true
+        type: string
+      image:
+        description: Container image reference to deploy
+        required: true
+        type: string
+      wait-for-service-stability:
+        description: Wait for the ECS service to stabilise after the update
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      aws-access-key-id:
+        description: Optional AWS access key ID when not assuming a role
+        required: false
+      aws-secret-access-key:
+        description: Optional AWS secret access key when not assuming a role
+        required: false
+      aws-session-token:
+        description: Optional AWS session token for temporary credentials
+        required: false
+      aws-role-to-assume:
+        description: Optional IAM role ARN to assume for deployment
+        required: false
+      ECS_CLUSTER:
+        description: Target ECS cluster name or ARN
+        required: true
+      ECS_SERVICE:
+        description: Target ECS service name
+        required: true
+      ECS_CONTAINER:
+        description: Container name within the task definition to update
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Update ECS service
+    runs-on: ubuntu-latest
+    outputs:
+      task-definition-arn: ${{ steps.deploy.outputs.task-definition-arn }}
+    env:
+      AWS_REGION: ${{ inputs.aws-region }}
+      CLUSTER: ${{ secrets.ECS_CLUSTER }}
+      SERVICE: ${{ secrets.ECS_SERVICE }}
+      CONTAINER_NAME: ${{ secrets.ECS_CONTAINER }}
+      IMAGE: ${{ inputs.image }}
+      WAIT_FOR_STABILITY: ${{ inputs['wait-for-service-stability'] }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ inputs.aws-region }}
+          role-to-assume: ${{ secrets.aws-role-to-assume }}
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-session-token: ${{ secrets.aws-session-token }}
+
+      - name: Update task definition and service
+        id: deploy
+        run: |
+          set -euo pipefail
+
+          if [ -z "$CLUSTER" ] || [ -z "$SERVICE" ] || [ -z "$CONTAINER_NAME" ]; then
+            echo "Cluster, service, and container name must be provided via secrets." >&2
+            exit 1
+          fi
+
+          if [ -z "$IMAGE" ]; then
+            echo "An image reference must be supplied." >&2
+            exit 1
+          fi
+
+          echo "Fetching current task definition for $SERVICE"
+          TASK_DEF_ARN=$(aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" --query 'services[0].taskDefinition' --output text)
+
+          if [ "$TASK_DEF_ARN" = "None" ] || [ -z "$TASK_DEF_ARN" ]; then
+            echo "Unable to resolve task definition for service $SERVICE on cluster $CLUSTER" >&2
+            exit 1
+          fi
+
+          aws ecs describe-task-definition --task-definition "$TASK_DEF_ARN" --include TAGS > task-def.json
+
+          echo "Rendering new task definition revision"
+          jq --arg container "$CONTAINER_NAME" --arg image "$IMAGE" '(
+            .taskDefinition
+            | del(
+                .taskDefinitionArn,
+                .revision,
+                .status,
+                .requiresAttributes,
+                .compatibilities,
+                .registeredAt,
+                .registeredBy
+              )
+            | .containerDefinitions = (
+                .containerDefinitions
+                | map(if .name == $container then .image = $image else . end)
+              )
+          ) + { tags: (.tags // []) }' task-def.json > rendered-task-def.json
+
+          if ! jq -e --arg container "$CONTAINER_NAME" '.containerDefinitions | map(select(.name == $container)) | length == 1' rendered-task-def.json >/dev/null; then
+            echo "Container $CONTAINER_NAME not found in task definition." >&2
+            exit 1
+          fi
+
+          echo "Registering new task definition revision"
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://rendered-task-def.json --query 'taskDefinition.taskDefinitionArn' --output text)
+
+          echo "Updating service $SERVICE to use $NEW_TASK_DEF_ARN"
+          aws ecs update-service --cluster "$CLUSTER" --service "$SERVICE" --task-definition "$NEW_TASK_DEF_ARN" --force-new-deployment >/dev/null
+
+          if [ "${WAIT_FOR_STABILITY,,}" != "false" ]; then
+            echo "Waiting for service to stabilise"
+            aws ecs wait services-stable --cluster "$CLUSTER" --services "$SERVICE"
+          else
+            echo "Skipping wait for service stability"
+          fi
+
+          echo "task-definition-arn=$NEW_TASK_DEF_ARN" >> "$GITHUB_OUTPUT"
+
+          rm -f task-def.json rendered-task-def.json
+
+      - name: Show deployed revision
+        run: |
+          echo "Updated task definition: ${{ steps.deploy.outputs.task-definition-arn }}"
