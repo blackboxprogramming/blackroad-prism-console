@@ -531,6 +531,7 @@ app.use('/api/admin/org/keys', requireOrg(), requireRole('admin'), orgKeys);
 app.use('/api/admin/org/audit', requireOrg(), requireRole('admin'), orgAudit);
 app.use('/api/tre', treBA, treSR, trePF, trePY, treSG, treFX, treDB, trePL);
 app.use('/api/mkt', mktAJ, mktCC, mktCS, mktAT, mktConsent);
+app.use('/api/tre', treBA, treSR, trePF, trePY, treSG, treFX, treDB, trePL);
 
 const port = process.env.PORT || 4000;
 
