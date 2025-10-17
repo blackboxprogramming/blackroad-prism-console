@@ -203,3 +203,10 @@ curl -fsS localhost:8080/version
 - `DEV_MODE` (or an equivalent flag) resolves to `1`/`true` in either the environment or configuration.
 - The Python probe prints `controller_ok …` with a directive, step percentage, and reason without triggering a traceback.
 - The `/version` endpoint or logs show developer/debug markers and verbose reasoning strings.
+
+## Environment references
+
+Before promoting a release, review `infra/environments/blackroad.yaml` to confirm the
+target environment's provider, deployment workflow, and required secrets. Use the manifest
+to select the correct GitHub Actions workflow, container tag, and observability dashboards
+for preview, staging, or production pushes.
