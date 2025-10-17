@@ -1,0 +1,28 @@
+# Linear seed configuration for "ALL CONNECTIONS" orchestrator
+labels:
+  - Automation
+  - Audit
+  - Infra
+  - Ops
+  - Data
+  - HR
+  - Finance
+  - Security
+  - Design
+workflows:
+  default:
+    description: Standard software delivery lifecycle
+    states:
+      - Backlog
+      - Ready
+      - In Progress
+      - In Review
+      - Done
+    default_state: Backlog
+projects:
+  - code: AC
+    name: ALL CONNECTIONS Automations
+    description: Tracking for "ALL CONNECTIONS" orchestrator work
+    lead: codex
+    labels:
+      - Automation

@@ -1,0 +1,68 @@
+# Bot registry for "ALL CONNECTIONS" orchestrator
+bots:
+  linear-hq:
+    endpoint: https://linear.example.com/webhook
+    role: router+planner
+    intents: ["fix", "enhance", "debug", "status"]
+    sources: [Slack, GitHub, Notion, Asana, Jira, Zendesk, Datadog, Splunk]
+    actions: [create_issue, create_subtasks, attach_plan, attach_tests, attach_evidence, update_status, post_backlinks]
+  slack-ops:
+    endpoint: https://slack.example.com/webhook
+    triggers: ["@codex fix|enhance|debug", "/codex status", "message_action: Send to Linear"]
+    actions: [call_linear, echo_issue_link, subscribe_thread, post_status]
+  github-autopilot:
+    endpoint: https://github.example.com/webhook
+    triggers: ["pr_comment:@codex ...", "check_failed", "label:automation"]
+    actions: [open_pr_from_plan, apply_labels, request_review, attach_evidence, auto_merge_on_green]
+  notion-docs:
+    endpoint: https://notion.example.com/webhook
+    triggers: ["memo_status:Approved", "@codex in page"]
+    actions: [spawn_linear_epic, create_tasks, sync_decision, weekly_ceo_update]
+  asana-sync:
+    endpoint: https://asana.example.com/webhook
+    triggers: ["task_label:Automation", "@codex in comment"]
+    actions: [mirror_to_linear, keep_bidirectional_until_done]
+  jira-sync:
+    endpoint: https://jira.example.com/webhook
+    triggers: ["issue_label:Automation", "incident_created"]
+    actions: [mirror_to_linear, war_room_link]
+  salesforce-bot:
+    endpoint: https://salesforce.example.com/webhook
+    triggers: ["opportunity_stage_changes", "lead_created"]
+    actions: [asana_task, slack_notify, update_linear]
+  hubspot-bot:
+    endpoint: https://hubspot.example.com/webhook
+    triggers: ["form_submit", "campaign_event"]
+    actions: [sync_salesforce, create_tasks, update_dashboards]
+  stripe-finops:
+    endpoint: https://stripe.example.com/webhook
+    triggers: ["invoice.paid", "dispute.created"]
+    actions: [provision_flags, product_api, revenue_events_to_dw, finance_alerts]
+  netsuite-bridge:
+    endpoint: https://netsuite.example.com/webhook
+    triggers: ["journal_posted"]
+    actions: [revenue_checks, export_to_dw, weekly_finance_pdf]
+  workday-iam:
+    endpoint: https://workday.example.com/webhook
+    triggers: ["hire", "termination", "role_change"]
+    actions: [okta_scim, access_profiles, training_tasks, revoke_on_term]
+  datadog-slo:
+    endpoint: https://datadog.example.com/webhook
+    triggers: ["slo_breach", "p95_latency", "error_budget_burn"]
+    actions: [open_linear, attach_graphs, auto-remediation, freeze_promotions, RCA_required]
+  splunk-audit:
+    endpoint: https://splunk.example.com/webhook
+    triggers: ["new_evidence_bundle", "search_thresholds"]
+    actions: [index_pointers, schedule_reports, feed_grc]
+  figma-writer:
+    endpoint: https://figma.example.com/webhook
+    triggers: ["design_review", "@codex export"]
+    actions: [snapshot_to_notion, asana_tasks]
+  io-ingest:
+    endpoint: https://iot.example.com/webhook
+    triggers: ["jetson/pi/arduino telemetry"]
+    actions: [normalize, route_to_dw, threshold_alerts]
+command_grammar: |
+  @codex fix: <problem>; env:<staging|prod>; flow:<name>; sla:<P0|P1|P2>
+  @codex enhance: <idea>; link:<url>
+  @codex debug: <symptom>; attach:<graph/log>
