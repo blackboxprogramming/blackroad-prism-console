@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
       - run: npm ci --prefix apps/api
-      - run: node scripts/health_digest.ts
+      - run: npx tsx scripts/health_digest.ts
         env:
           WAREHOUSE_URL: ${{ secrets.WAREHOUSE_URL }}
           WAREHOUSE_TOKEN: ${{ secrets.WAREHOUSE_TOKEN }}
