@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>BlackRoad Prism Console</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#0b0d10; color:#f2f5f8; margin:0; padding:20px; }
+    .card { background:#151a21; border-radius:12px; padding:20px; box-shadow:0 12px 30px rgba(0,0,0,0.4); max-width:720px; }
+    .title { font-size:1.4rem; font-weight:bold; margin-bottom:12px; }
+    button { background:#2563eb; border:none; color:#fff; padding:8px 14px; border-radius:6px; cursor:pointer; }
+    button:hover { background:#1d4ed8; }
+    select, input { background:#0f141b; color:#f2f5f8; border:1px solid #1f2937; border-radius:6px; padding:6px; }
+    small { color:#9ca3af; }
+    code { background:#111827; padding:2px 4px; border-radius:4px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="title">Flasher</div>
+    <div>
+      <button id="listBtn">List Devices</button>
+      <select id="devSel"></select>
+    </div>
+
+    <div style="margin-top:8px;">
+      <button id="loadImgs">Load Known Images</button>
+      <select id="imgSel" style="width:70%"></select>
+    </div>
+
+    <input type="text" id="imgUrl" placeholder="Or paste custom image URL (.xz)" style="width:70%; margin-top:8px">
+
+    <div style="margin-top:8px;">
+      <small>Type device name to confirm (e.g. <code>/dev/sda</code>)</small><br>
+      <input type="text" id="confirmTxt" placeholder="/dev/xxx" style="width:40%">
+    </div>
+
+    <button id="flashBtn" style="margin-top:10px;">Flash</button>
+    <div id="flashLog" style="margin-top:10px;background:#000;color:#0f0;padding:1em;height:180px;overflow:auto;border-radius:6px;"></div>
+  </div>
+
+  <script>
+  const devSel = document.getElementById('devSel');
+  const imgSel = document.getElementById('imgSel');
+  const loadImgs = document.getElementById('loadImgs');
+  const flashBtn = document.getElementById('flashBtn');
+  const imgUrl = document.getElementById('imgUrl');
+  const flog = document.getElementById('flashLog');
+  const confirmTxt = document.getElementById('confirmTxt');
+
+  document.getElementById('listBtn').onclick = async () => {
+    flog.textContent = '';
+    try {
+      const r = await fetch('/flash/devices');
+      const j = await r.json();
+      devSel.innerHTML = '';
+      (j.devices||[]).forEach(d=>{
+        const o=document.createElement('option');
+        o.value=d.device; o.text=`${d.device} ${d.size||''} ${d.model||''}`.trim();
+        devSel.appendChild(o);
+      });
+    } catch (err) {
+      flog.textContent = `Failed to list devices: ${err}`;
+    }
+  };
+
+  loadImgs.onclick = async () => {
+    try {
+      const r = await fetch('/flash/images');
+      const j = await r.json();
+      imgSel.innerHTML = '';
+      (j.images||[]).forEach(im=>{
+        const o=document.createElement('option');
+        o.value=im.url; o.text=im.name; o.dataset.sha = im.sha256 || "";
+        imgSel.appendChild(o);
+      });
+      imgSel.onchange = ()=> { imgUrl.value = imgSel.value; };
+      if (imgSel.options.length > 0) {
+        imgSel.selectedIndex = 0;
+        imgSel.dispatchEvent(new Event('change'));
+      }
+    } catch (err) {
+      flog.textContent = `Failed to load images: ${err}`;
+    }
+  };
+
+  flashBtn.onclick = () => {
+    flog.textContent = '';
+    const d = devSel.value;
+    const selectedIndex = imgSel.selectedIndex;
+    const selected = selectedIndex >= 0 ? imgSel.options[selectedIndex] : null;
+    const sha = selected ? selected.dataset.sha : '';
+    const u = (imgUrl.value || imgSel.value).trim();
+    if(!u || !d){flog.textContent='Select device and image URL'; return;}
+    if(confirmTxt.value.trim() !== d){flog.textContent='Type the device name exactly to confirm.'; return;}
+    const proto = location.protocol === 'https:' ? 'wss':'ws';
+    const ws = new WebSocket(`${proto}://${location.host}/ws/flash`);
+    ws.onopen = ()=> ws.send(JSON.stringify({device:d, image_url:u, sha256_url: sha}));
+    ws.onmessage = ev => { flog.textContent += ev.data + "\n"; flog.scrollTop=flog.scrollHeight; };
+    ws.onerror = () => { flog.textContent += "\nERROR: websocket failure"; };
+  };
+  </script>
+</body>
+</html>

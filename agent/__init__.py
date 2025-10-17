@@ -46,3 +46,4 @@ def _host_user(host: str | None = None, user: str | None = None) -> Tuple[str, s
     resolved_host = host or DEFAULT_REMOTE_HOST
     resolved_user = user or DEFAULT_REMOTE_USER
     return resolved_host, resolved_user
+"""BlackRoad flashing agent package."""
