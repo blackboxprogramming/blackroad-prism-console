@@ -3,7 +3,7 @@
 from .generator import Proposal, ProposeInput, LocalGenerator
 from .validator import RuleSet, MemoryStore, ValidationResult, validate
 from .arbiter import ArbiterDecision, decide
-from .logger import DuetLogger
+from .logger import DuetLogger, TaskDescriptor
 
 __all__ = [
     "Proposal",
@@ -16,4 +16,5 @@ __all__ = [
     "ArbiterDecision",
     "decide",
     "DuetLogger",
+    "TaskDescriptor",
 ]
