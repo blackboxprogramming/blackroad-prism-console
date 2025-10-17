@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach } from "vitest";
 import Fastify from "fastify";
 import request from "supertest";
 import runbookRoutes from "../api/runbooks";
