@@ -17,6 +17,8 @@ pydantic
 pyarrow==16.1.0
 pre-commit==4.3.0
 psutil
+openai==1.30.1
+pandas
 pydantic
 pyarrow==16.1.0
 pre-commit==4.3.0
@@ -27,6 +29,7 @@ qiskit-aer==0.17.1
 qiskit-machine-learning==0.8.4
 requests==2.32.4
 redis
+scipy
 streamlit==1.48.1
 torch
 uvicorn
