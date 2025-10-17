@@ -1,0 +1,22 @@
+name: infra_release_policy
+steps:
+  - action: gate
+    params:
+      when: "change_approved('CAB')"
+      on_fail: "abort:missing_change_approval"
+  - action: notify
+    params:
+      channel: "#eng"
+      message: "Starting infrastructure release for {{ env }} / {{ service }}"
+  - action: trigger_workflow
+    params:
+      workflow: ".github/workflows/blackroad-deploy.yml"
+      ref: "{{ release_ref }}"
+  - action: gate
+    params:
+      when: "workflow_status == 'success'"
+      on_fail: "invoke:infra_release_rollback"
+  - action: notify
+    params:
+      channel: "#eng"
+      message: "Release complete for {{ env }} / {{ service }}"

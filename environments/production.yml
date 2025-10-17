@@ -95,9 +95,18 @@ deployments:
 change_management:
   approvals:
     - .github/workflows/change-approve.yml
+  policy_gates:
+    - name: cab-approval
+      description: Change Advisory Board approval must clear via the change-approve workflow before promoting builds.
+      workflow: .github/workflows/change-approve.yml
+    - name: release-runbook
+      description: Execute the infra release runbook so rollbacks and notifications stay coordinated across teams.
+      runbook: runbooks/examples/infra_release_policy.yaml
   runbooks:
     - README-DEPLOY.md
     - README-OPS.md
+    - runbooks/examples/infra_release_policy.yaml
+    - runbooks/examples/infra_release_rollback.yaml
 observability:
   health_checks:
     - name: frontend

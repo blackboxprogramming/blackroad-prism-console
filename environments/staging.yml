@@ -75,6 +75,10 @@ deployments:
 change_management:
   approvals:
     - .github/workflows/change-approve.yml
+  policy_gates:
+    - name: release-runbook
+      description: Run the infra release policy to coordinate verification and fast rollback while staging matures.
+      runbook: runbooks/examples/infra_release_policy.yaml
 observability:
   health_checks:
     - name: static-health
