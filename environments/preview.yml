@@ -50,6 +50,30 @@ automation:
         - PREVIEW_ENV_TF_LOCK_TABLE
         - SLACK_PREVIEW_CHANNEL
         - SLACK_BOT_TOKEN
+    - name: PR Preview Containers
+      file: .github/workflows/preview-containers.yml
+      triggers:
+        - pull_request (opened, reopened, synchronize, ready_for_review)
+      summary: >-
+        Builds GHCR preview images, uploads SBOM artifacts, runs Grype
+        vulnerability scans, and posts docker run instructions on the PR.
+      secrets: []
+    - name: Cleanup Preview Containers
+      file: .github/workflows/preview-containers-cleanup.yml
+      triggers:
+        - pull_request (closed)
+      summary: Deletes the PR-specific GHCR tags once the pull request closes
+        to keep the registry tidy.
+      secrets: []
+    - name: Reusable Docker Preview Build
+      file: .github/workflows/reusable-docker-preview-build.yml
+      triggers:
+        - workflow_call
+      summary: Parameterised image builder leveraged by preview pipelines to
+        publish container tags and surface build digests.
+      secrets:
+        - registry-username (optional)
+        - registry-password (optional)
 deployments:
   - service: web-console
     type: container-service
@@ -62,6 +86,13 @@ deployments:
       key_template: preview/pr-<pr-number>.tfstate
     domain_pattern: https://pr-<pr-number>.dev.blackroad.io
     health_check: https://pr-<pr-number>.dev.blackroad.io/health
+    images:
+      registry: ghcr.io
+      repository: ghcr.io/blackboxprogramming/blackroad-prism-console
+      tag_pattern: pr-<pr-number>-<short-sha>
+      sbom_artifact: pr-<pr-number>-sbom
+      vulnerability_scans:
+        - anchore/grype → code scanning (SARIF)
     environment:
       AWS_REGION: us-east-1
       PREVIEW_DOMAIN: dev.blackroad.io
