@@ -6,9 +6,9 @@ jobs:
   scim:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - name: Reconcile users/groups (stub)
         run: |
           echo '{"ok":true,"synced":"users,groups"}' > /tmp/scim_sync.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with: { name: scim-sync, path: /tmp/scim_sync.json }

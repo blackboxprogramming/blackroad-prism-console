@@ -9,5 +9,5 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - run: node -e "const fs=require('fs');let ok=true;if(fs.existsSync('dq/schemas/index.json')){const i=JSON.parse(fs.readFileSync('dq/schemas/index.json','utf-8'));if(!i.schemas)ok=false;}process.exit(ok?0:1);"

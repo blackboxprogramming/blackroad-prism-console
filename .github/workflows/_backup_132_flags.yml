@@ -23,7 +23,7 @@ jobs:
       web_performance: ${{ steps.f.outputs.web_performance }}
       heavy_linters: ${{ steps.f.outputs.heavy_linters }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - id: f
         run: |
           file=".github/feature-flags.yml"

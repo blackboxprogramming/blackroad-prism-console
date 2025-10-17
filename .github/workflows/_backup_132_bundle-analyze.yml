@@ -6,7 +6,7 @@ jobs:
     if: startsWith(github.event.comment.body, '/bundle analyze')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
       - run: |
@@ -15,7 +15,7 @@ jobs:
           npm i -D rollup-plugin-visualizer
           npm run build
           node -e "const fs=require('fs');fs.writeFileSync('dist/stats.html','<meta charset=utf-8>'+fs.readFileSync('dist/stats.html','utf8'))" || true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: bundle-stats
           path: sites/blackroad/dist/**/stats.html

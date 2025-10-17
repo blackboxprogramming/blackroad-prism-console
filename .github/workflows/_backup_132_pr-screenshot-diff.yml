@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with: { fetch-depth: 0 }
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -22,7 +22,7 @@ jobs:
           npm ci --omit=optional || npm i --package-lock-only
           npm run build
       - name: Checkout main to baseline/
-        uses: actions/checkout@v4
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           path: baseline
@@ -39,7 +39,7 @@ jobs:
           node .github/tools/site/screenshot-diff.js \
             "sites/blackroad/dist" "baseline/sites/blackroad/dist" "artifacts/pr-diff"
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: pr-screenshots
           path: artifacts/pr-diff/*
