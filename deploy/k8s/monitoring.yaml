@@ -77,13 +77,13 @@ data:
               summary: '{{ $labels.service }} dependency {{ $labels.dependency }} is flapping'
               description: 'The dependency {{ $labels.dependency }} for {{ $labels.service }} changed state more than 6 times in 15 minutes.'
           - alert: ServiceDependencyAbsent
-            expr: absent(service_dependency_up)
+            expr: absent_over_time(service_dependency_up{service!=""}[10m])
             for: 10m
             labels:
               severity: warning
             annotations:
-              summary: 'No dependency metrics reported'
-              description: 'Prometheus has not received service_dependency_up metrics in the last 10 minutes.'
+              summary: '{{ $labels.service }} is not reporting dependency metrics'
+              description: 'Prometheus has not received service_dependency_up metrics from {{ $labels.service }} in the last 10 minutes.'
 ---
 apiVersion: apps/v1
 kind: Deployment
