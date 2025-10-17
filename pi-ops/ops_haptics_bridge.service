@@ -1,0 +1,17 @@
+[Unit]
+Description=Blackroad Ops Haptics Bridge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /home/pi/ops_haptics_bridge.py --mqtt-host=localhost --serial-port=/dev/ttyACM0
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
