@@ -1006,3 +1006,8 @@ Mini tour:
 3. `python -m cli.console twin:replay --from "2025-01-01" --to "2025-01-02" --mode verify`
 4. `python -m cli.console twin:stress --profile default --duration 10`
 5. `python -m cli.console twin:compare --left artifacts/runA --right artifacts/runB`
+## R&D Lab Quickstart
+
+```bash
+python -m cli.console rnd:idea:new --title "Example" --problem x --solution y --owner U1 --tags demo
+```

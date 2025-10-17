@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": ["idea_id", "experiment_id", "decision"],
+  "properties": {
+    "idea_id": {"type": "string"},
+    "experiment_id": {"type": "string"},
+    "decision": {"type": "string"}
+  }
+}

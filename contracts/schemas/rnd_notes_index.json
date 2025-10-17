@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {"type": "string"}
+      }
+    }
+  },
+  "required": ["index"]
+}
