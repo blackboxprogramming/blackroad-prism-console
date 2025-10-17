@@ -9,23 +9,45 @@ intentionally omitted in this scaffold.
 from typing import Any, Dict
 import os
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
+
+from services.observability import DependencyRecorder, DependencyStatus
 
 app = FastAPI()
 
-FEATURE_EARTHDATA_ADAPTER = os.getenv("FEATURE_EARTHDATA_ADAPTER", "false").lower() == "true"
+_dependency_recorder = DependencyRecorder("earthdata-adapter")
+
+
+def _feature_enabled() -> bool:
+    return os.getenv("FEATURE_EARTHDATA_ADAPTER", "false").lower() == "true"
 
 
 def _feature_guard() -> None:
     """Raise an HTTP error if the adapter feature is disabled."""
-    if not FEATURE_EARTHDATA_ADAPTER:
+    if not _feature_enabled():
         raise HTTPException(status_code=503, detail="earthdata adapter disabled")
+
+
+def _dependency_status() -> dict[str, DependencyStatus]:
+    if _feature_enabled():
+        return {"feature_flag": DependencyStatus.ok("enabled")}
+    return {"feature_flag": DependencyStatus.disabled("set FEATURE_EARTHDATA_ADAPTER=true")}
 
 
 @app.get("/health")
 def health() -> Dict[str, Any]:
     """Health check endpoint."""
-    return {"status": "ok", "feature_enabled": FEATURE_EARTHDATA_ADAPTER}
+
+    return _dependency_recorder.snapshot(_dependency_status())
+
+
+@app.get("/metrics")
+def metrics() -> Response:
+    _dependency_recorder.snapshot(_dependency_status())
+    return Response(
+        content=_dependency_recorder.render_prometheus(),
+        media_type=_dependency_recorder.prometheus_content_type,
+    )
 
 
 @app.post("/appeears/jobs:list")

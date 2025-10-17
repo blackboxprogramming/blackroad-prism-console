@@ -20,6 +20,8 @@ jobs:
           test "$A1" = "$A2"
       - name: Contract validation
         run: python scripts/validate_contracts.py
+      - name: Observability lint
+        run: make lint-observability
       - name: Artifacts hash
         run: bash scripts/hash_artifacts.sh || true
 
