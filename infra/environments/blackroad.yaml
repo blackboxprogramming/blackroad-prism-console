@@ -43,7 +43,7 @@ environments:
         certificates:
           - staging.blackroad.io
     deployment:
-      workflow: .github/workflows/deploy-staging.yml
+      workflow: .github/workflows/pages-stage.yml
       image_registry: ghcr.io/blackroad/prism-console
       image_tag: staging
       strategy: blue-green
@@ -75,7 +75,7 @@ environments:
         cdn: cloudflare
         domain: console.blackroad.io
     deployment:
-      workflow: .github/workflows/deploy-production.yml
+      workflow: .github/workflows/blackroad-deploy.yml
       image_registry: ghcr.io/blackroad/prism-console
       image_tag: main
       strategy: canary-10-30-60
