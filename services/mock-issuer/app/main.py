@@ -10,10 +10,12 @@ from uuid import uuid4
 
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
 
 import jwt
+
+from services.observability import DependencyRecorder, DependencyStatus
 
 
 def _b64(value: int) -> str:
@@ -33,6 +35,21 @@ class TokenRequest(BaseModel):
 app = FastAPI(title="Mock OIDC Issuer", version="0.1.0")
 _private_key = _build_private_key()
 _kid = os.getenv("MOCK_ISSUER_KID", uuid4().hex)
+_dependency_recorder = DependencyRecorder("mock-issuer")
+
+
+def _dependency_status() -> dict[str, DependencyStatus]:
+    deps: dict[str, DependencyStatus] = {}
+    if _private_key is None:
+        deps["signing_key"] = DependencyStatus.error("missing private key")
+    else:
+        deps["signing_key"] = DependencyStatus.ok("loaded")
+
+    if not _kid:
+        deps["kid"] = DependencyStatus.degraded("kid env missing")
+    else:
+        deps["kid"] = DependencyStatus.ok(_kid)
+    return deps
 
 
 def _issuer_url() -> str:
@@ -75,8 +92,17 @@ async def jwks() -> Dict[str, Any]:
 
 
 @app.get("/healthz")
-async def healthz() -> Dict[str, str]:
-    return {"status": "ok"}
+async def healthz() -> Dict[str, object]:
+    return _dependency_recorder.snapshot(_dependency_status())
+
+
+@app.get("/metrics")
+async def metrics() -> Response:
+    _dependency_recorder.snapshot(_dependency_status())
+    return Response(
+        content=_dependency_recorder.render_prometheus(),
+        media_type=_dependency_recorder.prometheus_content_type,
+    )
 
 
 @app.post("/token")

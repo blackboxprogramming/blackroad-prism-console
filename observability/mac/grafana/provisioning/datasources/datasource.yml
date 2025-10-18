@@ -15,3 +15,9 @@ datasources:
     secureJsonData:
       token: ${GF_INFLUX_TOKEN}
     editable: false
+  - name: Prism Prometheus
+    type: prometheus
+    access: proxy
+    uid: prism_prometheus
+    url: http://prometheus:9090
+    editable: false
