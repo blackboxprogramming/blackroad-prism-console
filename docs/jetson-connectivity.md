@@ -4,7 +4,22 @@ The dashboard shells against the Jetson over SSH. If name resolution for
 `jetson.local` fails, the backend falls back to that hostname and all commands
 error with `could not resolve hostname jetson.local`.
 
-Use one of the following approaches to point the backend at the right device.
+Use the discovery helper below or one of the manual approaches to point the
+backend at the right device.
+
+## 0. Discover the Jetson on a wired link
+
+When the Jetson is tethered over Ethernet (e.g., directly to a Pi 400) the DHCP
+range is often limited to a small /24. You can scan it from the controller:
+
+```sh
+cd /workspace/blackroad-prism-console
+python -m agent.discover
+```
+
+If multiple interfaces are up, set `BLACKROAD_DISCOVER_IFACE` to pick the
+Ethernet device (for example `enx00e04c123456`). The output lists the hosts that
+respond to ping/SSH and flags the Jetson automatically.
 
 ## 1. Host override (quick workaround)
 
