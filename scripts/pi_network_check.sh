@@ -29,10 +29,12 @@ for host in "${HOSTS[@]}"; do
     echo "[WARN] Host $target did not respond to ping"
   fi
 
-  if ssh -o BatchMode=yes -o ConnectTimeout=5 "$host" exit >/dev/null 2>&1; then
-    echo "[OK] SSH connectivity to $host confirmed"
+  if remote_hostname=$(ssh -o BatchMode=yes -o ConnectTimeout=5 "$host" 'hostname' 2>/dev/null); then
+    echo "[OK] SSH connectivity to $host confirmed (remote hostname: $remote_hostname)"
+    echo "    VS Code Remote: code --remote \"ssh-remote+$host\""
   else
     echo "[WARN] Could not establish passwordless SSH session to $host"
+    echo "      Tip: run 'ssh-copy-id $host' to install your public key"
   fi
 
 done
