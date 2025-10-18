@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "installCommand": "npm ci --omit=optional",
+  "outputDirectory": "dist",
+  "github": {
+    "silent": true
+  }
+}

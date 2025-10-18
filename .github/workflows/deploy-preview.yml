@@ -4,15 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: Target environment name
+        description: Target environment label (used for metadata/alias)
         required: false
         default: ''
       pr:
         description: Source pull request number
         required: false
+        default: ''
       head_sha:
         description: Head commit SHA for the preview
         required: false
+        default: ''
   workflow_call:
     inputs:
       environment:
@@ -25,13 +27,182 @@ on:
         type: string
         required: false
 
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  PROJECT_DIR: sites/blackroad
+
 jobs:
-  deploy:
+  vercel-preview:
+    name: Vercel preview deploy
     runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+      environment: ${{ steps.deploy.outputs.environment }}
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      PR_NUMBER: ${{ inputs.pr || '' }}
+      TARGET_ENVIRONMENT: ${{ inputs.environment || '' }}
+      HEAD_SHA: ${{ inputs.head_sha || github.sha }}
     steps:
-      - name: Log deployment request
+      - name: Check Vercel credentials
+        id: secrets
+        shell: bash
         run: |
-          echo "Deploy preview stub"
-          echo "PR: ${{ inputs.pr }}"
-          echo "Environment: ${{ inputs.environment }}"
-          echo "Head SHA: ${{ inputs.head_sha }}"
+          missing=""
+          for key in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            value="${!key:-}"
+            if [ -z "$value" ]; then
+              if [ -n "$missing" ]; then
+                missing="${missing},${key}"
+              else
+                missing="$key"
+              fi
+            fi
+          done
+
+          if [ -n "$missing" ]; then
+            echo "missing=true" >> "$GITHUB_OUTPUT"
+            echo "missing_list=$missing" >> "$GITHUB_OUTPUT"
+            {
+              echo "⚠️ Vercel preview skipped."
+              echo
+              echo "**Missing secrets:**"
+              IFS=',' read -ra parts <<< "$missing"
+              for part in "${parts[@]}"; do
+                echo "- \`$part\`"
+              done
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "missing=false" >> "$GITHUB_OUTPUT"
+            echo "missing_list=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: steps.secrets.outputs.missing == 'false'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ env.HEAD_SHA }}
+
+      - name: Setup Node.js
+        if: steps.secrets.outputs.missing == 'false'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ${{ env.PROJECT_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        if: steps.secrets.outputs.missing == 'false'
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: npm ci --omit=optional
+
+      - name: Build site
+        if: steps.secrets.outputs.missing == 'false'
+        working-directory: ${{ env.PROJECT_DIR }}
+        env:
+          CI: 'true'
+        run: npm run build
+
+      - name: Install Vercel CLI
+        if: steps.secrets.outputs.missing == 'false'
+        run: npm install -g vercel@latest
+
+      - name: Deploy to Vercel
+        if: steps.secrets.outputs.missing == 'false'
+        id: deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          env_name="$TARGET_ENVIRONMENT"
+          if [ -z "$env_name" ]; then
+            if [ -n "$PR_NUMBER" ]; then
+              env_name="pr-${PR_NUMBER}"
+            else
+              env_name="preview"
+            fi
+          fi
+
+          cd "$PROJECT_DIR"
+
+          # Populate .vercel/project.json with the supplied project/org IDs
+          vercel pull --yes --environment=preview --token "$VERCEL_TOKEN"
+
+          deploy_json=$(vercel deploy \
+            --token "$VERCEL_TOKEN" \
+            --scope "$VERCEL_ORG_ID" \
+            --yes \
+            --json \
+            --meta githubCommitSha="$HEAD_SHA" \
+            --meta githubPr="$PR_NUMBER" \
+            --meta previewEnvironment="$env_name")
+
+          url=$(echo "$deploy_json" | jq -r '.url // .deployUrl // .inspectUrl // .inspectorUrl // empty')
+          if [ -z "$url" ] || [ "$url" = "null" ]; then
+            echo "$deploy_json"
+            echo "Failed to determine preview URL" >&2
+            exit 1
+          fi
+
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "environment=$env_name" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Vercel preview"
+            echo
+            echo "*Environment:* \`$env_name\`"
+            echo "*URL:* $url"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment with preview URL
+        if: steps.secrets.outputs.missing == 'false' && env.PR_NUMBER != ''
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.url }}
+          PREVIEW_ENV: ${{ steps.deploy.outputs.environment }}
+          PR_NUMBER: ${{ env.PR_NUMBER }}
+        with:
+          script: |
+            const pr = Number(process.env.PR_NUMBER);
+            if (!pr || !process.env.PREVIEW_URL) {
+              core.info('Preview URL or PR number missing; skipping comment.');
+              return;
+            }
+            const envLabel = process.env.PREVIEW_ENV ? ` (\`${process.env.PREVIEW_ENV}\`)` : '';
+            const body = `▲ **Vercel preview${envLabel}**: ${process.env.PREVIEW_URL}`;
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: pr,
+              body,
+            });
+
+      - name: Comment missing secret info
+        if: steps.secrets.outputs.missing == 'true' && env.PR_NUMBER != ''
+        uses: actions/github-script@v7
+        env:
+          MISSING: ${{ steps.secrets.outputs.missing_list }}
+          PR_NUMBER: ${{ env.PR_NUMBER }}
+        with:
+          script: |
+            const pr = Number(process.env.PR_NUMBER);
+            if (!pr) {
+              return;
+            }
+            const missing = (process.env.MISSING || '')
+              .split(',')
+              .filter(Boolean)
+              .map((name) => `\`${name.trim()}\``)
+              .join(', ');
+            const suffix = missing ? `missing ${missing}` : 'missing required Vercel secrets';
+            const body = `⚠️ Vercel preview skipped: ${suffix}.`;
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: pr,
+              body,
+            });
