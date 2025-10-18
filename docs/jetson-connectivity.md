@@ -6,6 +6,25 @@ error with `could not resolve hostname jetson.local`.
 
 Use one of the following approaches to point the backend at the right device.
 
+## 0. Discover the Jetson's address (optional)
+
+If you are unsure where the Jetson lives on the network, run the helper to
+locate it. The script probes common hostnames (`jetson.local`, `jetson-01`,
+etc.) and can sweep the LAN for SSH endpoints that report Jetson/Tegra
+metadata:
+
+```sh
+./scripts/find_jetson.py
+```
+
+When the Jetson responds, the script prints `[FOUND] host: ...` with the first
+line of `/etc/nv_tegra_release`. Provide `--host` or `--subnet` to check custom
+targets or broader address ranges. The helper autodetects active IPv4 networks
+via `ip` on Linux or `ifconfig` on macOS and sweeps them in parallel (16 worker
+threads by default) so larger subnets complete quickly even over flaky Wi-Fi.
+Tune concurrency with `--workers` or set `--skip-scan` to avoid subnet sweeps
+when you only want to test explicit hostnames.
+
 ## 1. Host override (quick workaround)
 
 Append a static mapping for the Jetson into `/etc/hosts` on the controller:
