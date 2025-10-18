@@ -102,6 +102,9 @@ def capture_snapshot(
     reference them the next time the "Next!" impulse hits.
     """
 
+    if pulses < 2:
+        raise ValueError("pulses must be at least 2 to compute phase drift")
+
     pulse_levels = iterate_logistic_loop(gain=gain, seed_level=seed_level, pulses=pulses)
     phase_drift = pulse_levels[-1] - pulse_levels[-2]
     mean_level = fmean(pulse_levels)
