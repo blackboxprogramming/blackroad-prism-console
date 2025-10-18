@@ -1,23 +1,23 @@
+from __future__ import annotations
+
 import inspect
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Type
 
+import settings
 from bots import available_bots
+from orchestrator import lineage, metrics, redaction
+from policy import enforcer
 from tools import storage
 
 from .base import BaseBot, assert_guardrails
 from .perf import perf_timer
 from .protocols import BotResponse, Task
 from .slo import SLO_CATALOG
-import settings
-from bots import available_bots
-from orchestrator import lineage, redaction
-from policy import enforcer
-from tools import storage
 
-from .base import BaseBot, assert_guardrails
-from .protocols import BotResponse, Task
+logger = logging.getLogger(__name__)
 
 _memory_path = Path(__file__).resolve().with_name("memory.jsonl")
 _current_doc = ""
@@ -39,6 +39,10 @@ def route(task: Task, bot_name: str) -> BotResponse:
     if bot_name not in registry:
         raise ValueError(f"Unknown bot: {bot_name}")
 
+    logger.info("routing task", extra={"task_id": task.id, "bot": bot_name})
+    metrics.inc("orchestrator_tasks_total")
+    metrics.inc(f"orchestrator_tasks_bot_{bot_name}")
+
     violations = enforcer.check_task(task)
     if bot_name in settings.FORBIDDEN_BOTS:
         violations.append("TASK_FORBIDDEN_BOT")
@@ -54,10 +58,22 @@ def route(task: Task, bot_name: str) -> BotResponse:
     _current_doc = inspect.getdoc(bot) or ""
 
     slo = SLO_CATALOG.get(bot_name)
-    with perf_timer("bot_run") as perf:
-        response = bot.run(task)
+    try:
+        with perf_timer("bot_run") as perf:
+            response = bot.run(task)
+    except Exception:
+        metrics.inc("orchestrator_task_failures_total")
+        metrics.inc(f"orchestrator_task_failures_bot_{bot_name}")
+        logger.exception("bot run failed", extra={"task_id": task.id, "bot": bot_name, "trace_id": trace_id})
+        lineage.finalize(trace_id)
+        raise
+
     response.elapsed_ms = perf.get("elapsed_ms")
     response.rss_mb = perf.get("rss_mb")
+    if response.elapsed_ms is not None:
+        metrics.gauge("orchestrator_last_run_elapsed_ms", int(response.elapsed_ms))
+    if response.rss_mb is not None:
+        metrics.gauge("orchestrator_last_run_rss_mb", int(response.rss_mb))
     if slo:
         response.slo_name = slo.name
         response.p50_target = slo.p50_ms
@@ -89,4 +105,15 @@ def route(task: Task, bot_name: str) -> BotResponse:
         }
     storage.write(str(_memory_path), record)
     lineage.finalize(trace_id)
+    metrics.inc("orchestrator_task_success_total")
+    metrics.inc(f"orchestrator_task_success_bot_{bot_name}")
+    logger.info(
+        "task completed",
+        extra={
+            "task_id": task.id,
+            "bot": bot_name,
+            "trace_id": trace_id,
+            "elapsed_ms": response.elapsed_ms,
+        },
+    )
     return response

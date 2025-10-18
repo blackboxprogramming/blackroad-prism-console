@@ -17,6 +17,8 @@ def _read_memory() -> list[Dict]:
     entries = []
     if MEMORY_PATH.exists():
         for line in storage.read(str(MEMORY_PATH)).splitlines():
+            if not line.strip():
+                continue
             entries.append(json.loads(line))
     return entries
 
