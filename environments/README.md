@@ -41,4 +41,4 @@ module, domain, or approval requirement). These files should stay aligned with
 
 - `production.yml` — customer-facing blackroad.io footprint.
 - `staging.yml` — stage.blackroad.io plus the AWS scaffolding that mirrors prod.
-- `preview.yml` — ephemeral PR preview infrastructure under dev.blackroad.io.
+- `preview-env.yml` — ephemeral PR preview infrastructure under dev.blackroad.io.

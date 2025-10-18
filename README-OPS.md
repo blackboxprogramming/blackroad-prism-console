@@ -5,7 +5,7 @@ Bridge runs on :4000; nginx routes `/api` and `/ws`. Static web artifacts publis
 
 | Environment | Domains | Primary workflow | Notes |
 | --- | --- | --- | --- |
-| Preview (`pr`) | `https://dev.blackroad.io`, `https://pr-<n>.dev.blackroad.io` | `.github/workflows/preview.yml` | Spins up ephemeral ECS services + ALB rules per pull request. Terraform config lives in `infra/preview-env/` and the manifest is documented in `environments/preview.yml`. |
+| Preview (`pr`) | `https://dev.blackroad.io`, `https://pr-<n>.dev.blackroad.io` | `.github/workflows/preview-env.yml` | Spins up ephemeral ECS services + ALB rules per pull request. Terraform config lives in `infra/preview-env/` and the manifest is documented in `environments/preview.yml`. |
 | Staging (`stg`) | `https://stage.blackroad.io` | `.github/workflows/pages-stage.yml` | Builds and archives the static site proof artifact. API wiring is planned; see `environments/staging.yml` for current status. |
 | Production (`prod`) | `https://blackroad.io`, `https://www.blackroad.io`, `https://api.blackroad.io` | `.github/workflows/blackroad-deploy.yml` | GitHub Pages publishes the marketing site; API gateway will promote via the same workflow once the ECS module is enabled. Full manifest: `environments/production.yml`. |
 
@@ -21,7 +21,7 @@ checks fail. Keep both runbooks handy during CAB reviews.
 ## Deployment workflows
 
 ### Preview (per PR)
-- Triggered automatically on pull request open/update via `preview.yml`.
+- Triggered automatically on pull request open/update via `preview-env.yml`.
 - Builds the image, applies Terraform (`infra/preview-env`), and comments with the preview URL.
 - Closing the PR or re-running the `destroy` job removes ALB rules, target groups, ECS services, and Route53 aliases.
 - Smoke test: `curl -sSfL https://pr-<n>.dev.blackroad.io/healthz/ui` (already executed in the workflow).
@@ -68,6 +68,6 @@ Document every rollback/forward action in the incident log and update the corres
 - Environment manifests: `environments/*.yml`
 - Preview Terraform stack: `infra/preview-env/`
 - Reusable module: `modules/preview-env/`
-- Deployment workflows: `.github/workflows/preview.yml`, `pages-stage.yml`, `blackroad-deploy.yml`, `prism-ssh-deploy.yml`
+- Deployment workflows: `.github/workflows/preview-env.yml`, `pages-stage.yml`, `blackroad-deploy.yml`, `prism-ssh-deploy.yml`
 
 _Last updated on 2025-10-06_
