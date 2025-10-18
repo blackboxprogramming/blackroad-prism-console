@@ -1,0 +1,5 @@
+paho-mqtt
+pillow
+opencv-python
+fastapi
+uvicorn
