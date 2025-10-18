@@ -1,13 +1,13 @@
 export const buildMeta = (title: string, description: string, path = '/') => ({
-  title: `${title} | BlackRoad`,
+  title: `${title} | Blackroad`,
   description,
-  canonical: `https://blackroadinc.us${path}`
+  canonical: `https://blackroad.com${path}`
 });
 
 export const orgJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "BlackRoad, Inc.",
-  "url": "https://blackroadinc.us",
-  "logo": "https://blackroadinc.us/logo.png"
+  "name": "Blackroad",
+  "url": "https://blackroad.com",
+  "logo": "https://blackroad.com/logo.png"
 };
