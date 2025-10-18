@@ -1,0 +1,36 @@
+name: PR Preview — Vercel
+
+on:
+  pull_request:
+    paths:
+      - 'sites/blackroad/**'
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number to deploy
+        required: false
+        default: ''
+      head_sha:
+        description: Commit SHA to deploy (overrides PR head)
+        required: false
+        default: ''
+      environment:
+        description: Optional environment label (appears in comments/metadata)
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-preview.yml
+    permissions:
+      contents: read
+      pull-requests: write
+    secrets: inherit
+    with:
+      pr: ${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.event.inputs.pr || '' }}
+      head_sha: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.inputs.head_sha || '' }}
+      environment: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.event.inputs.environment || '' }}
