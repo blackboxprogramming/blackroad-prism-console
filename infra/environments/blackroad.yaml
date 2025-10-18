@@ -1,0 +1,99 @@
+environments:
+  preview:
+    description: Ephemeral review environments created per pull request for UI and API validation.
+    lifecycle: ephemeral
+    infrastructure:
+      provider: aws
+      account_alias: blackroad-preview
+      region: us-east-1
+      stack: ecs-fargate
+      network:
+        vpc: vpc-preview-shared
+        subnets:
+          - preview-public-a
+          - preview-public-b
+        load_balancer: preview-prism-alb
+    deployment:
+      entrypoint: infra/preview-env
+      workflow: .github/workflows/preview-env.yml
+      image_registry: ghcr.io/blackroad/prism-console
+      image_tag_pattern: 'pr-${{ github.event.pull_request.number }}'
+      teardown: terraform destroy -auto-approve
+    secrets:
+      store: aws-secrets-manager
+      prefix: /preview/prism/
+      required:
+        - BLACKROAD_API_KEY
+        - PRISM_DB_URL
+    observability:
+      metrics: cloudwatch
+      tracing: disabled
+      logging: aws-firelens
+
+  staging:
+    description: Stable pre-production environment mirroring production topology for release verification.
+    lifecycle: persistent
+    infrastructure:
+      provider: fly.io
+      org: blackroad-studio
+      region: iad
+      stack: fly-machines
+      network:
+        app: prism-console-staging
+        certificates:
+          - staging.blackroad.io
+    deployment:
+      workflow: .github/workflows/pages-stage.yml
+      image_registry: ghcr.io/blackroad/prism-console
+      image_tag: staging
+      strategy: blue-green
+    secrets:
+      store: fly-secrets
+      required:
+        - BLACKROAD_API_KEY
+        - PRISM_DB_URL
+        - LUCIDIA_LLM_ENDPOINT
+    observability:
+      metrics: grafana-cloud
+      tracing: honeycomb
+      logging: fly-log-shipper
+
+  production:
+    description: Primary customer-facing deployment serving https://console.blackroad.io.
+    lifecycle: persistent
+    infrastructure:
+      provider: aws
+      account_alias: blackroad-prod
+      region: us-west-2
+      stack: ecs-fargate
+      network:
+        vpc: vpc-prism-prod
+        subnets:
+          - prism-public-a
+          - prism-public-b
+        load_balancer: prism-console-alb
+        cdn: cloudflare
+        domain: console.blackroad.io
+    deployment:
+      workflow: .github/workflows/blackroad-deploy.yml
+      image_registry: ghcr.io/blackroad/prism-console
+      image_tag: main
+      strategy: canary-10-30-60
+      approvals:
+        - security
+        - operations
+    secrets:
+      store: aws-secrets-manager
+      prefix: /production/prism/
+      required:
+        - BLACKROAD_API_KEY
+        - PRISM_DB_URL
+        - LUCIDIA_LLM_ENDPOINT
+        - STRIPE_SECRET_KEY
+    observability:
+      metrics: datadog
+      tracing: aws-xray
+      logging: cloudwatch-logs
+      alerts:
+        pagerduty_service: prism-console
+        sla_minutes: 15
