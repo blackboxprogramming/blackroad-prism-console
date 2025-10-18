@@ -1,18 +1,13 @@
 """Streamlit app for the BlackRoad Prism Generator with GPT and voice input."""
-import streamlit as st
-from openai import OpenAI
-import numpy as np
-import matplotlib.pyplot as plt
-import ast
-"""Streamlit app for BlackRoad Prism Generator with GPT and voice input."""
 
-import io
+from __future__ import annotations
+
 import os
 import tempfile
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
-import openai
 import streamlit as st
 import whisper
 from openai import OpenAI
@@ -20,249 +15,286 @@ from streamlit.runtime.uploaded_file_manager import UploadedFile
 
 from prism_utils import parse_numeric_prefix
 
-@st.cache_resource
-def load_whisper_model():
-    """Load the Whisper model once and reuse across reruns."""
-    return whisper.load_model("base")
+_SYSTEM_PROMPT = (
+    "You are the BlackRoad Venture Console AI, a holographic assistant that replies "
+    "with scientific and symbolic insights."
+)
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-api_key = os.getenv("OPENAI_API_KEY")
-if api_key:
-    client = OpenAI(api_key=api_key)
-else:
-    client = None
-    st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-client = OpenAI(api_key=api_key) if api_key else None
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-# Cache the Whisper model so it's loaded only once
-@st.cache_resource
-def load_whisper_model():
-    return whisper.load_model("base")
-import streamlit as st
-import whisper
-from openai import OpenAI
-
-# Configure OpenAI client
-_api_key = os.getenv("OPENAI_API_KEY")
-if not _api_key:
-    st.warning("OPENAI_API_KEY not set; responses will be unavailable.")
-    client = None
-else:
-    client = OpenAI(api_key=_api_key)
-
-@st.cache_resource
-def get_whisper_model():
-    """Load and cache the Whisper model to avoid reloading on each request."""
-    return whisper.load_model("base")
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
-st.set_page_config(layout="wide")
-st.title("BlackRoad Prism Generator with GPT + Voice Console")
-
-# Configure OpenAI client
-_api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=_api_key) if _api_key else None
-if client is None:
-    st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
+st.set_page_config(layout="wide", page_title="BlackRoad Prism Console")
 
 
 @st.cache_resource
-def get_whisper_model():
-    """Load and cache the Whisper model."""
+def get_whisper_model() -> whisper.Whisper:
+    """Load and cache the Whisper model once for the session."""
+
     return whisper.load_model("base")
+
+
+@st.cache_resource
+def get_openai_client(api_key: Optional[str]) -> Optional[OpenAI]:
+    """Instantiate the OpenAI client if an API key is available."""
+
+    if not api_key:
+        return None
+    return OpenAI(api_key=api_key)
+
+
+def ensure_session_state() -> None:
+    """Initialize Streamlit session state defaults."""
+
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = [
+            {"role": "system", "content": _SYSTEM_PROMPT},
+        ]
+    st.session_state.setdefault("last_amplitude", 1.0)
+    st.session_state.setdefault("pending_voice_input", "")
+    st.session_state.setdefault("last_voice_preview", "")
 
 
 def transcribe_audio(uploaded_file: UploadedFile) -> str:
-    """Transcribe an uploaded audio file using Whisper."""
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-        tmp.write(uploaded_file.read())
-        tmp_path = tmp.name
-    try:
-        model = get_whisper_model()
-        result = model.transcribe(tmp_path)
-    finally:
-        try:
-            os.remove(tmp_path)
-        except OSError:
-            pass
-    return result["text"]
-
-
-# Initialize chat history
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = [
-        {
-            "role": "system",
-            "content": (
-                "You are the BlackRoad Venture Console AI, a holographic assistant that replies "
-                "with scientific and symbolic insights."
-            ),
-        }
-    ]
-
-st.markdown(
-    "#### Speak or type an idea, formula, or question. The AI will respond and project a hologram:"
-)
-
-audio_file = st.file_uploader("Upload your voice (mp3 or wav)", type=["mp3", "wav"])
-if audio_file is not None:
-    user_input = transcribe_audio(audio_file)
-    """
-#### Speak or type an idea, formula, or question. The AI will respond and project a hologram:
-"""
-)
-
-@st.cache_resource
-def load_whisper_model():
-    """Load the Whisper model once to avoid repeated initialization."""
-    return whisper.load_model("base")
-
-
-def parse_numeric_prefix(text: str) -> float:
-    """Return the leading numeric value in ``text`` or ``1.0`` if not found."""
-    try:
-        value = ast.literal_eval(text.split(",", maxsplit=1)[0].strip())
-        if isinstance(value, (int, float)):
-            return float(value)
-    except Exception:
-        pass
-    return 1.0
-
-
-# Audio input
-@st.cache_resource
-def load_whisper_model():
-    """Load Whisper model once and cache for subsequent requests."""
-    return whisper.load_model("base")
-
-
-audio_file = st.file_uploader("Upload your voice (mp3 or wav)", type=["mp3", "wav"])
-if audio_file is not None:
-    suffix = os.path.splitext(audio_file.name)[1] or ".wav"
-    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_audio:
-        temp_audio.write(audio_file.read())
-    """#### Speak or type an idea, formula, or question. The AI will respond and project a hologram:"""
-)
-
-
-def _transcribe_audio(uploaded_file: st.runtime.uploaded_file_manager.UploadedFile) -> str:
-    """Transcribe an uploaded audio file using Whisper and clean up the temp file."""
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio:
-        temp_audio.write(uploaded_file.read())
-        temp_audio_path = temp_audio.name
-    model = load_whisper_model()
-    result = model.transcribe(temp_audio_path)
-    os.remove(temp_audio_path)
-    os.unlink(temp_audio_path)
-
-    if "whisper_model" not in st.session_state:
-        st.session_state.whisper_model = whisper.load_model("base")
-    model = st.session_state.whisper_model
-    result = model.transcribe(temp_audio_path)
-    os.remove(temp_audio_path)
+    """Transcribe an uploaded audio file with Whisper and return the text."""
 
     model = get_whisper_model()
-    result = model.transcribe(temp_audio_path)
-    os.unlink(temp_audio_path)
-    user_input = result["text"]
-    return result["text"]
-
-
-audio_file = st.file_uploader("Upload your voice (mp3 or wav)", type=["mp3", "wav"])
-if audio_file is not None:
-    user_input = _transcribe_audio(audio_file)
-    st.markdown(f"**You said:** {user_input}")
+    suffix = os.path.splitext(uploaded_file.name)[1] or ".wav"
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
+        tmp_file.write(uploaded_file.read())
+        temp_path = tmp_file.name
     try:
-        model = load_whisper_model()
-        result = model.transcribe(temp_audio_path)
-        user_input = result["text"]
-        st.markdown(f"**You said:** {user_input}")
+        uploaded_file.seek(0)  # type: ignore[attr-defined]
+    except Exception:
+        pass
+    try:
+        result = model.transcribe(temp_path)
     finally:
         try:
-            os.remove(temp_audio_path)
+            os.remove(temp_path)
         except OSError:
             pass
-else:
-    user_input = st.text_input("Or type here")
+    text = result.get("text", "").strip()
+    return text
 
-if user_input:
-    if not client:
-        st.error("OpenAI API key not set.")
+
+def process_audio_input(audio_file: Optional[UploadedFile]) -> None:
+    """Process voice input once and stage it as a pending user message."""
+
+    if audio_file is None:
+        return
+
+    audio_id = getattr(audio_file, "id", audio_file.name)
+    if st.session_state.get("processed_audio_id") == audio_id:
+        return
+
+    with st.spinner("Transcribing voice input..."):
+        transcript = transcribe_audio(audio_file)
+
+    st.session_state["processed_audio_id"] = audio_id
+    st.session_state["pending_voice_input"] = transcript
+    st.session_state["last_voice_preview"] = transcript
+    if transcript:
+        st.success("Voice transcription captured. Sending to the console…")
     else:
-        st.session_state.chat_history.append({"role": "user", "content": user_input})
+        st.warning("The transcription was empty. Try recording again.")
+
+
+def capture_user_message() -> Optional[str]:
+    """Capture typed or voice-derived user input for the conversation."""
+
+    typed_message = st.chat_input(
+        "Speak or type an idea, formula, or question for the Venture Console AI."
+    )
+    if typed_message and typed_message.strip():
+        return typed_message.strip()
+
+    pending_voice = st.session_state.get("pending_voice_input", "").strip()
+    if pending_voice:
+        st.session_state["pending_voice_input"] = ""
+        return pending_voice
+    return None
+
+
+def trim_history(max_messages: int = 25) -> None:
+    """Keep the chat history from growing without bounds."""
+
+    history = st.session_state.chat_history
+    if len(history) <= max_messages:
+        return
+
+    system_message = history[0]
+    recent_messages = history[-(max_messages - 1) :]
+    st.session_state.chat_history = [system_message, *recent_messages]
+
+
+def generate_assistant_reply(client: Optional[OpenAI]) -> Optional[str]:
+    """Invoke the OpenAI chat completion API and return the assistant reply."""
+
+    if client is None:
+        st.error("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
+        return None
+
+    try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
-        if client is None:
-            raise ValueError("OpenAI API key is not configured")
-        response = client.chat.completions.create(
-        if not openai.api_key:
-            raise RuntimeError("OpenAI API key not configured.")
-
-        st.session_state.chat_history.append({"role": "user", "content": user_input})
-
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
             messages=st.session_state.chat_history,
+            temperature=0.6,
         )
-        assistant_reply = response.choices[0].message.content
-        st.session_state.chat_history.append({"role": "assistant", "content": assistant_reply})
-        st.markdown(f"**Venture Console AI:** {assistant_reply}")
+    except Exception as exc:  # pragma: no cover - network/runtime failure
+        st.error(f"Failed to generate a response: {exc}")
+        return None
 
-        magnitude = parse_numeric_prefix(user_input)
-        fig = plt.figure(figsize=(6, 4))
-        ax = fig.add_subplot(111, projection="3d")
-        x = np.linspace(-5, 5, 100)
-        y = np.linspace(-5, 5, 100)
-        x, y = np.meshgrid(x, y)
-        z = np.sin(np.sqrt(x**2 + y**2)) * magnitude
-        ax.plot_surface(x, y, z, cmap="plasma")
-        if client:
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=st.session_state.chat_history,
-            )
-            assistant_reply = response.choices[0].message.content
-        else:
-            assistant_reply = "OpenAI API key not provided."
+    if not response.choices:
+        return None
 
-        st.session_state.chat_history.append({"role": "assistant", "content": assistant_reply})
-        st.markdown(f"**Venture Console AI:** {assistant_reply}")
+    message = getattr(response.choices[0], "message", None)
+    content = getattr(message, "content", "") if message else ""
+    return content.strip() or None
 
-        result = parse_numeric_prefix(user_input)
-        try:
-            result = float(user_input.split(",")[0])
-        except ValueError:
-            result = 1.0
 
-        fig = plt.figure(figsize=(6, 4))
-        ax = fig.add_subplot(111, projection="3d")
-        X = np.linspace(-5, 5, 100)
-        Y = np.linspace(-5, 5, 100)
-        X, Y = np.meshgrid(X, Y)
-        Z = np.sin(np.sqrt(X**2 + Y**2)) * result
+def handle_user_message(user_input: str, client: Optional[OpenAI]) -> None:
+    """Append the user message, call the model, and record the reply."""
 
-        ax.plot_surface(X, Y, Z, cmap="plasma")
-        ax.axis("off")
+    user_input = user_input.strip()
+    if not user_input:
+        return
 
-        buf = io.BytesIO()
-        plt.savefig(buf, format="png")
-        buf.seek(0)
-        st.image(buf)
-        plt.close(fig)
+    st.session_state.chat_history.append({"role": "user", "content": user_input})
+    st.session_state.last_amplitude = parse_numeric_prefix(user_input)
+    trim_history()
 
-st.markdown("---")
-st.markdown("**BlackRoad Prism Console** | Live UI Simulation")
-st.image("72BF9767-A2EE-4CB6-93F4-4D738108BC4B.png", caption="Live Console Interface")
-    except Exception as e:  # pragma: no cover - Streamlit handles runtime errors
-        st.error(f"Error: {e}")
+    reply = generate_assistant_reply(client)
+    if reply:
+        st.session_state.chat_history.append({"role": "assistant", "content": reply})
+        trim_history()
 
-st.markdown("---")
-st.markdown("**BlackRoad Prism Console** | Live UI Simulation")
-st.image(
-    "72BF9767-A2EE-4CB6-93F4-4D738108BC4B.png",
-    caption="Live Console Interface",
-)
-st.image("72BF9767-A2EE-4CB6-93F4-4D738108BC4B.png", caption="Live Console Interface")
+
+def render_chat_history() -> None:
+    """Display the conversation using Streamlit's chat message component."""
+
+    for message in st.session_state.chat_history:
+        if message["role"] == "system":
+            continue
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+
+def render_prism(
+    amplitude: float,
+    frequency: float,
+    grid_size: int,
+    colormap: str,
+    show_axes: bool,
+    show_wireframe: bool,
+) -> None:
+    """Render the holographic prism visualization based on the controls."""
+
+    x = np.linspace(-5, 5, grid_size)
+    y = np.linspace(-5, 5, grid_size)
+    x_mesh, y_mesh = np.meshgrid(x, y)
+    radius = np.sqrt(x_mesh**2 + y_mesh**2)
+    z = np.sin(frequency * radius) * amplitude
+
+    fig = plt.figure(figsize=(6, 5))
+    ax = fig.add_subplot(111, projection="3d")
+    surface = ax.plot_surface(
+        x_mesh,
+        y_mesh,
+        z,
+        cmap=colormap,
+        linewidth=0,
+        antialiased=True,
+        alpha=0.92,
+    )
+
+    if show_wireframe:
+        ax.plot_wireframe(x_mesh, y_mesh, z, color="white", linewidth=0.3, alpha=0.6)
+
+    if show_axes:
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.set_zlabel("Intensity")
+    else:
+        ax.set_axis_off()
+
+    ax.view_init(elev=35, azim=225)
+    fig.colorbar(surface, shrink=0.6, aspect=12, pad=0.1)
+    st.pyplot(fig, use_container_width=True)
+    plt.close(fig)
+
+
+def main() -> None:
+    """Entrypoint for the Streamlit application."""
+
+    ensure_session_state()
+
+    api_key = os.getenv("OPENAI_API_KEY")
+    client = get_openai_client(api_key)
+    if client is None:
+        st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
+
+    with st.sidebar:
+        st.header("Voice Input")
+        audio_file = st.file_uploader("Upload your voice (mp3 or wav)", type=["mp3", "wav"])
+        process_audio_input(audio_file)
+        if st.session_state.get("last_voice_preview"):
+            st.caption(f"Latest transcription: {st.session_state.last_voice_preview}")
+
+        st.header("Prism Controls")
+        base_amplitude = st.slider("Base amplitude scale", 0.5, 5.0, value=1.0, step=0.1)
+        frequency = st.slider("Frequency multiplier", 0.5, 4.0, value=1.0, step=0.1)
+        grid_size = st.slider("Grid density", 30, 200, value=80, step=10)
+        colormap = st.selectbox(
+            "Colormap",
+            ["plasma", "viridis", "magma", "cividis", "inferno"],
+            index=0,
+        )
+        show_axes = st.checkbox("Show axes", value=False)
+        show_wireframe = st.checkbox("Overlay wireframe", value=False)
+
+    user_message = capture_user_message()
+    if user_message:
+        handle_user_message(user_message, client)
+
+    st.title("BlackRoad Prism Generator with GPT + Voice Console")
+    st.caption(
+        "Speak or type an idea, formula, or question. The AI will respond and project a hologram."
+    )
+
+    if st.session_state.get("last_voice_preview"):
+        st.markdown(f"**Latest voice transcription:** {st.session_state.last_voice_preview}")
+
+    col1, col2 = st.columns((3, 2))
+
+    with col1:
+        render_chat_history()
+
+    with col2:
+        input_amplitude = st.session_state.get("last_amplitude", 1.0)
+        rendered_amplitude = base_amplitude * input_amplitude
+        st.subheader("Prism Projection")
+        render_prism(
+            amplitude=rendered_amplitude,
+            frequency=frequency,
+            grid_size=grid_size,
+            colormap=colormap,
+            show_axes=show_axes,
+            show_wireframe=show_wireframe,
+        )
+        st.markdown(
+            f"""
+            - **Input magnitude:** `{input_amplitude:.2f}`
+            - **Base amplitude scale:** `{base_amplitude:.2f}`
+            - **Frequency multiplier:** `{frequency:.2f}`
+            - **Rendered amplitude:** `{rendered_amplitude:.2f}`
+            """
+        )
+
+    st.markdown("---")
+    st.markdown("**BlackRoad Prism Console** | Live UI Simulation")
+    st.image(
+        "72BF9767-A2EE-4CB6-93F4-4D738108BC4B.png",
+        caption="Live Console Interface",
+        use_column_width=True,
+    )
+
+
+if __name__ == "__main__":
+    main()
