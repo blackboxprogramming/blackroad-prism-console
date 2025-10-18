@@ -1,0 +1,70 @@
+⸻
+
+type: codex-prompt
+id: phase-14
+slug: phase-14
+title: "Phase 14 — Edge Ecosystems (API & Mini-App Marketplace)"
+summary: "Open the platform via public APIs, in-dashboard mini-apps, and revenue-sharing approvals."
+owner: "blackroad"
+tags: ["codex","ecosystem","api","marketplace","mini-apps"]
+model_hint: "Codex"
+temperature: 0
+updated: "2025-09-13"
+version: "1.0.0"
+canonical_repo: "blackboxprogramming/blackroad-prism-console"
+copy_filename: "codex_phase_14.txt"
+
+Here’s Phase 14 — Edge Ecosystems (API & Mini-App Marketplace). Paste this into Codex.
+
+⸻
+
+Codex Prompt — Phase 14 (edge ecosystems: public APIs, in-console mini-apps, payout hooks)
+
+Invite builders to extend RoadChain without diluting trust. Publish hardened APIs, embed mini-app scaffolds inside the console, and run a revenue-sharing approval flow so every new capability compounds the core product.
+
+Objectives (acceptance criteria)
+1. Public API Surface
+
+• Define OpenAPI spec in `api/specs/roadchain_public.yaml` (workflows, renders, payouts)
+• Implement gateway service `api/public_gateway.py` with request signing, rate limits, and audit logging
+• Endpoints:
+  - `/v1/workflows/trigger` (idempotent job launch, returns tracking ID)
+  - `/v1/renderings/:id` (streaming SSE with status updates)
+  - `/v1/payouts/hooks` (register payout webhooks, HMAC signed)
+• Publish SDK stubs (`sdk/js/index.ts`, `sdk/python/roadchain.py`) generated from spec
+• Documentation: `docs/api/phase-14-public.md` with examples + auth flow (API keys + optional OAuth client creds)
+
+2. Mini-App Runtime inside Dashboard
+
+• Create `apps/runtime/manifest.json` for describing community widgets (name, version, permissions, entry URL)
+• Sandbox loader in `frontend/src/miniapps/runtime.tsx` (iframe + postMessage bridge, capability whitelist)
+• Provide developer CLI `miniapp:package --path` to validate and bundle submissions
+• Persistence: approved manifests stored under `artifacts/miniapps/approved.json`
+• Telemetry: emit `miniapp.usage` events (profile_id, app_id, session_duration, RoadCoin tips routed)
+
+3. Review & Revenue Share Workflow
+
+• Intake pipeline `ops/miniapps/review.py` to run lint, security scan, licensing check
+• Approval board integrates with Phase 7 governance (multi-sig or voting) storing decisions in `artifacts/miniapps/decisions.json`
+• Pricing: support free, RC tip, and subscription models; route payments via existing treasury adapters
+• Settlement job `finance/miniapps/settlement.py` calculates platform cut %, creator payout schedule, writes ledger entries
+• Dashboard page `frontend/src/pages/MiniApps.jsx` listing curated + trending apps with install CTA
+
+4. Compliance & Support
+
+• Terms update stored in `legal/miniapps_tos.md` and surfaced in onboarding modal
+• Support playbook `support/miniapps.md` covering escalation paths, disabling compromised apps, refund policy
+• Monitoring: extend observability stack with dashboards `observability/dashboards/miniapps.json`
+• Incident response drill: run tabletop scenario script `runbooks/miniapp_incident.md`
+
+Deliverables
+• Integration tests hitting public API endpoints with signed requests
+• End-to-end flow: developer submits manifest → automated checks → governance approval → app install → revenue share payout
+• Marketing assets: add `sites/blackroad/content/codex/phase-14.md` + blog teaser linking to builder docs
+• Update CLI help and README to showcase `miniapp:*` commands
+
+Notes
+• Default sandbox policy denies external network unless explicitly whitelisted
+• Provide migration path for internal tools to register as first-party mini-apps (flag `internal: true`)
+• Revenue splits configurable via `config/miniapps.json` with sane defaults (30/70, override per app)
+

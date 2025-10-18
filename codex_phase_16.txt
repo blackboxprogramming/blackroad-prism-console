@@ -1,0 +1,64 @@
+⸻
+
+type: codex-prompt
+id: phase-16
+slug: phase-16
+title: "Phase 16 — Exit Velocity (Scale vs Depth Decision Point)"
+summary: "Translate momentum into capital or cashflow plays while protecting ownership discipline."
+owner: "blackroad"
+tags: ["codex","strategy","finance","roadcoin","scale"]
+model_hint: "Codex"
+temperature: 0
+updated: "2025-09-13"
+version: "1.0.0"
+canonical_repo: "blackboxprogramming/blackroad-prism-console"
+copy_filename: "codex_phase_16.txt"
+
+Here’s Phase 16 — Exit Velocity (Scale vs Depth Decision Point). Paste this into Codex.
+
+⸻
+
+Codex Prompt — Phase 16 (exit velocity: fundraise positioning, bootstrap playbooks, ownership discipline)
+
+You now have SaaS revenue, a token economy, a data moat, and culture. Decide how to weaponize it without losing the soul of the movement.
+
+Objectives (acceptance criteria)
+1. Strategic Options Dossier
+
+• Build comparative model `finance/exit_velocity/options_model.xlsx` (Scale vs Depth scenarios)
+• Narrative memo `strategy/exit_velocity/decision_memo.md` covering TAM, capital needs, dilution math, and token hedge impact
+• Scenario simulator `strategy/exit_velocity/simulator.py` ingesting KPIs (ARR, churn, RoadCoin velocity) → outputs runway & hiring plans
+• Governance briefing deck `strategy/exit_velocity/board_briefing.pptx`
+
+2. Fundraise-Ready Infrastructure (if Scale path)
+
+• Data room checklist `strategy/exit_velocity/data_room.md` referencing audited financials, security reports, growth metrics
+• Investor API bundle `investor/api/index.md` (read-only dashboards, sanitized dataset exports)
+• Pitch narrative `marketing/investor_pitch/script.md` + `media/investor_pitch/teaser.mp4`
+• Cap table tooling `finance/cap_table/allocator.py` modeling equity vs token exposure; ensure guardrails for founder control
+
+3. Bootstrap Expansion Playbook (if Depth path)
+
+• Profitability plan `finance/bootstrap/operating_plan.xlsx` with sensitivity analysis by ARR band
+• Sub-brand launch kits `brand/subbrands/blackroad_studios.md`, `brand/subbrands/lucidia_labs.md`
+• Hiring/partnership scorecards `people/scorecards/bootstrap_roles.yaml`
+• Franchise-style manual `ops/bootstrap/playbook.md` for replicating top-performing creator pods
+
+4. Decision Ritual & Cadence
+
+• Facilitate strategy council workshop agenda `strategy/exit_velocity/workshop_agenda.md`
+• Voting framework referencing Phase 7 governance (token-weighted + council approval) stored in `governance/policies/exit_velocity.md`
+• Post-decision comms plan `communications/exit_velocity_announcement.md` tailored for creators, investors, internal teams
+• Metrics guardrail dashboard `analytics/dashboards/exit_velocity.json` watching liquidity, burn, retention
+
+Deliverables
+• Executive summary slide `strategy/exit_velocity/one_pager.pdf` contrasting Scale vs Depth recommendation
+• Run decision dry-run with recorded notes `strategy/exit_velocity/dry_run_notes.md`
+• Update public narrative: `sites/blackroad/content/codex/phase-16.md` + blog post about “Movement to Movement+”
+• CLI command `strategy:exit-velocity --scenario scale` generating reports automatically
+
+Notes
+• Ownership discipline: lock founder/token treasury thresholds into policy (minimum 51% combined voting control)
+• Ensure compliance—legal review for both fundraising and token issuance expansions
+• Capture decision rationale in RoadChain ledger for future audits
+
