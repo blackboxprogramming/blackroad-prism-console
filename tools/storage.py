@@ -1,12 +1,25 @@
+from __future__ import annotations
+
 import json
 import os
 from pathlib import Path
-from typing import Union
+from typing import Any, Iterable, Union
+
+import yaml
+
+BASE_DIR = Path(__file__).resolve().parents[1]
+DATA_ROOT = Path(os.environ.get("PRISM_DATA_ROOT", BASE_DIR / "data"))
+CONFIG_ROOT = BASE_DIR / "config"
+READ_ONLY = os.environ.get("PRISM_READ_ONLY", "0") == "1"
+
+
+def _ensure_parent(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
 
 
 def write(path: str, content: Union[dict, str]) -> None:
     p = Path(path)
-    os.makedirs(p.parent, exist_ok=True)
+    _ensure_parent(p)
     mode = "a" if p.suffix == ".jsonl" else "w"
     text = json.dumps(content) if isinstance(content, dict) else str(content)
     with open(p, mode, encoding="utf-8") as fh:
@@ -23,18 +36,6 @@ def read(path: str) -> str:
             return fh.read()
     except FileNotFoundError:
         return ""
-from __future__ import annotations
-
-import json
-import os
-from pathlib import Path
-from typing import Any, Iterable
-import yaml
-
-BASE_DIR = Path(__file__).resolve().parents[1]
-DATA_ROOT = Path(os.environ.get("PRISM_DATA_ROOT", BASE_DIR / "data"))
-CONFIG_ROOT = BASE_DIR / "config"
-READ_ONLY = os.environ.get("PRISM_READ_ONLY", "0") == "1"
 
 
 def _resolve(path: str, root: Path) -> Path:
@@ -55,7 +56,7 @@ def write_json(path: str, data: Any, *, from_data: bool = True) -> None:
         raise RuntimeError("read-only mode")
     root = DATA_ROOT if from_data else CONFIG_ROOT
     target = _resolve(path, root)
-    target.parent.mkdir(parents=True, exist_ok=True)
+    _ensure_parent(target)
     with open(target, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, sort_keys=True)
 
@@ -65,7 +66,7 @@ def append_jsonl(path: str, record: Any, *, from_data: bool = True) -> None:
         raise RuntimeError("read-only mode")
     root = DATA_ROOT if from_data else CONFIG_ROOT
     target = _resolve(path, root)
-    target.parent.mkdir(parents=True, exist_ok=True)
+    _ensure_parent(target)
     with open(target, "a", encoding="utf-8") as f:
         f.write(json.dumps(record) + "\n")
 
@@ -102,6 +103,6 @@ def write_text(path: str, text: str, *, from_data: bool = False) -> None:
         raise RuntimeError("read-only mode")
     root = DATA_ROOT if from_data else CONFIG_ROOT
     target = _resolve(path, root)
-    target.parent.mkdir(parents=True, exist_ok=True)
+    _ensure_parent(target)
     with open(target, "w", encoding="utf-8") as f:
         f.write(text)

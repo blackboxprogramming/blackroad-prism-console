@@ -1,37 +1,3 @@
-[project]
-name = "blackroad-prism-console"
-version = "0.1.0"
-requires-python = ">=3.10"
-description = "Offline PLM & Manufacturing Ops (Phase 37) — deterministic, file-backed."
-readme = "README.md"
-authors = [{ name = "Blackroad", email = "eng@blackroadinc.us" }]
-dependencies = [
-    "paho-mqtt",
-    "typer",
-    "fastapi",
-    "pydantic",
-    "fastapi",
-    "jinja2",
-    "typer",
-    "uvicorn",
-]
-
-[project.scripts]
-brc = "cli.console:main"
-blackroad-api = "agent.api:main"
-blackroad-dashboard = "agent.dashboard:main"
-blackroad = "cli.console:main"
-blackroad-agent = "agent.daemon:main"
-dependencies = ["typer", "click"]
-
-[project.scripts]
-brc = "cli.console:main"
-blackroad = "cli.blackroad:cli"
-
-[tool.pytest.ini_options]
-pythonpath = ["."]
-addopts = "-q"
-testpaths = ["tests"]
 [build-system]
 requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -39,12 +5,41 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "blackroad-prism-console"
 version = "0.1.0"
-description = "BlackRoad Prism console CLI"
-authors = [{ name = "BlackRoad" }]
-dependencies = ["typer>=0.9.0"]
+description = "Offline PLM & Manufacturing Ops (Phase 37) — deterministic, file-backed."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Blackroad", email = "eng@blackroadinc.us" }]
+dependencies = [
+    "click>=8.1.0",
+    "fastapi>=0.110.0",
+    "jinja2>=3.1.0",
+    "paho-mqtt>=1.6.0",
+    "pydantic>=2.0.0",
+    "typer>=0.9.0",
+    "uvicorn>=0.23.0",
+]
+
+[project.scripts]
+brc = "cli.console:main"
+blackroad = "cli.blackroad:cli"
+blackroad-api = "agent.api:main"
+blackroad-agent = "agent.daemon:main"
+blackroad-dashboard = "agent.dashboard:main"
 
 [tool.setuptools]
-packages = ["cli"]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+agent = ["templates/*.html"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "-q"
+testpaths = ["tests"]
 
 [tool.black]
 line-length = 100
@@ -56,9 +51,3 @@ profile = "black"
 [tool.ruff]
 line-length = 100
 extend-select = ["I"]
-
-[tool.setuptools]
-include-package-data = true
-
-[tool.setuptools.package-data]
-agent = ["templates/*.html"]
