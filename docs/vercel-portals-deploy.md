@@ -1,5 +1,20 @@
 # Vercel Deploy Fixes & Nginx Split
 
+## TL;DR – commands to "get Vercel on"
+
+If you just need the exact commands, run this sequence from your terminal. Replace the email with the one that is already on your Vercel team, then rerun your production deploy:
+
+```bash
+git config --global user.name "Alexa Louise"
+git config --global user.email "YOUR_REAL_EMAIL@EXAMPLE.COM"
+npx vercel switch             # pick "Alexa Amundson's projects"
+cd ~/blackroad-prism-console/apps/portals
+npx vercel link               # select the existing project
+npx vercel --prod --yes
+```
+
+The sections below explain why each step matters and how to troubleshoot if any command fails.
+
 ## Resolve "Git author you@example.com" errors
 
 Vercel refuses deploys when the Git author on the commit does not match a member of the target team. Fix it locally, then re-deploy:
