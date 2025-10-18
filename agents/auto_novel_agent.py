@@ -1,13 +1,13 @@
-"""Simple auto novel agent example with game creation abilities."""
+"""Simple auto novel agent example with creative and coding abilities."""
 
+import re
 from dataclasses import dataclass
-from typing import ClassVar, List, Set
-from typing import ClassVar
+from typing import ClassVar, Dict, List, Set
 
 
 @dataclass
 class AutoNovelAgent:
-    """A toy agent that can deploy itself and create simple games.
+    """A toy agent that can deploy itself, create games, and assist with English.
 
     Attributes:
         name: Human-readable name of the agent.
@@ -17,31 +17,26 @@ class AutoNovelAgent:
 
     name: str = "AutoNovelAgent"
     gamma: float = 1.0
-    # Use a typing Set for broader Python version compatibility
     SUPPORTED_ENGINES: ClassVar[Set[str]] = {"unity", "unreal"}
+    SAMPLE_SNIPPETS: ClassVar[Dict[str, str]] = {
+        "python": "def solve():\n    pass\n",
+        "javascript": "function solve() {\n  return null;\n}\n",
+        "java": "class Solution {\n    void solve() {\n    }\n}\n",
+    }
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
+
         print(f"{self.name} deployed and ready to generate novels!")
 
     def supports_engine(self, engine: str) -> bool:
-        """Return ``True`` if the engine is supported.
+        """Return ``True`` if the engine is supported."""
 
-        The check is case-insensitive.
-
-        Args:
-            engine: Name of the engine to verify.
-        """
         return engine.lower() in self.SUPPORTED_ENGINES
 
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
-        """Create a basic game using a supported engine without weapons.
+        """Create a basic game using a supported engine without weapons."""
 
-        Args:
-            engine: Game engine to use.
-            include_weapons: If True, raise a ``ValueError`` because weapons are not
-                allowed.
-        """
         engine_lower = engine.lower()
         if not self.supports_engine(engine_lower):
             supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
@@ -52,41 +47,23 @@ class AutoNovelAgent:
         print(f"Creating {article} {engine_lower.capitalize()} game without weapons...")
 
     def add_supported_engine(self, engine: str) -> None:
-        """Register a new game engine.
+        """Register a new game engine."""
 
-        Engines are stored in lowercase to keep lookups case-insensitive.
-
-        Args:
-            engine: Name of the engine to allow.
-        """
         self.SUPPORTED_ENGINES.add(engine.lower())
 
     def remove_supported_engine(self, engine: str) -> None:
-        """Remove a game engine if it is currently supported.
+        """Remove a game engine if it is currently supported."""
 
-        Args:
-            engine: Name of the engine to remove.
-        """
         self.SUPPORTED_ENGINES.discard(engine.lower())
 
     def list_supported_engines(self) -> List[str]:
-    def list_supported_engines(self) -> list[str]:
         """Return a list of supported game engines."""
+
         return sorted(self.SUPPORTED_ENGINES)
 
     def generate_game_idea(self, theme: str, engine: str) -> str:
-        """Return a short description for a themed game.
+        """Return a short description for a themed game."""
 
-        Args:
-            theme: Central theme for the game.
-            engine: Game engine to use. Must be supported.
-
-        Returns:
-            A short game pitch describing the theme and engine.
-
-        Raises:
-            ValueError: If ``theme`` is blank or ``engine`` unsupported.
-        """
         if not theme or not theme.strip():
             raise ValueError("Theme must be a non-empty string.")
         engine_lower = engine.lower()
@@ -100,18 +77,8 @@ class AutoNovelAgent:
         )
 
     def generate_story(self, theme: str, protagonist: str = "An adventurer") -> str:
-        """Generate a short themed story.
+        """Generate a short themed story."""
 
-        Args:
-            theme: Central theme of the story. Must be a non-empty string.
-            protagonist: Name or description of the main character.
-
-        Returns:
-            A short story string.
-
-        Raises:
-            ValueError: If ``theme`` is empty or whitespace.
-        """
         if not theme or not theme.strip():
             raise ValueError("Theme must be a non-empty string.")
         theme_clean = theme.strip()
@@ -125,19 +92,8 @@ class AutoNovelAgent:
     def generate_story_series(
         self, themes: List[str], protagonist: str = "An adventurer"
     ) -> List[str]:
-        """Generate a series of short stories for multiple themes.
+        """Generate a series of short stories for multiple themes."""
 
-        Args:
-            themes: A list of themes. Each must be a non-empty string.
-            protagonist: Name or description of the main character used for all
-                stories.
-
-        Returns:
-            A list containing a short story for each provided theme.
-
-        Raises:
-            ValueError: If ``themes`` is empty or any theme is blank.
-        """
         if not themes:
             raise ValueError("Themes list must not be empty.")
         stories: List[str] = []
@@ -148,100 +104,73 @@ class AutoNovelAgent:
         return stories
 
     def set_gamma(self, gamma: float) -> None:
-        """Set the creativity scaling factor.
+        """Set the creativity scaling factor."""
 
-        Args:
-            gamma: Positive scaling factor. Higher values increase excitement.
-
-        Raises:
-            ValueError: If ``gamma`` is not positive.
-        """
         if gamma <= 0:
             raise ValueError("gamma must be positive.")
         self.gamma = gamma
 
-    def add_supported_engine(self, engine: str) -> None:
-        """Register a new game engine.
+    # ------------------------------------------------------------------
+    # Coding and English assistance abilities
+    # ------------------------------------------------------------------
+    def generate_coding_challenge(self, topic: str, difficulty: str = "medium") -> str:
+        """Return a concise coding challenge prompt for the provided topic."""
 
-        Engines are stored in lowercase to keep lookups case-insensitive.
-
-        Args:
-            engine: Name of the engine to allow.
-        """
-        self.SUPPORTED_ENGINES.add(engine.lower())
-
-    def remove_supported_engine(self, engine: str) -> None:
-        """Remove a game engine if it is currently supported.
-
-        Args:
-            engine: Name of the engine to remove.
-        """
-        self.SUPPORTED_ENGINES.discard(engine.lower())
-
-    def list_supported_engines(self) -> List[str]:
-        """Return a list of supported game engines."""
-        return sorted(self.SUPPORTED_ENGINES)
-
-    def generate_story(self, theme: str, protagonist: str = "An adventurer") -> str:
-        """Generate a short themed story.
-
-        Args:
-            theme: Central theme of the story. Must be a non-empty string.
-            protagonist: Name or description of the main character.
-
-        Returns:
-            A short story string.
-
-        Raises:
-            ValueError: If ``theme`` is empty or whitespace.
-        """
-        if not theme or not theme.strip():
-            raise ValueError("Theme must be a non-empty string.")
-        theme_clean = theme.strip()
-        protagonist_clean = protagonist.strip()
-        excitement = "!" * max(1, int(self.gamma))
+        if not topic or not topic.strip():
+            raise ValueError("Topic must be a non-empty string.")
+        difficulty_normalized = difficulty.lower()
+        if difficulty_normalized not in {"easy", "medium", "hard"}:
+            raise ValueError("Difficulty must be 'easy', 'medium', or 'hard'.")
+        topic_clean = topic.strip()
         return (
-            f"{protagonist_clean} set out on a {theme_clean} journey, "
-            f"discovering wonders along the way{excitement}"
+            f"[{difficulty_normalized.title()}] Implement a solution that addresses "
+            f"the '{topic_clean}' challenge. Describe your approach before coding "
+            "and ensure the solution handles edge cases."
         )
 
-    def generate_story_series(
-        self, themes: List[str], protagonist: str = "An adventurer"
-    ) -> List[str]:
-        """Generate a series of short stories for multiple themes.
+    def generate_code_snippet(self, description: str, language: str = "python") -> str:
+        """Produce a starter code snippet in the requested language."""
 
-        Args:
-            themes: A list of themes. Each must be a non-empty string.
-            protagonist: Name or description of the main character used for all
-                stories.
+        if not description or not description.strip():
+            raise ValueError("Description must be provided for code generation.")
+        language_lower = language.lower()
+        snippet = self.SAMPLE_SNIPPETS.get(language_lower)
+        if snippet is None:
+            supported_languages = ", ".join(sorted(self.SAMPLE_SNIPPETS))
+            raise ValueError(
+                f"Unsupported language. Choose one of: {supported_languages}."
+            )
+        comment_prefix = "#" if language_lower == "python" else "//"
+        return (
+            f"{comment_prefix} TODO: {description.strip()}\n"
+            f"{snippet}"
+        )
 
-        Returns:
-            A list containing a short story for each provided theme.
+    def improve_sentence(self, sentence: str) -> str:
+        """Apply simple grammar fixes to a single sentence."""
 
-        Raises:
-            ValueError: If ``themes`` is empty or any theme is blank.
-        """
-        if not themes:
-            raise ValueError("Themes list must not be empty.")
-        stories: List[str] = []
-        for theme in themes:
-            if not theme or not theme.strip():
-                raise ValueError("Each theme must be a non-empty string.")
-            stories.append(self.generate_story(theme, protagonist))
-        return stories
+        if not sentence or not sentence.strip():
+            raise ValueError("Sentence must be a non-empty string.")
+        trimmed = sentence.strip()
+        capitalized = trimmed[0].upper() + trimmed[1:]
+        if capitalized[-1] not in {".", "!", "?"}:
+            capitalized += "."
+        return " ".join(part for part in capitalized.split())
 
-    def set_gamma(self, gamma: float) -> None:
-        """Set the creativity scaling factor.
+    def proofread_paragraph(self, paragraph: str) -> str:
+        """Proofread a paragraph by applying :meth:`improve_sentence` to sentences."""
 
-        Args:
-            gamma: Positive scaling factor. Higher values increase excitement.
-
-        Raises:
-            ValueError: If ``gamma`` is not positive.
-        """
-        if gamma <= 0:
-            raise ValueError("gamma must be positive.")
-        self.gamma = gamma
+        if not paragraph or not paragraph.strip():
+            raise ValueError("Paragraph must be a non-empty string.")
+        sentences = [
+            chunk.strip()
+            for chunk in re.split(r"(?<=[.!?])\s+", paragraph.strip())
+            if chunk.strip()
+        ]
+        if not sentences:
+            raise ValueError("Paragraph must contain at least one sentence.")
+        improved = [self.improve_sentence(sentence) for sentence in sentences]
+        return " ".join(improved)
 
 
 if __name__ == "__main__":
@@ -250,3 +179,6 @@ if __name__ == "__main__":
     agent.create_game("unity")
     print(agent.generate_story("mystical", "A coder"))
     print(agent.generate_game_idea("mystical", "unity"))
+    print(agent.generate_coding_challenge("graph traversal", "hard"))
+    print(agent.generate_code_snippet("Implement depth-first search", "python"))
+    print(agent.proofread_paragraph("this is a test paragraph it needs polish"))

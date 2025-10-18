@@ -1,6 +1,14 @@
 {
   "name": "lang_master",
   "version": "1.0.0",
-  "description": "lang_master elite coding agent",
-  "capabilities": ["ping", "analyze", "codegen"]
+  "description": "lang_master elite coding and language agent",
+  "capabilities": [
+    "ping",
+    "analyze",
+    "codegen",
+    "coding_plan",
+    "code_review",
+    "grammar_check",
+    "english_refine"
+  ]
 }
