@@ -1,0 +1,177 @@
+environment: production
+description: Customer-facing environment serving the BlackRoad Prism experience with strict availability targets.
+owner:
+  team: Production Engineering
+  contact: prod@blackroad.io
+  pagerduty_service: plat-production
+regions:
+  - provider: aws
+    name: us-east-1
+    accounts:
+      - alias: production-primary
+        id: "000000000002"
+        role: production-deployer
+  - provider: aws
+    name: eu-west-1
+    accounts:
+      - alias: production-eu
+        id: "000000000003"
+        role: production-deployer
+  - provider: fly.io
+    name: global
+    apps:
+      - prism
+      - prism-edge
+repositories:
+  - name: blackroad-prism-console
+    path: github.com/blackroad-labs/blackroad-prism-console
+    artifact: web
+  - name: blackroad-api
+    path: github.com/blackroad-labs/blackroad-api
+    artifact: api
+  - name: ollama-bridge
+    path: github.com/blackroad-labs/ollama-bridge
+    artifact: bridge
+deployments:
+  - name: prism-console
+    platform: ecs
+    cluster: br-production
+    service: prism-console
+    runtime: nodejs18
+    image: ghcr.io/blackroad/prism-console:prod
+    scaling:
+      min_count: 4
+      max_count: 10
+      cpu: 1024
+      memory: 2048
+    ingress:
+      url: https://app.blackroad.io
+      healthcheck: https://app.blackroad.io/healthz
+      public: true
+      waf: aws-waf-prism
+    observability:
+      logs: cloudwatch
+      traces: otel-prod
+      dashboards:
+        - grafana/production/prism-console
+      alerts:
+        - pagerduty:plat-production-critical
+        - pagerduty:product-oncall
+  - name: api
+    platform: ecs
+    cluster: br-production
+    service: api
+    runtime: nodejs18
+    image: ghcr.io/blackroad/api:prod
+    scaling:
+      min_count: 4
+      max_count: 10
+      cpu: 2048
+      memory: 4096
+    ingress:
+      url: https://app.blackroad.io/api
+      healthcheck: https://app.blackroad.io/api/health
+      public: true
+      waf: aws-waf-api
+    observability:
+      logs: cloudwatch
+      traces: otel-prod
+      dashboards:
+        - grafana/production/api
+      alerts:
+        - pagerduty:plat-production-critical
+  - name: ollama-bridge
+    platform: ecs
+    cluster: br-production
+    service: ollama-bridge
+    runtime: nodejs18
+    image: ghcr.io/blackroad/ollama-bridge:prod
+    scaling:
+      min_count: 2
+      max_count: 4
+      cpu: 1024
+      memory: 2048
+    ingress:
+      url: https://app.blackroad.io/api/llm
+      healthcheck: https://app.blackroad.io/api/llm/health
+      public: false
+    observability:
+      logs: cloudwatch
+      traces: otel-prod
+      dashboards:
+        - grafana/production/bridge
+      alerts:
+        - pagerduty:ml-bridge
+  - name: realtime-collab
+    platform: fly.io
+    app: prism-collab
+    runtime: nodejs20
+    image: ghcr.io/blackroad/prism-collab:prod
+    scaling:
+      min_count: 3
+      max_count: 8
+      regions:
+        - iad
+        - ord
+        - fra
+    ingress:
+      url: https://collab.blackroad.io
+      healthcheck: https://collab.blackroad.io/healthz
+      public: true
+    observability:
+      logs: fly-log-shipper
+      traces: otel-prod
+      dashboards:
+        - grafana/production/collab
+      alerts:
+        - pagerduty:plat-production-critical
+dependencies:
+  databases:
+    - name: prism-production
+      engine: aurora-postgresql
+      size: large
+      notes: Multi-AZ with point-in-time recovery enabled.
+    - name: prism-analytics
+      engine: redshift-serverless
+      size: baseline
+      notes: Feeds BI dashboards and ML feature store.
+  caches:
+    - name: prism-production-redis
+      engine: elasticache-redis
+      size: cache.r6g.xlarge
+      notes: Cluster mode enabled with multi-AZ replication.
+  messaging:
+    - name: prism-events
+      type: sns+sqs
+      notes: Fan-out from SNS topics to dedicated SQS queues per service.
+  third_party:
+    - name: BlackRoad Auth
+      purpose: Primary OAuth + SSO tenant
+      notes: Production client IDs; integrates with customer IdPs via SCIM.
+    - name: Stripe Live
+      purpose: Billing and subscription management
+      notes: Webhooks consumed by api service; idempotency enforced via Redis locks.
+    - name: Datadog
+      purpose: Synthetic monitoring and APM correlation
+      notes: Monitors public endpoints every 1 minute.
+release_process:
+  cadence: Twice weekly (Tuesday & Thursday) with hotfix exceptions
+  approvals:
+    required: true
+    approvers:
+      - platform-lead
+      - security-duty
+      - product-oncall
+    change_window: 18:00–22:00 UTC
+  rollout:
+    strategy: Canary 10% -> 50% -> 100% with automated metrics checks
+    health_gates:
+      - curl -sf https://app.blackroad.io/healthz
+      - npm run smoke -- --env=production
+      - scripts/quick_quality_gates.sh
+    metrics_watch:
+      - 5xx_rate < 1%
+      - latency_p95 < 400ms
+  rollback:
+    strategy: Automated rollback via deployment orchestrator with manual override
+    notes: Promote previous task set, invalidate CloudFront, notify #status.
