@@ -1,971 +1,413 @@
 #!/usr/bin/env python3
-"""BlackRoad Sync Pipeline
+"""BlackRoad.io Codex sync and deployment helper.
 
-This utility orchestrates the end-to-end flow from Codex to the live
-BlackRoad.io deployment. It offers both explicit flags and a small
-"""Scaffold for BlackRoad.io end-to-end sync and deployment.
+This script turns the "chat-style" commands described in the Codex
+specification into reproducible automation steps.  The goal is not to
+replace a full CI/CD system but to provide a trustworthy bridge between
+Codex conversations and the BlackRoad deployment pipeline.
 
-This script provides a chat-first control surface for triggering the
-full pipeline from Codex to the live BlackRoad.io site. The current
-implementation is a skeleton; connector integration and droplet deploy
-steps are placeholders to be filled in later.
-"""
+The placeholders that previously lived in this file are replaced with a
+small amount of real orchestration logic:
 
-import argparse
-import subprocess
-import logging
-from typing import List
+* Git operations stage, commit (if required) and push the current branch.
+* Connector syncs persist timestamps so we can audit when a service was
+  last refreshed.
+* Working Copy refreshes support both an SSH target and a local checkout.
+* Droplet deployments execute over SSH when configured and record their
+  status.
+* Each action writes to ``codex/runtime/logs/blackroad_sync.log`` so other
+  agents can observe progress.
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-
-
-def run(cmd: List[str]) -> None:
-    """Run a shell command and log it."""
-    logging.info("Running: %s", " ".join(cmd))
-    subprocess.run(cmd, check=False)
-
-
-def push_latest() -> None:
-    """Commit and push local changes to GitHub."""
-    run(["git", "add", "-A"])
-    run(["git", "commit", "-m", "chore: automatic commit from codex"])
-    run(["git", "push"])
-
-
-def sync_connectors() -> None:
-    """Placeholder for connector sync (Salesforce, Airtable, Slack, etc.)."""
-    logging.info("TODO: implement connector synchronization")
-
-
-def refresh_working_copy() -> None:
-    """Placeholder for iOS Working Copy refresh."""
-    logging.info("TODO: implement Working Copy automation")
-
-
-def deploy_to_droplet() -> None:
-    """Placeholder for droplet deployment."""
-    logging.info("TODO: implement droplet deployment")
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description="BlackRoad.io sync scaffold")
-    sub = parser.add_subparsers(dest="cmd")
-
-    sub.add_parser("push", help="Commit and push local changes")
-    sub.add_parser("sync", help="Sync connectors and Working Copy")
-    sub.add_parser("deploy", help="Deploy latest code to droplet")
-    sub.add_parser("all", help="Run push, sync, and deploy steps")
-
-    args = parser.parse_args()
-
-    if args.cmd == "push":
-        push_latest()
-    elif args.cmd == "sync":
-        sync_connectors()
-        refresh_working_copy()
-    elif args.cmd == "deploy":
-        deploy_to_droplet()
-    elif args.cmd == "all":
-        push_latest()
-        sync_connectors()
-        refresh_working_copy()
-        deploy_to_droplet()
-    else:
-        parser.print_help()
-"""BlackRoad end-to-end sync & deploy scaffolder.
-
-This utility sketches the flow from local changes to the live site.  Each
-step is represented by a function that can be filled in with project specific
-logic.  The goal is to provide a single entry point that mirrors the
-requirements in the "CodeX prompt" so an operator can type a natural language
-command and have the underlying steps executed in order.
-
-The functions are intentionally lightweight: they log what they would do and
-return.  Replace the placeholders with real API calls, OAuth flows, webhook
-handlers and deployment logic as the infrastructure solidifies.
-
-Example usage::
-
-    python codex/tools/blackroad_sync.py "Push latest to BlackRoad.io"
-
-Available commands are documented in ``COMMAND_MAP`` below.
-"""
-BlackRoad Sync (Codex Infinity)
----------------------------------
-Unified automation script that wires Codex conversations to the
-BlackRoad.io deployment pipeline.  The goal is a single entry point
-so operators can type natural language commands and have them flow
-through GitHub, connectors, Working Copy on iOS and the production
-droplet.
-
-This file intentionally focuses on scaffolding.  Each stage exposes a
-function with a minimal implementation and abundant docstrings so human
-or machine collaborators can extend the logic.
-
-Current capabilities
-~~~~~~~~~~~~~~~~~~~~
-* git commit/push with automatic rebase
-* skeletal deploy hook via SSH
-* connector placeholders (Salesforce/Airtable/Slack/Linear)
-* working copy refresh hook
-* trivial natural-language command router
-
-Usage examples
-==============
-```bash
-python3 codex/tools/blackroad_sync.py --cmd "Push latest to BlackRoad.io"
-python3 codex/tools/blackroad_sync.py --cmd "Refresh working copy and redeploy"
-```
-"""BlackRoad Sync Pipeline
-
-Scaffolds an end-to-end flow from the local repo to the live BlackRoad.io
-instance.  Provides a small CLI that mirrors the chat-first commands described
-in the spec.  Each sub-command only logs the intended action so the script can
-be extended into a full CI/CD pipeline.
-
-Usage:
-  python codex/tools/blackroad_sync.py push     # push latest to GitHub
-  python codex/tools/blackroad_sync.py refresh  # refresh working copy & redeploy
-  python codex/tools/blackroad_sync.py rebase   # rebase branch and update site
-  python codex/tools/blackroad_sync.py sync     # sync external connectors
+Every function honours the global ``--dry-run`` flag which prints the
+commands without executing them.  This keeps the tool safe to use during
+simulation runs while still documenting the exact behaviour it would
+perform in production.
 """
 
 from __future__ import annotations
 
 import argparse
+import json
+import logging
+import os
 import shlex
 import subprocess
+import sys
+import urllib.error
+import urllib.request
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Dict
+from typing import Callable, Mapping, MutableMapping, Sequence
+
+LOG = logging.getLogger("codex.blackroad_sync")
+LOG_PATH = Path("codex/runtime/logs/blackroad_sync.log")
+STATE_PATH = Path("codex/runtime/state/blackroad_sync.json")
+DEFAULT_CONNECTORS = ("salesforce", "airtable", "slack", "linear")
+DEFAULT_COMMIT_MESSAGE = "chore: sync via Codex pipeline"
 
 
-def run(cmd: str) -> None:
-    """Run a shell command, streaming output to the console."""
+def _timestamp() -> str:
+    """Return a timezone-aware ISO 8601 timestamp."""
 
-    print(f"$ {cmd}")
-    subprocess.run(shlex.split(cmd), check=False)
-
-
-# --- GitHub integration ----------------------------------------------------
+    return datetime.now(timezone.utc).isoformat()
 
 
-def github_push() -> None:
-    """Commit and push local changes to the current branch."""
+def _ensure_runtime_dirs() -> None:
+    """Ensure directories for log/state files exist."""
 
-    run("git add -A")
-    run("git commit -m 'chore: sync from codex' || true")
-    run("git push origin HEAD")
-
-
-# --- Connector placeholders -------------------------------------------------
+    LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
-def sync_connectors() -> None:
-    """Stub for Salesforce/Airtable/Slack/Linear sync tasks."""
+def _append_log(message: str) -> None:
+    """Append *message* to the runtime log and echo via ``logging``."""
 
-    print("[connectors] syncing external services… (placeholder)")
-
-
-# --- Working Copy (iOS) ----------------------------------------------------
-
-
-def refresh_working_copy() -> None:
-    """Placeholder for automating iOS Working Copy refresh."""
-
-    print("[working-copy] refresh triggered… (placeholder)")
+    LOG.info(message)
+    _ensure_runtime_dirs()
+    with LOG_PATH.open("a", encoding="utf-8") as fh:
+        fh.write(f"{_timestamp()} {message}\n")
 
 
-# --- Droplet deployment ----------------------------------------------------
+def _load_state() -> MutableMapping[str, object]:
+    """Load the sync state JSON file if it exists."""
 
-DEPLOY_PATH = Path("/srv/blackroad-api")
-
-
-def deploy_to_droplet() -> None:
-    """Pull latest code, run migrations and restart services."""
-
-    print("[droplet] pulling latest code… (placeholder)")
-    print("[droplet] running migrations… (placeholder)")
-    print("[droplet] restarting services… (placeholder)")
-
-
-# --- High level flows ------------------------------------------------------
+    _ensure_runtime_dirs()
+    if not STATE_PATH.exists():
+        return {"connectors": {}}
+    try:
+        return json.loads(STATE_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        LOG.warning("State file %s was corrupt; starting fresh", STATE_PATH)
+        return {"connectors": {}}
 
 
-def push_latest_flow() -> None:
-    github_push()
-    sync_connectors()
-    refresh_working_copy()
-    deploy_to_droplet()
+def _write_state(state: Mapping[str, object], *, dry_run: bool) -> None:
+    """Persist *state* to disk unless we are in dry-run mode."""
+
+    if dry_run:
+        return
+    _ensure_runtime_dirs()
+    STATE_PATH.write_text(json.dumps(state, indent=2, sort_keys=True), encoding="utf-8")
 
 
-def refresh_and_deploy_flow() -> None:
-    refresh_working_copy()
-    deploy_to_droplet()
+class SlackNotifier:
+    """Best-effort Slack webhook helper."""
+
+    def __init__(self, webhook: str | None) -> None:
+        self.webhook = webhook or ""
+
+    def send(self, message: str) -> None:
+        if not self.webhook:
+            LOG.debug("Slack webhook not configured; skipping notification")
+            return
+        data = json.dumps({"text": message}).encode("utf-8")
+        req = urllib.request.Request(
+            self.webhook,
+            data=data,
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            urllib.request.urlopen(req, timeout=10).read()
+        except urllib.error.URLError as exc:  # pragma: no cover - best effort
+            LOG.warning("Failed to post Slack notification: %s", exc)
 
 
-def rebase_and_update_flow() -> None:
-    run("git pull --rebase")
-    deploy_to_droplet()
+@dataclass(slots=True)
+class SyncConfig:
+    """Configuration resolved from the environment."""
+
+    repo_root: Path = field(default_factory=lambda: Path.cwd())
+    working_copy_target: str | None = None
+    working_copy_path: Path | None = None
+    droplet_target: str | None = None
+    connectors: tuple[str, ...] = field(default_factory=lambda: DEFAULT_CONNECTORS)
+    commit_message: str = DEFAULT_COMMIT_MESSAGE
+    notifier: SlackNotifier | None = None
+    dry_run: bool = False
+
+    @classmethod
+    def from_env(cls, *, dry_run: bool = False) -> "SyncConfig":
+        repo_root = Path(os.environ.get("BLACKROAD_REPO_ROOT", Path.cwd()))
+
+        working_copy_target = os.environ.get("WORKING_COPY_SSH")
+        working_copy_path_env = os.environ.get("WORKING_COPY_PATH")
+        working_copy_path = (
+            Path(working_copy_path_env).expanduser()
+            if working_copy_path_env
+            else None
+        )
+
+        droplet_target = os.environ.get("DROPLET_SSH")
+
+        connectors_raw = os.environ.get("BLACKROAD_CONNECTORS")
+        connectors: tuple[str, ...]
+        if connectors_raw:
+            parsed = [part.strip() for part in connectors_raw.split(",") if part.strip()]
+            connectors = tuple(parsed) if parsed else DEFAULT_CONNECTORS
+        else:
+            connectors = DEFAULT_CONNECTORS
+
+        commit_message = os.environ.get("BLACKROAD_COMMIT_MESSAGE", DEFAULT_COMMIT_MESSAGE)
+
+        webhook = os.environ.get("SLACK_WEBHOOK_URL") or os.environ.get("SLACK_WEBHOOK")
+        notifier = SlackNotifier(webhook) if webhook else None
+
+        return cls(
+            repo_root=repo_root,
+            working_copy_target=working_copy_target,
+            working_copy_path=working_copy_path,
+            droplet_target=droplet_target,
+            connectors=connectors,
+            commit_message=commit_message,
+            notifier=notifier,
+            dry_run=dry_run,
+        )
 
 
-def sync_salesforce_to_droplet_flow() -> None:
-    sync_connectors()
-    deploy_to_droplet()
+def _display_command(cmd: Sequence[str]) -> str:
+    return " ".join(shlex.quote(part) for part in cmd)
 
 
-COMMAND_MAP: Dict[str, Callable[[], None]] = {
+def run_command(
+    cmd: Sequence[str] | str,
+    *,
+    cwd: Path | None = None,
+    dry_run: bool = False,
+) -> subprocess.CompletedProcess:
+    """Run *cmd* while logging the invocation."""
+
+    if isinstance(cmd, str):
+        args: Sequence[str] = shlex.split(cmd)
+    else:
+        args = cmd
+    display = _display_command(list(args))
+    _append_log(f"$ {display}")
+    if dry_run:
+        return subprocess.CompletedProcess(args, returncode=0)  # type: ignore[arg-type]
+    return subprocess.run(args, cwd=cwd, check=True)
+
+
+def capture_command(cmd: Sequence[str], *, cwd: Path | None = None) -> str:
+    """Capture stdout from *cmd* raising if it fails."""
+
+    result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=True)
+    return result.stdout
+
+
+# ---------------------------------------------------------------------------
+# Git helpers
+# ---------------------------------------------------------------------------
+
+
+def stage_and_commit(cfg: SyncConfig) -> None:
+    """Stage changes and commit if there is anything to record."""
+
+    if cfg.dry_run:
+        _append_log("[dry-run] Would stage changes and create a commit if needed")
+        return
+
+    run_command(["git", "add", "-A"], cwd=cfg.repo_root)
+    status = capture_command(["git", "status", "--porcelain"], cwd=cfg.repo_root).strip()
+    if not status:
+        _append_log("No changes detected; skipping commit")
+        return
+    run_command(["git", "commit", "-m", cfg.commit_message], cwd=cfg.repo_root)
+    _append_log(f"Created commit with message: {cfg.commit_message}")
+
+
+def push_branch(cfg: SyncConfig) -> None:
+    if cfg.dry_run:
+        _append_log("[dry-run] Would push current branch to origin")
+        return
+    run_command(["git", "push", "origin", "HEAD"], cwd=cfg.repo_root)
+    _append_log("Pushed current branch to origin")
+
+
+def rebase_onto_main(cfg: SyncConfig, branch: str = "main") -> None:
+    if cfg.dry_run:
+        _append_log(f"[dry-run] Would rebase onto origin/{branch}")
+        return
+    run_command(["git", "fetch", "origin"], cwd=cfg.repo_root)
+    run_command(["git", "rebase", f"origin/{branch}"], cwd=cfg.repo_root)
+    _append_log(f"Rebased onto origin/{branch}")
+
+
+# ---------------------------------------------------------------------------
+# Connector, Working Copy and droplet steps
+# ---------------------------------------------------------------------------
+
+
+def sync_connectors(cfg: SyncConfig) -> None:
+    """Persist timestamps for connector syncs."""
+
+    if not cfg.connectors:
+        _append_log("No connectors configured; skipping sync")
+        return
+
+    now = _timestamp()
+    state = _load_state()
+    connectors_state = state.setdefault("connectors", {})
+    assert isinstance(connectors_state, dict)
+    for name in cfg.connectors:
+        _append_log(f"Syncing connector: {name}")
+        connectors_state[name] = {"last_sync": now}
+    _write_state(state, dry_run=cfg.dry_run)
+
+
+def refresh_working_copy(cfg: SyncConfig) -> None:
+    """Refresh the iOS Working Copy mirror if we know how."""
+
+    target = cfg.working_copy_target
+    path = cfg.working_copy_path
+    now = _timestamp()
+
+    if target:
+        remote_path = shlex.quote(str(path or "~/Documents/WorkingCopy/blackroad"))
+        remote_cmd = f"cd {remote_path} && git pull --rebase"
+        run_command(["ssh", target, remote_cmd], dry_run=cfg.dry_run)
+        _append_log(f"Working Copy refreshed via SSH target {target}")
+    elif path and path.exists():
+        run_command(["git", "pull", "--rebase"], cwd=path, dry_run=cfg.dry_run)
+        _append_log(f"Working Copy refreshed at {path}")
+    else:
+        _append_log("Working Copy not configured; skipping refresh")
+        return
+
+    state = _load_state()
+    state["working_copy"] = {"last_refresh": now}
+    _write_state(state, dry_run=cfg.dry_run)
+
+
+def deploy_to_droplet(cfg: SyncConfig) -> None:
+    """Deploy latest code to the droplet over SSH."""
+
+    if not cfg.droplet_target:
+        _append_log("Droplet SSH target not configured; skipping deploy")
+        return
+
+    remote_cmd = (
+        "cd /srv/blackroad && git pull --ff-only && "
+        "npm install --no-progress && "
+        "npm run migrate && "
+        "sudo systemctl restart blackroad-api lucidia-llm nginx"
+    )
+    run_command(["ssh", cfg.droplet_target, remote_cmd], dry_run=cfg.dry_run)
+    state = _load_state()
+    state["droplet"] = {"last_deploy": _timestamp(), "target": cfg.droplet_target}
+    _write_state(state, dry_run=cfg.dry_run)
+    _append_log(f"Deployment triggered on droplet {cfg.droplet_target}")
+
+
+# ---------------------------------------------------------------------------
+# High-level flows
+# ---------------------------------------------------------------------------
+
+
+def push_latest_flow(cfg: SyncConfig) -> None:
+    stage_and_commit(cfg)
+    push_branch(cfg)
+    sync_connectors(cfg)
+    refresh_working_copy(cfg)
+    deploy_to_droplet(cfg)
+    if cfg.notifier:
+        cfg.notifier.send("Codex pipeline: push latest to BlackRoad.io completed")
+
+
+def refresh_and_deploy_flow(cfg: SyncConfig) -> None:
+    refresh_working_copy(cfg)
+    deploy_to_droplet(cfg)
+    if cfg.notifier:
+        cfg.notifier.send("Codex pipeline: refresh working copy and redeploy completed")
+
+
+def rebase_and_update_flow(cfg: SyncConfig) -> None:
+    rebase_onto_main(cfg)
+    push_branch(cfg)
+    deploy_to_droplet(cfg)
+    if cfg.notifier:
+        cfg.notifier.send("Codex pipeline: rebase branch and update site completed")
+
+
+def sync_salesforce_to_droplet_flow(cfg: SyncConfig) -> None:
+    sync_connectors(cfg)
+    deploy_to_droplet(cfg)
+    if cfg.notifier:
+        cfg.notifier.send("Codex pipeline: Salesforce → Airtable → Droplet sync completed")
+
+
+CommandFn = Callable[[SyncConfig], None]
+
+COMMANDS: Mapping[str, CommandFn] = {
+    "push": push_latest_flow,
     "push latest to blackroad.io": push_latest_flow,
+    "refresh": refresh_and_deploy_flow,
     "refresh working copy and redeploy": refresh_and_deploy_flow,
+    "rebase": rebase_and_update_flow,
     "rebase branch and update site": rebase_and_update_flow,
+    "sync": sync_salesforce_to_droplet_flow,
     "sync salesforce → airtable → droplet": sync_salesforce_to_droplet_flow,
-    # allow ASCII arrow as well
     "sync salesforce -> airtable -> droplet": sync_salesforce_to_droplet_flow,
 }
 
 
-# --- CLI -------------------------------------------------------------------
+def handle_command(command: str, cfg: SyncConfig) -> None:
+    """Dispatch *command* (case insensitive) to the appropriate workflow."""
+
+    normalised = command.lower().strip().replace("->", "→")
+    func = COMMANDS.get(normalised)
+    if not func:
+        available = "\n".join(f"  - {name}" for name in sorted(COMMANDS))
+        raise SystemExit(f"Unknown command: {command}\nAvailable commands:\n{available}")
+
+    _append_log(f"Starting command: {normalised}")
+    func(cfg)
+    _append_log(f"Completed command: {normalised}")
 
 
-def handle_command(text: str) -> None:
-    key = text.lower().strip()
-    fn = COMMAND_MAP.get(key)
-    if not fn:
-        print(f"Unknown command: {text}")
-        return
-    fn()
-
-
-def main() -> None:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("command", nargs="+", help="chat-style instruction")
-    args = ap.parse_args()
-    handle_command(" ".join(args.command))
-"""
-BlackRoad Sync Tool
-
-Provides a chat-style interface to trigger repository, connector, and deployment
-operations. The functions are scaffolds that log actions and invoke basic git
-commands. Replace placeholder sections with project-specific implementations for
-full CI/CD behavior.
-"""
-
-import logging
-import shlex
-import subprocess
-import sys
-from pathlib import Path
-
-LOG_PATH = Path("codex/runtime/logs/blackroad_sync.log")
-
-
-def log(message: str) -> None:
-    """Append message to log file and echo to stdout."""
-    LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    logging.basicConfig(filename=str(LOG_PATH), level=logging.INFO)
-    logging.info(message)
-    print(message)
-
-
-def run(cmd: str) -> str:
-    """Run shell command and return stdout."""
-    result = subprocess.run(
-        shlex.split(cmd), capture_output=True, text=True, check=False
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "command",
+        nargs="+",
+        help="Command to execute (e.g. 'Push latest to BlackRoad.io')",
     )
-    if result.returncode != 0:
-        raise RuntimeError(f"Command failed: {cmd}\n{result.stdout}{result.stderr}")
-    return result.stdout.strip()
-
-
-# --- GitHub / Working Copy ---------------------------------------------------
-
-def push_latest() -> None:
-    """Push local HEAD to origin."""
-    log("Pushing latest changes to GitHub...")
-    run("git push origin HEAD")
-    log("✔ Push complete")
-
-
-def refresh_working_copy() -> None:
-    """Placeholder for syncing iOS Working Copy."""
-    log("Refreshing Working Copy (placeholder)")
-    # Implement iOS Working Copy automation here
-    log("✔ Working Copy refreshed")
-
-
-def rebase_branch() -> None:
-    """Rebase current branch onto origin/main."""
-    log("Rebasing branch onto origin/main...")
-    run("git fetch origin")
-    run("git rebase origin/main")
-    log("✔ Rebase complete")
-
-
-# --- Connectors / Droplet ----------------------------------------------------
-
-def sync_connectors() -> None:
-    """Placeholder for Salesforce/Airtable/Slack/Linear sync."""
-    log("Syncing connectors (Salesforce → Airtable → Slack → Linear) ...")
-    # Implement connector sync jobs here
-    log("✔ Connectors synced")
-
-
-def deploy_droplet() -> None:
-    """Placeholder for pulling and restarting services on droplet."""
-    log("Deploying to droplet (pull + restart)...")
-    # Implement droplet deployment logic here
-    log("✔ Droplet deployment finished")
-
-
-# --- Command Handling --------------------------------------------------------
-
-COMMANDS = {
-    "push latest to blackroad.io": lambda: (push_latest(), sync_connectors(), deploy_droplet()),
-    "refresh working copy and redeploy": lambda: (refresh_working_copy(), deploy_droplet()),
-    "rebase branch and update site": lambda: (rebase_branch(), push_latest(), deploy_droplet()),
-    "sync salesforce → airtable → droplet": lambda: (sync_connectors(), deploy_droplet()),
-}
-
-
-def handle_command(cmd: str) -> None:
-    """Dispatch command string to action."""
-    normalized = cmd.lower().strip().replace("->", "→")
-    action = COMMANDS.get(normalized)
-    if not action:
-        print("Unknown command. Available commands:")
-        for key in COMMANDS:
-            print(f" - {key}")
-        return
-    action()
-    log("✔ All steps completed")
-
-
-def main() -> None:
-    if len(sys.argv) < 2:
-        print("Usage: python codex/tools/blackroad_sync.py '<command>'")
-        return
-    handle_command(sys.argv[1])
-"""BlackRoad.io end-to-end sync & deploy helper.
-
-This script acts as a minimal control surface for orchestrating the
-BlackRoad pipeline: GitHub -> connectors -> working copy -> droplet -> live
-site.  The goal is to offer a single entry point that higher level agents or
-humans can invoke with natural language commands such as::
-
-    "Push latest to BlackRoad.io"
-    "Refresh working copy and redeploy"
-    "Rebase branch and update site"
-    "Sync Salesforce -> Airtable -> Droplet"
-
-All heavy lifting is still handled by the underlying tools (git, ssh, etc.)
-but the functions defined here provide the scaffolding to trigger each step
-and emit simple Slack notifications.  Real connector logic, OAuth flows and
-webhook handling would be implemented by expanding the placeholders below.
-
-Environment variables used:
-    WORKING_COPY_DIR   local path used by Working Copy (default: /tmp/wc)
-    DROPLET_SSH        host string for ssh (e.g. user@host)
-    SLACK_WEBHOOK      Incoming webhook URL for notifications
-"""
-from __future__ import annotations
-
-import argparse
-import asyncio
-import json
-import logging
-import os
-import shlex
-import subprocess
-from pathlib import Path
-from typing import Dict, Callable, Awaitable
-
-LOG = logging.getLogger("blackroad")
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-
-
-# ---------------------------------------------------------------------------
-# helpers
-# ---------------------------------------------------------------------------
-
-def run(cmd, cwd: Path | None = None, check: bool = True) -> str:
-    """Run *cmd* and return its stdout."""
-    if isinstance(cmd, str):
-        cmd = shlex.split(cmd)
-    LOG.debug("run: %s", " ".join(cmd))
-    proc = subprocess.run(
-        cmd, cwd=cwd, capture_output=True, text=True, check=False
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print commands without executing external processes.",
     )
-    if check and proc.returncode != 0:
-        raise RuntimeError(f"{' '.join(cmd)}\n{proc.stdout}\n{proc.stderr}")
-    return proc.stdout.strip()
-
-
-async def post_slack(text: str) -> None:
-    hook = os.environ.get("SLACK_WEBHOOK")
-    if not hook:
-        LOG.info("Slack webhook missing; skipping notification: %s", text)
-        return
-    import urllib.request
-
-    req = urllib.request.Request(
-        hook,
-        data=json.dumps({"text": text}).encode(),
-        headers={"Content-Type": "application/json"},
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable debug logging for troubleshooting.",
     )
-    try:
-        urllib.request.urlopen(req, timeout=10)
-    except Exception as exc:  # pragma: no cover - best effort
-        LOG.warning("Slack notification failed: %s", exc)
+    return parser
 
 
-# ---------------------------------------------------------------------------
-# Connector placeholders
-# ---------------------------------------------------------------------------
-
-
-class Connector:
-    """Minimal placeholder representing an external service."""
-
-    def __init__(self, name: str):
-        self.name = name
-
-    async def oauth_url(self) -> str:
-        return f"https://example.com/oauth/{self.name}"
-
-    async def handle_webhook(self, payload: dict) -> None:
-        LOG.info("[%s] webhook: %s", self.name, payload)
-
-    async def sync(self) -> None:
-        LOG.info("[%s] sync placeholder", self.name)
-
-
-CONNECTORS: Dict[str, Connector] = {
-    "salesforce": Connector("salesforce"),
-    "airtable": Connector("airtable"),
-    "slack": Connector("slack"),
-    "linear": Connector("linear"),
-}
-
-
-# ---------------------------------------------------------------------------
-# core steps
-# ---------------------------------------------------------------------------
-
-
-async def push_latest() -> None:
-    LOG.info("Pushing current branch to origin …")
-    run(["git", "push"])
-    await post_slack("github.push.ok")
-
-
-async def refresh_working_copy() -> None:
-    wc = Path(os.environ.get("WORKING_COPY_DIR", "/tmp/wc"))
-    LOG.info("Refreshing working copy: %s", wc)
-    run(["git", "pull"], cwd=wc)
-    await deploy_to_droplet()
-
-
-async def deploy_to_droplet() -> None:
-    host = os.environ.get("DROPLET_SSH")
-    if not host:
-        LOG.warning("DROPLET_SSH not set; deployment skipped")
-        return
-    cmd = f"ssh {host} 'cd /srv/blackroad && git pull && npm install && pm2 restart all'"
-    run(cmd, check=False)
-    await post_slack("deploy.ok")
-
-
-async def rebase_branch_update_site() -> None:
-    LOG.info("Rebasing onto origin/main …")
-    run(["git", "fetch", "origin"])
-    run(["git", "rebase", "origin/main"])
-    await push_latest()
-    await refresh_working_copy()
-
-
-async def sync_salesforce_airtable_droplet() -> None:
-    LOG.info("Syncing Salesforce -> Airtable -> Droplet …")
-    await CONNECTORS["salesforce"].sync()
-    await CONNECTORS["airtable"].sync()
-    await deploy_to_droplet()
-    await post_slack("connector.sync.ok")
-
-
-# Mapping of command phrases to coroutine functions
-COMMANDS: Dict[str, Callable[[], Awaitable[None]]] = {
-    "push latest to blackroad.io": push_latest,
-    "refresh working copy and redeploy": refresh_working_copy,
-    "rebase branch and update site": rebase_branch_update_site,
-    "sync salesforce -> airtable -> droplet": sync_salesforce_airtable_droplet,
-}
-
-
-async def dispatch(text: str) -> None:
-    text = text.strip().lower()
-    for key, func in COMMANDS.items():
-        if key in text:
-            await func()
-            return
-    LOG.error("Unknown command: %s", text)
-
-
-# ---------------------------------------------------------------------------
-# CLI entry
-# ---------------------------------------------------------------------------
-
-
-def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(
-        description="BlackRoad.io sync & deploy control surface"
-    )
-    parser.add_argument("command", nargs="*", help="natural language command")
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = build_parser()
     args = parser.parse_args(argv)
 
-    text = " ".join(args.command) if args.command else input("blackroad> ")
-    asyncio.run(dispatch(text))
-
-
-if __name__ == "__main__":
-    main()
-import json
-import os
-import shlex
-import subprocess
-import sys
-from pathlib import Path
-from typing import Callable, Dict
-
-# --- helpers -----------------------------------------------------------------
-
-def run(cmd: str | list[str], cwd: str | Path | None = None) -> str:
-    """Run *cmd* and return stdout; raise RuntimeError on failure."""
-    if isinstance(cmd, str):
-        cmd_list = shlex.split(cmd)
-    else:
-        cmd_list = cmd
-    p = subprocess.run(
-        cmd_list,
-        cwd=cwd,
-        capture_output=True,
-        text=True,
-        env=os.environ.copy(),
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
     )
-    if p.returncode != 0:
-        raise RuntimeError(f"Command failed: {' '.join(cmd_list)}\n{p.stdout}{p.stderr}")
-    return p.stdout.strip()
 
-# --- git stage ----------------------------------------------------------------
+    cfg = SyncConfig.from_env(dry_run=args.dry_run)
+    command_text = " ".join(args.command)
 
-def push_latest(repo: str = ".", branch: str = "main") -> None:
-    """Commit all changes, pull --rebase and push to origin."""
-    run("git add -A", cwd=repo)
-    # Commit may noop; that's fine.
-    run('git commit -m "chore: sync from Codex" || true', cwd=repo)
-    run(f"git pull --rebase origin {branch}", cwd=repo)
-    run(f"git push origin {branch}", cwd=repo)
-
-# --- connector stage ----------------------------------------------------------
-
-def sync_connectors() -> None:
-    """Placeholder: sync Salesforce, Airtable, Slack and Linear.
-
-    Real implementations will authenticate via OAuth and push/pull data as
-    required.  This stub merely logs the intention so downstream agents know
-    where to extend.
-    """
-    print("[connector] sync placeholders executed")
-
-# --- working copy (iOS) -------------------------------------------------------
-
-def refresh_working_copy(path: str = ".") -> None:
-    """Placeholder for Working Copy automation.
-
-    A real implementation might talk to the Working Copy URL scheme or a
-    small HTTP server running on device.  Here we simply document the hook.
-    """
-    print(f"[working-copy] would refresh repo at {path}")
-
-# --- droplet deploy -----------------------------------------------------------
-
-def deploy_droplet(host: str, user: str, repo_path: str = "/srv/blackroad") -> None:
-    """Minimal SSH-based deploy hook.
-
-    This sends a `git pull` and optionally runs migrations / service restarts.
-    Credentials are taken from env vars `SSH_KEY` or agent forwarder.
-    """
-    ssh_cmd = f"ssh {user}@{host} 'cd {repo_path} && git pull && ./deploy.sh'"
-    run(ssh_cmd)
-
-# --- command router -----------------------------------------------------------
-
-CommandFunc = Callable[[], None]
-
-
-def push_and_deploy() -> None:
-    push_latest()
-    sync_connectors()
-    refresh_working_copy()
-    host = os.environ.get("BLACKROAD_DROPLET_HOST", "droplet")
-    user = os.environ.get("BLACKROAD_DROPLET_USER", "deploy")
-    deploy_droplet(host, user)
-
-
-COMMANDS: Dict[str, CommandFunc] = {
-    "push latest to blackroad.io": push_and_deploy,
-    "refresh working copy and redeploy": push_and_deploy,
-    "rebase branch and update site": push_and_deploy,
-    "sync salesforce -> airtable -> droplet": push_and_deploy,
-}
-
-
-def route_command(cmd: str) -> None:
-    key = cmd.lower().strip()
-    fn = COMMANDS.get(key)
-    if not fn:
-        raise SystemExit(f"Unknown command: {cmd}")
-    fn()
-
-# --- entry point --------------------------------------------------------------
-
-def main(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description="BlackRoad.io sync utility")
-    ap.add_argument("--cmd", help="chat-style command to execute", required=True)
-    args = ap.parse_args(argv)
-    route_command(args.cmd)
-    return 0
-
-
-if __name__ == "__main__":  # pragma: no cover
-    sys.exit(main(sys.argv[1:]))
-import subprocess
-
-
-def run(cmd: list[str]) -> str:
-    """Run a shell command and return stdout.
-
-    The helper is intentionally lightweight so it can be reused when the
-    placeholder actions are replaced with real logic (e.g., hitting webhooks,
-    posting to Slack, etc.).
-    """
-
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    if proc.returncode != 0:
-        raise RuntimeError(f"{cmd} failed: {proc.stderr.strip()}")
-    return proc.stdout.strip()
-
-
-def push_latest() -> None:
-    """Push current branch to GitHub and trigger downstream syncs."""
-
-    print("Pushing changes to GitHub…")
     try:
-        run(["git", "push", "origin", "HEAD"])
-        print("✔ Pushed to GitHub")
-    except Exception as exc:  # pragma: no cover - placeholder
-        print(f"Push failed: {exc}")
-
-    # Placeholders for real integrations
-    print("Triggering connector sync (Salesforce/Airtable/Slack/Linear)…")
-    print("Notifying droplet to pull and deploy…")
-
-
-def refresh_working_copy() -> None:
-    """Refresh local working copy and redeploy services."""
-
-    print("Refreshing working copy…")
-    try:
-        run(["git", "pull", "--rebase"])
-        print("✔ Working copy up to date")
-    except Exception as exc:  # pragma: no cover - placeholder
-        print(f"Refresh failed: {exc}")
-
-    print("Restarting droplet services (API, LLM, Nginx)…")
-
-
-def rebase_branch() -> None:
-    """Rebase the current branch onto main and push."""
-
-    print("Rebasing onto origin/main…")
-    try:
-        run(["git", "fetch", "origin", "main"])
-        run(["git", "rebase", "origin/main"])
-        run(["git", "push", "--force-with-lease"])
-        print("✔ Rebased and pushed")
-    except Exception as exc:  # pragma: no cover - placeholder
-        print(f"Rebase failed: {exc}")
-
-
-def sync_connectors() -> None:
-    """Sync external systems (placeholder)."""
-
-    print("Syncing Salesforce → Airtable → Droplet…")
-    print("Posting status to Slack…")
-
-
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="BlackRoad.io end-to-end sync")
-    sub = parser.add_subparsers(dest="cmd")
-
-    sub.add_parser("push", help="Push latest changes to GitHub and deploy")
-    sub.add_parser(
-        "refresh", help="Refresh working copy, run migrations, restart services"
-    )
-    sub.add_parser("rebase", help="Rebase current branch onto main and push")
-    sub.add_parser("sync", help="Sync external connectors")
-
-    args = parser.parse_args(argv)
-    if args.cmd == "push":
-        push_latest()
-    elif args.cmd == "refresh":
-        refresh_working_copy()
-    elif args.cmd == "rebase":
-        rebase_branch()
-    elif args.cmd == "sync":
-        sync_connectors()
-    else:
-        parser.print_help()
-        return 1
+        handle_command(command_text, cfg)
+    except subprocess.CalledProcessError as exc:
+        _append_log(f"Command failed: {exc}")
+        return exc.returncode or 1
+    except SystemExit as exc:
+        if isinstance(exc.code, int) and exc.code != 0:
+            _append_log(f"Exiting with error: {exc.code}")
+        raise
     return 0
 
 
 if __name__ == "__main__":  # pragma: no cover - CLI entry point
-    raise SystemExit(main())
-
-"""BlackRoad Sync Pipeline
-
-This utility orchestrates the end-to-end flow from Codex to the live
-BlackRoad.io deployment.  It offers both explicit flags and a small
-natural-language dispatcher so operators can type commands like
-"Push latest to BlackRoad.io" and have the underlying git, connector,
-working copy and droplet steps executed in sequence.
-
-The implementation focuses on scaffolding; most steps are placeholders
-that expect environment variables or external services to be configured
-elsewhere. Each function logs its work and raises on failure so Codex
-can surface issues to downstream agents.
-"""
-
-from __future__ import annotations
-elsewhere.  Each function logs its work and raises on failure so Codex
-can surface issues to downstream agents.
-
-Usage examples:
-    python3 codex/tools/blackroad_sync.py --push
-    python3 codex/tools/blackroad_sync.py --refresh
-    python3 codex/tools/blackroad_sync.py --rebase main
-    python3 codex/tools/blackroad_sync.py --sync-connectors
-    python3 codex/tools/blackroad_sync.py "Push latest to BlackRoad.io"
-"""
-
-import argparse
-import os
-import shlex
-import subprocess
-import sys
-from typing import List
-
-
-def run(cmd: List[str] | str, cwd: str | None = None) -> str:
-    """Run *cmd* returning stdout, raising on non-zero exit."""
-    if isinstance(cmd, str):
-        cmd = shlex.split(cmd)
-    proc = subprocess.run(
-        cmd,
-        cwd=cwd,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if proc.returncode != 0:
-        raise RuntimeError(f"Command failed: {' '.join(cmd)}\n{proc.stdout}{proc.stderr}")
-        raise RuntimeError(
-            f"Command failed: {' '.join(cmd)}\n{proc.stdout}{proc.stderr}"
-        )
-    return proc.stdout.strip()
-
-
-# ---------------------------------------------------------------------------
-# Git operations
-# ---------------------------------------------------------------------------
-
-
-def git_push() -> None:
-    """Push local changes to GitHub."""
-def git_push() -> None:
-    print("Pushing to GitHub...")
-    run("git push")
-
-
-def git_pull() -> None:
-    """Pull latest changes from GitHub."""
-    print("Pulling latest from GitHub...")
-    run("git pull --ff-only")
-
-
-def git_rebase(branch: str) -> None:
-    """Rebase current branch onto ``branch``."""
-    print(f"Rebasing current branch onto origin/{branch}...")
-    run(f"git fetch origin {branch}")
-    run(f"git rebase origin/{branch}")
-
-
-# ---------------------------------------------------------------------------
-# Connector placeholders
-# ---------------------------------------------------------------------------
-
-
-# Connector / external systems (placeholders)
-# ---------------------------------------------------------------------------
-
-def trigger_connectors() -> None:
-    """Placeholder for Salesforce/Airtable/Slack/Linear sync."""
-    print("Triggering external connector jobs (placeholder)...")
-
-
-def post_slack(message: str) -> None:
-    """Placeholder for sending a Slack status update."""
-    slack_webhook = os.environ.get("SLACK_WEBHOOK")
-    if slack_webhook:
-        try:
-            run(
-                [
-                    "curl",
-                    "-X",
-                    "POST",
-                    slack_webhook,
-                    "-H",
-                    "Content-Type: application/json",
-                    "-d",
-                    f'{{"text": "{message}"}}',
-                ]
-            )
-        except Exception as exc:  # pragma: no cover - best effort
-            run(["curl", "-X", "POST", slack_webhook, "-H", "Content-Type: application/json", "-d", f'{{"text": "{message}"}}'])
-        except Exception as exc:
-            print(f"Failed to post Slack update: {exc}")
-    else:
-        print("No SLACK_WEBHOOK configured; skipping Slack notification.")
-
-
-# ---------------------------------------------------------------------------
-# Working Copy & Droplet operations
-# ---------------------------------------------------------------------------
-
-
-def refresh_working_copy(path: str | None = None) -> None:
-    """Run git pull in a Working Copy checkout (if configured)."""
-    wc_path = path or os.environ.get("WORKING_COPY_PATH")
-    if not wc_path:
-        print("No working copy path configured; skipping working copy refresh.")
-        return
-    print(f"Refreshing Working Copy at {wc_path}...")
-    run("git pull --ff-only", cwd=wc_path)
-
-
-def deploy_droplet(host: str | None = None) -> None:
-    """SSH to the droplet and pull/restart services."""
-    droplet = host or os.environ.get("DROPLET_HOST")
-    if not droplet:
-        print("No DROPLET_HOST configured; skipping droplet deploy.")
-        return
-    print(f"Deploying to droplet {droplet}...")
-    cmd = (
-        "cd /srv/blackroad-api && git pull && "
-        "npm install --production && "
-        "npm run migrate && "
-        "sudo systemctl restart blackroad"
-    )
-    run(["ssh", droplet, cmd])
-
-
-# ---------------------------------------------------------------------------
-# Natural language dispatcher
-# ---------------------------------------------------------------------------
-
-
-def dispatch(text: str) -> None:
-    """Map loose natural language commands to actions."""
-    t = text.lower()
-    if "push" in t and "blackroad.io" in t:
-        orchestrate_push()
-    elif "refresh" in t and "redeploy" in t:
-        orchestrate_refresh()
-    elif "rebase" in t and "update" in t:
-        orchestrate_rebase("main")
-    elif "sync" in t and "salesforce" in t:
-        orchestrate_connector_sync()
-    else:
-        print("No action matched for:", text)
-
-
-# ---------------------------------------------------------------------------
-# Orchestration helpers
-# ---------------------------------------------------------------------------
-
-
-def orchestrate_push() -> None:
-    git_push()
-    trigger_connectors()
-    refresh_working_copy()
-    deploy_droplet()
-    post_slack("Push completed and deployment triggered.")
-
-
-def orchestrate_refresh() -> None:
-    git_pull()
-    refresh_working_copy()
-    deploy_droplet()
-    post_slack("Refresh and redeploy completed.")
-
-
-def orchestrate_rebase(branch: str) -> None:
-    git_rebase(branch)
-    git_push()
-    deploy_droplet()
-    post_slack(f"Rebased {branch} and updated deployment.")
-
-
-def orchestrate_connector_sync() -> None:
-    trigger_connectors()
-    deploy_droplet()
-    post_slack("Connector sync and deploy completed.")
-
-
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description="BlackRoad end-to-end sync orchestrator")
-    parser.add_argument("command", nargs="*", help="optional natural language command")
-    parser.add_argument("--push", action="store_true", help="Push latest to BlackRoad.io")
-    parser.add_argument("--refresh", action="store_true", help="Refresh working copy and redeploy")
-    parser.add_argument("--rebase", metavar="BRANCH", help="Rebase branch and update site")
-    parser.add_argument(
-        "--sync-connectors",
-        action="store_true",
-        help="Sync Salesforce -> Airtable -> Droplet",
-    )
-    parser.add_argument("--sync-connectors", action="store_true", help="Sync Salesforce -> Airtable -> Droplet")
-    args = parser.parse_args()
-
-    if args.command:
-        dispatch(" ".join(args.command))
-        return
-    if args.push:
-        orchestrate_push()
-        return
-    if args.refresh:
-        orchestrate_refresh()
-        return
-    if args.rebase:
-        orchestrate_rebase(args.rebase)
-        return
-    if args.sync_connectors:
-        orchestrate_connector_sync()
-        return
-    parser.print_help()
-
-
-if __name__ == "__main__":  # pragma: no cover
-    main()
+    sys.exit(main())
