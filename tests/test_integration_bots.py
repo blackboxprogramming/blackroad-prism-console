@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from bots import available_bots
-from bots.integration_bots import integration_bot_names
+from bots.integration_bots import integration_bot_names, integration_bot_registry
+from orchestrator.base import assert_guardrails
 from orchestrator.protocols import Task
 
 
@@ -49,4 +50,23 @@ def test_integration_bot_awaits_mention() -> None:
     assert response.ok is False
     assert "Queued" in response.summary
     assert any("Watch for @blackboxprogramming" in action for action in response.next_actions)
+
+
+def test_all_integration_bots_emit_guarded_responses() -> None:
+    registry = integration_bot_registry()
+
+    assert len(registry) == len(integration_bot_names())
+
+    for class_name, bot_cls in registry.items():
+        bot = bot_cls()
+        task = Task(
+            id=f"task-{class_name}",
+            goal=f"Smoke test {bot_cls.name}",
+            context={"mentions": ["@blackboxprogramming"]},
+            created_at=datetime.utcnow(),
+        )
+
+        response = bot.run(task)
+        assert response.ok is True
+        assert_guardrails(response)
 

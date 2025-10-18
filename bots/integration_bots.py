@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import re
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Type
 
 from orchestrator.base import BaseBot
 from orchestrator.protocols import BotResponse, Task
@@ -168,6 +168,10 @@ def _make_run(entry: Dict[str, str]):  # type: ignore[override]
 
 INTEGRATION_ENTRIES = _parse_integration_rows()
 
+# Build a registry that maps the exported class name to the dynamically generated
+# bot class.  Keeping the mapping explicit makes it easier for tests and tooling
+# to inspect the inventory without relying on module globals.
+INTEGRATION_BOT_REGISTRY: Dict[str, Type[BaseBot]] = {}
 __all__: List[str] = []
 
 for entry in INTEGRATION_ENTRIES:
@@ -190,6 +194,7 @@ for entry in INTEGRATION_ENTRIES:
     )
     bot_cls.__module__ = __name__
     globals()[class_name] = bot_cls
+    INTEGRATION_BOT_REGISTRY[class_name] = bot_cls
     __all__.append(class_name)
 
 
@@ -197,4 +202,10 @@ def integration_bot_names() -> List[str]:
     """Expose the human-readable bot names for testing and discovery."""
 
     return [f"{entry['platform']}-BOT" for entry in INTEGRATION_ENTRIES]
+
+
+def integration_bot_registry() -> Dict[str, Type[BaseBot]]:
+    """Return a copy of the integration bot registry keyed by class name."""
+
+    return dict(INTEGRATION_BOT_REGISTRY)
 
