@@ -259,6 +259,8 @@ require('./modules/devices')({ app, io, dbPath: DB_PATH });
 // Mount project-specific job runner under a separate prefix so the
 // legacy deployment job endpoints at `/api/jobs` continue to work.
 require('./modules/jobs')({ app, prefix: '/api/project-jobs' });
+require('./modules/truth_quorum')({ app, io });
+require('./modules/trust_graph')({ app });
 
 const emitter = new EventEmitter();
 const jobs = new Map();
