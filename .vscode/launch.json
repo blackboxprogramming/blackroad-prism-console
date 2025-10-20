@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Docker Build: sites/blackroad (BuildKit debug)",
+      "type": "docker-build",
+      "request": "launch",
+      "dockerBuild": {
+        "context": "${workspaceFolder}",
+        "dockerfile": "${workspaceFolder}/docker/Dockerfile.build-debug",
+        "target": "final",
+        "buildCommand": "docker build --debug -f docker/Dockerfile.build-debug ."
+      },
+      "presentation": {
+        "reveal": "always"
+      }
+    }
+  ]
+}
