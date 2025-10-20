@@ -48,4 +48,16 @@ routes:
     mention: "@your-handle"   # swap with your GH username
 
 # Always mention these on every PR (optional)
+# Replace YOUR_ORG with your org slug; replace team slugs/handles as needed.
+routes:
+  - patterns: ["blackroad/**", "apps/blackroad/**", "packages/blackroad/**"]
+    mention: "@YOUR_ORG/blackroad-team"
+  - patterns: ["prism/**", "apps/prism/**", "packages/prism/**"]
+    mention: "@YOUR_ORG/prism-team"
+  - patterns: ["infra/**", ".github/workflows/**"]
+    mention: "@YOUR_ORG/platform-team"
+  - patterns: ["db/migrations/**"]
+    mention: "@YOUR_ORG/data-team"
+  - patterns: ["docs/**"]
+    mention: "@your-username"  # optional: swap with a maintainer
 always: []
