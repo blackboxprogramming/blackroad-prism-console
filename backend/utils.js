@@ -30,9 +30,10 @@ function adminMiddleware(req, res, next) {
   next();
 }
 
-function nowISO(){ return new Date().toISOString(); }
+function nowISO() {
+  return new Date().toISOString();
+}
 
-module.exports = { signToken, verifyToken, authMiddleware, adminMiddleware, nowISO };
 function requireAdmin(req, res, next) {
   const role = req.user?.role;
   if (!['admin', 'owner'].includes(role)) {
@@ -41,4 +42,11 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-module.exports = { signToken, verifyToken, authMiddleware, nowISO, requireAdmin };
+module.exports = {
+  signToken,
+  verifyToken,
+  authMiddleware,
+  adminMiddleware,
+  nowISO,
+  requireAdmin,
+};
