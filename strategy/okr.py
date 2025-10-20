@@ -83,6 +83,10 @@ def new_key_result(objective_id: str, metric: str, target: float, unit: str, sco
 
 def link(child_id: str, parent_id: str) -> None:
     period = _find_period_for_obj(child_id)
+    try:
+        _find_period_for_obj(parent_id)
+    except ValueError as exc:
+        raise ValueError(f"parent objective {parent_id} not found") from exc
     objs, _ = _load(period)
     for obj in objs:
         if obj["id"] == child_id:
