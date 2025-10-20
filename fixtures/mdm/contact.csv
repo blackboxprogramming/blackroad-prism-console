@@ -1,0 +1,3 @@
+source,source_id,first_name,last_name,email,updated_at
+CRM,1,Alice,Smith,alice@example.com,2024-01-01
+CRM,2,Bob,Jones,,2024-01-03

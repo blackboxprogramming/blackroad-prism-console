@@ -1,0 +1,8 @@
+rules:
+  - rule: REQUIRED
+    field: email
+  - rule: UNIQUE
+    field: source_id
+  - rule: NOT_NULL_RATIO
+    field: email
+    min: 0.5

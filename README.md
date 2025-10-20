@@ -1040,4 +1040,11 @@ Mount a volume at `/app/data` to persist data.
 python -m cli.console mkt:segments:build --config configs/marketing/segments.yaml
 python -m cli.console mkt:leadscore --config configs/marketing/lead_score.yaml
 python -m cli.console mkt:attr --model linear
+## Master Data & Governance Quickstart
+
+```bash
+python -m cli.console mdm:stage --domain account --file fixtures/mdm/account.csv
+python -m cli.console mdm:match --domain account --config configs/mdm/match_account.yaml
+python -m cli.console mdm:golden --domain account --policy configs/mdm/survivorship_account.yaml
+python -m cli.console mdm:dq --domain account --config configs/mdm/dq_account.yaml
 ```

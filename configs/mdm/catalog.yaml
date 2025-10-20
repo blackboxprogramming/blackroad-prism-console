@@ -1,0 +1,11 @@
+entries:
+  - domain: account
+    field: name
+    type: string
+    owners: [data_steward]
+    pii: false
+  - domain: account
+    field: email
+    type: string
+    owners: [data_steward]
+    pii: true

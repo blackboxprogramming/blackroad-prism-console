@@ -1,0 +1,4 @@
+weights:
+  name: 1.0
+thresholds:
+  auto_merge: 1.0
