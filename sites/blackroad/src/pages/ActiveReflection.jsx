@@ -1,23 +1,25 @@
 import { useEffect, useState } from "react";
 
 function createBaseline(prompts) {
-  const answers = prompts.map(() => "");
-  const checks = prompts.map(() => false);
-  return { answers, checks, notes: "" };
+  return {
+    answers: prompts.map(() => ""),
+    checks: prompts.map(() => false),
+    notes: "",
+  };
 }
 
 function normalizeFromStorage(raw, prompts) {
-  const fallback = createBaseline(prompts);
   if (!raw) {
-    return fallback;
+    return createBaseline(prompts);
   }
 
   try {
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
       return {
-        ...fallback,
         answers: prompts.map((_, index) => parsed[index] ?? ""),
+        checks: prompts.map(() => false),
+        notes: "",
       };
     }
 
@@ -28,16 +30,14 @@ function normalizeFromStorage(raw, prompts) {
     };
   } catch (error) {
     console.warn("Failed to parse ActiveReflection storage", error);
-    return fallback;
+    return createBaseline(prompts);
   }
 }
 
 export default function ActiveReflection({ title = "Active Reflection", prompts = [], storageKey }) {
   const [state, setState] = useState(() => {
-    const fallback = createBaseline(prompts);
-
     if (typeof window === "undefined" || !storageKey) {
-      return fallback;
+      return createBaseline(prompts);
     }
 
     return normalizeFromStorage(localStorage.getItem(storageKey), prompts);
@@ -137,85 +137,6 @@ export default function ActiveReflection({ title = "Active Reflection", prompts 
           placeholder="Summarize the big ideas, invariants, or questions that emerged."
         />
       </div>
-    </section>
-export default function ActiveReflection({ title, storageKey, prompts }) {
-  const [notes, setNotes] = useState(() =>
-    prompts.map((_, i) => localStorage.getItem(`${storageKey}_${i}`) || "")
-  );
-
-  useEffect(() => {
-    notes.forEach((n, i) => {
-      try {
-        localStorage.setItem(`${storageKey}_${i}`, n);
-      } catch {}
-    });
-  }, [notes, storageKey]);
-
-  const update = (i, val) => {
-    setNotes((ns) => {
-      const copy = ns.slice();
-      copy[i] = val;
-      return copy;
-    });
-  };
-
-  return (
-    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-      <h3 className="font-semibold mb-2">{title}</h3>
-      {prompts.map((p, i) => (
-        <div key={i} className="mb-3">
-          <p className="text-sm mb-1">{p}</p>
-          <textarea
-            value={notes[i]}
-            onChange={(e) => update(i, e.target.value)}
-            className="w-full text-sm p-1 rounded bg-white/10 border border-white/10"
-            rows={3}
-          />
-        </div>
-      ))}
-    </div>
-export default function ActiveReflection({ title, storageKey, prompts }) {
-export default function ActiveReflection({ title = "Active Reflection", storageKey = "reflect", prompts = [] }) {
-  const [text, setText] = useState("");
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved !== null) setText(saved);
-      if (saved) setText(saved);
-    } catch {}
-  }, [storageKey]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(storageKey, text);
-    } catch {}
-  }, [text, storageKey]);
-  }, [storageKey, text]);
-
-  return (
-    <section className="p-3 rounded-lg bg-white/5 border border-white/10">
-      <h3 className="font-semibold mb-2">{title}</h3>
-      <ul className="mb-2 list-disc list-inside text-sm opacity-80">
-        {prompts.map((p, i) => (
-          <li key={i}>{p}</li>
-        ))}
-      </ul>
-      <textarea
-        className="w-full h-32 p-2 rounded bg-white/5 border border-white/10"
-      {prompts.length > 0 && (
-        <ul className="mb-2 list-disc list-inside text-sm opacity-80">
-          {prompts.map((p, i) => (
-            <li key={i}>{p}</li>
-          ))}
-        </ul>
-      )}
-      <textarea
-        className="w-full text-sm text-black rounded p-1"
-        rows={6}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      />
     </section>
   );
 }

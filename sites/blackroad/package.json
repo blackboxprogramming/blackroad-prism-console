@@ -15,8 +15,6 @@
     "e2e": "playwright test"
   },
   "dependencies": {
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-rnd": "10.5.2",
@@ -27,8 +25,6 @@
     "@eslint/js": "^9.9.0",
     "@playwright/test": "^1.47.0",
     "@size-limit/file": "^11.1.5",
-    "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.5",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.5",
     "@typescript-eslint/eslint-plugin": "^8.4.0",
