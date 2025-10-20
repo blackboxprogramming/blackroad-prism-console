@@ -163,8 +163,8 @@
     }
   ],
   "variable": [
-    { "key": "backplane", "value": "https://prism-control.tailnet.ts.net:4000" },
-    { "key": "api_key", "value": "lucidia-prod-secret" },
+    { "key": "backplane", "value": "https://YOUR-BACKPLANE-HOST" },
+    { "key": "api_key", "value": "" },
     { "key": "daily_key", "value": "" },
     { "key": "device_id", "value": "lucidia-a" },
     { "key": "led_device", "value": "pi-01" },
