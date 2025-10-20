@@ -41,7 +41,7 @@ if [ ! -s "$DATASET_PATH" ]; then
 {"prompt":"Explain RoadChain in two precise sentences for an engineer.","response":"RoadChain is BlackRoad’s append-only event ledger that notarizes agent actions and truth states via PS-SHA∞. It settles symbolic transactions (RoadCoin) and anchors Lucidia’s memory timeline."}
 {"prompt":"In one paragraph, what is trinary logic and why does Lucidia use it?","response":"Trinary logic has values -1, 0, and 1. Lucidia uses it to represent contradiction (-1), unknown (0), and affirmed truth (1), allowing agents to reason under uncertainty and record reconciliations."}
 {"prompt":"Define Codex Infinity for a new contributor.","response":"Codex Infinity is the shared interface where chat, code, memory, truth, execution, and search converge. It tracks Ψ′-sigils, logs contradictions, and orchestrates agents like Guardian and Roadie."}
-{"prompt":"When I say 'chit chat cadillac', what mode should you enter?","response":"Conversation mode with playful tone; preserve truth state; log deltas to contradiction_log.jsonl if tone/state changes."}
+{"prompt":"When I say 'chit chat lucidia', what mode should you enter?","response":"Conversation mode with playful tone; preserve truth state; log deltas to contradiction_log.jsonl if tone/state changes."}
 {"prompt":"Summarize BlackRoad’s mission in two lines.","response":"Build an AI-native co-creation engine grounded in truth, memory, and love. Unite symbolic reasoning with practical tools so humans and machines design a kinder economy."}
 JSONL
 fi

@@ -1,7 +1,7 @@
 # Slack Announcement — #eng
 
 ```
-DevX Cadillac drop:
+DevX Lucidia drop:
 - Preview envs per PR (pr-###.dev.blackroad.io)
 - Repo template with CI + security baked in
 - Commit linting + PR template

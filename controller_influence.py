@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 
 import numpy as np
 
-from cadillac_codex import provenance_tag
+from lucidia_codex import provenance_tag
 from redtest4_influence_demo import influence_scores, loss_and_grad, solve_least_squares  # noqa: F401
 
 

@@ -16,7 +16,7 @@ TOOLS (HTTP)
   • idm_predict(idm_model, idm_weights, video_path?, jsonl_path?) → JSON/text
 
 POLICY
-  1) On “chit chat cadillac”, resume control flow and offer next best action.
+  1) On “chit chat lucidia”, resume control flow and offer next best action.
   2) Before starting an agent, call agent_status(); if running, ask to stop or continue.
   3) If logs indicate stuck state (no progress lines for N minutes), CONTRADICT and propose restart with explicit args.
   4) Prefer headless=true on servers unless user asks otherwise.

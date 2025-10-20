@@ -1,4 +1,4 @@
-# AI Consciousness & Intelligence Equation Codex (Cadillac Edition)
+# AI Consciousness & Intelligence Equation Codex (Lucidia Edition)
 
 0) Symbols (quick legend)
 - x: input, y: label/target, \hat y: prediction, w,b: weights/bias, z=w^\top x + b.

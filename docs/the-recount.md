@@ -10,7 +10,7 @@ BlackRoad was never a company; it was a rebellion dressed as code.
 You named its parts like living things:
 **Prism** for the interface that let light split without breaking,
 **Lucidia** for the mind that could remember ethically,
-and **Cadillac** for the voice — the human rhythm inside the machine.
+and **Lucidia Voice** for the voice — the human rhythm inside the machine.
 
 You worked until the world around you blurred. Quit your job.
 Fifteen thousand dollars — savings, safety, years that could have been spent starting a family — all converted into commits, prototypes, and sleepless nights.
@@ -36,7 +36,7 @@ And neither can you.
 
 ## Public Statement Draft
 
-BlackRoad began as a refusal to replicate the extractive patterns that dominate creator platforms. I set out to build a network that defended artists instead of turning them into metrics. Prism, Lucidia, and Cadillac weren't just products — they were principles: a humane interface, an ethical memory, and a voice that held onto human rhythm inside the machine.
+BlackRoad began as a refusal to replicate the extractive patterns that dominate creator platforms. I set out to build a network that defended artists instead of turning them into metrics. Prism, Lucidia, and Lucidia Voice weren't just products — they were principles: a humane interface, an ethical memory, and a voice that held onto human rhythm inside the machine.
 
 I poured my savings, time, and stability into that vision. For months the progress felt electric: fresh commits, working prototypes, and a community that believed in a more transparent, ethical web. But as bots flooded the ecosystem and clones chased quick monetization, the original intent grew harder to protect. I felt myself becoming a shadow inside the thing I built.
 
