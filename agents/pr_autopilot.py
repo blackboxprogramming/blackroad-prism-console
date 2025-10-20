@@ -1,4 +1,5 @@
 """Automates pull request management tasks for BlackRoad repositories."""
+"""Automated pull request manager for BlackRoad repositories."""
 
 from __future__ import annotations
 
@@ -16,6 +17,7 @@ import requests
 @dataclass
 class AutomatedPullRequestManager:
     """Monitor Git events and orchestrate draft pull requests."""
+    """Monitor git events and orchestrate draft pull requests."""
 
     repo: str
     branch_prefix: str = "codex/"
@@ -23,9 +25,7 @@ class AutomatedPullRequestManager:
     codex_trigger: str = "@codex"
     log_file: str = "pr_autopilot.log"
     token: Optional[str] = None
-    auto_fix_commands: tuple[Sequence[str] | str, ...] = (
-        ("bash", "fix-everything.sh"),
-    )
+    auto_fix_commands: tuple[Sequence[str] | str, ...] = (("bash", "fix-everything.sh"),)
     max_fix_iterations: int = 3
 
     def __post_init__(self) -> None:
@@ -51,6 +51,12 @@ class AutomatedPullRequestManager:
                 "preparing a draft PR."
             )
             return None
+        """Check whether the repository has uncommitted changes."""
+
+        return self._has_uncommitted_changes(Path.cwd())
+
+    def prepare_draft_pr(self) -> None:
+        """Create a draft pull request from the latest commit."""
 
         commit_msg = subprocess.run(
             ["git", "log", "-1", "--pretty=%s"],
@@ -81,6 +87,13 @@ class AutomatedPullRequestManager:
             text=True,
             check=False,
             cwd=repo_root,
+        subprocess.run(["git", "checkout", "-b", branch_name], check=False)
+        subprocess.run(["git", "push", "-u", "origin", branch_name], check=False)
+        diff = subprocess.run(
+            ["git", "diff", "origin/main..."],
+            capture_output=True,
+            text=True,
+            check=False,
         ).stdout
         body = f"### Diff Summary\n```\n{diff[:1000]}\n```\n"
 
@@ -96,17 +109,26 @@ class AutomatedPullRequestManager:
         return pr
 
     def _create_pr(self, title: str, head: str, base: str, body: str) -> dict:
+        """Create a pull request via the GitHub API and return its response."""
+
         url = f"https://api.github.com/repos/{self.repo}/pulls"
         headers = {"Accept": "application/vnd.github+json"}
         if self.token:
             headers["Authorization"] = f"token {self.token}"
-        payload = {"title": title, "head": head, "base": base, "body": body, "draft": True}
+        payload = {
+            "title": title,
+            "head": head,
+            "base": base,
+            "body": body,
+            "draft": True,
+        }
         response = requests.post(url, json=payload, headers=headers, timeout=10)
         response.raise_for_status()
         return response.json()
 
     def _assign_reviewer(self, pr_number: int) -> None:
         """Request a review from the default reviewer."""
+
         url = f"https://api.github.com/repos/{self.repo}/pulls/{pr_number}/requested_reviewers"
         headers = {"Accept": "application/vnd.github+json"}
         if self.token:
@@ -185,10 +207,12 @@ class AutomatedPullRequestManager:
 
     def log(self, message: str) -> None:
         """Write a message to the log file."""
+
         logging.info(message)
 
     def auto_enhance_pull_request(self, pr_number: int, branch_name: str) -> None:
         """Apply configured fixers to iteratively improve an open pull request."""
+
         if not self.auto_fix_commands:
             self.log("No auto-fix commands configured; skipping enhancements.")
             return
@@ -207,7 +231,9 @@ class AutomatedPullRequestManager:
                 self._run_auto_fix_command(command, repo_root)
 
             if not self._has_uncommitted_changes(repo_root):
-                self.log(f"No changes detected after auto-fix iteration {iteration}; stopping.")
+                self.log(
+                    f"No changes detected after auto-fix iteration {iteration}; stopping."
+                )
                 break
 
             if not self._commit_and_push(branch_name, repo_root, iteration):
@@ -317,7 +343,9 @@ class AutomatedPullRequestManager:
 
         node_id = self._get_pr_node_id(pr_number)
         if not node_id:
-            self.log(f"Unable to determine node id for PR #{pr_number}; cannot enable auto-merge.")
+            self.log(
+                f"Unable to determine node id for PR #{pr_number}; cannot enable auto-merge."
+            )
             return
 
         method = merge_method.upper()
@@ -360,6 +388,7 @@ class AutomatedPullRequestManager:
         except requests.RequestException as exc:
             self.log(f"Failed to fetch PR #{pr_number} metadata: {exc}")
             return None
+
 
 if __name__ == "__main__":
     manager = AutomatedPullRequestManager("blackboxprogramming/blackroad")
