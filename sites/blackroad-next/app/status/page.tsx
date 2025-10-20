@@ -1,6 +1,28 @@
+import { headers } from "next/headers";
+
+function resolveBaseUrl() {
+  const envBase = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_BASE_URL;
+  if (envBase) {
+    try {
+      const normalized = envBase.startsWith("http") ? envBase : `https://${envBase}`;
+      return new URL(normalized).toString();
+    } catch {
+      // ignore invalid env values and fall back to headers
+    }
+  }
+
+  const headerList = headers();
+  const host = headerList.get("x-forwarded-host") || headerList.get("host");
+  if (!host) return null;
+  const protocol = headerList.get("x-forwarded-proto") || (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
+  return `${protocol}://${host}`;
+}
+
 async function getStatus() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ""}/status.json`, { cache: "no-store" });
+    const baseUrl = resolveBaseUrl();
+    if (!baseUrl) return null;
+    const res = await fetch(new URL("/status.json", baseUrl), { cache: "no-store" });
     if (!res.ok) return null;
     return res.json();
   } catch {
