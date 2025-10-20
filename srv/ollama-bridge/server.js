@@ -2,13 +2,20 @@ import fs from 'node:fs';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import express from 'express';
+import express from 'express';
+import os from 'os';
+import fs from 'fs';
+import crypto from 'crypto';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 app.use(express.json({ limit: '1mb' }));
 
 const PORT = process.env.PORT || 4010;
 const MODEL_DEFAULT = 'qwen2:1.5b';
-const PERSONA_DEFAULT = 'You are a kind, curious BlackRoad assistant. ALWAYS ask 1 short follow-up. Never claim remote powers. Be truthful and concise.';
+const PERSONA_DEFAULT =
+  'You are a kind, curious BlackRoad assistant. ALWAYS ask 1 short follow-up. Never claim remote powers. Be truthful and concise.';
 
 let identityCache = { ts: 0, data: null };
 
@@ -49,6 +56,9 @@ async function detectModel() {
     const j = await r.json();
     if (Array.isArray(j.models) && j.models.length > 0) return j.models[0].name;
   } catch (e) {}
+  } catch (e) {
+    // ignore detection failures
+  }
   return 'unknown';
 }
 
@@ -80,6 +90,9 @@ async function buildIdentity() {
     const r = await fetch('http://127.0.0.1:4000/health');
     if (r.ok) services['blackroad-api'] = 'active';
   } catch (e) {}
+  } catch (e) {
+    // ignore health probe failures
+  }
   return {
     host,
     ip,
@@ -87,11 +100,12 @@ async function buildIdentity() {
     time,
     code,
     uptime_s: Math.floor(process.uptime()),
-    services
+    services,
   };
 }
 
 app.get('/api/codex/identity', async (req, res) => {
+app.get('/api/codex/identity', async (_req, res) => {
   if (Date.now() - identityCache.ts < 60000 && identityCache.data) {
     return res.json(identityCache.data);
   }
@@ -110,6 +124,9 @@ function getSystem(body) {
   const sys = body.system && body.system.trim() ? body.system : PERSONA_DEFAULT;
   logPersona(sys);
   return sys;
+  const system = body.system && body.system.trim() ? body.system : PERSONA_DEFAULT;
+  logPersona(system);
+  return system;
 }
 
 function buildPrompt(messages) {
@@ -120,17 +137,25 @@ function buildPrompt(messages) {
 app.post('/api/llm/chat', async (req, res) => {
   const system = getSystem(req.body);
   const prompt = buildPrompt(req.body.messages || []);
+  return messages.map((m) => `${m.role}: ${m.content}`).join('\n') + '\nassistant:';
+}
+
+app.post('/api/llm/chat', async (req, res) => {
+  const system = getSystem(req.body || {});
+  const prompt = buildPrompt((req.body && req.body.messages) || []);
   try {
     const r = await fetch('http://127.0.0.1:11434/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: MODEL_DEFAULT, prompt, stream: false, system })
+      body: JSON.stringify({ model: MODEL_DEFAULT, prompt, stream: false, system }),
     });
     const j = await r.json();
     const text = j.response || j.output || j.text || '';
     return res.json({ choices: [{ message: { role: 'assistant', content: text } }] });
   } catch (e) {
     const last = (req.body.messages || []).filter(m => m.role === 'user').pop();
+    const last = ((req.body && req.body.messages) || []).filter((m) => m.role === 'user').pop();
     return res.json({ choices: [{ message: { role: 'assistant', content: last ? last.content : '' } }] });
   }
 });
@@ -138,11 +163,14 @@ app.post('/api/llm/chat', async (req, res) => {
 app.post('/api/llm/stream', async (req, res) => {
   const system = getSystem(req.body);
   const prompt = buildPrompt(req.body.messages || []);
+  const system = getSystem(req.body || {});
+  const prompt = buildPrompt((req.body && req.body.messages) || []);
   try {
     const r = await fetch('http://127.0.0.1:11434/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: MODEL_DEFAULT, prompt, stream: true, system })
+      body: JSON.stringify({ model: MODEL_DEFAULT, prompt, stream: true, system }),
     });
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -166,6 +194,7 @@ app.post('/api/llm/stream', async (req, res) => {
           }
         } catch (err) {
           /* ignore */
+          // ignore malformed chunks
         }
       }
     }
@@ -182,6 +211,11 @@ app.get('/api/llm/health', (req, res) => {
 });
 
 app.get('/api/backups/last', (req, res) => {
+app.get('/api/llm/health', (_req, res) => {
+  res.json({ ok: true });
+});
+
+app.get('/api/backups/last', (_req, res) => {
   try {
     const t = fs.readFileSync('/srv/blackroad-backups/.last_snapshot', 'utf8').trim();
     res.json({ time: t });
@@ -193,5 +227,13 @@ app.get('/api/backups/last', (req, res) => {
 app.listen(PORT, () => {
   console.log(`ollama-bridge listening on ${PORT}`);
 });
+const modulePath = fileURLToPath(import.meta.url);
+const isMain = process.argv[1] && modulePath === path.resolve(process.argv[1]);
+
+if (isMain) {
+  app.listen(PORT, () => {
+    console.log(`ollama-bridge listening on ${PORT}`);
+  });
+}
 
 export default app;
