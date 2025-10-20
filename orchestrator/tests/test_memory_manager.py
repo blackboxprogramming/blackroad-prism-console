@@ -4,7 +4,14 @@ from pathlib import Path
 
 import pytest
 
-from orchestrator.memory_manager import MemoryManager, MemoryOperationError
+from orchestrator.memory_manager import (
+    LongTermMemory,
+    MemoryConfig,
+    MemoryManager,
+    MemoryOperationError,
+    ShortTermMemory,
+    WorkingMemory,
+)
 
 
 def config_path() -> Path:
@@ -40,3 +47,18 @@ def test_memory_manager_rejects_unknown_operation() -> None:
     manager = MemoryManager.from_yaml(config_path())
     with pytest.raises(MemoryOperationError):
         manager.apply_op({"op": "unknown"})
+
+
+def test_short_term_memory_purges_after_ttl() -> None:
+    config = MemoryConfig(
+        short_term=ShortTermMemory(ttl_turns=2, purpose="test"),
+        working=WorkingMemory(keys=()),
+        long_term=LongTermMemory(schema=()),
+    )
+    manager = MemoryManager(config)
+
+    for turn in range(1, 5):
+        manager.start_turn({"turn": turn})
+
+    short_term = manager.hydrate_state()["short_term"]
+    assert short_term == [{"turn": 4}]

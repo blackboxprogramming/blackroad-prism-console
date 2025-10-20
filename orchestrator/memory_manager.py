@@ -28,7 +28,6 @@ class ShortTermMemory:
 
     def append(self, record: Mapping[str, Any]) -> None:
         self._entries.append(dict(record))
-        self._turns = 0
 
     def tick(self) -> None:
         self._turns += 1
