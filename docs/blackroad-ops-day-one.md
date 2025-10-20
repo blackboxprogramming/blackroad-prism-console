@@ -16,16 +16,28 @@ This playbook captures the immediate decisions, setup actions, and reusable auto
 - **Monitoring & security**: Datadog and Snyk.
 
 ### Domain Routing
-- **blackroad.io** → public marketing site and customer-facing products.
-  - `www.blackroad.io` (marketing)
-  - `app.blackroad.io` (customer app)
-  - `api.blackroad.io` (public API)
-  - `status.blackroad.io` (Statuspage)
-- **blackroadinc.us** → internal operations footprint.
-  - `hub.blackroadinc.us` (Notion)
-  - `id.blackroadinc.us` (Okta)
-  - `ops.blackroadinc.us` (internal portal)
-  - `data.blackroadinc.us` (business intelligence)
+- **Day-1 must-haves** — keep the first launch small. Only attach the apex and `www` hosts for each domain so both sites are live on Vercel immediately.
+  - `blackroad.io` (apex) → Vercel project `blackroad-io` via **ALIAS → `cname.vercel-dns-*.com`**.
+  - `www.blackroad.io` → same project via **CNAME → `cname.vercel-dns.com`**.
+  - `blackroadinc.us` (apex) → Vercel redirect project that 301s to `https://blackroad.io/:path*` (**ALIAS → `cname.vercel-dns-*.com`**).
+  - `www.blackroadinc.us` → same redirect project (**CNAME → `cname.vercel-dns.com`**).
+- **Day-2 and later** — layer in focused subdomains once the primary routing is stable.
+  - `status.blackroad.io` → surface `/status` from the main project.
+  - `docs.blackroad.io` → route to `/docs` (or a dedicated project if we separate documentation).
+  - `portal.blackroad.io` / `app.blackroad.io` → either map to `/portal` on the main project or a standalone app project if we need isolated cookies.
+  - `api.blackroad.io` → keep `/api/*` on the main project or split to a Fastify/API-only project when scaling.
+  - `staging.blackroad.io` / `preview.blackroad.io` → attach as preview domains for Vercel environments.
+  - Wildcard `*.blackroad.io` → only if we intentionally need a catch-all (skip when planning email services).
+  - `hub.blackroadinc.us`, `id.blackroadinc.us`, `ops.blackroadinc.us`, `data.blackroadinc.us` → continue to reserve for internal tools once routing maturity allows.
+
+> **Vercel DNS tip:** When Vercel nameservers are delegated, stay on ALIAS/CNAME records. Skip manual `A 76.76.21.21` entries to avoid conflicts with managed certificates and automatic failover.
+
+#### DNS Activation Checklist
+1. In Vercel, open the `blackroad-io` project → **Settings → Domains** and add `blackroad.io` (apex) and `www.blackroad.io`. Accept the suggested `cname.vercel-dns-*.com` target for the apex and `cname.vercel-dns.com` for `www`.
+2. Open the redirect project (`blackroadinc.us`) → **Settings → Domains** and add `blackroadinc.us` (apex) plus `www.blackroadinc.us`. Confirm the generated ALIAS/CNAME targets.
+3. In **Vercel DNS**, create the ALIAS/CNAME records using the targets from steps 1–2. No `A` records are required.
+4. Verify both domains resolve (`dig blackroad.io`, `dig www.blackroadinc.us`) and that visiting `blackroadinc.us` performs a 301 redirect to `https://blackroad.io/:path*`.
+5. Once live, capture screenshots of the Vercel domain status (green check) for the ops log.
 
 ### Naming Normalization
 Standardize external vendor names to "BlackRoad <Capability>" (e.g., "BlackRoad Tasks" for Asana, "BlackRoad Leads" for HubSpot, "BlackRoad Chat" for Slack) to keep integrations and documentation consistent.
@@ -76,7 +88,7 @@ Standardize external vendor names to "BlackRoad <Capability>" (e.g., "BlackRoad 
 - Apply GitHub org policies, create repos, enable Actions, Snyk, Dependabot, CODEOWNERS.
 - Wire Okta SSO (Slack, Asana, Jira, GitHub, Notion) and enforce MFA.
 - Establish 1Password vaults and shared secret policy; ensure `.env.example` files exist.
-- Provision DNS subdomains (`app`, `api`, `status`, `hub`, `id`, `ops`, `data`).
+- Provision Day-1 DNS records (apex + `www` for `blackroad.io` and `blackroadinc.us`), then stage Day-2 subdomains once the core routing is healthy.
 - Schedule daily stand-up (9:00) and Friday demo/retro (14:00).
 
 ## 3. Operating Rhythm, Risks, and Metrics
