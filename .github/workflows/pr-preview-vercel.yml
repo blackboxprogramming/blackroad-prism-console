@@ -24,7 +24,32 @@ permissions:
   pull-requests: write
 
 jobs:
+  resolve-head:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.pr != '' && github.event.inputs.head_sha == ''
+    runs-on: ubuntu-latest
+    outputs:
+      head_sha: ${{ steps.lookup.outputs.result }}
+    steps:
+      - name: Resolve PR head SHA
+        id: lookup
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            const prNumber = Number('${{ github.event.inputs.pr }}');
+            if (!Number.isInteger(prNumber)) {
+              core.setFailed(`Invalid pull request number: ${prNumber}`);
+            }
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+            return pr.head.sha;
+
   deploy:
+    needs: resolve-head
     uses: ./.github/workflows/deploy-preview.yml
     permissions:
       contents: read
@@ -32,5 +57,5 @@ jobs:
     secrets: inherit
     with:
       pr: ${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.event.inputs.pr || '' }}
-      head_sha: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.inputs.head_sha || '' }}
+      head_sha: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.inputs.head_sha || needs.resolve-head.outputs.head_sha || '' }}
       environment: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.event.inputs.environment || '' }}
