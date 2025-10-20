@@ -53,3 +53,27 @@ tests:
       resource_class: secret
     want:
       decision: allow
+rule_id: "MIRROR_CLASS_LIMIT"
+name: "Mirror requests restricted to non-secret repos"
+category: "enforce"
+severity: "high"
+version: 1
+description: >
+  Block mirror jobs that target restricted or secret repositories to prevent
+  inadvertent data exfiltration.
+expr: |
+  action == "mirror" && (resource_class == "restricted" || resource_class == "secret")
+metrics_selector:
+  prom: ""
+  ch: ""
+on_match:
+  decision: "deny"
+  reason: "mirror_class_limit"
+  details:
+    message: "Blocked by policy MIRROR_CLASS_LIMIT."
+    remediation: "Request a temporary exemption from SecOps."
+notify:
+  channels: ["slack:#security-ops"]
+docs_url: "https://your.docs/policies/mirror_class_limit"
+owners: ["secops@company.com", "@oncall-security"]
+canary: false
