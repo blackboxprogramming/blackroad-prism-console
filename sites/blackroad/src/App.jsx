@@ -191,6 +191,44 @@ const navLinkClassName = ({ isActive }) =>
     "rounded-lg px-3 py-2 text-sm transition",
     isActive ? "bg-white/10 text-white" : "text-slate-200/80 hover:text-white",
   ].join(" ");
+import { NavLink, Routes, Route } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import Chat from './pages/Chat.jsx';
+import Canvas from './pages/Canvas.jsx';
+import Editor from './pages/Editor.jsx';
+import Terminal from './pages/Terminal.jsx';
+import RoadView from './pages/RoadView.jsx';
+import Backroad from './pages/Backroad.jsx';
+import Subscribe from './pages/Subscribe.jsx';
+import Lucidia from './pages/Lucidia.jsx';
+import InfinityMath from './pages/InfinityMath.jsx';
+import Agents from './pages/Agents.jsx';
+import Desktop from './pages/Desktop.jsx';
+import QuantumConsciousness from './pages/QuantumConsciousness.jsx';
+import OptimalTransportLab from './pages/OptimalTransportLab.jsx';
+import BifurcationLab from './pages/BifurcationLab.jsx';
+import ContinuedFractionsLab from './pages/ContinuedFractionsLab.jsx';
+import QuatJuliaLab from './pages/QuatJuliaLab.jsx';
+import StableFluidsLab from './pages/StableFluidsLab.jsx';
+import AutoDiffLab from './pages/AutoDiffLab.jsx';
+import ConformalGridLab from './pages/ConformalGridLab.jsx';
+import EikonalLab from './pages/EikonalLab.jsx';
+import PoissonDiskLab from './pages/PoissonDiskLab.jsx';
+import LSystemLab from './pages/LSystemLab.jsx';
+import MinimalSurfaceLab from './pages/MinimalSurfaceLab.jsx';
+import EigenmapsLab from './pages/EigenmapsLab.jsx';
+import PoissonBlendLab from './pages/PoissonBlendLab.jsx';
+import NBodyLab from './pages/NBodyLab.jsx';
+import WaveletLab from './pages/WaveletLab.jsx';
+import PoissonBoltzmannLab from './pages/PoissonBoltzmannLab.jsx';
+import RidgeRegressionLab from './pages/RidgeRegressionLab.jsx';
+import KernelPCALab from './pages/KernelPCALab.jsx';
+import BrushfirePathLab from './pages/BrushfirePathLab.jsx';
+import BlueNoiseTSPLab from './pages/BlueNoiseTSPLab.jsx';
+import BezierShadedSurfaceLab from './pages/BezierShadedSurfaceLab.jsx';
+import Kalman2DTrackerLab from './pages/Kalman2DTrackerLab.jsx';
+import VorticityStreamLab from './pages/VorticityStreamLab.jsx';
+import CodexPromptPage from './pages/CodexPrompt.jsx';
 
 function useApiHealth() {
   const [state, setState] = useState({ ok: null, info: "" });
@@ -499,6 +537,75 @@ function LegacyApp() {
             <Route path="gs-gallery" element={<GrayScottGalleryLab/>} />
             <Route path="plane3d" element={<RansacPlane3DLab/>} />
             <Route path="*" element={<div>Not found</div>} />
+            <Route path="/" element={<Chat />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/canvas" element={<Canvas />} />
+            <Route path="/editor" element={<Editor />} />
+            <Route path="/terminal" element={<Terminal />} />
+            <Route path="/roadview" element={<RoadView />} />
+            <Route path="/backroad" element={<Backroad />} />
+            <Route path="/agents" element={<Agents />} />
+            <Route path="/subscribe" element={<Subscribe />} />
+            <Route path="/lucidia" element={<Lucidia />} />
+            <Route path="/math" element={<InfinityMath />} />
+            <Route path="/codex/:slug" element={<CodexPromptPage />} />
+            <Route path="/ot" element={<OptimalTransportLab />} />
+            <Route path="/bifurcate" element={<BifurcationLab />} />
+            <Route path="/cfrac" element={<ContinuedFractionsLab />} />
+            <Route path="/qjulia" element={<QuatJuliaLab />} />
+            <Route path="/fluids" element={<StableFluidsLab />} />
+            <Route path="/autodiff" element={<AutoDiffLab />} />
+            <Route path="/conformal" element={<ConformalGridLab />} />
+            <Route path="/eikonal" element={<EikonalLab />} />
+            <Route path="/poisson2" element={<PoissonDiskLab />} />
+            <Route path="/lsys" element={<LSystemLab />} />
+            <Route path="/minimal" element={<MinimalSurfaceLab />} />
+            <Route path="/eigenmaps" element={<EigenmapsLab />} />
+            <Route path="/blend" element={<PoissonBlendLab />} />
+            <Route path="/nbody" element={<NBodyLab />} />
+            <Route path="/wavelet" element={<WaveletLab />} />
+            <Route path="/pb" element={<PoissonBoltzmannLab />} />
+            <Route path="/ridge" element={<RidgeRegressionLab />} />
+            <Route path="/kpca" element={<KernelPCALab />} />
+             <Route path="/brushfire" element={<BrushfirePathLab />} />
+             <Route path="/blue-tsp" element={<BlueNoiseTSPLab />} />
+             <Route path="/bezier-lit" element={<BezierShadedSurfaceLab />} />
+             <Route path="/kf-2d" element={<Kalman2DTrackerLab />} />
+             <Route path="/vorticity" element={<VorticityStreamLab />} />
+            <Route path="chat" element={<Chat />} />
+            <Route path="canvas" element={<Canvas />} />
+            <Route path="editor" element={<Editor />} />
+            <Route path="terminal" element={<Terminal />} />
+            <Route path="roadview" element={<RoadView />} />
+            <Route path="backroad" element={<Backroad />} />
+            <Route path="subscribe" element={<Subscribe />} />
+            <Route path="lucidia" element={<Lucidia />} />
+            <Route path="math" element={<InfinityMath />} />
+            <Route path="codex/:slug" element={<CodexPromptPage />} />
+            <Route path="ot" element={<OptimalTransportLab />} />
+            <Route path="bifurcate" element={<BifurcationLab />} />
+            <Route path="cfrac" element={<ContinuedFractionsLab />} />
+            <Route path="qjulia" element={<QuatJuliaLab />} />
+            <Route path="fluids" element={<StableFluidsLab />} />
+            <Route path="autodiff" element={<AutoDiffLab />} />
+            <Route path="conformal" element={<ConformalGridLab />} />
+            <Route path="eikonal" element={<EikonalLab />} />
+            <Route path="poisson2" element={<PoissonDiskLab />} />
+            <Route path="lsys" element={<LSystemLab />} />
+            <Route path="minimal" element={<MinimalSurfaceLab />} />
+            <Route path="eigenmaps" element={<EigenmapsLab />} />
+            <Route path="blend" element={<PoissonBlendLab />} />
+            <Route path="nbody" element={<NBodyLab />} />
+            <Route path="wavelet" element={<WaveletLab />} />
+            <Route path="pb" element={<PoissonBoltzmannLab />} />
+            <Route path="ridge" element={<RidgeRegressionLab />} />
+            <Route path="kpca" element={<KernelPCALab />} />
+             <Route path="brushfire" element={<BrushfirePathLab />} />
+             <Route path="blue-tsp" element={<BlueNoiseTSPLab />} />
+             <Route path="bezier-lit" element={<BezierShadedSurfaceLab />} />
+             <Route path="kf-2d" element={<Kalman2DTrackerLab />} />
+             <Route path="vorticity" element={<VorticityStreamLab />} />
+             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
       </main>

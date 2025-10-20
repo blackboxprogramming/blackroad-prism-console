@@ -1,0 +1,10 @@
+{
+  "prompts": [
+    {
+      "id": "phase-37",
+      "slug": "phase-37-plm-manufacturing-ops",
+      "title": "Phase 37 — PLM & MANUFACTURING OPS (BOMs, ECO/ECR, Routings, Work Instructions, SPC, Yield, COQ)",
+      "summary": "Offline PLM & Manufacturing Ops layer for blackboxprogramming/blackroad-prism-console"
+    }
+  ]
+}
