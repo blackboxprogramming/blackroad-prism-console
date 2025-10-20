@@ -18,6 +18,13 @@ cat >/var/www/blackroad/index.html <<'HTML'
 <main><h1>BlackRoad is live</h1><p>Static deploy wired to Nginx. Content incoming.</p></main>
 HTML
 
+# --- 1a) SELinux context for the custom web root ---
+if selinuxenabled; then
+    dnf -y install policycoreutils-python-utils  # provides semanage on Rocky/Alma/CentOS
+    semanage fcontext -a -t httpd_sys_content_t '/var/www/blackroad(/.*)?'
+    restorecon -Rv /var/www/blackroad
+fi
+
 # --- 2) Nginx site config (HTTP first) ---
 cat >/etc/nginx/conf.d/blackroad.conf <<'NGINX'
 server {
@@ -43,6 +50,8 @@ curl -s http://127.0.0.1/healthz
 ```
 
 Expect `HTTP/1.1 200 OK` from the first curl and the JSON payload from `/healthz` to confirm the service is responding.
+
+If SELinux is enforcing (the default on Rocky/Alma/CentOS), the `selinuxenabled` block above relabels `/var/www/blackroad` so Nginx can read the files. Without the updated context the smoke test will return `403 Forbidden`.
 
 ## Block B — DNS (GoDaddy)
 
