@@ -320,6 +320,13 @@ import RansacPlane3DLab from "./pages/RansacPlane3DLab.jsx";
 import PrimeGapsLab from "./pages/PrimeGapsLab.jsx";
 import FareyTreeLab from "./pages/FareyTreeLab.jsx";
 import FourierLab from "./pages/FourierLab.jsx";
+import OptimalTransportLab from "./pages/OptimalTransportLab.jsx";
+import BifurcationLab from "./pages/BifurcationLab.jsx";
+import ContinuedFractionsLab from "./pages/ContinuedFractionsLab.jsx";
+import RiemannMappingToy from "./pages/RiemannMappingToy.jsx";
+import OULab from "./pages/OULab.jsx";
+import VoronoiLloydLab from "./pages/VoronoiLloydLab.jsx";
+import BeliefPropagationLab from "./pages/BeliefPropagationLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -490,6 +497,10 @@ function LegacyApp() {
             <Route path="/primes" element={<PrimeGapsLab/>} />
             <Route path="/farey" element={<FareyTreeLab/>} />
             <Route path="/fourier" element={<FourierLab/>} />
+            <Route path="/riemann" element={<RiemannMappingToy/>} />
+            <Route path="/ou" element={<OULab/>} />
+            <Route path="/vor" element={<VoronoiLloydLab/>} />
+            <Route path="/belief" element={<BeliefPropagationLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -545,6 +556,10 @@ function LegacyApp() {
             <Route path="primes" element={<PrimeGapsLab/>} />
             <Route path="farey" element={<FareyTreeLab/>} />
             <Route path="fourier" element={<FourierLab/>} />
+            <Route path="riemann" element={<RiemannMappingToy/>} />
+            <Route path="ou" element={<OULab/>} />
+            <Route path="vor" element={<VoronoiLloydLab/>} />
+            <Route path="belief" element={<BeliefPropagationLab/>} />
             <Route path="*" element={<div>Not found</div>} />
             <Route path="/" element={<Chat />} />
             <Route path="/chat" element={<Chat />} />
