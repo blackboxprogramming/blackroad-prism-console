@@ -112,3 +112,64 @@ observability:
     - aws ecs describe-services --cluster <cluster-arn> --services pr-<pr-number> --region us-east-1
     - docker pull ghcr.io/<owner>/blackroad-prism-console:pr-<pr-number>-<short-sha>
     - docker run --rm ghcr.io/<owner>/blackroad-prism-console:pr-<pr-number>-<short-sha>
+branch: pr/*
+description: >-
+  Ephemeral ECS/Fargate environments spun up per pull request for validation and
+  stakeholder review.
+url_template: https://pr-<pr-number>.dev.blackroad.io
+reviewers:
+  - devx-team
+  - platform-ops
+deploy_targets:
+  - surface: application
+    provider: aws_ecs
+    cluster_variable: ECS_CLUSTER
+    service_family: prism-console-preview
+    container:
+      image_repository_variable: ECR_REPO
+      port_variable: CONTAINER_PORT
+    load_balancer:
+      arn_variable: ALB_ARN
+      https_listener_variable: HTTPS_LISTENER_ARN
+      host_template: pr-<pr-number>.dev.blackroad.io
+    route53:
+      hosted_zone_variable: HOSTED_ZONE_ID
+      dns_name_variable: ALB_DNS
+    iam:
+      execution_role_variable: TASK_EXECUTION_ROLE_ARN
+      task_role_variable: TASK_ROLE_ARN
+    network:
+      vpc_variable: VPC_ID
+      subnet_variable: SUBNETS
+      security_group_variable: SERVICE_SG
+workflow: .github/workflows/preview.yml
+lifecycle:
+  create_on: [opened, reopened, synchronize]
+  destroy_on: [closed]
+inputs:
+  required_repository_variables:
+    - AWS_REGION
+    - ECS_CLUSTER
+    - VPC_ID
+    - SUBNETS
+    - SERVICE_SG
+    - ALB_ARN
+    - HTTPS_LISTENER_ARN
+    - ALB_ZONE_ID
+    - ALB_DNS
+    - HOSTED_ZONE_ID
+    - CONTAINER_PORT
+    - ECR_REPO
+    - TASK_EXECUTION_ROLE_ARN
+    - TASK_ROLE_ARN
+  required_secrets:
+    - AWS_ROLE_TO_ASSUME
+notifications:
+  slack_channel: #eng
+  pr_comment: true
+smoke_tests:
+  - curl -fsS $PREVIEW_URL/health
+notes:
+  - >-
+    Workflow provisions target groups, listener rules, Route53 alias records,
+    and the ECS service, then tears them down when the PR closes.
