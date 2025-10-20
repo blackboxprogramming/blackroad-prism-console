@@ -1,10 +1,18 @@
 from __future__ import annotations
 
+import sys
+import types
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import pytest
+
+# Patch broken storage module before importing orchestrator.
+storage_stub = types.ModuleType("storage")
+storage_stub.write = lambda path, content: None
+storage_stub.read = lambda path: ""
+sys.modules.setdefault("tools.storage", storage_stub)
 
 from orchestrator import orchestrator
 from orchestrator.base import BaseBot
@@ -32,6 +40,48 @@ def test_route_records_trace_and_storage(monkeypatch: pytest.MonkeyPatch) -> Non
     records: List[Dict[str, Any]] = []
     traces: List[str] = []
     scrubbed_contexts: List[Any] = []
+    status_events: List[Dict[str, Any]] = []
+
+    class DummyMemory:
+        def __init__(self) -> None:
+            self.started: List[Dict[str, Any]] = []
+            self.logged: List[Dict[str, Any]] = []
+
+        def start_turn(self, context: Dict[str, Any]) -> None:
+            self.started.append(context)
+
+        def hydrate_state(self) -> Dict[str, Any]:
+            return {"short_term": [], "working_memory": {}, "long_term": {}}
+
+        def record_task_result(
+            self,
+            *,
+            goal: str,
+            constraints: Optional[Any] = None,
+            artifacts: Optional[List[str]] = None,
+            open_questions: Optional[List[str]] = None,
+        ) -> None:
+            self.logged.append(
+                {
+                    "goal": goal,
+                    "constraints": constraints,
+                    "artifacts": artifacts or [],
+                    "open_questions": open_questions or [],
+                }
+            )
+
+        def apply_op(self, operation: Dict[str, Any]) -> None:  # pragma: no cover - noop
+            pass
+
+    dummy_memory = DummyMemory()
+    monkeypatch.setattr(orchestrator, 'memory_manager', dummy_memory)
+
+    class DummyStatus:
+        def emit(self, **event: Any) -> Dict[str, Any]:
+            status_events.append(event)
+            return event
+
+    monkeypatch.setattr(orchestrator, 'status_broadcaster', DummyStatus())
 
     monkeypatch.setattr(orchestrator, 'available_bots', lambda: {'demo': DemoBot})
 
@@ -74,6 +124,9 @@ def test_route_records_trace_and_storage(monkeypatch: pytest.MonkeyPatch) -> Non
 
     # Ensure context and response were sent through the scrubber
     assert any(isinstance(item, dict) and 'secret' in item for item in scrubbed_contexts)
+
+    assert status_events and {"status": "running"}.items() <= status_events[0].items()
+    assert any(evt.get('status') == 'completed' for evt in status_events)
 
 
 def test_route_raises_for_unknown_bot(monkeypatch: pytest.MonkeyPatch) -> None:

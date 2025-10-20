@@ -1,0 +1,13 @@
+op: promote_to_long_term
+data:
+  key: "routes.guardian"
+  value: "/guardian → policy panel v2"
+reason: "Route stabilized; referenced weekly."
+---
+op: demote_to_working
+data:
+  key: "experiment.temp_model"
+reason: "No longer canonical."
+---
+op: purge_short_term
+reason: "New task; reset chat context."

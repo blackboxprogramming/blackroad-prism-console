@@ -1,15 +1,9 @@
 import inspect
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Type
 
-from bots import available_bots
-from tools import storage
-
-from .base import BaseBot, assert_guardrails
-from .perf import perf_timer
-from .protocols import BotResponse, Task
-from .slo import SLO_CATALOG
 import settings
 from bots import available_bots
 from orchestrator import lineage, redaction
@@ -17,9 +11,22 @@ from policy import enforcer
 from tools import storage
 
 from .base import BaseBot, assert_guardrails
+from .memory_manager import MemoryManager, MemoryOperationError
+from .perf import perf_timer
 from .protocols import BotResponse, Task
+from .slo import SLO_CATALOG
+from .status import StatusBroadcaster
 
-_memory_path = Path(__file__).resolve().with_name("memory.jsonl")
+LOGGER = logging.getLogger(__name__)
+
+_module_path = Path(__file__).resolve()
+_memory_path = _module_path.with_name("memory.jsonl")
+_config_root = _module_path.parent.parent
+_memory_config_path = _config_root / "agents" / "memory" / "memory.yaml"
+
+memory_manager = MemoryManager.from_yaml(_memory_config_path)
+status_broadcaster = StatusBroadcaster(channel="#blackroad-status")
+
 _current_doc = ""
 
 
@@ -45,17 +52,45 @@ def route(task: Task, bot_name: str) -> BotResponse:
     enforcer.enforce_or_raise(violations)
 
     scrubbed_ctx = redaction.scrub(task.context) if task.context else None
-    task = Task(id=task.id, goal=task.goal, context=scrubbed_ctx, created_at=task.created_at)
+    memory_manager.start_turn(scrubbed_ctx or {})
 
     trace_id = lineage.start_trace(task.id)
+
+    hydrated_memory = memory_manager.hydrate_state()
+    enriched_context = dict(scrubbed_ctx or {})
+    enriched_context["memory"] = hydrated_memory
+    task = Task(id=task.id, goal=task.goal, context=enriched_context, created_at=task.created_at)
 
     bot = registry[bot_name]()
     global _current_doc
     _current_doc = inspect.getdoc(bot) or ""
 
+    owner = enriched_context.get("owner", "unassigned")
+    status_links = {"trace": f"logs://{bot_name}/{trace_id}"}
+    status_broadcaster.emit(
+        agent=bot_name,
+        status="running",
+        owner=owner,
+        task=task.goal,
+        next_step="act",
+        links=status_links,
+    )
+
     slo = SLO_CATALOG.get(bot_name)
     with perf_timer("bot_run") as perf:
-        response = bot.run(task)
+        try:
+            response = bot.run(task)
+        except Exception:
+            status_broadcaster.emit(
+                agent=bot_name,
+                status="blocked",
+                owner=owner,
+                task=task.goal,
+                next_step="Escalate to on-call",
+                links=status_links,
+            )
+            lineage.finalize(trace_id)
+            raise
     response.elapsed_ms = perf.get("elapsed_ms")
     response.rss_mb = perf.get("rss_mb")
     if slo:
@@ -68,6 +103,19 @@ def route(task: Task, bot_name: str) -> BotResponse:
 
     resp_dict = redaction.scrub(response.model_dump(mode="python"))
     response = BotResponse(**resp_dict)
+
+    memory_manager.record_task_result(
+        goal=task.goal,
+        constraints=enriched_context.get("constraints"),
+        artifacts=response.artifacts,
+        open_questions=enriched_context.get("open_questions"),
+    )
+    if response.memory_ops:
+        for op in response.memory_ops:
+            try:
+                memory_manager.apply_op(op)
+            except MemoryOperationError as exc:
+                LOGGER.warning("memory_op_failed", extra={"error": str(exc), "operation": op})
 
     violations = enforcer.check_response(bot_name, response)
     enforcer.enforce_or_raise(violations)
@@ -89,4 +137,15 @@ def route(task: Task, bot_name: str) -> BotResponse:
         }
     storage.write(str(_memory_path), record)
     lineage.finalize(trace_id)
+    status_broadcaster.emit(
+        agent=bot_name,
+        status="completed",
+        owner=owner,
+        task=task.goal,
+        next_step=(response.next_actions[0] if response.next_actions else None),
+        links={
+            "trace": status_links["trace"],
+            "artifact": response.artifacts[0] if response.artifacts else None,
+        },
+    )
     return response
