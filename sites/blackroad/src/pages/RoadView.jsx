@@ -1,8 +1,52 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 const NAV_LINKS = ["Home", "Explore", "Library"];
 
 const FILTER_TAGS = ["Recommended", "Motion", "UI", "Animation", "Courses"];
+
+const SORT_OPTIONS = [
+  { value: "last", label: "Last opened" },
+  { value: "name", label: "Alphabetical" },
+];
+
+const DEFAULT_ITEMS = [
+  {
+    id: 1,
+    title: "Quest Engine",
+    agent: "Athena",
+    team: "alpha",
+    type: "code",
+    category: "project",
+    lastOpened: "2025-09-01T10:00:00Z",
+  },
+  {
+    id: 2,
+    title: "City Skyline",
+    agent: "Apollo",
+    team: "beta",
+    type: "image",
+    category: "asset",
+    lastOpened: "2025-09-02T14:30:00Z",
+  },
+  {
+    id: 3,
+    title: "Retro Racer",
+    agent: "Zephyr",
+    team: "beta",
+    type: "video",
+    category: "game",
+    lastOpened: "2025-08-29T09:45:00Z",
+  },
+  {
+    id: 4,
+    title: "Debug Session",
+    agent: "Athena",
+    team: "alpha",
+    type: "code",
+    category: "session",
+    lastOpened: "2025-09-03T08:15:00Z",
+  },
+];
 
 const FEATURED_VIDEO = {
   title: "Designing a Dark Mode UI",
@@ -77,30 +121,6 @@ const RECOMMENDED_VIDEOS = [
   },
 ];
 
-const LIBRARY_ROWS = [
-  {
-    title: "Introduction to Programming",
-    creator: "codesacademy",
-    views: "875K views",
-    published: "4 days ago",
-    duration: "12:03",
-  },
-  {
-    title: "The Power of UI Animation",
-    creator: "Aesthetic",
-    views: "222K views",
-    published: "5 days ago",
-    duration: "5:56",
-  },
-  {
-    title: "Build a Website with HTML & CSS",
-    creator: "Life Tutorials",
-    views: "143K views",
-    published: "1 week ago",
-    duration: "14:32",
-  },
-];
-
 const TUTORIALS = [
   { label: "Intro to Figma", done: true },
   { label: "UI Design Basics", done: true },
@@ -134,27 +154,168 @@ function VideoCard({ video }) {
   );
 }
 
+function FilterSelect({ label, value, onChange, options }) {
+  return (
+    <label className="flex flex-col gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">
+      <span>{label}</span>
+      <select
+        aria-label={label}
+        className="min-w-[160px] rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-slate-200 focus:outline-none focus:ring-2 focus:ring-white/20"
+        onChange={(event) => onChange(event.target.value)}
+        value={value}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value} className="bg-[#05070F] text-slate-900">
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function LibraryRow({ item }) {
+  const capitalize = (value) =>
+    typeof value === "string" && value.length > 0
+      ? value.charAt(0).toUpperCase() + value.slice(1)
+      : value;
+
+  const metaSegments = [
+    item.category ? capitalize(item.category) : null,
+    item.type ? capitalize(item.type) : null,
+    item.agent ? `Agent ${item.agent}` : null,
+    item.team ? `Team ${capitalize(item.team)}` : null,
+  ].filter(Boolean);
+
+  const lastOpened = item.lastOpened
+    ? new Date(item.lastOpened).toLocaleString()
+    : null;
+
+  const destination = item.id ? `/lucidia?item=${encodeURIComponent(item.id)}` : "/lucidia";
+
   return (
     <div className="flex flex-col gap-3 rounded-3xl border border-white/10 bg-white/5 px-5 py-4 text-sm text-slate-200 md:flex-row md:items-center md:justify-between">
       <div>
         <p className="text-base font-semibold text-white">{item.title}</p>
-        <p className="text-xs uppercase tracking-wide text-slate-400">{item.creator}</p>
+        {metaSegments.length > 0 && (
+          <p className="text-xs uppercase tracking-wide text-slate-400">
+            {metaSegments.join(" • ")}
+          </p>
+        )}
       </div>
-      <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400">
-        <span>{item.views}</span>
-        <span>•</span>
-        <span>{item.published}</span>
-        <span>•</span>
-        <span>{item.duration}</span>
+      <div className="flex flex-col items-start gap-2 text-xs text-slate-400 md:items-end">
+        {lastOpened && <span>Last opened {lastOpened}</span>}
+        <a
+          className="btn-secondary inline-flex items-center justify-center text-xs font-semibold uppercase tracking-wide"
+          href={destination}
+        >
+          Open in Lucidia
+        </a>
       </div>
-      <button className="btn-secondary text-xs font-semibold uppercase tracking-wide">Play</button>
     </div>
   );
 }
 
 export default function RoadView() {
+  const [items] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = window.localStorage.getItem("roadview-items");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            return parsed;
+          }
+        } catch {
+          // ignore malformed values and fall back to defaults
+        }
+      }
+      window.localStorage.setItem("roadview-items", JSON.stringify(DEFAULT_ITEMS));
+    }
+    return DEFAULT_ITEMS;
+  });
+
+  const [agentFilter, setAgentFilter] = useState("all");
+  const [teamFilter, setTeamFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState("last");
+
+  const agents = useMemo(() => {
+    const uniqueAgents = new Set(
+      items.map((item) => item.agent).filter((value) => typeof value === "string" && value.length > 0),
+    );
+    return ["all", ...uniqueAgents];
+  }, [items]);
+
+  const teams = useMemo(() => {
+    const uniqueTeams = new Set(
+      items.map((item) => item.team).filter((value) => typeof value === "string" && value.length > 0),
+    );
+    return ["all", ...uniqueTeams];
+  }, [items]);
+
+  const types = useMemo(() => {
+    const uniqueTypes = new Set(
+      items.map((item) => item.type).filter((value) => typeof value === "string" && value.length > 0),
+    );
+    return ["all", ...uniqueTypes];
+  }, [items]);
+
+  const filteredItems = useMemo(() => {
+    let list = items;
+
+    if (agentFilter !== "all") {
+      list = list.filter((item) => item.agent === agentFilter);
+    }
+
+    if (teamFilter !== "all") {
+      list = list.filter((item) => item.team === teamFilter);
+    }
+
+    if (typeFilter !== "all") {
+      list = list.filter((item) => item.type === typeFilter);
+    }
+
+    const sorted = [...list].sort((a, b) => {
+      if (sortOrder === "last") {
+        return new Date(b.lastOpened ?? 0) - new Date(a.lastOpened ?? 0);
+      }
+      return (a.title ?? "").localeCompare(b.title ?? "");
+    });
+
+    return sorted;
+  }, [items, agentFilter, teamFilter, typeFilter, sortOrder]);
+
   const sortedTags = useMemo(() => FILTER_TAGS, []);
+
+  const agentOptions = useMemo(
+    () =>
+      agents.map((agent) => ({
+        value: agent,
+        label: agent === "all" ? "All agents" : agent,
+      })),
+    [agents],
+  );
+
+  const teamOptions = useMemo(
+    () =>
+      teams.map((team) => ({
+        value: team,
+        label: team === "all" ? "All teams" : team,
+      })),
+    [teams],
+  );
+
+  const typeOptions = useMemo(
+    () =>
+      types.map((type) => ({
+        value: type,
+        label: type === "all" ? "All types" : type,
+      })),
+    [types],
+  );
+
+  const sortOptions = useMemo(() => SORT_OPTIONS, []);
 
   return (
     <div className="min-h-screen bg-[#05070F] text-white">
@@ -358,14 +519,48 @@ export default function RoadView() {
         </section>
 
         <section className="space-y-6">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Library</p>
-            <h2 className="text-2xl font-semibold text-white">Keep the streak going</h2>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Library</p>
+              <h2 className="text-2xl font-semibold text-white">Keep the streak going</h2>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <FilterSelect
+                label="Agent"
+                onChange={setAgentFilter}
+                options={agentOptions}
+                value={agentFilter}
+              />
+              <FilterSelect
+                label="Team"
+                onChange={setTeamFilter}
+                options={teamOptions}
+                value={teamFilter}
+              />
+              <FilterSelect
+                label="Type"
+                onChange={setTypeFilter}
+                options={typeOptions}
+                value={typeFilter}
+              />
+              <FilterSelect
+                label="Sort"
+                onChange={setSortOrder}
+                options={sortOptions}
+                value={sortOrder}
+              />
+            </div>
           </div>
           <div className="space-y-4">
-            {LIBRARY_ROWS.map((item) => (
-              <LibraryRow key={item.title} item={item} />
-            ))}
+            {filteredItems.length > 0 ? (
+              filteredItems.map((item) => (
+                <LibraryRow key={item.id ?? item.title} item={item} />
+              ))
+            ) : (
+              <div className="rounded-3xl border border-dashed border-white/10 bg-white/5 px-5 py-6 text-sm text-slate-400">
+                No RoadView entries match your filters yet. Adjust filters or add a new story from Lucidia.
+              </div>
+            )}
           </div>
         </section>
       </main>
