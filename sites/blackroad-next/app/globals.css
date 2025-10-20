@@ -1,1 +1,18 @@
-html,body{margin:0;padding:0;font-family:Inter,system-ui,sans-serif;}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+body { @apply bg-ink-900 text-zinc-200 antialiased; }
+
+.container-x { @apply max-w-6xl mx-auto px-4; }
+.card       { @apply rounded-2xl bg-ink-800/60 ring-1 ring-white/10 p-5; }
+
+.btn-primary {
+  @apply inline-flex items-center gap-2 rounded-2xl px-4 py-2 font-medium
+  bg-gradient-to-r from-pink-500 via-fuchsia-500 to-orange-400 text-white shadow-soft;
+}
+.btn-ghost { @apply rounded-xl px-4 py-2 bg-ink-800/60 hover:bg-ink-800; }
+
+.h1 { @apply text-4xl sm:text-6xl font-semibold tracking-tight; }
+.h2 { @apply text-2xl sm:text-3xl font-semibold; }
