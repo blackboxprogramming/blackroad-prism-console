@@ -309,6 +309,13 @@ import mdmMatch from './routes/mdm/match.js';
 import mdmMerge from './routes/mdm/merge.js';
 import mdmPublish from './routes/mdm/publish.js';
 import mdmXref from './routes/mdm/xref.js';
+import p2pPay from './routes/p2p/payments.js';
+import obsServices from './routes/obs/services.js';
+import obsIngest from './routes/obs/ingest.js';
+import obsSlo from './routes/obs/slo.js';
+import obsAlerts from './routes/obs/alerts.js';
+import obsRunbooks from './routes/obs/runbooks.js';
+import obsRR from './routes/obs/rr.js';
 
 dotenv.config();
 import express from "express";
@@ -443,7 +450,6 @@ app.use('/api/cpq', cpqCatalog, cpqPricing, cpqQuotes, cpqApprovals, cpqOrders, 
 app.use('/api/cpm', cpmDrivers, cpmForecast, cpmVariance, cpmPacks);
 app.use('/api/sox', soxRCM, soxNarr, soxTests, soxDef, soxSoD, soxScope);
 app.use('/api/p2p', p2pV, p2pI, p2pReq, p2pPO, p2pRec, p2pAP, p2pPol, p2pPay);
-app.use('/api/expenses', expRep, expCard);
 app.use('/api/payroll', prEmp, prSched, prTime, prRun, prForms);
 app.use('/api/finops', foProv, foCost, foAlloc, foBud, foAnom, foRecs, foUnit);
 app.use('/api/cmdb', cmdbCI, cmdbBase, lic);
@@ -540,6 +546,7 @@ app.use('/api/tre', treBA, treSR, trePF, trePY, treSG, treFX, treDB, trePL);
 app.use('/api/mkt', mktAJ, mktCC, mktCS, mktAT, mktConsent);
 app.use('/api/tre', treBA, treSR, trePF, trePY, treSG, treFX, treDB, trePL);
 app.use('/api/mdm', mdmDomains, mdmRules, mdmStage, mdmMatch, mdmMerge, mdmPublish, mdmXref);
+app.use('/api/obs', obsServices, obsIngest, obsSlo, obsAlerts, obsRunbooks, obsRR);
 
 const port = process.env.PORT || 4000;
 
