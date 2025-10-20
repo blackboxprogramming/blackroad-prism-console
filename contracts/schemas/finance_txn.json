@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": ["week", "cash_in", "cash_out"],
+  "properties": {
+    "week": {"type": "string"},
+    "cash_in": {"type": "number"},
+    "cash_out": {"type": "number"}
+  }
+}

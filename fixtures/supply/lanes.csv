@@ -1,0 +1,5 @@
+origin,dest,mode,base_rate,fuel_adj,lead_time
+siteA,NA,sea,1.0,0.1,7
+siteA,NA,air,3.0,0.2,2
+siteA,EU,sea,1.2,0.1,8
+siteA,EU,air,3.5,0.2,3
