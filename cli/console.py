@@ -1210,11 +1210,7 @@ def cmd_cookbook(args):
         print("unknown cookbook name", slug)
         print("available:", ", ".join(_list_cookbook()))
         return
-    try:
-        text = path.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        print("Binary files are not supported; provide a UTF-8 Markdown task instead.")
-        return
+    text = path.read_text()
     context = _parse_context(text)
     ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = ARTIFACT_DIR / f"{slug}.json"
