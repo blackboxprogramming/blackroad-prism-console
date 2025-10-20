@@ -43,8 +43,10 @@ def main(argv=None):
             print("  ", k)
         sys.exit(1)
     verb, *rest = argv
-    ns = verb.rsplit(':', 1)[0]
-    mod_name = NS_MAP.get(ns)
+    mod_name = NS_MAP.get(verb)
+    if not mod_name and ':' in verb:
+        ns = verb.rsplit(':', 1)[0]
+        mod_name = NS_MAP.get(ns)
     fun_name = VERB_FUN.get(verb)
     if not (mod_name and fun_name):
         raise SystemExit(f"Unknown verb: {verb}")
