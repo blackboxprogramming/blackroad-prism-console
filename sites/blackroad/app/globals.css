@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-ink-900 text-zinc-200 antialiased;
+}
+
+.container-x {
+  @apply mx-auto max-w-6xl px-4;
+}
+
+.btn-primary {
+  @apply inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-pink-500 via-fuchsia-500 to-orange-400 px-4 py-2 font-medium text-white shadow-soft transition;
+}
+
+.btn-ghost {
+  @apply rounded-xl bg-ink-800/60 px-4 py-2 text-zinc-300 transition hover:bg-ink-800;
+}
+
+.card {
+  @apply rounded-2xl bg-ink-800/60 p-5 ring-1 ring-white/10;
+}
+
+.h1 {
+  @apply text-4xl font-semibold tracking-tight sm:text-6xl;
+}
+
+.h2 {
+  @apply text-2xl font-semibold sm:text-3xl;
+}
