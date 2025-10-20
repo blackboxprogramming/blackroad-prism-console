@@ -174,3 +174,5 @@ services:
 
 # Stop with: docker compose -f miners-compose.yml stop <service>
 # Remove with: docker compose -f miners-compose.yml down <service>
+    # Enable:
+    # docker compose -f miners/miners-compose.yml up -d chia
