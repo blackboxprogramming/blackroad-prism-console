@@ -1,2 +1,6 @@
 export * from './types';
-// TODO: export other modules
+export * from './events';
+export * from './spans';
+export * from './run';
+export * from './diffs';
+export * from './policies';
