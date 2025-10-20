@@ -59,3 +59,8 @@ __all__ = ["dashboard", "jobs", "telemetry"]
 
 __all__ = ["__version__"]
 __version__ = "0.1.0"
+"""Agent utilities for remote job orchestration."""
+
+from . import jobs, store  # noqa: F401
+
+__all__ = ["jobs", "store"]
