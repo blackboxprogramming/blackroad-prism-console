@@ -5,6 +5,9 @@ import { marked } from 'marked';
 
 export async function onRequest({ params }: { params: { id: string } }) {
   const { id } = params;
+  if (!/^[a-z0-9-]+$/.test(id)) {
+    return new Response('Prompt not found', { status: 404 });
+  }
   try {
     const file = path.join(process.cwd(), 'sites', 'blackroad', 'content', 'codex', `${id}.md`);
     const raw = await fs.readFile(file, 'utf8');
