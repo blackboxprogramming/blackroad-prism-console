@@ -17,3 +17,9 @@ def test_guardrails_missing_fields():
     )
     with pytest.raises(AssertionError):
         assert_guardrails(bad)
+from tools import web_search
+
+
+def test_web_search_stub():
+    with pytest.raises(NotImplementedError):
+        web_search.search("test")

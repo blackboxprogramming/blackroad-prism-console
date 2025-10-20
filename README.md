@@ -1,3 +1,41 @@
+# Multi-Bot Console
+
+A Python 3.11 console that routes tasks to a roster of enterprise bots.
+
+## Quickstart
+
+```bash
+pip install -r requirements.txt
+python cli/console.py bot:list
+```
+
+## Architecture
+
+```
+[console] -> [orchestrator] -> [bots]
+                    |
+                memory.jsonl
+```
+
+## Security
+
+All tool adapters are stubbed and make no external calls. Every interaction is logged to `memory.jsonl`.
+
+## Add a New Bot
+
+1. Copy an existing bot in `bots/`.
+2. Update the docstring with Mission, Inputs, Outputs, KPIs, Guardrails, Hand-offs.
+3. Register in `bots/__init__.py`.
+
+## Example Commands
+
+```bash
+python cli/console.py task:create --goal "test"
+python cli/console.py bot:list
+```
+
+---
+
 # BlackRoad.io — Dependency & Ops Bundle
 
 Date: 2025-08-22

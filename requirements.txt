@@ -46,3 +46,5 @@ requests==2.32.2
 streamlit==1.35.0
 torch
 whisper
+typer==0.12.3
+pytest

@@ -106,3 +106,9 @@ def write_text(path: str, text: str, *, from_data: bool = False) -> None:
     _ensure_parent(target)
     with open(target, "w", encoding="utf-8") as f:
         f.write(text)
+"""Stub storage adapter."""
+
+
+def save(path: str, content: bytes) -> None:
+    """Stubbed storage write."""
+    raise NotImplementedError("Storage adapter not implemented. TODO: connect to object store")
