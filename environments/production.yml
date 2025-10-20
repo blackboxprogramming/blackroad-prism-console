@@ -182,3 +182,35 @@ notes:
   - >-
     Use the autopal dual-approval environment access workflow before making
     production changes.
+status: live
+description: >-
+  Customer-facing BlackRoad Prism Console footprint.
+branch: main
+urls:
+  primary: https://blackroad.io
+  health: https://blackroad.io/healthz
+  status: https://status.blackroad.io
+governance:
+  approvals_required: true
+  reviewers:
+    - handle: blackboxprogramming
+  contacts:
+    owner: amundsonalexa@gmail.com
+    slack_channels:
+      - channel: ops-monitor
+        purpose: Track lead time, deployment frequency, change fail rate, and MTTR once instrumentation is wired up.
+runbooks:
+  release: DEPLOYMENT.md
+  rollback: DEPLOYMENT.md#rollback
+  operations: RUNBOOK.md
+deployment:
+  branch_policy:
+    auto_deploy_from: main
+  workflows:
+    - .github/workflows/blackroad-deploy.yml
+    - .github/workflows/release.yml
+observability:
+  dashboards:
+    - deploy/k8s/monitoring.yaml
+notes:
+  - Next initiative: hook CI/CD outputs into Fly.io and AWS ECS targets via reusable workflows.

@@ -141,3 +141,39 @@ notes:
   - >-
     Exercise the autopal environment access workflow for staging when dual
     control is required.
+slug: stage
+status: ready
+description: >-
+  Pre-production validation footprint for release candidates and smoke tests.
+branch: staging
+urls:
+  primary: https://staging.blackroad.io
+  aliases:
+    - https://dev.blackroadinc.us
+governance:
+  approvals_required: false
+  reviewers:
+    - handle: blackboxprogramming
+  contacts:
+    owner: amundsonalexa@gmail.com
+    slack_channels:
+      - channel: ops-monitor
+        purpose: Track lead time, deployment frequency, change fail rate, and MTTR once instrumentation is wired up.
+runbooks:
+  release: DEPLOYMENT.md
+  rollback: DEPLOYMENT.md#rollback
+  operations: RUNBOOK.md
+deployment:
+  branch_policy:
+    auto_deploy_from: staging
+  workflows:
+    - .github/workflows/pages-stage.yml
+    - .github/workflows/blackroad-deploy.yml
+observability:
+  dashboards:
+    - deploy/k8s/monitoring.yaml
+notes:
+  - Staging smoke tests target https://staging.blackroad.io in the CI examples.
+  - dev.blackroadinc.us should CNAME to this staging surface for internal routing.
+  - Pull requests publish preview hosts at pr-###.dev.blackroad.io prior to promotion.
+  - Next initiative: hook CI/CD outputs into Fly.io and AWS ECS targets via reusable workflows.

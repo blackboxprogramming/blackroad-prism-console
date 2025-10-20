@@ -173,3 +173,35 @@ notes:
   - >-
     Workflow provisions target groups, listener rules, Route53 alias records,
     and the ECS service, then tears them down when the PR closes.
+slug: pr-preview
+status: live
+description: >-
+  Ephemeral per-pull-request environment provisioned on AWS ECS Fargate.
+branch: pull_request
+urls:
+  pattern: https://pr-<pr-number>.dev.blackroad.io
+governance:
+  approvals_required: false
+  reviewers:
+    - handle: blackboxprogramming
+  contacts:
+    owner: amundsonalexa@gmail.com
+    slack_channels:
+      - channel: eng
+        purpose: Preview announcements for reviewers.
+runbooks:
+  operations: docs/preview-environments.md
+  developer_notes: docs/devx/preview-environments.md
+deployment:
+  branch_policy:
+    auto_deploy_from: pull_requests
+  workflows:
+    - .github/workflows/preview.yml
+    - .github/workflows/preview-env.yml
+observability:
+  healthcheck_path: /health
+notes:
+  - Workflow provisions ECS services, ALB rules, and Route53 aliases per PR before teardown on close.
+  - Repository variables and secrets cover the AWS region, cluster, listener, hosted zone, and IAM roles needed for previews.
+  - Preview URLs are broadcast to #eng alongside PR comments during deployments.
+  - Next initiative: integrate preview rollouts with shared Fly.io and AWS ECS deployment targets.
