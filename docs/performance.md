@@ -24,6 +24,51 @@ python -m cli.console slo:report
 
 Use `--perf` on any command to print a timing footer. Benchmarks write results under `artifacts/bench` and compare them against SLO targets. The `slo:gate` command fails if p95 latency regresses by more than 10%.
 
+## Prism console load tests
+
+We exercise the Prism console UI plus the two critical backend services (`quantum_lab` and `materials_service`) with a dedicated [`k6` scenario](../load/k6_prism_console.js). The script ships three flows:
+
+- **`uiSmoke`** – constant 5 VUs that fetch the landing shell and dashboard bundle to ensure static assets render quickly.
+- **`quantumApi`** – ramping arrival rate that logs in and runs the CHSH simulation behind the quantum token gate.
+- **`materialsJobs`** – per-VU iterations that enqueue grain-coarsening jobs and poll the job status API for completions.
+
+### How to run locally
+
+1. Launch the service stack in separate shells (all ports bind to localhost):
+   ```bash
+   QUANTUM_API_TOKEN=dev-quantum uvicorn services.quantum_lab.app:app --port 8020
+   FEATURE_MATERIALS=true uvicorn services.materials_service.app:app --port 8030
+   (cd frontend && python -m http.server 4173)
+   ```
+2. Execute the k6 scenario and export the summary for later parsing:
+   ```bash
+   UI_BASE_URL=http://127.0.0.1:4173 \
+   QUANTUM_BASE_URL=http://127.0.0.1:8020 \
+   QUANTUM_TOKEN=dev-quantum \
+   MATERIALS_BASE_URL=http://127.0.0.1:8030 \
+   k6 run --summary-export logs/perf/k6_summary.json load/k6_prism_console.js
+   ```
+   The latest run artifacts live under `logs/perf/` (`k6_latest.txt` contains the stdout summary and `k6_summary.json` holds the machine-readable metrics).
+
+### Latest results (local staging profile)
+
+- **UI shell**: p95 = 3.94 ms, 400 requests, 0 failures.【F:logs/perf/k6_latest.txt†L243-L249】
+- **Quantum Lab API**: p95 = 36.69 ms, max 189 ms during ramp-up, 380 requests, 0 failures.【F:logs/perf/k6_latest.txt†L245-L250】
+- **Materials jobs API**: p95 = 9.93 ms, 30 job creations per VU, 0 failures.【F:logs/perf/k6_latest.txt†L244-L249】
+- Aggregate throughput held at ~20.7 req/s with all checks passing.【F:logs/perf/k6_latest.txt†L236-L256】
+
+Resource snapshots captured mid-test show the hottest Quantum Lab `uvicorn` worker hovering around 9% CPU and <0.3% memory; the materials worker remained idle in comparison.【F:logs/perf/snapshot1.txt†L1-L4】【F:logs/perf/snapshot2.txt†L1-L4】
+
+### Operational thresholds and alerts
+
+The `k6` options enforce conservative p95 thresholds (UI < 850 ms, Quantum Lab < 1.2 s, Materials < 1.4 s) so CI will fail before a regression ships.【F:load/k6_prism_console.js†L5-L81】 After each run, call the helper below to append an alert entry if any component breaches its bound:
+
+```bash
+python tools/prism_load_alerts.py  # reads logs/perf/k6_summary.json by default
+```
+
+Alerts are written as newline-delimited JSON to `data/aiops/alerts.jsonl` with the component, observed p95 latency, severity, and threshold so downstream automation (watcher bot, notebooks, etc.) can fan them out.【F:tools/prism_load_alerts.py†L6-L84】
+
 ## Quick Ollama sanity benchmark
 
 When you only need a fast smell test for a tiny local model (1B–3B params), run the sequence below. It captures latency,
