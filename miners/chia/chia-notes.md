@@ -10,3 +10,7 @@ sudo nano /etc/fstab               # add a persistent mount entry
 docker compose -f miners/miners-compose.yml up -d chia
 docker compose -f miners/miners-compose.yml logs -f chia
 ```
+
+```
+
+---

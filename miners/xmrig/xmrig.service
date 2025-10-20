@@ -10,10 +10,14 @@ WorkingDirectory=/home/pi/miners/xmrig
 ExecStart=/usr/bin/bash /home/pi/miners/xmrig/run-throttled.sh
 Restart=always
 RestartSec=10
+
+# caps: roughly 25% of a core and 256 MB
 CPUQuota=25%
 MemoryMax=256M
 IOSchedulingClass=idle
 IOSchedulingPriority=7
+
+# sandboxing
 NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectSystem=strict
