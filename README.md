@@ -39,6 +39,9 @@ This repo includes a deterministic offline Record-to-Report layer. See
 ```
 python -m cli.console close:cal:new --period 2025-09 --template configs/close/template.yaml
 ```
+## Strategy & OKR Governance
+
+Minimal offline tooling to manage objectives, bets, scorecards, reviews, trade-offs, and memos.
 
 > Nothing here overwrites your existing code. The scripts are defensive: they detect paths,
 > **merge** deps, and only generate files if missing.

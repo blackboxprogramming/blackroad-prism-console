@@ -1,0 +1,8 @@
+weights:
+  impact: 1.0
+  cost: 0.5
+  risk:
+    low: 0
+    med: 10
+    high: 20
+  speed: 0.2
