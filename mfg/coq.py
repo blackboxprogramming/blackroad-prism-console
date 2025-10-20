@@ -33,4 +33,4 @@ def build(period: str):
         "\n".join(f"{k}: {v}" for k, v in totals.items()),
     )
     metrics.inc("coq_built")
-    return report
+    return totals
