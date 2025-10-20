@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/Users/alexa/blackroad-prism-console-7/build",
+  "command": "/usr/bin/cc  -I/Users/alexa/blackroad-prism-console-7/linmath/include -I/Users/alexa/blackroad-prism-console-7/linmath/tests -g -arch arm64 -o CMakeFiles/linmath_test.dir/tests/linmath_test.c.o -c /Users/alexa/blackroad-prism-console-7/linmath/tests/linmath_test.c",
+  "file": "/Users/alexa/blackroad-prism-console-7/linmath/tests/linmath_test.c",
+  "output": "CMakeFiles/linmath_test.dir/tests/linmath_test.c.o"
+}
+]

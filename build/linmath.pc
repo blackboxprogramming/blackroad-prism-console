@@ -1,0 +1,7 @@
+prefix=/usr
+exec_prefix=${prefix}
+includedir=${prefix}/include
+Name: linmath
+Description: Header-only linear math for graphics (vec3/vec4/mat4x4/quat)
+Version: 0.1.0
+Cflags: -I${includedir}
