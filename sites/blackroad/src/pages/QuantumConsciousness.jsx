@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 function Card({ title, metaphor, color, delay }) {
-  const [show, setShow] = useState(false);
+  const [visible, setVisible] = useState(false);
+
   useEffect(() => {
-    const t = setTimeout(() => setShow(true), delay);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setVisible(true), delay);
+    return () => clearTimeout(timer);
   }, [delay]);
+
   return (
     <div
       className={`p-4 rounded-lg border-2 transition-all duration-700 ${
-        show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       }`}
       style={{ borderColor: color }}
     >
@@ -21,46 +22,56 @@ function Card({ title, metaphor, color, delay }) {
 }
 
 export default function QuantumConsciousness() {
-  const [log, setLog] = useState("");
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const topics = ["reasoning", "memory", "symbolic"];
-      const lines = [];
-      for (const t of topics) {
-        try {
-          const r = await fetch(`/api/quantum/${t}`);
-          const j = await r.json();
-          lines.push(`${t.toUpperCase()}: ${j.summary}`);
-        } catch {
-          lines.push(`${t.toUpperCase()}: error`);
-        }
-      }
-      if (alive) setLog(lines.join("\n"));
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
-  const ts = new Date().toISOString();
+  const [topicLog, setTopicLog] = useState("");
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const topics = ["reasoning", "memory", "symbolic"];
+      const lines = [];
+      for (const topic of topics) {
+        try {
+          const response = await fetch(`/api/quantum/${topic}`);
+          if (!response.ok) {
+            throw new Error(`Request failed: ${response.status}`);
+          }
+          const payload = await response.json();
+          lines.push(`${topic.toUpperCase()}: ${payload.summary ?? "—"}`);
+        } catch (err) {
+          console.error("quantum-topic", err);
+          lines.push(`${topic.toUpperCase()}: unavailable`);
+        }
+      }
+      if (!cancelled) {
+        setTopicLog(lines.join("\n"));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const fetchNotes = useCallback(async (signal) => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/quantum", {
+      const response = await fetch("/api/quantum", {
         cache: "no-store",
         signal,
       });
-      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-      const data = await res.json();
-      if (!Array.isArray(data.topics)) throw new Error("Invalid payload");
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+      const payload = await response.json();
+      if (!Array.isArray(payload.topics)) {
+        throw new Error("Invalid payload");
+      }
       if (signal?.aborted) return;
-      setNotes(data.topics);
+      setNotes(payload.topics);
       setLastUpdated(new Date());
     } catch (err) {
       if (signal?.aborted) return;
@@ -81,7 +92,7 @@ export default function QuantumConsciousness() {
     };
   }, [fetchNotes]);
 
-  const log = useMemo(() => {
+  const renderedNotes = useMemo(() => {
     if (error) return `⚠️ ${error}`;
     if (!notes.length) return "No research notes available yet.";
     return notes
@@ -89,7 +100,7 @@ export default function QuantumConsciousness() {
       .join("\n");
   }, [error, notes]);
 
-  const ts = new Date().toISOString();
+  const timestamp = useMemo(() => new Date().toISOString(), []);
   const lastSynced = useMemo(() => {
     if (!lastUpdated) return "—";
     try {
@@ -98,6 +109,7 @@ export default function QuantumConsciousness() {
       return lastUpdated.toISOString();
     }
   }, [lastUpdated]);
+
   return (
     <div className="min-h-screen flex flex-col items-center p-8 space-y-8">
       <header className="text-center">
@@ -112,6 +124,7 @@ export default function QuantumConsciousness() {
           Quantum x Consciousness
         </h1>
       </header>
+
       <section className="grid md:grid-cols-3 gap-4 w-full max-w-5xl">
         <Card
           title="Reasoning"
@@ -132,35 +145,36 @@ export default function QuantumConsciousness() {
           delay={300}
         />
       </section>
+
       <section className="w-full max-w-5xl">
         <div className="bg-black text-green-400 font-mono p-4 rounded-md h-48 overflow-auto">
-          <pre>{log || "Loading research notes..."}</pre>
+          <pre>{topicLog || "Loading quantum system status..."}</pre>
+        </div>
+      </section>
+
       <section className="w-full max-w-5xl space-y-3">
         <div className="flex justify-between items-center text-sm opacity-70">
           <span>Research console</span>
           <span>Last sync: {lastSynced}</span>
         </div>
         <div className="bg-black text-green-400 font-mono p-4 rounded-md h-56 overflow-auto">
-          <pre>
-            {loading ? "Loading research notes..." : log}
-          </pre>
+          <pre>{loading ? "Loading research notes..." : renderedNotes}</pre>
         </div>
         <div className="flex justify-end">
           <button
             type="button"
-            onClick={fetchNotes}
+            onClick={() => fetchNotes()}
             disabled={loading}
             className={`px-4 py-2 rounded-md border border-white/20 transition ${
-              loading
-                ? "opacity-60 cursor-not-allowed"
-                : "hover:bg-white/10"
+              loading ? "opacity-60 cursor-not-allowed" : "hover:bg-white/10"
             }`}
           >
             {loading ? "Syncing" : "Refresh"}
           </button>
         </div>
       </section>
-      <footer className="text-xs opacity-60">Deployed via Codex • {ts}</footer>
+
+      <footer className="text-xs opacity-60">Deployed via Codex • {timestamp}</footer>
     </div>
   );
 }
