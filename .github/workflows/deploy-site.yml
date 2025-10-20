@@ -17,7 +17,7 @@ jobs:
             - name: Install dependencies
               run: |
                   cd sites/blackroad
-                  npm ci
+                  npm install
             - name: Build site
               run: |
                   cd sites/blackroad
