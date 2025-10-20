@@ -1,0 +1,16 @@
+memory:
+  short_term:
+    ttl_turns: 50
+    purpose: "Context for the current exchange."
+  working_memory:
+    keys:
+      - "goal"
+      - "constraints"
+      - "artifacts"
+      - "open_questions"
+  long_term:
+    schema:
+      - "glossary"
+      - "systems"
+      - "routes"
+      - "decisions_log"
