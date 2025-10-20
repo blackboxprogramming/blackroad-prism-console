@@ -44,18 +44,33 @@ def score_pair(a: Dict[str, Any], b: Dict[str, Any], weights: Dict[str, float]) 
 
 def cluster(rows: List[Dict[str, Any]], cfg: MatchConfig) -> List[Dict[str, Any]]:
     n = len(rows)
+    if n == 0:
+        return []
+
+    adjacency: List[List[int]] = [[] for _ in range(n)]
+    for i in range(n):
+        for j in range(i + 1, n):
+            if score_pair(rows[i], rows[j], cfg.weights) >= cfg.auto_merge:
+                adjacency[i].append(j)
+                adjacency[j].append(i)
+
     seen = [False] * n
     clusters = []
     for i in range(n):
         if seen[i]:
             continue
-        group = [i]
+        stack = [i]
         seen[i] = True
-        for j in range(i + 1, n):
-            if score_pair(rows[i], rows[j], cfg.weights) >= cfg.auto_merge:
-                group.append(j)
-                seen[j] = True
-        clusters.append({"members": group})
+        members: List[int] = []
+        while stack:
+            idx = stack.pop()
+            members.append(idx)
+            for neighbor in adjacency[idx]:
+                if not seen[neighbor]:
+                    seen[neighbor] = True
+                    stack.append(neighbor)
+        members.sort()
+        clusters.append({"members": members})
     return clusters
 
 
