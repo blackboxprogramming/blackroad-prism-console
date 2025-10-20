@@ -1,6 +1,6 @@
-# Prism Panel Specs — Cadillac Set A
+# Prism Panel Specs — Asteria Set A
 
-This document captures the drop-in Prism panel specifications for the Cadillac Set A release. Each panel is designed for hardened deployments, with explicit math, control knobs, telemetry, and Roadie 30 field notes.
+This document captures the drop-in Prism panel specifications for the Asteria Set A release. Each panel is designed for hardened deployments, with explicit math, control knobs, telemetry, and Roadie 30 field notes.
 
 ## 1. Verifiable Compute (SNARK / zkVM)
 

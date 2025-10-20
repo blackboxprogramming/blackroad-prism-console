@@ -30,7 +30,7 @@ CHORUS_HANDLES: tuple[str, ...] = (
     "@chatgpt",
     "@claude",
     "@lucidia",
-    "@cadillac",
+    "@asteria",
     "@blackroad",
 )
 

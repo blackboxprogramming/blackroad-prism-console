@@ -37,7 +37,7 @@ pub mod serial {
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     serial_init();
-    serial_println!("PrismOS Cadillac Kernel Booting…");
+    serial_println!("PrismOS Asteria Kernel Booting…");
     loop {}
 }
 

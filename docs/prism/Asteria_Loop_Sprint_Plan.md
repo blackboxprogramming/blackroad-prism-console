@@ -1,6 +1,6 @@
-# Prism Cadillac Loop Sprint Plan
+# Prism Asteria Loop Sprint Plan
 
-This document drafts the pull request titles, bodies, and supporting GitHub issues for the three-part onboarding and Cadillac Loop rollout described in `docs/prism-onboarding-ux.md` and the v0.1 notes.
+This document drafts the pull request titles, bodies, and supporting GitHub issues for the three-part onboarding and Asteria Loop rollout described in `docs/prism-onboarding-ux.md` and the v0.1 notes.
 
 ## Pull Request Drafts
 
@@ -20,7 +20,7 @@ This document drafts the pull request titles, bodies, and supporting GitHub issu
 - [ ] pnpm dev (manual onboarding flow smoke test)
 ```
 
-### PR-2 — Creator Upload → Gallery (Cadillac Loop)
+### PR-2 — Creator Upload → Gallery (Asteria Loop)
 **Title:** `feat(prism-creator): enable upload-to-gallery loop`
 
 **Body:**

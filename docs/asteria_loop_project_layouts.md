@@ -1,8 +1,10 @@
-# Cadillac Loop Project Layouts
+# Asteria Loop Project Layouts
 
-This document outlines lightweight project management setups for the Cadillac Loop effort. Both boards target the goal of enabling the first external creator to upload, publish, and receive a payout within 30 days.
+This document outlines lightweight project management setups for the Asteria Loop effort. Both boards target the goal of enabling the first external creator to upload, publish, and receive a payout within 30 days.
 
-## Asana Project: "Cadillac Loop v0.1"
+> **Renaming reminder:** Asteria Loop replaces the former codename (now retired) to steer clear of trademark concerns raised during review.
+
+## Asana Project: "Asteria Loop v0.1"
 
 **Goal:** First external creator completes upload → publish → payout.
 
@@ -11,7 +13,7 @@ This document outlines lightweight project management setups for the Cadillac Lo
 - Decide stack (Node + Next + Stripe test mode)
 - Design mock RoadCoin balance system
 - Set up Asana + GitHub sync
-- Create Slack channel `#cadillac-loop`
+- Create Slack channel `#asteria-loop`
 
 ### Column 2: In Progress
 - Frontend upload form
@@ -42,7 +44,7 @@ This document outlines lightweight project management setups for the Cadillac Lo
 - Connect GitHub → Asana integration so each PR auto-creates a task and moves cards when merged.
 - Set a recurring “Friday Retro” task that asks: *What worked? What drained time? What should we cut?*
 
-## Monday.com Board: "Cadillac Loop v0.1"
+## Monday.com Board: "Asteria Loop v0.1"
 
 **High-level Widget:** A dashboard view pinning goal metrics (time-to-first-payout, creator satisfaction), plus a workload chart.
 
@@ -74,7 +76,7 @@ This document outlines lightweight project management setups for the Cadillac Lo
 ### Integrations & Best Practices
 - Connect GitHub integration (item created per PR, auto-link branch).
 - Link Stripe test dashboard for payout verification.
-- Use Workdocs page "Cadillac Loop Playbook" to store SOPs and attach demo videos.
+- Use Workdocs page "Asteria Loop Playbook" to store SOPs and attach demo videos.
 - Pin a whiteboard for mapping the creator experience flow.
 
 This paired layout lets the team pilot the loop in Asana while keeping a migration-ready structure in Monday.com if deeper reporting or automation is needed.

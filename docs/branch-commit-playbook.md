@@ -56,7 +56,7 @@ Refs: Closes #<issue>, Relates-to #<issue>
 
 #### Payout (Stripe)
 - `💸 feat(payouts): claim button + test PaymentIntent`
-- `⚙️ ops(slack): post "First Payout" to #cadillac-loop`
+- `⚙️ ops(slack): post "First Payout" to #asteria-loop`
 - `🧰 chore(payouts): idempotent retries on webhook`
 
 ## Opening Pull Requests
