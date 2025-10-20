@@ -317,6 +317,9 @@ import AStarLab from "./pages/AStarLab.jsx";
 import TSPLab from "./pages/TSPLab.jsx";
 import GrayScottGalleryLab from "./pages/GrayScottGalleryLab.jsx";
 import RansacPlane3DLab from "./pages/RansacPlane3DLab.jsx";
+import PrimeGapsLab from "./pages/PrimeGapsLab.jsx";
+import FareyTreeLab from "./pages/FareyTreeLab.jsx";
+import FourierLab from "./pages/FourierLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -484,6 +487,9 @@ function LegacyApp() {
             <Route path="/tsp" element={<TSPLab/>} />
             <Route path="/gs-gallery" element={<GrayScottGalleryLab/>} />
             <Route path="/plane3d" element={<RansacPlane3DLab/>} />
+            <Route path="/primes" element={<PrimeGapsLab/>} />
+            <Route path="/farey" element={<FareyTreeLab/>} />
+            <Route path="/fourier" element={<FourierLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -536,6 +542,9 @@ function LegacyApp() {
             <Route path="tsp" element={<TSPLab/>} />
             <Route path="gs-gallery" element={<GrayScottGalleryLab/>} />
             <Route path="plane3d" element={<RansacPlane3DLab/>} />
+            <Route path="primes" element={<PrimeGapsLab/>} />
+            <Route path="farey" element={<FareyTreeLab/>} />
+            <Route path="fourier" element={<FourierLab/>} />
             <Route path="*" element={<div>Not found</div>} />
             <Route path="/" element={<Chat />} />
             <Route path="/chat" element={<Chat />} />
