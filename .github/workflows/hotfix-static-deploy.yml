@@ -1,0 +1,40 @@
+name: Hotfix • Static Deploy
+on:
+  workflow_dispatch:
+
+jobs:
+  static-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Ensure payload tar from sites/blackroad
+        run: |
+          mkdir -p sites/blackroad
+          test -f sites/blackroad/index.html || \
+            printf '%s\n' '<!doctype html><html><body><h1>Hello World</h1></body></html>' > sites/blackroad/index.html
+          tar -czf blackroad-site.tar.gz -C sites/blackroad .
+
+      - name: Upload site archive
+        uses: appleboy/scp-action@8a92fcdb1eb4ffbf538b2fa286739760aac8a95b
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || '22' }}
+          source: blackroad-site.tar.gz
+          target: /tmp/
+
+      - name: Remote install to /var/www/blackroad
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || '22' }}
+          script: |
+            set -euo pipefail
+            sudo mkdir -p /var/www/blackroad
+            sudo tar -xzf /tmp/blackroad-site.tar.gz -C /var/www/blackroad
+            sudo systemctl reload nginx || true
