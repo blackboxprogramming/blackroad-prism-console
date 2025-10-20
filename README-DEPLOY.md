@@ -78,6 +78,11 @@ NGINX
 
 nginx -t && systemctl enable --now nginx
 
+# Allow inbound HTTP/HTTPS traffic (firewalld blocks them by default)
+firewall-cmd --add-service=http --permanent 2>/dev/null || true
+firewall-cmd --add-service=https --permanent 2>/dev/null || true
+firewall-cmd --reload 2>/dev/null || true
+
 # Optional: browser-based admin
 dnf -y install cockpit
 systemctl enable --now cockpit.socket
