@@ -19,4 +19,24 @@
     },
     "required": ["id", "lines"]
   }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": {"type": "string"},
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "account": {"type": "string"},
+          "amount": {"type": "number"},
+          "drcr": {"type": "string"}
+        },
+        "required": ["account", "amount", "drcr"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["id", "lines"],
+  "additionalProperties": false
 }

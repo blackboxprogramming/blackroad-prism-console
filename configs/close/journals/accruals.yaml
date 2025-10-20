@@ -7,3 +7,11 @@ journals:
       - account: '4000'
         drcr: cr
         amount: 100.0
+  - id: ACCR-001
+    lines:
+      - account: "2000"
+        amount: 100.0
+        drcr: "dr"
+      - account: "1000"
+        amount: 100.0
+        drcr: "cr"

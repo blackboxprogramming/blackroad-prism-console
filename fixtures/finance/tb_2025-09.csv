@@ -1,3 +1,5 @@
 account,entity,dept,amount,drcr
 1000,ENT,SALES,5000,dr
 2000,ENT,SALES,5000,cr
+1000,ENT,DEPT,1000,dr
+2000,ENT,DEPT,1000,cr

@@ -1,4 +1,5 @@
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
     "id": {"type": "string"},
@@ -10,4 +11,6 @@
     "signed": {"type": "boolean"}
   },
   "required": ["id", "control_id", "period", "path", "owner", "checksum", "signed"]
+  "required": ["id", "control_id", "period", "path", "owner", "checksum", "signed"],
+  "additionalProperties": false
 }

@@ -9,4 +9,12 @@
     },
     "required": ["account", "drcr", "amount"]
   }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "account": {"type": "string"},
+    "amount": {"type": "number"}
+  },
+  "required": ["account", "amount"],
+  "additionalProperties": false
 }
