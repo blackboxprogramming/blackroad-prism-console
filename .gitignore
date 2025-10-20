@@ -60,6 +60,8 @@ models/
 !br-dbt/models/**
 checkpoints/
 outputs/
+!universal-sim-starter/40_compare/outputs/
+!universal-sim-starter/40_compare/outputs/.gitkeep
 rag/index/*.faiss
 rag/index/meta.json
 *.enc

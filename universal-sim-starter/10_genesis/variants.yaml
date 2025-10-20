@@ -1,0 +1,23 @@
+variants:
+  - name: gravity_low
+    description: "Lower gravity by twenty percent to study slower settling."
+    prompt_suffix: |
+      - Adjust gravitational acceleration to 8.0 m/s^2 so the drop lingers longer before impact.
+    config_overrides:
+      physics:
+        gravity: 8.0
+  - name: high_resolution
+    description: "Increase solver resolution for stress and splash sampling."
+    prompt_suffix: |
+      - Double the particle/grid resolution to capture sharper splash details.
+    config_overrides:
+      solver:
+        resolution_scale: 2.0
+  - name: soft_material
+    description: "Use a softer elastomer to check deformation extremes."
+    prompt_suffix: |
+      - Swap the impactor material to a soft elastomer with 50 kPa Young's modulus.
+    config_overrides:
+      materials:
+        impactor:
+          youngs_modulus_kpa: 50
