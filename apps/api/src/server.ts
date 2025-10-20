@@ -302,6 +302,13 @@ import mktCC from './routes/mkt/campaigns_creatives.js';
 import mktCS from './routes/mkt/channels_sends.js';
 import mktAT from './routes/mkt/attribution.js';
 import mktConsent from './routes/mkt/consent.js';
+import mdmDomains from './routes/mdm/domains.js';
+import mdmRules from './routes/mdm/rules.js';
+import mdmStage from './routes/mdm/stage.js';
+import mdmMatch from './routes/mdm/match.js';
+import mdmMerge from './routes/mdm/merge.js';
+import mdmPublish from './routes/mdm/publish.js';
+import mdmXref from './routes/mdm/xref.js';
 
 dotenv.config();
 import express from "express";
@@ -532,6 +539,7 @@ app.use('/api/admin/org/audit', requireOrg(), requireRole('admin'), orgAudit);
 app.use('/api/tre', treBA, treSR, trePF, trePY, treSG, treFX, treDB, trePL);
 app.use('/api/mkt', mktAJ, mktCC, mktCS, mktAT, mktConsent);
 app.use('/api/tre', treBA, treSR, trePF, trePY, treSG, treFX, treDB, trePL);
+app.use('/api/mdm', mdmDomains, mdmRules, mdmStage, mdmMatch, mdmMerge, mdmPublish, mdmXref);
 
 const port = process.env.PORT || 4000;
 

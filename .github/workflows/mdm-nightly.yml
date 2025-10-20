@@ -1,0 +1,13 @@
+name: MDM Nightly (Match → Merge → Publish)
+on:
+  schedule: [{ cron: "20 4 * * *" }]
+  workflow_dispatch:
+jobs:
+  mdm-nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/mdm/match_merge.ts
+      - run: node scripts/mdm/publish.ts
