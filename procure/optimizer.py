@@ -37,24 +37,32 @@ def choose_mix(
         first = options[0]
         if len(options) > 1 and max_suppliers > 1:
             second = options[1]
-            second_units = max(int(units * dual_min), second.moq)
+            requested_second_units = max(int(units * dual_min), second.moq)
+            second_units = min(requested_second_units, units)
             first_units = units - second_units
-            awards.append(
-                {
-                    "supplier": first.supplier,
-                    "sku": sku,
-                    "units": first_units,
-                    "unit_price": first.unit_price,
-                }
-            )
-            awards.append(
-                {
-                    "supplier": second.supplier,
-                    "sku": sku,
-                    "units": second_units,
-                    "unit_price": second.unit_price,
-                }
-            )
+
+            if second_units < second.moq:
+                second_units = 0
+                first_units = units
+
+            if first_units > 0:
+                awards.append(
+                    {
+                        "supplier": first.supplier,
+                        "sku": sku,
+                        "units": first_units,
+                        "unit_price": first.unit_price,
+                    }
+                )
+            if second_units > 0:
+                awards.append(
+                    {
+                        "supplier": second.supplier,
+                        "sku": sku,
+                        "units": second_units,
+                        "unit_price": second.unit_price,
+                    }
+                )
         else:
             awards.append(
                 {
