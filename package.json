@@ -54,7 +54,7 @@
     "stripe": "^12.18.0",
     "swr": "^2.2.5",
     "systeminformation": "^5.25.11",
-    "uuid": "^9.0.1",
+  "uuid": "^9.0.1"
   }
   ,
   "devDependencies": {
