@@ -1,5 +1,4 @@
-"""Bot for closing stale GitHub pull requests and comments."""
-"""Bot for closing stale GitHub pull requests."""
+"""Utilities to close stale pull requests and prune old comments."""
 
 from __future__ import annotations
 
@@ -14,15 +13,7 @@ import requests
 
 @dataclass
 class PullRequestCleanupBot:
-    """Close stale pull requests and delete aged comments.
-    """Close stale pull requests in a repository.
-
-    Attributes:
-        repo: Repository in ``owner/name`` format.
-        token: GitHub token with repo scope. Uses ``GITHUB_TOKEN`` env var if omitted.
-        days: Items with no updates for this many days are considered stale.
-        days: Pull requests with no updates for this many days are considered stale.
-    """
+    """Close stale pull requests in a repository."""
 
     repo: str
     token: Optional[str] = None
@@ -43,6 +34,7 @@ class PullRequestCleanupBot:
 
     def get_open_pull_requests(self) -> List[dict]:
         """Return all open pull requests for the repository."""
+
         url = f"https://api.github.com/repos/{self.repo}/pulls?state=open"
         response = requests.get(url, headers=self._headers(), timeout=10)
         response.raise_for_status()
@@ -50,6 +42,7 @@ class PullRequestCleanupBot:
 
     def close_pull_request(self, number: int) -> dict:
         """Close a pull request by number."""
+
         url = f"https://api.github.com/repos/{self.repo}/pulls/{number}"
         payload = {"state": "closed"}
         response = requests.patch(url, json=payload, headers=self._headers(), timeout=10)
@@ -58,6 +51,7 @@ class PullRequestCleanupBot:
 
     def close_stale_pull_requests(self) -> List[int]:
         """Close pull requests with no updates for ``days`` days."""
+
         cutoff = datetime.now(timezone.utc) - timedelta(days=self.days)
         closed: List[int] = []
         for pr in self.get_open_pull_requests():
@@ -69,6 +63,7 @@ class PullRequestCleanupBot:
 
     def _get_comments(self, number: int) -> List[dict]:
         """Return comments for a pull request."""
+
         url = f"https://api.github.com/repos/{self.repo}/issues/{number}/comments"
         response = requests.get(url, headers=self._headers(), timeout=10)
         response.raise_for_status()
@@ -76,12 +71,14 @@ class PullRequestCleanupBot:
 
     def _delete_comment(self, comment_id: int) -> None:
         """Delete a comment by ``comment_id``."""
+
         url = f"https://api.github.com/repos/{self.repo}/issues/comments/{comment_id}"
         response = requests.delete(url, headers=self._headers(), timeout=10)
         response.raise_for_status()
 
     def cleanup_stale_comments(self) -> List[int]:
         """Remove comments on open pull requests stale for ``days`` days."""
+
         cutoff = datetime.now(timezone.utc) - timedelta(days=self.days)
         deleted: List[int] = []
         for pr in self.get_open_pull_requests():
@@ -95,10 +92,12 @@ class PullRequestCleanupBot:
 
 def main(argv: List[str] | None = None) -> int:
     """CLI entry point to close stale pull requests."""
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("repo", help="Repository in owner/name format")
     parser.add_argument("--days", type=int, default=30, help="Days to consider stale")
     args = parser.parse_args(argv)
+
     bot = PullRequestCleanupBot(repo=args.repo, days=args.days)
     closed = bot.close_stale_pull_requests()
     for pr_number in closed:
