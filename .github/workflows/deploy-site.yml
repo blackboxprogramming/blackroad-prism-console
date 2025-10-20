@@ -1,0 +1,38 @@
+name: Deploy BlackRoad Site to GitHub Pages
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+            - name: Setup Node.js
+              uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+              with:
+                  node-version: "20"
+            - name: Install dependencies
+              run: |
+                  cd sites/blackroad
+                  npm install
+            - name: Build site
+              run: |
+                  cd sites/blackroad
+                  npm run build
+            - name: Log full commit SHA
+              run: |
+                  echo "Full commit SHA: ${{ github.sha }}" > sites/blackroad/dist/DEPLOY_COMMIT_SHA.txt
+                  echo "Deploying commit ${{ github.sha }}"
+            - name: Add CNAME to dist
+              run: |
+                  echo "blackroad.io" > sites/blackroad/dist/CNAME
+            - name: Deploy to GitHub Pages
+              uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: sites/blackroad/dist
+                  cname: blackroad.io
+                  force_orphan: true

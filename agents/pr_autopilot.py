@@ -1,5 +1,4 @@
 """Automates pull request management tasks for BlackRoad repositories."""
-"""Automated pull request manager for BlackRoad repos."""
 
 from __future__ import annotations
 
@@ -10,7 +9,6 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Sequence
-from typing import Optional
 
 import requests
 
@@ -18,7 +16,6 @@ import requests
 @dataclass
 class AutomatedPullRequestManager:
     """Monitor Git events and orchestrate draft pull requests."""
-    """Monitor git events and orchestrate draft pull requests."""
 
     repo: str
     branch_prefix: str = "codex/"
@@ -37,38 +34,66 @@ class AutomatedPullRequestManager:
         logging.basicConfig(filename=self.log_file, level=logging.INFO)
 
     def monitor_repo(self) -> bool:
-        """Check whether the repository has uncommitted changes."""
+        """Return ``True`` when the working tree has uncommitted changes."""
         return self._has_uncommitted_changes(Path.cwd())
 
-    def prepare_draft_pr(self) -> None:
-        """Create a draft pull request from the latest commit."""
-        """Return True if repo has uncommitted changes."""
-        result = subprocess.run(
-            ["git", "status", "--porcelain"], capture_output=True, text=True, check=False
-        )
-        return bool(result.stdout.strip())
+    def prepare_draft_pr(self, base_branch: str = "main") -> Optional[dict]:
+        """Create a draft pull request from the latest commit.
 
-    def prepare_draft_pr(self) -> None:
-        """Create a draft pull request from latest commit."""
+        Returns the pull request payload when successful, otherwise ``None``.
+        """
+
+        repo_root = Path.cwd()
+
+        if self._has_uncommitted_changes(repo_root):
+            self.log(
+                "Working tree has uncommitted changes; commit or stash them before "
+                "preparing a draft PR."
+            )
+            return None
+
         commit_msg = subprocess.run(
-            ["git", "log", "-1", "--pretty=%s"], capture_output=True, text=True, check=False
+            ["git", "log", "-1", "--pretty=%s"],
+            capture_output=True,
+            text=True,
+            check=False,
+            cwd=repo_root,
         ).stdout.strip()
+
+        if not commit_msg:
+            self.log("Unable to determine latest commit message; aborting draft PR creation.")
+            return None
+
         branch_name = f"{self.branch_prefix}{int(time.time())}"
-        # Use a timestamp to generate a unique branch name.
-        subprocess.run(["git", "checkout", "-b", branch_name], check=False)
-        subprocess.run(["git", "push", "-u", "origin", branch_name], check=False)
+
+        try:
+            subprocess.run(["git", "checkout", "-b", branch_name], cwd=repo_root, check=True)
+            subprocess.run(
+                ["git", "push", "-u", "origin", branch_name], cwd=repo_root, check=True
+            )
+        except subprocess.CalledProcessError as exc:
+            self.log(f"Failed to publish draft branch {branch_name!r}: {exc}")
+            return None
+
         diff = subprocess.run(
-            ["git", "diff", "origin/main..."], capture_output=True, text=True, check=False
+            ["git", "diff", f"origin/{base_branch}..."],
+            capture_output=True,
+            text=True,
+            check=False,
+            cwd=repo_root,
         ).stdout
         body = f"### Diff Summary\n```\n{diff[:1000]}\n```\n"
-        pr = self._create_pr(commit_msg, branch_name, "main", body)
+
+        try:
+            pr = self._create_pr(commit_msg, branch_name, base_branch, body)
+        except requests.RequestException as exc:
+            self.log(f"Failed to open draft PR for branch {branch_name!r}: {exc}")
+            return None
+
         self._assign_reviewer(pr["number"])
         self.auto_enhance_pull_request(pr["number"], branch_name)
         logging.info("Opened draft PR #%s", pr["number"])
-
-    def _create_pr(self, title: str, head: str, base: str, body: str) -> dict:
-        """Create a pull request via the GitHub API and return its response."""
-        logging.info("Opened draft PR #%s", pr["number"])
+        return pr
 
     def _create_pr(self, title: str, head: str, base: str, body: str) -> dict:
         url = f"https://api.github.com/repos/{self.repo}/pulls"
@@ -335,28 +360,6 @@ class AutomatedPullRequestManager:
         except requests.RequestException as exc:
             self.log(f"Failed to fetch PR #{pr_number} metadata: {exc}")
             return None
-    def handle_trigger(self, phrase: str) -> None:
-        """React to codex trigger phrases."""
-        phrase_lower = phrase.lower()
-        if "fix comments" in phrase_lower:
-            self.apply_comment_fixes()
-        elif "summarize" in phrase_lower:
-            self.log("Summarizing PR (placeholder)")
-        elif "merge" in phrase_lower:
-            self.log("Merging PR (placeholder)")
-
-    def apply_comment_fixes(self) -> None:
-        """Run the Codex comment fixer script."""
-        subprocess.run(
-            ["node", ".github/tools/codex-apply.js", ".github/prompts/codex-fix-comments.md"],
-            check=False,
-        )
-        self.log("Applied comment fixes")
-
-    def log(self, message: str) -> None:
-        """Log an arbitrary message to the log file."""
-        logging.info(message)
-
 
 if __name__ == "__main__":
     manager = AutomatedPullRequestManager("blackboxprogramming/blackroad")
