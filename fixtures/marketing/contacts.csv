@@ -1,0 +1,4 @@
+id,name,email,country,consent,company_size
+C1,Alice,a@example.com,US,true,enterprise
+C2,Bob,b@example.com,CA,false,mid
+C3,Carol,c@example.com,US,true,small

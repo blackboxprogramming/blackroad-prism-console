@@ -1034,3 +1034,10 @@ make run
 Mount a volume at `/app/data` to persist data.
 
 > Security note: the signing key in `config/dev_signing_key.txt` is for development only and should be rotated for production.
+## Marketing & Content Ops Quickstart
+
+```bash
+python -m cli.console mkt:segments:build --config configs/marketing/segments.yaml
+python -m cli.console mkt:leadscore --config configs/marketing/lead_score.yaml
+python -m cli.console mkt:attr --model linear
+```

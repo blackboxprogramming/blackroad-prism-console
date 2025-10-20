@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {"type": "string"},
+    "title": {"type": "string"},
+    "type": {"type": "string"},
+    "due": {"type": "string"},
+    "owner": {"type": "string"},
+    "status": {"type": "string"}
+  },
+  "required": ["id", "title", "type", "due", "owner", "status"]
+}
