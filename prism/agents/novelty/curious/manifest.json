@@ -1,0 +1,8 @@
+{
+  "name": "curious",
+  "type": "novelty",
+  "description": "curious agent",
+  "capabilities": [
+    "ping"
+  ]
+}

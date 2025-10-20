@@ -1,0 +1,8 @@
+{
+  "name": "poetry",
+  "type": "novelty",
+  "description": "poetry agent",
+  "capabilities": [
+    "ping"
+  ]
+}

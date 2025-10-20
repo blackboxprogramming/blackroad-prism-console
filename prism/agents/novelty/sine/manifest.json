@@ -1,0 +1,8 @@
+{
+  "name": "sine",
+  "type": "novelty",
+  "description": "sine agent",
+  "capabilities": [
+    "ping"
+  ]
+}

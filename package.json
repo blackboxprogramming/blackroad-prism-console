@@ -27,6 +27,11 @@
     "frontend:build": "npm run build:site",
     "build": "npm run build:site",
     "test-agents-pack": "node tests/test_agents_mega.js",
+    "test": "node tests/smoke.test.mjs && node tests/test_agents_novelty.js",
+    "dev:site": "npm --prefix sites/blackroad run dev",
+    "build": "npm --prefix sites/blackroad run build",
+    "frontend:dev": "npm --prefix sites/blackroad run dev",
+    "frontend:build": "npm --prefix sites/blackroad run build",
     "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
   },
   "dependencies": {

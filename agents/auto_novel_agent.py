@@ -4,6 +4,7 @@ import re
 from dataclasses import dataclass
 from typing import ClassVar, List, Set
 from typing import ClassVar, Dict, List, Set
+from typing import ClassVar
 
 
 @dataclass
@@ -46,12 +47,26 @@ class AutoNovelAgent:
             engine: Game engine to use.
             include_weapons: If ``True``, raise a ``ValueError`` because weapons
                 are not allowed.
+        """Create a basic game when given a supported engine name.
+
+        Args:
+            engine: Requested engine name. Accepts ``Unity`` or ``Unreal`` in a
+                case-insensitive manner.
+            include_weapons: Whether weapons should be included in the game.
+                ``True`` triggers a ``ValueError`` because weapons are not
+                allowed.
+
+        Raises:
+            ValueError: If the engine is not Unity/Unreal or weapons are
+                requested.
         """
 
         engine_lower = engine.lower()
         if not self.supports_engine(engine_lower):
             supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
-            raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
+            raise ValueError(
+                f"Unsupported engine '{engine}'. Choose one of: {supported}."
+            )
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
 
@@ -85,7 +100,7 @@ class AutoNovelAgent:
         """Return a sorted list of supported game engines."""
         self.SUPPORTED_ENGINES.discard(engine.lower())
 
-    def list_supported_engines(self) -> List[str]:
+    def list_supported_engines(self) -> list[str]:
         """Return a list of supported game engines."""
 
         return sorted(self.SUPPORTED_ENGINES)
