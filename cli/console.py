@@ -186,6 +186,9 @@ from orchestrator.perf import perf_timer
 from orchestrator.protocols import Task
 from tools import storage
 
+from experiments import ab_engine, flag_analytics, registry as exp_registry, rollout, review_pack
+from growth import loops as growth_loops, funnels as growth_funnels
+
 app = typer.Typer()
 from rnd import ideas as rnd_ideas
 from rnd import experiments as rnd_exp
@@ -2596,6 +2599,102 @@ def sec_sbom_watch_cmd(
 def mfg_mrp_cmd(demand: Path = typer.Option(..., "--demand", exists=True), inventory: Path = typer.Option(..., "--inventory", exists=True), pos: Path = typer.Option(..., "--pos", exists=True)):
     plan = mfg_mrp.plan(str(demand), str(inventory), str(pos))
     typer.echo(json.dumps(plan))
+
+@app.command("exp:new")
+def exp_new(
+    id: str = typer.Option(..., "--id"),
+    name: str = typer.Option(..., "--name"),
+    feature: str = typer.Option(..., "--feature"),
+    variants: str = typer.Option(..., "--variants"),
+    split: str = typer.Option(..., "--split"),
+    unit: str = typer.Option(..., "--unit"),
+):
+    exp = exp_registry.Experiment(
+        id=id,
+        name=name,
+        feature=feature,
+        start="", end="",
+        unit=unit,
+        variants=variants.split(","),
+        split=[float(x) for x in split.split(",")],
+    )
+    exp_registry.register_experiment(exp)
+    typer.echo("ok")
+
+
+@app.command("exp:assign")
+def exp_assign(
+    id: str = typer.Option(..., "--id"),
+    unit: str = typer.Option(..., "--unit"),
+    value: str = typer.Option(..., "--value"),
+):
+    reg = exp_registry.load_registry()
+    exp = reg[id]
+    v = exp_registry.assign_variant(exp, value)
+    typer.echo(v)
+
+
+@app.command("exp:analyze")
+def exp_analyze(
+    id: str = typer.Option(..., "--id"),
+    metrics: Path = typer.Option(..., "--metrics"),
+):
+    reg = exp_registry.load_registry()
+    exp = reg[id]
+    res = ab_engine.analyze(exp, str(metrics))
+    typer.echo(res["decision"])
+
+
+@app.command("flag:impact")
+def flag_impact(
+    feature: str = typer.Option(..., "--feature"),
+    window: int = typer.Option(14, "--window"),
+):
+    res = flag_analytics.impact(feature, window)
+    typer.echo(json.dumps(res))
+
+
+@app.command("rollout:plan")
+def rollout_plan(
+    feature: str = typer.Option(..., "--feature"),
+    stages: str = typer.Option(..., "--stages"),
+):
+    plan = rollout.plan(feature, [int(s) for s in stages.split(",")])
+    typer.echo(json.dumps(plan))
+
+
+@app.command("rollout:gate")
+def rollout_gate(
+    feature: str = typer.Option(..., "--feature"),
+    stage: int = typer.Option(..., "--stage"),
+):
+    typer.echo(rollout.gate(feature, stage))
+
+
+@app.command("growth:simulate")
+def growth_simulate(
+    horizon: int = typer.Option(..., "--horizon"),
+    config: Path = typer.Option(..., "--config"),
+):
+    res = growth_loops.simulate(horizon, str(config))
+    typer.echo(json.dumps(res["WAU"][-1]))
+
+
+@app.command("funnel:build")
+def funnel_build(
+    steps: str = typer.Option(..., "--steps"),
+    start: str = typer.Option(..., "--from"),
+    end: str = typer.Option(..., "--to"),
+):
+    res = growth_funnels.build(steps.split(","), start, end)
+    typer.echo(json.dumps(res))
+
+
+@app.command("exp:review")
+def exp_review(id: str = typer.Option(..., "--id")):
+    res = review_pack.build(id)
+    typer.echo(json.dumps(res))
+
 
 @app.command("status:build")
 def status_build():

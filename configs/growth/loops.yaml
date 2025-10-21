@@ -1,0 +1,4 @@
+acquire: 10
+activate: 0.5
+retain: 0.8
+refer: 0.1

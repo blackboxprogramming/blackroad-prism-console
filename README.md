@@ -1137,4 +1137,12 @@ python -m cli.console sec:assets:list --type service
 python -m cli.console sec:detect:run --rules configs/sec/rules --logs fixtures/sec/logs
 python -m cli.console sec:vuln:import --file fixtures/sec/vulns.csv
 python -m cli.console sec:sbom:watch --sbom dist/SBOM.spdx.json --cves fixtures/sec/cves_local.json
+## Growth & Experimentation Quickstart
+
+Run an experiment offline:
+
+```
+python -m cli.console exp:new --id EXP01 --name "Paywall copy" --feature paywall_v2 --variants A,B --split 0.5,0.5 --unit user
+python -m cli.console exp:assign --id EXP01 --unit user --value 12345
+python -m cli.console exp:analyze --id EXP01 --metrics configs/experiments/metrics.yaml
 ```
