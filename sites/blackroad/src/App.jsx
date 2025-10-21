@@ -305,6 +305,7 @@ import HungarianLab from "./pages/HungarianLab.jsx";
 import QuaternionRotLab from "./pages/QuaternionRotLab.jsx";
 import ComplexBarycentricLab from "./pages/ComplexBarycentricLab.jsx";
 import Lucidia from "./pages/Lucidia.jsx";
+<<<<<<< main
 import InfinityMath from "./pages/InfinityMath.jsx";
 import Agents from "./pages/Agents.jsx";
 import Desktop from "./pages/Desktop.jsx";
@@ -354,6 +355,10 @@ import ComplexPotentialsLab from "./pages/ComplexPotentialsLab.jsx";
 import PowerLloydLab from "./pages/PowerLloydLab.jsx";
 import CahnHilliardLab from "./pages/CahnHilliardLab.jsx";
 >>>>>>> origin/codex/add-react-pages-and-routes-zm01mq
+=======
+import Monitoring from "./pages/Monitoring.jsx";
+import { useEffect, useState } from "react";
+>>>>>>> origin/codex/add-real-time-monitoring-dashboard-to-prism-ui
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -428,6 +433,7 @@ function LegacyApp() {
           <NavLink className="nav-link" to="/agents">Agents</NavLink>
           <NavLink className="nav-link" to="/subscribe">Subscribe</NavLink>
           <NavLink className="nav-link" to="/lucidia">Lucidia</NavLink>
+<<<<<<< main
           <NavLink className="nav-link" to="/math">
             <span
               style={{
@@ -443,6 +449,9 @@ function LegacyApp() {
           <NavLink className="nav-link" to="/quantum-consciousness">
             Quantum Consciousness
           </NavLink>
+=======
+          <NavLink className="nav-link" to="/monitoring">Monitoring</NavLink>
+>>>>>>> origin/codex/add-real-time-monitoring-dashboard-to-prism-ui
         </nav>
         <div className="mt-8">
           <StatusPill />
@@ -477,6 +486,7 @@ function LegacyApp() {
             <Route path="/agents" element={<Agents/>} />
             <Route path="/subscribe" element={<Subscribe/>} />
             <Route path="/lucidia" element={<Lucidia/>} />
+<<<<<<< main
             <Route path="/math" element={<InfinityMath/>} />
             <Route path="/ot" element={<OptimalTransportLab/>} />
             <Route path="/bifurcate" element={<BifurcationLab/>} />
@@ -625,6 +635,9 @@ function LegacyApp() {
             <Route path="power-lloyd" element={<PowerLloydLab/>} />
             <Route path="cahn" element={<CahnHilliardLab/>} />
 >>>>>>> origin/codex/add-react-pages-and-routes-zm01mq
+=======
+            <Route path="/monitoring" element={<Monitoring/>} />
+>>>>>>> origin/codex/add-real-time-monitoring-dashboard-to-prism-ui
             <Route path="*" element={<div>Not found</div>} />
             <Route path="/" element={<Chat />} />
             <Route path="/chat" element={<Chat />} />
