@@ -333,6 +333,12 @@ import psaRev from './routes/psa/revenue.js';
 import psaAR from './routes/psa/ar.js';
 import productFlags from './routes/product/flags.js';
 import productFeedback from './routes/product/feedback.js';
+import rrPolicy from './routes/revrec/policy.js';
+import rrContracts from './routes/revrec/contracts.js';
+import rrAlloc from './routes/revrec/allocate.js';
+import rrSched from './routes/revrec/schedule.js';
+import rrJournal from './routes/revrec/journal.js';
+import rrPack from './routes/revrec/pack.js';
 
 dotenv.config();
 import express from "express";
@@ -572,6 +578,7 @@ app.use('/api/privacy', privacyConsent, privacyPrefs, privacyDsar);
 app.use('/api/pa', paSchema, paIngest, paSessions, paFunnels, paMetrics);
 app.use('/api/psa', psaProj, psaTime, psaExp, psaWip, psaBill, psaRev, psaAR);
 app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
+app.use('/api/revrec', rrPolicy, rrContracts, rrAlloc, rrSched, rrJournal, rrPack);
 
 const port = process.env.PORT || 4000;
 

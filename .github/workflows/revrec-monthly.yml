@@ -1,0 +1,15 @@
+name: RevRec Monthly (Allocate → Schedule → Journal → Pack)
+on:
+  schedule: [{ cron: "5 8 1 * *" }]
+  workflow_dispatch:
+jobs:
+  revrec:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/revrec/allocate.ts
+      - run: node scripts/revrec/schedule.ts
+      - run: node scripts/revrec/journalize.ts
+      - run: node scripts/revrec/audit_pack.ts

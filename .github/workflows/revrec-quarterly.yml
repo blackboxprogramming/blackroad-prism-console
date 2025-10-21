@@ -1,0 +1,10 @@
+name: RevRec Quarterly (Variance & Disclosures)
+on:
+  schedule: [{ cron: "10 8 1 1,4,7,10 *" }]
+  workflow_dispatch:
+jobs:
+  qrevrec:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "quarterly disclosures (stub)"
