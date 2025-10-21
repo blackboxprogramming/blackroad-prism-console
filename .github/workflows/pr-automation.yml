@@ -10,6 +10,7 @@ jobs:
     steps:
       - name: Checkout PR code
         uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
 
@@ -26,6 +27,7 @@ jobs:
       - name: Run PR Automation Bot
         env:
           GITHUB_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_BRANCH: ${{ github.head_ref }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
