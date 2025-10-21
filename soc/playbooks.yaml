@@ -1,0 +1,8 @@
+block_ip:
+  steps:
+    - action: block
+      target: 1.2.3.4
+isolate_host:
+  steps:
+    - action: isolate
+      target: host-123
