@@ -1119,4 +1119,12 @@ Example commands:
 python -m cli.console kg:stats
 python -m cli.console kg:query --file samples/kql/last_treasury_runs.kql
 python -m cli.console chain:run --plan configs/chain_examples/uptime_then_release.yaml
+## Security Ops Quickstart
+
+```
+python -m cli.console sec:assets:load --dir fixtures/sec
+python -m cli.console sec:assets:list --type service
+python -m cli.console sec:detect:run --rules configs/sec/rules --logs fixtures/sec/logs
+python -m cli.console sec:vuln:import --file fixtures/sec/vulns.csv
+python -m cli.console sec:sbom:watch --sbom dist/SBOM.spdx.json --cves fixtures/sec/cves_local.json
 ```

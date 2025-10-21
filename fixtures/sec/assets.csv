@@ -1,0 +1,4 @@
+id,type,owner,criticality,tags
+SVC1,service,U_APP,high,"web,auth"
+DB1,db,U_DB,medium,"data"
+END1,endpoint,U_END,low,"edge"

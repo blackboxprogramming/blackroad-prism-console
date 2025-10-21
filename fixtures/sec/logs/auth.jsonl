@@ -1,0 +1,6 @@
+{"ts":"2025-01-01T00:00:00","user":"alice","ip":"1.1.1.1","result":"FAIL"}
+{"ts":"2025-01-01T00:01:00","user":"alice","ip":"1.1.1.1","result":"FAIL"}
+{"ts":"2025-01-01T00:02:00","user":"alice","ip":"1.1.1.1","result":"FAIL"}
+{"ts":"2025-01-01T00:03:00","user":"alice","ip":"1.1.1.1","result":"FAIL"}
+{"ts":"2025-01-01T00:04:00","user":"alice","ip":"1.1.1.1","result":"FAIL"}
+{"ts":"2025-01-01T00:10:00","user":"bob","ip":"2.2.2.2","result":"OK"}

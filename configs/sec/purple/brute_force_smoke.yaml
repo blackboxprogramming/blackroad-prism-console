@@ -1,0 +1,3 @@
+name: brute_force_smoke
+expected:
+  - suspicious_login
