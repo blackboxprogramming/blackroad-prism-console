@@ -110,6 +110,15 @@ python -m cli.console log:optimize --demand artifacts/sop/allocations.csv --lane
 python -m cli.console procure:award --demand artifacts/sop/allocations.csv --suppliers fixtures/procure/suppliers.csv --policy configs/procure/policy.yaml
 python -m cli.console wc:simulate --demand artifacts/sop/allocations.csv --awards artifacts/procure/award.json --log artifacts/supply/log_plan_*/plan.json --terms configs/finance/terms.yaml
 ```
+## Digital Twin
+
+A minimal offline operations twin is available for deterministic experiments:
+
+1. `python -m cli.console twin:checkpoint --name demo`
+2. `python -m cli.console twin:list`
+3. `python -m cli.console twin:replay --from "2025-01-01" --to "2025-01-02" --mode verify`
+4. `python -m cli.console twin:stress --profile default --duration 5`
+5. `python -m cli.console twin:compare --left artifacts/run1 --right artifacts/run2`
 
 - The installer will:
   - Locate your API (prefers `./srv/blackroad-api`, then `/srv/blackroad-api`, else searches for `server_full.js`)

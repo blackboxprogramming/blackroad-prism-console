@@ -6,4 +6,9 @@
     "tasks": {"type": "integer"},
     "duration_s": {"type": "integer"}
   }
+  "properties": {
+    "submitted": { "type": "integer" },
+    "failures": { "type": "integer" }
+  },
+  "required": ["submitted", "failures"]
 }

@@ -7,4 +7,8 @@
     "removed": {"type": "array", "items": {"type": "string"}},
     "changed": {"type": "array", "items": {"type": "string"}}
   }
+  "properties": {
+    "diffs": { "type": "array" }
+  },
+  "required": ["diffs"]
 }

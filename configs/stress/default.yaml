@@ -3,3 +3,5 @@ arrival_rate: 1
 burstiness: 1
 task_mix:
   simple: 1.0
+arrival_rate: 1
+burstiness: 1

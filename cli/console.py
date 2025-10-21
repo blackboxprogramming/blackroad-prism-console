@@ -10,6 +10,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict
 from typing import Dict, List, Optional
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import List, Optional
 
 import typer
 import yaml
@@ -152,6 +155,10 @@ from kg.rules import run_rules
 from orchestrator import orchestrator
 from orchestrator.protocols import Task
 from tools import storage
+from twin import compare as twin_compare
+from twin import replay as twin_replay
+from twin import snapshots
+from twin import stress as twin_stress
 
 app = typer.Typer()
 from rnd import ideas as rnd_ideas
@@ -1356,12 +1363,18 @@ def version_show():
 def twin_checkpoint(name: str = typer.Option(..., "--name")):
     path = snapshots.create_checkpoint(name)
     typer.echo(path)
+@app.command("twin:checkpoint")
+def twin_checkpoint(name: str = typer.Option(..., "--name")):
+    snapshots.create_checkpoint(name)
+    typer.echo(name)
 
 
 @app.command("twin:list")
 def twin_list():
     for info in snapshots.list_checkpoints():
         typer.echo(f"{info['name']}\t{info['created_at']}")
+    for cp in snapshots.list_checkpoints():
+        typer.echo(cp["name"])
 
 
 @app.command("twin:restore")
@@ -1387,6 +1400,40 @@ def twin_stress(
 ):
     prof = stress.load_profile(profile)
     stress.run_load(prof, duration)
+def twin_replay_cmd(
+    range_from: Optional[str] = typer.Option(None, "--from"),
+    range_to: Optional[str] = typer.Option(None, "--to"),
+    window: Optional[str] = typer.Option(None, "--window"),
+    filter: List[str] = typer.Option([], "--filter"),
+    mode: str = typer.Option("verify", "--mode"),
+):
+    if window == "last_24h":
+        end = datetime.utcnow()
+        start = end - timedelta(days=1)
+    else:
+        if not range_from or not range_to:
+            raise typer.Exit(code=1)
+        start = datetime.fromisoformat(range_from)
+        end = datetime.fromisoformat(range_to)
+    filt = {}
+    for item in filter:
+        if "=" in item:
+            k, v = item.split("=", 1)
+            filt[k] = v
+    rep = twin_replay.replay(start.isoformat(), end.isoformat(), filt, mode)
+    typer.echo(rep.count)
+
+
+@app.command("twin:stress")
+def twin_stress_cmd(
+    profile: str = typer.Option(..., "--profile"),
+    duration: int = typer.Option(60, "--duration"),
+    cache: str = typer.Option("on", "--cache"),
+    exec_mode: str = typer.Option("inproc", "--exec"),
+    tenant: str = typer.Option("system", "--tenant"),
+):
+    prof = twin_stress.load_profile(profile)
+    twin_stress.run_load(prof, duration, cache, exec_mode, tenant)
     typer.echo("ok")
 
 
@@ -2240,6 +2287,14 @@ def chain_run(plan: Path = typer.Option(..., "--plan", exists=True, dir_okay=Fal
     data = yaml.safe_load(Path(plan).read_text())
     steps: List[PlanStep] = [PlanStep(**s) for s in data.get("steps", [])]
     execute_plan(steps)
+
+
+def twin_compare_cmd(
+    left: Path = typer.Option(..., "--left"),
+    right: Path = typer.Option(..., "--right"),
+):
+    twin_compare.compare_runs(str(left), str(right))
+    typer.echo("ok")
 
 
 if __name__ == "__main__":

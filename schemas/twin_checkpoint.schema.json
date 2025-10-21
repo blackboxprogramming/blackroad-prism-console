@@ -19,4 +19,9 @@
       }
     }
   }
+  "properties": {
+    "created_at": { "type": "string" },
+    "files": { "type": "array" }
+  },
+  "required": ["created_at", "files"]
 }

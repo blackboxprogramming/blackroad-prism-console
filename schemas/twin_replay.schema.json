@@ -7,4 +7,9 @@
     "mismatches": {"type": "integer"},
     "deltas": {"type": "object"}
   }
+  "properties": {
+    "mode": { "type": "string" },
+    "count": { "type": "integer" }
+  },
+  "required": ["mode", "count"]
 }
