@@ -470,6 +470,8 @@ app.use('/api/iam', iamIdp, iamDir, iamPol, iamPdp, iamScim, iamAccess, iamToken
 app.use('/api/aiops', ds, ft, ex, tr, md, mrm, dep, mon);
 app.use('/api/dev', devApis, devKeys, devPlans, devGW, devHooks, devDocs, devAnalytics);
 app.use('/api/tprm', tprmV, tprmQ, tprmR, tprmM, tprmMap, tprmB);
+app.use('/api/okr', okrOK, okrCK);
+app.use('/api/ppm', ppmIN, ppmRM, ppmCP, ppmST);
 app.use('/api/portal', portalAnn, portalCh, portalPrefs, portalBan, portalI18n, portalSearch);
 app.use('/api/ats', atsJC, atsAPP, atsINT, atsOF, atsOB, atsAR);
 app.use('/api/bcdr', bcdrPolicy, bcdrBackups, bcdrRestore, bcdrFailover, bcdrPlans, bcdrDrills);
