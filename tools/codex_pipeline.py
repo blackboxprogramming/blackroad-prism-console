@@ -12,6 +12,10 @@ Each stage is executed in order and wrapped with error handling.  Failures are
 logged to ``pipeline_errors.log`` and the pipeline stops unless ``--force`` is
 supplied.  Some failures trigger automatic rollback from the latest backup
 located in ``/var/backups/blackroad``.
+Each stage logs console output to ``pipeline.log`` and records failures in
+``pipeline_errors.log``. When a stage fails the pipeline stops unless the
+``--force`` flag is used. Some failures trigger automatic rollback from the
+latest backup located in ``/var/backups/blackroad``.
 """
 
 from __future__ import annotations
@@ -30,6 +34,12 @@ from urllib import request
 
 import requests
 from dotenv import load_dotenv
+import subprocess
+import traceback
+from datetime import datetime
+from pathlib import Path
+from typing import Callable
+from urllib import request
 
 ERROR_LOG = Path("pipeline_errors.log")
 BACKUP_ROOT = Path("/var/backups/blackroad")
@@ -57,6 +67,7 @@ def notify_webhook(webhook: str, payload: dict[str, object]) -> None:
     data = json.dumps(payload).encode()
     req = request.Request(webhook, data=data, headers={"Content-Type": "application/json"})
     request.urlopen(req, timeout=5)  # noqa: S310
+    request.urlopen(req, timeout=5)
 
 
 def log_error(stage: str, exc: Exception, rollback: bool, webhook: str | None) -> None:
@@ -114,6 +125,7 @@ def refresh_working_copy(*, repo_path: str = ".", dry_run: bool = False) -> None
 
 
 def deploy_to_droplet() -> None:
+    """Deploy the application to the droplet."""
     run("deploy-to-droplet")
 
 
@@ -247,6 +259,11 @@ def main(argv: list[str] | None = None) -> int:
     sync = sub.add_parser("sync", help="Sync Salesforce → Airtable → Droplet")
     sync.add_argument("action", choices=["paste", "append", "replace", "restart", "build"])
     sync.add_argument("payload", help="JSON payload for the action")
+def main(argv: list[str] | None = None) -> int:
+    """Minimal CLI wrapper for running the pipeline."""
+    parser = argparse.ArgumentParser(description="BlackRoad Codex pipeline")
+    parser.add_argument("--force", action="store_true", help="continue even if a step fails")
+    parser.add_argument("--webhook", help="Webhook URL for error notifications")
     args = parser.parse_args(argv)
 
     try:

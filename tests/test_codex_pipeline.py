@@ -1,3 +1,11 @@
+"""Unit tests for the minimal Codex deployment pipeline.
+
+The suite simulates failures in each pipeline stage and asserts that
+rollback or skip behavior occurs as expected.  This keeps coverage focused
+on error handling in ``tools.codex_pipeline`` without relying on external
+services.
+"""
+
 import subprocess
 
 import pytest
@@ -55,3 +63,37 @@ def test_validation_failure_triggers_rollback(monkeypatch):
         cp.run_pipeline()
     assert any("/var/backups/blackroad/latest" in c for c in runner.commands)
     assert ("validate_services", True) in logs
+
+
+def test_run_pipeline_force_continues(monkeypatch):
+    calls: list[str] = []
+
+    def fail_stage() -> None:
+        calls.append("fail")
+        raise subprocess.CalledProcessError(1, "fail")
+
+    def next_stage() -> None:
+        calls.append("next")
+
+    monkeypatch.setattr(cp, "STAGES", [fail_stage, next_stage], raising=False)
+    monkeypatch.setattr(cp, "log_error", lambda *a, **k: None)
+
+    cp.run_pipeline(force=True)
+
+    assert calls == ["fail", "next"]
+
+
+def test_cli_wrapper_returns_failure_on_subprocess_error(monkeypatch):
+    captured: dict[str, object] = {}
+
+    def fake_run_pipeline(*, force: bool, webhook: str | None) -> None:
+        captured["force"] = force
+        captured["webhook"] = webhook
+        raise subprocess.CalledProcessError(1, "cmd")
+
+    monkeypatch.setattr(cp, "run_pipeline", fake_run_pipeline)
+
+    exit_code = cp.main(["--force", "--webhook", "https://example.invalid/hook"])
+
+    assert exit_code == 1
+    assert captured == {"force": True, "webhook": "https://example.invalid/hook"}
