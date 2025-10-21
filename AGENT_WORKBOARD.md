@@ -48,3 +48,8 @@
 - Landed the RoadStudio pipeline MVP with deterministic renders and a golden-frame regression check.
 - Established observability baselines (OTel collectors, Prometheus/Grafana integration, exemplar stubs).
 - Next focus: auto-captioning, public API + SDKs, and tokenomics simulation unless strategic priorities shift.
+### 2025-10-04 – Stack Loop Progress
+- Added auto-captioning module with local speech-to-text stub and export formats to improve content accessibility.
+- Shipped public API gateway flow with proto contracts, SDK generation, and CI synchronization check to keep interfaces aligned.
+- Created tokenomics simulation notebook for deterministic unlock modeling across RoadCoin scenarios.
+- Next focus: publish pipeline between RoadStudio and RoadWeb, bridge module wiring, and release automation flow.
