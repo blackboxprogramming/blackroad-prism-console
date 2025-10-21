@@ -5,6 +5,7 @@ process.env.GIT_REPO_PATH = process.cwd();
 
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
+const { getAuthCookie } = require('./helpers/auth.js');
 
 describe('Git API', () => {
   afterAll((done) => {
@@ -17,6 +18,10 @@ describe('Git API', () => {
       .send({ username: 'root', password: 'Codex2025' }); // pragma: allowlist secret
     const cookie = login.headers['set-cookie'];
     const res = await request(app).get('/api/git/health').set('Cookie', cookie);
+    const cookie = await getAuthCookie();
+    const res = await request(app)
+      .get('/api/git/health')
+      .set('Cookie', cookie);
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
     expect(typeof res.body.repoPath).toBe('string');
@@ -29,6 +34,10 @@ describe('Git API', () => {
       .send({ username: 'root', password: 'Codex2025' }); // pragma: allowlist secret
     const cookie = login.headers['set-cookie'];
     const res = await request(app).get('/api/git/status').set('Cookie', cookie);
+    const cookie = await getAuthCookie();
+    const res = await request(app)
+      .get('/api/git/status')
+      .set('Cookie', cookie);
     expect(res.status).toBe(200);
     expect(typeof res.body.ok).toBe('boolean');
     expect(res.body.ok).toBe(!res.body.isDirty);
@@ -38,5 +47,7 @@ describe('Git API', () => {
     expect(res.body.counts).toHaveProperty('unstaged');
     expect(res.body.counts).toHaveProperty('untracked');
     expect(typeof res.body.isDirty).toBe('boolean');
+    expect(typeof res.body.shortHash).toBe('string');
+    expect(typeof res.body.lastCommitMsg).toBe('string');
   });
 });
