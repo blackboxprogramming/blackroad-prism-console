@@ -48,6 +48,26 @@ Supported command payload keys:
 - `scene`: Switches to the named scene if it is defined in the configuration.
 - `params`: Merges the provided dictionary into the active scene's parameters.
 
+## Audio Feedback Channel
+
+Pi-Holo can now respond to MQTT audio commands published to `holo/audio` (configurable via `MQTT_AUDIO_TOPIC`). Payloads should
+include the audio filename and optional volume:
+
+```bash
+mosquitto_pub -h pi-ops.local -t holo/audio \
+  -m '{"file":"alert.wav","volume":0.8}'
+```
+
+Audio files are resolved either by absolute path or relative to the directory provided through `AUDIO_BASE_PATH` (default:
+`pi_holo/Sounds`). Disable playback entirely with the `--disable-audio` flag or `DISABLE_AUDIO=1` when invoking `run.sh`:
+
+```bash
+DISABLE_AUDIO=1 bash run.sh
+```
+
+The reflex service automatically publishes audio cues for critical alerts so you can hear spikes and outages without looking at
+the display.
+
 ## Scenes and Configuration
 
 Scene definitions live in `Scenes/*.json`. The included `example.json` file demonstrates the available scene types (`text`, `clock`, and `camera`) along with default parameters such as colors, fonts, and animation options. Each scene definition can be overridden at runtime via MQTT.

@@ -14,6 +14,7 @@ import logging
 import os
 import queue
 import signal
+import threading
 import time
 from dataclasses import dataclass
 from datetime import datetime
@@ -21,6 +22,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Optional, Tuple
 
 import pygame
+import pygame.mixer
 
 try:
     import paho.mqtt.client as mqtt  # type: ignore
@@ -65,6 +67,21 @@ def parse_args() -> argparse.Namespace:
         help="MQTT topic for scene commands",
     )
     parser.add_argument(
+        "--audio-topic",
+        default=os.getenv("MQTT_AUDIO_TOPIC", "holo/audio"),
+        help="MQTT topic for audio playback commands",
+    )
+    parser.add_argument(
+        "--audio-base-path",
+        default=os.getenv("AUDIO_BASE_PATH", "Sounds"),
+        help="Base directory for audio files",
+    )
+    parser.add_argument(
+        "--disable-audio",
+        action="store_true",
+        help="Disable audio playback even if pygame mixer is available",
+    )
+    parser.add_argument(
         "--log-level",
         default=os.getenv("LOG_LEVEL", "INFO"),
         help="Python logging level",
@@ -92,6 +109,70 @@ class DisplayConfig:
         background = parse_color(payload.get("background"), cls.background)
         title = str(payload.get("title", cls.title))
         return cls(source_size=source_size, fps=fps, background=background, title=title)
+
+
+class AudioPlayer:
+    """Minimal MQTT-driven audio playback helper."""
+
+    def __init__(self, base_path: Path, disabled: bool = False) -> None:
+        self.base_path = base_path
+        self.disabled = disabled
+        self._lock = threading.Lock()
+        self._initialized = False
+
+    def _ensure_initialized(self) -> bool:
+        if self.disabled:
+            return False
+        with self._lock:
+            if self._initialized:
+                return True
+            try:
+                pygame.mixer.init()
+            except pygame.error as exc:
+                logging.warning("Audio mixer initialization failed: %s", exc)
+                self.disabled = True
+                return False
+            self._initialized = True
+            return True
+
+    def play(self, payload: Dict[str, Any]) -> None:
+        if not isinstance(payload, dict):
+            logging.debug("Ignoring non-dict audio payload: %s", payload)
+            return
+        file_name = payload.get("file")
+        volume = payload.get("volume", 1.0)
+        if not file_name:
+            logging.debug("Audio payload missing file: %s", payload)
+            return
+        if not self._ensure_initialized():
+            return
+        try:
+            volume_value = float(volume)
+        except (TypeError, ValueError):
+            volume_value = 1.0
+        volume_value = max(0.0, min(1.0, volume_value))
+        candidate = Path(str(file_name))
+        if not candidate.is_file():
+            candidate = (self.base_path / str(file_name)).expanduser()
+        if not candidate.is_file():
+            logging.warning("Audio file not found: %s", candidate)
+            return
+        with self._lock:
+            try:
+                pygame.mixer.music.load(candidate.as_posix())
+                pygame.mixer.music.set_volume(volume_value)
+                pygame.mixer.music.play()
+                logging.debug("Playing audio: %s at volume %.2f", candidate, volume_value)
+            except pygame.error as exc:
+                logging.warning("Failed to play audio %s: %s", candidate, exc)
+
+    def stop(self) -> None:
+        if not self._initialized:
+            return
+        with self._lock:
+            pygame.mixer.music.stop()
+            pygame.mixer.quit()
+            self._initialized = False
 
 
 def parse_color(value: Any, fallback: ColorValue) -> ColorValue:
@@ -360,11 +441,13 @@ class HoloRenderer:
         scene_manager: SceneManager,
         command_queue: "queue.Queue[Dict[str, Any]]",
         args: argparse.Namespace,
+        audio_player: AudioPlayer,
     ) -> None:
         self.display = display
         self.scene_manager = scene_manager
         self.command_queue = command_queue
         self.args = args
+        self.audio_player = audio_player
         self.running = True
         self._clock = pygame.time.Clock()
         self._screen: Optional[pygame.Surface] = None
@@ -372,6 +455,7 @@ class HoloRenderer:
         self._output_surface: Optional[pygame.Surface] = None
         self._source_surface: Optional[pygame.Surface] = None
         self._mqtt_client: Optional["mqtt.Client"] = None
+        self._audio_topic = args.audio_topic
 
     def initialize(self) -> None:
         pygame.init()
@@ -424,6 +508,8 @@ class HoloRenderer:
         if rc == 0:
             logging.info("Connected to MQTT broker")
             client.subscribe(self.args.mqtt_topic)
+            if self._audio_topic:
+                client.subscribe(self._audio_topic)
         else:
             logging.error("MQTT connection failed with code %s", rc)
 
@@ -431,7 +517,9 @@ class HoloRenderer:
         payload = message.payload.decode("utf-8", errors="ignore")
         try:
             data = json.loads(payload)
-            if isinstance(data, dict):
+            if message.topic == self._audio_topic:
+                self.audio_player.play(data if isinstance(data, dict) else {})
+            elif isinstance(data, dict):
                 self.command_queue.put(data)
             else:
                 logging.warning("Ignoring non-dict MQTT payload: %s", data)
@@ -513,6 +601,7 @@ class HoloRenderer:
             self._mqtt_client.disconnect()
             self._mqtt_client = None
         self.scene_manager.shutdown()
+        self.audio_player.stop()
         pygame.quit()
 
 
@@ -537,7 +626,11 @@ def main() -> None:
     use_camera = os.getenv("USE_CAMERA", "0") == "1"
     command_queue: "queue.Queue[Dict[str, Any]]" = queue.Queue()
     scene_manager = SceneManager(config, display, use_camera, args.camera_index)
-    renderer = HoloRenderer(display, scene_manager, command_queue, args)
+    audio_base_path = Path(args.audio_base_path)
+    if not audio_base_path.is_absolute():
+        audio_base_path = Path(__file__).resolve().parent / audio_base_path
+    audio_player = AudioPlayer(audio_base_path, disabled=args.disable_audio)
+    renderer = HoloRenderer(display, scene_manager, command_queue, args, audio_player)
 
     def handle_signal(signum: int, _frame: Any) -> None:
         logging.info("Received signal %s; stopping renderer", signum)
