@@ -68,6 +68,13 @@ from aiops import slo_budget as aiops_budget
 
 VERB_FUN: dict[str, str] = {}
 VERB_FUN['plm:bom:where-used'] = 'cli_bom_where_used'
+import time
+import importlib
+
+from plm import bom as plm_bom, eco as plm_eco
+from mfg import routing as mfg_routing, work_instructions as mfg_wi, spc as mfg_spc, coq as mfg_coq, mrp as mfg_mrp
+
+mfg_yield = importlib.import_module("mfg.yield")
 
 mfg_yield = importlib.import_module("mfg.yield")
 
@@ -906,6 +913,7 @@ def plm_bom_explode(
     rev: str = typer.Option(..., "--rev"),
     level: int = typer.Option(1, "--level"),
 ):
+def plm_bom_explode(item: str = typer.Option(..., "--item"), rev: str = typer.Option(..., "--rev"), level: int = typer.Option(1, "--level")):
     lines = plm_bom.explode(item, rev, level)
     for lvl, comp, qty in lines:
         typer.echo(f"{lvl}\t{comp}\t{qty}")
@@ -925,6 +933,8 @@ def plm_eco_new(
     to_rev: str = typer.Option(..., "--to"),
     reason: str = typer.Option(..., "--reason"),
 ):
+@app.command("plm:eco:new")
+def plm_eco_new(item: str = typer.Option(..., "--item"), from_rev: str = typer.Option(..., "--from"), to_rev: str = typer.Option(..., "--to"), reason: str = typer.Option(..., "--reason")):
     ch = plm_eco.new_change(item, from_rev, to_rev, reason)
     typer.echo(ch.id)
 
@@ -939,6 +949,7 @@ def plm_eco_impact(id: str = typer.Option(..., "--id")):
 def plm_eco_approve(
     id: str = typer.Option(..., "--id"), as_user: str = typer.Option(..., "--as-user")
 ):
+def plm_eco_approve(id: str = typer.Option(..., "--id"), as_user: str = typer.Option(..., "--as-user")):
     plm_eco.approve(id, as_user)
     typer.echo("approved")
 
@@ -961,6 +972,8 @@ def mfg_routing_load(
     strict: bool = typer.Option(False, "--strict"),
 ):
     mfg_routing.load_routings(str(dir), strict)
+def mfg_routing_load(dir: Path = typer.Option(..., "--dir", exists=True, file_okay=False)):
+    mfg_routing.load_routings(str(dir))
     typer.echo("ok")
 
 
@@ -970,6 +983,7 @@ def mfg_routing_capcheck(
     rev: str = typer.Option(..., "--rev"),
     qty: int = typer.Option(..., "--qty"),
 ):
+def mfg_routing_capcheck(item: str = typer.Option(..., "--item"), rev: str = typer.Option(..., "--rev"), qty: int = typer.Option(..., "--qty")):
     res = mfg_routing.capacity_check(item, rev, qty)
     typer.echo(json.dumps(res))
 
@@ -989,6 +1003,9 @@ def mfg_spc_analyze(
         typer.echo(" ".join(report["findings"]))
     else:
         typer.echo("OK")
+def mfg_spc_analyze(op: str = typer.Option(..., "--op"), window: int = typer.Option(50, "--window")):
+    findings = mfg_spc.analyze(op, window)
+    typer.echo(" ".join(findings))
 
 
 @app.command("mfg:yield")
@@ -2515,6 +2532,14 @@ def sec_sbom_watch_cmd(
     sbom_watch(sbom, cves)
     typer.echo("sbom scanned")
 
+def mfg_mrp_cmd(demand: Path = typer.Option(..., "--demand", exists=True), inventory: Path = typer.Option(..., "--inventory", exists=True), pos: Path = typer.Option(..., "--pos", exists=True)):
+    plan = mfg_mrp.plan(str(demand), str(inventory), str(pos))
+    typer.echo(json.dumps(plan))
+
+@app.command("status:build")
+def status_build():
+    status_gen.build()
+    typer.echo("built")
 
 if __name__ == "__main__":
     app()

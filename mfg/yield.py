@@ -6,6 +6,9 @@ from typing import Dict, List
 
 from orchestrator import metrics
 from tools import artifacts
+from typing import Dict
+
+from tools import storage
 
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "mfg" / "yield"
@@ -16,6 +19,7 @@ SCHEMA = ROOT / "contracts" / "schemas" / "mfg_yield.schema.json"
 def compute(period: str):
     path = FIXTURES / f"yield_{period}.csv"
     stations: List[Dict[str, float]] = []
+    stations = []
     with open(path, newline="", encoding="utf-8") as fh:
         reader = csv.DictReader(fh)
         for row in reader:
@@ -58,3 +62,21 @@ def compute(period: str):
     )
     metrics.inc("yield_reported")
     return report
+            stations.append((row["station"], total, defects, yield_pct))
+    if not stations:
+        raise ValueError("no data")
+    fpy = stations[0][3]
+    rty = 1.0
+    for s in stations:
+        rty *= s[3]
+    ART_DIR.mkdir(parents=True, exist_ok=True)
+    storage.write(
+        str(ART_DIR / "summary.md"),
+        f"FPY: {fpy:.3f}\nRTY: {rty:.3f}\n",
+    )
+    pareto_path = ART_DIR / "pareto.csv"
+    storage.write(
+        str(pareto_path),
+        "station,defects\n" + "\n".join(f"{s[0]},{s[2]}" for s in sorted(stations, key=lambda x: x[2], reverse=True)),
+    )
+    return {"fpy": fpy, "rty": rty}

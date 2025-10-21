@@ -8,6 +8,11 @@ from typing import List
 from orchestrator import metrics
 from tools import artifacts, storage
 
+from dataclasses import dataclass, field, asdict
+from pathlib import Path
+from typing import List
+
+from tools import storage
 from . import bom
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,6 +59,9 @@ def _save(ch: Change) -> None:
         str(ART_DIR / f"eco_{ch.id}.md"),
         f"# {ch.id}\nstatus: {ch.status}\nreason: {ch.reason}\n",
     )
+    storage.write(str(_path(ch.id)), json.dumps(asdict(ch)))
+    # simple markdown log
+    storage.write(str(ART_DIR / f"eco_{ch.id}.md"), f"# {ch.id}\nstatus: {ch.status}\nreason: {ch.reason}\n")
 
 
 def new_change(item_id: str, from_rev: str, to_rev: str, reason: str, risk: str = "low") -> Change:
@@ -75,6 +83,18 @@ def impact(change_id: str) -> float:
         return 0.0
 
     return _cost(ch.item_id, ch.to_rev) - _cost(ch.item_id, ch.from_rev)
+    items = bom.ITEMS or json.loads(storage.read(str(bom.ART_DIR / "items.json")))
+    def _get_cost(item_id, rev):
+        if isinstance(items, dict):
+            itm = items.get((item_id, rev))
+            if itm:
+                return itm.cost
+            # when loaded from json list
+        for itm in items if isinstance(items, list) else []:
+            if itm["id"] == item_id and itm["rev"] == rev:
+                return itm["cost"]
+        return 0.0
+    return _get_cost(ch.item_id, ch.to_rev) - _get_cost(ch.item_id, ch.from_rev)
 
 
 def approve(change_id: str, user: str) -> Change:
@@ -102,6 +122,11 @@ def _spc_unstable(item_id: str) -> bool:
         return False
     report = json.loads(data)
     return bool(report.get("unstable") or report.get("findings"))
+    findings = ROOT / "artifacts" / "mfg" / "spc" / "findings.json"
+    if not findings.exists():
+        return False
+    data = json.loads(storage.read(str(findings)) or "[]")
+    return bool(data)
 
 
 def release(change_id: str) -> Change:

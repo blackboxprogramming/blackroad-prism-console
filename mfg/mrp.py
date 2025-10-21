@@ -11,6 +11,15 @@ from tools import artifacts
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "mfg" / "mrp"
 SCHEMA = ROOT / "contracts" / "schemas" / "mfg_mrp_plan.schema.json"
+import json
+from pathlib import Path
+from typing import Dict, List
+
+from tools import storage
+from plm import bom
+
+ROOT = Path(__file__).resolve().parents[1]
+ART_DIR = ROOT / "artifacts" / "mfg" / "mrp"
 
 
 def _read_csv(path: str) -> List[Dict[str, str]]:
@@ -42,6 +51,7 @@ def plan(demand_file: str, inventory_file: str, pos_file: str):
         "planned": plan,
     }
     artifacts.validate_and_write(str(ART_DIR / "plan.json"), report, str(SCHEMA))
+    storage.write(str(ART_DIR / "plan.json"), json.dumps(plan, indent=2))
     # kitting lists
     for d in demand:
         item = d["item_id"]
@@ -52,3 +62,5 @@ def plan(demand_file: str, inventory_file: str, pos_file: str):
         artifacts.validate_and_write(str(ART_DIR / f"kitting_{item}.csv"), "\n".join(lines))
     metrics.inc("mrp_planned")
     return report
+        storage.write(str(ART_DIR / f"kitting_{item}.csv"), "\n".join(lines))
+    return plan

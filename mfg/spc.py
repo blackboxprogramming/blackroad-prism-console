@@ -7,6 +7,7 @@ from typing import List
 
 from orchestrator import metrics
 from tools import artifacts
+from tools import storage
 
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "mfg" / "spc"
@@ -85,3 +86,7 @@ def analyze(op: str, window: int = 50):
             sig.unlink()
     metrics.inc("spc_findings", len(findings) or 1)
     return report
+    storage.write(str(ART_DIR / "findings.json"), json.dumps(findings, indent=2))
+    chart_lines = ["index,value"] + [f"{i},{v}" for i, v in enumerate(vals, 1)]
+    storage.write(str(ART_DIR / "charts.md"), "\n".join(chart_lines))
+    return findings

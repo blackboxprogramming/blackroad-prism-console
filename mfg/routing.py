@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 from dataclasses import asdict, dataclass
+from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List
 
@@ -21,6 +22,10 @@ ART_DIR = ROOT / "artifacts" / "mfg"
 SCHEMA_DIR = ROOT / "contracts" / "schemas"
 WC_SCHEMA = SCHEMA_DIR / "mfg_work_centers.schema.json"
 ROUTING_SCHEMA = SCHEMA_DIR / "mfg_routings.schema.json"
+from tools import storage
+
+ROOT = Path(__file__).resolve().parents[1]
+ART_DIR = ROOT / "artifacts" / "mfg"
 
 
 @dataclass
@@ -89,6 +94,14 @@ def load_routings(directory: str, strict: bool = False) -> Dict[str, Routing]:
         data = yaml.safe_load(path.read_text())
         if schema and jsonschema:
             jsonschema.validate(data, schema)
+    storage.write(str(ART_DIR / "work_centers.json"), json.dumps([asdict(w) for w in wcs.values()], indent=2))
+    return wcs
+
+
+def load_routings(directory: str) -> Dict[str, Routing]:
+    rts: Dict[str, Routing] = {}
+    for path in Path(directory).glob("*.yaml"):
+        data = yaml.safe_load(path.read_text())
         steps = [RoutingStep(**s) for s in data.get("steps", [])]
         rt = Routing(item_rev=data["item_rev"], steps=steps)
         rts[rt.item_rev] = rt
@@ -101,6 +114,7 @@ def load_routings(directory: str, strict: bool = False) -> Dict[str, Routing]:
         str(ROUTING_SCHEMA),
     )
     metrics.inc("mfg_routings_loaded", len(rts) or 1)
+    storage.write(str(ART_DIR / "routings.json"), json.dumps([{"item_rev": r.item_rev, "steps": [asdict(s) for s in r.steps]} for r in rts.values()], indent=2))
     return rts
 
 
@@ -115,6 +129,7 @@ def capacity_check(item: str, rev: str, qty: int):
         mins = qty * step.std_time_min / (step.yield_pct or 1)
         totals[step.wc] = totals.get(step.wc, 0.0) + mins
     results: Dict[str, Dict[str, float]] = {}
+    results = {}
     labor_cost = 0.0
     for wc_id, req in totals.items():
         wc = WORK_CENTERS.get(wc_id)
@@ -150,3 +165,4 @@ def _ensure_loaded() -> None:
 def get_routing(item: str, rev: str) -> Routing | None:
     _ensure_loaded()
     return ROUTINGS.get(f"{item}_{rev}")
+    return results

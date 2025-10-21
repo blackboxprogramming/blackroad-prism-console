@@ -6,6 +6,7 @@ from typing import Dict
 
 from orchestrator import metrics
 from tools import artifacts
+from tools import storage
 
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "mfg" / "coq"
@@ -34,3 +35,12 @@ def build(period: str):
     )
     metrics.inc("coq_built")
     return report
+    storage.write(
+        str(ART_DIR / "coq.csv"),
+        "bucket,cost\n" + "\n".join(f"{k},{v}" for k, v in totals.items()),
+    )
+    storage.write(
+        str(ART_DIR / "coq.md"),
+        "\n".join(f"{k}: {v}" for k, v in totals.items()),
+    )
+    return totals

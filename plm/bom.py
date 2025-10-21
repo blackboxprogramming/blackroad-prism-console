@@ -15,6 +15,14 @@ SCHEMA_DIR = ROOT / "contracts" / "schemas"
 ITEM_SCHEMA = SCHEMA_DIR / "plm_items.schema.json"
 BOM_SCHEMA = SCHEMA_DIR / "plm_boms.schema.json"
 WHERE_USED_SCHEMA = SCHEMA_DIR / "plm_where_used.schema.json"
+from dataclasses import dataclass, asdict
+from pathlib import Path
+from typing import Dict, List, Tuple
+
+from tools import storage
+
+ROOT = Path(__file__).resolve().parents[1]
+ART_DIR = ROOT / "artifacts" / "plm"
 
 
 @dataclass
@@ -105,6 +113,8 @@ def _write_where_used() -> None:
     ]
     _write_artifact(_artifact_path("where_used.json"), facts, WHERE_USED_SCHEMA)
     metrics.inc("plm_where_used_written", len(facts) or 1)
+def _write_json(path: Path, data) -> None:
+    storage.write(str(path), json.dumps(data, indent=2))
 
 
 def load_items(directory: str) -> Dict[Tuple[str, str], Item]:
@@ -128,6 +138,8 @@ def load_items(directory: str) -> Dict[Tuple[str, str], Item]:
     payload = [asdict(i) for i in items.values()]
     _write_artifact(_artifact_path("items.json"), payload, ITEM_SCHEMA)
     metrics.inc("plm_items_written", len(payload) or 1)
+    ART_DIR.mkdir(parents=True, exist_ok=True)
+    _write_json(ART_DIR / "items.json", [asdict(i) for i in items.values()])
     return items
 
 
@@ -156,6 +168,11 @@ def load_boms(directory: str) -> Dict[Tuple[str, str], BOM]:
     _write_artifact(_artifact_path("boms.json"), payload, BOM_SCHEMA)
     metrics.inc("plm_boms_written", len(payload) or 1)
     _write_where_used()
+    ART_DIR.mkdir(parents=True, exist_ok=True)
+    _write_json(ART_DIR / "boms.json", [
+        {"item_id": b.item_id, "rev": b.rev, "lines": [asdict(l) for l in b.lines]}
+        for b in boms.values()
+    ])
     return boms
 
 
