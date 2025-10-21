@@ -13,3 +13,7 @@ Social account wiring,Confirm access: blackroadinc, blackroad.io, lucidia_ai, bl
 Friday Demo #2,Demo: Okta SSO, repo guardrails, PRISM auth stub + CI, Growth calendar live.,amundsonalexa@gmail.com,Today,2025-10-03
 Terraform: deploy api.blackroad.io service,Apply new module (ecs-service-alb) in dev and verify ALB HTTPS + health check.,amundsonalexa@gmail.com,Today,2025-10-04
 Pipeline: wire app repo vars,Add AWS_REGION/ECR_REPO/ECS_CLUSTER/ECS_SERVICE vars + AWS_ROLE_TO_ASSUME secret; test deploy.,amundsonalexa@gmail.com,Today,2025-10-04
+Enable WAFv2 on ALB,Apply wafv2-alb module with managed rules + rate limit.,amundsonalexa@gmail.com,Today,2025-10-05
+Add Route53 failover,Provision CF maintenance + dual A-alias records with health check.,amundsonalexa@gmail.com,Today,2025-10-05
+Test failover,Simulate unhealthy ALB target; verify CF page; restore health.,amundsonalexa@gmail.com,This Week,2025-10-06
+Tune WAF rules,Review logs; add allowlist/blocks if needed; set final rate.,amundsonalexa@gmail.com,This Week,2025-10-07

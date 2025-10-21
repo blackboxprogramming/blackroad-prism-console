@@ -25,3 +25,11 @@ output "https_listener_arn" {
 output "alb_arn_suffix" {
   value = aws_lb.this.arn_suffix
 }
+output "alb_arn" {
+  value = aws_lb.this.arn
+}
+
+output "alb_zone_id" {
+  value = aws_lb.this.zone_id
+}
+

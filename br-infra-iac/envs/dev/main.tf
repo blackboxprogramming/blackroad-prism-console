@@ -71,6 +71,36 @@ module "waf_logging" {
   s3_prefix      = "waf_logs/"
   retention_days = 30
   tags           = local.tags
+# WAF on ALB
+module "api_waf" {
+  source                     = "../../modules/wafv2-alb"
+  name                       = "br-dev-api"
+  alb_arn                    = module.api_service.alb_arn
+  ip_allowlist_cidrs         = []
+  ip_blocklist_cidrs         = []
+  rate_limit                 = 1000
+  enable_common_rules        = true
+  enable_ip_reputation_rules = true
+  enable_known_bad_inputs    = true
+  tags                       = local.tags
+}
+
+# Route53 failover to CloudFront maintenance
+module "api_failover" {
+  source = "../../modules/route53-failover"
+
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
+
+  name             = "br-dev-api"
+  hosted_zone_name = "blackroad.io."
+  domain_name      = "api.blackroad.io"
+  alb_dns_name     = module.api_service.alb_dns_name
+  alb_zone_id      = module.api_service.alb_zone_id
+  health_check_path = "/health"
+  tags             = local.tags
 }
 
 output "vpc_id"          { value = module.network.vpc_id }

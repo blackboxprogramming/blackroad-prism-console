@@ -85,3 +85,7 @@ Webhook optional for near-real-time.
 ## #security — Linear token handling
 
 Linear API keys stored only in SSM SecureString. No plaintext in DB or logs.
+
+## #products-prism — WAF + failover hardening
+
+Hardening pass shipped: WAFv2 (managed rules + per-IP rate-limit) on ALB + Route53 failover to CloudFront “maintenance” page for api.blackroad.io. If ALB health dips, traffic flips automatically; flip back is automatic when healthy. We’ll tune WAF after a day of real traffic.
