@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import Dict
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
+from opentelemetry import trace
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from .config import AppConfig
 from .dependencies import enforce_security, get_config, get_dual_control_registry, get_environment_registry, load_initial_config
@@ -14,11 +16,25 @@ from .dual_control import DualControlError, DualControlRegistry
 from .environment_control import EnvironmentControlError, EnvironmentRegistry
 from .rate_limiter import InMemoryRateLimiter
 from .schemas import ApprovalConfirm, ApprovalRequest, ApprovalResponse, EnvironmentRequest, EnvironmentResponse, MaterializeResponse
+from .metrics import snapshot as metrics_snapshot
+from .otel import init_tracing
 
 APP_TITLE = "Autopal Console"
 APP_VERSION = "0.1.0"
 
+init_tracing("autopal-fastapi")
 app = FastAPI(title=APP_TITLE, version=APP_VERSION)
+FastAPIInstrumentor().instrument_app(app)
+
+
+@app.middleware("http")
+async def add_trace_header(request: Request, call_next):
+    response = await call_next(request)
+    span = trace.get_current_span()
+    context = span.get_span_context() if span is not None else None
+    if context and context.trace_id:
+        response.headers["X-Trace-Id"] = format(context.trace_id, "032x")
+    return response
 
 
 def _default_config_path() -> Path:
@@ -62,6 +78,13 @@ async def ready(config: AppConfig = Depends(get_config)) -> Dict[str, str]:
     """Readiness probe that surfaces the global switch state."""
 
     return {"status": "ready", "global_enabled": "true" if config.global_enabled else "false"}
+
+
+@app.get("/metrics")
+async def metrics() -> Dict[str, Dict[str, int]]:
+    """Expose in-process counters for lightweight telemetry."""
+
+    return {"counters": metrics_snapshot()}
 
 
 @app.get("/config")

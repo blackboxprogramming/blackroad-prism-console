@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { getConfig } = require('../config');
 const { writeAudit } = require('../logger');
+const { increment } = require('../metrics');
 const { verifyBearerToken } = require('../services/tokenValidator');
 
 function parseBooleanHeader(value) {
@@ -51,7 +52,8 @@ async function authenticateRequest(req, res, next) {
           action: 'break_glass',
           subject: claims?.sub,
           audience: requestedAudience,
-          details: breakGlassContext
+          details: breakGlassContext,
+          trace_id: req.traceId
         });
       }
     }
@@ -59,10 +61,12 @@ async function authenticateRequest(req, res, next) {
     if (!breakGlassContext) {
       const stepUpHeader = req.headers[config.stepUp.header.toLowerCase()];
       if (!parseBooleanHeader(stepUpHeader)) {
+        increment('step_up.required');
         writeAudit({
           action: 'step_up_required',
           subject: claims?.sub,
-          audience: requestedAudience
+          audience: requestedAudience,
+          trace_id: req.traceId
         });
         res.status(401).json({ message: 'Step-up approval required' });
         return;
@@ -73,7 +77,8 @@ async function authenticateRequest(req, res, next) {
         writeAudit({
           action: 'dual_control_missing',
           subject: claims?.sub,
-          audience: requestedAudience
+          audience: requestedAudience,
+          trace_id: req.traceId
         });
         res.status(403).json({ message: 'Dual-control approval required' });
         return;
@@ -84,7 +89,8 @@ async function authenticateRequest(req, res, next) {
           action: 'dual_control_rejected',
           subject: claims?.sub,
           audience: requestedAudience,
-          reason: 'approver matches requester'
+          reason: 'approver matches requester',
+          trace_id: req.traceId
         });
         res.status(403).json({ message: 'Approver must differ from requester' });
         return;
@@ -102,7 +108,8 @@ async function authenticateRequest(req, res, next) {
     writeAudit({
       action: 'auth_failure',
       error: error.message,
-      path: req.originalUrl
+      path: req.originalUrl,
+      trace_id: req.traceId
     });
     res.status(401).json({ message: 'Unauthorized', detail: error.message });
   }

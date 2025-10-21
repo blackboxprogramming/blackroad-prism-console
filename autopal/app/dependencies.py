@@ -10,6 +10,7 @@ from fastapi import Depends, Header, HTTPException, Request
 from .config import AppConfig, ConfigError, load_config
 from .dual_control import DualControlError, DualControlRegistry
 from .environment_control import EnvironmentRegistry
+from .metrics import increment
 from .rate_limiter import InMemoryRateLimiter, RateLimitExceeded
 
 
@@ -44,6 +45,7 @@ def enforce_security(path: str):
         dual_control: DualControlRegistry = Depends(get_dual_control_registry),
     ) -> None:
         if not config.global_enabled:
+            increment("maintenance.block")
             raise HTTPException(status_code=503, detail="Service is currently disabled")
 
         policy = config.policy_for(path)
@@ -56,8 +58,10 @@ def enforce_security(path: str):
 
         if policy.step_up_required:
             if step_up is None:
+                increment("step_up.required")
                 raise HTTPException(status_code=403, detail="Step-up approval required")
             if step_up.lower() not in {"true", "1", "yes"}:
+                increment("step_up.required")
                 raise HTTPException(status_code=403, detail="Invalid step-up header value")
 
         if policy.dual_control_required:
@@ -77,6 +81,7 @@ def enforce_security(path: str):
             try:
                 await limiter.hit(key, policy.rate_limit.limit, policy.rate_limit.window_seconds)
             except RateLimitExceeded as exc:
+                increment("rate_limit.rejected")
                 raise HTTPException(
                     status_code=429,
                     detail="Rate limit exceeded",
