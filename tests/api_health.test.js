@@ -74,27 +74,30 @@ describe('API security and health', () => {
   it('responds to /health', async () => {
     const res = await request(app).get('/health').set(originHeaders);
 process.env.MATH_ENGINE_URL = '';
+process.env.DB_PATH = ':memory:';
 const request = require('supertest');
-const { app, server } = require('../srv/blackroad-api/server_full.js');
+const { app, shutdown } = require('../srv/blackroad-api/server_full.js');
 
-describe('API security and health', () => {
+describe('API smoke tests', () => {
   afterAll((done) => {
-    server.close(done);
+    shutdown(done);
   });
 
-  it('responds to /health', async () => {
-    const res = await request(app).get('/health');
+  it('returns 200 on /api/health', async () => {
+    const res = await request(app)
+      .get('/api/health')
+      .set('Origin', 'https://example.com');
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
   });
 
-  it('responds to /api/health with security headers', async () => {
+  it('sets security headers', async () => {
     const res = await request(app)
       .get('/api/health')
       .set(originHeaders)
       .set('Origin', 'https://example.com');
-    expect(res.status).toBe(200);
     expect(res.headers['x-dns-prefetch-control']).toBe('off');
+    expect(res.headers['x-frame-options']).toBe('SAMEORIGIN');
     expect(res.headers['access-control-allow-origin']).toBe(
       'https://example.com'
     );

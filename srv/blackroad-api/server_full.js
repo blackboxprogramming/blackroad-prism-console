@@ -1,9 +1,11 @@
 <!-- FILE: /srv/blackroad-api/server_full.js -->
 /* BlackRoad API — Express + SQLite + Socket.IO + LLM bridge
    Runs behind Nginx on port 4000 with cookie-session auth.
-   Env (optional):
+   Env:
      PORT=4000
-     SESSION_SECRET=change_me
+     SESSION_SECRET=
+     INTERNAL_TOKEN=
+     ALLOW_ORIGINS=
      DB_PATH=/srv/blackroad-api/blackroad.db
      LLM_URL=http://127.0.0.1:8000/chat
      MATH_ENGINE_URL=http://127.0.0.1:8100
@@ -62,6 +64,7 @@ const { isOn } = require('../../packages/flags/eval');
 // --- Config
 const PORT = parseInt(process.env.PORT || '4000', 10);
 const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
+const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
 const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
 const ALLOW_SHELL =
   String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
@@ -79,7 +82,6 @@ const MATH_ENGINE_URL = process.env.MATH_ENGINE_URL || '';
 const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
-const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
 const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
 const BRANCH_MAIN = process.env.BRANCH_MAIN || 'main';
 const BRANCH_STAGING = process.env.BRANCH_STAGING || 'staging';
@@ -115,12 +117,17 @@ const PRISM_PLACEHOLDER = {
   },
 };
 
-['SESSION_SECRET', 'INTERNAL_TOKEN'].forEach((name) => {
+['SESSION_SECRET', 'INTERNAL_TOKEN', 'ALLOW_ORIGINS'].forEach((name) => {
   if (!process.env[name]) {
     logger.fatal({ event: 'missing_env', name });
     process.exit(1);
   }
 });
+
+const SESSION_SECRET = process.env.SESSION_SECRET;
+const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN;
+const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim());
+const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
 
 const PLANS = [
   {
@@ -367,6 +374,7 @@ app.use(async (req, res, next) => {
 });
 app.use(compression());
 app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(morgan('tiny'));
 attachDebugProbes({ app, logger, enabled: DEBUG_MODE });
 app.use(compression());
@@ -1310,6 +1318,8 @@ io.on('connection', (socket) => {
 setInterval(() => {
   const total = os.totalmem(),
     free = os.freemem();
+const metricsInterval = setInterval(() => {
+  const total = os.totalmem(), free = os.freemem();
   const payload = {
     t: Date.now(),
     load: os.loadavg()[0],
@@ -1319,6 +1329,12 @@ setInterval(() => {
   };
   io.emit('metrics', payload);
 }, 2000).unref();
+
+function shutdown(done) {
+  clearInterval(metricsInterval);
+  io.close();
+  return server.close(done);
+}
 
 // --- Start
 server.listen(PORT, () => {
@@ -1336,4 +1352,4 @@ server.listen(PORT, () => {
 process.on('unhandledRejection', (e) => logger.error({ event: 'unhandled_rejection', error: String(e) }));
 process.on('uncaughtException', (e) => logger.error({ event: 'uncaught_exception', error: String(e) }));
 
-module.exports = { app, server };
+module.exports = { app, server, io, metricsInterval, shutdown };
