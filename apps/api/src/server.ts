@@ -319,6 +319,11 @@ import obsRR from './routes/obs/rr.js';
 import privacyConsent from './routes/privacy/consent.js';
 import privacyPrefs from './routes/privacy/preferences.js';
 import privacyDsar from './routes/privacy/dsar.js';
+import paSchema from './routes/pa/schema_keys.js';
+import paIngest from './routes/pa/ingest_identify.js';
+import paSessions from './routes/pa/sessions.js';
+import paFunnels from './routes/pa/funnels_cohorts.js';
+import paMetrics from './routes/pa/metrics_alerts.js';
 
 dotenv.config();
 import express from "express";
@@ -555,6 +560,7 @@ app.use('/api/obs', obsServices, obsIngest, obsSlo, obsAlerts, obsRunbooks, obsR
 app.use('/api/expenses', expRep, expCard);
 app.use('/api/payroll', prEmp, prSched, prTime, prRun, prForms);
 app.use('/api/privacy', privacyConsent, privacyPrefs, privacyDsar);
+app.use('/api/pa', paSchema, paIngest, paSessions, paFunnels, paMetrics);
 
 const port = process.env.PORT || 4000;
 
