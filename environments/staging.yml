@@ -199,3 +199,10 @@ notes:
     - curl -fsS https://stage.blackroad.io/health.json >/dev/null
     - aws ecs describe-clusters --cluster $(terraform output -raw ecs_cluster) \
         --region us-west-2
+url: https://staging.blackroad.io
+reviewers:
+  - blackboxprogramming
+  - platform-duty
+notes:
+  - Primary integration environment for release candidates.
+  - Deploys via Fly.io for the web tier and AWS ECS for APIs.

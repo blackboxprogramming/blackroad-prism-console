@@ -237,3 +237,11 @@ notes:
   - Repository variables and secrets cover the AWS region, cluster, listener, hosted zone, and IAM roles needed for previews.
   - Preview URLs are broadcast to #eng alongside PR comments during deployments.
   - Next initiative: integrate preview rollouts with shared Fly.io and AWS ECS deployment targets.
+url: https://dev.blackroad.io
+url_template: https://pr-<number>.dev.blackroad.io
+reviewers:
+  - blackboxprogramming
+  - devx-duty
+notes:
+  - Ephemeral environment spun up per pull request via .github/workflows/preview.yml.
+  - Routes traffic through AWS ALB with per-PR listener rules.
