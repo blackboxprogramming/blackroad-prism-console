@@ -6,3 +6,4 @@
 - `web_performance`: enables Lighthouse and size-limit jobs.
 
 Flip flags in `.github/feature-flags.yml` or via `/toggle` ChatOps commands (where supported).
+- Registry & % rollout; ties to earlier runtime flag middleware.

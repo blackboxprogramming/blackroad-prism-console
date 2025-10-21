@@ -331,6 +331,8 @@ import psaWip from './routes/psa/wip.js';
 import psaBill from './routes/psa/billing.js';
 import psaRev from './routes/psa/revenue.js';
 import psaAR from './routes/psa/ar.js';
+import productFlags from './routes/product/flags.js';
+import productFeedback from './routes/product/feedback.js';
 
 dotenv.config();
 import express from "express";
@@ -569,6 +571,7 @@ app.use('/api/payroll', prEmp, prSched, prTime, prRun, prForms);
 app.use('/api/privacy', privacyConsent, privacyPrefs, privacyDsar);
 app.use('/api/pa', paSchema, paIngest, paSessions, paFunnels, paMetrics);
 app.use('/api/psa', psaProj, psaTime, psaExp, psaWip, psaBill, psaRev, psaAR);
+app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
 
 const port = process.env.PORT || 4000;
 
