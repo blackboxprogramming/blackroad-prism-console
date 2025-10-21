@@ -52,6 +52,27 @@ module "rds" {
   tags                      = local.tags
 }
 
+module "api_waf" {
+  source                   = "../../modules/wafv2-alb"
+  name                     = "${local.name}-api"
+  scope                    = "REGIONAL"
+  association_resource_arn = null
+  enable_bot_control       = true
+  enable_anomaly_rules     = false
+  tags                     = local.tags
+}
+
+module "waf_logging" {
+  source         = "../../modules/waf-logging"
+  name           = "br-dev-api"
+  region         = var.region
+  web_acl_arn    = module.api_waf.web_acl_arn
+  s3_bucket_name = "br-dev-waf-logs-${var.region}"
+  s3_prefix      = "waf_logs/"
+  retention_days = 30
+  tags           = local.tags
+}
+
 output "vpc_id"          { value = module.network.vpc_id }
 output "private_subnets" { value = module.network.private_subnet_ids }
 output "ecs_cluster"     { value = module.ecs.cluster_name }
@@ -125,3 +146,5 @@ output "api_tg_blue_arn"  { value = module.api_service.tg_blue_arn }
 output "api_tg_green_arn" { value = module.api_service.tg_green_arn }
 output "api_https_listener_arn" { value = module.api_service.https_listener_arn }
 output "api_alb_arn_suffix"     { value = module.api_service.alb_arn_suffix }
+output "api_waf_arn"     { value = module.api_waf.web_acl_arn }
+output "waf_logs_s3"     { value = module.waf_logging.s3_log_path_hint }
