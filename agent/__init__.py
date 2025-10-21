@@ -84,3 +84,6 @@ __all__ = ["jobs", "store"]
 from . import api, config, flash, jobs, telemetry  # noqa: F401
 
 __all__ = ["api", "config", "flash", "jobs", "telemetry"]
+"""Utility modules for the BlackRoad agent dashboard."""
+
+__all__ = []
