@@ -77,6 +77,7 @@ import AutoHeal from './pages/AutoHeal.jsx'
 import GitPage from './pages/GitPage.jsx'
 import ControlPanel from './pages/ControlPanel.jsx'
 import PeriodicTableOfEquations from './pages/PeriodicTableOfEquations.jsx'
+import Resilience from './pages/Resilience.jsx'
 
 export default function App(){
   const location = useLocation()
@@ -368,6 +369,7 @@ export default function App(){
               <NavItem to="/novelty" icon={<Sparkles size={18} />} text="Novelty Dashboard" />
               <NavItem icon={<Rocket size={18} />} text="Orchestrator" to="/orchestrator" />
               <NavItem icon={<Rocket size={18} />} text="Manifesto" href="/manifesto" />
+              <NavItem to="/resilience" icon={<ShieldCheck size={18} />} text="Resilience" />
             </nav>
           </aside>
                 <NavItem to="/roadview" icon={<LayoutGrid size={18} />} text="RoadView" />
@@ -456,6 +458,7 @@ export default function App(){
               <Route path="/autoheal" element={<AutoHeal />} />
               <Route path="/git" element={<GitPage />} />
               <Route path="/control" element={<ControlPanel />} />
+              <Route path="/resilience" element={<Resilience />} />
             </Routes>
           </main>
         </>

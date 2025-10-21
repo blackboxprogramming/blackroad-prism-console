@@ -10,5 +10,12 @@ export default defineConfig({
       bundler: 'vite'
     },
     supportFile: 'cypress/support/component.js'
+const { defineConfig } = require('cypress')
+
+module.exports = defineConfig({
+  e2e: {
+    baseUrl: 'http://localhost:8080',
+    supportFile: false,
+    fileServerFolder: 'dist'
   }
 })
