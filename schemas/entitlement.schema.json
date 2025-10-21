@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["sku", "tenant", "seats", "start", "end"],
+  "properties": {
+    "sku": {"type": "string"},
+    "tenant": {"type": "string"},
+    "seats": {"type": "integer"},
+    "start": {"type": "string"},
+    "end": {"type": "string"},
+    "features": {"type": "array", "items": {"type": "string"}}
+  }
+}

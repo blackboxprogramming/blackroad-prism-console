@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["invoice_id", "tenant", "period", "total"],
+  "properties": {
+    "invoice_id": {"type": "string"},
+    "tenant": {"type": "string"},
+    "period": {"type": "string"},
+    "line_items": {"type": "array"},
+    "subtotal": {"type": "number"},
+    "taxes": {"type": "number"},
+    "total": {"type": "number"}
+  }
+}

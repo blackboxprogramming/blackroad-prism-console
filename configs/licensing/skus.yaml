@@ -1,0 +1,24 @@
+F500-CORE:
+  features: [core]
+  limits:
+    tasks_per_day: 100
+    data_bytes_per_day: 1000
+  price_list:
+    USD: 1
+  dependencies: []
+F500-PRO:
+  features: [core, pro]
+  limits:
+    tasks_per_day: 500
+    data_bytes_per_day: 5000
+  price_list:
+    USD: 5
+  dependencies: [F500-CORE]
+F500-ENTERPRISE:
+  features: [core, pro, enterprise]
+  limits:
+    tasks_per_day: 1000
+    data_bytes_per_day: 10000
+  price_list:
+    USD: 10
+  dependencies: [F500-PRO]

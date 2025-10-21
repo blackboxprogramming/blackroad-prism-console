@@ -1,0 +1,15 @@
+partner:
+  id: P001
+  name: Sample Partner
+  tier: Gold
+  regions: [EMEA]
+  strengths: [integration]
+  certs: []
+listings:
+  - id: L-PRICING-PACK
+    sku: F500-PRO
+    version: "1.0"
+    price: 1000
+    capabilities: [pricing]
+    requirements: []
+    status: active
