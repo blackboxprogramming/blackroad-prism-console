@@ -59,6 +59,45 @@ jobs:
             .join('\n');
           require('fs').writeFileSync('masked_table.txt', table + '\n');
           console.log(table);
+          # Inject each secret into env using built-in context
+          # We'll load values step-by-step and never echo them.
+        shell: bash
+        run: |
+          set -euo pipefail
+          CSV="$CSV"
+          IFS=',' read -ra NAMES <<< "$CSV"
+          # export env vars:
+          for n in "${NAMES[@]}"; do
+            key="$(echo "$n" | xargs)"
+            # write to temp file to avoid echoing in logs
+            {
+              echo "$key<<EOF"
+              echo "${{ secrets[key] }}"
+              echo "EOF"
+            } >> $GITHUB_ENV
+          done
+
+          node - <<'NODE'
+          const crypto = require('crypto');
+          const csv = process.env.CSV || '';
+          const names = csv.split(',').map(s=>s.trim()).filter(Boolean);
+          const rows = [];
+          rows.push(['NAME','LEN','MASKED','DIGEST8']);
+          for (const name of names) {
+            const v = process.env[name] || '';
+            const dg = crypto.createHash('sha256').update(v,'utf8').digest('hex').slice(0,8);
+            const masked = v ? '****' + v.slice(-6) : '';
+            rows.push([name, String(v.length), masked, dg]);
+          }
+          const w = i => Math.max(...rows.map(r => (r[i]||'').length));
+          const W = [0,1,2,3].map(w);
+          const line = r => r.map((c,i)=> (i===0? c.padEnd(W[i]) : c.padStart(W[i])) ).join('  ');
+          const out = [line(rows[0]), '-'.repeat(W.reduce((a,b)=>a+b,0)+6)]
+                      .concat(rows.slice(1).map(line)).join('\n');
+          // set outputs
+          const core = require('fs');
+          core.writeFileSync('masked_table.txt', out+'\n');
+          console.log(out); // safe: masked + digests only
           NODE
 
       - name: Upload summary artifact (optional)
