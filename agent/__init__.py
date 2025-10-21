@@ -69,3 +69,8 @@ __all__ = ["jobs", "store"]
 from .flash import flash, list_devices
 
 __all__ = ["flash", "list_devices"]
+"""Agent package for BlackRoad Pi services."""
+
+from . import flash  # re-export for convenience
+
+__all__ = ["flash"]
