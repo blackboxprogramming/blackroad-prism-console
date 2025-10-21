@@ -951,6 +951,11 @@ Run common investor relations workflows:
 ```
 python -m cli.console ir:kpi:compute --period 2025Q3
 python -m cli.console ir:kpi:signoff --kpi revenue --period 2025Q3
+## Board & IR Quickstart
+
+```bash
+python -m cli.console ir:kpi:compute --period 2025Q3
+python -m cli.console ir:kpi:signoff --kpi revenue --period 2025Q3 --request
 python -m cli.console ir:kpi:approve --kpi revenue --period 2025Q3 --as-user U_CFO
 python -m cli.console ir:guidance --period 2025Q4 --assumptions configs/ir/assumptions.yaml
 python -m cli.console ir:earnings:build --period 2025Q3 --as-user U_IR

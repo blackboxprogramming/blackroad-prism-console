@@ -7,4 +7,16 @@
     "unit": {"type": "string"}
   },
   "required": ["id", "value", "unit"]
+  "type": "object",
+  "patternProperties": {
+    ".+": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "value": {"type": "number"},
+        "unit": {"type": "string"}
+      },
+      "required": ["id", "value", "unit"]
+    }
+  }
 }

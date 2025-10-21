@@ -9,4 +9,12 @@
     "content_hash": {"type": "string"}
   },
   "required": ["type", "path", "who", "when", "content_hash"]
+  "type": "object",
+  "properties": {
+    "who": {"type": "string"},
+    "when": {"type": "string"},
+    "channel": {"type": "string"},
+    "content_hash": {"type": "string"}
+  },
+  "required": ["who", "when", "channel", "content_hash"]
 }
