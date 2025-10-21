@@ -19,4 +19,14 @@
     "outDir": "dist"
   },
   "include": ["src", "test"]
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
 }

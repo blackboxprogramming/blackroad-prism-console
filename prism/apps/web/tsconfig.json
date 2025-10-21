@@ -10,4 +10,11 @@
     "outDir": "dist"
   },
   "include": ["src", "test"]
+    "moduleResolution": "Node",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]
 }
