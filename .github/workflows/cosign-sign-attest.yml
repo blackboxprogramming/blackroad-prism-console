@@ -1,0 +1,75 @@
+name: Supply Chain • Cosign keyless signing
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: 'OCI image reference to sign and attest'
+        type: string
+        required: true
+      predicate-type:
+        description: 'Predicate type URI for the attestation'
+        type: string
+        required: false
+        default: https://blackroad.io/attestations/run-metadata
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+
+jobs:
+  sign-and-attest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install cosign
+        uses: sigstore/cosign-installer@d7543c93d881b35a8faa02e8e3605f69b7a1ce62
+        with:
+          cosign-release: v2.4.0
+      - name: Authenticate to GHCR (if applicable)
+        if: startsWith(inputs.image, 'ghcr.io/')
+        run: |
+          echo '${{ github.token }}' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
+      - name: Sign container image
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+        run: |
+          cosign sign --yes --keyless "${{ inputs.image }}"
+      - name: Prepare attestation predicate
+        id: predicate
+        run: |
+          cat <<'JSON' > predicate.json
+          {
+            "buildType": "https://github.com/${{ github.repository }}/actions/${{ github.workflow }}",
+            "builder": {
+              "id": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            },
+            "invocation": {
+              "parameters": {
+                "image": "${{ inputs.image }}"
+              },
+              "environment": {
+                "repository": "${{ github.repository }}",
+                "ref": "${{ github.ref }}",
+                "sha": "${{ github.sha }}",
+                "runAttempt": "${{ github.run_attempt }}"
+              }
+            },
+            "metadata": {
+              "buildStartedOn": "${{ github.run_started_at }}",
+              "buildFinishedOn": "${{ github.run_started_at }}"
+            }
+          }
+          JSON
+          echo "predicate=predicate.json" >> "$GITHUB_OUTPUT"
+      - name: Attest container image
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+        run: |
+          cosign attest --yes --keyless \
+            --predicate "${{ steps.predicate.outputs.predicate }}" \
+            --type "${{ inputs['predicate-type'] }}" \
+            "${{ inputs.image }}"
+      - name: Cleanup predicate
+        if: always()
+        run: rm -f predicate.json
