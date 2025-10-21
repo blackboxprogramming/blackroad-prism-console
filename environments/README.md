@@ -47,6 +47,20 @@ Run the schema validator to confirm manifests stay consistent:
 
 The command exits non-zero when a manifest fails validation and prints the
 specific path and schema error to help with debugging.
+## CLI helper
+
+Generate a quick summary for release tooling (or manual spot checks) with the
+environment summary script:
+
+```bash
+python tools/environments_summary.py --format text
+```
+
+Filter to a single environment by slug when wiring automation:
+
+```bash
+python tools/environments_summary.py --env stg
+```
 
 ## Current coverage
 

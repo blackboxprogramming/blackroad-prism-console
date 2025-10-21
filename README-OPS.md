@@ -29,6 +29,9 @@ checks fail. Keep both runbooks handy during CAB reviews.
 ### Staging
 - Pushes to `main` touching `blackroad-stage/**` or manual dispatch run `pages-stage.yml`.
 - Generates a daily proof + `health.json` for `stage.blackroad.io` and uploads the artifact (no automatic publish step yet).
+- Run `gh workflow run stage-stress.yml -f STRESS=true` to execute the optional
+  **Stage Stress** workflow before promoting a build; it replays the generated
+  artifact under controlled load.
 - Use the artifact for QA sign-off or handoff to downstream deploy automation.
 
 ### Production

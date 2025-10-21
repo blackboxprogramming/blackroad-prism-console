@@ -66,6 +66,15 @@ automation:
       notes: >-
         Requires operators to explicitly opt in via the STRESS input so casual
         pushes do not overload the environment.
+    - name: Stage Stress (safe)
+      file: .github/workflows/stage-stress.yml
+      triggers:
+        - workflow_dispatch (STRESS input)
+        - push (stage, blackroad-stage/**)
+      summary: >-
+        Optional load test that reuses the stage artifact to simulate user
+        traffic before promoting a build downstream. Defaults to a no-op unless
+        the STRESS input is set to "true".
 deployments:
   - service: marketing-site
     type: static-site
@@ -76,6 +85,7 @@ deployments:
       path: blackroad-stage
     domain: https://stage.blackroad.io
     health_check: https://stage.blackroad.io/health.json
+    state: active
   - service: api-gateway
     type: container-service
     provider: aws-ecs-fargate
@@ -206,3 +216,6 @@ reviewers:
 notes:
   - Primary integration environment for release candidates.
   - Deploys via Fly.io for the web tier and AWS ECS for APIs.
+  verification:
+    - curl -fsS https://stage.blackroad.io/ >/dev/null
+    - gh workflow run stage-stress.yml -f STRESS=true
