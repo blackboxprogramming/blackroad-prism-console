@@ -14,6 +14,8 @@ from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Optional
+from typing import Optional
+from dataclasses import asdict
 
 import typer
 import yaml
@@ -188,6 +190,8 @@ from tools import storage
 
 from experiments import ab_engine, flag_analytics, registry as exp_registry, rollout, review_pack
 from growth import loops as growth_loops, funnels as growth_funnels
+
+from close import calendar as close_calendar, journal as close_journal, recon as close_recon, flux as close_flux, sox as close_sox, packet as close_packet
 
 app = typer.Typer()
 from rnd import ideas as rnd_ideas
@@ -2709,6 +2713,109 @@ def status_build():
     if rc:
         raise typer.Exit(code=1)
 
+
+if __name__ == "__main__":
+    app()
+
+from close import calendar as close_calendar
+from close import journal as close_journal
+from close import recon as close_recon
+from close import flux as close_flux
+from close import sox as close_sox
+from close import packet as close_packet
+
+
+@app.command("close:cal:new")
+def close_cal_new(period: str = typer.Option(..., "--period"), template: Path = typer.Option(..., "--template", exists=True)):
+    cal = close_calendar.CloseCalendar.from_template(period, str(template))
+    cal.save()
+    typer.echo("ok")
+
+
+@app.command("close:cal:list")
+def close_cal_list(period: str = typer.Option(..., "--period")):
+    cal = close_calendar.load_calendar(period)
+    for t in cal.tasks:
+        typer.echo(json.dumps(asdict(t)))
+
+
+@app.command("close:cal:update")
+def close_cal_update(
+    period: str = typer.Option(..., "--period"),
+    task: str = typer.Option(..., "--task"),
+    status: str = typer.Option(None, "--status"),
+    evidence: str = typer.Option(None, "--evidence"),
+):
+    cal = close_calendar.load_calendar(period)
+    cal.update(task, status, evidence)
+    typer.echo("updated")
+
+
+@app.command("close:jrnl:propose")
+def close_jrnl_propose(
+    period: str = typer.Option(..., "--period"),
+    rules: Path = typer.Option(..., "--rules", exists=True),
+):
+    close_journal.propose_journals(period, str(rules))
+    typer.echo("proposed")
+
+
+@app.command("close:jrnl:post")
+def close_jrnl_post(period: str = typer.Option(..., "--period")):
+    journals = close_journal.load_journals(period)
+    close_journal.post(period, journals)
+    typer.echo("posted")
+
+
+@app.command("close:recon:run")
+def close_recon_run(period: str = typer.Option(..., "--period"), fixtures: Path = typer.Option(..., "--fixtures", exists=True)):
+    close_recon.run_recons(period, str(fixtures))
+    typer.echo("recons")
+
+
+@app.command("close:flux")
+def close_flux_cmd(
+    period: str = typer.Option(..., "--period"),
+    prev: str = typer.Option(..., "--prev"),
+    py: str = typer.Option(..., "--py"),
+    threshold: float = typer.Option(..., "--threshold"),
+):
+    close_flux.run_flux(period, prev, py, threshold)
+    typer.echo("flux")
+
+
+@app.command("close:sox:add")
+def close_sox_add(
+    period: str = typer.Option(..., "--period"),
+    control: str = typer.Option(..., "--control"),
+    path: str = typer.Option(..., "--path"),
+    owner: str = typer.Option("cli", "--owner"),
+):
+    close_sox.add_evidence(period, control, path, owner)
+    typer.echo("logged")
+
+
+@app.command("close:sox:check")
+def close_sox_check(period: str = typer.Option(..., "--period")):
+    close_sox.check_evidence(period)
+    typer.echo("ok")
+
+
+@app.command("close:packet")
+def close_packet_cmd(period: str = typer.Option(..., "--period")):
+    close_packet.build_packet(period)
+    typer.echo("packet")
+
+
+@app.command("close:sign")
+def close_sign(period: str = typer.Option(..., "--period"), role: str = typer.Option(..., "--role"), as_user: str = typer.Option(..., "--as-user")):
+    close_packet.sign(period, role, as_user)
+    typer.echo("signed")
+
+@app.command("status:build")
+def status_build():
+    status_gen.build()
+    typer.echo("built")
 
 if __name__ == "__main__":
     app()
