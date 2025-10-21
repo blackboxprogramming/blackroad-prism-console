@@ -18,6 +18,7 @@ dependencies = [
     "typer>=0.9.0",
     "uvicorn>=0.23.0",
 ]
+dependencies = ["typer", "fastapi", "httpx", "pyjwt[crypto]", "cachetools", "aioredis"]
 
 [project.scripts]
 brc = "cli.console:main"

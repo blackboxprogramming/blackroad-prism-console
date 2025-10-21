@@ -52,3 +52,7 @@ opentelemetry-sdk
 opentelemetry-exporter-otlp
 opentelemetry-instrumentation-fastapi
 opentelemetry-instrumentation-asgi
+aioredis
+cachetools
+httpx
+pyjwt[crypto]
