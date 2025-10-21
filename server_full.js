@@ -208,6 +208,10 @@ function createCheckoutSession({ user: _user, plan: _plan }) {
   };
 }
 
+subRouter.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
 subRouter.get('/plans', (_req, res) => {
   const rows = db
     .prepare(

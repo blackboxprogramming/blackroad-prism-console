@@ -9,6 +9,12 @@ const connectorStore = require('../services/connectorStore');
 
 const SUBSCRIPTIONS_ENABLED = process.env.SUBSCRIPTIONS_ENABLED !== 'false';
 
+// GET /api/subscribe/health
+// This endpoint remains available even when subscriptions are disabled.
+router.get('/subscribe/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
 function ensureEnabled(req, res, next) {
   if (!SUBSCRIPTIONS_ENABLED) {
     return res.status(503).json({ message: 'subscriptions_disabled' });

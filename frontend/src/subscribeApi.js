@@ -52,5 +52,7 @@ export async function fetchOnboardingSlots(){
 
 export async function bookOnboarding(slot){
   const { data } = await axios.post(`${API_BASE}/api/subscribe/onboarding/book`, { slot });
+export async function fetchHealth() {
+  const { data } = await axios.get(`${API_BASE}/api/subscribe/health`);
   return data;
 }
