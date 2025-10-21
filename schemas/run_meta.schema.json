@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Run metadata",
+  "type": "object",
+  "required": ["run_id", "generated_at", "artifacts", "metrics"],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "Unique identifier for the orchestration run."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Mapping of artifact labels to relative file paths."
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["label", "mae", "rmse", "max_error", "pass_fraction"],
+        "properties": {
+          "label": {"type": "string"},
+          "mae": {"type": "number"},
+          "rmse": {"type": "number"},
+          "max_error": {"type": "number"},
+          "pass_fraction": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    }
+  }
+}
