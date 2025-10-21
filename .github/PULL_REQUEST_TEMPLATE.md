@@ -110,6 +110,7 @@ Notes for reviewers / special instructions:
 - [ ] Tests or benchmarks captured
 
 ### Context
+- Context: <!-- auto-filled by pr-automation -->
 - What changed and why?
 - Anything reviewers should focus on?
 
