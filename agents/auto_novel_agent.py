@@ -54,6 +54,8 @@ class AutoNovelAgent:
                 case-insensitive manner.
             include_weapons: Whether weapons should be included in the game.
                 ``True`` triggers a ``ValueError`` because weapons are not
+            engine: Game engine to use. Must be a non-empty string.
+            include_weapons: If True, raise a ``ValueError`` because weapons are not
                 allowed.
 
         Raises:
@@ -67,6 +69,19 @@ class AutoNovelAgent:
             raise ValueError(
                 f"Unsupported engine '{engine}'. Choose one of: {supported}."
             )
+        if not engine or not engine.strip():
+            raise ValueError("Engine name must be a non-empty string.")
+
+        engine_clean = engine.strip()
+        if not self.supports_engine(engine_clean):
+            supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
+            raise ValueError(
+                "Unsupported engine "
+                f"'{engine_clean}'. Supported engines: {supported}. "
+                "Use ``add_supported_engine`` to register new engines."
+            )
+
+        engine_lower = engine_clean.lower()
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
 
