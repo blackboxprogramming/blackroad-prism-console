@@ -1,0 +1,24 @@
+# syntax=docker/dockerfile:1.7
+# Sample Dockerfile tailored for BuildKit step debugging.
+# It builds the BlackRoad marketing site (sites/blackroad) using Node.js
+# and Caddy. Each stage is intentionally small so you can step through
+# during a debug build.
+
+ARG NODE_IMAGE=node:22-alpine
+
+FROM ${NODE_IMAGE} AS deps
+WORKDIR /workspace/sites/blackroad
+COPY sites/blackroad/package*.json ./
+RUN npm ci
+
+FROM ${NODE_IMAGE} AS build
+WORKDIR /workspace/sites/blackroad
+COPY --from=deps /workspace/sites/blackroad/node_modules ./node_modules
+COPY sites/blackroad/ ./
+RUN npm run build
+
+FROM caddy:2.8-alpine AS final
+COPY --from=build /workspace/sites/blackroad/dist /srv
+COPY sites/blackroad/Caddyfile /etc/caddy/Caddyfile
+EXPOSE 80
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
