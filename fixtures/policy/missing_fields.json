@@ -1,0 +1,7 @@
+{
+  "window": "15m",
+  "events": [
+    {"ts": "2024-04-11T16:00:00Z"}
+  ],
+  "expected": {"decision": "allow", "reason": "", "notes": "missing deny_reason tolerated"}
+}

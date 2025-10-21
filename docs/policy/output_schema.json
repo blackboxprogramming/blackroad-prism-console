@@ -1,0 +1,10 @@
+{
+  "decision": "allow | deny | notify",
+  "reason": "string (machine-friendly)",
+  "rule_id": "GUID",
+  "details": {
+    "message": "human-readable summary",
+    "remediation": "optional, how to fix",
+    "context": { "optional_key": "value" }
+  }
+}

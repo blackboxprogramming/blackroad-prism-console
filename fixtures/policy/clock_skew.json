@@ -1,0 +1,8 @@
+{
+  "window": "5m",
+  "events": [
+    {"ts": "2024-04-11T16:05:00Z", "deny_reason": "auth_clock_skew"},
+    {"ts": "2024-04-11T16:06:00Z", "deny_reason": "auth_clock_skew"}
+  ],
+  "expected": {"decision": "allow", "reason": "", "notes": "clock skew suppression"}
+}
