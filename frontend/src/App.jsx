@@ -21,6 +21,7 @@ import {
   Activity,
   Brain,
   Cpu,
+  FunctionSquare,
   GitCommit,
   LayoutGrid,
   Rocket,
@@ -75,6 +76,7 @@ import Manifesto from './components/Manifesto.jsx'
 import AutoHeal from './pages/AutoHeal.jsx'
 import GitPage from './pages/GitPage.jsx'
 import ControlPanel from './pages/ControlPanel.jsx'
+import PeriodicTableOfEquations from './pages/PeriodicTableOfEquations.jsx'
 
 export default function App(){
   const location = useLocation()
@@ -285,6 +287,7 @@ export default function App(){
     { key: 'guardian', to: '/guardian', text: 'Guardian', icon: <ShieldCheck size={18} /> },
     { key: 'claude', to: '/claude', text: 'Claude', icon: <Cpu size={18} /> },
     { key: 'codex', to: '/codex', text: 'Codex', icon: <Brain size={18} /> },
+    { key: 'equations', to: '/equations', text: 'Equations', icon: <FunctionSquare size={18} /> },
     { key: 'roadcoin', to: '/roadcoin', text: 'RoadCoin', icon: <Wallet size={18} /> },
     { key: 'orchestrator', to: '/orchestrator', text: 'Orchestrator', icon: <Rocket size={18} /> },
     { key: 'roadbook', to: '/roadbook', text: 'Roadbook', icon: <BookOpen size={18} /> },
@@ -333,6 +336,7 @@ export default function App(){
               <Route path="/guardian" element={<Guardian />} />
               <Route path="/claude" element={<Section><Claude socket={socket} /></Section>} />
               <Route path="/codex" element={<Section><Codex socket={socket} /></Section>} />
+              <Route path="/equations" element={<Section><PeriodicTableOfEquations /></Section>} />
               <Route path="/roadcoin" element={<Section><RoadCoin onUpdate={handleWalletUpdate} /></Section>} />
               <Route path="/orchestrator" element={<Section><Orchestrator socket={socket} /></Section>} />
               <Route path="/roadbook" element={<Section><Roadbook /></Section>} />
