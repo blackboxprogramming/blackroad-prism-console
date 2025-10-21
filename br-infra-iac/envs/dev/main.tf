@@ -44,6 +44,7 @@ module "rds" {
   vpc_id                    = module.network.vpc_id
   subnet_ids                = module.network.private_subnet_ids
   app_sg_ids                = [aws_security_group.app_egress.id]
+  app_sg_ids                = [] # put ECS SG here when you add services
   db_allowed_cidr_blocks    = var.db_allowed_cidr_blocks
   instance_class            = var.rds_instance_class
   multi_az                  = false
