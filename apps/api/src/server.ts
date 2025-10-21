@@ -549,6 +549,8 @@ app.use('/api/mkt', mktAJ, mktCC, mktCS, mktAT, mktConsent);
 app.use('/api/tre', treBA, treSR, trePF, trePY, treSG, treFX, treDB, trePL);
 app.use('/api/mdm', mdmDomains, mdmRules, mdmStage, mdmMatch, mdmMerge, mdmPublish, mdmXref);
 app.use('/api/obs', obsServices, obsIngest, obsSlo, obsAlerts, obsRunbooks, obsRR);
+app.use('/api/expenses', expRep, expCard);
+app.use('/api/payroll', prEmp, prSched, prTime, prRun, prForms);
 
 const port = process.env.PORT || 4000;
 
