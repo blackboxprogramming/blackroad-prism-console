@@ -349,6 +349,15 @@ import rrAlloc from './routes/revrec/allocate.js';
 import rrSched from './routes/revrec/schedule.js';
 import rrJournal from './routes/revrec/journal.js';
 import rrPack from './routes/revrec/pack.js';
+import taxJ from './routes/tax/jurisdictions.js';
+import taxT from './routes/tax/taxability.js';
+import taxQ from './routes/tax/quote.js';
+import taxN from './routes/tax/nexus.js';
+import taxP from './routes/tax/payees.js';
+import taxIRS from './routes/tax/irs.js';
+import taxFATCA from './routes/tax/fatca.js';
+import taxEINV from './routes/tax/einvoice.js';
+import taxFiles from './routes/tax/files.js';
 
 dotenv.config();
 import express from "express";
@@ -590,6 +599,7 @@ app.use('/api/pa', paSchema, paIngest, paSessions, paFunnels, paMetrics);
 app.use('/api/psa', psaProj, psaTime, psaExp, psaWip, psaBill, psaRev, psaAR);
 app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
 app.use('/api/revrec', rrPolicy, rrContracts, rrAlloc, rrSched, rrJournal, rrPack);
+app.use('/api/tax', taxJ, taxT, taxQ, taxN, taxP, taxIRS, taxFATCA, taxEINV, taxFiles);
 
 const port = process.env.PORT || 4000;
 
