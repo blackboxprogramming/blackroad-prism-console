@@ -1,0 +1,22 @@
+name: stripe-seed
+on:
+  workflow_dispatch:
+    inputs:
+      amount:
+        description: 'Optional one-off charge (USD cents)'
+        required: false
+        default: '0'
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    env:
+      STRIPE_KEY: ${{ secrets.STRIPE_TEST_KEY }}
+      AMOUNT: ${{ inputs.amount }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        working-directory: stripe-seed
+        run: npm install
+      - name: Run seed script
+        working-directory: stripe-seed
+        run: npm run seed
