@@ -40,6 +40,14 @@ module.exports = function requestGuard(app){
       }
       finalize();
     });
+  const SKIP = ['/api/normalize'];
+  const skip = (p) => SKIP.some(s => p === s || p.startsWith(s + '/'));
+  app.use((req,res,next)=>{
+    if (skip(req.path)) return next();
+    // parse JSON (small, safe)
+    if (req.method !== 'GET' && (req.headers['content-type']||'').includes('application/json')) {
+      let b=''; req.on('data',d=>b+=d); req.on('end',()=>{ try{ req.body = JSON.parse(b||'{}'); }catch{ req.body={}; } ; next(); });
+    } else next();
   });
   app.use((req,res,next)=>{
     if (skip(req.path)) return next();
