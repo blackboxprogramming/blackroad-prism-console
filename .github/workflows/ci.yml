@@ -32,6 +32,15 @@ jobs:
         run: |
           mkdir -p artifacts/test-results
           pytest -q --junitxml=artifacts/test-results/junit-python.xml
+        with: { python-version: '3.11' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Install JS smoke-test dependencies
+        run: |
+          npm ci --no-audit --no-fund --prefix services/api
+          npm ci --no-audit --no-fund --prefix frontend
+      - run: python -m pip install -U pip pytest jsonschema
+      - run: pytest -q tests/test_prism_console_smoke.py tests/test_frontend_smoke.py tests/test_services_api_smoke.py
       - name: Determinism smoke
         run: |
           python -m pip install .
