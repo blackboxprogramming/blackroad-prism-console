@@ -379,6 +379,13 @@ function Dashboard({route}) {
 
   const loadJobs=useCallback(async()=>{try{const res=await fetch('/jobs');const data=await res.json();setJobs(Array.isArray(data.jobs)?data.jobs:[]);}catch(err){console.error('jobs load failed',err);}},[]);
   const openJob=useCallback(async(id)=>{activeJobRef.current=id;try{const res=await fetch(`/jobs/${id}`);const data=await res.json();const text=data.output||JSON.stringify(data,null,2);setJobOutput(text);setTimeout(()=>{if(jobOutRef.current){jobOutRef.current.scrollTop=jobOutRef.current.scrollHeight;}},0);}catch(err){setJobOutput(String(err));}},[]);
+  const [flashDevices,setFlashDevices]=useState([]);
+  const [flashDevice,setFlashDevice]=useState('');
+  const [flashUrl,setFlashUrl]=useState('');
+  const [flashLog,setFlashLog]=useState('');
+  const [flashBusy,setFlashBusy]=useState(false);
+  const flashSocket=useRef(null);
+  const flashLogRef=useRef(null);
 
   useEffect(()=>{Promise.allSettled([apiGet('/api/timeline'),apiGet('/api/tasks'),apiGet('/api/commits'),apiGet('/api/state')]).then(([tl,ts,cs,st])=>{
     if(tl.value)setTimeline(tl.value); if(ts.value)setTasks(ts.value); if(cs.value)setCommits(cs.value);
@@ -391,6 +398,62 @@ function Dashboard({route}) {
   Object.assign(patched,origWS); patched.prototype=origWS.prototype; window.WebSocket=patched; return()=>{window.WebSocket=origWS;};},[loadJobs,openJob]);
 
   const formatTs=ts=>ts?new Date(ts*1000).toLocaleTimeString():'-';
+
+  useEffect(()=>{return ()=>{if(flashSocket.current){flashSocket.current.close(); flashSocket.current=null;}};},[]);
+  useEffect(()=>{if(flashLogRef.current){const el=flashLogRef.current; el.scrollTop=el.scrollHeight;}},[flashLog]);
+
+  async function listFlashDevices(){
+    try{
+      const r=await fetch('/flash/devices');
+      const j=await r.json();
+      if(j && j.devices && !Array.isArray(j.devices) && j.devices.error){
+        setFlashLog(prev=>`${prev ? prev+'\n' : ''}ERROR: ${j.devices.error}`);
+        return;
+      }
+      const devices=Array.isArray(j.devices)?j.devices:[];
+      setFlashDevices(devices);
+      if(devices.length){
+        const found=devices.find(d=>d.device===flashDevice);
+        setFlashDevice(found?flashDevice:devices[0].device);
+      }
+      if(!devices.length){
+        setFlashLog(prev=>`${prev ? prev+'\n' : ''}No removable devices detected.`);
+      }
+    }catch(e){
+      setFlashLog(prev=>`${prev ? prev+'\n' : ''}ERROR: ${e.message||e}`);
+    }
+  }
+
+  function startFlash(){
+    const url=flashUrl.trim();
+    if(!url || !flashDevice){
+      setFlashLog('Select device and image URL');
+      return;
+    }
+    if(flashSocket.current){
+      flashSocket.current.close();
+      flashSocket.current=null;
+    }
+    setFlashLog('');
+    setFlashBusy(true);
+    const proto=location.protocol==='https:'?'wss':'ws';
+    const ws=new WebSocket(`${proto}://${location.host}/ws/flash`);
+    flashSocket.current=ws;
+    ws.onopen=()=>{ws.send(JSON.stringify({device:flashDevice,image_url:url}));};
+    ws.onmessage=ev=>{
+      const text=ev.data;
+      setFlashLog(prev=>`${prev ? prev+'\n' : ''}${text}`);
+      if(text==='[[BLACKROAD_DONE]]' || text==='[BLACKROAD_FLASH_DONE]' || text.startsWith('ERROR')){
+        setFlashBusy(false);
+      }
+    };
+    ws.onerror=()=>{
+      setFlashLog(prev=>`${prev ? prev+'\n' : ''}ERROR: websocket error`);
+      setFlashBusy(false);
+      ws.close();
+    };
+    ws.onclose=()=>{setFlashBusy(false); flashSocket.current=null;};
+  }
 
   const filteredTimeline=useMemo(()=>timeline.filter(x=>(x.title||'').toLowerCase().includes(filter.toLowerCase())||(x.desc||'').toLowerCase().includes(filter.toLowerCase())),[timeline,filter]);
   const [code,setCode]=useState(`// Example code\nconsole.log('BlackRoad online');`);
@@ -496,6 +559,24 @@ function Dashboard({route}) {
         <Card>
           <div style={{fontWeight:700}}>Session Notes</div>
           <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Type notes…" style={{minHeight:120,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:10}}/>
+        </Card>
+        <Card>
+          <div style={{fontWeight:700}}>Flasher</div>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center',marginTop:8}}>
+            <button className="btn small" type="button" onClick={listFlashDevices} disabled={flashBusy}>List Devices</button>
+            <select value={flashDevice} onChange={e=>setFlashDevice(e.target.value)} style={{flex:1,minWidth:160,background:'#09122a',border:'1px solid var(--border)',borderRadius:12,color:'#fff',padding:'8px 10px'}} disabled={flashBusy}>
+              <option value="">Select device</option>
+              {flashDevices.map(d=>(<option key={d.device} value={d.device}>{(
+                `${d.device} ${d.size||''} ${d.model||''}`
+              ).trim()}</option>))}
+            </select>
+          </div>
+          <input value={flashUrl} onChange={e=>setFlashUrl(e.target.value)} placeholder="Image URL (xz)" style={{marginTop:8,width:'100%',padding:'10px',borderRadius:12,border:'1px solid var(--border)',background:'#09122a',color:'#fff'}} disabled={flashBusy}/>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginTop:8}}>
+            <button className="btn small" type="button" onClick={startFlash} disabled={flashBusy}>Flash</button>
+            {flashBusy && <span className="chip">Flashing…</span>}
+          </div>
+          <pre ref={flashLogRef} style={{marginTop:10,background:'#000',color:'#0f0',padding:12,height:180,overflow:'auto',borderRadius:12,whiteSpace:'pre-wrap'}}>{flashLog || 'Ready.'}</pre>
         </Card>
       </Panel>
     </Body>
