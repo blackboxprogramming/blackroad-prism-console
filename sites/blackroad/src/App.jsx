@@ -343,10 +343,17 @@ import EikonalLab from "./pages/EikonalLab.jsx";
 import PoissonDiskLab from "./pages/PoissonDiskLab.jsx";
 import LSystemLab from "./pages/LSystemLab.jsx";
 import MinimalSurfaceLab from "./pages/MinimalSurfaceLab.jsx";
+<<<<<<< main
 import LaplaceConductorsLab from "./pages/LaplaceConductorsLab.jsx";
 import PoincarePendulumLab from "./pages/PoincarePendulumLab.jsx";
 import CatMapLab from "./pages/CatMapLab.jsx";
 import IsoSliceLab from "./pages/IsoSliceLab.jsx";
+=======
+import SpectralGraphLab from "./pages/SpectralGraphLab.jsx";
+import ComplexPotentialsLab from "./pages/ComplexPotentialsLab.jsx";
+import PowerLloydLab from "./pages/PowerLloydLab.jsx";
+import CahnHilliardLab from "./pages/CahnHilliardLab.jsx";
+>>>>>>> origin/codex/add-react-pages-and-routes-zm01mq
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -490,6 +497,7 @@ function LegacyApp() {
             <Route path="/poisson2" element={<PoissonDiskLab/>} />
             <Route path="/lsys" element={<LSystemLab/>} />
             <Route path="/minimal" element={<MinimalSurfaceLab/>} />
+<<<<<<< main
             <Route path="/rrtstar" element={<RRTStarLab/>} />
             <Route path="/epicycles" element={<FourierPainterLab/>} />
             <Route path="/hilbert" element={<HilbertMortonLab/>} />
@@ -533,6 +541,12 @@ function LegacyApp() {
             <Route path="/poincare" element={<PoincarePendulumLab/>} />
             <Route path="/catmap" element={<CatMapLab/>} />
             <Route path="/isoslice" element={<IsoSliceLab/>} />
+=======
+            <Route path="/spectral-graph" element={<SpectralGraphLab/>} />
+            <Route path="/potentials" element={<ComplexPotentialsLab/>} />
+            <Route path="/power-lloyd" element={<PowerLloydLab/>} />
+            <Route path="/cahn" element={<CahnHilliardLab/>} />
+>>>>>>> origin/codex/add-react-pages-and-routes-zm01mq
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -561,6 +575,7 @@ function LegacyApp() {
             <Route path="poisson2" element={<PoissonDiskLab/>} />
             <Route path="lsys" element={<LSystemLab/>} />
             <Route path="minimal" element={<MinimalSurfaceLab/>} />
+<<<<<<< main
             <Route path="rrtstar" element={<RRTStarLab/>} />
             <Route path="epicycles" element={<FourierPainterLab/>} />
             <Route path="hilbert" element={<HilbertMortonLab/>} />
@@ -604,6 +619,12 @@ function LegacyApp() {
             <Route path="poincare" element={<PoincarePendulumLab/>} />
             <Route path="catmap" element={<CatMapLab/>} />
             <Route path="isoslice" element={<IsoSliceLab/>} />
+=======
+            <Route path="spectral-graph" element={<SpectralGraphLab/>} />
+            <Route path="potentials" element={<ComplexPotentialsLab/>} />
+            <Route path="power-lloyd" element={<PowerLloydLab/>} />
+            <Route path="cahn" element={<CahnHilliardLab/>} />
+>>>>>>> origin/codex/add-react-pages-and-routes-zm01mq
             <Route path="*" element={<div>Not found</div>} />
             <Route path="/" element={<Chat />} />
             <Route path="/chat" element={<Chat />} />
