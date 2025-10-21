@@ -119,6 +119,12 @@ A minimal offline operations twin is available for deterministic experiments:
 3. `python -m cli.console twin:replay --from "2025-01-01" --to "2025-01-02" --mode verify`
 4. `python -m cli.console twin:stress --profile default --duration 5`
 5. `python -m cli.console twin:compare --left artifacts/run1 --right artifacts/run2`
+## People Ops Suite Quickstart
+
+```bash
+python -m cli.console people:hc:forecast --plans fixtures/people/plans.csv --attrition fixtures/people/attrition.csv --transfers fixtures/people/transfers.csv --policy configs/people/hc_policy.yaml
+```
+
 
 - The installer will:
   - Locate your API (prefers `./srv/blackroad-api`, then `/srv/blackroad-api`, else searches for `server_full.js`)

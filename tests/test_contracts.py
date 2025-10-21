@@ -57,3 +57,14 @@ def test_contract_validation(tmp_path):
     data_s = [e.to_dict() for e in sox.list_evidence(period)]
     for e in data_s:
         jsonschema.validate(e, schema_s)
+from people import headcount
+
+
+def test_headcount_schema():
+    plans = Path('fixtures/people/plans.csv')
+    attr = Path('fixtures/people/attrition.csv')
+    transfers = Path('fixtures/people/transfers.csv')
+    policy = Path('configs/people/hc_policy.yaml')
+    plan, _ = headcount.forecast(plans, attr, transfers, policy)
+    schema = json.loads(Path('contracts/schemas/headcount_plan.json').read_text())
+    jsonschema.validate(plan, schema)

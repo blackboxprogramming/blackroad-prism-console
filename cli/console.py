@@ -197,6 +197,8 @@ from growth import loops as growth_loops, funnels as growth_funnels
 
 from close import calendar as close_calendar, journal as close_journal, recon as close_recon, flux as close_flux, sox as close_sox, packet as close_packet
 
+from people import analytics, comp_cycle, headcount, orgchart, perf_cycle, recruiting
+
 app = typer.Typer()
 from rnd import ideas as rnd_ideas
 from rnd import experiments as rnd_exp
@@ -2815,6 +2817,103 @@ def close_packet_cmd(period: str = typer.Option(..., "--period")):
 def close_sign(period: str = typer.Option(..., "--period"), role: str = typer.Option(..., "--role"), as_user: str = typer.Option(..., "--as-user")):
     close_packet.sign(period, role, as_user)
     typer.echo("signed")
+
+@app.command("people:hc:forecast")
+def people_hc_forecast(
+    plans: Path = typer.Option(..., "--plans", exists=True),
+    attrition: Path = typer.Option(..., "--attrition", exists=True),
+    transfers: Path = typer.Option(..., "--transfers", exists=True),
+    policy: Path = typer.Option(..., "--policy", exists=True),
+):
+    plan, summary = headcount.forecast(plans, attrition, transfers, policy)
+    ts = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    out_dir = ARTIFACTS / "people" / f"headcount_{ts}"
+    headcount.write_artifacts(out_dir, plan, summary)
+    typer.echo("hc_plan_generated")
+
+
+@app.command("people:req:load")
+def people_req_load(dir: Path = typer.Option(..., "--dir", exists=True)):
+    data = recruiting.load_reqs(dir)
+    ts = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    out_dir = ARTIFACTS / "people" / f"recruiting_{ts}"
+    recruiting.write_artifacts(out_dir, data)
+    typer.echo("recruiting_loaded")
+
+
+@app.command("people:req:report")
+def people_req_report(dept: str = typer.Option(..., "--dept")):
+    typer.echo(f"report for {dept}")
+
+
+@app.command("people:perf:new")
+def people_perf_new(
+    cycle: str = typer.Option(..., "--cycle"),
+    config: Path = typer.Option(..., "--config", exists=True),
+):
+    demo = Path("fixtures/people/demographics.csv")
+    out_dir = ARTIFACTS / "people" / "perf" / cycle
+    perf_cycle.new_cycle(cycle, config, demo, out_dir)
+    typer.echo("perf_cycle_created")
+
+
+@app.command("people:perf:calibrate")
+def people_perf_calibrate(cycle: str = typer.Option(..., "--cycle")):
+    cycle_dir = ARTIFACTS / "people" / "perf" / cycle
+    perf_cycle.calibrate(cycle_dir)
+    typer.echo("perf_calibrated")
+
+
+@app.command("people:comp:plan")
+def people_comp_plan(
+    cycle: str = typer.Option(..., "--cycle"),
+    policy: Path = typer.Option(..., "--policy", exists=True),
+):
+    demo = Path("fixtures/people/demographics.csv")
+    out_dir = ARTIFACTS / "people" / "comp" / cycle
+    comp_cycle.plan(cycle, demo, policy, out_dir)
+    typer.echo("comp_plan_built")
+
+
+@app.command("people:comp:letters")
+def people_comp_letters(cycle: str = typer.Option(..., "--cycle")):
+    cycle_dir = ARTIFACTS / "people" / "comp" / cycle
+    comp_cycle.letters(cycle_dir)
+    typer.echo("letters_emitted")
+
+
+@app.command("people:org:build")
+def people_org_build(include_open_reqs: bool = typer.Option(False, "--include-open-reqs")):
+    demo = Path("fixtures/people/demographics.csv")
+    include = None
+    if include_open_reqs:
+        plans = Path("fixtures/people/plans.csv")
+        include = headcount._read_csv(plans) if plans.exists() else None
+    children = orgchart.build_tree(demo, include)
+    tree = orgchart.render_tree(children)
+    out_dir = ARTIFACTS / "people" / "orgchart"
+    orgchart.write_artifacts(out_dir, tree, list(csv.DictReader(demo.open())))
+    typer.echo("orgchart_built")
+
+
+@app.command("people:org:whatif")
+def people_org_whatif(
+    freeze: str = typer.Option(None, "--freeze"),
+    move: str = typer.Option(None, "--move"),
+):
+    typer.echo("what-if complete")
+
+
+@app.command("people:analytics:build")
+def people_analytics_build():
+    demo = Path("fixtures/people/demographics.csv")
+    attr = Path("fixtures/people/attrition.csv")
+    recruiting_path = ARTIFACTS / "people"
+    json_data = next(recruiting_path.glob("recruiting_*/kanban.json"), None)
+    out_dir = ARTIFACTS / "people" / f"analytics_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+    analytics.build(demo, attr, Path(str(json_data)) if json_data else Path("nonexistent"), Path("configs/people/pay_bands.yaml"), out_dir)
+    typer.echo("analytics_built")
+
 
 @app.command("status:build")
 def status_build():

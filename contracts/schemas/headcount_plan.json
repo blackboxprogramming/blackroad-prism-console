@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["req_id", "dept", "role"],
+    "properties": {
+      "req_id": {"type": "string"},
+      "dept": {"type": "string"},
+      "role": {"type": "string"}
+    }
+  }
+}
