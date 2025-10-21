@@ -71,6 +71,64 @@ automation:
       secrets:
         - AWS_PROD_DEPLOY_ROLE_ARN
         - AWS_PROD_EXTERNAL_ID
+    - name: deploy-canary
+      file: .github/workflows/deploy-canary.yml
+      triggers:
+        - push (main)
+        - workflow_dispatch (canary percent input)
+      summary: >-
+        Builds a fresh container image, pushes to ECR, updates the ECS service,
+        and shifts a configurable percentage of traffic through the green target
+        group while watching CloudWatch metrics for regression.
+      secrets:
+        - AWS_ROLE_TO_ASSUME
+      variables:
+        - AWS_REGION
+        - ECR_REPO
+        - ECS_CLUSTER
+        - ECS_SERVICE
+        - TG_BLUE_ARN
+        - TG_GREEN_ARN
+        - HTTPS_LISTENER_ARN
+        - APP_URL
+        - ALB_ARN_SUFFIX
+    - name: deploy-canary-ladder
+      file: .github/workflows/deploy-canary-ladder.yml
+      triggers:
+        - workflow_dispatch (steps + soak configuration)
+      summary: >-
+        Automates a progressive promotion through multiple canary percentages,
+        running health and CloudWatch checks at each step and rolling back to
+        blue on failure.
+      secrets:
+        - AWS_ROLE_TO_ASSUME
+      variables:
+        - AWS_REGION
+        - ECR_REPO
+        - ECS_CLUSTER
+        - ECS_SERVICE
+        - TG_BLUE_ARN
+        - TG_GREEN_ARN
+        - HTTPS_LISTENER_ARN
+        - APP_URL
+        - ALB_ARN_SUFFIX
+        - API_URL
+    - name: Deploy & Self-Heal
+      file: .github/workflows/deploy-self-heal.yml
+      triggers:
+        - push (main)
+      summary: >-
+        Rsyncs the repo to long-lived hosts, runs the legacy deploy script, and
+        executes the self-heal routine that can roll back via git or Docker when
+        the health probes fail.
+      secrets:
+        - BR_HOST
+        - BR_USER
+        - BR_SSH_KEY
+      variables:
+        - optional HEALTH_ENDPOINTS list
+        - ROLLBACK_STRATEGY
+        - ROLLBACK_REF
 deployments:
   - service: marketing-site
     type: static-site
@@ -86,6 +144,11 @@ deployments:
     provider: aws-ecs-fargate
     terraform_directory: br-infra-iac/envs/prod
     module: modules/ecs-service-alb
+    terraform_backend:
+      bucket: br-tfstate-<unique>
+      key: prod/terraform.tfstate
+      region: us-west-2
+      lock_table: br-terraform-lock
     state: planned
     notes: >-
       Production wiring follows the dev module that provisions api.blackroad.io
@@ -107,6 +170,7 @@ change_management:
     - README-OPS.md
     - runbooks/examples/infra_release_policy.yaml
     - runbooks/examples/infra_release_rollback.yaml
+    - docs/ops/rollback-forward.md
 observability:
   health_checks:
     - name: frontend
@@ -214,3 +278,12 @@ observability:
     - deploy/k8s/monitoring.yaml
 notes:
   - Next initiative: hook CI/CD outputs into Fly.io and AWS ECS targets via reusable workflows.
+  verification:
+    - curl -fsS https://blackroad.io/healthz >/dev/null
+    - curl -fsS https://api.blackroad.io/health >/dev/null
+    - aws ecs describe-services --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE" \
+        --region us-west-2
+    - aws cloudwatch get-metric-statistics --namespace AWS/ApplicationELB \
+        --metric-name HTTPCode_ELB_5XX_Count --dimensions Name=LoadBalancer,Value=$ALB_ARN_SUFFIX \
+        --start-time "$(date -u -d '15 minutes ago' +%Y-%m-%dT%H:%M:%SZ)" \
+        --end-time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --period 300 --statistics Sum

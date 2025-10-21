@@ -117,6 +117,25 @@ jobs:
     secrets:
       fly-api-token: ${{ secrets.FLY_API_TOKEN }}
 ```
+## Canary + rollback workflows
+
+Production traffic now flows through paired workflows that mirror the
+environment manifest entries:
+
+- **deploy-canary** — build, publish, and shift a configurable percentage of
+  requests to the green target group while watching CloudWatch latency/5xx
+  baselines. Use this for quick spot checks or a single promotion.
+- **deploy-canary-ladder** — iterate through multiple percentages (defaults to
+  `1,50,100`) with soak times and automated rollback to blue if the metrics or
+  HTTP probes cross thresholds.
+- **Deploy & Self-Heal** — rsync to long-lived hosts, run
+  `scripts/deploy.sh`, and invoke the self-heal automation capable of rolling
+  back via Git or Docker. Useful when ECS or the webhook path is unhealthy.
+
+The secrets/variables called out in `environments/production.yml` must stay in
+sync with GitHub repository settings so these jobs can assume the correct AWS
+roles and reference the ALB listener or target groups. For step-by-step
+procedures, see [`docs/ops/rollback-forward.md`](docs/ops/rollback-forward.md).
 
 ## Related documentation
 
