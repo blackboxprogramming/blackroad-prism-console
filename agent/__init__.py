@@ -74,3 +74,8 @@ __all__ = ["flash", "list_devices"]
 from . import flash  # re-export for convenience
 
 __all__ = ["flash"]
+"""Utilities for managing remote jobs executed on Jetson hosts."""
+
+from . import jobs, store
+
+__all__ = ["jobs", "store"]
