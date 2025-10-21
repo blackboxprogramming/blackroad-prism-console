@@ -110,6 +110,19 @@ class AutoNovelAgent:
         """
 
         self.SUPPORTED_ENGINES.discard(engine.lower())
+        """Remove a game engine from the supported list.
+
+        Args:
+            engine: Name of the engine to remove. The lookup is
+                case-insensitive.
+
+        Raises:
+            ValueError: If the engine is not currently supported.
+        """
+        try:
+            self.SUPPORTED_ENGINES.remove(engine.lower())
+        except KeyError as exc:
+            raise ValueError(f"Unsupported engine: {engine}.") from exc
 
     def list_supported_engines(self) -> List[str]:
         """Return a sorted list of supported game engines."""

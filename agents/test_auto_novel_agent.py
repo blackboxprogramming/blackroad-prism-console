@@ -4,6 +4,15 @@ import pytest
 from auto_novel_agent import AutoNovelAgent
 
 
+@pytest.fixture(autouse=True)
+def reset_supported_engines():
+    """Ensure each test starts with the default engine set."""
+
+    original = AutoNovelAgent.SUPPORTED_ENGINES.copy()
+    yield
+    AutoNovelAgent.SUPPORTED_ENGINES = original.copy()
+
+
 def test_supports_engine_case_insensitive():
     agent = AutoNovelAgent()
     assert agent.supports_engine("UNITY")
@@ -47,3 +56,15 @@ def test_generate_story_requires_theme():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
         agent.generate_story("")
+
+def test_remove_supported_engine():
+    agent = AutoNovelAgent()
+    agent.add_supported_engine("godot")
+    agent.remove_supported_engine("godot")
+    assert not agent.supports_engine("godot")
+
+
+def test_remove_unsupported_engine_raises():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError):
+        agent.remove_supported_engine("godot")
