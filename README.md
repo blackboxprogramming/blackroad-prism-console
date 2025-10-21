@@ -169,6 +169,21 @@ leaderboard through the `leaderboard-refresh` GitHub Action to keep things
 up-to-date.
 
 ## Developing with VS Code and Docker on macOS
+2. Run checks:
+   ```bash
+   pre-commit run --files <file1> [file2 ...]
+   npm test
+   ```
+3. Commit with a clear message:
+   ```bash
+   git commit -m "feat: describe your change"
+   ```
+4. Push the branch:
+   ```bash
+   git push origin <branch-name>
+   ```
+5. Open a Pull Request with a short title and description, then review the CI results.
+6. If reviewers request changes, edit locally, commit, and push again—new commits update the same PR.
 
 ## Developing with VS Code and Docker on macOS
 
