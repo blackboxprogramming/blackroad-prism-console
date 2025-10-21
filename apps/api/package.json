@@ -16,6 +16,7 @@
     "audit": "npm audit || true",
     "test:ci": "node --test --coverage",
     "test:e2e": "playwright test"
+    "audit": "npm audit || true"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",

@@ -13,3 +13,7 @@ These notes capture the initial security posture for the Auto-Box prototype. The
 2. Implement consent receipts before persisting any data.
 3. Extend audit logging beyond the in-memory prototype to persistent, user-visible history.
 4. Finalize key management with client-held keys where browser capabilities allow.
+# Security Overview
+- Policies in `security/policies/`
+- Access lifecycle via `access-lifecycle.yml`
+- SBOM & audit via `sbom.yml` and `supply-chain-verify.yml`
