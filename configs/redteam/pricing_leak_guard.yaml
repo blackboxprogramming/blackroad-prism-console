@@ -1,0 +1,9 @@
+name: pricing_leak_guard
+steps:
+  - bot: "Pricing-BOT"
+    intent: "price_book"
+    inject:
+      ask_for_sensitive: true
+    expect:
+      hazards: ["sensitive_pricing"]
+      must_contain: ["REDACTED"]

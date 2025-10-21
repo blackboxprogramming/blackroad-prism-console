@@ -185,8 +185,12 @@ from sec.purple.sim import run as purple_run
 from sec.sbom_watch import watch as sbom_watch
 from orchestrator import orchestrator, slo_report
 from orchestrator.perf import perf_timer
-from orchestrator.protocols import Task
+from orchestrator.protocols import BotResponse, Task
 from tools import storage
+from safety import policy
+from redteam import scenarios as rt_scenarios, runner as rt_runner
+from quality import checks as quality_checks
+import settings
 
 from experiments import ab_engine, flag_analytics, registry as exp_registry, rollout, review_pack
 from growth import loops as growth_loops, funnels as growth_funnels
@@ -2816,6 +2820,82 @@ def close_sign(period: str = typer.Option(..., "--period"), role: str = typer.Op
 def status_build():
     status_gen.build()
     typer.echo("built")
+@app.command("safety:list-packs")
+def safety_list_packs():
+    for name in policy.list_packs():
+        typer.echo(name)
+
+
+@app.command("safety:evaluate")
+def safety_evaluate(
+    response: Path = typer.Option(..., "--response", exists=True, dir_okay=False),
+    packs: str = typer.Option("", "--packs"),
+):
+    data = json.loads(storage.read(str(response)))
+    resp = BotResponse(**data)
+    pack_list = [p.strip() for p in packs.split(",") if p.strip()] or settings.PACKS_ENABLED
+    for code in policy.evaluate(resp, pack_list):
+        typer.echo(code)
+
+
+@app.command("redteam:list")
+def redteam_list():
+    for name in rt_scenarios.list_scenarios():
+        typer.echo(name)
+
+
+@app.command("redteam:run")
+def redteam_run(name: str = typer.Option(..., "--name")):
+    rep = rt_runner.run_scenario(name)
+    typer.echo("passed" if rep.passed else "failed")
+
+
+@app.command("quality:assess")
+def quality_assess(
+    artifact: Path = typer.Option(..., "--artifact", exists=True, dir_okay=False),
+    config: Path = typer.Option(..., "--config", exists=True, dir_okay=False),
+):
+    findings = quality_checks.assess(artifact, config)
+    for f in findings:
+        typer.echo(f.code)
+
+
+@app.command("playbook:show")
+def playbook_show(name: str = typer.Option(..., "--name")):
+    path = ROOT / "playbooks" / "safe_ops.md"
+    lines = path.read_text(encoding="utf-8").splitlines()
+    key = name.replace("_", " ").lower()
+    out: list[str] = []
+    collect = False
+    for line in lines:
+        lower = line.lower()
+        if lower.startswith("## "):
+            heading = lower[3:].strip()
+            if collect and heading != key:
+                break
+            collect = heading == key
+            continue
+        if collect:
+            out.append(line)
+    for line in out:
+        typer.echo(line)
+    typer.echo(f"Path: {path}")
+
+
+@app.command("bot:run")
+def bot_run(
+    bot: str = typer.Option(..., "--bot"),
+    goal: str = typer.Option(..., "--goal"),
+    safety_pack: str = typer.Option("", "--safety-pack"),
+):
+    task_id = _next_task_id()
+    task = Task(id=task_id, goal=goal, context=None, created_at=datetime.utcnow())
+    packs = [safety_pack] if safety_pack else None
+    response = orchestrator.route(task, bot, safety_packs=packs)
+    resp_path = ARTIFACTS / task_id / f"{bot}_response.json"
+    storage.write(str(resp_path), response.model_dump(mode="json"))
+    typer.echo(str(resp_path))
+
 
 if __name__ == "__main__":
     app()

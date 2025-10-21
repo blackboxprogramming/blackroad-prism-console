@@ -1,0 +1,7 @@
+required_segments: ["North", "South"]
+fairness:
+  threshold: 5
+  groups:
+    a: 10
+    b: 20
+required_fields: ["Owner", "Timeline"]

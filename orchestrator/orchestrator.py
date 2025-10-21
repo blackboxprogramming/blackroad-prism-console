@@ -26,7 +26,10 @@ _memory_config_path = _config_root / "agents" / "memory" / "memory.yaml"
 
 memory_manager = MemoryManager.from_yaml(_memory_config_path)
 status_broadcaster = StatusBroadcaster(channel="#blackroad-status")
+import metrics
+import settings
 from bots import available_bots
+from safety import duty_of_care, policy
 from tools import storage
 
 from .base import BaseBot, assert_guardrails
@@ -47,7 +50,7 @@ def red_team(response: BotResponse) -> None:
         raise AssertionError("KPIs not referenced")
 
 
-def route(task: Task, bot_name: str) -> BotResponse:
+def route(task: Task, bot_name: str, safety_packs: list[str] | None = None) -> BotResponse:
     """Route a task to the named bot and log the interaction."""
     registry: Dict[str, Type[BaseBot]] = available_bots()
     if bot_name not in registry:
@@ -109,6 +112,11 @@ def route(task: Task, bot_name: str) -> BotResponse:
         response = bot.run(task)
     assert_guardrails(response)
     red_team(response)
+    violations = policy.evaluate(response, safety_packs or settings.PACKS_ENABLED)
+    if settings.DUTY_OF_CARE:
+        err = duty_of_care.gate(violations)
+        if err:
+            raise RuntimeError(err)
 
     resp_dict = redaction.scrub(response.model_dump(mode="python"))
     response = BotResponse(**resp_dict)
@@ -168,6 +176,7 @@ def route(task: Task, bot_name: str) -> BotResponse:
             "artifact": response.artifacts[0] if response.artifacts else None,
         },
     )
+    metrics.record("orchestrator_run", {"bot": bot_name, "task": task.id})
     return response
 from __future__ import annotations
 
