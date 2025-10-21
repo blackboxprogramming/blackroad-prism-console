@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Mapping
+from typing import Any, Dict
 
 import pytest
 
@@ -107,6 +108,11 @@ def test_rule_definitions(_rule_path: Path, rule: Rule, case) -> None:
     if rule.mode is RuleMode.ENFORCE:
         assert result.blocked == triggered_expectation
         if triggered_expectation:
+    assert result.triggered is case.want, f"{rule.id}/{case.name} expected {case.want}, got {result.triggered}"
+
+    if rule.mode is RuleMode.ENFORCE:
+        assert result.blocked == case.want
+        if case.want:
             expected_message = rule.metadata.get("block_message") if isinstance(rule.metadata, dict) else None
             if expected_message:
                 expected_message = expected_message.format(**event)
@@ -131,6 +137,7 @@ def test_rule_definitions(_rule_path: Path, rule: Rule, case) -> None:
             assert result.details.get("decision") in (None, "allow")
 
     if triggered_expectation:
+    if case.want:
         assert result.violation_id
         assert runtime.notifications, "violation should enqueue notification"
     else:

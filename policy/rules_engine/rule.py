@@ -70,6 +70,12 @@ class Rule:
         for key in ("name", "owners", "docs_url"):
             if key in payload and key not in metadata:
                 metadata[key] = payload[key]
+        rule_id = payload["id"]
+        expr = payload["expr"]
+        mode = RuleMode(payload.get("mode", RuleMode.OBSERVE.value))
+        severity = payload.get("severity", "low")
+        block_on_error = bool(payload.get("block_on_error", False))
+        metadata = dict(payload.get("metadata", {}))
         return cls(rule_id, expr, mode=mode, severity=severity, block_on_error=block_on_error, metadata=metadata)
 
     def evaluate(self, event: Mapping[str, Any], ctx: EvaluationContext) -> RuleEvaluationResult:
@@ -101,6 +107,10 @@ class Rule:
                 rule_details.setdefault("owners", self.metadata["owners"])
             if "docs_url" in self.metadata:
                 rule_details.setdefault("docs_url", self.metadata["docs_url"])
+            details.setdefault("rule", {"id": self.id, "mode": self.mode.value, "severity": self.severity})
+            return RuleEvaluationResult(False, details, error=exc)
+        details = ctx.to_details()
+        details.setdefault("rule", {"id": self.id, "mode": self.mode.value, "severity": self.severity})
         return RuleEvaluationResult(outcome, details)
 
 

@@ -12,6 +12,10 @@ owners:
   - "@oncall-security"
   - "security@company.com"
 docs_url: https://your.docs/policies/mirror_class_limit
+id: MIRROR_CLASS_LIMIT
+mode: enforce
+severity: high
+block_on_error: true
 metadata:
   runbook: docs/runbooks/mirror_class_limit.md
   summary: Block mirrors on restricted or secret repositories.
@@ -77,3 +81,16 @@ notify:
 docs_url: "https://your.docs/policies/mirror_class_limit"
 owners: ["secops@company.com", "@oncall-security"]
 canary: false
+tests:
+  - name: deny_secret
+    input: { action: "mirror", resource_class: "secret", repo: "api/core" }
+    want: true
+  - name: deny_restricted
+    input: { action: "mirror", resource_class: "restricted", repo: "ml/labs" }
+    want: true
+  - name: allow_internal
+    input: { action: "mirror", resource_class: "internal" }
+    want: false
+  - name: allow_other_action
+    input: { action: "deploy", resource_class: "secret" }
+    want: false

@@ -16,6 +16,7 @@ from .rule import Rule
 class RuleTestCase:
     name: str
     want: Any
+    want: bool
     input: Optional[Dict[str, Any]] = None
     series: Optional[List[Dict[str, Any]]] = None
     window: Optional[str] = None
@@ -60,6 +61,7 @@ def load_rule_file(path: str | Path) -> tuple[Rule, List[RuleTestCase]]:
         tc = RuleTestCase(
             name=entry["name"],
             want=entry.get("want"),
+            want=bool(entry.get("want")),
             input=dict(entry.get("input", {})),
             window=entry.get("window"),
             baseline=dict(entry.get("baseline", {})),
@@ -81,6 +83,9 @@ def load_rule_file(path: str | Path) -> tuple[Rule, List[RuleTestCase]]:
                     tc.window = str(window)
             else:
                 tc.series = _expand_series(series_entry)
+        )
+        if "series" in entry:
+            tc.series = _expand_series(entry["series"])
         tests.append(tc)
     return rule, tests
 

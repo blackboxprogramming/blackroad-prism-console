@@ -6,6 +6,8 @@ owners:
   - "@policy-engineering"
   - "policy@company.com"
 docs_url: https://your.docs/policies/policy_drift_regression
+mode: observe
+severity: medium
 metadata:
   product: Mirror Guard
   description: Compare deny rate to baseline after recent policy change.

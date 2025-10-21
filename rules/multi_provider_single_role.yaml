@@ -7,6 +7,9 @@ owners:
   - "@secops-automation"
   - "automation@company.com"
 docs_url: https://your.docs/policies/multi_provider_single_role
+mode: enforce
+severity: medium
+block_on_error: true
 metadata:
   product: Mirror Guard
   description: Block low-privilege users from fanning out mirrors across providers.
@@ -84,3 +87,19 @@ tests:
     want: {decision: "allow", reason: ""}
 comments:
   - "Keep canary=true for a week to measure noise; then flip."
+tests:
+  - name: viewer_multi_provider_blocks
+    fixture: multi/multi_provider_window.series.json
+    want: true
+  - name: contributor_single_provider_allows
+    window: "5m"
+    series:
+      - { action: "mirror", resource_provider: "github", user_role: "contributor" }
+      - { action: "mirror", resource_provider: "github", user_role: "contributor" }
+    want: false
+  - name: admin_multi_provider_allows
+    window: "5m"
+    series:
+      - { action: "mirror", resource_provider: "github", user_role: "admin" }
+      - { action: "mirror", resource_provider: "gitlab", user_role: "admin" }
+    want: false
