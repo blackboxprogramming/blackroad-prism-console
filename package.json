@@ -16,6 +16,8 @@
     "test": "jest tests/api_health.test.js",
     "guard:dev-mode": "node scripts/security/dev_mode_guard.js",
     "debug:scan-logs": "node scripts/guardrails/log_scan_stub.js",
+    "test": "npx jest",
+    "guard:dev-mode": "node scripts/security/dev_mode_guard.js",
     "typecheck": "echo 'no typecheck'",
     "health": "node scripts/health.js",
     "next:start": "next start",
