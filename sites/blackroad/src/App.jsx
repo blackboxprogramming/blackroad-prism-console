@@ -331,6 +331,14 @@ import RRTSmoothLab from "./pages/RRTSmoothLab.jsx";
 import DiffusionMapsLab from "./pages/DiffusionMapsLab.jsx";
 import PerlinTerrainLab from "./pages/PerlinTerrainLab.jsx";
 import PDELiveLab from "./pages/PDELiveLab.jsx";
+import QuatJuliaLab from "./pages/QuatJuliaLab.jsx";
+import StableFluidsLab from "./pages/StableFluidsLab.jsx";
+import AutoDiffLab from "./pages/AutoDiffLab.jsx";
+import ConformalGridLab from "./pages/ConformalGridLab.jsx";
+import EikonalPathLab from "./pages/EikonalPathLab.jsx";
+import PowerDiagramLab from "./pages/PowerDiagramLab.jsx";
+import FourierOpticsLab from "./pages/FourierOpticsLab.jsx";
+import CircleInversionLab from "./pages/CircleInversionLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -509,6 +517,10 @@ function LegacyApp() {
             <Route path="/ou" element={<OULab/>} />
             <Route path="/vor" element={<VoronoiLloydLab/>} />
             <Route path="/belief" element={<BeliefPropagationLab/>} />
+            <Route path="/geo" element={<EikonalPathLab/>} />
+            <Route path="/power" element={<PowerDiagramLab/>} />
+            <Route path="/optics" element={<FourierOpticsLab/>} />
+            <Route path="/invert" element={<CircleInversionLab/>} />
             <Route path="chat" element={<Chat/>} />
             <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
@@ -572,6 +584,10 @@ function LegacyApp() {
             <Route path="ou" element={<OULab/>} />
             <Route path="vor" element={<VoronoiLloydLab/>} />
             <Route path="belief" element={<BeliefPropagationLab/>} />
+            <Route path="geo" element={<EikonalPathLab/>} />
+            <Route path="power" element={<PowerDiagramLab/>} />
+            <Route path="optics" element={<FourierOpticsLab/>} />
+            <Route path="invert" element={<CircleInversionLab/>} />
             <Route path="*" element={<div>Not found</div>} />
             <Route path="/" element={<Chat />} />
             <Route path="/chat" element={<Chat />} />
