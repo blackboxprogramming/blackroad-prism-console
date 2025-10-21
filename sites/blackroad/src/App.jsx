@@ -327,6 +327,10 @@ import RiemannMappingToy from "./pages/RiemannMappingToy.jsx";
 import OULab from "./pages/OULab.jsx";
 import VoronoiLloydLab from "./pages/VoronoiLloydLab.jsx";
 import BeliefPropagationLab from "./pages/BeliefPropagationLab.jsx";
+import RRTSmoothLab from "./pages/RRTSmoothLab.jsx";
+import DiffusionMapsLab from "./pages/DiffusionMapsLab.jsx";
+import PerlinTerrainLab from "./pages/PerlinTerrainLab.jsx";
+import PDELiveLab from "./pages/PDELiveLab.jsx";
 
 function useApiHealth(){
   const [state,setState]=useState({ok:null, info:""});
@@ -462,6 +466,10 @@ function LegacyApp() {
             <Route path="/bezier3d" element={<BezierSurfaceLab/>} />
             <Route path="/cluster2" element={<ClusteringCompareLab/>} />
             <Route path="/implicit" element={<MarchingSquaresLab/>} />
+            <Route path="/rrt-smooth" element={<RRTSmoothLab/>} />
+            <Route path="/diffmaps" element={<DiffusionMapsLab/>} />
+            <Route path="/terrain" element={<PerlinTerrainLab/>} />
+            <Route path="/pde" element={<PDELiveLab/>} />
             <Route path="/eikonal" element={<EikonalLab/>} />
             <Route path="/poisson2" element={<PoissonDiskLab/>} />
             <Route path="/lsys" element={<LSystemLab/>} />
@@ -521,6 +529,10 @@ function LegacyApp() {
             <Route path="bezier3d" element={<BezierSurfaceLab/>} />
             <Route path="cluster2" element={<ClusteringCompareLab/>} />
             <Route path="implicit" element={<MarchingSquaresLab/>} />
+            <Route path="rrt-smooth" element={<RRTSmoothLab/>} />
+            <Route path="diffmaps" element={<DiffusionMapsLab/>} />
+            <Route path="terrain" element={<PerlinTerrainLab/>} />
+            <Route path="pde" element={<PDELiveLab/>} />
             <Route path="eikonal" element={<EikonalLab/>} />
             <Route path="poisson2" element={<PoissonDiskLab/>} />
             <Route path="lsys" element={<LSystemLab/>} />
