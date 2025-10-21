@@ -316,6 +316,9 @@ import obsSlo from './routes/obs/slo.js';
 import obsAlerts from './routes/obs/alerts.js';
 import obsRunbooks from './routes/obs/runbooks.js';
 import obsRR from './routes/obs/rr.js';
+import privacyConsent from './routes/privacy/consent.js';
+import privacyPrefs from './routes/privacy/preferences.js';
+import privacyDsar from './routes/privacy/dsar.js';
 
 dotenv.config();
 import express from "express";
@@ -551,6 +554,7 @@ app.use('/api/mdm', mdmDomains, mdmRules, mdmStage, mdmMatch, mdmMerge, mdmPubli
 app.use('/api/obs', obsServices, obsIngest, obsSlo, obsAlerts, obsRunbooks, obsRR);
 app.use('/api/expenses', expRep, expCard);
 app.use('/api/payroll', prEmp, prSched, prTime, prRun, prForms);
+app.use('/api/privacy', privacyConsent, privacyPrefs, privacyDsar);
 
 const port = process.env.PORT || 4000;
 

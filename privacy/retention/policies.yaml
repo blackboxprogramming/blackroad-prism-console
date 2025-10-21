@@ -1,0 +1,4 @@
+policies:
+  consent_events: 1095
+  dsar_queue: 1825
+  audit_logs: 365

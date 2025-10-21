@@ -21,3 +21,6 @@ Lucidia exists to protect participant agency. This document records the data-han
 - Sensitive configuration (keys, algorithms) is isolated per user and never shared across tenants.
 # Data Privacy & Governance
 - Policies/classifications, ROPA, consent, DSARs, DPIAs, retention/holds, DLP, and tokenization.
+# Privacy Program
+- This layer implements consent, preferences, DSAR intake, RoPA, data catalog, retention, DPIA templates, and reporting.
+- All PII handling here is **example/stub** — connect to real stores before production.

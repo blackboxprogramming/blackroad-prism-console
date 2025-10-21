@@ -1,0 +1,12 @@
+systems:
+  - key: api
+    name: BlackRoad API
+    purposes: [ "analytics", "billing", "support" ]
+    data_categories: [ "contact", "usage", "billing" ]
+    lawful_basis: [ "contract", "legitimate_interests" ]
+    processors: [ "Stripe", "DigitalOcean" ]
+  - key: warehouse
+    name: Data Warehouse
+    purposes: [ "analytics", "reporting" ]
+    data_categories: [ "usage", "billing" ]
+    lawful_basis: [ "legitimate_interests" ]
