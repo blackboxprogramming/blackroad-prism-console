@@ -5,6 +5,7 @@ Reports pass/fail for each agent.
 """
 
 import importlib.util
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -62,6 +63,47 @@ def test_agents():
         else:
             print(f"PASSED import only (no main): {file.name}")
             results.append((file.name, "pass"))
+    if spec is None or spec.loader is None:
+        return False, "unable to load module spec"
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    try:
+        spec.loader.exec_module(module)
+        return True, ""
+    except Exception as exc:  # pragma: no cover - used for debugging
+        sys.modules.pop(name, None)
+        return False, str(exc)
+
+def test_agents():
+    print("=== Agent Test Runner ===")
+    results = []
+    for file in AGENTS_DIR.rglob("*.py"):
+        if file.name in SKIP_FILES or "__pycache__" in file.parts:
+            continue
+        rel_name = file.relative_to(AGENTS_DIR)
+        print(f"\nTesting agent: {rel_name}")
+        # First, try importing
+        ok, err = import_module(file)
+        if not ok:
+            print(f"FAILED to import: {rel_name} -- {err}")
+            results.append((str(rel_name), "import_failed"))
+            continue
+        # Then, run as script if main block exists
+        with open(file, "r", encoding="utf-8") as f:
+            src = f.read()
+        if "if __name__ == \"__main__\"" in src:
+            rc, out, err = run_module_main(str(file))
+            if rc == 0:
+                print(f"PASSED main execution: {rel_name}")
+                results.append((str(rel_name), "pass"))
+            else:
+                print(f"FAILED main execution: {rel_name}")
+                print("stdout:", out)
+                print("stderr:", err)
+                results.append((str(rel_name), "main_failed"))
+        else:
+            print(f"PASSED import only (no main): {rel_name}")
+            results.append((str(rel_name), "pass"))
     print("\n=== Summary ===")
     for name, status in results:
         print(f"{name}: {status}")
