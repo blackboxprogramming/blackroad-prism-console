@@ -71,3 +71,12 @@ Document every rollback/forward action in the incident log and update the corres
 - Deployment workflows: `.github/workflows/preview.yml`, `pages-stage.yml`, `blackroad-deploy.yml`, `prism-ssh-deploy.yml`
 
 _Last updated on 2025-10-06_
+## PD↔Jira sandbox smoke
+
+- Configure the sandbox credentials (see `.env` or Secrets Manager) including `PD_*_SANDBOX`, `JIRA_*_SANDBOX`, `SMOKE_SYSTEM_KEY`, and `RUNBOOK_URL_SANDBOX`.
+- Ops Portal exposes a **Run PD+Jira Smoke** button on `/ops` once your ops identity is stored locally. The button calls `/api/smoke/pd-jira?sandbox=1`, which opens and resolves a PagerDuty + Jira pair in under 90 seconds.
+- The smoke flow also lives in GitHub Actions as `.github/workflows/pd-jira-smoke.yml`. Trigger it manually with the service identity (`vars.SMOKE_ACTOR_EMAIL` and `vars.SMOKE_ACTOR_GROUPS`).
+- A one-hour throttle prevents repeated sandbox pages. Results surface in the heatmap snapshot as system `sandbox`, including PD and Jira links.
+
+
+_Last updated on 2025-10-31_
