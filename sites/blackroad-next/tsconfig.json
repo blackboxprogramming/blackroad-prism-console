@@ -6,6 +6,7 @@
       "dom.iterable",
       "esnext"
     ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
@@ -39,4 +40,8 @@
   "exclude": [
     "node_modules"
   ]
+    "incremental": true
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
 }
