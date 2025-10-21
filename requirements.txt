@@ -48,3 +48,7 @@ torch
 whisper
 typer==0.12.3
 pytest
+opentelemetry-sdk
+opentelemetry-exporter-otlp
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-asgi
