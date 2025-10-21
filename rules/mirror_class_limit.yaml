@@ -13,8 +13,12 @@ owners:
   - "security@company.com"
 docs_url: https://your.docs/policies/mirror_class_limit
 id: MIRROR_CLASS_LIMIT
+name: Mirror class limit
+description: Block mirrors on restricted or secret repositories.
+category: enforce
 mode: enforce
 severity: high
+version: 1
 block_on_error: true
 metadata:
   runbook: docs/runbooks/mirror_class_limit.md
@@ -83,14 +87,25 @@ owners: ["secops@company.com", "@oncall-security"]
 canary: false
 tests:
   - name: deny_secret
-    input: { action: "mirror", resource_class: "secret", repo: "api/core" }
-    want: true
+    input:
+      action: mirror
+      resource_class: secret
+      repo: api/core
+    want:
+      decision: deny
   - name: deny_restricted
-    input: { action: "mirror", resource_class: "restricted", repo: "ml/labs" }
-    want: true
+    input:
+      action: mirror
+      resource_class: restricted
+      repo: ml/labs
+    want:
+      decision: deny
   - name: allow_internal
-    input: { action: "mirror", resource_class: "internal" }
-    want: false
+    input:
+      action: mirror
+      resource_class: internal
+    want:
+      decision: allow
   - name: allow_other_action
     input: { action: "deploy", resource_class: "secret" }
     want: false
@@ -136,3 +151,8 @@ tests:
 comments:
   - "Blocking rule. Be cautious toggling category."
   - "If you change classification vocabulary, update expr + tests."
+    input:
+      action: deploy
+      resource_class: secret
+    want:
+      decision: allow
