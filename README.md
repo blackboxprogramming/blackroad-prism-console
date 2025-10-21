@@ -1091,3 +1091,12 @@ python -m cli.console mdm:match --domain account --config configs/mdm/match_acco
 python -m cli.console mdm:golden --domain account --policy configs/mdm/survivorship_account.yaml
 python -m cli.console mdm:dq --domain account --config configs/mdm/dq_account.yaml
 ```
+## DX Quickstart
+
+Run developer tooling:
+
+```
+python -m cli.console dx:onboard:doctor
+python -m cli.console dx:quality
+```
+

@@ -1,0 +1,8 @@
+- py: "3.11"
+  ear: true
+  read_only: false
+  mode: "inproc"
+- py: "3.10"
+  ear: false
+  read_only: true
+  mode: "sandbox"
