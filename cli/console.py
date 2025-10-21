@@ -6,6 +6,7 @@ from dataclasses import asdict
 import os
 import subprocess
 import sys
+from contextlib import nullcontext
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict
@@ -180,6 +181,10 @@ from sec.ir import add_timeline as ir_timeline, assign as ir_assign, open_from_d
 from sec.vuln import import_csv as vuln_import, prioritize as vuln_prioritize
 from sec.purple.sim import run as purple_run
 from sec.sbom_watch import watch as sbom_watch
+from orchestrator import orchestrator, slo_report
+from orchestrator.perf import perf_timer
+from orchestrator.protocols import Task
+from tools import storage
 
 app = typer.Typer()
 from rnd import ideas as rnd_ideas
@@ -421,6 +426,10 @@ def _perf_footer(perf: bool, data: dict) -> None:
         typer.echo(f"time={data.get('elapsed_ms')} rss={data.get('rss_mb')} cache=na exec=inproc")
         typer.echo(
             f"time={data.get('elapsed_ms')} rss={data.get('rss_mb')} cache=na exec=inproc"
+def _footer(perf: bool, stats: dict, cache: str = "na"):
+    if perf:
+        typer.echo(
+            f"time={stats.get('elapsed_ms', 0)} rss={stats.get('rss_mb')} cache={cache} exec=inproc"
         )
 
 
@@ -434,6 +443,24 @@ def bench_list():
 def bench_show(name: str = typer.Option(..., "--name")):
     cfg = bench_runner.load_scenario(name)
     typer.echo(json.dumps(cfg, indent=2))
+def bench_list(perf: bool = typer.Option(False, "--perf", is_flag=True)):
+    ctx = perf_timer("bench_list") if perf else nullcontext({})
+    with ctx as p:
+        for name in bench_runner.list_scenarios():
+            typer.echo(name)
+    _footer(perf, p)
+
+
+@app.command("bench:show")
+def bench_show(
+    name: str = typer.Option(..., "--name"),
+    perf: bool = typer.Option(False, "--perf", is_flag=True),
+):
+    ctx = perf_timer("bench_show") if perf else nullcontext({})
+    with ctx as p:
+        data = bench_runner.show_scenario(name)
+        typer.echo(json.dumps(data))
+    _footer(perf, p)
 
 
 @app.command("bench:run")
@@ -453,6 +480,23 @@ def bench_run(
         p = {"elapsed_ms": None, "rss_mb": None}
         bench_runner.run_bench(name, iterations, warmup, cache, export_csv)
     _perf_footer(perf, p)
+    iterations: int = typer.Option(20, "--iter", "--iterations"),
+    warmup: int = typer.Option(5, "--warmup"),
+    cache: str = typer.Option("na", "--cache"),
+    export_csv: Optional[Path] = typer.Option(None, "--export-csv"),
+    perf: bool = typer.Option(False, "--perf", is_flag=True),
+    as_user: Optional[str] = typer.Option(None, "--as-user"),
+):
+    ctx = perf_timer("bench_run") if perf else nullcontext({})
+    with ctx as p:
+        res = bench_runner.run_bench(
+            name, iterations=iterations, warmup=warmup, cache=cache
+        )
+        if export_csv:
+            src = Path(res["env"]).with_name("timings.csv")
+            storage.write(str(export_csv), Path(src).read_text())
+        typer.echo(json.dumps(res, indent=2))
+    _footer(perf, p, cache=cache)
 
 
 @app.command("bench:all")
@@ -481,6 +525,23 @@ def slo_report_cmd(
         p = {"elapsed_ms": None, "rss_mb": None}
         slo_report.build_report()
     _perf_footer(perf, p)
+    iterations: int = typer.Option(20, "--iter", "--iterations"),
+    warmup: int = typer.Option(5, "--warmup"),
+    perf: bool = typer.Option(False, "--perf", is_flag=True),
+):
+    ctx = perf_timer("bench_all") if perf else nullcontext({})
+    with ctx as p:
+        results = bench_runner.run_all(iterations=iterations, warmup=warmup)
+        typer.echo(json.dumps(results, indent=2))
+    _footer(perf, p)
+
+
+@app.command("slo:report")
+def slo_report_cmd(perf: bool = typer.Option(False, "--perf", is_flag=True)):
+    ctx = perf_timer("slo_report") if perf else nullcontext({})
+    with ctx as p:
+        slo_report.build_report()
+    _footer(perf, p)
 
 
 @app.command("slo:gate")
@@ -2540,6 +2601,15 @@ def mfg_mrp_cmd(demand: Path = typer.Option(..., "--demand", exists=True), inven
 def status_build():
     status_gen.build()
     typer.echo("built")
+    perf: bool = typer.Option(False, "--perf", is_flag=True),
+):
+    ctx = perf_timer("slo_gate") if perf else nullcontext({})
+    with ctx as p:
+        rc = slo_report.gate(fail_on=fail_on)
+    _footer(perf, p)
+    if rc:
+        raise typer.Exit(code=1)
+
 
 if __name__ == "__main__":
     app()

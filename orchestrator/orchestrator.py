@@ -26,6 +26,13 @@ _memory_config_path = _config_root / "agents" / "memory" / "memory.yaml"
 
 memory_manager = MemoryManager.from_yaml(_memory_config_path)
 status_broadcaster = StatusBroadcaster(channel="#blackroad-status")
+from bots import available_bots
+from tools import storage
+
+from .base import BaseBot, assert_guardrails
+from .perf import perf_timer
+from .protocols import BotResponse, Task
+from .slo import SLO_CATALOG
 
 _current_doc = ""
 
@@ -98,6 +105,8 @@ def route(task: Task, bot_name: str) -> BotResponse:
         response.p50_target = slo.p50_ms
         response.p95_target = slo.p95_ms
         response.max_mem_mb = slo.max_mem_mb
+    with perf_timer("bot_run") as perf:
+        response = bot.run(task)
     assert_guardrails(response)
     red_team(response)
 
@@ -135,6 +144,17 @@ def route(task: Task, bot_name: str) -> BotResponse:
             "p95_target": slo.p95_ms,
             "max_mem_mb": slo.max_mem_mb,
         }
+    }
+    slo = SLO_CATALOG.get(bot_name)
+    if slo:
+        record.update(
+            {
+                "slo_name": slo.name,
+                "p50_target": slo.p50_ms,
+                "p95_target": slo.p95_ms,
+                "max_mem_mb": slo.max_mem_mb,
+            }
+        )
     storage.write(str(_memory_path), record)
     lineage.finalize(trace_id)
     status_broadcaster.emit(

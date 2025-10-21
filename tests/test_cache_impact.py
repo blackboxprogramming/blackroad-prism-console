@@ -17,3 +17,12 @@ def test_cache_impact_delta(tmp_path, monkeypatch):
     assert delta_path.exists()
     text = delta_path.read_text()
     assert "mean_ms" in text
+from pathlib import Path
+
+from bench.runner import run_cache_experiment
+
+
+def test_cache_experiment_writes_delta():
+    path = run_cache_experiment("Treasury-BOT", iterations=3, warmup=1)
+    content = Path(path).read_text()
+    assert "speedup" in content
