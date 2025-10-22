@@ -29,6 +29,8 @@ sudo touch /media/$USER/boot/ssh
 
 ## 2. Initial Login & System Update
 
+> **Dual-display tip:** If you connect more than one monitor and see boot logs on one screen but the desktop on another, follow the [Raspberry Pi Dual-Display Troubleshooting](./dual_display_troubleshooting.md) guide to ensure HDMI0 is set as the primary output.
+
 ```bash
 # Default credentials if not customized during imaging: pi / raspberry
 ssh pi@pi-tower.local
