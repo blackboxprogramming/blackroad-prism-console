@@ -614,6 +614,22 @@ class AutoNovelAgent:
 
         return " ".join([opening, conflict, resolution])
 
+    def generate_story(self, title: str, protagonist: str) -> str:
+        """Generate a simple short story.
+
+        Args:
+            title: Title of the story.
+            protagonist: Name of the hero of the story.
+
+        Returns:
+            A three line story using the provided information.
+        """
+        return (
+            f"{title}\n"
+            f"{protagonist} embarks on a grand adventure.\n"
+            "The story concludes with lessons learned."
+        )
+
 
 if __name__ == "__main__":
     agent = AutoNovelAgent(gamma=2.0)
@@ -645,3 +661,5 @@ if __name__ == "__main__":
             "friendship", setting="a bustling spaceport", protagonist="Rin"
         )
     )
+    story = agent.generate_story("The Quest", "Aria")
+    print(story)

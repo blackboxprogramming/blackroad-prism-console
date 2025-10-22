@@ -5,10 +5,9 @@ from __future__ import annotations
 import argparse
 import logging
 import subprocess
-<<<<<<< Headdd
 from subprocess import CalledProcessError
+<<<<<<< main
 from typing import List
-=======
 import sys
 from dataclasses import dataclass, field
 from subprocess import CalledProcessError, CompletedProcess, DEVNULL, run
@@ -28,6 +27,7 @@ from dataclasses import dataclass
 import subprocess
 from subprocess import CalledProcessError, CompletedProcess
 from subprocess import CalledProcessError
+=======
 from typing import Dict, List
 >>>>>>> origin/codex/create-monorepo-structure-for-blackroad-foundation
 
@@ -46,6 +46,10 @@ class CleanupBot:
     dry_run:
         When ``True`` no commands are executed and planned actions are printed
         instead.
+    Args:
+        branches: Branch names to delete.
+        dry_run: When ``True`` the planned commands are printed instead of
+            executed.
     """
 
     branches: list[str]
@@ -133,6 +137,8 @@ class CleanupBot:
         executing.
         """
         cmd = ["git", *args]
+    def _run(self, *cmd: str) -> None:
+        """Run a command unless in dry-run mode."""
         if self.dry_run:
             print("DRY-RUN:", " ".join(cmd))
             return subprocess.CompletedProcess(cmd, 0, "", "")
@@ -192,16 +198,78 @@ class CleanupBot:
                 subprocess.run(["git", "branch", "-D", branch], check=True)
             except CalledProcessError:
                 print(f"Failed to delete local branch '{branch}'")
+    def validate_environment(self) -> bool:
+        """Verify the current repository is suitable for branch cleanup."""
+
+        checks = (
+            (
+                ("git", "rev-parse", "--is-inside-work-tree"),
+                "Not inside a Git work tree. Aborting cleanup.",
+            ),
+            (
+                ("git", "remote", "get-url", "origin"),
+                "Remote 'origin' is not configured. Aborting cleanup.",
+            ),
+        )
+        for cmd, failure_message in checks:
             try:
                 subprocess.run(
-                    ["git", "push", "origin", "--delete", branch],
+                    cmd,
                     check=True,
+                    capture_output=True,
+                    text=True,
                 )
             except CalledProcessError:
                 print(f"Failed to delete remote branch '{branch}'")
             results[branch] = self.delete_branch(branch)
         return results
 
+            except CalledProcessError as error:
+                print(failure_message)
+                if error.stderr:
+                    print(error.stderr.strip())
+                return False
+        return True
+
+    def delete_branch(self, branch: str) -> bool:
+        """Delete a branch locally and remotely.
+
+        Args:
+            branch: The branch name to remove.
+
+        Returns:
+            ``True`` if the branch was deleted both locally and remotely.
+        """
+
+        success = True
+        commands = (
+            ("git", "branch", "-D", branch),
+            ("git", "push", "origin", "--delete", branch),
+        )
+        for cmd, failure_message in zip(
+            commands,
+            (
+                f"Local branch '{branch}' does not exist.",
+                f"Remote branch '{branch}' does not exist.",
+            ),
+        ):
+            try:
+                self._run(*cmd)
+            except CalledProcessError:
+                print(failure_message)
+                success = False
+        return success
+
+    def cleanup(self) -> Dict[str, bool]:
+        """Remove the configured branches locally and remotely."""
+
+        if not self.validate_environment():
+            return {branch: False for branch in self.branches}
+
+        results: Dict[str, bool] = {}
+        for branch in self.branches:
+            results[branch] = self.delete_branch(branch)
+        return results
 
 def cleanup(branches: Iterable[str], dry_run: bool = False) -> Dict[str, bool]:
     """Convenience wrapper around :class:`CleanupBot`."""
