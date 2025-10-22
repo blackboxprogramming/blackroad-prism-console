@@ -78,6 +78,10 @@ export default function MaxFlowLab(){
   const down = useRef(false);
   const nodesRef = useRef(nodes);
   useEffect(()=>{ nodesRef.current = nodes; }, [nodes]);
+  const dragRef = useRef(null);
+  const downRef = useRef(false);
+  const nodesRef = useRef(nodes);
+  useEffect(()=>{ nodesRef.current = nodes; });
   useEffect(()=>{
     const svg = svgRef.current; if(!svg) return;
     const downH=(e)=>{
@@ -91,6 +95,15 @@ export default function MaxFlowLab(){
       setNodes(ns=> ns.map((p,i)=> i===drag.current ? {...p,x,y} : p));
     };
     const upH=()=>{ down.current=false; drag.current=null; };
+      if(id>=0){ downRef.current=true; dragRef.current=id; }
+    };
+    const moveH=(e)=>{
+      if(!downRef.current || dragRef.current==null) return;
+      const {x,y} = clientToSvg(e, svg);
+      const id = dragRef.current;
+      setNodes(ns=> ns.map((p,i)=> i===id ? {...p,x,y} : p));
+    };
+    const upH=()=>{ downRef.current=false; dragRef.current=null; };
     svg.addEventListener("mousedown",downH);
     window.addEventListener("mousemove",moveH);
     window.addEventListener("mouseup",upH);
@@ -103,6 +116,9 @@ export default function MaxFlowLab(){
     setResult(r);
     if(!r.paths.length) return setLastAug(null);
     const idx = lastAug==null ? 0 : Math.min(r.paths.length-1, lastAug+1);
+    const {paths} = r;
+    if(!paths.length){ setLastAug(null); return; }
+    const idx = lastAug==null ? 0 : Math.min(paths.length-1, lastAug+1);
     setLastAug(idx);
   };
 

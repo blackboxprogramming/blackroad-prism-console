@@ -65,16 +65,17 @@ export default function ClusteringCompareLab(){
   const [k,setK]=useState(3);
   const [sep,setSep]=useState(3.2);
   const [seed,setSeed]=useState(7);
+  const [sigma,setSigma]=useState(0.8);
 
   const data = useMemo(()=> makeData(n,k,sep,seed),[n,k,sep,seed]);
   const km = useMemo(()=> kmeans(data, k),[data,k]);
-  const sp = useMemo(()=> spectral(data, k),[data,k]);
+  const sp = useMemo(()=> spectral(data, k, sigma),[data,k,sigma]);
 
   return (
     <div className="p-4 space-y-3">
       <h2 className="text-xl font-semibold">K-Means vs Spectral — side-by-side</h2>
       <div className="grid" style={{gridTemplateColumns:"1fr 1fr", gap:16}}>
-        <Scatter title="K-Means" pts={data} labels={km.labels}/>
+        <Scatter title="K-Means" pts={data} labels={km.labels} centers={km.centers}/>
         <Scatter title="Spectral" pts={data} labels={sp}/>
       </div>
       <div className="grid" style={{gridTemplateColumns:"1fr 320px", gap:16}}>
@@ -84,6 +85,7 @@ export default function ClusteringCompareLab(){
           <Slider label="clusters k" v={k} set={setK} min={2} max={5} step={1}/>
           <Slider label="separation" v={sep} set={setSep} min={1.2} max={5.0} step={0.1}/>
           <Slider label="seed" v={seed} set={setSeed} min={1} max={9999} step={1}/>
+          <Slider label="spectral σ" v={sigma} set={setSigma} min={0.2} max={1.6} step={0.05}/>
           <ActiveReflection
             title="Active Reflection — Clustering"
             storageKey="reflect_cluster_compare"
@@ -99,24 +101,74 @@ export default function ClusteringCompareLab(){
   );
 }
 
-function Scatter({title, pts, labels}){
+function Scatter({title, pts, labels, centers}){
   const W=640,H=360,pad=20;
   const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]);
   const minX=Math.min(...xs), maxX=Math.max(...xs);
   const minY=Math.min(...ys), maxY=Math.max(...ys);
   const X=x=> pad+(x-minX)/(maxX-minX+1e-9)*(W-2*pad);
   const Y=y=> H-pad-(y-minY)/(maxY-minY+1e-9)*(H-2*pad);
+  const palette=["#60a5fa","#f97316","#34d399","#f472b6","#facc15","#a855f7","#22d3ee","#f87171"];
+  const colorForLabel=(label)=>{
+    const idx = ((label ?? 0)%palette.length + palette.length)%palette.length;
+    return palette[idx];
+  };
+  const uniqueLabels = labels ? Array.from(new Set(labels)) : [];
   return (
     <section className="p-3 rounded-lg bg-white/5 border border-white/10">
       <h3 className="font-semibold mb-2">{title}</h3>
       <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
-        {pts.map((p,i)=><circle key={i} cx={X(p[0])} cy={Y(p[1])} r="3"/>)}
+        {pts.map((p,i)=>{
+          const fill = labels?.length ? colorForLabel(labels[i]) : "#cbd5f5";
+          return (
+            <circle
+              key={i}
+              cx={X(p[0])}
+              cy={Y(p[1])}
+              r="3.5"
+              fill={fill}
+              stroke="rgba(15,23,42,0.6)"
+              strokeWidth="0.8"
+            />
+          );
+        })}
+        {centers?.map((c,i)=>(
+          <g key={`center-${i}`}>
+            <circle
+              cx={X(c[0])}
+              cy={Y(c[1])}
+              r="7"
+              fill="none"
+              stroke={colorForLabel(i)}
+              strokeWidth="2"
+            />
+            <line x1={X(c[0])-6} y1={Y(c[1])} x2={X(c[0])+6} y2={Y(c[1])} stroke={colorForLabel(i)} strokeWidth="1.5"/>
+            <line x1={X(c[0])} y1={Y(c[1])-6} x2={X(c[0])} y2={Y(c[1])+6} stroke={colorForLabel(i)} strokeWidth="1.5"/>
+          </g>
+        ))}
       </svg>
+      {uniqueLabels.length ? (
+        <div className="mt-2 flex flex-wrap gap-3 text-xs opacity-80">
+          {uniqueLabels.map((lab)=> (
+            <span key={lab} className="flex items-center gap-1">
+              <span
+                className="inline-block w-3 h-3 rounded-sm"
+                style={{background: colorForLabel(lab)}}
+              />
+              Cluster {lab}
+            </span>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }
 function Slider({label,v,set,min,max,step}){
-  const show=(typeof v==='number'&&v.toFixed)?v.toFixed(2):v;
+  let digits=2;
+  if(typeof step==='number'){
+    if(step>=1) digits=0; else if(step>=0.1) digits=1;
+  }
+  const show=(typeof v==='number'&&Number.isFinite(v))?v.toFixed(digits):v;
   return (<div className="mb-2"><label className="text-sm opacity-80">{label}: <b>{show}</b></label>
     <input className="w-full" type="range" min={min} max={max} step={step}
            value={v} onChange={e=>set(parseFloat(e.target.value))}/></div>);

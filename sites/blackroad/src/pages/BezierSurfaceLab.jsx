@@ -17,7 +17,10 @@ export default function BezierSurfaceLab(){
     const base=[ [0,0,0,0],[0,0.4,0.4,0],[0,0.4,0.4,0],[0,0,0,0] ];
     return base.map(r=>r.slice());
   });
-  const [drag,setDrag]=useState(null);
+  const dragRef = useRef(null);
+  const downRef = useRef(false);
+  const PRef = useRef(P);
+  useEffect(()=>{ PRef.current = P; },[P]);
 
   const W=640,H=360, pad=30;
   const X=(u)=> pad + u*(W-2*pad);
@@ -36,26 +39,25 @@ export default function BezierSurfaceLab(){
   const svgRef=useRef(null);
   useEffect(()=>{
     const svg=svgRef.current; if(!svg) return;
-    let down=false;
     const hit=(x,y)=>{
       // control grid at (i,j) located at (u=i/3, v=j/3); visual marker at bottom plane
       for(let i=0;i<4;i++) for(let j=0;j<4;j++){
-        const px=X(j/3), py=Y((P[i][j]+1)/2);
+        const px=X(j/3), py=Y((PRef.current[i][j]+1)/2);
         if((px-x)**2 + (py-y)**2 < 9**2) return [i,j];
       }
       return null;
     };
-    const downH=(e)=>{ down=true; const {x,y}=clientToSvg(e,svg); const h=hit(x,y); if(h) setDrag(h); };
-    const moveH=(e)=>{ if(!down||!drag) return; const {x,y}=clientToSvg(e,svg);
-      const j=drag[1], val = 2*( (H-pad - y)/(H-2*pad) ) - 1; // invert Y mapping
-      setP(prev=>{ const copy=prev.map(r=>r.slice()); copy[drag[0]][j]=Math.max(-1,Math.min(1,val)); return copy; });
+    const downH=(e)=>{ downRef.current=true; const {x,y}=clientToSvg(e,svg); const h=hit(x,y); if(h) dragRef.current=h; };
+    const moveH=(e)=>{ if(!downRef.current || !dragRef.current) return; const {x,y}=clientToSvg(e,svg);
+      const [i,j]=dragRef.current; const val = 2*( (H-pad - y)/(H-2*pad) ) - 1; // invert Y mapping
+      setP(prev=>{ const copy=prev.map(r=>r.slice()); copy[i][j]=Math.max(-1,Math.min(1,val)); return copy; });
     };
-    const upH=()=>{ down=false; setDrag(null); };
+    const upH=()=>{ downRef.current=false; dragRef.current=null; };
     svg.addEventListener("mousedown",downH);
     window.addEventListener("mousemove",moveH);
     window.addEventListener("mouseup",upH);
     return ()=>{ svg.removeEventListener("mousedown",downH); window.removeEventListener("mousemove",moveH); window.removeEventListener("mouseup",upH); };
-  },[drag,P]);
+  },[]);
 
   return (
     <div className="p-4 space-y-3">
