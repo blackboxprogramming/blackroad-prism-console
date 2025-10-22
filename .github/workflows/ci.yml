@@ -286,3 +286,30 @@ jobs:
           python -m cli.console mfg:yield --period 2025-09
           python -m cli.console mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv
           python -m cli.console mfg:coq --period 2025-Q3
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    uses: ./.github/workflows/reusable-node20.yml
+    with:
+      run: npm run lint || pnpm lint || yarn lint
+
+  typecheck:
+    uses: ./.github/workflows/reusable-node20.yml
+    with:
+      run: npm run typecheck || pnpm typecheck || yarn typecheck
+
+  test:
+    uses: ./.github/workflows/reusable-node20.yml
+    with:
+      run: npm test -- --ci --reporters=default || pnpm test -- --ci --reporters=default || yarn test --ci --reporters=default

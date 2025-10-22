@@ -1,0 +1,19 @@
+[Unit]
+Description=Node20 Safe Address Agent
+After=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/app/agent
+ExecStart=/usr/bin/node /home/pi/app/agent/dist/index.js
+EnvironmentFile=/etc/default/node-agent
+Restart=always
+RestartSec=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target
