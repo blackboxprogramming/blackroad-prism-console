@@ -78,6 +78,10 @@ def load_work_centers(file: str) -> Dict[str, WorkCenter]:
         str(WC_SCHEMA),
     )
     metrics.inc("mfg_work_centers_loaded", len(wcs) or 1)
+    storage.write(
+        str(ART_DIR / "work_centers.json"),
+        json.dumps([asdict(w) for w in wcs.values()], indent=2),
+    )
     return wcs
 
 
@@ -115,6 +119,16 @@ def load_routings(directory: str) -> Dict[str, Routing]:
     )
     metrics.inc("mfg_routings_loaded", len(rts) or 1)
     storage.write(str(ART_DIR / "routings.json"), json.dumps([{"item_rev": r.item_rev, "steps": [asdict(s) for s in r.steps]} for r in rts.values()], indent=2))
+    storage.write(
+        str(ART_DIR / "routings.json"),
+        json.dumps(
+            [
+                {"item_rev": r.item_rev, "steps": [asdict(s) for s in r.steps]}
+                for r in rts.values()
+            ],
+            indent=2,
+        ),
+    )
     return rts
 
 
