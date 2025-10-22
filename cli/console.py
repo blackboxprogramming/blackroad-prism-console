@@ -7,6 +7,9 @@ import os
 import subprocess
 import sys
 from contextlib import nullcontext
+import json
+import time
+from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict
@@ -15,7 +18,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Optional
 from typing import Optional
-from dataclasses import asdict
 
 import typer
 import yaml
@@ -58,6 +60,12 @@ from strategy import scorecard as strat_scorecard
 from strategy import reviews as strat_reviews
 from strategy import tradeoffs as strat_tradeoffs
 from strategy import memos as strat_memos
+from orchestrator import orchestrator, slo_report
+from orchestrator.perf import perf_timer
+from orchestrator.protocols import Task
+from plm import bom as plm_bom
+from plm import eco as plm_eco
+from runbooks import executor as rb_executor
 from services import catalog as svc_catalog
 from services import deps as svc_deps
 from status import generator as status_gen
@@ -78,6 +86,9 @@ from plm import bom as plm_bom, eco as plm_eco
 from mfg import routing as mfg_routing, work_instructions as mfg_wi, spc as mfg_spc, coq as mfg_coq, mrp as mfg_mrp
 
 mfg_yield = importlib.import_module("mfg.yield")
+
+mfg_yield = importlib.import_module("mfg.yield")
+
 
 mfg_yield = importlib.import_module("mfg.yield")
 
@@ -741,6 +752,22 @@ def close_cal_new(
     template: str = typer.Option(..., "--template"),
 ):
     cal = close_calendar.CloseCalendar.from_template(period, template)
+@app.command("change:conflicts")
+def change_conflicts(service: str = typer.Option(..., "--service")):
+    issues = change_calendar.conflicts(service)
+    if issues:
+        for i in issues:
+            typer.echo(i)
+        raise typer.Exit(code=1)
+    typer.echo("ok")
+
+
+@app.command("close:cal:new")
+def close_cal_new(
+    period: str = typer.Option(..., "--period"),
+    template: Path = typer.Option(..., "--template", exists=True),
+):
+    cal = close_calendar.CloseCalendar.from_template(period, str(template))
     cal.save()
     typer.echo("created")
 
@@ -811,6 +838,9 @@ def close_recon_run(
             for row in reader:
                 tb[row["account"]] = float(row["amount"])
     close_recon.run_recons(period, tb, config, fixtures)
+    fixtures: Path = typer.Option(..., "--fixtures", exists=True),
+):
+    close_recon.run_recons(period, str(fixtures))
     typer.echo("recons")
 
 
@@ -859,6 +889,12 @@ def close_sign(period: str = typer.Option(..., "--period"), role: str = typer.Op
     except ValueError as e:
         typer.echo(str(e))
         raise typer.Exit(code=1)
+def close_sign(
+    period: str = typer.Option(..., "--period"),
+    role: str = typer.Option(..., "--role"),
+    as_user: str = typer.Option(..., "--as-user"),
+):
+    close_packet.sign(period, role, as_user)
     typer.echo("signed")
 
 @app.command("change:conflicts")
@@ -998,6 +1034,17 @@ def plm_bom_where_used(component: str = typer.Option(..., "--component")):
     rows = plm_bom.where_used(component)
     for item_id, rev in rows:
         typer.echo(f"{item_id}\t{rev}")
+
+
+@app.command("plm:bom:explode")
+def plm_bom_explode(
+    item: str = typer.Option(..., "--item"),
+    rev: str = typer.Option(..., "--rev"),
+    level: int = typer.Option(1, "--level"),
+):
+    lines = plm_bom.explode(item, rev, level)
+    for lvl, comp, qty in lines:
+        typer.echo(f"{lvl}\t{comp}\t{qty}")
 
 
 @app.command("plm:eco:new")
@@ -2994,6 +3041,7 @@ def bot_run(
     resp_path = ARTIFACTS / task_id / f"{bot}_response.json"
     storage.write(str(resp_path), response.model_dump(mode="json"))
     typer.echo(str(resp_path))
+
 
 
 if __name__ == "__main__":

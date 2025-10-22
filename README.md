@@ -1187,3 +1187,10 @@ python -m cli.console exp:new --id EXP01 --name "Paywall copy" --feature paywall
 python -m cli.console exp:assign --id EXP01 --unit user --value 12345
 python -m cli.console exp:analyze --id EXP01 --metrics configs/experiments/metrics.yaml
 ```
+
+## Training & Enablement Hub Quickstart
+
+```bash
+python -m cli.console learn:courses:load --dir configs/enablement/courses
+python -m cli.console learn:courses:list --role_track "Solutions Engineer"
+```
