@@ -4,6 +4,9 @@ import re
 from dataclasses import dataclass
 from typing import ClassVar, List, Set
 from typing import ClassVar, Dict, List, Set
+from __future__ import annotations
+
+from dataclasses import dataclass
 from typing import ClassVar
 from dataclasses import dataclass, field
 
@@ -29,6 +32,11 @@ class AutoNovelAgent:
     supported_engines: set[str] = field(
         default_factory=lambda: {"unity", "unreal"}
     )
+    """A toy agent that can deploy itself and create simple games."""
+
+    name: str = "AutoNovelAgent"
+    gamma: float = 1.0
+    supported_engines: ClassVar[set[str]] = {"unity", "unreal"}
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
@@ -56,6 +64,7 @@ class AutoNovelAgent:
         if not engine_lower:
             raise ValueError("Engine name cannot be empty.")
         return engine_lower
+        return engine.lower() in self.supported_engines
 
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
         """Create a basic game using a supported engine without weapons."""
@@ -101,6 +110,8 @@ class AutoNovelAgent:
         engine_lower = engine_clean.lower()
         engine_lower = self._normalize_engine(engine)
         if engine_lower not in self.supported_engines:
+        engine_lower = engine.lower()
+        if not self.supports_engine(engine_lower):
             supported = ", ".join(sorted(self.supported_engines))
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
         if include_weapons:
@@ -122,6 +133,7 @@ class AutoNovelAgent:
         """
 
         self.SUPPORTED_ENGINES.add(engine.lower())
+        self.supported_engines.add(engine.lower())
 
     def remove_supported_engine(self, engine: str) -> None:
         """Remove a game engine if it is currently supported."""
@@ -173,13 +185,15 @@ class AutoNovelAgent:
 
     def generate_game_idea(self, theme: str, engine: str) -> str:
         """Return a short description for a themed game."""
+        self.supported_engines.discard(engine.lower())
 
-        Args:
-            theme: Central theme for the game.
-            engine: Game engine to use. Must be supported.
+    def list_supported_engines(self) -> list[str]:
+        """Return a list of supported game engines."""
 
-        Returns:
-            A short game pitch describing the theme and engine.
+        return sorted(self.supported_engines)
+
+    def generate_game_idea(self, theme: str, engine: str) -> str:
+        """Return a short description for a themed game."""
 
         Raises:
             ValueError: If ``theme`` is blank or ``engine`` unsupported.
@@ -190,7 +204,7 @@ class AutoNovelAgent:
 
         engine_lower = engine.lower()
         if not self.supports_engine(engine_lower):
-            supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
+            supported = ", ".join(sorted(self.supported_engines))
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
 
         theme_clean = theme.strip()
@@ -224,6 +238,9 @@ class AutoNovelAgent:
     def generate_story(self, theme: str, protagonist: str = "An adventurer") -> str:
         """Generate a short themed story."""
 
+    def generate_story(self, theme: str, protagonist: str = "An adventurer") -> str:
+        """Generate a short themed story."""
+
         if not theme or not theme.strip():
             raise ValueError("Theme must be a non-empty string.")
         theme_clean = theme.strip()
@@ -237,11 +254,13 @@ class AutoNovelAgent:
     def generate_story_series(
         self, themes: List[str], protagonist: str = "An adventurer"
     ) -> List[str]:
+        self, themes: list[str], protagonist: str = "An adventurer"
+    ) -> list[str]:
         """Generate a series of short stories for multiple themes."""
 
         if not themes:
             raise ValueError("Themes list must not be empty.")
-        stories: List[str] = []
+        stories: list[str] = []
         for theme in themes:
             if not theme or not theme.strip():
                 raise ValueError("Each theme must be a non-empty string.")
@@ -309,6 +328,7 @@ class AutoNovelAgent:
         Raises:
             ValueError: If ``gamma`` is not positive.
         """
+
 
         if gamma <= 0:
             raise ValueError("gamma must be positive.")
