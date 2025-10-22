@@ -62,6 +62,7 @@ class AutoNovelAgent:
             self.supported_engines = set(DEFAULT_SUPPORTED_ENGINES)
         else:
             self.supported_engines = {engine.lower() for engine in self.supported_engines}
+    SUPPORTED_ENGINES: ClassVar[set[str]] = {"unity", "unreal", "godot"}
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
@@ -629,6 +630,20 @@ class AutoNovelAgent:
             f"{protagonist} embarks on a grand adventure.\n"
             "The story concludes with lessons learned."
         )
+
+    def add_engine(self, engine: str) -> None:
+        """Add a new engine to the supported set.
+
+        Args:
+            engine: Name of the engine to add.
+
+        Raises:
+            ValueError: If the provided engine name is blank.
+        """
+        normalized_engine = engine.strip().lower()
+        if not normalized_engine:
+            raise ValueError("Engine name cannot be empty.")
+        self.SUPPORTED_ENGINES.add(normalized_engine)
 
 
 if __name__ == "__main__":
