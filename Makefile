@@ -1,5 +1,5 @@
 .RECIPEPREFIX = >
-.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy notify
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy notify lint-observability
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy mpm-core energy
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy docs
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy dummy check view
@@ -18,6 +18,9 @@ orchestrate:
 
 lint:
 >. .venv/bin/activate && ruff .
+
+lint-observability:
+>python -m observability.lint
 
 validate:
 >. .venv/bin/activate && python scripts/validate_contracts.py

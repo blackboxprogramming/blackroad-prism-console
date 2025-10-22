@@ -3,18 +3,41 @@ import os
 from typing import Any, Dict
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import StreamingResponse
 
 from .deps import get_redis
 from redis.asyncio import Redis
 
+from services.observability import DependencyRecorder, DependencyStatus
+
 router = APIRouter()
+_dependency_recorder = DependencyRecorder("lucidia-api")
+
+
+async def _redis_dependency() -> dict[str, DependencyStatus]:
+    redis = await get_redis()
+    try:
+        await redis.ping()
+    except Exception as exc:  # noqa: BLE001
+        return {"redis": DependencyStatus.error(str(exc))}
+    return {"redis": DependencyStatus.ok("connected")}
 
 
 @router.get("/health")
-async def health() -> Dict[str, bool]:
-    return {"ok": True}
+async def health() -> Dict[str, object]:
+    statuses = await _redis_dependency()
+    return _dependency_recorder.snapshot(statuses)
+
+
+@router.get("/metrics")
+async def metrics() -> Response:
+    statuses = await _redis_dependency()
+    _dependency_recorder.snapshot(statuses)
+    return Response(
+        content=_dependency_recorder.render_prometheus(),
+        media_type=_dependency_recorder.prometheus_content_type,
+    )
 
 
 @router.post("/chat")

@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from typing import Any, Dict, Tuple
 
-from fastapi import Depends, FastAPI, Header, HTTPException, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Response, status
 from fastapi.responses import JSONResponse
+from services.observability import DependencyRecorder, DependencyStatus
 
 from .auth import TokenVerificationError, get_token_verifier
 from .config import settings
@@ -31,6 +32,18 @@ def _build_rate_limiter() -> RateLimiter:
 
 app = FastAPI(title="AutoPal", version="1.0.0")
 _rate_limiter = _build_rate_limiter()
+_dependency_recorder = DependencyRecorder("autopal")
+
+
+async def _rate_limiter_dependency() -> dict[str, DependencyStatus]:
+    backend = _rate_limiter.backend
+    if hasattr(backend, "_client"):
+        try:
+            await backend._client.ping()
+        except Exception as exc:  # noqa: BLE001
+            return {"rate_limiter": DependencyStatus.error(f"redis: {exc}")}
+        return {"rate_limiter": DependencyStatus.ok("redis")}
+    return {"rate_limiter": DependencyStatus.ok("in-memory")}
 
 
 async def verify_request(
@@ -51,10 +64,21 @@ async def verify_request(
 
 
 @app.get("/healthz")
-async def healthcheck() -> Dict[str, str]:
-    """Lightweight readiness probe."""
+async def healthcheck() -> Dict[str, object]:
+    """Lightweight readiness probe with dependency status."""
 
-    return {"status": "ok"}
+    statuses = await _rate_limiter_dependency()
+    return _dependency_recorder.snapshot(statuses)
+
+
+@app.get("/metrics")
+async def metrics() -> Response:
+    statuses = await _rate_limiter_dependency()
+    _dependency_recorder.snapshot(statuses)
+    return Response(
+        content=_dependency_recorder.render_prometheus(),
+        media_type=_dependency_recorder.prometheus_content_type,
+    )
 
 
 @app.post("/secrets/materialize")
