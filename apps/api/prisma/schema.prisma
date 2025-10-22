@@ -60,6 +60,12 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL") // e.g. file:./blackroad.db
 }
 
 model User {
@@ -118,4 +124,16 @@ model ApiKey {
   createdAt DateTime @default(now())
   revokedAt DateTime?
   org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions  Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  issuedAt  DateTime @default(now())
+  expiresAt DateTime
 }
