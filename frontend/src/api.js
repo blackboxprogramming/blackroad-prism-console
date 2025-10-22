@@ -232,6 +232,9 @@ export async function fetchSnapshotLogs() {
 export async function fetchRollbackLogs() {
   const { data } = await axios.get(`${API_BASE}/api/rollback/logs`)
   return data.logs
+export async function fetchPiStatus(){
+  const { data } = await axios.get(`${API_BASE}/api/pi/status`)
+  return data
 }
 
 export { API_BASE }
