@@ -12,6 +12,10 @@ from dataclasses import dataclass, field
 from typing import ClassVar
 from dataclasses import dataclass, field
 from typing import List, Set
+from dataclasses import dataclass, field
+from typing import List
+
+DEFAULT_SUPPORTED_ENGINES = frozenset({"unity", "unreal"})
 
 
 @dataclass
@@ -43,6 +47,14 @@ class AutoNovelAgent:
     supported_engines: Set[str] = field(
         default_factory=lambda: {"unity", "unreal"}
     )
+    supported_engines: set[str] = field(default_factory=lambda: set(DEFAULT_SUPPORTED_ENGINES))
+
+    def __post_init__(self) -> None:
+        """Normalise supported engine names to lowercase."""
+        if not self.supported_engines:
+            self.supported_engines = set(DEFAULT_SUPPORTED_ENGINES)
+        else:
+            self.supported_engines = {engine.lower() for engine in self.supported_engines}
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
@@ -75,16 +87,25 @@ class AutoNovelAgent:
         return engine_lower
         return engine.lower() in self.supported_engines
         return engine.lower() in self.SUPPORTED_ENGINES
+        return engine.lower() in self.supported_engines
 
     def add_supported_engine(self, engine: str) -> None:
-        """Add a new engine to the supported list.
+        """Register a new game engine.
 
-        Engines are stored in lowercase to keep lookups case-insensitive.
+        Engines are stored in lowercase for case-insensitive matching.
 
         Args:
-            engine: Name of the engine to add.
+            engine: Name of the engine to allow.
         """
-        self.SUPPORTED_ENGINES.add(engine.lower())
+        self.supported_engines.add(engine.lower())
+
+    def remove_supported_engine(self, engine: str) -> None:
+        """Remove an engine from the supported list.
+
+        Args:
+            engine: Name of the engine to remove. Lookup is case-insensitive.
+        """
+        self.supported_engines.discard(engine.lower())
 
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
         """Create a basic game using a supported engine without weapons."""

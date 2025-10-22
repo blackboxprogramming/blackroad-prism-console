@@ -70,3 +70,10 @@ def test_remove_unsupported_engine_raises():
         agent.remove_supported_engine("godot")
     with pytest.raises(ValueError):
         agent.create_game("cryengine")
+
+
+def test_remove_supported_engine():
+    """Removing an engine should make it unsupported for that agent."""
+    agent = AutoNovelAgent(supported_engines={"unity", "unreal"})
+    agent.remove_supported_engine("unity")
+    assert not agent.supports_engine("unity")
