@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import fs from 'fs';
+import { v4 as uuid } from 'uuid';
+const r = Router(); const C='data/wfm/clock.jsonl', TS='data/wfm/timesheets.jsonl';
+const append=(p:string,row:any)=>{ fs.mkdirSync('data/wfm',{recursive:true}); fs.appendFileSync(p, JSON.stringify(row)+'\n'); };
+const lines=(p:string)=> fs.existsSync(p)? fs.readFileSync(p,'utf-8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)):[ ];
+r.post('/clock/punch',(req,res)=>{ const punchId=`p_${uuid().slice(0,8)}`; append(C,{ ts:req.body?.ts||Date.now(), punchId, ...req.body }); res.json({ ok:true, punchId }); });
+r.post('/timesheets/submit',(req,res)=>{ append(TS,{ ts:Date.now(), ...req.body }); res.json({ ok:true }); });
+r.get('/time/recent',(req,res)=>{ const s=String(req.query.subjectId||''); const punches=lines(C).reverse().filter((x:any)=>!s||x.subjectId===s).slice(0,200); const sheets=lines(TS).reverse().filter((x:any)=>!s||x.subjectId===s).slice(0,50); res.json({ punches, timesheets:sheets }); });
+export default r;

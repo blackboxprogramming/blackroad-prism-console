@@ -363,6 +363,11 @@ import taxIRS from './routes/tax/irs.js';
 import taxFATCA from './routes/tax/fatca.js';
 import taxEINV from './routes/tax/einvoice.js';
 import taxFiles from './routes/tax/files.js';
+import wfmTS from './routes/wfm/teams_shifts.js';
+import wfmRS from './routes/wfm/rosters.js';
+import wfmTM from './routes/wfm/time.js';
+import wfmLV from './routes/wfm/leave.js';
+import wfmOT from './routes/wfm/overtime_export.js';
 
 dotenv.config();
 import express from "express";
@@ -606,6 +611,7 @@ app.use('/api/psa', psaProj, psaTime, psaExp, psaWip, psaBill, psaRev, psaAR);
 app.use('/api/product', productIdeas, productPrd, productRoadmap, productReleases, productFlags, productFeedback);
 app.use('/api/revrec', rrPolicy, rrContracts, rrAlloc, rrSched, rrJournal, rrPack);
 app.use('/api/tax', taxJ, taxT, taxQ, taxN, taxP, taxIRS, taxFATCA, taxEINV, taxFiles);
+app.use('/api/wfm', wfmTS, wfmRS, wfmTM, wfmLV, wfmOT);
 
 const port = process.env.PORT || 4000;
 
