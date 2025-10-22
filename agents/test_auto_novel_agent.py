@@ -11,6 +11,9 @@ def reset_supported_engines():
     original = AutoNovelAgent.SUPPORTED_ENGINES.copy()
     yield
     AutoNovelAgent.SUPPORTED_ENGINES = original.copy()
+    """Ensure each test starts with the default supported engines."""
+
+    AutoNovelAgent.SUPPORTED_ENGINES = {"unity", "unreal"}
 
 
 def test_supports_engine_case_insensitive():
@@ -77,3 +80,14 @@ def test_remove_supported_engine():
     agent = AutoNovelAgent(supported_engines={"unity", "unreal"})
     agent.remove_supported_engine("unity")
     assert not agent.supports_engine("unity")
+    agent = AutoNovelAgent()
+    agent.add_supported_engine("godot")
+    assert agent.supports_engine("godot")
+    agent.remove_supported_engine("Godot")
+    assert not agent.supports_engine("godot")
+
+
+def test_remove_supported_engine_errors_when_unknown():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError, match="Supported engines: unity, unreal"):
+        agent.remove_supported_engine("cryengine")

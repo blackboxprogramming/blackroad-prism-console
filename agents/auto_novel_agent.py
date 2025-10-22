@@ -257,6 +257,18 @@ class AutoNovelAgent:
             raise ValueError("Engine name must be a non-empty string.")
         self.SUPPORTED_ENGINES.add(engine_lower)
 
+    def remove_supported_engine(self, engine: str) -> None:
+        """Remove a supported engine, raising ``ValueError`` when unknown."""
+
+        engine_lower = engine.lower()
+        if engine_lower not in self.SUPPORTED_ENGINES:
+            supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
+            raise ValueError(
+                "Cannot remove unsupported engine "
+                f"'{engine_lower}'. Supported engines: {supported}."
+            )
+        self.SUPPORTED_ENGINES.remove(engine_lower)
+
     def list_supported_engines(self) -> List[str]:
         """Return a sorted list of supported game engines."""
         self.SUPPORTED_ENGINES.discard(engine.lower())
