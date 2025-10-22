@@ -262,3 +262,26 @@ def test_list_supported_engines_returns_fresh_copy(agent: AutoNovelAgent) -> Non
 
     # The agent should not expose internal state that can be mutated from callers.
     assert "godot" not in agent.list_supported_engines()
+def test_create_game_rejects_invalid_engine():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError):
+        agent.create_game("godot")
+
+
+def test_create_game_rejects_weapons():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError):
+        agent.create_game("unity", include_weapons=True)
+
+
+def test_generate_story_uses_protagonist():
+    agent = AutoNovelAgent()
+    story = agent.generate_story("an ancient temple", protagonist="Lara")
+    assert "Lara" in story
+    assert story.startswith("an ancient temple")
+
+
+def test_generate_story_rejects_blank_prompt():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError):
+        agent.generate_story("   ")

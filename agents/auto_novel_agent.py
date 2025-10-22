@@ -178,6 +178,21 @@ class AutoNovelAgent:
         """
         self.SUPPORTED_ENGINES.discard(engine.lower())
 
+    def generate_story(self, prompt: str, *, protagonist: str = "Hero") -> str:
+        """Generate a short, deterministic story from a prompt.
+
+        Args:
+            prompt: Seed idea for the story.
+            protagonist: Name of the main character in the story.
+
+        Returns:
+            A tiny story incorporating the protagonist and the prompt.
+        """
+        cleaned_prompt = prompt.strip()
+        if not cleaned_prompt:
+            raise ValueError("Prompt must not be empty.")
+        return f"{cleaned_prompt} stars {protagonist} in a short tale."
+
     def list_supported_engines(self) -> List[str]:
         """Return a sorted list of supported game engines."""
         self.SUPPORTED_ENGINES.discard(engine.lower())
@@ -434,3 +449,4 @@ if __name__ == "__main__":
     agent = AutoNovelAgent()
     agent.deploy()
     agent.create_game("godot")
+    print(agent.generate_story("a mysterious forest"))
