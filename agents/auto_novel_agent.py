@@ -10,6 +10,8 @@ from dataclasses import dataclass
 from typing import ClassVar
 from dataclasses import dataclass, field
 from typing import ClassVar
+from dataclasses import dataclass, field
+from typing import List, Set
 
 
 @dataclass
@@ -38,6 +40,9 @@ class AutoNovelAgent:
     name: str = "AutoNovelAgent"
     gamma: float = 1.0
     supported_engines: ClassVar[set[str]] = {"unity", "unreal"}
+    supported_engines: Set[str] = field(
+        default_factory=lambda: {"unity", "unreal"}
+    )
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
@@ -127,6 +132,7 @@ class AutoNovelAgent:
         if engine_lower not in self.supported_engines:
         engine_lower = engine.lower()
         if not self.supports_engine(engine_lower):
+        if engine_lower not in self.supported_engines:
             supported = ", ".join(sorted(self.supported_engines))
             raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
         if include_weapons:
@@ -439,6 +445,19 @@ class AutoNovelAgent:
             raise ValueError("Paragraph must contain at least one sentence.")
         improved = [self.improve_sentence(sentence) for sentence in sentences]
         return " ".join(improved)
+        return sorted(self.supported_engines)
+
+    def add_engine(self, engine: str) -> None:
+        """Add a new supported game engine.
+
+        Args:
+            engine: Name of the engine to add. Comparison is case-insensitive.
+
+        """
+        normalized_engine = engine.strip().lower()
+        if not normalized_engine:
+            raise ValueError("Engine name cannot be empty.")
+        self.supported_engines.add(normalized_engine)
 
 
 if __name__ == "__main__":
