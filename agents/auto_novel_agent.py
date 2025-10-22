@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import ClassVar, List, Set
 from typing import ClassVar, Dict, List, Set
 from typing import ClassVar
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -25,6 +26,9 @@ class AutoNovelAgent:
         "javascript": "function solve() {\n  return null;\n}\n",
         "java": "class Solution {\n    void solve() {\n    }\n}\n",
     }
+    supported_engines: set[str] = field(
+        default_factory=lambda: {"unity", "unreal"}
+    )
 
     def deploy(self) -> None:
         """Deploy the agent by printing a greeting."""
@@ -39,6 +43,19 @@ class AutoNovelAgent:
         """
 
         return engine.lower() in self.SUPPORTED_ENGINES
+    def _normalize_engine(self, engine: str) -> str:
+        """Normalize an engine name to a lowercase, trimmed string.
+
+        Args:
+            engine: Engine name to normalize.
+
+        Raises:
+            ValueError: If the engine name is empty after normalization.
+        """
+        engine_lower = engine.strip().lower()
+        if not engine_lower:
+            raise ValueError("Engine name cannot be empty.")
+        return engine_lower
 
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
         """Create a basic game using a supported engine without weapons."""
@@ -82,6 +99,10 @@ class AutoNovelAgent:
             )
 
         engine_lower = engine_clean.lower()
+        engine_lower = self._normalize_engine(engine)
+        if engine_lower not in self.supported_engines:
+            supported = ", ".join(sorted(self.supported_engines))
+            raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
 
@@ -132,6 +153,23 @@ class AutoNovelAgent:
         """Return a list of supported game engines."""
 
         return sorted(self.SUPPORTED_ENGINES)
+    def list_supported_engines(self) -> list[str]:
+        """Return a list of supported game engines."""
+        return sorted(self.supported_engines)
+
+    def add_engine(self, engine: str) -> None:
+        """Add a new game engine to the supported set.
+
+        Args:
+            engine: Name of the engine to add.
+
+        Raises:
+            ValueError: If the engine name is empty or already supported.
+        """
+        engine_lower = self._normalize_engine(engine)
+        if engine_lower in self.supported_engines:
+            raise ValueError("Engine already supported.")
+        self.supported_engines.add(engine_lower)
 
     def generate_game_idea(self, theme: str, engine: str) -> str:
         """Return a short description for a themed game."""
