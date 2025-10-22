@@ -44,6 +44,11 @@ def test_remove_supported_engine_blocks_creation():
 
 
 def test_create_game_disallows_weapons():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError, match="Weapons are not allowed"):
+        agent.create_game("unity", include_weapons=True)
+
+
 @pytest.mark.parametrize(
     ("engine", "expected"),
     [
@@ -66,13 +71,6 @@ def test_create_game_unsupported_engine():
         agent.create_game("godot")
 
 
-def test_create_game_with_weapons():
-    """Creating a game with weapons enabled raises ValueError."""
-    agent = AutoNovelAgent()
-    with pytest.raises(ValueError, match="Weapons are not allowed"):
-        agent.create_game("unity", include_weapons=True)
-
-
 def test_create_game_rejects_unsupported_engine():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
@@ -92,6 +90,13 @@ def test_generate_story_series_produces_multiple_stories():
     assert "Explorer" in stories[0]
     assert "mystery" in stories[0]
     assert "space" in stories[1]
+
+
+def test_generate_story_series_rejects_blank_theme():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError, match="Each theme must be a non-empty string"):
+        agent.generate_story_series(["mystery", "   "], protagonist="Explorer")
+
 def test_list_supported_engines():
     """list_supported_engines returns the supported engines sorted alphabetically."""
     agent = AutoNovelAgent()

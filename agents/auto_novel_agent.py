@@ -306,6 +306,11 @@ class AutoNovelAgent:
         if difficulty_normalized not in {"easy", "medium", "hard"}:
             raise ValueError("Difficulty must be 'easy', 'medium', or 'hard'.")
         topic_clean = topic.strip()
+        if not theme or not theme.strip():
+            raise ValueError("Theme must be a non-empty string.")
+        theme_clean = theme.strip()
+        protagonist_clean = protagonist.strip()
+        excitement = "!" * max(1, int(self.gamma))
         return (
             f"[{difficulty_normalized.title()}] Implement a solution that addresses "
             f"the '{topic_clean}' challenge. Describe your approach before coding "
