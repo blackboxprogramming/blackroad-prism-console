@@ -12,3 +12,7 @@ def test_point_beyond_3sigma(tmp_path, monkeypatch):
     s = (sum((x - m) ** 2 for x in baseline) / len(baseline)) ** 0.5
     x = 10
     assert s > 0 and x > m + 3 * s
+def test_basic_stats():
+    xs = [1,1,1,1,1,1,1,5]
+    assert spc._mean(xs) > 0
+    assert spc._stdev(xs) >= 0

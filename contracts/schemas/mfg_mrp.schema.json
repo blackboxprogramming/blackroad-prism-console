@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","additionalProperties":{"type":"object","required":["planned_qty","release_day_offset","kitting_list"],"properties":{"planned_qty":{"type":"number","exclusiveMinimum":0},"release_day_offset":{"type":"integer","minimum":0},"kitting_list":{"type":"array","items":{"type":"string"},"minItems":1}}}}

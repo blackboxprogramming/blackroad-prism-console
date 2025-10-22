@@ -1,0 +1,4 @@
+id,rev,type,uom,lead_time_days,cost,suppliers
+PROD-100,A,assembly,ea,15,25.00,SUP-ACME|SUP-GLOBAL
+COMP-001,A,component,ea,10,2.50,SUP-ACME
+RAW-101,A,raw,kg,5,1.20,SUP-RAW
