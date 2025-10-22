@@ -120,6 +120,10 @@ class AutoNovelAgent:
 
         engine_clean = engine.strip()
         if not self.supports_engine(engine_clean):
+        engine_lower = engine.strip().lower()
+        if not engine_lower:
+            raise ValueError("Engine name must be a non-empty string.")
+        if engine_lower not in self.SUPPORTED_ENGINES:
             supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
             raise ValueError(
                 "Unsupported engine "
@@ -212,6 +216,18 @@ class AutoNovelAgent:
         if not cleaned_prompt:
             raise ValueError("Prompt must not be empty.")
         return f"{cleaned_prompt} stars {protagonist} in a short tale."
+
+    def add_supported_engine(self, engine: str) -> None:
+        """Register a new game engine.
+
+        Args:
+            engine: Name of the engine to allow. The value is stored in
+                lowercase for case-insensitive matching.
+        """
+        engine_lower = engine.strip().lower()
+        if not engine_lower:
+            raise ValueError("Engine name must be a non-empty string.")
+        self.SUPPORTED_ENGINES.add(engine_lower)
 
     def list_supported_engines(self) -> List[str]:
         """Return a sorted list of supported game engines."""
