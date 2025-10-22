@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+JETSON_USER=${JETSON_USER:-jetson}
+JETSON_HOST=${JETSON_HOST:-jetson.local}
+JETSON_SSH_OPTS=${JETSON_SSH_OPTS:-}
+
+prompt_for_password() {
+  local prompt=${1:-"Jetson sudo password: "}
+  local password
+
+  if [[ -t 0 && -t 1 ]]; then
+    read -rsp "$prompt" password
+    echo
+    JETSON_SUDO_PASSWORD=$password
+  fi
+}
+
+if [[ -z "${JETSON_SUDO_PASSWORD:-}" ]]; then
+  prompt_for_password
+fi
+
+remote_command="blackroad-telemetry"
+if [[ -n "${JETSON_SUDO_PASSWORD:-}" ]]; then
+  printf -v remote_env 'JETSON_SUDO_PASSWORD=%q' "$JETSON_SUDO_PASSWORD"
+  remote_command="$remote_env $remote_command"
+fi
+
+ssh_command=(ssh -tt)
+if [[ -n "$JETSON_SSH_OPTS" ]]; then
+  # shellcheck disable=SC2206
+  ssh_command+=( $JETSON_SSH_OPTS )
+fi
+ssh_command+=("${JETSON_USER}@${JETSON_HOST}" "$remote_command")
+
+"${ssh_command[@]}"
+
+unset -v JETSON_SUDO_PASSWORD || true

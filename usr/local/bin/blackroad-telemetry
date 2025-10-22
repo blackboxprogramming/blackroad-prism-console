@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Pi will call this over SSH to grab Jetson stats
+echo "## Jetson Telemetry"
+echo "Uptime: $(uptime -p)"
+echo "Load: $(uptime | awk -F'load average:' '{print $2}')"
+
+collect_tegrastats() {
+  local -a tegrastats_cmd=(tegrastats --interval 1000 --count 1)
+
+  if ! command -v tegrastats >/dev/null 2>&1; then
+    echo "tegrastats not available"
+    return 0
+  fi
+
+  if sudo -n true >/dev/null 2>&1; then
+    sudo "${tegrastats_cmd[@]}"
+    return 0
+  fi
+
+  if [[ -n "${JETSON_SUDO_PASSWORD:-}" ]]; then
+    if printf '%s\n' "$JETSON_SUDO_PASSWORD" | sudo -S -p '' "${tegrastats_cmd[@]}"; then
+      return 0
+    fi
+
+    echo "Failed to run tegrastats with provided sudo password." >&2
+    return 1
+  fi
+
+  cat <<'EOF' >&2
+Unable to collect tegrastats output.
+Passwordless sudo for tegrastats is not configured and no Jetson sudo password was provided.
+Provide the password via JETSON_SUDO_PASSWORD or grant passwordless access for tegrastats (e.g. using visudo).
+EOF
+  return 1
+}
+
+collect_tegrastats
+
+unset -v JETSON_SUDO_PASSWORD || true
