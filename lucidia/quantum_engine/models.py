@@ -27,6 +27,11 @@ class PQCClassifier(nn.Module):
             pad = torch.zeros(bsz, 4 - meas.shape[-1], device=meas.device, dtype=meas.dtype)
             meas = torch.cat([meas, pad], dim=-1)
         logits = meas[..., :4].reshape(bsz, 2, 2).sum(-1)
+        measurements = self.measure(qdev)
+        if measurements.shape[1] < 4:
+            pad = 4 - measurements.shape[1]
+            measurements = F.pad(measurements, (0, pad))
+        logits = measurements[:, :4].reshape(bsz, 2, 2).sum(-1)
         return F.log_softmax(logits, dim=1)
 
 

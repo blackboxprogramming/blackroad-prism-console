@@ -110,3 +110,140 @@ for _cls in (_torchquantum.QuantumDevice, _module.QuantumDevice):
         setattr(_cls, "expval_z", _expval_z)
     if not hasattr(_cls, "measure_all"):
         setattr(_cls, "measure_all", _measure_all)
+from torch import nn
+
+I2 = torch.eye(2, dtype=torch.cfloat)
+
+class QuantumDevice:
+    def __init__(self, n_wires, bsz=1, device='cpu'):
+        self.n_wires = n_wires
+        self.bsz = bsz
+        self.device = device
+        dim = 2 ** n_wires
+        self.state = torch.zeros(bsz, dim, dtype=torch.cfloat, device=device)
+        self.state[:, 0] = 1
+        self.ops = []
+
+    def _kron(self, mats):
+        res = mats[0]
+        for m in mats[1:]:
+            res = torch.kron(res, m)
+        return res
+
+    def _apply_matrix(self, mat, wire):
+        mats = []
+        for i in range(self.n_wires):
+            mats.append(mat if i == wire else I2.to(mat.device))
+        full = self._kron(mats)
+        self.state = torch.matmul(self.state, full.transpose(-2, -1))
+
+    def apply(self, name, mat, wire, params=None):
+        self.ops.append((name, wire, params))
+        self._apply_matrix(mat, wire)
+
+    def expval_z(self, wire):
+        mats = []
+        Z = torch.tensor([[1, 0], [0, -1]], dtype=torch.cfloat, device=self.state.device)
+        for i in range(self.n_wires):
+            mats.append(Z if i == wire else I2.to(self.state.device))
+        full = self._kron(mats)
+        psi = self.state
+        tmp = torch.matmul(psi, full.transpose(-2, -1))
+        return torch.sum(psi.conj() * tmp, dim=1).real
+
+    def measure_all(self):
+        vals = [self.expval_z(w) for w in range(self.n_wires)]
+        return torch.stack(vals, dim=1)
+
+    def qasm(self):
+        lines = []
+        for name, wire, params in self.ops:
+            if params is None:
+                lines.append(f"{name} q[{wire}]")
+            else:
+                lines.append(f"{name}({float(params[0])}) q[{wire}]")
+        return "\n".join(lines)
+
+    def prob_11(self, wires):
+        dim = 2 ** self.n_wires
+        idxs = []
+        for i in range(dim):
+            keep = True
+            for w in wires:
+                if not ((i >> w) & 1):
+                    keep = False
+                    break
+            if keep:
+                idxs.append(i)
+        amps = self.state[:, idxs]
+        return (amps.abs() ** 2).sum(dim=1)
+
+class RX(nn.Module):
+    def __init__(self, trainable=True, bias=True):
+        super().__init__()
+        if trainable:
+            self.theta = nn.Parameter(torch.zeros(1))
+        else:
+            self.register_buffer('theta', torch.zeros(1))
+
+    def forward(self, qdev, wires):
+        t = self.theta
+        c = torch.cos(t / 2).to(torch.cfloat)
+        s = (-1j * torch.sin(t / 2)).to(torch.cfloat)
+        row0 = torch.stack((c, s), dim=0).squeeze(-1)
+        row1 = torch.stack((s, c), dim=0).squeeze(-1)
+        mat = torch.stack([row0, row1], dim=0)
+        qdev.apply('rx', mat, wires, params=[t])
+
+class RY(nn.Module):
+    def __init__(self, trainable=True, bias=True):
+        super().__init__()
+        if trainable:
+            self.theta = nn.Parameter(torch.zeros(1))
+        else:
+            self.register_buffer('theta', torch.zeros(1))
+
+    def forward(self, qdev, wires):
+        t = self.theta
+        c = torch.cos(t / 2).to(torch.cfloat)
+        s = torch.sin(t / 2).to(torch.cfloat)
+        row0 = torch.stack((c, -s), dim=0).squeeze(-1)
+        row1 = torch.stack((s, c), dim=0).squeeze(-1)
+        mat = torch.stack([row0, row1], dim=0)
+        qdev.apply('ry', mat, wires, params=[t])
+
+class RZ(nn.Module):
+    def __init__(self, trainable=True, bias=True):
+        super().__init__()
+        if trainable:
+            self.theta = nn.Parameter(torch.zeros(1))
+        else:
+            self.register_buffer('theta', torch.zeros(1))
+
+    def forward(self, qdev, wires):
+        t = self.theta
+        e = torch.exp(-0.5j * t).to(torch.cfloat)
+        zero = torch.zeros_like(e)
+        row0 = torch.stack((e, zero), dim=0).squeeze(-1)
+        row1 = torch.stack((zero, e.conj()), dim=0).squeeze(-1)
+        mat = torch.stack([row0, row1], dim=0)
+        qdev.apply('rz', mat, wires, params=[t])
+
+class PauliZ:
+    matrix = torch.tensor([[1, 0], [0, -1]], dtype=torch.cfloat)
+
+class MeasureAll(nn.Module):
+    def __init__(self, observable):
+        super().__init__()
+        self.observable = observable
+
+    def forward(self, qdev):
+        return qdev.measure_all()
+
+class RandomLayer(nn.Module):
+    def forward(self, qdev):
+        return qdev
+
+class QFTLayer(nn.Module):
+    def forward(self, qdev):
+        return qdev
