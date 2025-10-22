@@ -6,6 +6,9 @@ from pathlib import Path
 
 from .exceptions import is_excepted
 
+import yaml
+from pathlib import Path
+
 
 class PolicyKernel:
     """Evaluate events against policy: ALLOW | REVIEW | DENY."""
@@ -55,6 +58,10 @@ class PolicyKernel:
                 }
             return {"decision": "DENY", "risk": 10, "reason": "Global kill-switch active"}
 
+        if self.kill_switch:
+            return {"decision": "DENY", "risk": 10, "reason": "Global kill-switch active"}
+
+        typ = envelope.get("type", "")
         src = envelope.get("source", "")
         policy = self.policies.get(typ, {"mode": "review", "max_risk": 5, "compensations": True})
         risk = self._risk(src, typ, envelope.get("payload", {}))

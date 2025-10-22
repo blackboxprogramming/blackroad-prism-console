@@ -58,6 +58,9 @@ def _prepare_exception_db(path: str, rule_id: str, subject_type: str, subject_id
     conn.close()
 
 
+from policy.kernel.kernel import PolicyKernel
+
+
 def test_closed_won_allow():
     pk = PolicyKernel()
     env = {
