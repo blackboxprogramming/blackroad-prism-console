@@ -368,6 +368,12 @@ import wfmRS from './routes/wfm/rosters.js';
 import wfmTM from './routes/wfm/time.js';
 import wfmLV from './routes/wfm/leave.js';
 import wfmOT from './routes/wfm/overtime_export.js';
+import trCash from './routes/treasury/cash.js';
+import trAlm from './routes/treasury/alm.js';
+import trMkt from './routes/treasury/market.js';
+import trCred from './routes/treasury/credit.js';
+import trHedge from './routes/treasury/hedges.js';
+import trPol from './routes/treasury/policy.js';
 
 dotenv.config();
 import express from "express";
@@ -612,6 +618,7 @@ app.use('/api/product', productIdeas, productPrd, productRoadmap, productRelease
 app.use('/api/revrec', rrPolicy, rrContracts, rrAlloc, rrSched, rrJournal, rrPack);
 app.use('/api/tax', taxJ, taxT, taxQ, taxN, taxP, taxIRS, taxFATCA, taxEINV, taxFiles);
 app.use('/api/wfm', wfmTS, wfmRS, wfmTM, wfmLV, wfmOT);
+app.use('/api/treasury', trCash, trAlm, trMkt, trCred, trHedge, trPol);
 
 const port = process.env.PORT || 4000;
 
