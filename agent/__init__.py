@@ -92,3 +92,8 @@ __all__ = ["api", "config", "flash", "jobs", "telemetry"]
 """Utility modules for the BlackRoad agent dashboard."""
 
 __all__ = []
+"""Agent service package."""
+
+__all__ = [
+    "transcribe",
+]
