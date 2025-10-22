@@ -1,4 +1,5 @@
 """Utilities to close stale pull requests and prune old comments."""
+"""Bot for closing stale GitHub pull requests and comments."""
 
 from __future__ import annotations
 
@@ -14,6 +15,13 @@ import requests
 @dataclass
 class PullRequestCleanupBot:
     """Close stale pull requests in a repository."""
+    """Close stale pull requests and delete aged comments.
+
+    Attributes:
+        repo: Repository in ``owner/name`` format.
+        token: GitHub token with repo scope. Uses ``GITHUB_TOKEN`` env var if omitted.
+        days: Items with no updates for this many days are considered stale.
+    """
 
     repo: str
     token: Optional[str] = None
