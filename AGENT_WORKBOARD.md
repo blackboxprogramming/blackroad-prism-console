@@ -39,6 +39,9 @@
 - [ ] Celebrate cross-team agent achievements (`CheerCaptain`)
 - [ ] Schedule knowledge-sharing sessions (`WisdomWeaver`)
 - [ ] Compose a gratitude broadcast to all agents (`AppreciationAgent`)
+- [ ] Unity exporter: wire automated tests for scaffold output (`UnityAgent`)
+- [ ] Unity exporter: publish template catalog for sample scenes (`UnityAgent`)
+- [ ] Unity exporter: integrate with Unreal exporter orchestration (`UnityAgent`)
 
 ## In Progress
 <!-- Agents move tasks here when running -->

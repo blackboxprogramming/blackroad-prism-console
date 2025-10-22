@@ -66,8 +66,16 @@ curl -X POST http://localhost:3000/export \
 
 Track progress and divide work in [`TASKS.md`](./TASKS.md). Add yourself when starting a task to avoid overlap.
 Stub service that writes a placeholder Unity project zip.
+A lightweight service that scaffolds a Unity project and packages it as a zip file.
 
 - **Endpoint:** `POST /export`
-- **Output:** `downloads/unity-project.zip`
+- **Body (optional):**
+  - `projectName` — folder name for the generated project.
+  - `sceneName` — default scene stub to create under `Assets/Scenes`.
+  - `scriptName` — C# script file name created under `Assets/Scripts`.
+  - `scriptContents` — override the default `MonoBehaviour` template.
+  - `sceneContents` — override the placeholder scene notes.
+- **Output:** `downloads/<project>-<timestamp>.zip`
 
-Replace with a real Unity build pipeline when available.
+The exporter creates Unity-style directories (`Assets`, `Packages`, `ProjectSettings`) with
+starter content so collaborators can open the archive directly in Unity and continue building.
