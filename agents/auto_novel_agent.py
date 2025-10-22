@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import ClassVar
 from dataclasses import dataclass, field
+from typing import ClassVar
 
 
 @dataclass
@@ -191,6 +192,14 @@ class AutoNovelAgent:
 
     def add_engine(self, engine: str) -> None:
         """Add a new game engine to the supported set.
+    @classmethod
+    def list_supported_engines(cls) -> list[str]:
+        """Return a sorted list of supported game engines."""
+        return sorted(cls.SUPPORTED_ENGINES)
+
+    @classmethod
+    def add_supported_engine(cls, engine: str) -> None:
+        """Add a new supported engine shared across all agent instances.
 
         Args:
             engine: Name of the engine to add.
@@ -412,3 +421,16 @@ if __name__ == "__main__":
     print(agent.generate_coding_challenge("graph traversal", "hard"))
     print(agent.generate_code_snippet("Implement depth-first search", "python"))
     print(agent.proofread_paragraph("this is a test paragraph it needs polish"))
+        engine_normalized = engine.strip().lower()
+        if not engine_normalized:
+            raise ValueError("Engine name must be a non-empty string.")
+        if engine_normalized in cls.SUPPORTED_ENGINES:
+            raise ValueError("Engine already supported.")
+        cls.SUPPORTED_ENGINES.add(engine_normalized)
+
+
+if __name__ == "__main__":
+    AutoNovelAgent.add_supported_engine("godot")
+    agent = AutoNovelAgent()
+    agent.deploy()
+    agent.create_game("godot")
