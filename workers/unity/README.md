@@ -65,3 +65,9 @@ curl -X POST http://localhost:3000/export \
 ## Task Board
 
 Track progress and divide work in [`TASKS.md`](./TASKS.md). Add yourself when starting a task to avoid overlap.
+Stub service that writes a placeholder Unity project zip.
+
+- **Endpoint:** `POST /export`
+- **Output:** `downloads/unity-project.zip`
+
+Replace with a real Unity build pipeline when available.
