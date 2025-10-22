@@ -7,6 +7,7 @@
  * SALESFORCE_INSTANCE_URL, SALESFORCE_ACCESS_TOKEN,
  * AIRTABLE_API_KEY, AIRTABLE_BASE_ID, AIRTABLE_TABLE,
  * optional CLEANUP=true.
+ * JIRA_PROJECT_KEY, GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO, optional CLEANUP=true.
  */
 
 const {
@@ -26,6 +27,9 @@ const {
 } = process.env;
 
 const { execSync } = require('child_process');
+
+  CLEANUP,
+} = process.env;
 
 const required = [
   'JIRA_BASE_URL',
@@ -69,6 +73,7 @@ async function fetchJson(url, options = {}, service) {
   }
   if (service === 'airtable') {
     headers.Authorization = `Bearer ${AIRTABLE_API_KEY}`;
+    headers['User-Agent'] = 'jira-github-integration-test-script';
   }
 
   const max = 3;
@@ -132,6 +137,10 @@ async function step(name, fn) {
     });
 
     const me = await step('Jira auth', async () => {
+  let issueKey, browseUrl, ghNumber, ghUrl;
+
+  try {
+    await step('Jira auth', async () => {
       const data = await fetchJson(`${JIRA_BASE_URL}/rest/api/3/myself`, {}, 'jira');
       console.log(`PASS Jira auth: accountId ${data.accountId} displayName ${data.displayName}`);
       return data;
