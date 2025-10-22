@@ -63,6 +63,7 @@ extension points for future integrations.
 | 003 | The Workflow Circle     | Work runs in visible capture → adjust loops.    |
 | 004 | The Autonomy Manifest   | Data autonomy through consent, export, and wipe. |
 | 014 | The Automation Covenant | Automate the grind while preserving human choice. |
+| 009 | The Transparency Accord | Every operation is logged, explainable, visible. |
 
 ## BlackRoad Pipeline
 
