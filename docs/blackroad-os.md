@@ -31,6 +31,36 @@ specified device, and apply the following customizations:
 
 The operation is destructive and will wipe the target device.
 
+## Optional Configuration (Pi 400 Keyboard Defaults)
+
+The builder now accepts environment variables so you can pre-seed settings that
+match the Raspberry Pi 400 keyboard computer out of the box:
+
+| Variable | Purpose |
+| --- | --- |
+| `WIFI_SSID` / `WIFI_PSK` / `WIFI_COUNTRY` | Create `wpa_supplicant.conf` on the boot partition so the Pi joins Wi-Fi immediately. |
+| `PI_USER`, `PI_PASSWORD` or `PI_PASSWORD_HASH` | Provision the first user via `userconf.txt`. The plain password is hashed with `openssl` before writing. |
+| `PI_SSH_KEY` / `PI_SSH_KEY_FILE` | Seed SSH `authorized_keys` during imaging (keys are placed under `/boot/ssh/authorized_keys`). |
+| `PI_TIMEZONE` | Write `/etc/timezone` and `/etc/localtime` to match your region (e.g., `America/Los_Angeles`). |
+| `PI_LOCALE` | Sets `/etc/default/locale` and ensures the locale is enabled in `locale.gen`. |
+| `PI_KEYBOARD_MODEL`, `PI_KEYBOARD_LAYOUT`, `PI_KEYBOARD_VARIANT` | Update `/etc/default/keyboard` so the integrated keyboard layout matches your locale. |
+
+Example invocation for a Pi 400 destined for a US-based ops bench:
+
+```bash
+sudo WIFI_SSID="BlackRoadHQ" \
+  WIFI_PSK="super-secret" \
+  PI_USER=blackroad \
+  PI_PASSWORD='change-me-now' \
+  PI_SSH_KEY_FILE="$HOME/.ssh/id_ed25519.pub" \
+  PI_TIMEZONE=America/Los_Angeles \
+  PI_LOCALE=en_US.UTF-8 \
+  PI_KEYBOARD_LAYOUT=us \
+  ./blackroad-build.sh /dev/sdX
+```
+
+Any variables you leave unset fall back to Raspberry Pi OS defaults.
+
 ## First-Boot Finalization
 
 After the Raspberry Pi boots from the prepared media:
