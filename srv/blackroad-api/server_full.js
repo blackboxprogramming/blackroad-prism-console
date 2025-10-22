@@ -566,6 +566,7 @@ app.post('/api/billing/webhook', (req, res) => {
     );
   } catch (e) {
     logger.error({ event: 'stripe_webhook_verify_failed', err: e });
+    logger.error('stripe_webhook_verify_failed', e);
     return res.status(400).json({ error: 'invalid_signature' });
   }
   emitter.emit('stripe:event', event);
