@@ -9,6 +9,7 @@ description = "Offline PLM & Manufacturing Ops (Phase 37) — deterministic, fil
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Blackroad", email = "eng@blackroadinc.us" }]
+authors = [{ name = "BlackRoad", email = "eng@blackroadinc.us" }]
 dependencies = [
     "click>=8.1.0",
     "fastapi>=0.110.0",
@@ -18,7 +19,7 @@ dependencies = [
     "typer>=0.9.0",
     "uvicorn>=0.23.0",
     "paho-mqtt",
-    "typer",
+    "typer>=0.9.0",
     "fastapi",
     "pydantic>=2.0.0",
     "pydantic-settings>=2.0.0",
@@ -28,6 +29,10 @@ dependencies = [
     "redis>=4.6.0",
     "stripe>=7.0.0",
     "argon2-cffi>=21.0.0",
+    "pydantic",
+    "jinja2",
+    "uvicorn",
+    "click",
 ]
 dependencies = ["typer", "fastapi", "httpx", "pyjwt[crypto]", "cachetools", "aioredis"]
 
@@ -47,12 +52,27 @@ exclude = ["tests*"]
 
 [tool.setuptools.package-data]
 agent = ["templates/*.html"]
+blackroad-dashboard = "agent.dashboard:main"
+blackroad-agent = "agent.daemon:main"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
 addopts = "-q"
 testpaths = ["tests"]
 testpaths = ["tests/core", "tests/fuzz", "tests/mining_ops_lab"]
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["cli", "cli.*", "agent", "agent.*"]
+
+[tool.setuptools.package-data]
+agent = ["templates/*.html"]
 
 [tool.black]
 line-length = 100
