@@ -8,6 +8,11 @@ import fs from 'fs';
 import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import express from 'express';
+import os from 'node:os';
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import { TextDecoder } from 'node:util';
 
 const app = express();
 app.use(express.json({ limit: '1mb' }));
@@ -24,6 +29,8 @@ function base32(buf) {
   let out = '';
   let bits = 0;
   let value = 0;
+  let bits = 0,
+    value = 0;
   for (const byte of buf) {
     value = (value << 8) | byte;
     bits += 8;
@@ -132,6 +139,7 @@ function getSystem(body) {
 function buildPrompt(messages) {
   if (!Array.isArray(messages)) return '';
   return messages.map(m => `${m.role}: ${m.content}`).join('\n') + '\nassistant:';
+  return messages.map((m) => `${m.role}: ${m.content}`).join('\n') + '\nassistant:';
 }
 
 app.post('/api/llm/chat', async (req, res) => {
@@ -156,6 +164,7 @@ app.post('/api/llm/chat', async (req, res) => {
   } catch (e) {
     const last = (req.body.messages || []).filter(m => m.role === 'user').pop();
     const last = ((req.body && req.body.messages) || []).filter((m) => m.role === 'user').pop();
+    const last = (req.body.messages || []).filter((m) => m.role === 'user').pop();
     return res.json({ choices: [{ message: { role: 'assistant', content: last ? last.content : '' } }] });
   }
 });
