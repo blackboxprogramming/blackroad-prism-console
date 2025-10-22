@@ -181,6 +181,7 @@ function confirmHtml(url){
     <p>Click the button below to confirm your email for BlackRoad updates.</p>
     <p><a href="${url}" style="display:inline-block;padding:12px 18px;border-radius:10px;text-decoration:none;background:linear-gradient(90deg,#FF4FD8,#0096FF);color:#0b0b12;font-weight:700">Confirm</a></p>
     <p style="color:#555555;font-size:12px">If you didn't request this, ignore this email.</p>
+    <p style="color:#555;font-size:12px">If you didn't request this, ignore this email.</p>
   </div>`;
 }
 function unsubHtml(url){
@@ -190,6 +191,7 @@ function unsubHtml(url){
     <p>Click below to stop receiving BlackRoad emails for this address.</p>
     <p><a href="${url}" style="display:inline-block;padding:12px 18px;border-radius:10px;text-decoration:none;background:linear-gradient(90deg,#FF4FD8,#0096FF);color:#0b0b12;font-weight:700">Unsubscribe</a></p>
     <p style="color:#555555;font-size:12px">If you didn't request this, ignore this email.</p>
+    <p style="color:#555;font-size:12px">If you didn't request this, ignore this email.</p>
   </div>`;
 }
 
@@ -209,5 +211,8 @@ async function checkAdmin(req, env) {
   const sig = req.headers.get('X-Admin-HMAC') || req.headers.get('x-admin-hmac');
   if (!sig) return false;
   return timingSafeEqual(sig, secret);
+  const sig = req.headers.get('X-Admin-HMAC') || req.headers.get('x-admin-hmac');
+  const secret = env.ADMIN_HMAC || '';
+  return timingSafeEqual(sig || '', secret);
 }
 function timingSafeEqual(a,b){ if (a.length !== b.length) return false; let out=0; for (let i=0;i<a.length;i++) out |= a.charCodeAt(i)^b.charCodeAt(i); return out===0; }
