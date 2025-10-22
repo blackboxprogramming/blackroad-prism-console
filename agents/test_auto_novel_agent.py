@@ -59,10 +59,21 @@ def test_generate_story_requires_theme():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
         agent.generate_story("")
+    with pytest.raises(ValueError):
+        agent.create_game("cryengine")
+
 
 def test_remove_supported_engine():
     agent = AutoNovelAgent()
     agent.add_supported_engine("godot")
+    assert agent.supports_engine("godot")
+    agent.remove_supported_engine("GoDoT")
+    assert not agent.supports_engine("godot")
+    with pytest.raises(ValueError):
+        agent.create_game("godot")
+
+
+def test_remove_supported_engine_errors_on_missing():
     agent.remove_supported_engine("godot")
     assert not agent.supports_engine("godot")
 
@@ -91,3 +102,16 @@ def test_remove_supported_engine_errors_when_unknown():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError, match="Supported engines: unity, unreal"):
         agent.remove_supported_engine("cryengine")
+def test_generate_story_requires_theme():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError):
+        agent.generate_story("")
+
+
+def test_generate_story_series_produces_multiple_stories():
+    agent = AutoNovelAgent()
+    stories = agent.generate_story_series(["mystery", "space"], protagonist="Explorer")
+    assert len(stories) == 2
+    assert "Explorer" in stories[0]
+    assert "mystery" in stories[0]
+    assert "space" in stories[1]

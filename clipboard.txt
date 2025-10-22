@@ -1,0 +1,310 @@
+Got it — we’ll make the stack API‑only so every route returns application/json (no HTML). Below are drop‑in files to run a JSON‑first Express backend, with JSON 404/500 handlers, OpenAPI, systemd, and NGINX that proxies everything to the API.
+
+⸻
+
+1) API server (JSON‑only, one file)
+
+/* FILE: /srv/blackroad-api/server_json.js */
+const express = require("express");
+const helmet = require("helmet");
+const cors = require("cors");
+const compression = require("compression");
+const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
+
+const app = express();
+const PORT = process.env.PORT || 4000;
+
+/** ---------------------------
+ *  Helpers: JSON envelope
+ *  --------------------------- */
+const send = {
+  ok: (res, data = null, meta = {}) =>
+    res.status(200).json({ ok: true, status: 200, data, meta }),
+  created: (res, data = null, meta = {}) =>
+    res.status(201).json({ ok: true, status: 201, data, meta }),
+  bad: (res, message = "Bad Request", details = {}, status = 400) =>
+    res.status(status).json({ ok: false, status, error: { message, details } }),
+  notFound: (res, path) =>
+    res
+      .status(404)
+      .json({ ok: false, status: 404, error: { message: "Not Found", details: { path } } }),
+  serverErr: (res, err) =>
+    res.status(500).json({
+      ok: false,
+      status: 500,
+      error: { message: "Internal Server Error", details: { reason: err?.message } },
+    }),
+};
+
+// Trust proxy if behind Nginx
+app.set("trust proxy", 1);
+
+// Security / perf
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(cors({ origin: true, credentials: true }));
+app.use(compression());
+app.use(morgan("combined"));
+
+// Enforce JSON-only API
+app.use((req, res, next) => {
+  // Always respond JSON
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+
+  // For write methods, require JSON Content-Type
+  if (["POST", "PUT", "PATCH"].includes(req.method)) {
+    const ct = (req.headers["content-type"] || "").toLowerCase();
+    if (!ct.startsWith("application/json")) {
+      return send.bad(
+        res,
+        "Unsupported Media Type — use application/json",
+        { expected: "application/json", got: ct || null },
+        415
+      );
+    }
+  }
+  next();
+});
+
+app.use(express.json({ limit: "2mb" }));
+
+// Rate limit (e.g., 120 req/min per IP)
+app.use(
+  rateLimit({
+    windowMs: 60_000,
+    max: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { ok: false, status: 429, error: { message: "Too Many Requests" } },
+  })
+);
+
+/** ---------------------------
+ *  Basic meta routes
+ *  --------------------------- */
+const startedAt = new Date();
+
+app.get("/", (req, res) =>
+  send.ok(res, {
+    name: "BlackRoad API",
+    version: process.env.API_VERSION || "1.0.0",
+    status: "online",
+    uptime_seconds: Math.floor((Date.now() - startedAt.getTime()) / 1000),
+    now: new Date().toISOString(),
+  })
+);
+
+app.get("/api/health", (req, res) => send.ok(res, { healthy: true }));
+app.get("/api/status", (req, res) =>
+  send.ok(res, {
+    pid: process.pid,
+    memory: process.memoryUsage(),
+    uptime_seconds: Math.floor(process.uptime()),
+    env: { node: process.version, mode: process.env.NODE_ENV || "production" },
+  })
+);
+
+// Live route index (manually curated below)
+const routes = [
+  { method: "GET", path: "/" },
+  { method: "GET", path: "/api/health" },
+  { method: "GET", path: "/api/status" },
+  { method: "GET", path: "/api/routes" },
+  { method: "GET", path: "/api/openapi.json" },
+  { method: "POST", path: "/api/echo" },
+  { method: "GET", path: "/api/agents" },
+  { method: "POST", path: "/api/agents" },
+];
+
+app.get("/api/routes", (req, res) => send.ok(res, routes));
+
+/** ---------------------------
+ *  Example JSON resources
+ *  --------------------------- */
+// In-memory demo store
+const AGENTS = [
+  { id: "lucidia", role: "core", active: true },
+  { id: "roadie", role: "ops", active: false },
+];
+
+app.get("/api/agents", (req, res) => send.ok(res, AGENTS));
+app.post("/api/agents", (req, res) => {
+  const { id, role, active = false } = req.body || {};
+  if (!id || !role) return send.bad(res, "Missing required fields: id, role");
+  if (AGENTS.find((a) => a.id === id)) return send.bad(res, "Agent already exists", { id }, 409);
+  AGENTS.push({ id, role, active: !!active });
+  return send.created(res, { id });
+});
+
+// Utility echo for testing clients
+app.post("/api/echo", (req, res) => send.ok(res, { you_sent: req.body || null }));
+
+/** ---------------------------
+ *  OpenAPI (served as JSON)
+ *  --------------------------- */
+const openapi = {
+  openapi: "3.1.0",
+  info: { title: "BlackRoad API", version: "1.0.0" },
+  servers: [{ url: "/" }],
+  paths: {
+    "/": { get: { summary: "API root", responses: { "200": { description: "OK" } } } },
+    "/api/health": { get: { summary: "Health", responses: { "200": { description: "OK" } } } },
+    "/api/status": { get: { summary: "Status", responses: { "200": { description: "OK" } } } },
+    "/api/routes": { get: { summary: "List routes", responses: { "200": { description: "OK" } } } },
+    "/api/agents": {
+      get: { summary: "List agents", responses: { "200": { description: "OK" } } },
+      post: {
+        summary: "Create agent",
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { type: "object" } } },
+        },
+        responses: { "201": { description: "Created" }, "409": { description: "Conflict" } },
+      },
+    },
+    "/api/echo": {
+      post: {
+        summary: "Echo body",
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { type: "object" } } },
+        },
+        responses: { "200": { description: "OK" }, "415": { description: "Unsupported Media Type" } },
+      },
+    },
+  },
+};
+app.get("/api/openapi.json", (req, res) => res.status(200).json(openapi));
+
+/** ---------------------------
+ *  404 + error JSON handlers
+ *  --------------------------- */
+app.use((req, res) => send.notFound(res, req.originalUrl));
+app.use((err, req, res, _next) => {
+  console.error("API error:", err);
+  send.serverErr(res, err);
+});
+
+/** ---------------------------
+ *  Start
+ *  --------------------------- */
+app.listen(PORT, () => {
+  console.log(`[BlackRoad] JSON API listening on :${PORT}`);
+});
+
+
+⸻
+
+2) package.json for the API
+
+// FILE: /srv/blackroad-api/package.json
+{
+  "name": "blackroad-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "server_json.js",
+  "scripts": {
+    "start": "node /srv/blackroad-api/server_json.js"
+  },
+  "dependencies": {
+    "compression": "^1.7.5",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0"
+  }
+}
+
+
+⸻
+
+3) systemd unit (unchanged name, points to JSON server)
+
+# FILE: /etc/systemd/system/blackroad-api.service
+[Unit]
+Description=BlackRoad API (JSON-only)
+After=network.target
+
+[Service]
+Type=simple
+Environment=NODE_ENV=production
+Environment=PORT=4000
+WorkingDirectory=/srv/blackroad-api
+ExecStart=/usr/bin/node /srv/blackroad-api/server_json.js
+Restart=always
+RestartSec=2
+User=www-data
+Group=www-data
+
+[Install]
+WantedBy=multi-user.target
+
+After saving, run: systemctl daemon-reload && systemctl enable --now blackroad-api (no HTML served by this process).
+
+⸻
+
+4) NGINX: proxy everything to the JSON API
+
+# FILE: /etc/nginx/sites-available/blackroad.io
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;
+  server_name blackroad.io www.blackroad.io;
+
+  # If you use HTTPS, keep your existing SSL server block; mirror the same proxy rules there.
+
+  # Proxy all routes to the JSON API
+  location / {
+    proxy_pass         http://127.0.0.1:4000;
+    proxy_http_version 1.1;
+    proxy_set_header   Host $host;
+    proxy_set_header   X-Real-IP $remote_addr;
+    proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header   X-Forwarded-Proto $scheme;
+    proxy_set_header   Upgrade $http_upgrade;
+    proxy_set_header   Connection $connection_upgrade;
+
+    # Never override Content-Type from upstream (Express sets application/json)
+    proxy_hide_header  X-Powered-By;
+  }
+
+  # Health check (optional): hits API’s /api/health
+  location = /health {
+    proxy_pass http://127.0.0.1:4000/api/health;
+  }
+
+  # Basic hardening
+  add_header X-Content-Type-Options nosniff always;
+  add_header Referrer-Policy no-referrer-when-downgrade always;
+  add_header X-Frame-Options SAMEORIGIN always;
+  add_header X-XSS-Protection "1; mode=block" always;
+
+  access_log /var/log/nginx/blackroad.access.log;
+  error_log  /var/log/nginx/blackroad.error.log warn;
+}
+
+After saving, run: nginx -t && systemctl reload nginx.
+
+⸻
+
+What this gives you
+	•	No HTML anywhere: every endpoint (including /) responds with application/json.
+	•	Strict JSON writes: POST/PUT/PATCH require Content-Type: application/json (else 415).
+	•	Consistent envelope: { ok, status, data | error } across success/failure.
+	•	Typed health & status: /api/health, /api/status.
+	•	Discoverability: /api/routes and /api/openapi.json (machine‑readable, not a web page).
+	•	Operationally safe: rate limiting, compression, CORS, Helmet, JSON 404/500.
+
+⸻
+
+Quick sanity checks (client)
+
+curl -i http://localhost:4000/
+curl -i http://localhost:4000/api/health
+curl -i http://localhost:4000/api/openapi.json
+curl -i -X POST http://localhost:4000/api/echo -H 'Content-Type: application/json' -d '{"hello":"json"}'
+curl -i -X POST http://localhost:4000/api/agents -H 'Content-Type: application/json' -d '{"id":"truth","role":"core"}'
+
+If you need me to convert any existing routes you have into this JSON‑only pattern (same URLs, just JSON), tell me the route names and I’ll drop in the exact handlers.

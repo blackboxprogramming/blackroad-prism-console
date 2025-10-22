@@ -3,6 +3,9 @@ title = "BlackRoad Secrets Policy"
 [extend]
 useDefault = true
 
+[extend]
+# sensible defaults
+path = ""
 [allowlist]
 description = "Allow non-secret test fixtures"
 paths = [

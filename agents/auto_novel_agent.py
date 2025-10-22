@@ -114,6 +114,32 @@ class AutoNovelAgent:
         """
         self.supported_engines.discard(engine.lower())
 
+    def add_supported_engine(self, engine: str) -> None:
+        """Add a new engine to the supported list.
+
+        Engines are stored in lowercase to keep lookups case-insensitive.
+
+        Args:
+            engine: Name of the engine to add.
+        """
+        self.SUPPORTED_ENGINES.add(engine.lower())
+
+    def remove_supported_engine(self, engine: str) -> None:
+        """Remove an engine from the supported list.
+
+        Engines are matched in a case-insensitive manner.
+
+        Args:
+            engine: Name of the engine to remove.
+
+        Raises:
+            ValueError: If the engine is not currently supported.
+        """
+        normalized = engine.lower()
+        if normalized not in self.SUPPORTED_ENGINES:
+            raise ValueError(f"{engine} is not a supported engine.")
+        self.SUPPORTED_ENGINES.remove(normalized)
+
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
         """Create a basic game using a supported engine without weapons."""
 
@@ -135,6 +161,16 @@ class AutoNovelAgent:
         Raises:
             ValueError: If the engine is not Unity/Unreal or weapons are
                 requested.
+        """Create a basic game using a supported engine.
+
+        Args:
+            engine: Game engine to use (case-insensitive).
+            include_weapons: Whether to include weapons. Setting this to ``True``
+                raises a ``ValueError`` because weapons are not allowed.
+
+        Raises:
+            ValueError: If the engine is unsupported.
+            ValueError: If weapons are included.
         """
 
         engine_lower = engine.lower()
@@ -268,6 +304,7 @@ class AutoNovelAgent:
                 f"'{engine_lower}'. Supported engines: {supported}."
             )
         self.SUPPORTED_ENGINES.remove(engine_lower)
+        self.SUPPORTED_ENGINES.add(engine.lower())
 
     def list_supported_engines(self) -> List[str]:
         """Return a sorted list of supported game engines."""
