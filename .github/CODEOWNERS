@@ -16,3 +16,5 @@ lightning/** @blackboxprogramming/maintainers
 /flows/            @integration-team
 /monitors/         @sre-team
 /runbooks/         @platform-team
+miners/** @blackboxprogramming/maintainers
+lightning/** @blackboxprogramming/maintainers
