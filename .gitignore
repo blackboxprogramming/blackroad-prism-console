@@ -58,6 +58,8 @@ benchmarks/
 secrets/*
 datasets/
 models/
+!alice_lucidia/models/
+!alice_lucidia/models/**
 !br-dbt/models/
 !br-dbt/models/**
 checkpoints/
