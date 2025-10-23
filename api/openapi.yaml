@@ -159,6 +159,10 @@ paths:
       responses:
         '200':
           description: Contradiction summary
+      summary: List logged contradictions
+      responses:
+        '200':
+          description: Recent contradictions
           content:
             application/json:
               schema:
@@ -354,6 +358,9 @@ paths:
                     type: object
                   claim:
                     type: object
+                    type: array
+                    items:
+                      type: object
   /api/events:
     get:
       summary: List recent events
