@@ -16,6 +16,18 @@ Each stage logs console output to ``pipeline.log`` and records failures in
 ``pipeline_errors.log``. When a stage fails the pipeline stops unless the
 ``--force`` flag is used. Some failures trigger automatic rollback from the
 latest backup located in ``/var/backups/blackroad``.
+"""Lightweight deployment pipeline utilities for BlackRoad.
+
+The pipeline consists of four stages executed sequentially:
+
+1. push_to_github – push the current branch
+2. deploy_to_droplet – copy files to the production droplet
+3. call_connectors – notify external connectors
+4. validate_services – run a health check command
+
+Failures in any stage are logged to ``pipeline_errors.log`` and may trigger
+rollback from backups stored in ``/var/backups/blackroad``.  The module also
+exposes helpers for a tiny CLI used in the tests.
 """
 
 from __future__ import annotations
@@ -54,7 +66,14 @@ from urllib import request
 LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(logging.StreamHandler())
 LOGGER.setLevel(logging.INFO)
+from pathlib import Path
+from typing import Any, Callable, Dict
+from urllib import request
 
+import requests
+
+# ---------------------------------------------------------------------------
+# Logging and constants
 ERROR_LOG = Path("pipeline_errors.log")
 BACKUP_ROOT = Path("/var/backups/blackroad")
 LATEST_BACKUP = BACKUP_ROOT / "latest"
@@ -77,7 +96,27 @@ def run(cmd: str) -> None:
     subprocess.run(cmd, shell=True, check=True)
 
 
-def notify_webhook(webhook: str, payload: dict[str, object]) -> None:
+# ---------------------------------------------------------------------------
+# Helper functions
+def run(cmd: str, *, dry_run: bool = False) -> None:
+    """Execute ``cmd`` in a subprocess.
+
+    Parameters
+    ----------
+    cmd:
+        Shell command to run.
+    dry_run:
+        If ``True`` the command is logged but not executed.
+    """
+
+    LOGGER.info("[cmd] %s", cmd)
+    if not dry_run:
+        subprocess.run(cmd, shell=True, check=True)
+
+
+def notify_webhook(webhook: str, payload: Dict[str, Any]) -> None:
+    """Send ``payload`` as JSON to ``webhook`` ignoring errors."""
+
     data = json.dumps(payload).encode()
     req = request.Request(webhook, data=data, headers={"Content-Type": "application/json"})
     request.urlopen(req, timeout=5)  # noqa: S310
@@ -86,22 +125,29 @@ def notify_webhook(webhook: str, payload: dict[str, object]) -> None:
 
 def log_error(stage: str, exc: Exception, rollback: bool, webhook: str | None) -> None:
     timestamp = datetime.utcnow().isoformat()
+    """Record ``exc`` for ``stage`` and optionally notify a webhook."""
+
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    tb = traceback.format_exc()
     with ERROR_LOG.open("a", encoding="utf-8") as fh:
         fh.write(f"{timestamp} [{stage}] {exc}\n")
         if rollback:
             fh.write("ROLLBACK INITIATED\n")
     if webhook:
-        payload = {"stage": stage, "error": str(exc), "rollback": rollback}
         try:
             notify_webhook(webhook, payload)
         except Exception:  # pragma: no cover - best effort logging
         try:  # pragma: no cover - best effort notification
             notify_webhook(webhook, {"stage": stage, "error": str(exc), "rollback": rollback})
         except Exception:  # noqa: BLE001
+            notify_webhook(webhook, {"stage": stage, "error": str(exc), "rollback": rollback})
+        except Exception:  # pragma: no cover - best effort
             pass
 
 
 def rollback_from_backup() -> None:
+    """Restore the repository from the latest backup."""
+
     run(f"rsync -a {LATEST_BACKUP}/ ./")
 
 
@@ -155,6 +201,11 @@ def refresh_working_copy(*, repo_path: str = ".", dry_run: bool = False) -> None
     """Refresh the Working Copy mirror for this repository."""
     sync_to_working_copy(repo_path, dry_run=dry_run)
 
+# ---------------------------------------------------------------------------
+# Stage implementations
+def push_to_github() -> None:
+    run("git push origin HEAD")
+
 
 def deploy_to_droplet() -> None:
     """Deploy the application to the droplet."""
@@ -163,6 +214,7 @@ def deploy_to_droplet() -> None:
 
 def run_connector_sync() -> None:
     """Stage step which synchronises external connectors."""
+def _connector_stage() -> None:
     run("connector-sync")
 def sync_connectors(*, dry_run: bool = False) -> None:
     if dry_run:
@@ -205,6 +257,15 @@ def validate_services_stage() -> None:
 
 
 validate_services_stage.__name__ = "validate_services"
+def _validate_stage() -> None:
+    run("validate-services")
+
+
+# Expose stage names expected by tests
+connector_stage = _connector_stage
+connector_stage.__name__ = "call_connectors"
+validate_stage = _validate_stage
+validate_stage.__name__ = "validate_services"
 
 
 STAGES: list[Callable[[], None]] = [
@@ -214,25 +275,31 @@ STAGES: list[Callable[[], None]] = [
     run_validate_services,
     sync_connectors,
     validate_services_stage,
+    connector_stage,
+    validate_stage,
 ]
 
 
 def run_pipeline(*, force: bool = False, webhook: str | None = None) -> None:
     """Execute pipeline stages with rollback on failure."""
+    """Execute the pipeline stages in order."""
+
     for stage in STAGES:
         try:
             stage()
         except subprocess.CalledProcessError as exc:
             rollback = False
-            if stage is push_to_github:
-                run("git reset --hard")
-            elif stage is deploy_to_droplet:
+            if stage is deploy_to_droplet:
                 rollback = True
                 run(f"rsync -a {DROPLET_BACKUP}/ /srv/blackroad/")
             elif stage is run_validate_services:
             elif stage.__name__ == "validate_services":
+            elif stage is validate_stage:
                 rollback = True
                 rollback_from_backup()
+            elif stage is push_to_github:
+                run("git reset --hard")
+
             log_error(stage.__name__, exc, rollback, webhook)
             if not force:
                 raise
@@ -271,55 +338,112 @@ def redeploy_droplet(*, dry_run: bool = False) -> None:
     """Placeholder for redeploying the BlackRoad droplet."""
     LOGGER.info("TODO: implement droplet redeploy")
 
+# ---------------------------------------------------------------------------
+# Connector API
+def call_connectors(action: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Call BlackRoad's connectors API and return the JSON response."""
 
 def call_connectors(action: str, payload: Dict[str, Any]) -> Dict[str, Any]:
 def trigger_working_copy_pull(
     repo_name: str, *, server_url: str = "http://localhost:8081", dry_run: bool = False
 ) -> bool:
     """Trigger a pull via Working Copy's local automation server.
+    token = os.getenv("CONNECTOR_KEY")
+    if not token:
+        raise RuntimeError("CONNECTOR_KEY missing from environment")
 
-    Returns ``True`` if the request succeeded, ``False`` otherwise.
-    """
+    url = f"https://blackroad.io/connectors/{action}"
+    headers = {"Authorization": f"Bearer {token}"}
 
-    url = f"{server_url}/pull?repo={repo_name}"
-    LOGGER.info("Requesting Working Copy pull: %s", url)
-    if dry_run:
-        return True
+    LOGGER.info("POST %s payload=%s", url, payload)
+    resp = requests.post(url, headers=headers, json=payload, timeout=30)
+    resp.raise_for_status()
+    data = resp.json()
+    if data.get("ok") is not True:
+        raise RuntimeError("connector returned non-ok response")
+    return data
+
+
+def sync_connectors(action: str, payload: Dict[str, Any]) -> None:
+    """Wrapper used by the CLI to invoke connectors."""
+
+    call_connectors(action, payload)
+
+
+# ---------------------------------------------------------------------------
+# Working Copy helpers and CLI support
+def sync_to_working_copy(repo_path: str, *, dry_run: bool = False) -> None:
+    """Push to a ``working-copy`` remote if configured."""
+
+    LOGGER.info("sync_to_working_copy repo_path=%s", repo_path)
     try:
-        with request.urlopen(url) as resp:  # noqa: S310 - local request
-            LOGGER.info("Working Copy pull response: %s", resp.read())
-        return True
-    except error.URLError as exc:
-        LOGGER.warning("Working Copy pull failed: %s", exc)
-        return False
+        result = subprocess.run(
+            ["git", "-C", repo_path, "remote"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as exc:  # pragma: no cover - defensive
+        LOGGER.error("git remote failed: %s", exc)
+        return
+
+    if "working-copy" not in result.stdout:
+        LOGGER.info("No Working Copy remote configured; skipping sync")
+        return
+
+    run(f"git -C {repo_path} push working-copy HEAD", dry_run=dry_run)
 
 
+def push_latest(*, dry_run: bool = False) -> None:
+    """Push local commits to GitHub."""
+
+    run("git push origin HEAD", dry_run=dry_run)
+
+
+def refresh_working_copy(*, repo_path: str = ".", dry_run: bool = False) -> None:
+    """Refresh the Working Copy mirror for this repository."""
+
+    sync_to_working_copy(repo_path, dry_run=dry_run)
+
+
+def redeploy_droplet(*, dry_run: bool = False) -> None:
+    """Placeholder redeploy action for the droplet."""
+
+    LOGGER.info("TODO: implement droplet redeploy")
+    if not dry_run:
+        time.sleep(0)  # pragma: no cover - illustrative no-op
+
+
+# ---------------------------------------------------------------------------
+# Service validation
 def _check_service(name: str, url: str) -> str:
-    """Return ``OK`` if the service responds with ``{"status": "ok"}``."""
+    """Return ``OK`` if ``url`` responds with ``{"status": "ok"}``."""
+
     try:
-        with request.urlopen(url, timeout=5) as resp:  # nosec B310
+        with request.urlopen(url, timeout=5) as resp:  # noqa: S310 - local request
             if resp.getcode() != 200:
                 raise ValueError(f"unexpected status {resp.getcode()}")
             payload = json.loads(resp.read().decode())
             status = "OK" if payload.get("status") == "ok" else "FAIL"
-    except Exception:  # noqa: BLE001
+    except Exception:  # noqa: BLE001 - broad for resilience
         status = "FAIL"
 
-    timestamp = datetime.utcnow().isoformat()
+    timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     with LOG_FILE.open("a", encoding="utf-8") as fh:
         fh.write(f"{timestamp} {name} {status}\n")
     return status
 
 
-def validate_services() -> dict[str, str]:
+def validate_services() -> Dict[str, str]:
     """Check core services and return a status summary."""
+
     summary = {
         "frontend": _check_service("frontend", "https://blackroad.io/health"),
         "api": _check_service("api", "http://127.0.0.1:4000/api/health"),
         "llm": _check_service("llm", "http://127.0.0.1:8000/health"),
         "math": _check_service("math", "http://127.0.0.1:8500/health"),
     }
-    summary["timestamp"] = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+    summary["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     print(json.dumps(summary))
     return summary
 def call_connectors(action: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -396,6 +520,8 @@ def validate_services() -> dict[str, str]:
     return summary
 
 
+# ---------------------------------------------------------------------------
+# CLI
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="BlackRoad Codex pipeline")
     parser.add_argument(
@@ -423,6 +549,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--webhook", help="Webhook URL for error notifications")
     parser.add_argument("--dry-run", action="store_true", help="Simulate actions without executing external commands")
     parser.add_argument("--skip-validate", action="store_true", help="Skip service health validation")
+    """Entry point for the small command line interface."""
+
+    parser = argparse.ArgumentParser(description="BlackRoad Codex pipeline")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Simulate actions without executing commands"
+    )
+    parser.add_argument(
+        "--skip-validate", action="store_true", help="Skip service health validation"
+    )
+
     sub = parser.add_subparsers(dest="command")
     sub.add_parser("push", help="Push latest to BlackRoad.io")
     sub.add_parser("refresh", help="Refresh working copy and redeploy")
@@ -445,20 +581,27 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     args = parser.parse_args(argv)
 
+
+    args = parser.parse_args(argv)
     exit_code = 0
 
+    kwargs = {"dry_run": args.dry_run} if args.dry_run else {}
+
     if args.command == "push":
-        push_latest(dry_run=args.dry_run)
-        redeploy_droplet(dry_run=args.dry_run)
+        push_latest(**kwargs)
+        redeploy_droplet(**kwargs)
     elif args.command == "refresh":
-        push_latest(dry_run=args.dry_run)
-        refresh_working_copy(dry_run=args.dry_run)
-        redeploy_droplet(dry_run=args.dry_run)
+        push_latest(**kwargs)
+        refresh_working_copy(**kwargs)
+        redeploy_droplet(**kwargs)
     elif args.command == "rebase":
         if not args.dry_run:
             run("git pull --rebase")
         push_latest(dry_run=args.dry_run)
         redeploy_droplet(dry_run=args.dry_run)
+        run("git pull --rebase", dry_run=args.dry_run)
+        push_latest(**kwargs)
+        redeploy_droplet(**kwargs)
     elif args.command == "sync":
         payload = json.loads(args.payload)
         call_connectors(args.action, payload)
