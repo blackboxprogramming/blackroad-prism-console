@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pytest
 
-from agents.cadillac_codex import (
+from agents.asteria_codex import (
     Interval,
     clarke_subgrad,
     propagate_cov,

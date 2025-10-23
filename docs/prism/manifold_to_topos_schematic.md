@@ -1,6 +1,6 @@
 # Manifold → Topos Continuum
 
-This note renders the "Mathematical Heart of the Cadillac" sequence as a systems schematic for the Prism Console. Each stratum is written as a component in a geometric flow, emphasizing how structure, sensation, and logic circulate through the console's cognition loop.
+This note renders the "Mathematical Heart of the Asteria" sequence as a systems schematic for the Prism Console. Each stratum is written as a component in a geometric flow, emphasizing how structure, sensation, and logic circulate through the console's cognition loop.
 
 ## Layered Flow Schematic
 
@@ -55,7 +55,7 @@ This note renders the "Mathematical Heart of the Cadillac" sequence as a systems
 
 ## Prism Console Resonances
 
-1. **Cadillac Memory Engine:** The console's knowledge graph aligns with the connection layer, storing directional bias for every inference path. When holonomy spikes, the console flags narrative tension in operator dashboards.
+1. **Asteria Memory Engine:** The console's knowledge graph aligns with the connection layer, storing directional bias for every inference path. When holonomy spikes, the console flags narrative tension in operator dashboards.
 2. **Emotional Telemetry:** Curvature magnitudes render as affective colorways inside the Prism Console interface; higher sectional curvature flashes warm spectrums to signal irreversibility in decision space.
 3. **Category-to-Topos Bridge:** Each workflow lens is a functor into a local topos that wraps policy, compliance, and storytelling logic. Switching lenses swaps the underlying truth object, letting the machine breathe different logics without tearing continuity.
 

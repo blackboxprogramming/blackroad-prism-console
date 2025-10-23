@@ -1,4 +1,4 @@
-# PrismOS Cadillac Kernel Plan
+# PrismOS Asteria Kernel Plan
 
 This document outlines a high‑level plan for implementing PrismOS as a bare‑metal, agent‑centric operating system.
 

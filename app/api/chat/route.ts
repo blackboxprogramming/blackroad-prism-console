@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     }
     let mode: Mode = (modeIn || (process.env.DEFAULT_MODE as Mode) || "machine");
     const last = messages?.at(-1)?.content ?? "";
-    if (/chit\s*chat\s*cadillac/i.test(last)) mode = "chit-chat";
+    if (/chit\s*chat\s*asteria/i.test(last)) mode = "chit-chat";
 
     const boardOpt = typeof board === "string" ? board.trim() : "";
     const taskOpt = typeof task === "string" ? task.trim() : "";
