@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sympy as sp
 
+from .frameworks import select_backend
+
 
 @dataclass
 class PrimeVisualizer:
@@ -24,9 +26,12 @@ class PrimeVisualizer:
         plt.close(fig)
 
 
-def ulam_spiral(size: int) -> Tuple[np.ndarray, np.ndarray]:
+def ulam_spiral(size: int, *, backend: str | None = None) -> Tuple[np.ndarray, np.ndarray]:
     """Generate an Ulam spiral and mask of prime numbers."""
 
+    if backend is not None and backend != "numpy":
+        # Prime detection relies on SymPy; use numpy for now but validate name.
+        select_backend(backend)
     grid = np.zeros((size, size), dtype=int)
     x = y = size // 2
     dx, dy = 0, -1
@@ -36,7 +41,7 @@ def ulam_spiral(size: int) -> Tuple[np.ndarray, np.ndarray]:
         if x == y or (x < 0 and x == -y) or (x > 0 and x == 1 - y):
             dx, dy = -dy, dx
         x, y = x + dx, y + dy
-    prime_mask = np.vectorize(sp.isprime)(grid)
+    prime_mask = np.vectorize(sp.isprime)(grid).astype(bool)
     return grid, prime_mask
 
 
@@ -48,7 +53,7 @@ def plot_ulam(grid: np.ndarray, mask: np.ndarray) -> plt.Figure:
     return fig
 
 
-def residue_grid(mod: int, size: int = 100) -> np.ndarray:
+def residue_grid(mod: int, size: int = 100, *, backend: str | None = None) -> np.ndarray:
     """Compute a modular residue grid.
 
     Parameters
@@ -65,11 +70,14 @@ def residue_grid(mod: int, size: int = 100) -> np.ndarray:
         If ``size`` is not a perfect square.
     """
 
-    numbers = np.arange(1, size + 1)
+    backend_cfg = select_backend(backend)
+    xp = backend_cfg.array_module
+    numbers = xp.arange(1, size + 1)
     side = int(np.sqrt(size))
     if side * side != size:
         raise ValueError("size must be a perfect square")
-    return numbers.reshape(side, side) % mod
+    grid = xp.reshape(numbers, (side, side)) % mod
+    return np.asarray(grid)
 
 
 def plot_residue(grid: np.ndarray) -> plt.Figure:
@@ -80,13 +88,15 @@ def plot_residue(grid: np.ndarray) -> plt.Figure:
     return fig
 
 
-def fourier_prime_gaps(limit: int) -> Tuple[np.ndarray, np.ndarray]:
+def fourier_prime_gaps(limit: int, *, backend: str | None = None) -> Tuple[np.ndarray, np.ndarray]:
     """Return prime gaps and their Fourier transform magnitude."""
 
     primes = list(sp.primerange(2, limit))
-    gaps = np.diff(primes)
-    fft = np.abs(np.fft.fft(gaps))
-    return gaps, fft
+    backend_cfg = select_backend(backend)
+    xp = backend_cfg.array_module
+    gaps = xp.diff(xp.asarray(primes, dtype=float))
+    fft = xp.abs(xp.fft.fft(gaps))
+    return np.asarray(gaps, dtype=float), np.asarray(fft, dtype=float)
 
 
 def plot_fourier(gaps: np.ndarray, fft: np.ndarray) -> plt.Figure:

@@ -4,6 +4,12 @@ Local-first FastAPI service exposing small quantum puzzle simulations. Only the
 CHSH game is implemented; Magic Square and GHZ games are reserved for future
 work.
 
+The companion `lucidia-quantum` CLI now auto-detects TorchQuantum, Pennylane,
+and Qiskit backends for circuit generation. Use `lucidia-quantum --list-backends`
+to inspect availability on your machine and pass `--backend pennylane` when you
+need Pennylane-authored QASM exports while keeping batch training on
+TorchQuantum.
+
 ## Run
 
 ```bash
@@ -22,4 +28,4 @@ simulations.
   hashes for integrity.
 - The optional `ollama_client` only talks to localhost.
 
-_Last updated on 2025-09-11_
+_Last updated on 2025-09-12_

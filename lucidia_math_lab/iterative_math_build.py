@@ -32,6 +32,8 @@ from datetime import datetime, timezone
 from statistics import fmean
 from typing import Iterable, List
 
+from .frameworks import select_backend
+
 
 @dataclass(frozen=True)
 class LoopSnapshot:
@@ -58,7 +60,13 @@ class LoopSnapshot:
     mean_level: float
 
 
-def iterate_logistic_loop(*, gain: float, seed_level: float, pulses: int) -> List[float]:
+def iterate_logistic_loop(
+    *,
+    gain: float,
+    seed_level: float,
+    pulses: int,
+    backend: str | None = None,
+) -> List[float]:
     """Run the logistic map for the requested number of pulses.
 
     Parameters
@@ -69,6 +77,9 @@ def iterate_logistic_loop(*, gain: float, seed_level: float, pulses: int) -> Lis
         Initial pulse level.  Must be in ``(0, 1)`` for the canonical map.
     pulses:
         Number of iterations to execute.
+    backend:
+        Optional math backend name.  When ``"jax"`` is available the update
+        loop runs via ``jax.lax.scan``; otherwise the NumPy backend is used.
 
     Returns
     -------
@@ -80,6 +91,21 @@ def iterate_logistic_loop(*, gain: float, seed_level: float, pulses: int) -> Lis
         raise ValueError("pulses must be positive")
     if not 0.0 < seed_level < 1.0:
         raise ValueError("seed_level must be strictly between 0 and 1")
+
+    backend_cfg = select_backend(backend)
+    if backend_cfg.name == "jax":  # pragma: no cover - requires optional dependency
+        import jax
+
+        jnp = backend_cfg.array_module
+        gain_arr = jnp.asarray(gain, dtype=jnp.float64)
+        seed_arr = jnp.asarray(seed_level, dtype=jnp.float64)
+
+        def _step(x, _):
+            nxt = gain_arr * x * (1.0 - x)
+            return nxt, nxt
+
+        _, values = jax.lax.scan(_step, seed_arr, None, length=pulses)
+        return [float(val) for val in values.tolist()]
 
     level = seed_level
     pulse_levels: List[float] = []
@@ -95,6 +121,7 @@ def capture_snapshot(
     seed_level: float = 0.21,
     pulses: int = 128,
     tag_prefix: str = "symmetry_break",
+    backend: str | None = None,
 ) -> LoopSnapshot:
     """Simulate the loop and bundle the measurement in a :class:`LoopSnapshot`.
 
@@ -105,7 +132,12 @@ def capture_snapshot(
     if pulses < 2:
         raise ValueError("pulses must be at least 2 to compute phase drift")
 
-    pulse_levels = iterate_logistic_loop(gain=gain, seed_level=seed_level, pulses=pulses)
+    pulse_levels = iterate_logistic_loop(
+        gain=gain,
+        seed_level=seed_level,
+        pulses=pulses,
+        backend=backend,
+    )
     phase_drift = pulse_levels[-1] - pulse_levels[-2]
     mean_level = fmean(pulse_levels)
     timestamp = datetime.now(timezone.utc).strftime("%Y_%m_%dT%H%M%SZ")
@@ -137,6 +169,7 @@ def sweep_gains(
     gains: Iterable[float],
     seed_level: float,
     pulses: int,
+    backend: str | None = None,
 ) -> List[LoopSnapshot]:
     """Generate snapshots for a sequence of gains.
 
@@ -145,7 +178,13 @@ def sweep_gains(
     """
 
     return [
-        capture_snapshot(gain=gain, seed_level=seed_level, pulses=pulses, tag_prefix=f"gain_{gain:.3f}")
+        capture_snapshot(
+            gain=gain,
+            seed_level=seed_level,
+            pulses=pulses,
+            tag_prefix=f"gain_{gain:.3f}",
+            backend=backend,
+        )
         for gain in gains
     ]
 

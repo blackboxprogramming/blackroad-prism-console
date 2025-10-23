@@ -7,7 +7,9 @@ our lab notebooks, electronics bench, or field experiments.
 
 1. **Seed** – Start from a compact pattern.  The companion module
    `lucidia_math_lab/iterative_math_build.py` uses the logistic function as the
-   seed because it readily produces bifurcations.
+   seed because it readily produces bifurcations.  Pass `backend="jax"` to
+   accelerate long sweeps when JAX is installed; the helper falls back to NumPy
+   automatically.
 2. **Three translations** – Capture quick analogies that keep the idea moving:
    - *Physics*: logistic energy flow in a constrained ecosystem.
    - *Code*: a self-referential feedback loop with gain control.
