@@ -725,10 +725,20 @@ class AutoNovelAgent:
                 f"Requested scopes exceed least-privilege policy. Invalid scopes: {joined}."
             )
 
+    def add_supported_engine(self, engine: str) -> None:
+        """Register a new supported game engine.
+
+        Args:
+            engine: Name of the engine to add. Stored in lowercase to
+                preserve consistency.
+        """
+        self.SUPPORTED_ENGINES.add(engine.lower())
+
 
 if __name__ == "__main__":
     agent = AutoNovelAgent(gamma=2.0)
     agent.deploy()
+    agent.add_supported_engine("godot")
     agent.create_game("unity")
     print(agent.generate_story("mystical", "A coder"))
     print(agent.generate_game_idea("mystical", "unity"))
@@ -761,3 +771,4 @@ if __name__ == "__main__":
     outline = agent.generate_novel_outline("The Quest")
     for chapter in outline:
         print(chapter)
+    agent.create_game("godot")
