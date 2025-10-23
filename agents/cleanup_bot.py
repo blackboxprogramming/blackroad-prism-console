@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import logging
 import subprocess
+from dataclasses import dataclass
 from subprocess import CalledProcessError
 <<<<<<< main
 from typing import List
@@ -50,6 +51,9 @@ class CleanupBot:
         branches: Branch names to delete.
         dry_run: When ``True`` the planned commands are printed instead of
             executed.
+    Attributes:
+        branches: Branch names to remove.
+        dry_run: If True, print commands instead of executing them.
     """
 
     branches: list[str]
@@ -152,6 +156,11 @@ class CleanupBot:
         bool
             ``True`` if the branch was deleted both locally and remotely,
             ``False`` otherwise.
+        Args:
+            branch: The branch name to remove.
+
+        Returns:
+            True if the branch was deleted locally and remotely, False otherwise.
         """
         if self.dry_run:
             print(f"Would delete branch '{branch}' locally and remotely")
@@ -177,6 +186,8 @@ class CleanupBot:
 
         results: Dict[str, bool] = {}
         for branch in self._normalized_branches:
+            self._run("git", "branch", "-D", branch)
+            self._run("git", "push", "origin", "--delete", branch)
             return True
         except CalledProcessError:
             return False
@@ -273,6 +284,8 @@ class CleanupBot:
 
 def cleanup(branches: Iterable[str], dry_run: bool = False) -> Dict[str, bool]:
     """Convenience wrapper around :class:`CleanupBot`."""
+            results[branch] = self.delete_branch(branch)
+        return results
 
     return CleanupBot(branches=branches, dry_run=dry_run).cleanup()
 
