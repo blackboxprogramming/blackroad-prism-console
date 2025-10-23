@@ -12,6 +12,8 @@ lightning/** @blackboxprogramming/maintainers
 # Default reviewers for all files
 * @blackboxprogramming/core
 
+* @blackboxprogramming
+ 
 /infra/            @platform-team
 /flows/            @integration-team
 /monitors/         @sre-team

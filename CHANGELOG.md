@@ -2,9 +2,12 @@
 All notable changes to this project will be documented in this file.
 
 ## [1.9.0](https://github.com/blackboxprogramming/blackroad-prism-console/compare/v1.8.0...v1.9.0) (2025-10-13)
+All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-### Features
+## [0.1.0] - 2025-01-01
 
 * implement lucidia sim bridge runtime ([8e038e9](https://github.com/blackboxprogramming/blackroad-prism-console/commit/8e038e94c6ba5de75d4f3872f3d8709b6c124407))
 * sync PagerDuty incidents with Jira ([a967901](https://github.com/blackboxprogramming/blackroad-prism-console/commit/a967901141d0d72ddb3eb117065dec0a80a1a982))
@@ -174,3 +177,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial stable baseline of Phase 37
 
+### Added
+- Initial release.

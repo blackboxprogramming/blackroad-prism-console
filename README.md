@@ -37,8 +37,9 @@ python cli/console.py bot:list
 ---
 
 # BlackRoad.io — Dependency & Ops Bundle
+# Prism Console
 
-Date: 2025-08-22
+Offline-first console utilities for the BlackRoad Prism stack.
 
 Requires Node.js 20 or later. If you're bootstrapping a Red Hat Enterprise Linux
 (or CentOS Stream) host, follow the step-by-step guide in
@@ -54,11 +55,14 @@ pnpm -C prism/server dev
 pnpm -C prism/apps/web dev
 ```
 
+## Quick Start (90 seconds)
 
-This bundle is a **drop-in helper** to resolve “missing dependencies etc.” without requiring
-connector access. Push it into your working copy, then run one script on the server to scan
-your API, install missing npm packages, set up env defaults, and (optionally) boot a local
-LLM stub on port **8000** if none is running.
+1. `pip install -r requirements.txt`
+2. `python -m cli.console preflight:check`
+3. `python -m cli.console bot:list`
+4. `make demo`
+5. `python -m cli.console docs:build`
+6. `make dist`
 
 > **Heads-up from the maintainer:** I'm still getting everything set up and I'm honestly not a
 > strong coder yet. Thank you for your patience if anything here is rough around the edges —
@@ -485,55 +489,29 @@ into real connectors and infrastructure.
 
 Run the scaffolded end-to-end sync script to push local changes and deploy them
 to the live environment:
+## Local Release Flow
 
 ```bash
-python scripts/blackroad_sync.py
+python -m cli.console version:show
+python -m cli.console preflight:check
+make demo
+python -m cli.console release:notes --version $(python -m cli.console version:show | tail -1)
+make dist && ls -l dist/ && cat dist/checksums.txt
 ```
 
-The script pushes to GitHub, fans out to connector webhooks, refreshes an iOS
-Working Copy checkout and issues a remote deploy on the droplet when configured
-via environment variables.
+## Troubleshooting
 
-Additional operational docs live in the [`docs/`](docs) folder.
+- **Permissions**: ensure the `logs/` directory is writable.
+- **Missing key**: if `EAR_ENABLED=1`, provide `config/ear_key.json`.
+- **Read-only mode**: run commands with sufficient permissions to write to `dist/` and `logs/`.
 
-## Codex Pipeline
+## Support Matrix
 
-This repo ships with a chat-first deployment helper at
-`codex/tools/blackroad_pipeline.py`. The script accepts plain‑English
-commands and orchestrates git pushes, connector stubs and droplet
-deploys in one flow:
+| Python | Network |
+|--------|---------|
+| 3.11   | offline |
 
-```bash
-python3 codex/tools/blackroad_pipeline.py "Push latest to BlackRoad.io"
-python3 codex/tools/blackroad_pipeline.py "Refresh working copy and redeploy"
-```
-
-It relies on environment variables for remote hosts and tokens
-(`GIT_REMOTE`, `DROPLET_HOST`, `SLACK_WEBHOOK`).
-This scaffold is intentionally clean and compact so you can drop in your own logic fast.
-
-## Codex Deployment
-
-A helper script `scripts/blackroad_codex.sh` provides a chat-like interface for common deployment actions:
-
-```bash
-scripts/blackroad_codex.sh push
-scripts/blackroad_codex.sh deploy
-scripts/blackroad_codex.sh refresh
-scripts/blackroad_codex.sh rebase
-scripts/blackroad_codex.sh sync
-```
-
-Set `REMOTE`, `BRANCH`, and `DROPLET_HOST` to customize targets. Provide `SLACK_WEBHOOK` to post updates.
-
-## BlackRoad Sync & Deploy
-
-Run `scripts/blackroad_sync.sh` to push the latest changes to GitHub and roll them out to the droplet. The script accepts natural language commands, for example:
-
-```bash
-scripts/blackroad_sync.sh "Push latest to BlackRoad.io"
-scripts/blackroad_sync.sh "Refresh working copy and redeploy"
-```
+## License
 
 Set `WORKING_COPY_SSH`, `DROPLET_SSH`, and optionally `SLACK_WEBHOOK` environment variables before running. Logs are written to `blackroad_sync.log`.
 
@@ -1209,3 +1187,4 @@ python -m cli.console exp:analyze --id EXP01 --metrics configs/experiments/metri
 python -m cli.console learn:courses:load --dir configs/enablement/courses
 python -m cli.console learn:courses:list --role_track "Solutions Engineer"
 ```
+MIT

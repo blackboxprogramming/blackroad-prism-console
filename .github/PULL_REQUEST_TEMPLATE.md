@@ -127,3 +127,22 @@ Notes for reviewers / special instructions:
 - Docs/README updated if needed
 - No secrets committed
 - Labels added (area/site, area/api, etc.)
+**What**
+- 
+
+**Why**
+- 
+
+**Tests**
+- 
+
+**Screenshots**
+- 
+
+**Breaking Changes**
+- [] Yes
+- [] No
+
+**Checklist**
+- [ ] Tests added or updated
+- [ ] Docs updated
