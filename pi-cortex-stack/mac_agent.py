@@ -11,6 +11,7 @@ import argparse
 import base64
 import json
 import logging
+import mimetypes
 import os
 import signal
 import sys
@@ -25,6 +26,7 @@ from PIL import Image
 
 LOG_DIR = Path.home() / ".pi-cortex-agent" / "logs"
 DEFAULT_ASSET_NAME = "logo.png"
+DEFAULT_AUDIO_NAME = "clip.wav"
 
 
 def load_env_file(path: Path) -> Dict[str, str]:
@@ -54,6 +56,8 @@ class AgentConfig:
     panel_topic: str = "pi/panel/text"
     heartbeat_topic: str = "pi/ops/heartbeat"
     heartbeat_interval: int = 30
+    audio_topic: str = "pi/audio/clip"
+    audio_asset: str = DEFAULT_AUDIO_NAME
 
     @classmethod
     def from_env(cls, env: Optional[Dict[str, str]] = None) -> "AgentConfig":
@@ -75,6 +79,8 @@ class AgentConfig:
             heartbeat_interval=int(
                 env.get("PI_CORTEX_HEARTBEAT_INTERVAL", cls.heartbeat_interval)
             ),
+            audio_topic=env.get("PI_CORTEX_AUDIO_TOPIC", cls.audio_topic),
+            audio_asset=env.get("PI_CORTEX_AUDIO_ASSET", cls.audio_asset),
         )
 
 
@@ -129,14 +135,50 @@ class PiCortexAgent:
         info.wait_for_publish()
         logging.info("Asset push complete. MQTT mid=%s", info.mid)
 
+    def push_audio(self, audio_name: Optional[str] = None) -> None:
+        clip_name = audio_name or self.config.audio_asset
+        audio_path = self.config.asset_dir / clip_name
+        if not audio_path.exists():
+            raise FileNotFoundError(
+                f"Audio clip {audio_path} not found. Ensure the file exists before pushing."
+            )
+        logging.info("Pushing audio clip %s", audio_path)
+        payload = self._prepare_binary_payload(audio_path)
+        info = self._client.publish(self.config.audio_topic, payload, qos=1, retain=True)
+        info.wait_for_publish()
+        logging.info("Audio push complete. MQTT mid=%s", info.mid)
+
     def _prepare_image_payload(self, path: Path) -> bytes:
         with Image.open(path) as image:
             image = image.convert("RGBA")
             buffer = Path(LOG_DIR / "last_asset.png")
             image.save(buffer)
             data = buffer.read_bytes()
-        encoded = base64.b64encode(data).decode("ascii")
-        return json.dumps({"filename": path.name, "payload": encoded}).encode()
+        return self._encode_payload(
+            original_name=path.name,
+            data=data,
+            content_type="image/png",
+        )
+
+    def _prepare_binary_payload(self, path: Path) -> bytes:
+        data = path.read_bytes()
+        content_type, _ = mimetypes.guess_type(str(path))
+        return self._encode_payload(
+            original_name=path.name,
+            data=data,
+            content_type=content_type,
+        )
+
+    def _encode_payload(
+        self, *, original_name: str, data: bytes, content_type: Optional[str]
+    ) -> bytes:
+        payload: Dict[str, str] = {
+            "filename": original_name,
+            "payload": base64.b64encode(data).decode("ascii"),
+        }
+        if content_type:
+            payload["content_type"] = content_type
+        return json.dumps(payload).encode()
 
     # ------------------------------------------------------------------
     # Publishing helpers
@@ -211,6 +253,16 @@ def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
         "--name", default=DEFAULT_ASSET_NAME, help="Asset file name inside the assets directory"
     )
 
+    push_audio_parser = subparsers.add_parser("push-audio", help="Push an audio clip")
+    push_audio_parser.add_argument(
+        "--name",
+        default=None,
+        help=(
+            "Audio file name inside the assets directory. Defaults to PI_CORTEX_AUDIO_ASSET or"
+            f" {DEFAULT_AUDIO_NAME}."
+        ),
+    )
+
     publish_parser = subparsers.add_parser(
         "publish", help="Publish a one-off message to the holo/panel topics"
     )
@@ -231,6 +283,8 @@ def main(argv: Optional[list[str]] = None) -> None:
         try:
             if args.command == "push-assets":
                 agent.push_assets(asset_name=args.name)
+            elif args.command == "push-audio":
+                agent.push_audio(audio_name=args.name)
             elif args.command == "publish":
                 agent.publish_text(args.text)
         finally:

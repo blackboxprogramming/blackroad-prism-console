@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import mimetypes
 import os
 import threading
 import time
@@ -35,6 +36,8 @@ class PanelState:
     def __init__(self) -> None:
         self.text: str = ""
         self.asset: Optional[Path] = None
+        self.audio: Optional[Path] = None
+        self.audio_content_type: Optional[str] = None
         self.updated_at: float = time.time()
         self.lock = threading.Lock()
 
@@ -43,6 +46,8 @@ class PanelState:
             return {
                 "text": self.text,
                 "asset": str(self.asset) if self.asset else None,
+                "audio": str(self.audio) if self.audio else None,
+                "audio_content_type": self.audio_content_type,
                 "updated_at": self.updated_at,
             }
 
@@ -54,9 +59,23 @@ class PanelState:
     def update_asset(self, payload: bytes, filename: str) -> None:
         with self.lock:
             target_dir = ensure_state_dir()
-            target = target_dir / filename
+            safe_name = Path(filename).name
+            target = target_dir / safe_name
             target.write_bytes(payload)
             self.asset = target
+            self.updated_at = time.time()
+
+    def update_audio(
+        self, payload: bytes, filename: str, content_type: Optional[str]
+    ) -> None:
+        with self.lock:
+            target_dir = ensure_state_dir()
+            safe_name = Path(filename).name
+            target = target_dir / safe_name
+            target.write_bytes(payload)
+            guessed_type = content_type or mimetypes.guess_type(str(target))[0]
+            self.audio = target
+            self.audio_content_type = guessed_type
             self.updated_at = time.time()
 
 
@@ -83,6 +102,19 @@ def dashboard() -> str:
         asset_path = Path(str(data["asset"]))
         b64 = base64.b64encode(asset_path.read_bytes()).decode("ascii")
         asset_markup = f'<img src="data:image/png;base64,{b64}" alt="Asset" style="max-width:100%;height:auto;" />'
+    audio_markup = ""
+    if data["audio"] and Path(str(data["audio"])).exists():
+        audio_path = Path(str(data["audio"]))
+        content_type = data.get("audio_content_type") or mimetypes.guess_type(
+            str(audio_path)
+        )[0] or "audio/wav"
+        audio_b64 = base64.b64encode(audio_path.read_bytes()).decode("ascii")
+        audio_markup = (
+            "<audio controls style=\"width:100%;margin-top:20px;\">"
+            f"<source src=\"data:{content_type};base64,{audio_b64}\" type=\"{content_type}\">"
+            "Your browser does not support the audio element."
+            "</audio>"
+        )
     return f"""
     <html>
         <head>
@@ -101,6 +133,7 @@ def dashboard() -> str:
                 <p class="timestamp">Last update: {time.ctime(data['updated_at'])}</p>
                 <p style="font-size: 2rem;">{data['text']}</p>
                 {asset_markup}
+                {audio_markup}
             </div>
         </body>
     </html>
@@ -118,6 +151,8 @@ def state_json() -> dict[str, Optional[str]]:
     return {
         "text": snapshot["text"],
         "asset": snapshot["asset"],
+        "audio": snapshot["audio"],
+        "audio_content_type": snapshot["audio_content_type"],
         "updated_at": time.ctime(snapshot["updated_at"]),
     }
 
@@ -141,6 +176,7 @@ def start_mqtt_thread(env: dict[str, str]) -> None:
     port = int(env.get("PI_CORTEX_MQTT_PORT", "1883"))
     asset_topic = env.get("PI_CORTEX_ASSET_TOPIC", "pi/assets/logo")
     panel_topic = env.get("PI_CORTEX_PANEL_TOPIC", "pi/panel/text")
+    audio_topic = env.get("PI_CORTEX_AUDIO_TOPIC", "pi/audio/clip")
 
     client = mqtt.Client()
 
@@ -149,6 +185,7 @@ def start_mqtt_thread(env: dict[str, str]) -> None:
             logger.info("Panel connected to MQTT %s:%s", broker, port)
             client.subscribe(asset_topic)
             client.subscribe(panel_topic)
+            client.subscribe(audio_topic)
         else:
             logger.error("Panel failed to connect to MQTT rc=%s", rc)
 
@@ -165,6 +202,16 @@ def start_mqtt_thread(env: dict[str, str]) -> None:
         elif msg.topic == panel_topic:
             state.update_text(msg.payload.decode())
             logger.info("Panel text updated to %s", state.to_dict()["text"])
+        elif msg.topic == audio_topic:
+            try:
+                payload = json.loads(msg.payload.decode())
+                data = base64.b64decode(payload["payload"])
+                filename = payload.get("filename", "clip.wav")
+                content_type = payload.get("content_type")
+                state.update_audio(data, filename, content_type)
+                logger.info("Panel stored audio %s", filename)
+            except Exception as exc:  # noqa: BLE001
+                logger.exception("Failed to process audio payload: %s", exc)
 
     client.on_connect = on_connect
     client.on_message = on_message
