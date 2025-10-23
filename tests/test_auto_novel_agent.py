@@ -156,6 +156,11 @@ def test_create_game_disallows_weapons():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
         agent.create_game("unity", include_weapons=True)
+def test_deploy_outputs_greeting(capsys):
+    agent = AutoNovelAgent()
+    agent.deploy()
+    captured = capsys.readouterr()
+    assert "AutoNovelAgent deployed and ready to generate novels!" in captured.out
 
 
 def test_list_supported_engines_sorted():
@@ -184,6 +189,9 @@ def test_add_engine_is_instance_scoped():
 def test_create_game_normalizes_engine_name(capsys):
     agent = AutoNovelAgent()
     agent.create_game(" Unity ")
+def test_create_game_with_supported_engine(capsys):
+    agent = AutoNovelAgent()
+    agent.create_game("UNITY")
     captured = capsys.readouterr()
     assert "Creating a Unity game without weapons..." in captured.out
 
@@ -295,6 +303,9 @@ def test_remove_supported_engine_disallows_creation():
     agent.add_supported_engine("Godot")
     agent.remove_supported_engine("godot")
     with pytest.raises(ValueError):
+def test_create_game_rejects_unknown_engine():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError, match="Unsupported engine"):
         agent.create_game("godot")
 
 
@@ -436,3 +447,5 @@ def test_validate_scopes_rejects_broad_scope():
 
     with pytest.raises(ValueError, match="Invalid scopes: admin"):
         agent.validate_scopes(["outline:read", "admin"])
+    with pytest.raises(ValueError, match="Weapons are not allowed"):
+        agent.create_game("unity", include_weapons=True)

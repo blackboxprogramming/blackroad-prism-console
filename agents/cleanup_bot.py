@@ -54,6 +54,9 @@ class CleanupBot:
     Attributes:
         branches: Branch names to remove.
         dry_run: If True, print commands instead of executing them.
+        When ``True`` no commands are executed and planned actions are
+        printed instead. This is helpful for verifying branch names before
+        actual deletion.
     """
 
     branches: list[str]
@@ -159,8 +162,16 @@ class CleanupBot:
         Args:
             branch: The branch name to remove.
 
+    def delete_branch(self, branch: str) -> bool:
+        """Delete a branch locally and remotely.
+
+        Args:
+            branch: The branch name to remove.
+
         Returns:
             True if the branch was deleted locally and remotely, False otherwise.
+            ``True`` if the branch was deleted both locally and remotely,
+            ``False`` otherwise.
         """
         if self.dry_run:
             print(f"Would delete branch '{branch}' locally and remotely")
@@ -204,6 +215,7 @@ class CleanupBot:
         for branch in self.branches:
             if self.dry_run:
                 print(f"Would delete branch '{branch}' locally and remotely")
+                results[branch] = True
                 continue
             try:
                 subprocess.run(["git", "branch", "-D", branch], check=True)
@@ -285,6 +297,11 @@ class CleanupBot:
 def cleanup(branches: Iterable[str], dry_run: bool = False) -> Dict[str, bool]:
     """Convenience wrapper around :class:`CleanupBot`."""
             results[branch] = self.delete_branch(branch)
+        return results
+            success = self.delete_branch(branch)
+            if not success:
+                print(f"Failed to delete branch '{branch}' locally or remotely")
+            results[branch] = success
         return results
 
     return CleanupBot(branches=branches, dry_run=dry_run).cleanup()
