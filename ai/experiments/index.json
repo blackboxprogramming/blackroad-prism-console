@@ -1,1 +1,13 @@
-{ "list": [] }
+{
+  "list": [
+    {
+      "id": "gmt-fast-start",
+      "title": "Geometry-Memory Transport fast-start experiments",
+      "status": "planned",
+      "references": [
+        "docs/ai/geometry_memory_transport_framework.md",
+        "prompts/llm/geometry_memory_transport.yaml"
+      ]
+    }
+  ]
+}

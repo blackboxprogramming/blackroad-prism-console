@@ -1,0 +1,29 @@
+# Geometry-Memory Transport (GMT) prompt pack
+# Placeholder tasks for LLM workflows that support the GMT AI framework.
+description: |
+  Draft prompts that help teams explore the Geometry-Memory Transport (GMT) framework.
+  Each task sketches the type of interaction an assistant should enable once the full
+  workflow is implemented.
+tasks:
+  - id: gmt-overview-001
+    prompt: |
+      Summarize the seven pillars of the Geometry-Memory Transport framework and outline how
+      they interact during a single training cycle. Highlight the Hamiltonian optimiser,
+      transport objectives, associative memory, control layer, symmetry constraints,
+      dynamics model, and robustness safeguards.
+    expect_keywords: [Hamiltonian, transport, Hopfield, KL, symmetry, ODE, robustness]
+
+  - id: gmt-diagnostics-001
+    prompt: |
+      Given a log excerpt describing rising Wasserstein distances, energy drift, and a
+      failing causal audit, produce a triage checklist that references the GMT evaluation
+      metrics. Include suggested telemetry to collect for each issue.
+    expect_keywords: [Wasserstein, energy, causal, telemetry]
+
+  - id: gmt-experiment-001
+    prompt: |
+      Propose a week-long experiment plan that sequences the GMT fast-start experiments:
+      Wasserstein classification, Hopfield memory head, natural-gradient training, and the
+      information bottleneck with interventions. Explain expected outcomes and exit
+      criteria.
+    expect_keywords: [experiment, Sinkhorn, Hopfield, K-FAC, bottleneck]

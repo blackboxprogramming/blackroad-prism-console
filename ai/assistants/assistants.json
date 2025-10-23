@@ -1,1 +1,10 @@
-{ "list": [] }
+{
+  "list": [
+    {
+      "id": "geometry-memory-transport",
+      "name": "GeometryMemoryTransportArchitect",
+      "path": "ai/assistants/geometry_memory_transport.json",
+      "status": "draft"
+    }
+  ]
+}
