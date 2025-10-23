@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "alice-lucidia"
+version = "0.1.0"
+description = "Co-operating AI agents with Hopfield memory and natural gradients"
+authors = [{name = "Blackroad Prism", email = "opensource@example.com"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "torch>=2.0",
+  "transformers>=4.35",
+  "datasets>=2.14",
+  "faiss-cpu>=1.7.4; platform_machine != 'arm64' or sys_platform != 'darwin'",
+  "numpy>=1.23",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "ipykernel"]
+
+[tool.pytest.ini_options]
+addopts = "-q"

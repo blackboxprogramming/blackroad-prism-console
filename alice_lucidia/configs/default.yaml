@@ -1,0 +1,6 @@
+lucidia:
+  memory_path: ./alice_lucidia_memory.json
+  encoder_model: distilbert-base-uncased
+  hopfield_beta: 20
+  hopfield_projection: 64
+  hopfield_memory: 256
