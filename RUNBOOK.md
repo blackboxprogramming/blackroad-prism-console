@@ -139,6 +139,9 @@ Use the following steps to confirm the runtime controller is actually running wi
      '(^|\s)(app_env)\s*=\s*(production|staging|development)\b' \
      /etc /opt /srv /etc/default /etc/sysconfig 2>/dev/null | head
    grep -RIE --line-number --include='*.env' \
+   printf 'DEV_MODE=%q\n' "$DEV_MODE"
+   systemctl show controller.service -p Environment | sed 's/^Environment=//'
+   grep -RIE --line-number --include='*.env' \
      '(^|\s)(dev(eloper)?_mode|debug)\s*=\s*(1|true)\b' \
      /etc /opt /srv /etc/default /etc/sysconfig 2>/dev/null | head
    ```
