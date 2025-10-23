@@ -36,6 +36,7 @@ async function send() {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ timestamp: Date.now(), metrics, anomalies })
+    body: JSON.stringify({ timestamp: Date.now(), metrics })
   });
   console.log(`Warehouse sync status: ${res.status}`);
 }

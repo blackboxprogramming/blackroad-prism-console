@@ -3,3 +3,6 @@ creation_rules:
     encrypted_regex: '^(.*)$'
     age:
       - age1examplepublickeyreplace
+    encrypted_regex: ^(.*)$
+    age: # Insert your age recipient(s)
+      - <REPLACE_ME_PUBLIC_KEY>

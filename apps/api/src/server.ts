@@ -619,6 +619,9 @@ app.use('/api/revrec', rrPolicy, rrContracts, rrAlloc, rrSched, rrJournal, rrPac
 app.use('/api/tax', taxJ, taxT, taxQ, taxN, taxP, taxIRS, taxFATCA, taxEINV, taxFiles);
 app.use('/api/wfm', wfmTS, wfmRS, wfmTM, wfmLV, wfmOT);
 app.use('/api/treasury', trCash, trAlm, trMkt, trCred, trHedge, trPol);
+app.use('/api/hooks', hooks);
+app.use('/api/metrics', metrics);
+app.use('/api/auth/okta', okta);
 
 const port = process.env.PORT || 4000;
 

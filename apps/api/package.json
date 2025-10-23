@@ -70,6 +70,9 @@
     "yaml": "^2.5.0"
     "web-push": "^3.6.6"
     "adm-zip": "^0.5.10"
+    "morgan": "^1.10.0",
+    "openid-client": "^6.6.0",
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
     "semantic-release": "^24.0.0",
