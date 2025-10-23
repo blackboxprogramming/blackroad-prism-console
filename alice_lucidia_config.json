@@ -1,0 +1,74 @@
+{
+  "project": "alice_lucidia",
+  "version": "0.1.0",
+  "created_at": "2025-10-23T20:01:51.384158Z",
+  "models": {
+    "encoder": "distilbert-base-uncased",
+    "generator": "t5-small",
+    "sentence_embedder": "sentence-transformers/all-MiniLM-L6-v2"
+  },
+  "memory": {
+    "index": "faiss",
+    "size": 4096,
+    "hopfield": {
+      "enabled": true,
+      "beta": 20,
+      "projection_dim": 256
+    },
+    "write_policy": {
+      "type": "ema",
+      "alpha": 0.1,
+      "gated_write_threshold": 0.7
+    }
+  },
+  "learning": {
+    "optimizer": "natural_gradient",
+    "natural_gradient": {
+      "type": "diag_fisher",
+      "damping": 0.001
+    },
+    "ot": {
+      "enabled": true,
+      "sinkhorn_eps": 0.1,
+      "sinkhorn_iters": 50,
+      "alpha_ce": 0.3
+    },
+    "schrodinger_bridge": {
+      "enabled": true,
+      "steer_alpha": 0.3
+    },
+    "manifold_regularization": {
+      "enabled": true,
+      "lambda_ricci": 0.05,
+      "knn": 8
+    },
+    "neural_dynamics": {
+      "type": "ode",
+      "sigma": 0.0
+    }
+  },
+  "evaluation": {
+    "calibration": true,
+    "ece_bins": 15
+  },
+  "agents": {
+    "Alice": {
+      "role": "planner_critic",
+      "tools": [
+        "retrieve",
+        "generate",
+        "simulate"
+      ],
+      "self_critique": true
+    },
+    "Lucidia": {
+      "role": "world_model_memory",
+      "capabilities": [
+        "encode",
+        "store",
+        "retrieve",
+        "simulate"
+      ]
+    }
+  }
+}
