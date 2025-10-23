@@ -43,6 +43,90 @@ workflow's **Run workflow** dialog and choose `legacy-ssh` for the `target`
 input. Optional inputs let you deploy another ref or override the health check
 endpoints used during verification.
 
+## DigitalOcean browser console quickstart
+
+When you need a one-off static landing page without touching an SSH client,
+provision a Rocky/Alma/CentOS droplet in DigitalOcean and run the following
+commands directly from the browser console. They install Nginx, serve a
+placeholder site from `/var/www/blackroad`, expose a `/healthz` endpoint, and
+optionally enable the Cockpit web admin for future maintenance.
+
+```bash
+dnf -y install nginx
+
+mkdir -p /var/www/blackroad
+cat >/var/www/blackroad/index.html <<'HTML'
+<!doctype html><meta charset="utf-8"><title>BlackRoad</title>
+<style>body{margin:0;background:#060b18;color:#e6f0ff;font:16px/1.5 system-ui;display:grid;place-items:center;height:100vh}main{max-width:640px;padding:24px;text-align:center}</style>
+<main><h1>BlackRoad is live</h1><p>HTTP is up. HTTPS next.</p></main>
+HTML
+
+cat >/etc/nginx/conf.d/blackroad.conf <<'NGINX'
+server {
+  listen 80;
+  server_name blackroad.io www.blackroad.io;
+
+  root /var/www/blackroad;
+  index index.html;
+
+  location = /healthz {
+    add_header Content-Type application/json;
+    return 200 '{"ok":true,"service":"blackroad","ts":"$time_iso8601"}';
+  }
+}
+NGINX
+
+nginx -t && systemctl enable --now nginx
+
+# Allow inbound HTTP/HTTPS traffic (firewalld blocks them by default)
+firewall-cmd --add-service=http --permanent 2>/dev/null || true
+firewall-cmd --add-service=https --permanent 2>/dev/null || true
+firewall-cmd --reload 2>/dev/null || true
+
+# Optional: browser-based admin
+dnf -y install cockpit
+systemctl enable --now cockpit.socket
+firewall-cmd --add-service=cockpit --permanent 2>/dev/null || true
+firewall-cmd --reload 2>/dev/null || true
+
+# Local smoke tests
+curl -sI http://127.0.0.1 | head -n1
+curl -s http://127.0.0.1/healthz
+```
+
+Point the GoDaddy DNS records to the droplet's IP (`A` records for `@` and
+`www`), wait for propagation, and verify from a local terminal:
+
+```bash
+curl -I http://blackroad.io
+curl -s http://blackroad.io/healthz
+```
+
+To avoid SSH entirely, enable the Cockpit UI at
+`https://<droplet-ip>:9090` and sign in with the droplet's root credentials.
+
+Once DNS resolves, install Certbot and request certificates for HTTPS:
+
+```bash
+dnf -y install epel-release
+dnf -y install certbot python3-certbot-nginx || true
+if ! command -v certbot >/dev/null; then
+  dnf -y install snapd && systemctl enable --now snapd && ln -sf /var/lib/snapd/snap /snap
+  snap install core && snap refresh core
+  snap install --classic certbot
+  ln -sf /snap/bin/certbot /usr/bin/certbot
+fi
+
+certbot --nginx -d blackroad.io -d www.blackroad.io \
+  --redirect --agree-tos -m you@example.com --non-interactive
+
+curl -sI https://blackroad.io | head -n1
+curl -s https://blackroad.io/healthz
+```
+
+If any command fails, grab the trailing log lines and investigate before
+continuing.
+
 ### Legacy-specific secrets and variables
 
 Configure these secrets if you rely on the fallback path:
