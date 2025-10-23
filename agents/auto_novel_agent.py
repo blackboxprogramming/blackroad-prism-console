@@ -143,6 +143,8 @@ class AutoNovelAgent:
 
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
         """Create a basic game using a supported engine without weapons."""
+    def create_game(self, engine: str, include_weapons: bool = False) -> str:
+        """Create a basic game using a supported engine without weapons.
 
         Args:
             engine: Game engine to use.
@@ -172,6 +174,9 @@ class AutoNovelAgent:
         Raises:
             ValueError: If the engine is unsupported.
             ValueError: If weapons are included.
+        Returns:
+            The message describing the created game, which is also printed for
+            interactive use.
         """
 
         engine_lower = engine.lower()
@@ -306,6 +311,9 @@ class AutoNovelAgent:
             )
         self.SUPPORTED_ENGINES.remove(engine_lower)
         self.SUPPORTED_ENGINES.add(engine.lower())
+        message = self._build_creation_message(engine_lower)
+        print(message)
+        return message
 
     def list_supported_engines(self) -> List[str]:
         """Return a sorted list of supported game engines."""
@@ -644,6 +652,34 @@ class AutoNovelAgent:
         if not normalized_engine:
             raise ValueError("Engine name cannot be empty.")
         self.SUPPORTED_ENGINES.add(normalized_engine)
+
+    def _build_creation_message(self, engine_lower: str) -> str:
+        """Build the message used when creating a game.
+
+        Args:
+            engine_lower: The engine name in lowercase.
+
+        Returns:
+            The formatted message indicating the game creation action.
+        """
+        article = self._indefinite_article(engine_lower)
+        engine_name = engine_lower.capitalize()
+        return f"Creating {article} {engine_name} game without weapons..."
+
+    @staticmethod
+    def _indefinite_article(engine_name: str) -> str:
+        """Return the appropriate indefinite article for ``engine_name``."""
+        if not engine_name:
+            return "a"
+
+        lower = engine_name.lower()
+        if lower.startswith("uni"):
+            return "a"
+        if lower[0] in "aeiou":
+            return "an"
+        if lower.startswith("honest") or lower.startswith("hour") or lower.startswith("heir"):
+            return "an"
+        return "a"
 
 
 if __name__ == "__main__":
