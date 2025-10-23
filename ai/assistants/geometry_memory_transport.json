@@ -1,0 +1,10 @@
+{
+  "name": "GeometryMemoryTransportArchitect",
+  "description": "LLM placeholder for orchestrating the Geometry-Memory Transport AI framework.",
+  "status": "draft",
+  "notes": [
+    "Attach prompts from prompts/llm/geometry_memory_transport.yaml",
+    "Bind associative memory tools once implemented",
+    "Wire telemetry for energy, transport, and causal audits"
+  ]
+}
