@@ -1,0 +1,111 @@
+environment: preview
+description: Ephemeral preview environments created per pull request for integration testing.
+owner:
+  team: Platform Engineering
+  contact: platform@blackroad.io
+  pagerduty_service: plat-preview
+regions:
+  - provider: aws
+    name: us-east-1
+    accounts:
+      - alias: preview-shared
+        id: "000000000000"
+        role: preview-deployer
+repositories:
+  - name: blackroad-prism-console
+    path: github.com/blackroad-labs/blackroad-prism-console
+    artifact: web
+  - name: blackroad-api
+    path: github.com/blackroad-labs/blackroad-api
+    artifact: api
+  - name: ollama-bridge
+    path: github.com/blackroad-labs/ollama-bridge
+    artifact: bridge
+deployments:
+  - name: prism-console
+    platform: ecs
+    cluster: br-preview
+    service: prism-console
+    runtime: nodejs18
+    image: ghcr.io/blackroad/prism-console:pr-${pull_request}
+    scaling:
+      min_count: 1
+      max_count: 2
+      cpu: 256
+      memory: 512
+    ingress:
+      url_template: https://pr-${pull_request}.preview.blackroad.io
+      healthcheck: https://pr-${pull_request}.preview.blackroad.io/healthz
+      public: true
+    observability:
+      logs: cloudwatch
+      traces: otel-preview
+      dashboards:
+        - grafana/previews/prism-console
+  - name: api
+    platform: ecs
+    cluster: br-preview
+    service: api
+    runtime: nodejs18
+    image: ghcr.io/blackroad/api:pr-${pull_request}
+    scaling:
+      min_count: 1
+      max_count: 2
+      cpu: 512
+      memory: 1024
+    ingress:
+      url_template: https://pr-${pull_request}.preview.blackroad.io/api
+      healthcheck: https://pr-${pull_request}.preview.blackroad.io/api/health
+      public: true
+    observability:
+      logs: cloudwatch
+      traces: otel-preview
+      dashboards:
+        - grafana/previews/api
+  - name: ollama-bridge
+    platform: ecs
+    cluster: br-preview
+    service: ollama-bridge
+    runtime: nodejs18
+    image: ghcr.io/blackroad/ollama-bridge:pr-${pull_request}
+    scaling:
+      min_count: 1
+      max_count: 1
+      cpu: 256
+      memory: 512
+    ingress:
+      url_template: https://pr-${pull_request}.preview.blackroad.io/bridge
+      healthcheck: https://pr-${pull_request}.preview.blackroad.io/api/llm/health
+      public: false
+    observability:
+      logs: cloudwatch
+      traces: otel-preview
+      dashboards:
+        - grafana/previews/bridge
+dependencies:
+  databases:
+    - name: prism-preview
+      engine: aurora-postgresql
+      size: small
+      notes: Reset nightly; seeded with anonymised fixtures.
+  messaging:
+    - name: prism-events-preview
+      type: sqs
+      notes: Shared queue namespace for preview stacks.
+  third_party:
+    - name: BlackRoad Auth Preview
+      purpose: OAuth + SSO testing
+      notes: Sandbox client IDs only; tokens expire in 15 minutes.
+release_process:
+  cadence: On-demand per pull request
+  approvals:
+    required: false
+    notes: Automation applies Terraform using PR number as the workspace key.
+  rollout:
+    strategy: Blue/green using ECS task sets managed by GitHub Actions.
+    health_gates:
+      - curl -sf https://pr-${pull_request}.preview.blackroad.io/healthz
+      - npm run health --if-present
+  rollback:
+    strategy: Destroy workspace and close PR.
+    notes: Automation tears down resources on merge or close events.
