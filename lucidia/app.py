@@ -7,6 +7,7 @@ import os
 import re
 import subprocess
 import sys
+import subprocess
 from contextlib import redirect_stdout
 from pathlib import Path
 
@@ -94,6 +95,12 @@ def run_code():
             # ``local_vars`` exposes the math module.  No other globals are
             # accessible to the executed code.
             exec(code, {"__builtins__": SAFE_BUILTINS}, local_vars)
+    local_vars: dict[str, object] = {"math": math}
+    safe_builtins = {"print": print, "abs": abs, "round": round, "pow": pow}
+    stdout = io.StringIO()
+    try:
+        with redirect_stdout(stdout):
+            exec(code, {"__builtins__": safe_builtins}, local_vars)
         output = stdout.getvalue()
     except Exception as exc:  # noqa: BLE001 - broad for user feedback
         output = f"Error: {exc}"
