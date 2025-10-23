@@ -10,6 +10,10 @@
 
 Interactive qutrit lab: Lindbladian dynamics (γφ, γrel), von Neumann entropy S(ρ), selectable observables (Pauli-like/Gell-Mann), Hamiltonian editor, session recording + CSV, barycentric visualization.
 
+Pair the UI with the upgraded `lucidia-quantum` CLI to script experiments across
+TorchQuantum, Pennylane, or Qiskit. Invoke `lucidia-quantum --list-backends` to
+check available simulators before exporting QASM or running batched training.
+
 ## Run
 
 Open `apps/quantum/ternary_consciousness_v3.html` in a browser (no build step required).
@@ -29,4 +33,4 @@ Open `apps/quantum/ternary_consciousness_v3.html` in a browser (no build step re
 - `apps/quantum/ternary_consciousness_v3.html` — standalone app
 - `.github/workflows/deploy-quantum.yml` — CI/CD to server via rsync
 
-_Last updated on 2025-09-11_
+_Last updated on 2025-09-12_
