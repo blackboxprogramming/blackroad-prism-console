@@ -1,5 +1,5 @@
-# cadillac_codex.py
-# Minimal, dependency-light math engine for the Cadillac Codex.
+# lucidia_codex.py
+# Minimal, dependency-light math engine for the Lucidia Codex.
 # Only requires numpy. Optional: scipy (if available) improves numerics but not required.
 
 import hashlib

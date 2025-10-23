@@ -1,4 +1,4 @@
-# Prism Panel Specs — Cadillac Set A
+# Prism Panel Specs — Lucidia Set A
 
 These drop-in panels are designed to mesh with the existing Prism console while keeping math-first guarantees, operational guardrails, and "Roadie 30" field modes.
 

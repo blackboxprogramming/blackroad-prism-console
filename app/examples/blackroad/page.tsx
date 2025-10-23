@@ -78,7 +78,7 @@ export default function Page() {
         {items.length === 0 && (
           <div className="text-neutral-500">
             Try: <code>files.search RoadCoin</code> or say{' '}
-            <em>chit chat cadillac</em>.
+            <em>chit chat lucidia</em>.
           </div>
         )}
       </div>

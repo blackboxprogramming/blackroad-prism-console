@@ -1,4 +1,4 @@
-"""Numerical safety helpers for the Cadillac Codex toolkit.
+"""Numerical safety helpers for the Lucidia Codex toolkit.
 
 This module collects utilities that make traditionally undefined or unstable
 numerical operations usable inside Prism experiments.  Each helper mirrors a

@@ -1,6 +1,6 @@
 # Prism PR Automation Quickstart
 
-This note maps the Cadillac Loop milestones to the repo's automation guardrails so the generated pull requests fit without manual fixes.
+This note maps the Lucidia Loop milestones to the repo's automation guardrails so the generated pull requests fit without manual fixes.
 
 ## Guardrails to satisfy
 
