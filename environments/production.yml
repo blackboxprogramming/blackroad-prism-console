@@ -289,3 +289,7 @@ notes:
         --end-time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --period 300 --statistics Sum
 notes:
   - Public site served via GitHub Pages; API and relay live on AWS ECS.
+description: >-
+  Primary customer-facing deployment managed by the CI & Deploy to Droplet workflow.
+workflows:
+  - .github/workflows/deploy.yml

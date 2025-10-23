@@ -50,6 +50,12 @@ checks fail. Keep both runbooks handy during CAB reviews.
 Document every rollback/forward action in the incident log and update the corresponding manifest to reflect configuration changes.
 
 ## Routine health & cleanup
+## Environment manifests
+
+- `environments/production.yml` documents the GitHub Environment that drives the main deploy workflow.
+- `environments/staging.yml` captures pre-production checks (smoke tests and Slack alerts) used before promoting builds.
+- `environments/preview.yml` maps the per-PR AWS ECS Fargate previews under `dev.blackroad.io` managed by Terraform.
+
 
 - API health checks: `https://api.blackroad.io/health` (prod) and `http://127.0.0.1:4000/api/health` (bridge).
 - Static site health endpoints: `https://blackroad.io/healthz`, `https://stage.blackroad.io/health.json`.

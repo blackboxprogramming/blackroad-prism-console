@@ -245,3 +245,30 @@ reviewers:
 notes:
   - Ephemeral environment spun up per pull request via .github/workflows/preview.yml.
   - Routes traffic through AWS ALB with per-PR listener rules.
+url: https://pr-<number>.dev.blackroad.io
+reviewers:
+  - blackboxprogramming
+description: >-
+  Ephemeral per-pull-request environment built on AWS ECS Fargate via Terraform.
+workflows:
+  - .github/workflows/preview-env.yml
+infrastructure:
+  provider: aws-ecs-fargate
+  region: us-east-1
+  domain: dev.blackroad.io
+  terraform_directory: infra/preview-env
+  image_registry_secret: PREVIEW_ENV_ECR_REGISTRY
+  cluster_secret: PREVIEW_ENV_CLUSTER_ARN
+  task_role_secret: PREVIEW_ENV_TASK_ROLE_ARN
+  execution_role_secret: PREVIEW_ENV_EXECUTION_ROLE_ARN
+  subnet_secrets:
+    private: PREVIEW_ENV_PRIVATE_SUBNET_IDS
+    public: PREVIEW_ENV_PUBLIC_SUBNET_IDS
+  vpc_secret: PREVIEW_ENV_VPC_ID
+  state_backend_bucket_secret: PREVIEW_ENV_TF_STATE_BUCKET
+  state_lock_table_secret: PREVIEW_ENV_TF_LOCK_TABLE
+  environment_variables_secret: PREVIEW_ENV_VARS_JSON
+  secrets_payload: PREVIEW_ENV_SECRETS_JSON
+  teardown_on_close: true
+notifications:
+  slack_channel_secret: SLACK_PREVIEW_CHANNEL
