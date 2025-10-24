@@ -1,5 +1,6 @@
 [build-system]
 requires = ["setuptools>=61", "wheel"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -73,6 +74,8 @@ include = ["cli", "cli.*", "agent", "agent.*"]
 
 [tool.setuptools.package-data]
 agent = ["templates/*.html"]
+version = "0.0.0"
+requires-python = ">=3.11"
 
 [tool.black]
 line-length = 100
@@ -85,3 +88,6 @@ profile = "black"
 line-length = 100
 extend-select = ["I"]
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+extend-select = ["I"]  # import sort

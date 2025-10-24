@@ -25,11 +25,21 @@ BOMS_PATH = os.path.join(ART_DIR, 'boms.json')
 
 os.makedirs(ART_DIR, exist_ok=True)
 
+import csv, json, os, argparse
+from dataclasses import dataclass, asdict
+from typing import List, Dict, Any
+
+ART_DIR = os.path.join('artifacts', 'plm')
+ITEMS_PATH = os.path.join(ART_DIR, 'items.json')
+BOMS_PATH = os.path.join(ART_DIR, 'boms.json')
+
+os.makedirs(ART_DIR, exist_ok=True)
+
 @dataclass(frozen=True)
 class Item:
     id: str
     rev: str
-    type: str
+    type: str  # "assembly|component|raw"
     uom: str
     lead_time_days: int
     cost: float
@@ -196,6 +206,31 @@ def _load_csv_items(dirpath: str) -> List[Item]:
     return items
 
 
+    lines: List[Dict[str, Any]]  # {component_id, qty, refdes?, scrap_pct?}
+
+# In-memory normalized catalogs (deterministic ordering)
+_ITEMS: List[Item] = []
+_BOMS: List[BOM] = []
+
+
+def _load_csv_items(dirpath: str) -> List[Item]:
+    items: List[Item] = []
+    for name in sorted(os.listdir(dirpath)):
+        if not name.endswith('.csv'):
+            continue
+        with open(os.path.join(dirpath, name), newline='') as f:
+            r = csv.DictReader(f)
+            for row in r:
+                suppliers = [s.strip() for s in row.get('suppliers','').split('|') if s.strip()]
+                items.append(Item(
+                    id=row['id'].strip(), rev=row['rev'].strip(), type=row['type'].strip(),
+                    uom=row['uom'].strip(), lead_time_days=int(row['lead_time_days']),
+                    cost=float(row['cost']), suppliers=suppliers))
+    # stable deterministic sort
+    items.sort(key=lambda x: (x.id, x.rev))
+    return items
+
+
 def _load_csv_boms(dirpath: str) -> List[BOM]:
     boms: Dict[tuple, List[Dict[str, Any]]] = {}
     for name in sorted(os.listdir(dirpath)):
@@ -236,6 +271,7 @@ def load_boms(dirpath: str):
 
 
 def explode(item_id: str, rev: str, level: int = 99) -> List[Dict[str, Any]]:
+    # Deterministic multi-level explosion
     bom_map = {(b.item_id, b.rev): b for b in _BOMS}
     out = []
     def walk(it, rv, qty, lvl):
@@ -316,6 +352,11 @@ def _pick_latest_rev(item_id: str) -> str:
     return sorted(set(revs))[-1] if revs else 'A'
 
 # CLI
+    # Deterministic: latest by ASCII sort (A<B<...)
+    revs = [i.rev for i in _ITEMS if i.id==item_id]
+    return sorted(set(revs))[-1] if revs else 'A'
+
+# === CLI bindings ===
 
 def cli_items_load(argv):
     p = argparse.ArgumentParser(prog='plm:items:load')

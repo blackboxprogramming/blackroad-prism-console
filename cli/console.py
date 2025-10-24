@@ -3049,6 +3049,10 @@ if __name__ == "__main__":
 # Deterministic CLI dispatcher supporting "ns:cmd" verbs.
 import argparse, sys, importlib
 
+# Deterministic CLI dispatcher supporting "ns:cmd" verbs.
+import argparse, sys, importlib
+
+# Map namespace prefixes to modules
 NS_MAP = {
     'plm:items': 'plm.bom',
     'plm:bom': 'plm.bom',
@@ -3062,6 +3066,7 @@ NS_MAP = {
     'mfg:mrp': 'mfg.mrp',
 }
 
+# Verb -> function name mapping (implemented in target modules)
 VERB_FUN = {
     'plm:items:load': 'cli_items_load',
     'plm:bom:load': 'cli_bom_load',
@@ -3211,6 +3216,10 @@ def main(argv=None):
     verb, *rest = argv
     ns = verb.rsplit(':', 1)[0]
     mod_name = NS_MAP.get(ns)
+    mod_name = NS_MAP.get(verb)
+    if not mod_name and ':' in verb:
+        ns = verb.rsplit(':', 1)[0]
+        mod_name = NS_MAP.get(ns)
     fun_name = VERB_FUN.get(verb)
     if not (mod_name and fun_name):
         raise SystemExit(f"Unknown verb: {verb}")

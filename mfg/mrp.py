@@ -98,12 +98,17 @@ def plan(demand_csv: str, inventory_csv: str, pos_csv: str) -> Dict[str, Any]:
             }
     out_path = os.path.join(ART_DIR, 'plan.json')
     os.makedirs(ART_DIR, exist_ok=True)
+                'release_day_offset': 0,  # deterministic, lead-time calc can be added later
+                'kitting_list': [item]
+            }
+    out_path = os.path.join(ART_DIR, 'plan.json')
     with open(out_path, 'w') as f:
         json.dump(plan, f, indent=2, sort_keys=True)
     print(f"mrp_planned={len(plan)} -> {out_path}")
     return plan
 
 # CLI
+# === CLI ===
 
 def cli_mrp(argv):
     p = argparse.ArgumentParser(prog='mfg:mrp')

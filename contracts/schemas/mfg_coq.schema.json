@@ -12,3 +12,4 @@
   "additionalProperties": false
 }
 {"$schema":"https://json-schema.org/draft/2020-12/schema","type":"array","items":{"type":"object","additionalProperties":false,"required":["bucket","amount"],"properties":{"bucket":{"enum":["Prevention","Appraisal","Internal Failure","External Failure"]},"amount":{"type":"number","minimum":0}}}}
+{"type":"array","items":{"type":"object","required":["bucket","amount"],"properties":{"bucket":{"type":"string"},"amount":{"type":"number"}}}}

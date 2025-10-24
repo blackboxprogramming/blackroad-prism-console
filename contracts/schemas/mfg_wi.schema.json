@@ -14,3 +14,4 @@
     "additionalProperties": false
   }
 }
+{"type":"object","required":["item","rev","path"],"properties":{"item":{"type":"string"},"rev":{"type":"string"},"path":{"type":"string"}}}
