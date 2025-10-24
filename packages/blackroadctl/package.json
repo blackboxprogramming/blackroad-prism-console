@@ -14,7 +14,8 @@
     "commander": "^11.0.0",
     "chalk": "^5.3.0",
     "@blackroad/control-plane-sdk": "file:../control-plane-sdk",
-    "@blackroad/economy-sdk": "file:../economy-sdk"
+    "@blackroad/economy-sdk": "file:../economy-sdk",
+    "@blackroad/graph-engines": "file:../graph-engines"
   },
   "devDependencies": {
     "jest": "^29.7.0",

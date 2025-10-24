@@ -11,6 +11,10 @@ import { runEconomyEvidence } from '../src/commands/economy/evidence';
 import { runEconomyGraph } from '../src/commands/economy/graph';
 import { runSinkhornCli } from '../src/commands/ot/sb-run';
 import { runSinkhornFrames } from '../src/commands/ot/sb-frames';
+import { runGraphEmbed } from '../src/commands/graph/embed';
+import { runGraphLayout } from '../src/commands/graph/layout';
+import { runGraphPhase } from '../src/commands/graph/phase';
+import { runGraphBridge } from '../src/commands/graph/bridge';
 
 const program = new Command();
 program
@@ -118,6 +122,79 @@ economy
 
 program.addCommand(economy);
 
+const graph = new Command('graph').description('Graph Labs workflows');
+
+graph
+  .command('embed')
+  .description('Run spectral embedding on an edge list file')
+  .requiredOption('--edge-list <file>', 'Edge list file (source target per line)')
+  .option('--k <n>', 'Embedding dimension', (value) => parseInt(value, 10), 8)
+  .option('--seed <n>', 'Deterministic seed', (value) => parseInt(value, 10), 7)
+  .option('--out <dir>', 'Output directory', path.resolve(process.cwd(), 'artifacts/graph/embed'))
+  .action(async (options) => {
+    const telemetry = configureTelemetry('graph.embed');
+    await runGraphEmbed({
+      edgeList: options.edgeList,
+      k: options.k,
+      seed: options.seed,
+      outDir: options.out,
+      telemetry
+    });
+  });
+
+graph
+  .command('layout')
+  .description('Run PowerLloyd layout on an embedding CSV')
+  .requiredOption('--embedding <file>', 'Spectral embedding CSV path')
+  .option('--sites <n>', 'Initial sites', (value) => parseInt(value, 10), 12)
+  .option('--seed <n>', 'Deterministic seed', (value) => parseInt(value, 10), 11)
+  .option('--out <dir>', 'Output directory', path.resolve(process.cwd(), 'artifacts/graph/layout'))
+  .action(async (options) => {
+    const telemetry = configureTelemetry('graph.layout');
+    await runGraphLayout({
+      seed: options.seed,
+      outDir: options.out,
+      initSites: options.sites,
+      embeddingPath: options.embedding,
+      telemetry
+    });
+  });
+
+graph
+  .command('phase')
+  .description('Run Cahn–Hilliard phase evolution on an initial field JSON')
+  .requiredOption('--init <file>', 'Initial phase field JSON')
+  .option('--steps <n>', 'Number of steps', (value) => parseInt(value, 10), 120)
+  .option('--out <dir>', 'Output directory', path.resolve(process.cwd(), 'artifacts/graph/phase'))
+  .action(async (options) => {
+    const telemetry = configureTelemetry('graph.phase');
+    await runGraphPhase({
+      seed: 7,
+      outDir: options.out,
+      initPath: options.init,
+      steps: options.steps,
+      telemetry
+    });
+  });
+
+graph
+  .command('bridge')
+  .description('Bridge spectral embedding and layout outputs into downstream assets')
+  .requiredOption('--embedding <file>', 'Spectral embedding CSV')
+  .requiredOption('--layout <file>', 'Layout JSON with assignments')
+  .option('--out <dir>', 'Output directory', path.resolve(process.cwd(), 'artifacts/graph/bridge'))
+  .action(async (options) => {
+    const telemetry = configureTelemetry('graph.bridge');
+    await runGraphBridge({
+      spectralEmbedding: options.embedding,
+      layoutAssignments: options.layout,
+      outDir: options.out,
+      telemetry
+    });
+  });
+
+program.addCommand(graph);
+
 const ot = new Command('ot').description('Optimal transport workflows');
 
 ot
@@ -158,6 +235,6 @@ ot
 program.addCommand(ot);
 
 program.parseAsync(process.argv).catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
+  console.error(error);
+  process.exit(1);
 });
