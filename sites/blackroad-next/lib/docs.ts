@@ -33,7 +33,7 @@ export function renderDoc(slug: string): Doc | null {
     const raw = readFileSync(file, "utf-8");
     const { content } = matter(raw);
     const title = (content.match(/^#\s+(.+)/m) || ["", "Untitled"])[1].trim();
-    const html = marked.parse(content);
+    const html = marked.parse(content) as string;
     return { slug: entry.slug, title, html };
   } catch (error) {
     return null;

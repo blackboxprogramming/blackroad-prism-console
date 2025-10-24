@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
 
-const idpDomain = process.env.NEXT_PUBLIC_IDP_DOMAIN ?? 'id.blackroadinc.us';
+const idpDomain = process.env.NEXT_PUBLIC_IDP_DOMAIN ?? "id.blackroadinc.us";
 const clientId = process.env.NEXT_PUBLIC_IDP_CLIENT_ID;
-const redirectUri = process.env.NEXT_PUBLIC_IDP_REDIRECT ?? 'https://blackroad.com/auth/callback';
-const scope = process.env.NEXT_PUBLIC_IDP_SCOPE ?? 'openid email profile';
-const authorizePath = process.env.NEXT_PUBLIC_IDP_AUTHORIZE_PATH ?? 'oauth2/default/v1/authorize';
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.blackroad.io';
-const statusUrl = process.env.NEXT_PUBLIC_STATUS_URL ?? 'https://status.blackroad.io';
+const redirectUri = process.env.NEXT_PUBLIC_IDP_REDIRECT ?? "https://blackroadinc.us/auth/callback";
+const scope = process.env.NEXT_PUBLIC_IDP_SCOPE ?? "openid email profile";
+const authorizePath = process.env.NEXT_PUBLIC_IDP_AUTHORIZE_PATH ?? "oauth2/default/v1/authorize";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.blackroad.io";
+const statusUrl = process.env.NEXT_PUBLIC_STATUS_URL ?? "https://status.blackroad.io";
 const magicLinkUrl = process.env.NEXT_PUBLIC_MAGIC_LINK_URL;
-const contact = process.env.NEXT_PUBLIC_ACCESS_EMAIL ?? 'it@blackroad.com';
+const contact = process.env.NEXT_PUBLIC_ACCESS_EMAIL ?? "ops@blackroadinc.us";
 
 const contactHref = contact.startsWith('mailto:') || !contact.includes('@')
   ? contact
@@ -40,56 +40,56 @@ const companyAccountUrl = buildAuthorizeUrl(true);
 const emailMagicLinkUrl = magicLinkUrl ?? contactHref;
 
 export const metadata: Metadata = {
-  title: 'Login',
-  description: 'Central login hub for all Blackroad environments.',
-  alternates: { canonical: 'https://blackroad.com/' },
+  title: "Login",
+  description: "Central login hub for all BlackRoad environments.",
+  alternates: { canonical: "https://blackroadinc.us/" },
   openGraph: {
-    title: 'Blackroad — Login',
-    description: 'Central login hub for all Blackroad environments.',
-    url: 'https://blackroad.com/'
+    title: "BlackRoad Hub — Login",
+    description: "Central login hub for all BlackRoad environments.",
+    url: "https://blackroadinc.us/",
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Blackroad — Login',
-    description: 'Central login hub for all Blackroad environments.'
-  }
+    card: "summary_large_image",
+    title: "BlackRoad Hub — Login",
+    description: "Central login hub for all BlackRoad environments.",
+  },
 };
 
 export default function Page() {
   return (
-    <div className="hub-page">
-      <main className="hub-card">
-        <h1>Blackroad</h1>
-        <p className="hub-lead">Central login for all environments.</p>
-
-        <a className="hub-btn primary" href={primarySsoUrl}>
-          Sign in with SSO
-        </a>
-
-        <div className="hub-row">
-          <a className="hub-btn" href={companyAccountUrl}>
-            Use Company Account
-          </a>
-          <a className="hub-btn" href={emailMagicLinkUrl}>
-            Email Magic Link
-          </a>
-        </div>
-
-        <div className="hub-row">
-          <a className="hub-btn" href={appUrl}>
-            Go to App
-          </a>
-          <a className="hub-btn" href={statusUrl}>
-            Status
-          </a>
-        </div>
-
-        <div className="hub-muted">
-          Need access? Contact: <a href={contactHref}>{contact.replace(/^mailto:/, '')}</a>
-        </div>
-      </main>
-    </div>
     <>
+      <div className="hub-page">
+        <main className="hub-card">
+          <h1>BlackRoad</h1>
+          <p className="hub-lead">Central login for all environments.</p>
+
+          <a className="hub-btn primary" href={primarySsoUrl}>
+            Sign in with SSO
+          </a>
+
+          <div className="hub-row">
+            <a className="hub-btn" href={companyAccountUrl}>
+              Use Company Account
+            </a>
+            <a className="hub-btn" href={emailMagicLinkUrl}>
+              Email Magic Link
+            </a>
+          </div>
+
+          <div className="hub-row">
+            <a className="hub-btn" href={appUrl}>
+              Go to App
+            </a>
+            <a className="hub-btn" href={statusUrl}>
+              Status
+            </a>
+          </div>
+
+          <div className="hub-muted">
+            Need access? Contact: <a href={contactHref}>{contact.replace(/^mailto:/, "")}</a>
+          </div>
+        </main>
+      </div>
       <section className="container-x py-16 sm:py-24">
         <div className="max-w-3xl">
           <p className="mb-3 text-sm tracking-wide text-zinc-400">HELLO, WORLD!</p>
