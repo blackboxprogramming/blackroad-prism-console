@@ -1,0 +1,44 @@
+{
+  "$schema": "https://termius.app/schemas/snippets.v1.json",
+  "meta": {
+    "generated_at": "2024-09-01T00:00:00Z",
+    "description": "BlackRoad Lucidia mobile control snippets"
+  },
+  "variables": [
+    { "name": "BACKPLANE_URL", "description": "Root URL for the backplane (https://host:port)" },
+    { "name": "BR_KEY", "description": "X-BlackRoad-Key header" },
+    { "name": "DAILY_KEY", "description": "Optional X-BlackRoad-Daily header" },
+    { "name": "DEVICE_ID", "description": "Device ID (lucidia-a, lucidia-b, pi400, pizero, jetson-01)" },
+    { "name": "DEVICE_HOST", "description": "SSH hostname or Tailscale IP for the device" }
+  ],
+  "snippets": [
+    {
+      "id": "fleet-roll",
+      "name": "fleet-roll",
+      "description": "Ask every agent to pull the latest tagged release via the command bus.",
+      "shell": "sh",
+      "command": "curl -fsS -X POST \\\n  -H 'Content-Type: application/json' \\\n  -H 'X-BlackRoad-Key: {{BR_KEY}}' \\\n  -H 'X-BlackRoad-Daily: {{DAILY_KEY}}' \\\n  -d '{\"text\":\"deploy lucidia stack stable\",\"source\":\"termius\"}' \\\n  '{{BACKPLANE_URL}}/api/agents/command'"
+    },
+    {
+      "id": "rollback-one",
+      "name": "rollback-one",
+      "description": "Rollback a single device to the previous container tag via the command bus.",
+      "shell": "sh",
+      "command": "curl -fsS -X POST \\\n  -H 'Content-Type: application/json' \\\n  -H 'X-BlackRoad-Key: {{BR_KEY}}' \\\n  -H 'X-BlackRoad-Daily: {{DAILY_KEY}}' \\\n  -d '{\"text\":\"rollback {{DEVICE_ID}} to previous release\",\"source\":\"termius\"}' \\\n  '{{BACKPLANE_URL}}/api/agents/command'"
+    },
+    {
+      "id": "tail-logs",
+      "name": "tail-logs",
+      "description": "Tail the last 200 lines of the blackroad-agent journal on a device.",
+      "shell": "sh",
+      "command": "ssh operator@{{DEVICE_HOST}} 'sudo journalctl -u blackroad-agent --no-pager -n 200'"
+    },
+    {
+      "id": "restart-agent",
+      "name": "restart-agent",
+      "description": "Direct device restart for the blackroad-agent service via the device command queue.",
+      "shell": "sh",
+      "command": "curl -fsS -X POST \\\n  -H 'Content-Type: application/json' \\\n  -H 'X-BlackRoad-Key: {{BR_KEY}}' \\\n  -H 'X-BlackRoad-Daily: {{DAILY_KEY}}' \\\n  -d '{\"type\":\"service.restart\",\"service\":\"blackroad-agent\",\"ttl_s\":120}' \\\n  '{{BACKPLANE_URL}}/api/devices/{{DEVICE_ID}}/command'"
+    }
+  ]
+}
