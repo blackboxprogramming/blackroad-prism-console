@@ -1,0 +1,19 @@
+{
+  "name": "@blackroad/graph-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "graphql": "^16.9.0",
+    "@graphql-tools/schema": "^10.0.18",
+    "@blackroad/graph-engines": "file:../graph-engines"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

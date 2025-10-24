@@ -1,0 +1,29 @@
+name: Graph Labs CI
+
+on:
+  push:
+    paths:
+      - 'packages/graph-engines/**'
+      - 'packages/graph-gateway/**'
+      - 'packages/blackroadctl/src/commands/graph/**'
+      - 'docs/rfc/0014-graph-labs-pack.md'
+      - 'docs/guides/graph-labs.md'
+      - '.github/workflows/graph-labs-ci.yml'
+  pull_request:
+    paths:
+      - 'packages/graph-engines/**'
+      - 'packages/graph-gateway/**'
+      - 'packages/blackroadctl/src/commands/graph/**'
+      - 'docs/rfc/0014-graph-labs-pack.md'
+      - 'docs/guides/graph-labs.md'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm install
+      - run: npm test -- --runTestsByPath packages/graph-engines/tests/spectral.eigengap.spec.js packages/graph-engines/tests/powerlloyd.mass.spec.js packages/graph-engines/tests/cahn.conservation.spec.js packages/graph-gateway/tests/schema.contract.spec.js
