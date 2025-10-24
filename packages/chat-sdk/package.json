@@ -1,0 +1,19 @@
+{
+  "name": "@blackroad/chat-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/client.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/client.ts"
+    },
+    "./types": "./src/types.ts"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.5"
+  }
+}

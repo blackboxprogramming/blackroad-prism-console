@@ -1,0 +1,32 @@
+name: UI Display & Chat CI
+
+on:
+  pull_request:
+    paths:
+      - 'sites/blackroad/**'
+      - 'packages/chat-sdk/**'
+      - 'packages/obs-gateway/**'
+      - 'docs/guides/display-and-chat.md'
+      - 'docs/rfc/0013-chat-surface-contract.md'
+  workflow_dispatch: {}
+
+jobs:
+  ui-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install site deps
+        run: npm install
+        working-directory: sites/blackroad
+      - name: Run component goldens
+        run: npm run test:ui
+        working-directory: sites/blackroad
+      - name: Install chat SDK deps
+        run: npm install
+        working-directory: packages/chat-sdk
+      - name: Run chat SDK tests
+        run: npm run test
+        working-directory: packages/chat-sdk
