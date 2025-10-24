@@ -20,7 +20,7 @@ export async function runOpsIncidents(options: OpsIncidentsOptions) {
   });
 
   try {
-    const incidents = await client.recentIncidents(options.serviceId, options.limit);
+    const { incidents } = await client.recentIncidents(options.serviceId, options.limit);
     printIncidents(incidents);
   } finally {
     endTelemetry(options.telemetry);
