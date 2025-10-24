@@ -39,6 +39,10 @@ def reset_supported_engines():
     AutoNovelAgent.SUPPORTED_ENGINES = {"unity", "unreal"}
 
 
+import pytest
+from agents.auto_novel_agent import AutoNovelAgent
+
+
 def test_add_supported_engine_enables_creation():
     agent = AutoNovelAgent()
     with pytest.raises(ValueError):
