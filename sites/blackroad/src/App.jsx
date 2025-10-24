@@ -353,6 +353,7 @@ import IsoSliceLab from "./pages/IsoSliceLab.jsx";
 import SpectralGraphLab from "./pages/SpectralGraphLab.jsx";
 import ComplexPotentialsLab from "./pages/ComplexPotentialsLab.jsx";
 import PowerLloydLab from "./pages/PowerLloydLab.jsx";
+import OTLab from "./pages/OTLab.jsx";
 import CahnHilliardLab from "./pages/CahnHilliardLab.jsx";
 >>>>>>> origin/codex/add-react-pages-and-routes-zm01mq
 =======
@@ -555,6 +556,7 @@ function LegacyApp() {
             <Route path="/spectral-graph" element={<SpectralGraphLab/>} />
             <Route path="/potentials" element={<ComplexPotentialsLab/>} />
             <Route path="/power-lloyd" element={<PowerLloydLab/>} />
+            <Route path="/ot" element={<OTLab/>} />
             <Route path="/cahn" element={<CahnHilliardLab/>} />
 >>>>>>> origin/codex/add-react-pages-and-routes-zm01mq
             <Route path="chat" element={<Chat/>} />
@@ -633,6 +635,7 @@ function LegacyApp() {
             <Route path="spectral-graph" element={<SpectralGraphLab/>} />
             <Route path="potentials" element={<ComplexPotentialsLab/>} />
             <Route path="power-lloyd" element={<PowerLloydLab/>} />
+            <Route path="ot" element={<OTLab/>} />
             <Route path="cahn" element={<CahnHilliardLab/>} />
 >>>>>>> origin/codex/add-react-pages-and-routes-zm01mq
 =======

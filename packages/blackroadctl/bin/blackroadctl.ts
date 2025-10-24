@@ -21,6 +21,8 @@ import { runGraphEmbed } from '../src/commands/graph/embed';
 import { runGraphLayout } from '../src/commands/graph/layout';
 import { runGraphPhase } from '../src/commands/graph/phase';
 import { runGraphBridge } from '../src/commands/graph/bridge';
+import { runOtSolve } from '../src/commands/ot/solve';
+import { runOtInterpolate } from '../src/commands/ot/interpolate';
 
 const program = new Command();
 program
@@ -328,6 +330,45 @@ media
   });
 
 program.addCommand(media);
+const ot = new Command('ot').description('Optimal transport solvers');
+
+ot
+  .command('solve')
+  .description('Run an OT solver and write artifacts to disk')
+  .requiredOption('--kind <kind>', 'Solver kind (semidiscrete|dynamic)')
+  .requiredOption('--source <file>', 'Source density JSON')
+  .option('--target <file>', 'Target density or sites JSON')
+  .option('--steps <n>', 'Time steps for dynamic solver', (value) => parseInt(value, 10))
+  .option('--out <dir>', 'Artifact output directory')
+  .action(async (options) => {
+    const kind = options.kind as 'semidiscrete' | 'dynamic';
+    if (kind !== 'semidiscrete' && kind !== 'dynamic') {
+      throw new Error('kind must be semidiscrete or dynamic');
+    }
+    await runOtSolve({
+      kind,
+      source: options.source,
+      target: options.target,
+      steps: options.steps,
+      out: options.out,
+    });
+  });
+
+ot
+  .command('interpolate')
+  .description('Sample a displacement frame from a dynamic job output')
+  .requiredOption('--job <file>', 'Path to job.json produced by ot solve')
+  .requiredOption('--t <value>', 'Time in [0,1]', (value) => parseFloat(value))
+  .option('--out <dir>', 'Output directory (defaults to job directory)')
+  .action(async (options) => {
+    await runOtInterpolate({
+      job: options.job,
+      t: options.t,
+      out: options.out,
+    });
+  });
+
+program.addCommand(ot);
 
 program.parseAsync(process.argv).catch((error) => {
   console.error(error);

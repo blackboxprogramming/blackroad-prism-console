@@ -1,0 +1,37 @@
+name: OT Engine CI
+
+on:
+  push:
+    paths:
+      - 'packages/ot-engine/**'
+      - 'packages/ot-gateway/**'
+      - 'packages/blackroadctl/**'
+      - 'docs/rfc/**'
+      - 'docs/guides/**'
+      - 'sites/blackroad/**'
+      - '.github/workflows/ot-ci.yml'
+  pull_request:
+    paths:
+      - 'packages/ot-engine/**'
+      - 'packages/ot-gateway/**'
+      - 'packages/blackroadctl/**'
+      - 'docs/rfc/**'
+      - 'docs/guides/**'
+      - 'sites/blackroad/**'
+      - '.github/workflows/ot-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm install
+      - name: Run OT engine tests
+        run: |
+          npm test -- --runTestsByPath \
+            packages/ot-engine/tests/semidiscrete.conservation.spec.js \
+            packages/ot-engine/tests/dynamic.flow.continuity.spec.js
