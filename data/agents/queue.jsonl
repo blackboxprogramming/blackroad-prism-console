@@ -1,0 +1,2 @@
+{"id":"46ee451b-00da-496e-ac35-30ad4aa99cc9","ts":1760578819805,"intent":"slack_post_hello","action":"script:python scripts/agent_post_slack_hello.py","source":"manual","text":"post to slack: hellooooo!","status":"queued","requiresApproval":false}
+{"id":"2759df8c-6f26-4e41-91f9-1df00c362467","ts":1760578830575,"intent":"asana_post_hello","action":"script:python scripts/agent_post_asana_hello.py","source":"manual","text":"post to asana: hellooooo!","status":"queued","requiresApproval":false}
