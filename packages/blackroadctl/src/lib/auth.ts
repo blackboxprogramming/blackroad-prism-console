@@ -7,7 +7,11 @@ type CommandCapability =
   | 'ops:incidents'
   | 'economy:simulate'
   | 'economy:evidence'
-  | 'economy:graph';
+  | 'economy:graph'
+  | 'graph:spectral'
+  | 'graph:layout'
+  | 'graph:phase'
+  | 'graph:bridge';
 
 type RoleMatrix = Record<CliConfig['role'], CommandCapability[]>;
 
@@ -19,9 +23,23 @@ const roleCapabilities: RoleMatrix = {
     'ops:incidents',
     'economy:simulate',
     'economy:evidence',
-    'economy:graph'
+    'economy:graph',
+    'graph:spectral',
+    'graph:layout',
+    'graph:phase',
+    'graph:bridge'
   ],
-  operator: ['ops:status', 'ops:incidents', 'economy:simulate', 'economy:evidence', 'economy:graph'],
+  operator: [
+    'ops:status',
+    'ops:incidents',
+    'economy:simulate',
+    'economy:evidence',
+    'economy:graph',
+    'graph:spectral',
+    'graph:layout',
+    'graph:phase',
+    'graph:bridge'
+  ],
   viewer: ['ops:status', 'economy:evidence', 'economy:graph']
 };
 

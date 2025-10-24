@@ -1,0 +1,30 @@
+name: graph-labs
+
+on:
+  push:
+    paths:
+      - 'packages/graph-engines/**'
+      - 'packages/graph-gateway/**'
+      - 'packages/blackroadctl/**'
+      - 'sites/blackroad/**'
+      - 'docs/**'
+      - '.github/workflows/graph-labs-ci.yml'
+  pull_request:
+    paths:
+      - 'packages/graph-engines/**'
+      - 'packages/graph-gateway/**'
+      - 'packages/blackroadctl/**'
+      - 'sites/blackroad/**'
+      - 'docs/**'
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: pnpm install
+      - run: pnpm --filter @blackroad/graph-engines test
+      - run: pnpm --filter graph-gateway test
