@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import path from 'node:path';
 import { Command } from 'commander';
 import { runDeployCreate } from '../src/commands/deploy/create';
 import { runDeployPromote } from '../src/commands/deploy/promote';
@@ -8,6 +9,8 @@ import { configureTelemetry } from '../src/lib/telemetry';
 import { runEconomySimulate } from '../src/commands/economy/simulate';
 import { runEconomyEvidence } from '../src/commands/economy/evidence';
 import { runEconomyGraph } from '../src/commands/economy/graph';
+import { runSinkhornCli } from '../src/commands/ot/sb-run';
+import { runSinkhornFrames } from '../src/commands/ot/sb-frames';
 
 const program = new Command();
 program
@@ -114,6 +117,45 @@ economy
   });
 
 program.addCommand(economy);
+
+const ot = new Command('ot').description('Optimal transport workflows');
+
+ot
+  .command('sb-run')
+  .description('Run a Sinkhorn Schrödinger Bridge solve and export artifacts')
+  .requiredOption('--mu <file>', 'Source distribution JSON file')
+  .requiredOption('--nu <file>', 'Target distribution JSON file')
+  .requiredOption('--eps <value>', 'Entropic epsilon', parseFloat)
+  .option('--iters <n>', 'Maximum iterations', (value) => parseInt(value, 10), 500)
+  .option('--tol <value>', 'Tolerance for marginal error', parseFloat, 1e-3)
+  .option('--cost <type>', 'Cost metric (l2|cosine|tv_l1)', 'l2')
+  .option('--out <dir>', 'Artifact output directory', path.resolve(process.cwd(), 'artifacts/sb/cli'))
+  .action(async (options) => {
+    const telemetry = configureTelemetry('ot.sb-run');
+    await runSinkhornCli({
+      muPath: options.mu,
+      nuPath: options.nu,
+      epsilon: options.eps,
+      iters: options.iters,
+      tol: options.tol,
+      cost: options.cost,
+      outDir: options.out,
+      telemetry
+    });
+  });
+
+ot
+  .command('sb-frames')
+  .description('Generate additional interpolation frames for an SB run directory')
+  .requiredOption('--job <dir>', 'Job directory created by sb-run')
+  .requiredOption('--t <list>', 'Comma separated interpolation times (0-1)')
+  .action(async (options) => {
+    const telemetry = configureTelemetry('ot.sb-frames');
+    const times = (options.t as string).split(',').map((value) => parseFloat(value.trim()));
+    await runSinkhornFrames({ jobPath: options.job, times, telemetry });
+  });
+
+program.addCommand(ot);
 
 program.parseAsync(process.argv).catch((error) => {
   console.error(error.message);

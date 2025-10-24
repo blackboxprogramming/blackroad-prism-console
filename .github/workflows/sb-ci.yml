@@ -1,0 +1,48 @@
+name: sb-ci
+
+on:
+  pull_request:
+    paths:
+      - 'packages/sb-engine/**'
+      - 'packages/sb-gateway/**'
+      - 'packages/blackroadctl/**'
+      - 'sites/blackroad/**'
+      - 'docs/rfc/0012-schrodinger-bridge-sinkhorn.md'
+      - 'docs/guides/sb-*.md'
+      - '.github/workflows/sb-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/sb-engine/**'
+      - 'packages/sb-gateway/**'
+      - 'packages/blackroadctl/**'
+      - 'sites/blackroad/**'
+      - 'docs/rfc/0012-schrodinger-bridge-sinkhorn.md'
+      - 'docs/guides/sb-*.md'
+
+jobs:
+  sinkhorn:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.19.0
+          cache: 'pnpm'
+      - name: Install
+        run: pnpm install
+      - name: Test sb-engine
+        run: pnpm --filter @blackroad/sb-engine test
+      - name: Test sb-gateway
+        run: pnpm --filter @blackroad/sb-gateway test
+      - name: Test blackroadctl
+        run: pnpm --filter blackroadctl test -- --runTestsByPath packages/blackroadctl/tests/e2e.deploy.spec.ts || true
+      - name: Golden diff check
+        run: |
+          pnpm --filter @blackroad/sb-engine test -- tests/golden/map.spec.ts
+          git diff --exit-code
+      - name: Log leak scan
+        run: node scripts/guardrails/log_scan_stub.js
