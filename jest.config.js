@@ -7,6 +7,7 @@ module.exports = {
     '<rootDir>/packages/graph-gateway/tests',
     '<rootDir>/packages/diffusion-engine/tests',
     '<rootDir>/packages/diffusion-gateway/tests'
+    '<rootDir>/packages/ricci-engine/tests'
   ],
   roots: ['<rootDir>/tests', '<rootDir>/packages/ot-engine/tests'],
   testMatch: [

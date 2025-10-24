@@ -1,11 +1,13 @@
 import EmbeddingPlot from './EmbeddingPlot';
 import PowerDiagramView from './PowerDiagramView';
 import PhaseFieldView from './PhaseFieldView';
+import RicciPanel from './RicciPanel';
 
 const PANELS = {
   spectral: EmbeddingPlot,
   layout: PowerDiagramView,
-  phase: PhaseFieldView
+  phase: PhaseFieldView,
+  ricci: RicciPanel
 };
 
 export default function GraphCanvas({ job, selection }) {

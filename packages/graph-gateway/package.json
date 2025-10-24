@@ -12,7 +12,8 @@
   "dependencies": {
     "graphql": "^16.9.0",
     "@graphql-tools/schema": "^10.0.18",
-    "@blackroad/graph-engines": "file:../graph-engines"
+    "@blackroad/graph-engines": "file:../graph-engines",
+    "@blackroad/ricci-engine": "file:../ricci-engine"
   },
   "devDependencies": {
   "scripts": {

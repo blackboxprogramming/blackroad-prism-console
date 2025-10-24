@@ -1,0 +1,32 @@
+name: Ricci CI
+
+on:
+  push:
+    paths:
+      - 'packages/ricci-engine/**'
+      - 'packages/graph-gateway/**'
+      - 'packages/blackroadctl/**'
+      - 'sites/blackroad/**'
+      - 'docs/rfc/0016-ricci-flow-graphs.md'
+      - 'docs/guides/ricci-lab.md'
+  pull_request:
+    paths:
+      - 'packages/ricci-engine/**'
+      - 'packages/graph-gateway/**'
+      - 'packages/blackroadctl/**'
+      - 'sites/blackroad/**'
+      - 'docs/rfc/0016-ricci-flow-graphs.md'
+      - 'docs/guides/ricci-lab.md'
+
+jobs:
+  ricci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npx tsc -p packages/ricci-engine/tsconfig.json
+      - run: npm test -- ricci-engine
