@@ -6,7 +6,7 @@ services:
     ports:
       - "4000:4000"
     volumes:
-      - blackroad-db:/app/blackroad.db
+      - ./srv/blackroad-api/blackroad.db:/app/blackroad.db
     command: ["node", "server.mjs"]
 
   llm:
@@ -46,12 +46,6 @@ services:
       - math
 
 volumes:
-  blackroad-db:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./srv/blackroad-api/blackroad.db
   math-output:
     driver: local
     driver_opts:
