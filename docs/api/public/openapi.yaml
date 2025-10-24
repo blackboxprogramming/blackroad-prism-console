@@ -1,0 +1,594 @@
+openapi: 3.1.0
+info:
+  title: BlackRoad Public API
+  version: 0.1.0
+  summary: Contract-first public interface for deploying services, processing media captions, and running simulations on the BlackRoad platform.
+  description: |
+    The BlackRoad Public API exposes three capability families – Deploy/Release, Media/Caption Jobs, and Simulations/Evidence –
+    and is intended for external developer consumption. This specification is the single source of truth for our SDK generators
+    and compatibility gates. All breaking changes MUST be reflected in the changelog and compat.yml prior to merging.
+servers:
+  - url: https://api.blackroad.io
+    description: Production gateway
+  - url: https://sandbox.api.blackroad.io
+    description: Sandbox environment for developers
+security:
+  - oauth2: [read:all]
+  - serviceToken: []
+  - personalAccessToken: []
+  - hmacSignature: []
+externalDocs:
+  description: Developer onboarding portal
+  url: https://developers.blackroad.io
+x-metadata:
+  contractOwner: platform@blackroad.io
+  lifecycle: beta
+  idempotency:
+    header: Idempotency-Key
+    retentionHours: 24
+  webhooks:
+    delivery:
+      signatureHeader: X-BlackRoad-Signature
+      algorithm: HMAC-SHA256
+      toleranceSeconds: 300
+paths:
+  /v1/deploys:
+    post:
+      operationId: createDeploy
+      tags: [Deploys]
+      summary: Create a new deploy in the specified environment.
+      description: |
+        Creates a deploy for a given service and environment. Returns a release identifier that can be promoted when ready.
+        Requests should include an `Idempotency-Key` header to allow safe retries.
+      security:
+        - oauth2: [deploy:write]
+        - serviceToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDeployInput'
+      responses:
+        '201':
+          description: Created
+          headers:
+            Idempotency-Key:
+              $ref: '#/components/headers/IdempotencyKey'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeployCreatedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/releases/{releaseId}:promote:
+    post:
+      operationId: promoteRelease
+      tags: [Deploys]
+      summary: Promote a release to the active environment.
+      parameters:
+        - $ref: '#/components/parameters/ReleaseId'
+      security:
+        - oauth2: [release:write]
+        - serviceToken: []
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromotionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/captions:
+    post:
+      operationId: startCaptionJob
+      tags: [Captions]
+      summary: Start a captioning job for a media asset.
+      security:
+        - oauth2: [media:write]
+        - serviceToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaptionsRequest'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaptionsAccepted'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+  /v1/captions/{jobId}:
+    get:
+      operationId: getCaptionJob
+      tags: [Captions]
+      summary: Retrieve caption job status and available artifacts.
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      security:
+        - oauth2: [media:read]
+        - personalAccessToken: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaptionsJob'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/captions/{jobId}/artifacts:
+    get:
+      operationId: getCaptionArtifacts
+      tags: [Captions]
+      summary: List caption artifacts generated for a job.
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [jobId, artifacts]
+                properties:
+                  jobId:
+                    type: string
+                  artifacts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CaptionArtifact'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/simulations:
+    post:
+      operationId: runSimulation
+      tags: [Simulations]
+      summary: Run a simulation scenario within the Tokenomics engine.
+      security:
+        - oauth2: [sim:write]
+        - serviceToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationRequest'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationAccepted'
+  /v1/simulations/{simulationId}:
+    get:
+      operationId: getSimulation
+      tags: [Simulations]
+      summary: Fetch simulation run status.
+      parameters:
+        - $ref: '#/components/parameters/SimulationId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationRun'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/simulations/{simulationId}/artifacts:
+    get:
+      operationId: getSimulationArtifacts
+      tags: [Simulations]
+      summary: Retrieve simulation evidence artifacts.
+      parameters:
+        - $ref: '#/components/parameters/SimulationId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [simulationId, artifacts]
+                properties:
+                  simulationId:
+                    type: string
+                  artifacts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SimulationArtifact'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/webhooks/test-delivery:
+    post:
+      operationId: triggerWebhookTest
+      tags: [Webhooks]
+      summary: Request a signed webhook delivery to a sandbox endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [callbackUrl, eventType]
+              properties:
+                callbackUrl:
+                  type: string
+                  format: uri
+                eventType:
+                  type: string
+                  enum: [deploy.released, caption.completed, simulation.completed]
+      responses:
+        '202':
+          description: Test delivery scheduled
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      description: OAuth 2.1 Authorization Code with PKCE
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.blackroad.io/oauth2/authorize
+          tokenUrl: https://auth.blackroad.io/oauth2/token
+          scopes:
+            read:all: Read only access
+            deploy:write: Manage deploys and releases
+            release:write: Promote releases
+            media:read: Read media jobs
+            media:write: Submit media jobs
+            sim:write: Run simulations
+    serviceToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Signed service token for server-to-server integrations.
+    personalAccessToken:
+      type: apiKey
+      in: header
+      name: X-BlackRoad-Token
+      description: Personal access token for individual developers.
+    hmacSignature:
+      type: apiKey
+      in: header
+      name: X-BlackRoad-Signature
+      description: Optional request signature using HMAC-SHA256.
+  parameters:
+    ReleaseId:
+      name: releaseId
+      in: path
+      required: true
+      schema:
+        type: string
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema:
+        type: string
+    SimulationId:
+      name: simulationId
+      in: path
+      required: true
+      schema:
+        type: string
+  headers:
+    IdempotencyKey:
+      description: Value echoed from the request Idempotency-Key header.
+      schema:
+        type: string
+  schemas:
+    CreateDeployInput:
+      type: object
+      required:
+        - serviceId
+        - environment
+        - gitRef
+      properties:
+        serviceId:
+          type: string
+        environment:
+          type: string
+          enum: [staging, production]
+        gitRef:
+          type: string
+          pattern: "^[a-f0-9]{7,40}$"
+        metadata:
+          type: object
+          additionalProperties: true
+    DeployCreatedResponse:
+      type: object
+      required: [releaseId, status]
+      properties:
+        releaseId:
+          type: string
+        status:
+          type: string
+          enum: [pending, ready]
+        auditId:
+          type: string
+    PromotionResponse:
+      type: object
+      required: [releaseId, status]
+      properties:
+        releaseId:
+          type: string
+        status:
+          type: string
+          enum: [promoting, promoted]
+        promotedAt:
+          type: string
+          format: date-time
+    CaptionsRequest:
+      type: object
+      required: [assetUrl, sourceLanguage, targetLanguages]
+      properties:
+        assetUrl:
+          type: string
+          format: uri
+        sourceLanguage:
+          type: string
+        targetLanguages:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        backend:
+          type: string
+          enum: [native, premium, experimental]
+    CaptionsAccepted:
+      type: object
+      required: [jobId, status]
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [queued, processing]
+        estimatedCompletionSeconds:
+          type: integer
+          minimum: 0
+    CaptionArtifact:
+      type: object
+      required: [type, url]
+      properties:
+        type:
+          type: string
+          enum: [vtt, srt, txt]
+        url:
+          type: string
+          format: uri
+        checksum:
+          type: string
+    CaptionsJob:
+      type: object
+      required: [jobId, status, submittedAt]
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [queued, processing, completed, failed]
+        submittedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        artifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaptionArtifact'
+        error:
+          type: object
+          nullable: true
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+    SimulationRequest:
+      type: object
+      required: [scenario, parameters]
+      properties:
+        scenario:
+          type: string
+          enum: [cashflow, adoption, reward_curve]
+        parameters:
+          type: object
+          additionalProperties: true
+        seed:
+          type: integer
+          nullable: true
+    SimulationAccepted:
+      type: object
+      required: [simulationId, status]
+      properties:
+        simulationId:
+          type: string
+        status:
+          type: string
+          enum: [queued, running]
+    SimulationArtifact:
+      type: object
+      required: [kind, url]
+      properties:
+        kind:
+          type: string
+        url:
+          type: string
+          format: uri
+        mimeType:
+          type: string
+    SimulationRun:
+      type: object
+      required: [simulationId, status, submittedAt]
+      properties:
+        simulationId:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, completed, failed]
+        submittedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        evidenceScore:
+          type: number
+          format: float
+          nullable: true
+        artifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimulationArtifact'
+  responses:
+    BadRequest:
+      description: Invalid request payload.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RateLimited:
+      description: Too many requests.
+      headers:
+        Retry-After:
+          description: Seconds until quota resets.
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Unexpected error from gateway or downstream service.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource could not be located.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Release cannot be promoted due to state conflict.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnsupportedMediaType:
+      description: Media backend cannot process supplied format.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            requestId:
+              type: string
+              description: Trace identifier for support and auditing.
+webhooks:
+  deploy.released:
+    post:
+      summary: A deploy has completed and been promoted to production.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [eventId, occurredAt, releaseId, serviceId, environment]
+              properties:
+                eventId:
+                  type: string
+                occurredAt:
+                  type: string
+                  format: date-time
+                releaseId:
+                  type: string
+                serviceId:
+                  type: string
+                environment:
+                  type: string
+                  enum: [staging, production]
+  caption.completed:
+    post:
+      summary: Caption job has finished processing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [eventId, occurredAt, jobId, status]
+              properties:
+                eventId:
+                  type: string
+                occurredAt:
+                  type: string
+                  format: date-time
+                jobId:
+                  type: string
+                status:
+                  type: string
+                  enum: [completed, failed]
+  simulation.completed:
+    post:
+      summary: Simulation completed and evidence artifacts are available.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [eventId, occurredAt, simulationId, status]
+              properties:
+                eventId:
+                  type: string
+                occurredAt:
+                  type: string
+                  format: date-time
+                simulationId:
+                  type: string
+                status:
+                  type: string
+                  enum: [completed, failed]
