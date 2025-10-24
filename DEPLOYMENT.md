@@ -1,5 +1,61 @@
 # BlackRoad Deployment
 
+## Quick Start: DigitalOcean Droplet Deployment
+
+### Prerequisites
+- Docker and Docker Compose installed on droplet
+- Git installed
+- SSH access configured
+
+### Initial Droplet Setup
+```bash
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+apt-get update && apt-get install -y docker-compose-plugin
+
+# Clone repository
+cd /root
+git clone https://github.com/blackboxprogramming/blackroad-prism-console.git
+cd blackroad-prism-console
+
+# Create production environment file
+cp .env.production .env
+# IMPORTANT: Edit .env and update SESSION_SECRET and INTERNAL_TOKEN
+# Use: openssl rand -hex 32
+```
+
+### GitHub Secrets Configuration
+Set in your repository settings:
+- `DROPLET_IP`: Your droplet's IP address
+- `DROPLET_SSH_KEY`: Private SSH key for root access
+
+### Manual Deployment
+```bash
+cd /root/blackroad-prism-console
+git pull origin main
+docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml build --no-cache
+docker-compose -f docker-compose.prod.yml up -d
+docker-compose -f docker-compose.prod.yml ps
+```
+
+### Monitoring
+```bash
+# View logs
+docker-compose -f docker-compose.prod.yml logs -f
+
+# Check status
+docker-compose -f docker-compose.prod.yml ps
+```
+
+### Services
+- **api**: Backend API service (port 4000, internal)
+- **web**: Main application (port 8000, internal)
+- **caddy**: Reverse proxy with automatic HTTPS (ports 80, 443)
+
+---
+
 ## Environment
 
 1. Copy `srv/blackroad-api/.env.example` to `.env` and fill secrets.
