@@ -16,6 +16,14 @@ from prism_utils import parse_numeric_prefix
 
 # Configure the Streamlit layout early to avoid repeated warnings.
 st.set_page_config(layout="wide")
+st.set_page_config(layout="wide")
+st.title("BlackRoad Prism Generator with GPT + Voice Console")
+
+# Only create an OpenAI client when OPENAI_API_KEY is provided
+openai_api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=openai_api_key) if openai_api_key else None
+if client is None:
+    st.warning("OpenAI API key not set. Set OPENAI_API_KEY to enable responses.")
 
 
 @st.cache_resource
