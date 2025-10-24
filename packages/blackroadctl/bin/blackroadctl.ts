@@ -7,6 +7,8 @@ import { runOpsStatus } from '../src/commands/ops/status';
 import { runOpsIncidents } from '../src/commands/ops/incidents';
 import { runObsTail } from '../src/commands/obs/tail';
 import { runObsCorrelate } from '../src/commands/obs/correlate';
+import { runCaptionCreate } from '../src/commands/media/caption-create';
+import { runCaptionStatus } from '../src/commands/media/caption-status';
 import { configureTelemetry } from '../src/lib/telemetry';
 import { runEconomySimulate } from '../src/commands/economy/simulate';
 import { runEconomyEvidence } from '../src/commands/economy/evidence';
@@ -144,6 +146,22 @@ ot
       tol: options.tol,
       cost: options.cost,
       outDir: options.out,
+const media = new Command('media').description('Media workflows');
+
+media
+  .command('caption-create')
+  .description('Create a caption job for an asset')
+  .requiredOption('--asset <id>', 'Asset identifier')
+  .requiredOption('--file <path_or_url>', 'Path or URL to media source')
+  .option('--backend <name>', 'Transcription backend', 'local')
+  .option('--lang <code>', 'Language code', 'en')
+  .action(async (options) => {
+    const telemetry = configureTelemetry('media.caption-create');
+    await runCaptionCreate({
+      assetId: options.asset,
+      source: options.file,
+      backend: options.backend,
+      lang: options.lang,
       telemetry
     });
   });
@@ -216,6 +234,23 @@ chat
   });
 
 program.addCommand(chat);
+media
+  .command('caption-status')
+  .description('Fetch the status of a caption job')
+  .requiredOption('--job <id>', 'Caption job identifier')
+  .option('--watch', 'Poll until the job completes')
+  .option('--interval <ms>', 'Polling interval in milliseconds', (value) => parseInt(value, 10))
+  .action(async (options) => {
+    const telemetry = configureTelemetry('media.caption-status');
+    await runCaptionStatus({
+      jobId: options.job,
+      watch: Boolean(options.watch),
+      intervalMs: options.interval,
+      telemetry
+    });
+  });
+
+program.addCommand(media);
 
 program.parseAsync(process.argv).catch((error) => {
   console.error(error.message);
