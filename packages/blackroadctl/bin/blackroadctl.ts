@@ -21,6 +21,9 @@ import { runGraphEmbed } from '../src/commands/graph/embed';
 import { runGraphLayout } from '../src/commands/graph/layout';
 import { runGraphPhase } from '../src/commands/graph/phase';
 import { runGraphBridge } from '../src/commands/graph/bridge';
+import { runDiffusionRun } from '../src/commands/diffusion/run';
+import { runDiffusionCompare } from '../src/commands/diffusion/compare';
+import { runDiffusionExport } from '../src/commands/diffusion/export';
 
 const program = new Command();
 program
@@ -200,6 +203,66 @@ graph
   });
 
 program.addCommand(graph);
+
+const diffusion = new Command('diffusion').description('Diffusion Lab workflows');
+
+diffusion
+  .command('run')
+  .description('Execute an SDE or Fokker–Planck simulation')
+  .requiredOption('--mode <mode>', 'Mode to run (sde|fp)')
+  .option('--potential <name>', 'Potential preset', 'double_well')
+  .option('--score <name>', 'Score model name')
+  .option('--beta <schedule>', 'Diffusion schedule', 'const:0.02')
+  .option('--steps <n>', 'Number of steps', (value) => parseInt(value, 10), 200)
+  .option('--dt <value>', 'Time step size', parseFloat, 0.01)
+  .option('--particles <n>', 'Number of particles for SDE', (value) => parseInt(value, 10))
+  .option('--grid <n>', 'Grid resolution (square)', (value) => parseInt(value, 10))
+  .option('--boundary <type>', 'Boundary condition for FP', 'neumann')
+  .option('--seed <n>', 'Deterministic seed', (value) => parseInt(value, 10), 7)
+  .option('--out <dir>', 'Output directory for artifacts')
+  .action(async (options) => {
+    const mode = options.mode as 'sde' | 'fp';
+    if (!['sde', 'fp'].includes(mode)) {
+      throw new Error(`Unsupported diffusion mode ${options.mode}`);
+    }
+    const telemetry = configureTelemetry('diffusion.run');
+    await runDiffusionRun({
+      mode,
+      potential: options.potential,
+      score: options.score,
+      beta: options.beta,
+      steps: options.steps,
+      dt: options.dt,
+      particles: options.particles,
+      grid: options.grid,
+      boundary: options.boundary,
+      seed: options.seed,
+      outDir: options.out,
+      telemetry
+    });
+  });
+
+diffusion
+  .command('compare')
+  .description('Compute KL, MMD, and entropy metrics between jobs')
+  .requiredOption('--sde <jobId>', 'SDE job identifier')
+  .requiredOption('--fp <jobId>', 'Fokker–Planck job identifier')
+  .action(async (options) => {
+    const telemetry = configureTelemetry('diffusion.compare');
+    await runDiffusionCompare({ sde: options.sde, fp: options.fp, telemetry });
+  });
+
+diffusion
+  .command('export')
+  .description('Export recorded frames to a JSON sequence file')
+  .requiredOption('--job <jobId>', 'Job identifier to export')
+  .requiredOption('--output <file>', 'Output file path')
+  .action(async (options) => {
+    const telemetry = configureTelemetry('diffusion.export');
+    await runDiffusionExport({ job: options.job, output: options.output, telemetry });
+  });
+
+program.addCommand(diffusion);
 
 const ot = new Command('ot').description('Optimal transport workflows');
 

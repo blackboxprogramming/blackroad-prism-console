@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -16,7 +20,21 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ],
+      "@blackroad/diffusion-engine/*": [
+        "packages/diffusion-engine/src/*"
+      ],
+      "@blackroad/diffusion-gateway/*": [
+        "packages/diffusion-gateway/src/*"
+      ],
+      "@blackroad/diffusion-engine": [
+        "packages/diffusion-engine/src/index.ts"
+      ],
+      "@blackroad/diffusion-gateway": [
+        "packages/diffusion-gateway/src/index.ts"
+      ]
     },
     "plugins": [
       {
@@ -24,6 +42,13 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

@@ -1,0 +1,31 @@
+name: Diffusion CI
+
+on:
+  push:
+    paths:
+      - 'packages/diffusion-engine/**'
+      - 'packages/diffusion-gateway/**'
+      - 'packages/blackroadctl/src/commands/diffusion/**'
+      - 'docs/rfc/0017-diffusion-fokker-planck.md'
+      - 'docs/guides/diffusion-lab.md'
+      - '.github/workflows/diffusion-ci.yml'
+  pull_request:
+    paths:
+      - 'packages/diffusion-engine/**'
+      - 'packages/diffusion-gateway/**'
+      - 'packages/blackroadctl/src/commands/diffusion/**'
+      - 'docs/rfc/0017-diffusion-fokker-planck.md'
+      - 'docs/guides/diffusion-lab.md'
+      - '.github/workflows/diffusion-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm install
+      - run: npm run test -- --runTestsByPath packages/diffusion-engine/tests/sde.euler_consistency.spec.ts packages/diffusion-engine/tests/pde.mass_conservation.spec.ts packages/diffusion-engine/tests/sde_vs_pde.kl.spec.ts packages/diffusion-gateway/tests/schema.contract.spec.ts
+      - run: npm run typecheck
