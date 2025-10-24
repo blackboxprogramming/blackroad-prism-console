@@ -38,8 +38,9 @@ Deliver a "BlackRoad Control Plane" that stitches together the existing producti
 
 ## Immediate Next Steps
 1. Run stakeholder interviews with release, SRE, and security leads to validate workflow priorities.
-2. Draft domain model RFC and circulate for feedback.
-3. Prototype service catalog schema and CLI scaffolding in a spike branch.
+2. Draft domain model RFC and circulate for feedback. ✅ [RFC 0001](rfc/0001-control-plane-domain-model.md)
+3. Prototype service catalog schema and CLI scaffolding in a spike branch. ✅ [RFC 0002](rfc/0002-adapter-interface.md)
+4. Track spike execution in `codex/control-plane-mvp` with feature-flag rollout notes in [`docs/guides/control-plane-getting-started.md`](guides/control-plane-getting-started.md).
 
 ## Looking Ahead
 Once the control plane is established, layer in governance policy packs, automated evidence collection, and developer ergonomics features (repo bootstrap, workflow updates) as plugins. This keeps the surface area coherent while still enabling the additional investments you outlined.

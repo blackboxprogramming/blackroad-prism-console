@@ -27,6 +27,7 @@
     "next:dev": "next dev",
     "next:build": "next build && node scripts/build-codex-index.js",
     "dev:site": "npm --prefix sites/blackroad run dev",
+    "dev:control-plane": "pnpm -r --parallel --filter control-plane-gateway --filter blackroadctl --filter sites/blackroad dev",
     "build:site": "npm --prefix sites/blackroad run build",
     "frontend:dev": "npm run dev:site",
     "frontend:build": "npm run build:site",

@@ -1,0 +1,50 @@
+name: Control Plane CI
+
+on:
+  push:
+    branches:
+      - codex/control-plane-mvp
+  pull_request:
+    paths:
+      - 'packages/control-plane-gateway/**'
+      - 'packages/control-plane-sdk/**'
+      - 'packages/blackroadctl/**'
+      - 'docs/rfc/**'
+      - 'docs/guides/control-plane-getting-started.md'
+      - '.github/workflows/control-plane-ci.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: |
+          pnpm --filter control-plane-gateway build
+          pnpm --filter control-plane-sdk build
+          pnpm --filter blackroadctl build
+
+      - name: Run unit tests
+        run: |
+          pnpm --filter control-plane-gateway test
+          pnpm --filter control-plane-sdk test
+          pnpm --filter blackroadctl test
+
+      - name: Run log scan
+        run: npm run debug:scan-logs
