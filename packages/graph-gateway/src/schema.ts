@@ -20,6 +20,28 @@ export const typeDefs = `#graphql
     artifacts: [Artifact!]!
   }
 
+  type RicciJob {
+    id: ID!
+    status: String!
+    createdAt: String!
+    updatedAt: String!
+    config: JSON!
+    metrics: JSON
+    artifacts: [Artifact!]!
+    error: String
+  }
+
+  input RicciConfig {
+    curvature: String!
+    tau: Float = 0.05
+    iterations: Int = 50
+    epsilonW: Float = 1e-6
+    targetKappa: Float = 0
+    minTau: Float
+    sinkhorn: JSON
+    layout: String = "mds"
+  }
+
   type CahnJob {
     id: ID!
     status: String!
@@ -30,6 +52,7 @@ export const typeDefs = `#graphql
   type Query {
     spectralJob(id: ID!): SpectralJob
     powerLloydJob(id: ID!): PowerLloydJob
+    ricciJob(id: ID!): RicciJob
     cahnJob(id: ID!): CahnJob
   }
 
@@ -48,11 +71,15 @@ export const typeDefs = `#graphql
       dt: Float = 0.1,
       steps: Int = 400
     ): CahnJob!
+    ricciRun(edgeList: String!, cfg: RicciConfig!): RicciJob!
+    ricciLayout(jobId: ID!, layout: String = "mds"): RicciJob!
+    ricciStep(jobId: ID!, tau: Float): RicciJob!
     bridgeSpectralToDensity(jobId: ID!, scheme: String = "kde"): Artifact!
     bridgeLayoutToPhase(layoutJobId: ID!, alpha: Float = 0.5): CahnJob!
   }
 
   type Subscription {
     graphEvents(jobId: ID): JSON!
+    ricciEvents(jobId: ID): RicciJob!
   }
 `;

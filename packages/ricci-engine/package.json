@@ -1,0 +1,31 @@
+{
+  "name": "@blackroad/ricci-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./curvature": "./dist/curvature/index.js",
+    "./curvature/forman": "./dist/curvature/forman.js",
+    "./curvature/ollivier": "./dist/curvature/ollivier.js",
+    "./flow": "./dist/flow/index.js",
+    "./flow/update": "./dist/flow/update.js",
+    "./flow/runner": "./dist/flow/runner.js",
+    "./embed": "./dist/embed/index.js",
+    "./embed/mds": "./dist/embed/mds.js",
+    "./embed/spectral": "./dist/embed/spectral.js",
+    "./embed/powerlloyd_bridge": "./dist/embed/powerlloyd_bridge.js",
+    "./io/artifacts": "./dist/io/artifacts.js",
+    "./determinism": "./dist/determinism.js",
+    "./types": "./dist/types.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

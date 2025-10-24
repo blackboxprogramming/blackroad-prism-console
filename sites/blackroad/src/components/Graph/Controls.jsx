@@ -3,11 +3,12 @@ import { useState } from 'react';
 const BUTTONS = [
   { id: 'spectral', label: 'Run Spectral (k=8) 🧪' },
   { id: 'layout', label: 'Blue-Noise Layout 🧰' },
-  { id: 'phase', label: 'Phase Relax 📈' }
+  { id: 'phase', label: 'Phase Relax 📈' },
+  { id: 'ricci', label: 'Ricci Flow ♾️' }
 ];
 
 export default function GraphControls({ onRun, onSelect }) {
-  const [params, setParams] = useState({ k: 8, iterations: 50, steps: 100 });
+  const [params, setParams] = useState({ k: 8, iterations: 50, steps: 100, tau: 0.05, curvature: 'forman' });
 
   const trigger = (id) => {
     onRun?.({ id, params });
@@ -53,6 +54,31 @@ export default function GraphControls({ onRun, onSelect }) {
               max={500}
             />
           </label>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block text-sm">
+              <span className="text-slate-300">Ricci τ</span>
+              <input
+                className="mt-1 w-full rounded bg-slate-800 px-3 py-2 text-white"
+                type="number"
+                step="0.01"
+                value={params.tau}
+                onChange={(event) => setParams({ ...params, tau: Number(event.target.value) })}
+                min={0.001}
+                max={0.5}
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="text-slate-300">Curvature</span>
+              <select
+                className="mt-1 w-full rounded bg-slate-800 px-3 py-2 text-white"
+                value={params.curvature}
+                onChange={(event) => setParams({ ...params, curvature: event.target.value })}
+              >
+                <option value="forman">Forman</option>
+                <option value="ollivier">Ollivier</option>
+              </select>
+            </label>
+          </div>
         </div>
         <div className="mt-6 space-y-3">
           {BUTTONS.map((button) => (

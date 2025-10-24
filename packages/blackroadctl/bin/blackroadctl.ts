@@ -21,6 +21,8 @@ import { runGraphEmbed } from '../src/commands/graph/embed';
 import { runGraphLayout } from '../src/commands/graph/layout';
 import { runGraphPhase } from '../src/commands/graph/phase';
 import { runGraphBridge } from '../src/commands/graph/bridge';
+import { runGraphRicci } from '../src/commands/graph/ricci-run';
+import { runGraphRicciLayout } from '../src/commands/graph/ricci-layout';
 
 const program = new Command();
 program
@@ -194,6 +196,50 @@ graph
     await runGraphBridge({
       spectralEmbedding: options.embedding,
       layoutAssignments: options.layout,
+      outDir: options.out,
+      telemetry
+    });
+  });
+
+graph
+  .command('ricci-run')
+  .description('Run curvature-aware Ricci flow on an edge list file')
+  .requiredOption('--edge-list <file>', 'Edge list file (source target [weight])')
+  .option('--curvature <type>', 'Curvature engine (forman|ollivier)', 'forman')
+  .option('--tau <value>', 'Step size', parseFloat, 0.05)
+  .option('--iters <n>', 'Iterations', (value) => parseInt(value, 10), 20)
+  .option('--epsilon <value>', 'Minimum weight floor', parseFloat, 1e-4)
+  .option('--target <value>', 'Target curvature (kappa*)', parseFloat)
+  .option('--layout <type>', 'Layout engine (mds|spectral|powerlloyd)', 'mds')
+  .option('--out <dir>', 'Output directory', path.resolve(process.cwd(), 'artifacts/graph/ricci'))
+  .action(async (options) => {
+    const telemetry = configureTelemetry('graph.ricci-run');
+    await runGraphRicci({
+      edgeList: options['edgeList'] ?? options.edgeList,
+      curvature: options.curvature,
+      tau: options.tau,
+      iterations: options.iters,
+      epsilon: options.epsilon,
+      target: options.target,
+      layout: options.layout,
+      outDir: options.out,
+      telemetry
+    });
+  });
+
+graph
+  .command('ricci-layout')
+  .description('Re-embed a flowed Ricci graph using stored weights')
+  .requiredOption('--edge-list <file>', 'Original edge list file')
+  .requiredOption('--weights <file>', 'Weights CSV from ricci-run')
+  .option('--layout <type>', 'Layout engine (mds|spectral|powerlloyd)', 'mds')
+  .option('--out <dir>', 'Output directory', path.resolve(process.cwd(), 'artifacts/graph/ricci-layout'))
+  .action(async (options) => {
+    const telemetry = configureTelemetry('graph.ricci-layout');
+    await runGraphRicciLayout({
+      edgeList: options['edgeList'] ?? options.edgeList,
+      weights: options.weights,
+      layout: options.layout,
       outDir: options.out,
       telemetry
     });
