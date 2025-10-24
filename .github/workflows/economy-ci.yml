@@ -1,0 +1,36 @@
+name: Economy CI
+
+on:
+  push:
+    paths:
+      - 'packages/tokenomics-sim/**'
+      - 'packages/economy-gateway/**'
+      - 'packages/economy-sdk/**'
+      - 'packages/blackroadctl/**'
+      - '.github/workflows/economy-ci.yml'
+  pull_request:
+    paths:
+      - 'packages/tokenomics-sim/**'
+      - 'packages/economy-gateway/**'
+      - 'packages/economy-sdk/**'
+      - 'packages/blackroadctl/**'
+      - '.github/workflows/economy-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Tokenomics simulator tests
+        run: pnpm --filter @blackroad/tokenomics-sim test
+      - name: Economy gateway tests
+        run: pnpm --filter economy-gateway test
+      - name: Economy SDK tests
+        run: pnpm --filter @blackroad/economy-sdk test
+      - name: CLI build check
+        run: pnpm --filter blackroadctl build

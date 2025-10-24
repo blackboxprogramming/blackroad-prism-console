@@ -5,6 +5,9 @@ import { runDeployPromote } from '../src/commands/deploy/promote';
 import { runOpsStatus } from '../src/commands/ops/status';
 import { runOpsIncidents } from '../src/commands/ops/incidents';
 import { configureTelemetry } from '../src/lib/telemetry';
+import { runEconomySimulate } from '../src/commands/economy/simulate';
+import { runEconomyEvidence } from '../src/commands/economy/evidence';
+import { runEconomyGraph } from '../src/commands/economy/graph';
 
 const program = new Command();
 program
@@ -70,6 +73,47 @@ ops
   });
 
 program.addCommand(ops);
+
+const economy = new Command('economy').description('Tokenomics simulation workflows');
+
+economy
+  .command('simulate')
+  .description('Run a tokenomics simulation and collect artifacts')
+  .requiredOption('--scenario <file>', 'Scenario JSON file')
+  .option('--seed <n>', 'Deterministic seed', (value) => parseInt(value, 10))
+  .option('--out <dir>', 'Directory to copy artifacts into')
+  .action(async (options) => {
+    const telemetry = configureTelemetry('economy.simulate');
+    await runEconomySimulate({
+      scenarioPath: options.scenario,
+      seed: options.seed,
+      out: options.out,
+      telemetry
+    });
+  });
+
+economy
+  .command('evidence')
+  .description('Inspect evidence for a simulation run')
+  .requiredOption('--id <simulationId>', 'Simulation identifier')
+  .option('--open', 'Print evidence markdown to stdout')
+  .action(async (options) => {
+    const telemetry = configureTelemetry('economy.evidence');
+    await runEconomyEvidence({ id: options.id, open: Boolean(options.open), telemetry });
+  });
+
+economy
+  .command('graph')
+  .description('Render a sparkline for a simulation metric')
+  .requiredOption('--id <simulationId>', 'Simulation identifier')
+  .option('--metric <metric>', 'Metric to chart', 'circulating')
+  .action(async (options) => {
+    const telemetry = configureTelemetry('economy.graph');
+    const metric = options.metric as 'circulating' | 'totalSupply' | 'inflation';
+    await runEconomyGraph({ id: options.id, metric, telemetry });
+  });
+
+program.addCommand(economy);
 
 program.parseAsync(process.argv).catch((error) => {
   console.error(error.message);
