@@ -36,6 +36,10 @@ class PolicyKernel:
                 r += 1
             if payload.get("event") == "push":
                 r += 1
+            if payload.get("event") == "delete":
+                r += 1
+                if payload.get("ref_type") == "branch":
+                    r += 1
         if payload.get("env") == "prod" or payload.get("pii"):
             r += 2
         return min(r, 10)

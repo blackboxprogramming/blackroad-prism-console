@@ -26,8 +26,24 @@ class InMemoryEventBus:
 
 def github_webhook_to_event(body: str) -> EventEnvelope:
     data = json.loads(body)
-    etype = data.get("event") or data.get("type") or "push"
-    return EventEnvelope(source="github", type=f"github.{etype}", payload=data, headers={})
+    etype = (
+        data.get("event")
+        or data.get("type")
+        or (data.get("headers") or {}).get("X-GitHub-Event")
+        or "push"
+    )
+    payload = data
+    event_type = f"github.{etype}"
+
+    if etype == "delete" and payload.get("ref_type") == "branch":
+        payload.setdefault("branch", payload.get("ref"))
+        payload.setdefault(
+            "actor",
+            (payload.get("sender") or {}).get("login") or payload.get("actor"),
+        )
+        event_type = "github.branch.deleted"
+
+    return EventEnvelope(source="github", type=event_type, payload=payload, headers={})
 
 
 def salesforce_webhook_to_event(body: str) -> EventEnvelope:

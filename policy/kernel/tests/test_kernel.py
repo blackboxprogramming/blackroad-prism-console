@@ -83,6 +83,24 @@ def test_closed_won_review_large_amount():
     assert result["decision"] == "REVIEW"
 
 
+def test_github_branch_delete_auto():
+    pk = PolicyKernel()
+    env = {
+        "source": "github",
+        "type": "github.branch.deleted",
+        "payload": {
+            "event": "delete",
+            "ref_type": "branch",
+            "ref": "refs/heads/feature/cleanup",
+            "repository": {"full_name": "blackroad/prism-console", "default_branch": "main"},
+        },
+    }
+
+    result = pk.evaluate(env)
+
+    assert result["decision"] == "ALLOW"
+
+
 def test_global_kill_switch():
     pk = PolicyKernel()
     pk.set_kill_switch(True)

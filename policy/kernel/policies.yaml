@@ -13,3 +13,7 @@ policies:
     mode: auto
     max_risk: 5
     compensations: true
+  github.branch.deleted:
+    mode: auto
+    max_risk: 5
+    compensations: false

@@ -33,6 +33,8 @@ class AutonomousActionRouter:
         if evt.source == "github":
             apply_github(evt, self.graph)
 
+        event_id = evt.type.split(".", 1)[-1]
+
         if evt.source == "salesforce" and evt.type.endswith("opportunity.closed_won"):
             acc = evt.payload["account"]["name"]
             if decision["decision"] == "REVIEW":
@@ -44,7 +46,7 @@ class AutonomousActionRouter:
             sid = self.sagas.start("ProvisioningSaga", {"account_name": acc})
             return {"ok": True, "routed": "saga_provision", "saga_id": sid}
 
-        if evt.source == "github" and evt.type in ("push", "pr.merged"):
+        if evt.source == "github" and event_id in ("push", "pr.merged"):
             repo = evt.payload.get("repository", {}).get("full_name", "repo/unknown")
             if decision["decision"] == "REVIEW":
                 self.system.connectors["notify"].execute(
@@ -56,5 +58,34 @@ class AutonomousActionRouter:
                 "send", channel="#deploys", message=f"🚀 Deployed {repo} to staging"
             )
             return {"ok": True, "routed": "github.change.cicd"}
+
+        if evt.source == "github" and event_id == "branch.deleted":
+            repo = evt.payload.get("repository", {}).get("full_name", "repo/unknown")
+            branch = evt.payload.get("branch") or evt.payload.get("ref")
+            actor = (
+                evt.payload.get("actor")
+                or (evt.payload.get("sender") or {}).get("login")
+                or "unknown"
+            )
+            if decision["decision"] == "REVIEW":
+                self.system.connectors["notify"].execute(
+                    "send",
+                    channel="#ops",
+                    message=f'⚠️ REVIEW branch delete {branch or "unknown"} in {repo} risk={decision["risk"]}',
+                )
+                return {"ok": True, "routed": "review"}
+            record = self.system.record_branch_deletion(
+                repo=repo,
+                branch=branch,
+                actor=actor,
+                ref=evt.payload.get("ref"),
+                ref_type=evt.payload.get("ref_type"),
+                deleted_at=evt.payload.get("deleted_at"),
+            )
+            self.system.notify(
+                channel="#ops",
+                message=f"🧹 Deleted branch {record['branch'] or 'unknown'} from {repo} (by {actor})",
+            )
+            return {"ok": True, "routed": "github.branch.deleted", "record": record}
 
         return {"ok": True, "routed": "no-op"}
