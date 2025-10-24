@@ -1,0 +1,148 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  deploy(id: ID!): Deploy
+  captionJob(id: ID!): CaptionJob
+  simulation(id: ID!): Simulation
+  captionArtifacts(jobId: ID!): [CaptionArtifact!]!
+  simulationArtifacts(simulationId: ID!): [SimulationArtifact!]!
+}
+
+type Mutation {
+  createDeploy(input: CreateDeployInput!): DeployMutationPayload!
+  promoteRelease(releaseId: ID!): PromoteReleasePayload!
+  startCaptionJob(input: StartCaptionJobInput!): CaptionJobMutationPayload!
+  runSimulation(input: RunSimulationInput!): SimulationMutationPayload!
+}
+
+type Deploy {
+  releaseId: ID!
+  status: DeployStatus!
+  serviceId: ID!
+  environment: DeployEnvironment!
+  auditId: ID!
+}
+
+type CaptionJob {
+  jobId: ID!
+  status: CaptionJobStatus!
+  submittedAt: DateTime!
+  completedAt: DateTime
+  artifacts: [CaptionArtifact!]!
+  error: CaptionJobError
+}
+
+type Simulation {
+  simulationId: ID!
+  status: SimulationStatus!
+  submittedAt: DateTime!
+  completedAt: DateTime
+  evidenceScore: Float
+  artifacts: [SimulationArtifact!]!
+}
+
+type CaptionArtifact {
+  type: CaptionArtifactType!
+  url: String!
+  checksum: String
+}
+
+type SimulationArtifact {
+  kind: String!
+  url: String!
+  mimeType: String!
+}
+
+type CaptionJobError {
+  code: String!
+  message: String!
+}
+
+type DeployMutationPayload {
+  deploy: Deploy!
+  auditEventId: ID!
+}
+
+type PromoteReleasePayload {
+  releaseId: ID!
+  status: DeployStatus!
+}
+
+type CaptionJobMutationPayload {
+  job: CaptionJob!
+  estimatedCompletionSeconds: Int!
+}
+
+type SimulationMutationPayload {
+  simulation: Simulation!
+}
+
+input CreateDeployInput {
+  serviceId: ID!
+  environment: DeployEnvironment!
+  gitRef: String!
+  metadata: JSON
+}
+
+input StartCaptionJobInput {
+  assetUrl: String!
+  sourceLanguage: String!
+  targetLanguages: [String!]!
+  backend: CaptionBackend = NATIVE
+}
+
+input RunSimulationInput {
+  scenario: SimulationScenario!
+  parameters: JSON!
+  seed: Int
+}
+
+enum DeployStatus {
+  PENDING
+  READY
+  PROMOTING
+  PROMOTED
+}
+
+enum DeployEnvironment {
+  STAGING
+  PRODUCTION
+}
+
+enum CaptionJobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum CaptionArtifactType {
+  VTT
+  SRT
+  TXT
+}
+
+enum CaptionBackend {
+  NATIVE
+  PREMIUM
+  EXPERIMENTAL
+}
+
+enum SimulationStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum SimulationScenario {
+  CASHFLOW
+  ADOPTION
+  REWARD_CURVE
+}
+
+scalar DateTime
+scalar JSON

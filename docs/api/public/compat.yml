@@ -1,0 +1,40 @@
+# Compatibility rules for the BlackRoad Public API.
+# This file is evaluated in CI to block breaking changes.
+
+rules:
+  - name: forbid-removing-paths
+    description: Removing a path is a breaking change.
+    match:
+      kind: path
+    changes:
+      removed: error
+  - name: forbid-removing-operations
+    description: Removing HTTP operations is a breaking change.
+    match:
+      kind: operation
+    changes:
+      removed: error
+  - name: forbid-response-contract-changes
+    description: Changing response schemas or status codes must be flagged.
+    match:
+      kind: response
+    changes:
+      removed: error
+      added:
+        level: warn
+      modified:
+        level: warn
+  - name: forbid-security-scheme-removal
+    description: Removing security schemes or scopes requires a major version.
+    match:
+      kind: securityScheme
+    changes:
+      removed: error
+  - name: webhook-contract-lock
+    description: Webhook payload shapes are contractually bound and cannot change silently.
+    match:
+      kind: webhook
+    changes:
+      removed: error
+      modified:
+        level: warn
