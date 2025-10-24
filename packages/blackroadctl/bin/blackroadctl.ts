@@ -4,6 +4,8 @@ import { runDeployCreate } from '../src/commands/deploy/create';
 import { runDeployPromote } from '../src/commands/deploy/promote';
 import { runOpsStatus } from '../src/commands/ops/status';
 import { runOpsIncidents } from '../src/commands/ops/incidents';
+import { runObsTail } from '../src/commands/obs/tail';
+import { runObsCorrelate } from '../src/commands/obs/correlate';
 import { configureTelemetry } from '../src/lib/telemetry';
 
 const program = new Command();
@@ -70,6 +72,30 @@ ops
   });
 
 program.addCommand(ops);
+
+const obs = new Command('obs').description('Observability mesh commands');
+
+obs
+  .command('tail')
+  .description('Stream mesh events via SSE')
+  .option('--filter <json>', 'JSON encoded EventFilter payload')
+  .option('--limit <n>', 'Maximum events to print', (value) => parseInt(value, 10))
+  .action(async (options) => {
+    const telemetry = configureTelemetry('obs.tail');
+    await runObsTail({ filter: options.filter, limit: options.limit, telemetry });
+  });
+
+obs
+  .command('correlate')
+  .description('Query correlated timelines for a key')
+  .requiredOption('--key <value>', 'Correlation key value')
+  .requiredOption('--keyType <type>', 'Correlation key type (traceId|releaseId|assetId|simId)')
+  .action(async (options) => {
+    const telemetry = configureTelemetry('obs.correlate');
+    await runObsCorrelate({ key: options.key, keyType: options.keyType, telemetry });
+  });
+
+program.addCommand(obs);
 
 program.parseAsync(process.argv).catch((error) => {
   console.error(error.message);
