@@ -13,4 +13,16 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests"]
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "tests"
+  ]
 }

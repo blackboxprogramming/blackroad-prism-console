@@ -7,4 +7,8 @@ export * from './powerlloyd/density';
 export * from './cahn-hilliard/semi_implicit';
 export * from './bridges/spectral_to_density';
 export * from './bridges/layout_to_phase';
+export * from './spectral';
+export * from './powerlloyd';
+export * from './cahn-hilliard';
+export * from './bridges';
 export * from './io/artifacts';

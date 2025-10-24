@@ -14,6 +14,10 @@ type CommandCapability =
   | 'chat:tail';
   | 'media:caption:create'
   | 'media:caption:status';
+  | 'graph:spectral'
+  | 'graph:layout'
+  | 'graph:phase'
+  | 'graph:bridge';
 
 type RoleMatrix = Record<CliConfig['role'], CommandCapability[]>;
 
@@ -49,6 +53,23 @@ const roleCapabilities: RoleMatrix = {
   operator: ['ops:status', 'ops:incidents', 'media:caption:create', 'media:caption:status'],
   viewer: ['ops:status', 'media:caption:status']
   viewer: ['ops:status', 'economy:evidence', 'economy:graph', 'obs:tail', 'chat:tail']
+    'graph:spectral',
+    'graph:layout',
+    'graph:phase',
+    'graph:bridge'
+  ],
+  operator: [
+    'ops:status',
+    'ops:incidents',
+    'economy:simulate',
+    'economy:evidence',
+    'economy:graph',
+    'graph:spectral',
+    'graph:layout',
+    'graph:phase',
+    'graph:bridge'
+  ],
+  viewer: ['ops:status', 'economy:evidence', 'economy:graph']
 };
 
 export function assertCapability(config: CliConfig, capability: CommandCapability) {
