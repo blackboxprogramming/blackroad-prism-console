@@ -1,0 +1,18 @@
+{
+  "type": "codex-prompt",
+  "id": "phase-42",
+  "slug": "blackroad-ecosystem-intelligence",
+  "title": "Phase 42 — BlackRoad Ecosystem Framework: Competitive Intelligence Automation",
+  "summary": "Orchestrate multi-agent research and synthesis across 8+ product categories using memory-aware orchestration and policy-safe outputs.",
+  "owner": "blackroad",
+  "tags": ["codex", "intel", "market-analysis", "blackroad"],
+  "model_hint": "Codex",
+  "temperature": 0,
+  "objectives": [
+    "Parse industry datasets and public reports into structured opportunity maps.",
+    "Quantify user frustration and switching intent per category.",
+    "Detect 'trust destruction moments'—policy violations, price hikes, or data scandals.",
+    "Produce executive-ready Markdown reports following the Competitive Intelligence template."
+  ]
+}
+

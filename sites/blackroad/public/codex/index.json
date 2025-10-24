@@ -5,6 +5,13 @@
       "slug": "phase-37-plm-manufacturing-ops",
       "title": "Phase 37 — PLM & MANUFACTURING OPS (BOMs, ECO/ECR, Routings, Work Instructions, SPC, Yield, COQ)",
       "summary": "Offline PLM & Manufacturing Ops layer for blackboxprogramming/blackroad-prism-console"
+    },
+    {
+      "id": "phase-42",
+      "slug": "blackroad-ecosystem-intelligence",
+      "title": "Phase 42 — BlackRoad Ecosystem Framework: Competitive Intelligence Automation",
+      "summary": "Orchestrate multi-agent research and synthesis across 8+ product categories using memory-aware orchestration and policy-safe outputs."
     }
   ]
 }
+
