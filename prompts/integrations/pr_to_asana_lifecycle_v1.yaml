@@ -1,0 +1,40 @@
+# --- CODEx PROMPT ---
+id: pr_to_asana_lifecycle_v1
+name: PR ↔ Asana Task
+owner: Ops
+systems_of_record: [GitHub, Asana, Slack]
+triggers: [webhook:github.pull_request.opened, webhook:github.pull_request.closed]
+secrets: [ASANA_PROJECT_ID, ASANA_TOKEN, SLACK_WEBHOOK_URL]
+risk_level: L1
+kpis: [created_tasks, completed_tasks, failures]
+# --------------------
+
+Goal
+----
+When a PR opens, create `PR: <title>` in Asana (notes = PR URL). When the PR merges, mark the task complete and post a Slack confirmation.
+
+Inputs
+------
+- pr.title
+- pr.url
+- pr.state (opened|closed)
+- asana.project_id
+
+Outputs
+-------
+- Asana task created for opened PRs
+- Asana task marked completed for merged PRs
+- Slack message posted to #dev-prs confirming completion
+
+Steps
+-----
+1. On `opened`, call `POST /tasks` with `{ name, notes, projects:[ASANA_PROJECT_ID] }`.
+2. Persist the resulting `task_gid` on the PR (e.g., comment or label `asana:<gid>`).
+3. On `closed` with merge, call `PUT /tasks/{gid}` with `{ completed: true }`.
+4. Post Slack message: `Merged ✅ ${pr.title} → ${asana_link}` to `#dev-prs`.
+
+Guardrails
+----------
+- If `ASANA_PROJECT_ID` is missing, fail fast and log the error.
+- Retry up to three times with exponential backoff; enforce idempotency by checking for existing PR URL.
+- Never expose secrets in logs or outbound notifications.

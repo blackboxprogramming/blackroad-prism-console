@@ -1,0 +1,40 @@
+# --- CODEx PROMPT ---
+id: investor_portal_digest_v1
+name: Investor Deck + KPI Digest
+owner: Exec
+systems_of_record: [Notion, Slack, Status]
+triggers: [cron:FRI@16:00-0500]
+secrets: []
+risk_level: L1
+kpis: [weekly_send_rate]
+# --------------------
+
+Goal
+----
+Generate and distribute a weekly investor summary covering product progress, uptime, and key risks while updating the investor deck.
+
+Inputs
+------
+- status.last7d
+- product.changelog
+- kpi.snapshots
+- risks.top3
+
+Outputs
+-------
+- Notion page under `/Investor Updates/YYYY-MM-DD`
+- Slide deck section titled “This Week” with 5–7 slides
+- Slack DM to investor list containing summary and link
+
+Steps
+-----
+1. Pull uptime metrics from status feeds and highlights from PRISM “What’s new” or the product changelog.
+2. Compile KPI snapshots and top risks into a structured Notion page for the current week.
+3. Append or regenerate the “This Week” slide section in the investor deck with visuals or bullet slides.
+4. Send a Slack DM to the investor distribution list summarizing highlights and linking to the Notion page and deck.
+
+Guardrails
+----------
+- Exclude revenue or sensitive financials unless `public_ok=true` is explicitly provided.
+- Maintain consistent titling and date formatting across Notion and slide artifacts.
+- Store generated assets in the investor workspace with proper permissions.
