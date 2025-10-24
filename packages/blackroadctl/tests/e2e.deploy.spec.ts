@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import ControlPlaneClient from '@blackroad/control-plane-sdk';
 import { runDeployCreate } from '../src/commands/deploy/create';
 

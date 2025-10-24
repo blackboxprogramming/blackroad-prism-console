@@ -7,10 +7,9 @@ type CommandCapability =
   | 'ops:incidents'
   | 'economy:simulate'
   | 'economy:evidence'
-  | 'economy:graph';
-  | 'obs:tail'
-  | 'obs:correlate';
   | 'economy:graph'
+  | 'obs:tail'
+  | 'obs:correlate'
   | 'chat:post'
   | 'chat:tail';
 
@@ -25,24 +24,23 @@ const roleCapabilities: RoleMatrix = {
     'economy:simulate',
     'economy:evidence',
     'economy:graph',
+    'obs:tail',
+    'obs:correlate',
     'chat:post',
     'chat:tail'
   ],
-  operator: ['ops:status', 'ops:incidents', 'economy:simulate', 'economy:evidence', 'economy:graph'],
-  viewer: ['ops:status', 'economy:evidence', 'economy:graph']
-  deployer: ['deploy:create', 'deploy:promote', 'ops:status', 'ops:incidents', 'obs:tail', 'obs:correlate'],
-  operator: ['ops:status', 'ops:incidents', 'obs:tail', 'obs:correlate'],
-  viewer: ['ops:status', 'obs:tail']
   operator: [
     'ops:status',
     'ops:incidents',
     'economy:simulate',
     'economy:evidence',
     'economy:graph',
+    'obs:tail',
+    'obs:correlate',
     'chat:post',
     'chat:tail'
   ],
-  viewer: ['ops:status', 'economy:evidence', 'economy:graph', 'chat:tail']
+  viewer: ['ops:status', 'economy:evidence', 'economy:graph', 'obs:tail', 'chat:tail']
 };
 
 export function assertCapability(config: CliConfig, capability: CommandCapability) {

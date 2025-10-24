@@ -1,0 +1,56 @@
+name: HJB Lab CI
+
+on:
+  push:
+    paths:
+      - 'packages/hjb-engine/**'
+      - 'packages/hjb-gateway/**'
+      - 'packages/blackroadctl/**'
+      - 'sites/blackroad/**'
+      - 'docs/rfc/0015-hjb-lab-pde-and-mdp.md'
+      - 'docs/guides/hjb-getting-started.md'
+      - '.github/workflows/hjb-ci.yml'
+  pull_request:
+    paths:
+      - 'packages/hjb-engine/**'
+      - 'packages/hjb-gateway/**'
+      - 'packages/blackroadctl/**'
+      - 'sites/blackroad/**'
+      - 'docs/rfc/0015-hjb-lab-pde-and-mdp.md'
+      - 'docs/guides/hjb-getting-started.md'
+      - '.github/workflows/hjb-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install root dependencies
+        run: npm install
+      - name: Install hjb-engine dependencies
+        run: npm install
+        working-directory: packages/hjb-engine
+      - name: Install hjb-gateway dependencies
+        run: npm install
+        working-directory: packages/hjb-gateway
+      - name: Install blackroadctl dependencies
+        run: npm install
+        working-directory: packages/blackroadctl
+      - name: Install site dependencies
+        run: npm install
+        working-directory: sites/blackroad
+      - name: Test hjb-engine
+        run: npm test
+        working-directory: packages/hjb-engine
+      - name: Test hjb-gateway
+        run: npm test
+        working-directory: packages/hjb-gateway
+      - name: Test blackroadctl
+        run: npm test -- --runInBand
+        working-directory: packages/blackroadctl
+      - name: Lint site
+        run: npm run lint
+        working-directory: sites/blackroad

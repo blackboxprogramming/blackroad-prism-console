@@ -15,6 +15,8 @@ import { runSinkhornCli } from '../src/commands/ot/sb-run';
 import { runSinkhornFrames } from '../src/commands/ot/sb-frames';
 import { runChatPost } from '../src/commands/chat/post';
 import { runChatTail } from '../src/commands/chat/tail';
+import { runHjbSolve } from '../src/commands/control/hjb-solve';
+import { runHjbRollout } from '../src/commands/control/hjb-rollout';
 
 const program = new Command();
 program
@@ -160,6 +162,39 @@ ot
   });
 
 program.addCommand(ot);
+
+const control = new Command('control').description('Control lab workflows');
+
+control
+  .command('hjb-solve')
+  .description('Solve a PDE or MDP configuration and export artifacts')
+  .requiredOption('--config <file>', 'Configuration JSON file')
+  .action(async (options) => {
+    const telemetry = configureTelemetry('control.hjb-solve');
+    await runHjbSolve({ configPath: options.config, telemetry });
+  });
+
+control
+  .command('hjb-rollout')
+  .description('Simulate a rollout using an HJB configuration')
+  .requiredOption('--config <file>', 'Configuration JSON file')
+  .option('--start <values>', 'Comma separated start state')
+  .option('--steps <n>', 'Number of steps', (value) => parseInt(value, 10))
+  .option('--dt <value>', 'Time step', parseFloat)
+  .option('--out <dir>', 'Output directory for rollout artifact')
+  .action(async (options) => {
+    const telemetry = configureTelemetry('control.hjb-rollout');
+    await runHjbRollout({
+      configPath: options.config,
+      start: options.start,
+      steps: options.steps,
+      dt: options.dt,
+      out: options.out,
+      telemetry
+    });
+  });
+
+program.addCommand(control);
 const obs = new Command('obs').description('Observability mesh commands');
 
 obs
