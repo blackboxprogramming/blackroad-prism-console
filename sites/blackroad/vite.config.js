@@ -4,6 +4,12 @@ import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@chat-sdk': resolve(__dirname, '../../packages/chat-sdk/src/client.ts'),
+      '@blackroad/chat-sdk': resolve(__dirname, '../../packages/chat-sdk/src/client.ts'),
+    },
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,

@@ -13,6 +13,8 @@ import { runEconomyEvidence } from '../src/commands/economy/evidence';
 import { runEconomyGraph } from '../src/commands/economy/graph';
 import { runSinkhornCli } from '../src/commands/ot/sb-run';
 import { runSinkhornFrames } from '../src/commands/ot/sb-frames';
+import { runChatPost } from '../src/commands/chat/post';
+import { runChatTail } from '../src/commands/chat/tail';
 
 const program = new Command();
 program
@@ -181,6 +183,39 @@ obs
   });
 
 program.addCommand(obs);
+const chat = new Command('chat').description('Collaborate with job threads');
+
+chat
+  .command('post')
+  .description('Post a message into a job thread')
+  .requiredOption('--job <id>', 'Job identifier')
+  .requiredOption('--text <message>', 'Message to post')
+  .option('--attachment <kind:url>', 'Attachment to include', (value, previous) => {
+    if (previous) {
+      return [...previous, value];
+    }
+    return [value];
+  })
+  .action(async (options) => {
+    const telemetry = configureTelemetry('chat.post');
+    await runChatPost({
+      jobId: options.job,
+      text: options.text,
+      attachments: options.attachment,
+      telemetry,
+    });
+  });
+
+chat
+  .command('tail')
+  .description('Stream chat events for a job')
+  .option('--job <id>', 'Job identifier (defaults to all jobs)')
+  .action(async (options) => {
+    const telemetry = configureTelemetry('chat.tail');
+    await runChatTail({ jobId: options.job, telemetry });
+  });
+
+program.addCommand(chat);
 
 program.parseAsync(process.argv).catch((error) => {
   console.error(error.message);

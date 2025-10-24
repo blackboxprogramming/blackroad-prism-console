@@ -1,0 +1,103 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ArtifactViewer > renders deterministic artifact layout 1`] = `
+<div
+  class="flex h-full flex-col rounded-lg border border-slate-200 bg-white shadow-sm"
+>
+  <div
+    class="flex items-center justify-between border-b border-slate-200 px-4 py-2"
+  >
+    <div>
+      <h2
+        class="text-sm font-semibold text-slate-900"
+      >
+        Artifacts
+      </h2>
+      <p
+        class="text-xs text-slate-500"
+      >
+        Job 
+        demo
+      </p>
+    </div>
+    <a
+      class="rounded border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 shadow hover:bg-slate-100"
+      href="/static/frame1.png"
+      rel="noreferrer"
+      target="_blank"
+    >
+      Download
+    </a>
+  </div>
+  <div
+    class="flex flex-1 overflow-hidden"
+  >
+    <aside
+      class="w-48 border-r border-slate-200 bg-slate-50"
+    >
+      <ul
+        class="max-h-full overflow-auto text-sm"
+      >
+        <li>
+          <button
+            class="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-slate-100 bg-slate-200 font-semibold"
+            type="button"
+          >
+            <span>
+              Frame 1
+            </span>
+            <span
+              class="text-xs uppercase text-slate-500"
+            >
+              image
+            </span>
+          </button>
+        </li>
+        <li>
+          <button
+            class="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-slate-100 text-slate-700"
+            type="button"
+          >
+            <span>
+              Metrics
+            </span>
+            <span
+              class="text-xs uppercase text-slate-500"
+            >
+              table
+            </span>
+          </button>
+        </li>
+        <li>
+          <button
+            class="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-slate-100 text-slate-700"
+            type="button"
+          >
+            <span>
+              Config
+            </span>
+            <span
+              class="text-xs uppercase text-slate-500"
+            >
+              json
+            </span>
+          </button>
+        </li>
+      </ul>
+    </aside>
+    <div
+      class="flex-1 overflow-auto p-4"
+    >
+      <figure
+        class="flex h-full w-full flex-col items-center justify-center gap-3"
+      >
+        <img
+          alt="Frame 1"
+          class="max-h-[480px] max-w-full rounded border border-slate-200 object-contain shadow"
+          src="/static/frame1.png"
+        />
+      </figure>
+    </div>
+  </div>
+</div>
+`;
