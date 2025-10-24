@@ -1,0 +1,24 @@
+{
+  "name": "@blackroad/sb-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "@blackroad/sb-engine": "workspace:*",
+    "@graphql-tools/schema": "^10.0.12",
+    "@opentelemetry/api": "^1.9.0",
+    "graphql": "^16.9.0",
+    "nanoid": "^5.0.7"
+  },
+  "devDependencies": {
+    "ts-jest": "^29.2.5"
+  }
+}
