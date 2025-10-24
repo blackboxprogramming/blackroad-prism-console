@@ -1,12 +1,10 @@
 # BlackRoad API Bridge — production image
-
 FROM node:20-alpine AS base
 WORKDIR /app
 ENV NODE_ENV=production PORT=4000
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev
-COPY server.mjs healthcheck.mjs ./
-
+COPY server.mjs healthcheck.mjs telemetry.mjs ./
 # tiny runtime
 FROM node:20-alpine
 WORKDIR /app
