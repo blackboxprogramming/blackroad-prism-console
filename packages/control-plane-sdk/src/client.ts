@@ -1,3 +1,4 @@
+import { CaptionsClient } from './captions';
 import { AuditEvent, DeployCreateInput, DeployPromoteInput, Incident, Release, Service, StatusSummary } from './types';
 
 export interface ControlPlaneClientOptions {
@@ -112,6 +113,15 @@ export class ControlPlaneClient {
       { serviceId, limit }
     );
     return result.auditTail;
+  }
+
+  captions(): CaptionsClient {
+    return new CaptionsClient({
+      endpoint: this.endpoint,
+      token: this.token,
+      devToken: this.devToken,
+      fetchImpl: this.fetchImpl
+    });
   }
 
   private async request<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
