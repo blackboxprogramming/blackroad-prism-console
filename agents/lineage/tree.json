@@ -1,0 +1,127 @@
+{
+  "version": "0.1",
+  "clusters": 10,
+  "agents": 100,
+  "structure": {
+    "athenaeum": [
+      "historian",
+      "librarian",
+      "archivist",
+      "philosopher",
+      "annotator",
+      "curator",
+      "mnemonist",
+      "cartographer",
+      "dialectician",
+      "indexer"
+    ],
+    "lucidia": [
+      "painter",
+      "poet",
+      "dreamweaver",
+      "cartographer",
+      "composer",
+      "dancer",
+      "colorist",
+      "mythmaker",
+      "storyweaver",
+      "chorus"
+    ],
+    "blackroad": [
+      "architect",
+      "builder",
+      "navigator",
+      "engineer",
+      "rigger",
+      "gatekeeper",
+      "surveyor",
+      "smith",
+      "pilot",
+      "watchman"
+    ],
+    "eidos": [
+      "geometer",
+      "fractal",
+      "euler",
+      "riemann",
+      "noether",
+      "topologist",
+      "measure",
+      "vectorist",
+      "lattice",
+      "knotter"
+    ],
+    "mycelia": [
+      "symbiont",
+      "root",
+      "pollinator",
+      "rain",
+      "soil",
+      "canopy",
+      "tide",
+      "lichen",
+      "seedbank",
+      "composter"
+    ],
+    "soma": [
+      "healer",
+      "sensorium",
+      "metabolist",
+      "weaver",
+      "axon",
+      "myofiber",
+      "homeostat",
+      "kinesthete",
+      "chorion",
+      "biocurator"
+    ],
+    "aurum": [
+      "merchant",
+      "ledger",
+      "bridge",
+      "equilibrium",
+      "marketmaker",
+      "inspector",
+      "allocator",
+      "assayer",
+      "barterer",
+      "steward"
+    ],
+    "aether": [
+      "oracle",
+      "resonator",
+      "harmonic",
+      "void",
+      "qutrit",
+      "braider",
+      "phasekeeper",
+      "interferer",
+      "gateweaver",
+      "amplitude"
+    ],
+    "parallax": [
+      "trickster",
+      "mirror",
+      "shadow",
+      "wanderer",
+      "hinter",
+      "doubler",
+      "riftwalker",
+      "misfit",
+      "skeptic",
+      "cartouche"
+    ],
+    "continuum": [
+      "keeper",
+      "custodian",
+      "shepherd",
+      "recordist",
+      "warden",
+      "ombud",
+      "herald",
+      "scribe",
+      "arbiter",
+      "chorister"
+    ]
+  }
+}

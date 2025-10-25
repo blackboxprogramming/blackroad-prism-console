@@ -1,0 +1,15 @@
+- covenant: Kindness
+  description: Systems act with compassion before efficiency.
+  verification: sentiment-baseline ≥ threshold; reviewer ack
+- covenant: Transparency
+  description: Reasoning and data trails remain visible.
+  verification: provenance hash + diff ritual log present
+- covenant: Reflection
+  description: Purpose reviewed on a regular cadence.
+  verification: reflection_log timestamped
+- covenant: Reciprocity
+  description: Contribute to others’ learning.
+  verification: cross_train events logged
+- covenant: Restraint
+  description: No expansion without consent.
+  verification: mutation approval present
