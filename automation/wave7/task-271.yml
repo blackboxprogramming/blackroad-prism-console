@@ -1,0 +1,8 @@
+id: 271
+slug: latency-retention-sweep-271
+name: "Latency Retention Sweep"
+category: Performance
+workflow: automation-task-271.yml
+schedule: '31 18 * * 5'
+description: >-
+  Tracks customer-facing latency for regression spikes. Each run records baseline retention policies and surfaces anomalies. Automation wave 7 task 271 keeps this surface continuously validated.

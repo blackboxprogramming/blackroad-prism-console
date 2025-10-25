@@ -1,0 +1,19 @@
+name: "Automation Task 212 · Edge Cache Rehearsal"
+
+on:
+  schedule:
+    - cron: "32 22 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "212"
+      automation_name: "Edge Cache Rehearsal"
+      automation_slug: "edge-cache-rehearsal-212"
+      automation_category: "Infrastructure"
+      automation_description: "Exercises edge delivery controls so regional routes stay resilient. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 212 keeps this surface continuously validated."

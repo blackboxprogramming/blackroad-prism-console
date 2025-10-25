@@ -1,0 +1,19 @@
+name: "Automation Task 252 · Pipeline Cache Rehearsal"
+
+on:
+  schedule:
+    - cron: "12 12 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "252"
+      automation_name: "Pipeline Cache Rehearsal"
+      automation_slug: "pipeline-cache-rehearsal-252"
+      automation_category: "Data"
+      automation_description: "Verifies data processing pipelines stay healthy and timely. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 252 keeps this surface continuously validated."

@@ -1,0 +1,8 @@
+id: 208
+slug: telemetry-regression-scan-208
+name: "Telemetry Regression Scan"
+category: Observability
+workflow: automation-task-208.yml
+schedule: '28 21 * * 5'
+description: >-
+  Keeps telemetry baselines aligned with golden signal thresholds. Each run runs regression scans focused on critical metrics and flows. Automation wave 7 task 208 keeps this surface continuously validated.

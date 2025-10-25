@@ -1,0 +1,8 @@
+id: 219
+slug: edge-recovery-drill-219
+name: "Edge Recovery Drill"
+category: Infrastructure
+workflow: automation-task-219.yml
+schedule: '39 01 * * 2'
+description: >-
+  Exercises edge delivery controls so regional routes stay resilient. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 219 keeps this surface continuously validated.

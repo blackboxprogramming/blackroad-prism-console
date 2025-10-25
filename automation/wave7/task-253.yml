@@ -1,0 +1,8 @@
+id: 253
+slug: pipeline-review-cadence-253
+name: "Pipeline Review Cadence"
+category: Data
+workflow: automation-task-253.yml
+schedule: '13 12 * * 1'
+description: >-
+  Verifies data processing pipelines stay healthy and timely. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 253 keeps this surface continuously validated.

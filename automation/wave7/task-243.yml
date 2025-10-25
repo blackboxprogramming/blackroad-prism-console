@@ -1,0 +1,8 @@
+id: 243
+slug: artifact-review-cadence-243
+name: "Artifact Review Cadence"
+category: Release
+workflow: automation-task-243.yml
+schedule: '03 09 * * 5'
+description: >-
+  Confirms build artifacts remain reproducible, signed, and traceable. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 243 keeps this surface continuously validated.

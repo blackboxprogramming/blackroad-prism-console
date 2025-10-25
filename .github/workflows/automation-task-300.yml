@@ -1,0 +1,19 @@
+name: "Automation Task 300 · Cost Forecast Update"
+
+on:
+  schedule:
+    - cron: "00 04 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "300"
+      automation_name: "Cost Forecast Update"
+      automation_slug: "cost-forecast-update-300"
+      automation_category: "FinOps"
+      automation_description: "Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 300 keeps this surface continuously validated."

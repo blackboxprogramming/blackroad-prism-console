@@ -1,0 +1,19 @@
+name: "Automation Task 284 · Resiliency Rotation Drill"
+
+on:
+  schedule:
+    - cron: "44 22 * * 4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "284"
+      automation_name: "Resiliency Rotation Drill"
+      automation_slug: "resiliency-rotation-drill-284"
+      automation_category: "Reliability"
+      automation_description: "Exercises failover paths and disaster recovery hooks. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 284 keeps this surface continuously validated."

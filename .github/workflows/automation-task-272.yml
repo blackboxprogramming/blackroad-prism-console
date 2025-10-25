@@ -1,0 +1,19 @@
+name: "Automation Task 272 · Latency Cache Rehearsal"
+
+on:
+  schedule:
+    - cron: "32 18 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "272"
+      automation_name: "Latency Cache Rehearsal"
+      automation_slug: "latency-cache-rehearsal-272"
+      automation_category: "Performance"
+      automation_description: "Tracks customer-facing latency for regression spikes. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 272 keeps this surface continuously validated."

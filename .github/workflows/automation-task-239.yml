@@ -1,0 +1,19 @@
+name: "Automation Task 239 · Secrets Recovery Drill"
+
+on:
+  schedule:
+    - cron: "59 07 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "239"
+      automation_name: "Secrets Recovery Drill"
+      automation_slug: "secrets-recovery-drill-239"
+      automation_category: "Security"
+      automation_description: "Checks rotation cadence and secret hygiene across managed vaults. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 239 keeps this surface continuously validated."

@@ -1,0 +1,8 @@
+id: 227
+slug: access-validation-sweep-227
+name: "Access Validation Sweep"
+category: Security
+workflow: automation-task-227.yml
+schedule: '47 03 * * 3'
+description: >-
+  Validates identity guardrails across federation and entitlement layers. Each run executes validation suites to detect drift or breaking changes. Automation wave 7 task 227 keeps this surface continuously validated.

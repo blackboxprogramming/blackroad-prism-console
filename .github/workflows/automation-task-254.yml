@@ -1,0 +1,19 @@
+name: "Automation Task 254 · Pipeline Rotation Drill"
+
+on:
+  schedule:
+    - cron: "14 12 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "254"
+      automation_name: "Pipeline Rotation Drill"
+      automation_slug: "pipeline-rotation-drill-254"
+      automation_category: "Data"
+      automation_description: "Verifies data processing pipelines stay healthy and timely. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 254 keeps this surface continuously validated."

@@ -1,0 +1,19 @@
+name: "Automation Task 223 · Access Review Cadence"
+
+on:
+  schedule:
+    - cron: "43 02 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "223"
+      automation_name: "Access Review Cadence"
+      automation_slug: "access-review-cadence-223"
+      automation_category: "Security"
+      automation_description: "Validates identity guardrails across federation and entitlement layers. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 223 keeps this surface continuously validated."

@@ -1,0 +1,8 @@
+id: 274
+slug: latency-rotation-drill-274
+name: "Latency Rotation Drill"
+category: Performance
+workflow: automation-task-274.yml
+schedule: '34 19 * * 1'
+description: >-
+  Tracks customer-facing latency for regression spikes. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 274 keeps this surface continuously validated.

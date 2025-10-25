@@ -1,0 +1,19 @@
+name: "Automation Task 266 · Schema Health Audit"
+
+on:
+  schedule:
+    - cron: "26 16 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "266"
+      automation_name: "Schema Health Audit"
+      automation_slug: "schema-health-audit-266"
+      automation_category: "Data"
+      automation_description: "Catches schema drift across contract-managed APIs and storage. Each run audits health reports and emits targeted follow-up actions. Automation wave 7 task 266 keeps this surface continuously validated."

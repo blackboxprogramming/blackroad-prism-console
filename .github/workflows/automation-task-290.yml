@@ -1,0 +1,19 @@
+name: "Automation Task 290 · Resiliency Forecast Update"
+
+on:
+  schedule:
+    - cron: "50 00 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "290"
+      automation_name: "Resiliency Forecast Update"
+      automation_slug: "resiliency-forecast-update-290"
+      automation_category: "Reliability"
+      automation_description: "Exercises failover paths and disaster recovery hooks. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 290 keeps this surface continuously validated."

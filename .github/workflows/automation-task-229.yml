@@ -1,0 +1,19 @@
+name: "Automation Task 229 · Access Recovery Drill"
+
+on:
+  schedule:
+    - cron: "49 04 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "229"
+      automation_name: "Access Recovery Drill"
+      automation_slug: "access-recovery-drill-229"
+      automation_category: "Security"
+      automation_description: "Validates identity guardrails across federation and entitlement layers. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 229 keeps this surface continuously validated."

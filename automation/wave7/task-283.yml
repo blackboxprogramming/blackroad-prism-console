@@ -1,0 +1,8 @@
+id: 283
+slug: resiliency-review-cadence-283
+name: "Resiliency Review Cadence"
+category: Reliability
+workflow: automation-task-283.yml
+schedule: '43 22 * * 3'
+description: >-
+  Exercises failover paths and disaster recovery hooks. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 283 keeps this surface continuously validated.

@@ -1,0 +1,8 @@
+id: 259
+slug: pipeline-recovery-drill-259
+name: "Pipeline Recovery Drill"
+category: Data
+workflow: automation-task-259.yml
+schedule: '19 14 * * 0'
+description: >-
+  Verifies data processing pipelines stay healthy and timely. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 259 keeps this surface continuously validated.

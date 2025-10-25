@@ -1,0 +1,8 @@
+id: 220
+slug: edge-forecast-update-220
+name: "Edge Forecast Update"
+category: Infrastructure
+workflow: automation-task-220.yml
+schedule: '40 01 * * 3'
+description: >-
+  Exercises edge delivery controls so regional routes stay resilient. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 220 keeps this surface continuously validated.

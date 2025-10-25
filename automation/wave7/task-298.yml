@@ -1,0 +1,8 @@
+id: 298
+slug: cost-regression-scan-298
+name: "Cost Regression Scan"
+category: FinOps
+workflow: automation-task-298.yml
+schedule: '58 03 * * 4'
+description: >-
+  Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run runs regression scans focused on critical metrics and flows. Automation wave 7 task 298 keeps this surface continuously validated.

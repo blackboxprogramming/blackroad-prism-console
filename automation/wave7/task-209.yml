@@ -1,0 +1,8 @@
+id: 209
+slug: telemetry-recovery-drill-209
+name: "Telemetry Recovery Drill"
+category: Observability
+workflow: automation-task-209.yml
+schedule: '29 21 * * 6'
+description: >-
+  Keeps telemetry baselines aligned with golden signal thresholds. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 209 keeps this surface continuously validated.

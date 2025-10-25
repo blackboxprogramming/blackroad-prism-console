@@ -1,0 +1,8 @@
+id: 229
+slug: access-recovery-drill-229
+name: "Access Recovery Drill"
+category: Security
+workflow: automation-task-229.yml
+schedule: '49 04 * * 5'
+description: >-
+  Validates identity guardrails across federation and entitlement layers. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 229 keeps this surface continuously validated.

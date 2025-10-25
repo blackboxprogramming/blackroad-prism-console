@@ -1,0 +1,8 @@
+id: 300
+slug: cost-forecast-update-300
+name: "Cost Forecast Update"
+category: FinOps
+workflow: automation-task-300.yml
+schedule: '00 04 * * 6'
+description: >-
+  Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 300 keeps this surface continuously validated.

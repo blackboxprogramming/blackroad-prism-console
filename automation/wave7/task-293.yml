@@ -1,0 +1,8 @@
+id: 293
+slug: cost-review-cadence-293
+name: "Cost Review Cadence"
+category: FinOps
+workflow: automation-task-293.yml
+schedule: '53 01 * * 6'
+description: >-
+  Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 293 keeps this surface continuously validated.

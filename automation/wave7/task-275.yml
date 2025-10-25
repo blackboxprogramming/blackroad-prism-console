@@ -1,0 +1,8 @@
+id: 275
+slug: latency-catalog-sync-275
+name: "Latency Catalog Sync"
+category: Performance
+workflow: automation-task-275.yml
+schedule: '35 19 * * 2'
+description: >-
+  Tracks customer-facing latency for regression spikes. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 275 keeps this surface continuously validated.

@@ -1,0 +1,8 @@
+id: 245
+slug: artifact-catalog-sync-245
+name: "Artifact Catalog Sync"
+category: Release
+workflow: automation-task-245.yml
+schedule: '05 09 * * 0'
+description: >-
+  Confirms build artifacts remain reproducible, signed, and traceable. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 245 keeps this surface continuously validated.

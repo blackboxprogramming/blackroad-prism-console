@@ -1,0 +1,8 @@
+id: 210
+slug: telemetry-forecast-update-210
+name: "Telemetry Forecast Update"
+category: Observability
+workflow: automation-task-210.yml
+schedule: '30 22 * * 0'
+description: >-
+  Keeps telemetry baselines aligned with golden signal thresholds. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 210 keeps this surface continuously validated.

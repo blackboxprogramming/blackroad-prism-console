@@ -1,0 +1,19 @@
+name: "Automation Task 278 · Latency Regression Scan"
+
+on:
+  schedule:
+    - cron: "38 20 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "278"
+      automation_name: "Latency Regression Scan"
+      automation_slug: "latency-regression-scan-278"
+      automation_category: "Performance"
+      automation_description: "Tracks customer-facing latency for regression spikes. Each run runs regression scans focused on critical metrics and flows. Automation wave 7 task 278 keeps this surface continuously validated."

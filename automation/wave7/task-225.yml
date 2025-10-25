@@ -1,0 +1,8 @@
+id: 225
+slug: access-catalog-sync-225
+name: "Access Catalog Sync"
+category: Security
+workflow: automation-task-225.yml
+schedule: '45 03 * * 1'
+description: >-
+  Validates identity guardrails across federation and entitlement layers. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 225 keeps this surface continuously validated.

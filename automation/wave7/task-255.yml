@@ -1,0 +1,8 @@
+id: 255
+slug: pipeline-catalog-sync-255
+name: "Pipeline Catalog Sync"
+category: Data
+workflow: automation-task-255.yml
+schedule: '15 13 * * 3'
+description: >-
+  Verifies data processing pipelines stay healthy and timely. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 255 keeps this surface continuously validated.

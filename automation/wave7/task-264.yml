@@ -1,0 +1,8 @@
+id: 264
+slug: schema-rotation-drill-264
+name: "Schema Rotation Drill"
+category: Data
+workflow: automation-task-264.yml
+schedule: '24 16 * * 5'
+description: >-
+  Catches schema drift across contract-managed APIs and storage. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 264 keeps this surface continuously validated.

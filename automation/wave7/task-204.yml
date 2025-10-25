@@ -1,0 +1,8 @@
+id: 204
+slug: telemetry-rotation-drill-204
+name: "Telemetry Rotation Drill"
+category: Observability
+workflow: automation-task-204.yml
+schedule: '24 20 * * 1'
+description: >-
+  Keeps telemetry baselines aligned with golden signal thresholds. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 204 keeps this surface continuously validated.

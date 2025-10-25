@@ -1,0 +1,8 @@
+id: 240
+slug: secrets-forecast-update-240
+name: "Secrets Forecast Update"
+category: Security
+workflow: automation-task-240.yml
+schedule: '00 08 * * 2'
+description: >-
+  Checks rotation cadence and secret hygiene across managed vaults. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 240 keeps this surface continuously validated.

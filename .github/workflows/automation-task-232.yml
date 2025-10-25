@@ -1,0 +1,19 @@
+name: "Automation Task 232 · Secrets Cache Rehearsal"
+
+on:
+  schedule:
+    - cron: "52 05 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "232"
+      automation_name: "Secrets Cache Rehearsal"
+      automation_slug: "secrets-cache-rehearsal-232"
+      automation_category: "Security"
+      automation_description: "Checks rotation cadence and secret hygiene across managed vaults. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 232 keeps this surface continuously validated."

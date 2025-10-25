@@ -1,0 +1,8 @@
+id: 263
+slug: schema-review-cadence-263
+name: "Schema Review Cadence"
+category: Data
+workflow: automation-task-263.yml
+schedule: '23 15 * * 4'
+description: >-
+  Catches schema drift across contract-managed APIs and storage. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 263 keeps this surface continuously validated.

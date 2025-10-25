@@ -1,0 +1,19 @@
+name: "Automation Task 251 · Pipeline Retention Sweep"
+
+on:
+  schedule:
+    - cron: "11 11 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "251"
+      automation_name: "Pipeline Retention Sweep"
+      automation_slug: "pipeline-retention-sweep-251"
+      automation_category: "Data"
+      automation_description: "Verifies data processing pipelines stay healthy and timely. Each run records baseline retention policies and surfaces anomalies. Automation wave 7 task 251 keeps this surface continuously validated."

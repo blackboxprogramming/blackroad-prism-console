@@ -1,0 +1,19 @@
+name: "Automation Task 234 · Secrets Rotation Drill"
+
+on:
+  schedule:
+    - cron: "54 06 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "234"
+      automation_name: "Secrets Rotation Drill"
+      automation_slug: "secrets-rotation-drill-234"
+      automation_category: "Security"
+      automation_description: "Checks rotation cadence and secret hygiene across managed vaults. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 234 keeps this surface continuously validated."

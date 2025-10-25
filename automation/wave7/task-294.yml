@@ -1,0 +1,8 @@
+id: 294
+slug: cost-rotation-drill-294
+name: "Cost Rotation Drill"
+category: FinOps
+workflow: automation-task-294.yml
+schedule: '54 02 * * 0'
+description: >-
+  Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 294 keeps this surface continuously validated.

@@ -1,0 +1,19 @@
+name: "Automation Task 282 · Resiliency Cache Rehearsal"
+
+on:
+  schedule:
+    - cron: "42 22 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "282"
+      automation_name: "Resiliency Cache Rehearsal"
+      automation_slug: "resiliency-cache-rehearsal-282"
+      automation_category: "Reliability"
+      automation_description: "Exercises failover paths and disaster recovery hooks. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 282 keeps this surface continuously validated."

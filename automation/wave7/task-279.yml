@@ -1,0 +1,8 @@
+id: 279
+slug: latency-recovery-drill-279
+name: "Latency Recovery Drill"
+category: Performance
+workflow: automation-task-279.yml
+schedule: '39 21 * * 6'
+description: >-
+  Tracks customer-facing latency for regression spikes. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 279 keeps this surface continuously validated.

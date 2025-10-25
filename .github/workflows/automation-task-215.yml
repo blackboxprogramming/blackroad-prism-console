@@ -1,0 +1,19 @@
+name: "Automation Task 215 · Edge Catalog Sync"
+
+on:
+  schedule:
+    - cron: "35 23 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "215"
+      automation_name: "Edge Catalog Sync"
+      automation_slug: "edge-catalog-sync-215"
+      automation_category: "Infrastructure"
+      automation_description: "Exercises edge delivery controls so regional routes stay resilient. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 215 keeps this surface continuously validated."

@@ -1,0 +1,8 @@
+id: 231
+slug: secrets-retention-sweep-231
+name: "Secrets Retention Sweep"
+category: Security
+workflow: automation-task-231.yml
+schedule: '51 05 * * 0'
+description: >-
+  Checks rotation cadence and secret hygiene across managed vaults. Each run records baseline retention policies and surfaces anomalies. Automation wave 7 task 231 keeps this surface continuously validated.

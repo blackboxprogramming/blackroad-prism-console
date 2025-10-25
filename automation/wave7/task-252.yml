@@ -1,0 +1,8 @@
+id: 252
+slug: pipeline-cache-rehearsal-252
+name: "Pipeline Cache Rehearsal"
+category: Data
+workflow: automation-task-252.yml
+schedule: '12 12 * * 0'
+description: >-
+  Verifies data processing pipelines stay healthy and timely. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 252 keeps this surface continuously validated.

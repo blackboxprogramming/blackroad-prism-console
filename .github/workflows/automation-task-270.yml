@@ -1,0 +1,19 @@
+name: "Automation Task 270 · Schema Forecast Update"
+
+on:
+  schedule:
+    - cron: "30 18 * * 4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "270"
+      automation_name: "Schema Forecast Update"
+      automation_slug: "schema-forecast-update-270"
+      automation_category: "Data"
+      automation_description: "Catches schema drift across contract-managed APIs and storage. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 270 keeps this surface continuously validated."

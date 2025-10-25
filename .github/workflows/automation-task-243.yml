@@ -1,0 +1,19 @@
+name: "Automation Task 243 · Artifact Review Cadence"
+
+on:
+  schedule:
+    - cron: "03 09 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "243"
+      automation_name: "Artifact Review Cadence"
+      automation_slug: "artifact-review-cadence-243"
+      automation_category: "Release"
+      automation_description: "Confirms build artifacts remain reproducible, signed, and traceable. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 243 keeps this surface continuously validated."

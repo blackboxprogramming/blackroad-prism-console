@@ -1,0 +1,8 @@
+id: 201
+slug: telemetry-retention-sweep-201
+name: "Telemetry Retention Sweep"
+category: Observability
+workflow: automation-task-201.yml
+schedule: '21 19 * * 5'
+description: >-
+  Keeps telemetry baselines aligned with golden signal thresholds. Each run records baseline retention policies and surfaces anomalies. Automation wave 7 task 201 keeps this surface continuously validated.

@@ -1,0 +1,19 @@
+name: "Automation Task 222 · Access Cache Rehearsal"
+
+on:
+  schedule:
+    - cron: "42 02 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "222"
+      automation_name: "Access Cache Rehearsal"
+      automation_slug: "access-cache-rehearsal-222"
+      automation_category: "Security"
+      automation_description: "Validates identity guardrails across federation and entitlement layers. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 222 keeps this surface continuously validated."

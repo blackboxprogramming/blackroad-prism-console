@@ -1,0 +1,8 @@
+id: 282
+slug: resiliency-cache-rehearsal-282
+name: "Resiliency Cache Rehearsal"
+category: Reliability
+workflow: automation-task-282.yml
+schedule: '42 22 * * 2'
+description: >-
+  Exercises failover paths and disaster recovery hooks. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 282 keeps this surface continuously validated.

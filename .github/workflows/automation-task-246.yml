@@ -1,0 +1,19 @@
+name: "Automation Task 246 · Artifact Health Audit"
+
+on:
+  schedule:
+    - cron: "06 10 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "246"
+      automation_name: "Artifact Health Audit"
+      automation_slug: "artifact-health-audit-246"
+      automation_category: "Release"
+      automation_description: "Confirms build artifacts remain reproducible, signed, and traceable. Each run audits health reports and emits targeted follow-up actions. Automation wave 7 task 246 keeps this surface continuously validated."

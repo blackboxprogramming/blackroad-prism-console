@@ -1,0 +1,8 @@
+id: 233
+slug: secrets-review-cadence-233
+name: "Secrets Review Cadence"
+category: Security
+workflow: automation-task-233.yml
+schedule: '53 05 * * 2'
+description: >-
+  Checks rotation cadence and secret hygiene across managed vaults. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 233 keeps this surface continuously validated.

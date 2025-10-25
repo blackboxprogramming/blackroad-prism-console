@@ -1,0 +1,68 @@
+name: "♻️ Fully Automated Task Runner"
+
+on:
+  workflow_call:
+    inputs:
+      automation_id:
+        required: true
+        type: string
+      automation_name:
+        required: true
+        type: string
+      automation_slug:
+        required: true
+        type: string
+      automation_category:
+        required: true
+        type: string
+      automation_description:
+        required: true
+        type: string
+
+jobs:
+  execute:
+    name: "Run automation"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Emit automation summary
+        run: |
+          cat <<'SUMMARY' >> "$GITHUB_STEP_SUMMARY"
+          # ${{ inputs.automation_name }}
+
+          * **ID:** `${{ inputs.automation_id }}`
+          * **Slug:** `${{ inputs.automation_slug }}`
+          * **Category:** `${{ inputs.automation_category }}`
+          * **Description:** ${{ inputs.automation_description }}
+          * **Triggered by:** `${{ github.event_name }}`
+
+          This job uses the reusable automation runner to validate that the
+          repository can execute automation wave tasks in isolation.
+          SUMMARY
+
+      - name: Record automation metadata
+        run: |
+          cat <<'JSON' > automation-output.json
+          {
+            "id": "${{ inputs.automation_id }}",
+            "name": "${{ inputs.automation_name }}",
+            "slug": "${{ inputs.automation_slug }}",
+            "category": "${{ inputs.automation_category }}",
+            "description": "${{ inputs.automation_description }}",
+            "event": "${{ github.event_name }}",
+            "run_id": "${{ github.run_id }}",
+            "repository": "${{ github.repository }}",
+            "timestamp": "${{ github.run_started_at }}"
+          }
+          JSON
+
+      - name: Upload automation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: automation-${{ inputs.automation_slug }}
+          path: automation-output.json
+          retention-days: 7

@@ -1,0 +1,8 @@
+id: 251
+slug: pipeline-retention-sweep-251
+name: "Pipeline Retention Sweep"
+category: Data
+workflow: automation-task-251.yml
+schedule: '11 11 * * 6'
+description: >-
+  Verifies data processing pipelines stay healthy and timely. Each run records baseline retention policies and surfaces anomalies. Automation wave 7 task 251 keeps this surface continuously validated.

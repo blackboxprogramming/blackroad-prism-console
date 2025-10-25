@@ -1,0 +1,8 @@
+id: 288
+slug: resiliency-regression-scan-288
+name: "Resiliency Regression Scan"
+category: Reliability
+workflow: automation-task-288.yml
+schedule: '48 00 * * 1'
+description: >-
+  Exercises failover paths and disaster recovery hooks. Each run runs regression scans focused on critical metrics and flows. Automation wave 7 task 288 keeps this surface continuously validated.

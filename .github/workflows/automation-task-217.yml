@@ -1,0 +1,19 @@
+name: "Automation Task 217 · Edge Validation Sweep"
+
+on:
+  schedule:
+    - cron: "37 00 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "217"
+      automation_name: "Edge Validation Sweep"
+      automation_slug: "edge-validation-sweep-217"
+      automation_category: "Infrastructure"
+      automation_description: "Exercises edge delivery controls so regional routes stay resilient. Each run executes validation suites to detect drift or breaking changes. Automation wave 7 task 217 keeps this surface continuously validated."

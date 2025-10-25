@@ -1,0 +1,19 @@
+name: "Automation Task 202 · Telemetry Cache Rehearsal"
+
+on:
+  schedule:
+    - cron: "22 19 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "202"
+      automation_name: "Telemetry Cache Rehearsal"
+      automation_slug: "telemetry-cache-rehearsal-202"
+      automation_category: "Observability"
+      automation_description: "Keeps telemetry baselines aligned with golden signal thresholds. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 202 keeps this surface continuously validated."

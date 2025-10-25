@@ -1,0 +1,8 @@
+id: 276
+slug: latency-health-audit-276
+name: "Latency Health Audit"
+category: Performance
+workflow: automation-task-276.yml
+schedule: '36 20 * * 3'
+description: >-
+  Tracks customer-facing latency for regression spikes. Each run audits health reports and emits targeted follow-up actions. Automation wave 7 task 276 keeps this surface continuously validated.

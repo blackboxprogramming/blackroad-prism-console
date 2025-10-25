@@ -1,0 +1,19 @@
+name: "Automation Task 286 · Resiliency Health Audit"
+
+on:
+  schedule:
+    - cron: "46 23 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "286"
+      automation_name: "Resiliency Health Audit"
+      automation_slug: "resiliency-health-audit-286"
+      automation_category: "Reliability"
+      automation_description: "Exercises failover paths and disaster recovery hooks. Each run audits health reports and emits targeted follow-up actions. Automation wave 7 task 286 keeps this surface continuously validated."

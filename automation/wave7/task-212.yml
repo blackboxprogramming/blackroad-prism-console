@@ -1,0 +1,8 @@
+id: 212
+slug: edge-cache-rehearsal-212
+name: "Edge Cache Rehearsal"
+category: Infrastructure
+workflow: automation-task-212.yml
+schedule: '32 22 * * 2'
+description: >-
+  Exercises edge delivery controls so regional routes stay resilient. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 212 keeps this surface continuously validated.

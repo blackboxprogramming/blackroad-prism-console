@@ -1,0 +1,19 @@
+name: "Automation Task 214 · Edge Rotation Drill"
+
+on:
+  schedule:
+    - cron: "34 23 * * 4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "214"
+      automation_name: "Edge Rotation Drill"
+      automation_slug: "edge-rotation-drill-214"
+      automation_category: "Infrastructure"
+      automation_description: "Exercises edge delivery controls so regional routes stay resilient. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 214 keeps this surface continuously validated."

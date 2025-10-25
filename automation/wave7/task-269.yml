@@ -1,0 +1,8 @@
+id: 269
+slug: schema-recovery-drill-269
+name: "Schema Recovery Drill"
+category: Data
+workflow: automation-task-269.yml
+schedule: '29 17 * * 3'
+description: >-
+  Catches schema drift across contract-managed APIs and storage. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 269 keeps this surface continuously validated.

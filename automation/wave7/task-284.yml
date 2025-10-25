@@ -1,0 +1,8 @@
+id: 284
+slug: resiliency-rotation-drill-284
+name: "Resiliency Rotation Drill"
+category: Reliability
+workflow: automation-task-284.yml
+schedule: '44 22 * * 4'
+description: >-
+  Exercises failover paths and disaster recovery hooks. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 284 keeps this surface continuously validated.

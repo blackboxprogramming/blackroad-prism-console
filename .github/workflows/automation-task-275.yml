@@ -1,0 +1,19 @@
+name: "Automation Task 275 · Latency Catalog Sync"
+
+on:
+  schedule:
+    - cron: "35 19 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "275"
+      automation_name: "Latency Catalog Sync"
+      automation_slug: "latency-catalog-sync-275"
+      automation_category: "Performance"
+      automation_description: "Tracks customer-facing latency for regression spikes. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 275 keeps this surface continuously validated."

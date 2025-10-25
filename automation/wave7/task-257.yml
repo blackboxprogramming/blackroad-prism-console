@@ -1,0 +1,8 @@
+id: 257
+slug: pipeline-validation-sweep-257
+name: "Pipeline Validation Sweep"
+category: Data
+workflow: automation-task-257.yml
+schedule: '17 13 * * 5'
+description: >-
+  Verifies data processing pipelines stay healthy and timely. Each run executes validation suites to detect drift or breaking changes. Automation wave 7 task 257 keeps this surface continuously validated.

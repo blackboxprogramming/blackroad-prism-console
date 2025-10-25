@@ -1,0 +1,8 @@
+id: 216
+slug: edge-health-audit-216
+name: "Edge Health Audit"
+category: Infrastructure
+workflow: automation-task-216.yml
+schedule: '36 00 * * 6'
+description: >-
+  Exercises edge delivery controls so regional routes stay resilient. Each run audits health reports and emits targeted follow-up actions. Automation wave 7 task 216 keeps this surface continuously validated.

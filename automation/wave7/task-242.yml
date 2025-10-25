@@ -1,0 +1,8 @@
+id: 242
+slug: artifact-cache-rehearsal-242
+name: "Artifact Cache Rehearsal"
+category: Release
+workflow: automation-task-242.yml
+schedule: '02 08 * * 4'
+description: >-
+  Confirms build artifacts remain reproducible, signed, and traceable. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 242 keeps this surface continuously validated.

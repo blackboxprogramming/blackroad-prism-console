@@ -1,0 +1,8 @@
+id: 280
+slug: latency-forecast-update-280
+name: "Latency Forecast Update"
+category: Performance
+workflow: automation-task-280.yml
+schedule: '40 21 * * 0'
+description: >-
+  Tracks customer-facing latency for regression spikes. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 280 keeps this surface continuously validated.

@@ -1,0 +1,8 @@
+id: 217
+slug: edge-validation-sweep-217
+name: "Edge Validation Sweep"
+category: Infrastructure
+workflow: automation-task-217.yml
+schedule: '37 00 * * 0'
+description: >-
+  Exercises edge delivery controls so regional routes stay resilient. Each run executes validation suites to detect drift or breaking changes. Automation wave 7 task 217 keeps this surface continuously validated.

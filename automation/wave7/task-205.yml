@@ -1,0 +1,8 @@
+id: 205
+slug: telemetry-catalog-sync-205
+name: "Telemetry Catalog Sync"
+category: Observability
+workflow: automation-task-205.yml
+schedule: '25 20 * * 2'
+description: >-
+  Keeps telemetry baselines aligned with golden signal thresholds. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 205 keeps this surface continuously validated.

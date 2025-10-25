@@ -1,0 +1,8 @@
+id: 232
+slug: secrets-cache-rehearsal-232
+name: "Secrets Cache Rehearsal"
+category: Security
+workflow: automation-task-232.yml
+schedule: '52 05 * * 1'
+description: >-
+  Checks rotation cadence and secret hygiene across managed vaults. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 232 keeps this surface continuously validated.

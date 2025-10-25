@@ -1,0 +1,8 @@
+id: 272
+slug: latency-cache-rehearsal-272
+name: "Latency Cache Rehearsal"
+category: Performance
+workflow: automation-task-272.yml
+schedule: '32 18 * * 6'
+description: >-
+  Tracks customer-facing latency for regression spikes. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 272 keeps this surface continuously validated.
