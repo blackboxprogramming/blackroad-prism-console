@@ -345,3 +345,26 @@ jobs:
           find artifacts -type f -print0 | sort -z | xargs -0 sha256sum > artifact_hashes.txt
           cp artifact_hashes.txt artifact_hashes_prev.txt
           diff -u artifact_hashes_prev.txt artifact_hashes.txt || true
+  roadview-web:
+    name: RoadView Web Quality
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/roadview
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: apps/roadview/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile=false
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm storybook:build
+      - run: pnpm e2e
