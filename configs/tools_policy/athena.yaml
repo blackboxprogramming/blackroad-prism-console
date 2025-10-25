@@ -1,0 +1,22 @@
+{
+  "agent": "Athena",
+  "algo": "ucb1",
+  "arms": {
+    "github_client": 0.55,
+    "notion_client": 0.6,
+    "linear_client": 0.7,
+    "hf_client": 0.4,
+    "slack_client": 0.75,
+    "dropbox_client": 0.35
+  },
+  "reward_weights": {
+    "merge_success": 0.4,
+    "latency_inverse": 0.4,
+    "user_rating": 0.2
+  },
+  "constraints": {
+    "requires_review": ["tool_policy"],
+    "max_latency_ms": 900
+  },
+  "last_updated": "2024-03-20T00:00:00Z"
+}

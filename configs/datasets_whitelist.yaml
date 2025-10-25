@@ -1,0 +1,14 @@
+version: 1
+datasets:
+  - name: blackroad/prism_pr_history
+    description: Historical PR metadata for supervised evaluation.
+    pii_reviewed: true
+    retention_days: 365
+  - name: blackroad/linear_incidents
+    description: Incident timelines and resolution summaries.
+    pii_reviewed: true
+    retention_days: 180
+  - name: blackroad/notion_docs_public
+    description: Sanitised knowledge base exports for retrieval tuning.
+    pii_reviewed: true
+    retention_days: 730

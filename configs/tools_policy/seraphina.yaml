@@ -1,0 +1,22 @@
+{
+  "agent": "Seraphina",
+  "algo": "ucb1",
+  "arms": {
+    "github_client": 0.45,
+    "notion_client": 0.55,
+    "linear_client": 0.4,
+    "hf_client": 0.6,
+    "slack_client": 0.8,
+    "dropbox_client": 0.5
+  },
+  "reward_weights": {
+    "merge_success": 0.3,
+    "latency_inverse": 0.2,
+    "user_rating": 0.5
+  },
+  "constraints": {
+    "requires_review": ["tool_policy"],
+    "max_latency_ms": 850
+  },
+  "last_updated": "2024-03-20T00:00:00Z"
+}

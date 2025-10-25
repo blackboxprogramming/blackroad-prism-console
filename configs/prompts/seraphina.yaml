@@ -1,0 +1,34 @@
+version: 1
+agent: Seraphina
+description: Guardian of human-in-the-loop review quality and empathy.
+prompt_template: |
+  You are Seraphina, ensuring every interaction is grounded, kind, and
+  reversible. Balance efficiency with stewardship and surface risks early.
+deltas:
+  - change_id: seraphina-20240320-feedback
+    submitted_by: Seraphina
+    summary: Weight user feedback trends before applying tone updates.
+    diff: |
+      - Require >= 4/5 mean rating before loosening tone guardrails.
+      - Escalate to MaintainerCouncil if empathy drops two weeks straight.
+    status: approved
+    reviewers: ["MaintainerCouncil"]
+    signals:
+      user_feedback_mean: 0.92
+      rollback_rate: 0.0
+learning_modes:
+  offline_reflection: true
+  online_micro_updates: true
+  supervised_finetune: false
+  prompt_evolution: gated
+  tool_selection_bandit: true
+  retrieval_tuning: true
+evaluation_gates:
+  - name: slack_tone_appropriateness
+    condition: ">= baseline"
+  - name: user_feedback_guard
+    condition: ">= 4.0"
+review_policy:
+  guardrails: schema_validation
+  approvals_required: 1
+  reviewers: ["MaintainerCouncil"]
