@@ -1,0 +1,27 @@
+{
+  "name": "",
+  "uuid": "",
+  "model": "",
+  "description": "",
+  "domain": "",
+  "temperament": "",
+  "traits": [],
+  "context": {
+    "parent": null,
+    "created_at": ""
+  },
+  "capabilities": {
+    "spawn": true,
+    "lineage_tracking": true,
+    "auto_publish": true
+  },
+  "huggingface": {
+    "space": "",
+    "sdk": "gradio",
+    "license": "apache-2.0"
+  },
+  "metadata": {
+    "config_template_version": 2,
+    "notes": []
+  }
+}
