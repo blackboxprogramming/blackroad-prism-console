@@ -1,0 +1,8 @@
+id: 297
+slug: cost-validation-sweep-297
+name: "Cost Validation Sweep"
+category: FinOps
+workflow: automation-task-297.yml
+schedule: '57 03 * * 3'
+description: >-
+  Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run executes validation suites to detect drift or breaking changes. Automation wave 7 task 297 keeps this surface continuously validated.

@@ -1,0 +1,19 @@
+name: "Automation Task 255 · Pipeline Catalog Sync"
+
+on:
+  schedule:
+    - cron: "15 13 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "255"
+      automation_name: "Pipeline Catalog Sync"
+      automation_slug: "pipeline-catalog-sync-255"
+      automation_category: "Data"
+      automation_description: "Verifies data processing pipelines stay healthy and timely. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 255 keeps this surface continuously validated."

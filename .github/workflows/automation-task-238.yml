@@ -1,0 +1,19 @@
+name: "Automation Task 238 · Secrets Regression Scan"
+
+on:
+  schedule:
+    - cron: "58 07 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "238"
+      automation_name: "Secrets Regression Scan"
+      automation_slug: "secrets-regression-scan-238"
+      automation_category: "Security"
+      automation_description: "Checks rotation cadence and secret hygiene across managed vaults. Each run runs regression scans focused on critical metrics and flows. Automation wave 7 task 238 keeps this surface continuously validated."

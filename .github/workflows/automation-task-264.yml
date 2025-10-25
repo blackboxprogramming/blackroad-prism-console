@@ -1,0 +1,19 @@
+name: "Automation Task 264 · Schema Rotation Drill"
+
+on:
+  schedule:
+    - cron: "24 16 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "264"
+      automation_name: "Schema Rotation Drill"
+      automation_slug: "schema-rotation-drill-264"
+      automation_category: "Data"
+      automation_description: "Catches schema drift across contract-managed APIs and storage. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 264 keeps this surface continuously validated."

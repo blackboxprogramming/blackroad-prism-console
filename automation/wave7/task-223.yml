@@ -1,0 +1,8 @@
+id: 223
+slug: access-review-cadence-223
+name: "Access Review Cadence"
+category: Security
+workflow: automation-task-223.yml
+schedule: '43 02 * * 6'
+description: >-
+  Validates identity guardrails across federation and entitlement layers. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 223 keeps this surface continuously validated.

@@ -1,0 +1,19 @@
+name: "Automation Task 288 · Resiliency Regression Scan"
+
+on:
+  schedule:
+    - cron: "48 00 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "288"
+      automation_name: "Resiliency Regression Scan"
+      automation_slug: "resiliency-regression-scan-288"
+      automation_category: "Reliability"
+      automation_description: "Exercises failover paths and disaster recovery hooks. Each run runs regression scans focused on critical metrics and flows. Automation wave 7 task 288 keeps this surface continuously validated."

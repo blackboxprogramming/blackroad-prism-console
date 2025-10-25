@@ -1,0 +1,8 @@
+id: 273
+slug: latency-review-cadence-273
+name: "Latency Review Cadence"
+category: Performance
+workflow: automation-task-273.yml
+schedule: '33 19 * * 0'
+description: >-
+  Tracks customer-facing latency for regression spikes. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 273 keeps this surface continuously validated.

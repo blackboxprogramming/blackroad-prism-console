@@ -1,0 +1,19 @@
+name: "Automation Task 210 · Telemetry Forecast Update"
+
+on:
+  schedule:
+    - cron: "30 22 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "210"
+      automation_name: "Telemetry Forecast Update"
+      automation_slug: "telemetry-forecast-update-210"
+      automation_category: "Observability"
+      automation_description: "Keeps telemetry baselines aligned with golden signal thresholds. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 210 keeps this surface continuously validated."

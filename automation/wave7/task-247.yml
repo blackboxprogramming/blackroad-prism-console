@@ -1,0 +1,8 @@
+id: 247
+slug: artifact-validation-sweep-247
+name: "Artifact Validation Sweep"
+category: Release
+workflow: automation-task-247.yml
+schedule: '07 10 * * 2'
+description: >-
+  Confirms build artifacts remain reproducible, signed, and traceable. Each run executes validation suites to detect drift or breaking changes. Automation wave 7 task 247 keeps this surface continuously validated.

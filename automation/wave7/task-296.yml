@@ -1,0 +1,8 @@
+id: 296
+slug: cost-health-audit-296
+name: "Cost Health Audit"
+category: FinOps
+workflow: automation-task-296.yml
+schedule: '56 02 * * 2'
+description: >-
+  Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run audits health reports and emits targeted follow-up actions. Automation wave 7 task 296 keeps this surface continuously validated.

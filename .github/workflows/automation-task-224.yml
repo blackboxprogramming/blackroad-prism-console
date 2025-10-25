@@ -1,0 +1,19 @@
+name: "Automation Task 224 · Access Rotation Drill"
+
+on:
+  schedule:
+    - cron: "44 02 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "224"
+      automation_name: "Access Rotation Drill"
+      automation_slug: "access-rotation-drill-224"
+      automation_category: "Security"
+      automation_description: "Validates identity guardrails across federation and entitlement layers. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 224 keeps this surface continuously validated."

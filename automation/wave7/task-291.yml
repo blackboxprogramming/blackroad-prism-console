@@ -1,0 +1,8 @@
+id: 291
+slug: cost-retention-sweep-291
+name: "Cost Retention Sweep"
+category: FinOps
+workflow: automation-task-291.yml
+schedule: '51 01 * * 4'
+description: >-
+  Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run records baseline retention policies and surfaces anomalies. Automation wave 7 task 291 keeps this surface continuously validated.

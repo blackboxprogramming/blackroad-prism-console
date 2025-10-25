@@ -1,0 +1,19 @@
+name: "Automation Task 299 · Cost Recovery Drill"
+
+on:
+  schedule:
+    - cron: "59 03 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "299"
+      automation_name: "Cost Recovery Drill"
+      automation_slug: "cost-recovery-drill-299"
+      automation_category: "FinOps"
+      automation_description: "Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 299 keeps this surface continuously validated."

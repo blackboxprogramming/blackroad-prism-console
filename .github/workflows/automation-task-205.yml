@@ -1,0 +1,19 @@
+name: "Automation Task 205 · Telemetry Catalog Sync"
+
+on:
+  schedule:
+    - cron: "25 20 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "205"
+      automation_name: "Telemetry Catalog Sync"
+      automation_slug: "telemetry-catalog-sync-205"
+      automation_category: "Observability"
+      automation_description: "Keeps telemetry baselines aligned with golden signal thresholds. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 205 keeps this surface continuously validated."

@@ -1,0 +1,19 @@
+name: "Automation Task 225 · Access Catalog Sync"
+
+on:
+  schedule:
+    - cron: "45 03 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "225"
+      automation_name: "Access Catalog Sync"
+      automation_slug: "access-catalog-sync-225"
+      automation_category: "Security"
+      automation_description: "Validates identity guardrails across federation and entitlement layers. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 225 keeps this surface continuously validated."

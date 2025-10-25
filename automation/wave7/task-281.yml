@@ -1,0 +1,8 @@
+id: 281
+slug: resiliency-retention-sweep-281
+name: "Resiliency Retention Sweep"
+category: Reliability
+workflow: automation-task-281.yml
+schedule: '41 21 * * 1'
+description: >-
+  Exercises failover paths and disaster recovery hooks. Each run records baseline retention policies and surfaces anomalies. Automation wave 7 task 281 keeps this surface continuously validated.

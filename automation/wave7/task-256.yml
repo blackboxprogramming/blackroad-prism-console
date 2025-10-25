@@ -1,0 +1,8 @@
+id: 256
+slug: pipeline-health-audit-256
+name: "Pipeline Health Audit"
+category: Data
+workflow: automation-task-256.yml
+schedule: '16 13 * * 4'
+description: >-
+  Verifies data processing pipelines stay healthy and timely. Each run audits health reports and emits targeted follow-up actions. Automation wave 7 task 256 keeps this surface continuously validated.

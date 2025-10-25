@@ -1,0 +1,8 @@
+id: 215
+slug: edge-catalog-sync-215
+name: "Edge Catalog Sync"
+category: Infrastructure
+workflow: automation-task-215.yml
+schedule: '35 23 * * 5'
+description: >-
+  Exercises edge delivery controls so regional routes stay resilient. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 215 keeps this surface continuously validated.

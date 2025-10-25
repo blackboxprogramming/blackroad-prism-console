@@ -1,0 +1,8 @@
+id: 213
+slug: edge-review-cadence-213
+name: "Edge Review Cadence"
+category: Infrastructure
+workflow: automation-task-213.yml
+schedule: '33 23 * * 3'
+description: >-
+  Exercises edge delivery controls so regional routes stay resilient. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 213 keeps this surface continuously validated.

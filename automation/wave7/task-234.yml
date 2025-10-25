@@ -1,0 +1,8 @@
+id: 234
+slug: secrets-rotation-drill-234
+name: "Secrets Rotation Drill"
+category: Security
+workflow: automation-task-234.yml
+schedule: '54 06 * * 3'
+description: >-
+  Checks rotation cadence and secret hygiene across managed vaults. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 234 keeps this surface continuously validated.

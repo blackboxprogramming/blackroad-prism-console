@@ -1,0 +1,19 @@
+name: "Automation Task 257 · Pipeline Validation Sweep"
+
+on:
+  schedule:
+    - cron: "17 13 * * 5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "257"
+      automation_name: "Pipeline Validation Sweep"
+      automation_slug: "pipeline-validation-sweep-257"
+      automation_category: "Data"
+      automation_description: "Verifies data processing pipelines stay healthy and timely. Each run executes validation suites to detect drift or breaking changes. Automation wave 7 task 257 keeps this surface continuously validated."

@@ -1,0 +1,8 @@
+id: 260
+slug: pipeline-forecast-update-260
+name: "Pipeline Forecast Update"
+category: Data
+workflow: automation-task-260.yml
+schedule: '20 14 * * 1'
+description: >-
+  Verifies data processing pipelines stay healthy and timely. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 260 keeps this surface continuously validated.

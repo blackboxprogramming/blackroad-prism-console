@@ -1,0 +1,8 @@
+id: 262
+slug: schema-cache-rehearsal-262
+name: "Schema Cache Rehearsal"
+category: Data
+workflow: automation-task-262.yml
+schedule: '22 15 * * 3'
+description: >-
+  Catches schema drift across contract-managed APIs and storage. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 262 keeps this surface continuously validated.

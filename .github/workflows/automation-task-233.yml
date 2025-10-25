@@ -1,0 +1,19 @@
+name: "Automation Task 233 · Secrets Review Cadence"
+
+on:
+  schedule:
+    - cron: "53 05 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "233"
+      automation_name: "Secrets Review Cadence"
+      automation_slug: "secrets-review-cadence-233"
+      automation_category: "Security"
+      automation_description: "Checks rotation cadence and secret hygiene across managed vaults. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 233 keeps this surface continuously validated."

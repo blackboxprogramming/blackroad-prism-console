@@ -1,0 +1,19 @@
+name: "Automation Task 219 · Edge Recovery Drill"
+
+on:
+  schedule:
+    - cron: "39 01 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "219"
+      automation_name: "Edge Recovery Drill"
+      automation_slug: "edge-recovery-drill-219"
+      automation_category: "Infrastructure"
+      automation_description: "Exercises edge delivery controls so regional routes stay resilient. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 219 keeps this surface continuously validated."

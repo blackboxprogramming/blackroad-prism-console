@@ -1,0 +1,8 @@
+id: 228
+slug: access-regression-scan-228
+name: "Access Regression Scan"
+category: Security
+workflow: automation-task-228.yml
+schedule: '48 04 * * 4'
+description: >-
+  Validates identity guardrails across federation and entitlement layers. Each run runs regression scans focused on critical metrics and flows. Automation wave 7 task 228 keeps this surface continuously validated.

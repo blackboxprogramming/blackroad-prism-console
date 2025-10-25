@@ -1,0 +1,8 @@
+id: 289
+slug: resiliency-recovery-drill-289
+name: "Resiliency Recovery Drill"
+category: Reliability
+workflow: automation-task-289.yml
+schedule: '49 00 * * 2'
+description: >-
+  Exercises failover paths and disaster recovery hooks. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 289 keeps this surface continuously validated.

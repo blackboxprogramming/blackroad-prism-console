@@ -1,0 +1,8 @@
+id: 222
+slug: access-cache-rehearsal-222
+name: "Access Cache Rehearsal"
+category: Security
+workflow: automation-task-222.yml
+schedule: '42 02 * * 5'
+description: >-
+  Validates identity guardrails across federation and entitlement layers. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 222 keeps this surface continuously validated.

@@ -1,0 +1,8 @@
+id: 261
+slug: schema-retention-sweep-261
+name: "Schema Retention Sweep"
+category: Data
+workflow: automation-task-261.yml
+schedule: '21 15 * * 2'
+description: >-
+  Catches schema drift across contract-managed APIs and storage. Each run records baseline retention policies and surfaces anomalies. Automation wave 7 task 261 keeps this surface continuously validated.

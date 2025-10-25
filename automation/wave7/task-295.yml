@@ -1,0 +1,8 @@
+id: 295
+slug: cost-catalog-sync-295
+name: "Cost Catalog Sync"
+category: FinOps
+workflow: automation-task-295.yml
+schedule: '55 02 * * 1'
+description: >-
+  Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 295 keeps this surface continuously validated.

@@ -1,0 +1,8 @@
+id: 250
+slug: artifact-forecast-update-250
+name: "Artifact Forecast Update"
+category: Release
+workflow: automation-task-250.yml
+schedule: '10 11 * * 5'
+description: >-
+  Confirms build artifacts remain reproducible, signed, and traceable. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 250 keeps this surface continuously validated.

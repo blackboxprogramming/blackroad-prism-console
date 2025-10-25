@@ -1,0 +1,19 @@
+name: "Automation Task 287 · Resiliency Validation Sweep"
+
+on:
+  schedule:
+    - cron: "47 23 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "287"
+      automation_name: "Resiliency Validation Sweep"
+      automation_slug: "resiliency-validation-sweep-287"
+      automation_category: "Reliability"
+      automation_description: "Exercises failover paths and disaster recovery hooks. Each run executes validation suites to detect drift or breaking changes. Automation wave 7 task 287 keeps this surface continuously validated."

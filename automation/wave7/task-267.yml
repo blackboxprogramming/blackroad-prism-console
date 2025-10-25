@@ -1,0 +1,8 @@
+id: 267
+slug: schema-validation-sweep-267
+name: "Schema Validation Sweep"
+category: Data
+workflow: automation-task-267.yml
+schedule: '27 17 * * 1'
+description: >-
+  Catches schema drift across contract-managed APIs and storage. Each run executes validation suites to detect drift or breaking changes. Automation wave 7 task 267 keeps this surface continuously validated.

@@ -1,0 +1,8 @@
+id: 226
+slug: access-health-audit-226
+name: "Access Health Audit"
+category: Security
+workflow: automation-task-226.yml
+schedule: '46 03 * * 2'
+description: >-
+  Validates identity guardrails across federation and entitlement layers. Each run audits health reports and emits targeted follow-up actions. Automation wave 7 task 226 keeps this surface continuously validated.

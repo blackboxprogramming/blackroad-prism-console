@@ -1,0 +1,8 @@
+id: 299
+slug: cost-recovery-drill-299
+name: "Cost Recovery Drill"
+category: FinOps
+workflow: automation-task-299.yml
+schedule: '59 03 * * 5'
+description: >-
+  Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 299 keeps this surface continuously validated.

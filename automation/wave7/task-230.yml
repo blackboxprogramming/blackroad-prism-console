@@ -1,0 +1,8 @@
+id: 230
+slug: access-forecast-update-230
+name: "Access Forecast Update"
+category: Security
+workflow: automation-task-230.yml
+schedule: '50 04 * * 6'
+description: >-
+  Validates identity guardrails across federation and entitlement layers. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 230 keeps this surface continuously validated.

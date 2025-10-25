@@ -1,0 +1,19 @@
+name: "Automation Task 294 · Cost Rotation Drill"
+
+on:
+  schedule:
+    - cron: "54 02 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "294"
+      automation_name: "Cost Rotation Drill"
+      automation_slug: "cost-rotation-drill-294"
+      automation_category: "FinOps"
+      automation_description: "Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 294 keeps this surface continuously validated."

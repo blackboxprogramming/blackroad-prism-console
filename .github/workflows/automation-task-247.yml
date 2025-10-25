@@ -1,0 +1,19 @@
+name: "Automation Task 247 · Artifact Validation Sweep"
+
+on:
+  schedule:
+    - cron: "07 10 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "247"
+      automation_name: "Artifact Validation Sweep"
+      automation_slug: "artifact-validation-sweep-247"
+      automation_category: "Release"
+      automation_description: "Confirms build artifacts remain reproducible, signed, and traceable. Each run executes validation suites to detect drift or breaking changes. Automation wave 7 task 247 keeps this surface continuously validated."

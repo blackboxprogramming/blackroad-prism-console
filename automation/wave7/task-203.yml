@@ -1,0 +1,8 @@
+id: 203
+slug: telemetry-review-cadence-203
+name: "Telemetry Review Cadence"
+category: Observability
+workflow: automation-task-203.yml
+schedule: '23 19 * * 0'
+description: >-
+  Keeps telemetry baselines aligned with golden signal thresholds. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 203 keeps this surface continuously validated.

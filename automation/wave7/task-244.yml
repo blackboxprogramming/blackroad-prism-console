@@ -1,0 +1,8 @@
+id: 244
+slug: artifact-rotation-drill-244
+name: "Artifact Rotation Drill"
+category: Release
+workflow: automation-task-244.yml
+schedule: '04 09 * * 6'
+description: >-
+  Confirms build artifacts remain reproducible, signed, and traceable. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 244 keeps this surface continuously validated.

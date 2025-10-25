@@ -1,0 +1,19 @@
+name: "Automation Task 273 · Latency Review Cadence"
+
+on:
+  schedule:
+    - cron: "33 19 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "273"
+      automation_name: "Latency Review Cadence"
+      automation_slug: "latency-review-cadence-273"
+      automation_category: "Performance"
+      automation_description: "Tracks customer-facing latency for regression spikes. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 273 keeps this surface continuously validated."

@@ -1,0 +1,19 @@
+name: "Automation Task 293 · Cost Review Cadence"
+
+on:
+  schedule:
+    - cron: "53 01 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "293"
+      automation_name: "Cost Review Cadence"
+      automation_slug: "cost-review-cadence-293"
+      automation_category: "FinOps"
+      automation_description: "Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 293 keeps this surface continuously validated."

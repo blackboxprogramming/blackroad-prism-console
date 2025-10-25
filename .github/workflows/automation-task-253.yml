@@ -1,0 +1,19 @@
+name: "Automation Task 253 · Pipeline Review Cadence"
+
+on:
+  schedule:
+    - cron: "13 12 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "253"
+      automation_name: "Pipeline Review Cadence"
+      automation_slug: "pipeline-review-cadence-253"
+      automation_category: "Data"
+      automation_description: "Verifies data processing pipelines stay healthy and timely. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 253 keeps this surface continuously validated."

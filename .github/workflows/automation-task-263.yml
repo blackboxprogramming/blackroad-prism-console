@@ -1,0 +1,19 @@
+name: "Automation Task 263 · Schema Review Cadence"
+
+on:
+  schedule:
+    - cron: "23 15 * * 4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "263"
+      automation_name: "Schema Review Cadence"
+      automation_slug: "schema-review-cadence-263"
+      automation_category: "Data"
+      automation_description: "Catches schema drift across contract-managed APIs and storage. Each run confirms review schedules align with compliance expectations. Automation wave 7 task 263 keeps this surface continuously validated."

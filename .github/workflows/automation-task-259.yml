@@ -1,0 +1,19 @@
+name: "Automation Task 259 · Pipeline Recovery Drill"
+
+on:
+  schedule:
+    - cron: "19 14 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "259"
+      automation_name: "Pipeline Recovery Drill"
+      automation_slug: "pipeline-recovery-drill-259"
+      automation_category: "Data"
+      automation_description: "Verifies data processing pipelines stay healthy and timely. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 259 keeps this surface continuously validated."

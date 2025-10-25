@@ -1,0 +1,8 @@
+id: 290
+slug: resiliency-forecast-update-290
+name: "Resiliency Forecast Update"
+category: Reliability
+workflow: automation-task-290.yml
+schedule: '50 00 * * 3'
+description: >-
+  Exercises failover paths and disaster recovery hooks. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 290 keeps this surface continuously validated.

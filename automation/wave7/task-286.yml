@@ -1,0 +1,8 @@
+id: 286
+slug: resiliency-health-audit-286
+name: "Resiliency Health Audit"
+category: Reliability
+workflow: automation-task-286.yml
+schedule: '46 23 * * 6'
+description: >-
+  Exercises failover paths and disaster recovery hooks. Each run audits health reports and emits targeted follow-up actions. Automation wave 7 task 286 keeps this surface continuously validated.

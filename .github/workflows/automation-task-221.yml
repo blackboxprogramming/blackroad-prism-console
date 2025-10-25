@@ -1,0 +1,19 @@
+name: "Automation Task 221 · Access Retention Sweep"
+
+on:
+  schedule:
+    - cron: "41 01 * * 4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "221"
+      automation_name: "Access Retention Sweep"
+      automation_slug: "access-retention-sweep-221"
+      automation_category: "Security"
+      automation_description: "Validates identity guardrails across federation and entitlement layers. Each run records baseline retention policies and surfaces anomalies. Automation wave 7 task 221 keeps this surface continuously validated."

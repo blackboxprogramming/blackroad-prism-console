@@ -1,0 +1,8 @@
+id: 277
+slug: latency-validation-sweep-277
+name: "Latency Validation Sweep"
+category: Performance
+workflow: automation-task-277.yml
+schedule: '37 20 * * 4'
+description: >-
+  Tracks customer-facing latency for regression spikes. Each run executes validation suites to detect drift or breaking changes. Automation wave 7 task 277 keeps this surface continuously validated.

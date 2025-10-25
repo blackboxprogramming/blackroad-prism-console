@@ -1,0 +1,19 @@
+name: "Automation Task 244 · Artifact Rotation Drill"
+
+on:
+  schedule:
+    - cron: "04 09 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "244"
+      automation_name: "Artifact Rotation Drill"
+      automation_slug: "artifact-rotation-drill-244"
+      automation_category: "Release"
+      automation_description: "Confirms build artifacts remain reproducible, signed, and traceable. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 244 keeps this surface continuously validated."

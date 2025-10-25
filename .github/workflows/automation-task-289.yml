@@ -1,0 +1,19 @@
+name: "Automation Task 289 · Resiliency Recovery Drill"
+
+on:
+  schedule:
+    - cron: "49 00 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "289"
+      automation_name: "Resiliency Recovery Drill"
+      automation_slug: "resiliency-recovery-drill-289"
+      automation_category: "Reliability"
+      automation_description: "Exercises failover paths and disaster recovery hooks. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 289 keeps this surface continuously validated."

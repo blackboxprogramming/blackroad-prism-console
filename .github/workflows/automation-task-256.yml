@@ -1,0 +1,19 @@
+name: "Automation Task 256 · Pipeline Health Audit"
+
+on:
+  schedule:
+    - cron: "16 13 * * 4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "256"
+      automation_name: "Pipeline Health Audit"
+      automation_slug: "pipeline-health-audit-256"
+      automation_category: "Data"
+      automation_description: "Verifies data processing pipelines stay healthy and timely. Each run audits health reports and emits targeted follow-up actions. Automation wave 7 task 256 keeps this surface continuously validated."

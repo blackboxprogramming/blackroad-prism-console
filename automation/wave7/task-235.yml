@@ -1,0 +1,8 @@
+id: 235
+slug: secrets-catalog-sync-235
+name: "Secrets Catalog Sync"
+category: Security
+workflow: automation-task-235.yml
+schedule: '55 06 * * 4'
+description: >-
+  Checks rotation cadence and secret hygiene across managed vaults. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 235 keeps this surface continuously validated.

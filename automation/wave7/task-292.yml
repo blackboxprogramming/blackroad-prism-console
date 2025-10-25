@@ -1,0 +1,8 @@
+id: 292
+slug: cost-cache-rehearsal-292
+name: "Cost Cache Rehearsal"
+category: FinOps
+workflow: automation-task-292.yml
+schedule: '52 01 * * 5'
+description: >-
+  Reconciles spend telemetry with budget guardrails and anomaly budgets. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 292 keeps this surface continuously validated.

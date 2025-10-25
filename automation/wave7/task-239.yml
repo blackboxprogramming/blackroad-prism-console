@@ -1,0 +1,8 @@
+id: 239
+slug: secrets-recovery-drill-239
+name: "Secrets Recovery Drill"
+category: Security
+workflow: automation-task-239.yml
+schedule: '59 07 * * 1'
+description: >-
+  Checks rotation cadence and secret hygiene across managed vaults. Each run executes recovery drills to validate failover readiness. Automation wave 7 task 239 keeps this surface continuously validated.

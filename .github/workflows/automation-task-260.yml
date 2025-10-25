@@ -1,0 +1,19 @@
+name: "Automation Task 260 · Pipeline Forecast Update"
+
+on:
+  schedule:
+    - cron: "20 14 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "260"
+      automation_name: "Pipeline Forecast Update"
+      automation_slug: "pipeline-forecast-update-260"
+      automation_category: "Data"
+      automation_description: "Verifies data processing pipelines stay healthy and timely. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 260 keeps this surface continuously validated."

@@ -1,0 +1,8 @@
+id: 287
+slug: resiliency-validation-sweep-287
+name: "Resiliency Validation Sweep"
+category: Reliability
+workflow: automation-task-287.yml
+schedule: '47 23 * * 0'
+description: >-
+  Exercises failover paths and disaster recovery hooks. Each run executes validation suites to detect drift or breaking changes. Automation wave 7 task 287 keeps this surface continuously validated.

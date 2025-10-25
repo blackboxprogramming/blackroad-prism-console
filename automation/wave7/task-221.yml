@@ -1,0 +1,8 @@
+id: 221
+slug: access-retention-sweep-221
+name: "Access Retention Sweep"
+category: Security
+workflow: automation-task-221.yml
+schedule: '41 01 * * 4'
+description: >-
+  Validates identity guardrails across federation and entitlement layers. Each run records baseline retention policies and surfaces anomalies. Automation wave 7 task 221 keeps this surface continuously validated.

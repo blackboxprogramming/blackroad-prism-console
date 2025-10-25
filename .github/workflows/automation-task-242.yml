@@ -1,0 +1,19 @@
+name: "Automation Task 242 · Artifact Cache Rehearsal"
+
+on:
+  schedule:
+    - cron: "02 08 * * 4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "242"
+      automation_name: "Artifact Cache Rehearsal"
+      automation_slug: "artifact-cache-rehearsal-242"
+      automation_category: "Release"
+      automation_description: "Confirms build artifacts remain reproducible, signed, and traceable. Each run simulates cache purge and warmup events to validate configuration. Automation wave 7 task 242 keeps this surface continuously validated."

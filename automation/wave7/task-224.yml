@@ -1,0 +1,8 @@
+id: 224
+slug: access-rotation-drill-224
+name: "Access Rotation Drill"
+category: Security
+workflow: automation-task-224.yml
+schedule: '44 02 * * 0'
+description: >-
+  Validates identity guardrails across federation and entitlement layers. Each run runs credential and key rotation drills to ensure readiness. Automation wave 7 task 224 keeps this surface continuously validated.

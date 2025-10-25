@@ -1,0 +1,19 @@
+name: "Automation Task 220 · Edge Forecast Update"
+
+on:
+  schedule:
+    - cron: "40 01 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "220"
+      automation_name: "Edge Forecast Update"
+      automation_slug: "edge-forecast-update-220"
+      automation_category: "Infrastructure"
+      automation_description: "Exercises edge delivery controls so regional routes stay resilient. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 220 keeps this surface continuously validated."

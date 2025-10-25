@@ -1,0 +1,19 @@
+name: "Automation Task 261 · Schema Retention Sweep"
+
+on:
+  schedule:
+    - cron: "21 15 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "261"
+      automation_name: "Schema Retention Sweep"
+      automation_slug: "schema-retention-sweep-261"
+      automation_category: "Data"
+      automation_description: "Catches schema drift across contract-managed APIs and storage. Each run records baseline retention policies and surfaces anomalies. Automation wave 7 task 261 keeps this surface continuously validated."

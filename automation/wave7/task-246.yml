@@ -1,0 +1,8 @@
+id: 246
+slug: artifact-health-audit-246
+name: "Artifact Health Audit"
+category: Release
+workflow: automation-task-246.yml
+schedule: '06 10 * * 1'
+description: >-
+  Confirms build artifacts remain reproducible, signed, and traceable. Each run audits health reports and emits targeted follow-up actions. Automation wave 7 task 246 keeps this surface continuously validated.

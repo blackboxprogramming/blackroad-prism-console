@@ -1,0 +1,8 @@
+id: 266
+slug: schema-health-audit-266
+name: "Schema Health Audit"
+category: Data
+workflow: automation-task-266.yml
+schedule: '26 16 * * 0'
+description: >-
+  Catches schema drift across contract-managed APIs and storage. Each run audits health reports and emits targeted follow-up actions. Automation wave 7 task 266 keeps this surface continuously validated.

@@ -1,0 +1,8 @@
+id: 248
+slug: artifact-regression-scan-248
+name: "Artifact Regression Scan"
+category: Release
+workflow: automation-task-248.yml
+schedule: '08 10 * * 3'
+description: >-
+  Confirms build artifacts remain reproducible, signed, and traceable. Each run runs regression scans focused on critical metrics and flows. Automation wave 7 task 248 keeps this surface continuously validated.

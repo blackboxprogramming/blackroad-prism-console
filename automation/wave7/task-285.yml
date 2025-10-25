@@ -1,0 +1,8 @@
+id: 285
+slug: resiliency-catalog-sync-285
+name: "Resiliency Catalog Sync"
+category: Reliability
+workflow: automation-task-285.yml
+schedule: '45 23 * * 5'
+description: >-
+  Exercises failover paths and disaster recovery hooks. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 285 keeps this surface continuously validated.

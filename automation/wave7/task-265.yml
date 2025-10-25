@@ -1,0 +1,8 @@
+id: 265
+slug: schema-catalog-sync-265
+name: "Schema Catalog Sync"
+category: Data
+workflow: automation-task-265.yml
+schedule: '25 16 * * 6'
+description: >-
+  Catches schema drift across contract-managed APIs and storage. Each run synchronizes catalogs and registries backing automation surfaces. Automation wave 7 task 265 keeps this surface continuously validated.

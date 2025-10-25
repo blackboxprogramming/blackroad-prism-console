@@ -1,0 +1,8 @@
+id: 270
+slug: schema-forecast-update-270
+name: "Schema Forecast Update"
+category: Data
+workflow: automation-task-270.yml
+schedule: '30 18 * * 4'
+description: >-
+  Catches schema drift across contract-managed APIs and storage. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 270 keeps this surface continuously validated.

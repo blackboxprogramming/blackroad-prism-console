@@ -1,0 +1,19 @@
+name: "Automation Task 280 · Latency Forecast Update"
+
+on:
+  schedule:
+    - cron: "40 21 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "280"
+      automation_name: "Latency Forecast Update"
+      automation_slug: "latency-forecast-update-280"
+      automation_category: "Performance"
+      automation_description: "Tracks customer-facing latency for regression spikes. Each run refreshes forecasts using the latest telemetry and finance data. Automation wave 7 task 280 keeps this surface continuously validated."

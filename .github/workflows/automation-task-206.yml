@@ -1,0 +1,19 @@
+name: "Automation Task 206 · Telemetry Health Audit"
+
+on:
+  schedule:
+    - cron: "26 20 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  automation:
+    uses: ./.github/workflows/reusable-automation-task.yml
+    with:
+      automation_id: "206"
+      automation_name: "Telemetry Health Audit"
+      automation_slug: "telemetry-health-audit-206"
+      automation_category: "Observability"
+      automation_description: "Keeps telemetry baselines aligned with golden signal thresholds. Each run audits health reports and emits targeted follow-up actions. Automation wave 7 task 206 keeps this surface continuously validated."

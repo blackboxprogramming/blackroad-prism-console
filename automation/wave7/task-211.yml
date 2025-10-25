@@ -1,0 +1,8 @@
+id: 211
+slug: edge-retention-sweep-211
+name: "Edge Retention Sweep"
+category: Infrastructure
+workflow: automation-task-211.yml
+schedule: '31 22 * * 1'
+description: >-
+  Exercises edge delivery controls so regional routes stay resilient. Each run records baseline retention policies and surfaces anomalies. Automation wave 7 task 211 keeps this surface continuously validated.

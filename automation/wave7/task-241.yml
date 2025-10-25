@@ -1,0 +1,8 @@
+id: 241
+slug: artifact-retention-sweep-241
+name: "Artifact Retention Sweep"
+category: Release
+workflow: automation-task-241.yml
+schedule: '01 08 * * 3'
+description: >-
+  Confirms build artifacts remain reproducible, signed, and traceable. Each run records baseline retention policies and surfaces anomalies. Automation wave 7 task 241 keeps this surface continuously validated.

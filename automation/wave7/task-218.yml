@@ -1,0 +1,8 @@
+id: 218
+slug: edge-regression-scan-218
+name: "Edge Regression Scan"
+category: Infrastructure
+workflow: automation-task-218.yml
+schedule: '38 00 * * 1'
+description: >-
+  Exercises edge delivery controls so regional routes stay resilient. Each run runs regression scans focused on critical metrics and flows. Automation wave 7 task 218 keeps this surface continuously validated.
