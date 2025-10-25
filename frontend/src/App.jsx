@@ -78,6 +78,7 @@ import GitPage from './pages/GitPage.jsx'
 import ControlPanel from './pages/ControlPanel.jsx'
 import PeriodicTableOfEquations from './pages/PeriodicTableOfEquations.jsx'
 import Resilience from './pages/Resilience.jsx'
+import AgentLineage from './pages/AgentLineage.jsx'
 
 export default function App(){
   const location = useLocation()
@@ -287,6 +288,7 @@ export default function App(){
     { key: 'security', to: '/security', text: 'Security Spotlights', icon: <Shield size={18} /> },
     { key: 'guardian', to: '/guardian', text: 'Guardian', icon: <ShieldCheck size={18} /> },
     { key: 'claude', to: '/claude', text: 'Claude', icon: <Cpu size={18} /> },
+    { key: 'agents', to: '/agents', text: 'Agent Lineage', icon: <Brain size={18} /> },
     { key: 'codex', to: '/codex', text: 'Codex', icon: <Brain size={18} /> },
     { key: 'equations', to: '/equations', text: 'Equations', icon: <FunctionSquare size={18} /> },
     { key: 'roadcoin', to: '/roadcoin', text: 'RoadCoin', icon: <Wallet size={18} /> },
@@ -335,6 +337,7 @@ export default function App(){
               <Route path="/autoheal" element={<Section><AutoHeal /></Section>} />
               <Route path="/security" element={<Section><SecuritySpotlights /></Section>} />
               <Route path="/guardian" element={<Guardian />} />
+              <Route path="/agents" element={<Section><AgentLineage /></Section>} />
               <Route path="/claude" element={<Section><Claude socket={socket} /></Section>} />
               <Route path="/codex" element={<Section><Codex socket={socket} /></Section>} />
               <Route path="/equations" element={<Section><PeriodicTableOfEquations /></Section>} />

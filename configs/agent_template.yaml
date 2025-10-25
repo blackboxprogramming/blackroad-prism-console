@@ -1,0 +1,18 @@
+# Default agent template for newly spawned agents.
+name: ""
+agent_id: ""
+base_model: ""
+domain: ""
+description: ""
+parent_agent: null
+traits:
+  - lineage-tracked
+  - autonomous
+metadata:
+  created_at: ""
+  created_by: ""
+  status: pending
+capabilities:
+  dialogue: true
+  orchestration: true
+  analytics: false

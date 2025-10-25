@@ -36,6 +36,26 @@ export async function fetchAgents(){
   return data.agents
 }
 
+export async function fetchAgentRegistry(){
+  const { data } = await axios.get(`${API_BASE}/api/agents/registry`)
+  return data
+}
+
+export async function spawnAgent(payload){
+  const { data } = await axios.post(`${API_BASE}/api/agents/spawn`, payload)
+  return data
+}
+
+export async function updateAgentMetadata(agentId, payload){
+  const { data } = await axios.patch(`${API_BASE}/api/agents/${agentId}`, payload)
+  return data.agent
+}
+
+export async function revertAgentRegistration(agentId){
+  const { data } = await axios.post(`${API_BASE}/api/agents/${agentId}/revert`)
+  return data
+}
+
 export async function fetchOrchestratorAgents(){
   const { data } = await axios.get(`${API_BASE}/api/orchestrator/agents`)
   return data.agents
