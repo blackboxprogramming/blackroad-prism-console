@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+const DEFAULT_TITLE = "Active Reflection";
 
 function createBaseline(prompts) {
-  const answers = prompts.map(() => "");
-  const checks = prompts.map(() => false);
-  return { answers, checks, notes: "" };
+  return {
+    answers: prompts.map(() => ""),
+    checks: prompts.map(() => false),
+    notes: ""
+  };
 }
 
 function normalizeFromStorage(raw, prompts) {
@@ -14,17 +18,12 @@ function normalizeFromStorage(raw, prompts) {
 
   try {
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      return {
-        ...fallback,
-        answers: prompts.map((_, index) => parsed[index] ?? ""),
-      };
-    }
-
+    const answers = Array.isArray(parsed?.answers) ? parsed.answers : parsed;
+    const checks = Array.isArray(parsed?.checks) ? parsed.checks : [];
     return {
-      answers: prompts.map((_, index) => parsed.answers?.[index] ?? ""),
-      checks: prompts.map((_, index) => parsed.checks?.[index] ?? false),
-      notes: typeof parsed.notes === "string" ? parsed.notes : "",
+      answers: prompts.map((_, index) => answers?.[index] ?? ""),
+      checks: prompts.map((_, index) => checks?.[index] ?? false),
+      notes: typeof parsed?.notes === "string" ? parsed.notes : ""
     };
   } catch (error) {
     console.warn("Failed to parse ActiveReflection storage", error);
@@ -32,14 +31,11 @@ function normalizeFromStorage(raw, prompts) {
   }
 }
 
-export default function ActiveReflection({ title = "Active Reflection", prompts = [], storageKey }) {
+export default function ActiveReflection({ title = DEFAULT_TITLE, prompts = [], storageKey }) {
   const [state, setState] = useState(() => {
-    const fallback = createBaseline(prompts);
-
     if (typeof window === "undefined" || !storageKey) {
-      return fallback;
+      return createBaseline(prompts);
     }
-
     return normalizeFromStorage(localStorage.getItem(storageKey), prompts);
   });
 
@@ -49,7 +45,7 @@ export default function ActiveReflection({ title = "Active Reflection", prompts 
       return {
         answers: prompts.map((_, index) => previous.answers?.[index] ?? baseline.answers[index]),
         checks: prompts.map((_, index) => previous.checks?.[index] ?? baseline.checks[index]),
-        notes: previous.notes ?? baseline.notes,
+        notes: previous.notes ?? baseline.notes
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -87,10 +83,15 @@ export default function ActiveReflection({ title = "Active Reflection", prompts 
     setState((previous) => ({ ...previous, notes: value }));
   };
 
+  const completed = useMemo(() => state.checks.filter(Boolean).length, [state.checks]);
+
   return (
     <section className="rounded-lg border border-white/10 bg-white/5 p-4">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-base font-semibold text-white">{title}</h3>
+        <div>
+          <h3 className="text-base font-semibold text-white">{title}</h3>
+          <p className="text-xs text-slate-400">{completed} of {prompts.length} prompts complete</p>
+        </div>
         {storageKey ? (
           <span className="text-xs uppercase tracking-wide text-slate-400">Autosave key: {storageKey}</span>
         ) : null}

@@ -1,21 +1,44 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+const CARDS = [
+  {
+    title: "Reasoning",
+    metaphor: "Superposition lets minds hold multiple thoughts at once for quantum parallelism.",
+    color: "#FF4FD8",
+    delay: 0
+  },
+  {
+    title: "Memory",
+    metaphor: "Entangled quantum RAM could bind experiences across vast memory webs.",
+    color: "#0096FF",
+    delay: 150
+  },
+  {
+    title: "Symbolic Processing",
+    metaphor: "Interference patterns refine symbolic chains, amplifying the meaningful paths.",
+    color: "#FDBA2D",
+    delay: 300
+  }
+];
+
 function Card({ title, metaphor, color, delay }) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
     const timeout = setTimeout(() => setShow(true), delay);
     return () => clearTimeout(timeout);
+    const timeout = window.setTimeout(() => setShow(true), delay);
+    return () => window.clearTimeout(timeout);
   }, [delay]);
 
   return (
     <div
-      className={`p-4 rounded-lg border-2 transition-all duration-700 ${
-        show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+      className={`rounded-lg border-2 p-4 transition-all duration-700 ${
+        show ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       }`}
       style={{ borderColor: color }}
     >
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
+      <h3 className="mb-2 text-xl font-semibold">{title}</h3>
       <p className="text-sm opacity-80">{metaphor}</p>
     </div>
   );
@@ -23,7 +46,7 @@ function Card({ title, metaphor, color, delay }) {
 
 export default function QuantumConsciousness() {
   const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
 
@@ -68,6 +91,32 @@ export default function QuantumConsciousness() {
     },
     []
   );
+  const fetchNotes = useCallback(async (signal) => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/quantum", { cache: "no-store", signal });
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+      const data = await response.json();
+      if (!Array.isArray(data.topics)) {
+        throw new Error("Invalid payload");
+      }
+      if (signal?.aborted) return;
+      setNotes(data.topics);
+      setLastUpdated(new Date());
+    } catch (err) {
+      if (signal?.aborted) return;
+      console.error("quantum-console", err);
+      setError("Unable to reach the quantum research console.");
+      setNotes([]);
+    } finally {
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -77,12 +126,13 @@ export default function QuantumConsciousness() {
 
   const researchLog = useMemo(() => {
     if (error) return `⚠️ ${error}`;
+    if (loading) return "Loading research notes...";
     if (!notes.length) return "No research notes available yet.";
 
     return notes
       .map((entry) => `${String(entry.topic).toUpperCase()}: ${entry.summary}`)
       .join("\n");
-  }, [error, notes]);
+  }, [error, loading, notes]);
 
   const lastSynced = useMemo(() => {
     if (!lastUpdated) return "—";
@@ -98,20 +148,24 @@ export default function QuantumConsciousness() {
   const handleRefresh = () => {
     fetchNotes();
   };
+  const timestamp = useMemo(() => new Date().toISOString(), []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center p-8 space-y-8">
+    <div className="flex min-h-screen flex-col items-center space-y-8 p-8">
       <header className="text-center">
         <h1
-          className="text-4xl font-bold mb-4"
+          className="mb-4 text-4xl font-bold"
           style={{
             background: "linear-gradient(90deg,#FF4FD8,#0096FF,#FDBA2D)",
             WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            WebkitTextFillColor: "transparent"
           }}
         >
-          Quantum x Consciousness
+          Quantum × Consciousness
         </h1>
+        <p className="text-sm opacity-70">
+          A speculative console for tracking emergent cognitive research threads.
+        </p>
       </header>
 
       <section className="grid md:grid-cols-3 gap-4 w-full max-w-5xl">
@@ -133,15 +187,21 @@ export default function QuantumConsciousness() {
           color="#FDBA2D"
           delay={300}
         />
+      <section className="grid w-full max-w-5xl gap-4 md:grid-cols-3">
+        {CARDS.map((card) => (
+          <Card key={card.title} {...card} />
+        ))}
       </section>
 
       <section className="w-full max-w-5xl space-y-3">
-        <div className="flex justify-between items-center text-sm opacity-70">
+        <div className="flex items-center justify-between text-sm opacity-70">
           <span>Research console</span>
           <span>Last sync: {lastSynced}</span>
         </div>
         <div className="bg-black text-green-400 font-mono p-4 rounded-md h-56 overflow-auto">
           <pre>{loading ? "Loading research notes..." : researchLog}</pre>
+        <div className="h-56 overflow-auto rounded-md bg-black p-4 font-mono text-green-400">
+          <pre>{log}</pre>
         </div>
         <div className="flex justify-end">
           <button
@@ -150,6 +210,10 @@ export default function QuantumConsciousness() {
             disabled={loading}
             className={`px-4 py-2 rounded-md border border-white/20 transition ${
               loading ? "opacity-60 cursor-not-allowed" : "hover:bg-white/10"
+            onClick={() => fetchNotes()}
+            disabled={loading}
+            className={`rounded-md border border-white/20 px-4 py-2 text-sm transition ${
+              loading ? "cursor-not-allowed opacity-60" : "hover:bg-white/10"
             }`}
           >
             {loading ? "Syncing" : "Refresh"}
