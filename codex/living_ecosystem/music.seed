@@ -1,0 +1,13 @@
+key: D dorian
+bpm: 96
+meters:
+  - 5/4 kindness pulse anchors perseverance syncopation
+  - 3/4 community sway invites collaborative rests
+voices:
+  bass: "D2 F2 A2 C3"  # math logic groundline
+  melody: "E4 G4 A4 C5 B4"  # creativity speaking through meaning
+  percussion: "kick on 1,3; rim click on 4&"  # code execution cadence
+  harmony: "Dm9 -> G13 -> Cmaj9"  # philosophy resolves ethics to renewal
+kindness_motif: "sustain 2 beats on each chord change"
+perseverance_counterline: "ascending triad repeats every third measure with velocity swell"
+render_hint: "export midi with humanized swing at 6% and layer soft pads for empathy"
