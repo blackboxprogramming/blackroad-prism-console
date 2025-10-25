@@ -14,6 +14,7 @@ import asyncio
 import math
 import random
 import time
+from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Tuple, Any, Coroutine, Optional
 
@@ -193,6 +194,13 @@ class ReflexServer:
         await self.bus.publish("motor/cmd", cmd, priority=90)
         # Pain raises arousal
         await self.bus.publish("modulator/nudge", {"norepinephrine": +0.2}, priority=5)
+        # Strong negative reward: pain is aversive
+        lvl = float(e.payload.get("level", 1.0))
+        await self.bus.publish(
+            "reward/signal",
+            {"value": -0.3 * lvl, "novelty": 0.0, "action": "reflex_withdrawal"},
+            priority=30,
+        )
 
 # -----------------------
 # Basal ganglia (action selection gate)
@@ -205,6 +213,7 @@ class BasalGanglia:
     def __init__(self, bus: EventBus, mods: Modulators):
         self.bus = bus
         self.mods = mods
+        self.action_counts: Dict[str, int] = defaultdict(int)
         self.bus.subscribe("cortex/candidate_action", self.on_candidate, sub_priority=10)
 
     async def on_candidate(self, e: Event):
@@ -219,9 +228,78 @@ class BasalGanglia:
             await self.bus.publish("motor/cmd", out, priority=40)
             # Slight dopamine increase on go
             await self.bus.publish("modulator/nudge", {"dopamine": +0.02}, priority=2)
+            action = out.get("type", "unknown")
+            self.action_counts[action] += 1
+            novelty = 1.0 / math.sqrt(self.action_counts[action])
+            intrinsic = val
+            await self.bus.publish(
+                "reward/signal",
+                {
+                    "value": intrinsic,
+                    "novelty": novelty,
+                    "action": action,
+                    "p_go": p_go,
+                },
+                priority=6,
+            )
         else:
             # Slight dopamine decrease on no-go
             await self.bus.publish("modulator/nudge", {"dopamine": -0.01}, priority=2)
+            await self.bus.publish(
+                "reward/signal",
+                {
+                    "value": min(val, 0.0) - 0.05,
+                    "novelty": 0.0,
+                    "action": e.payload.get("type", "unknown"),
+                    "p_go": p_go,
+                    "reason": "no_go",
+                },
+                priority=4,
+            )
+
+
+class RewardLearner:
+    """Integrates reward signals into neuromodulators and synaptic plasticity."""
+
+    def __init__(self, bus: EventBus, mods: Modulators, stdp: STDP):
+        self.bus = bus
+        self.mods = mods
+        self.stdp = stdp
+        self.expected_reward = 0.0
+        self.alpha = 0.1
+        self.last_action: Optional[str] = None
+        self.bus.subscribe("reward/signal", self.on_reward, sub_priority=5)
+
+    async def on_reward(self, e: Event):
+        reward = float(e.payload.get("value", 0.0))
+        novelty = float(e.payload.get("novelty", 0.0))
+        action = e.payload.get("action")
+        if action and action != self.last_action:
+            # Encourage trying new strategies
+            novelty += 0.05
+        total = reward + novelty
+        self.expected_reward = (1 - self.alpha) * self.expected_reward + self.alpha * total
+        advantage = total - self.expected_reward
+        advantage = max(-1.0, min(1.0, advantage))
+
+        updates: Dict[str, float] = {}
+        if advantage >= 0:
+            updates["dopamine"] = 0.12 * advantage
+            updates["acetylcholine"] = 0.07 * advantage
+        else:
+            updates["dopamine"] = 0.08 * advantage
+            updates["norepinephrine"] = -0.05 * advantage
+            updates["serotonin"] = -0.03 * advantage
+
+        await self.bus.publish("modulator/nudge", updates, priority=6)
+        # Reinforce or depress the nociceptor synapse slightly based on reward
+        self.stdp.w += 0.04 * advantage
+        self.stdp.renormalize()
+
+        self.last_action = action
+        print(
+            f"[Reward] action={action} total={total:.3f} target={self.expected_reward:.3f} adv={advantage:.3f}"
+        )
 
 # -----------------------
 # Cerebellum (predictive correction)
@@ -245,6 +323,9 @@ class Cerebellum:
             await self.bus.publish("motor/cmd_corrected",
                                    {"type": "withdrawal", "amplitude": corrected, "source": cmd.get("source")},
                                    priority=e.priority)
+        else:
+            # Pass non-reflex actions through untouched so downstream units and reward loops see them
+            await self.bus.publish("motor/cmd_corrected", cmd, priority=e.priority)
 
 # -----------------------
 # Motor end-effector
@@ -262,8 +343,18 @@ class MotorUnit:
         if cmd.get("type") == "withdrawal":
             self.stdp.post_spike(e.ts)
         # In a real system, this would actuate motors; we just print
-        amp = cmd.get("amplitude", 0.0)
-        print(f"[Motor] {cmd.get('type')} via {cmd.get('source')} amp={amp:.3f}   (w={self.stdp.w:.3f})")
+        amp = cmd.get("amplitude")
+        val = cmd.get("value")
+        if amp is not None:
+            print(
+                f"[Motor] {cmd.get('type')} via {cmd.get('source')} amp={float(amp):.3f}   (w={self.stdp.w:.3f})"
+            )
+        elif val is not None:
+            print(
+                f"[Motor] {cmd.get('type')} via {cmd.get('source')} value={float(val):.3f}   (w={self.stdp.w:.3f})"
+            )
+        else:
+            print(f"[Motor] {cmd.get('type')} via {cmd.get('source')}   (w={self.stdp.w:.3f})")
 
 # -----------------------
 # Sensors (nociceptor & "cortex")
@@ -338,6 +429,7 @@ async def main(runtime_sec: float = 8.0):
     mods_center = ModulatorCenter(bus, mods)
     reflex = ReflexServer(bus, stdp, mods)
     bg = BasalGanglia(bus, mods)
+    reward = RewardLearner(bus, mods, stdp)
     cereb = Cerebellum(bus)
     motor = MotorUnit(bus, stdp)
     pain = Nociceptor(bus)
