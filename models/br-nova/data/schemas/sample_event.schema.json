@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ReflexBus Event",
+  "type": "object",
+  "required": ["topic", "payload", "timestamp"],
+  "properties": {
+    "topic": {"type": "string"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "payload": {
+      "type": "object",
+      "properties": {
+        "model": {"type": "string"},
+        "event": {"type": "string"},
+        "metadata": {"type": "object"}
+      },
+      "required": ["model", "event"]
+    }
+  }
+}
