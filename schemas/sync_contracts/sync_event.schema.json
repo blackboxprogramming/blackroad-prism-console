@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.ai/schemas/sync_event.schema.json",
+  "title": "SyncEvent",
+  "description": "Event emitted on the sync pub/sub bus",
+  "type": "object",
+  "properties": {
+    "timestamp": {"type": "string", "format": "date-time"},
+    "action": {"type": "string"},
+    "payload": {"type": "object", "additionalProperties": true},
+    "host": {"type": "string"},
+    "status": {"type": "string", "enum": ["ok", "error", "warning"]}
+  },
+  "required": ["timestamp", "action", "payload", "host"],
+  "additionalProperties": false
+}

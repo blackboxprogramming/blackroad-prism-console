@@ -1,0 +1,74 @@
+{
+  "repo_list": [
+    {
+      "name": "blackroad-prism-console",
+      "url": "https://github.com/blackboxprogramming/blackroad-prism-console",
+      "purpose": "Core engine, orchestration scripts, and cross-agent services",
+      "last_commit": "Staged sync hub scaffolding"
+    },
+    {
+      "name": "BlackRoad.io",
+      "url": "https://github.com/BlackRoad-AI/BlackRoad.io",
+      "purpose": "Public site, deployment configurations, and marketing surface",
+      "last_commit": "Site refresh hooks"
+    }
+  ],
+  "active_projects": [
+    {
+      "id": "BLA-212",
+      "title": "Cross-platform synchronization core",
+      "status": "in-progress",
+      "owner": "Magnus"
+    },
+    {
+      "id": "BLA-207",
+      "title": "BlackRoad collective awareness rollout",
+      "status": "in-review",
+      "owner": "Athena"
+    }
+  ],
+  "last_commit_summary": [
+    {
+      "repo": "blackroad-prism-console",
+      "author": "Lucidia",
+      "message": "Bootstrap sync hub service",
+      "sha": "a1b2c3d",
+      "committed_at": "2024-04-01T09:15:00Z"
+    },
+    {
+      "repo": "BlackRoad.io",
+      "author": "Perseus",
+      "message": "Update deployment manifest",
+      "sha": "d4e5f6a",
+      "committed_at": "2024-03-28T16:42:00Z"
+    }
+  ],
+  "notion_spaces": [
+    {
+      "id": "notion-sync-ops",
+      "title": "Sync Operations",
+      "url": "https://www.notion.so/blackroad/Sync-Operations"
+    },
+    {
+      "id": "notion-blackroad-handbook",
+      "title": "BlackRoad Handbook",
+      "url": "https://www.notion.so/blackroad/Handbook"
+    }
+  ],
+  "linear_issues_summary": [
+    {
+      "id": "BLA-212",
+      "title": "Wire GitHub ↔ Notion mirroring",
+      "status": "in-progress",
+      "assignee": "Lucidia"
+    },
+    {
+      "id": "BLA-198",
+      "title": "Expose shared awareness context API",
+      "status": "todo",
+      "assignee": "Cicero"
+    }
+  ],
+  "generated_at": "2024-04-01T12:00:00Z",
+  "refresh_interval_minutes": 15
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.ai/schemas/sync_job.schema.json",
+  "title": "SyncJob",
+  "description": "Contract for a sync job dispatched by the blackroad_sync_core",
+  "type": "object",
+  "properties": {
+    "task": {"type": "string"},
+    "source": {"type": "string"},
+    "target": {"type": "string"},
+    "agent": {"type": "string"},
+    "payload": {"type": "object", "additionalProperties": true},
+    "dispatched_at": {"type": "string", "format": "date-time"}
+  },
+  "required": ["task", "source", "target", "agent", "dispatched_at"],
+  "additionalProperties": false
+}
