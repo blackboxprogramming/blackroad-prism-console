@@ -1,0 +1,46 @@
+{
+  "lessons": [
+    {
+      "id": "lesson-math-functions",
+      "slug": "math-functions",
+      "title": "Understanding Functions",
+      "summary": "Explore the building blocks of mathematical functions and their graphs.",
+      "content": "# Functions\n\nFunctions map inputs to outputs.",
+      "tags": ["math", "algebra"],
+      "estMinutes": 25,
+      "outcomes": [
+        "Define a function",
+        "Evaluate functions for given inputs",
+        "Interpret function graphs"
+      ]
+    },
+    {
+      "id": "lesson-physics-kinematics",
+      "slug": "physics-kinematics",
+      "title": "Kinematics Basics",
+      "summary": "Analyze motion using displacement, velocity, and acceleration.",
+      "content": "# Kinematics\n\nKinematics describes motion.",
+      "tags": ["physics"],
+      "estMinutes": 30,
+      "outcomes": [
+        "Differentiate displacement and distance",
+        "Use velocity-time graphs",
+        "Solve constant acceleration problems"
+      ]
+    },
+    {
+      "id": "lesson-cs-sorting",
+      "slug": "cs-sorting",
+      "title": "Sorting Basics",
+      "summary": "Compare key comparison-based sorting algorithms.",
+      "content": "# Sorting\n\nSorting arranges data.",
+      "tags": ["cs", "algorithms"],
+      "estMinutes": 20,
+      "outcomes": [
+        "Describe bubble sort",
+        "Analyze time complexity",
+        "Choose algorithms for small datasets"
+      ]
+    }
+  ]
+}

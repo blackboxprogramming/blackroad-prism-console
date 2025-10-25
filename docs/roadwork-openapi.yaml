@@ -1,0 +1,81 @@
+openapi: 3.1.0
+info:
+  title: RoadWork Mock API
+  version: 0.1.0
+paths:
+  /api/lessons:
+    get:
+      summary: List lessons
+      responses:
+        '200':
+          description: Lessons payload
+  /api/lessons/{slug}:
+    get:
+      summary: Fetch lesson by slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lesson payload
+        '404':
+          description: Lesson not found
+  /api/lessons/{slug}/questions:
+    get:
+      summary: Fetch practice questions
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Questions payload
+  /api/quiz/start:
+    post:
+      summary: Start adaptive quiz
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                slug:
+                  type: string
+      responses:
+        '200':
+          description: Attempt created
+  /api/quiz/next:
+    post:
+      summary: Fetch next question
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                attemptId:
+                  type: string
+              required:
+                - attemptId
+      responses:
+        '200':
+          description: Question returned
+  /api/quiz/submit:
+    post:
+      summary: Submit quiz
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                attemptId:
+                  type: string
+      responses:
+        '200':
+          description: Score response
