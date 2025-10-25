@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-10-25T06:17:34Z",
+  "directive_count": 6,
+  "core_task_count": 6,
+  "behavioural_loop_length": 6,
+  "guidance_complexity": 21.48,
+  "exploration_pressure": 10.8,
+  "safety_margin": 2.48,
+  "balance_index": 6.64
+}
