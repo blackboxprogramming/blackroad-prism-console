@@ -16,4 +16,19 @@ a {
 
 .card {
   @apply bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-md;
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  @apply bg-slate-950 text-slate-50 min-h-screen;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+a {
+  @apply text-brand-400 hover:text-brand-300;
+}
+
+main {
+  @apply px-6 py-10 md:px-10;
 }

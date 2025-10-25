@@ -38,6 +38,39 @@
       "title": "Runbooks",
       "icon": "book",
       "url": "https://console.blackroad.io/runbooks"
+  "systemUptime": "47 days, 12 hours",
+  "activeAgents": 18,
+  "averageLatencyMs": 132,
+  "incidents24h": 0,
+  "metrics": [
+    { "id": "uptime", "label": "System Uptime", "value": "47d 12h", "trend": "up" },
+    { "id": "latency", "label": "Avg Latency", "value": "132 ms", "trend": "down", "change": -4.1 },
+    { "id": "agents", "label": "Active Agents", "value": "18", "trend": "up", "change": 2.0 },
+    { "id": "incidents", "label": "Incidents (24h)", "value": "0", "trend": "flat" }
+  ],
+  "latency": [
+    { "region": "us-east-1", "p95Ms": 120 },
+    { "region": "us-west-2", "p95Ms": 138 },
+    { "region": "eu-central-1", "p95Ms": 142 }
+  ],
+  "shortcuts": [
+    {
+      "id": "reboot-edge",
+      "label": "Reboot Edge Mesh",
+      "description": "Restarts the edge mesh orchestrator across all POPs",
+      "command": "brc mesh:reboot --scope=global"
+    },
+    {
+      "id": "refresh-policies",
+      "label": "Refresh Compliance Policies",
+      "description": "Pulls and reapplies the latest compliance baselines",
+      "command": "brc compliance:refresh"
+    },
+    {
+      "id": "drill-failover",
+      "label": "Failover Drill",
+      "description": "Initiates a simulated failover for readiness validation",
+      "command": "brc ops:failover --region=us-west-2"
     }
   ]
 }

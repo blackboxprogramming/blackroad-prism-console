@@ -1,0 +1,34 @@
+[
+  {
+    "id": "agent-ops-01",
+    "name": "Ops Sentience",
+    "domain": "Operations",
+    "status": "online",
+    "memoryUsageMb": 342,
+    "lastHeartbeat": "2024-09-01T12:15:00Z"
+  },
+  {
+    "id": "agent-risk-02",
+    "name": "Risk Sentinel",
+    "domain": "Risk & Compliance",
+    "status": "degraded",
+    "memoryUsageMb": 512,
+    "lastHeartbeat": "2024-09-01T12:12:00Z"
+  },
+  {
+    "id": "agent-supply-07",
+    "name": "Supply Minder",
+    "domain": "Supply Chain",
+    "status": "online",
+    "memoryUsageMb": 268,
+    "lastHeartbeat": "2024-09-01T12:16:30Z"
+  },
+  {
+    "id": "agent-sec-04",
+    "name": "Guardian Shield",
+    "domain": "Security",
+    "status": "offline",
+    "memoryUsageMb": 0,
+    "lastHeartbeat": "2024-09-01T11:42:10Z"
+  }
+]
