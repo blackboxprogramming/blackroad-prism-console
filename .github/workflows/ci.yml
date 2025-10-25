@@ -1,347 +1,111 @@
-name: ci
-on:
-  push:
-    branches: [main]
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+name: prism-console-web-ci
 
 on:
-  push:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-
-permissions:
-  contents: read
-  checks: write
-
-jobs:
-  build:
-    if: |
-      (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
-      !contains(github.event.head_commit.message, '[skip ci]') &&
-      !contains(format('{0}', github.event.pull_request.title), '[skip ci]')
-    timeout-minutes: 20
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-jobs:
-  build:
-    if: >-
-      !(
-        github.event_name == 'push' &&
-        contains(github.event.head_commit.message, '[skip ci]')
-      ) &&
-      (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-      - run: python -m pip install -U pip pytest jsonschema
-      - name: Run pytest
-        run: |
-          mkdir -p artifacts/test-results
-          pytest -q --junitxml=artifacts/test-results/junit-python.xml
-        with: { python-version: '3.11' }
-      - uses: actions/setup-node@v4
-        with: { node-version: '20' }
-      - name: Install JS smoke-test dependencies
-        run: |
-          npm ci --no-audit --no-fund --prefix services/api
-          npm ci --no-audit --no-fund --prefix frontend
-      - run: python -m pip install -U pip pytest jsonschema
-      - run: pytest -q tests/test_prism_console_smoke.py tests/test_frontend_smoke.py tests/test_services_api_smoke.py
-          cache-dependency-path: |
-            requirements.txt
-            requirements-dev.txt
-      - name: Install test dependencies
-        run: python -m pip install -U pip pytest jsonschema
-      - name: Run pytest
-        run: pytest -q --junitxml=junit-pytests.xml
-      - name: Publish test results
-        if: always()
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        with:
-          files: |
-            **/junit-*.xml
-      - name: Determinism smoke
-        run: |
-          python -m pip install .
-          brc plm:items:load --dir fixtures/plm/items
-          brc plm:bom:load --dir fixtures/plm/boms
-          A1=$(sha256sum artifacts/plm/items.json | cut -d' ' -f1)
-          A2=$(sha256sum artifacts/plm/items.json | cut -d' ' -f1)
-          test "$A1" = "$A2"
-      - name: Contract validation
-        run: python scripts/validate_contracts.py
-      - name: Artifacts hash
-        run: bash scripts/hash_artifacts.sh || true
-      - name: Publish test results
-        if: always()
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        with:
-          files: |
-            artifacts/test-results/junit-python.xml
-
-  build-test:
-    if: |
-      (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
-      !contains(github.event.head_commit.message, '[skip ci]') &&
-      !contains(format('{0}', github.event.pull_request.title), '[skip ci]')
-    timeout-minutes: 20
-    if: >-
-      !(
-        github.event_name == 'push' &&
-        contains(github.event.head_commit.message, '[skip ci]')
-      ) &&
-      (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-          cache: 'npm'
-          cache-dependency-path: |
-            apps/api/package-lock.json
-      - run: npm ci --prefix apps/api
-      - run: npm run build --prefix apps/api
-      - run: npm test --prefix apps/api --if-present
-      - name: Publish test results
-        if: always()
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        with:
-          files: |
-            apps/api/**/junit-*.xml
-      - name: Upload API dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-dist
-          path: apps/api/dist
----
-name: BlackRoad CI/CD
-
-'on':
   push:
     branches:
       - main
+      - work
   pull_request:
-    branches: ['main']
-  workflow_dispatch:
+    paths:
+      - "apps/prism-console-web/**"
+      - ".github/workflows/ci.yml"
+      - "pnpm-workspace.yaml"
 
-# Prevent overlapping prod deploys
-concurrency:
-  group: prod-deploy
-  cancel-in-progress: false
-
-permissions:
-  contents: read
-
-name: CI
-on: [pull_request]
 jobs:
-  validate:
-    name: Validate infrastructure & configs
-on: [push, pull_request]
-jobs:
-  build:
+  quality:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          terraform_version: 1.6.6
+          version: 8
 
-      - name: Validate Terraform
-        run: |
-          cd infra
-          terraform init -backend=false
-          terraform validate
-
-      - name: Lint Flow YAML
-        run: |
-          pipx install yamllint
-          yamllint flows
-
-      - name: Schemas & Tests
-        run: |
-          echo "stub: run schema/unit tests here"
-
-  build_test:
-    name: Build & Test
-    runs-on: ubuntu-latest
-    needs: validate
-    if: github.event_name != 'pull_request' || github.base_ref == 'main'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.11'
-      - run: python -m pip install -U pip pytest jsonschema
-      - run: python -m pip install -e .
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: apps/prism-console-web/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: apps/prism-console-web
+        run: pnpm install --ignore-workspace
+
+      - name: Lint
+        working-directory: apps/prism-console-web
+        run: pnpm lint
+
+      - name: Type check
+        working-directory: apps/prism-console-web
+        run: pnpm type-check
+
       - name: Unit tests
-        run: pytest -q
-      - name: Demo run (deterministic)
-        run: |
-          cd infra && terraform init -backend=false && terraform validate
-      - name: Lint Flow YAML
-        run: |
-          pipx install yamllint && yamllint flows
-      - name: Schemas & Tests
-          set -eu
-          mkdir -p release/web release/api
+        working-directory: apps/prism-console-web
+        run: pnpm test
 
-          # --- Web assets ---
-          if [ -d web ] && [ -f web/package.json ]; then
-            if [ -d web/dist ]; then cp -r web/dist/* release/web/; fi
-            if [ -d web/build ]; then cp -r web/build/* release/web/; fi
-            # Fallback: copy public if no build output
-            if [ ! -d release/web ] || [ -z "$(ls -A release/web 2>/dev/null || true)" ]; then
-              if [ -d web/public ]; then cp -r web/public/* release/web/; fi
-            fi
-          else
-            # Root web build fallback
-            if [ -d dist ]; then cp -r dist/* release/web/; fi
-            if [ -d build ]; then cp -r build/* release/web/; fi
-          fi
+      - name: Install Playwright browsers
+        working-directory: apps/prism-console-web
+        run: pnpm exec playwright install --with-deps
 
-          # --- API sources ---
-          if [ -d api ] && [ -f api/package.json ]; then
-            rsync -a --delete --exclude=node_modules --exclude='.git' --exclude='**/*.test.*' api/ release/api/
-          fi
+      - name: E2E tests
+        working-directory: apps/prism-console-web
+        run: pnpm test:e2e
 
-          tar -czf release.tar.gz -C release .
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: release-${{ github.sha }}
-          path: release.tar.gz
-          if-no-files-found: error
-
-  deploy:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: build_test
-    if: github.ref == 'refs/heads/main'
-    environment: production
-    steps:
-      - name: Checkout
-        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
-
-      - name: Download artifact
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          name: release-${{ github.sha }}
-          path: .
-
-      - name: Deploy (SSH + atomic symlinks + rollback)
+      - name: Build
+        working-directory: apps/prism-console-web
         env:
-          SERVER_HOST: ${{ secrets.SERVER_HOST }}
-          SERVER_USER: ${{ secrets.SERVER_USER }}
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          # Deploy + targets (match your known paths)
-          DEPLOY_ROOT: /opt/blackroad/releases
-          WEB_PATH: /var/www/blackroad
-          API_PATH: /srv/blackroad-api
-          # Health checks (external)
-          HEALTH_URL: https://blackroad.io/health
-          API_HEALTH_URL: https://blackroad.io/api/health
-          RELEASE: ${{ github.sha }}
-          KEEP_RELEASES: '3'
-          DO_API_DEPLOY: '1'
-        run: |
-          echo "stub: run schema/unit tests here"
-    - name: Contract validation
-      run: python scripts/validate_contracts.py
-    - name: Changelog guard
-      run: |
-        CHANGED=$(git diff --name-only HEAD~1 | grep -E '^(plm|mfg|cli|contracts)/' || true)
-        if [ -n "$CHANGED" ] && ! git diff --name-only HEAD~1 | grep -q '^CHANGELOG.md$'; then
-          echo 'Please update CHANGELOG.md'; exit 1; fi
-          python -m cli.console plm:items:load --dir fixtures/plm/items
-          python -m cli.console plm:bom:load --dir fixtures/plm/boms
-          python -m cli.console mfg:wc:load --file fixtures/mfg/work_centers.csv
-          python -m cli.console mfg:routing:load --dir fixtures/mfg/routings
-          python -m cli.console mfg:routing:capcheck --item PROD-100 --rev B --qty 1000
-          python -m cli.console mfg:wi:render --item PROD-100 --rev B
-          python -m cli.console mfg:spc:analyze --op OP-200 --window 50
-          python -m cli.console mfg:yield --period 2025-09
-          python -m cli.console mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv
-          python -m cli.console mfg:coq --period 2025-Q3
-name: CI
+          NEXT_DISABLE_LOCKFILE_CHECK: "1"
+          NODE_ENV: production
+        run: pnpm build
 
-on:
-  push:
-    branches:
-      - main
-      - release/*
-  pull_request:
-
-permissions:
-  contents: read
-
-jobs:
-  lint:
-    uses: ./.github/workflows/reusable-node20.yml
-    with:
-      run: npm run lint || pnpm lint || yarn lint
-
-  typecheck:
-    uses: ./.github/workflows/reusable-node20.yml
-    with:
-      run: npm run typecheck || pnpm typecheck || yarn typecheck
-
-  test:
-    uses: ./.github/workflows/reusable-node20.yml
-    with:
-      run: npm test -- --ci --reporters=default || pnpm test -- --ci --reporters=default || yarn test --ci --reporters=default
-on: [push, pull_request]
-jobs:
-  build:
+  preview:
+    needs: quality
+    if: ${{ github.event_name == 'pull_request' && secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != '' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          python-version: '3.11'
-      - run: python -m pip install -U pip pytest jsonschema
-      - run: python -m pip install -e .
-      - name: Unit tests
-        run: pytest -q
-      - name: Demo run (deterministic)
-        run: |
-          python -m cli.console plm:items:load --dir fixtures/plm/items
-          python -m cli.console plm:bom:load --dir fixtures/plm/boms
-          python -m cli.console mfg:wc:load --file fixtures/mfg/work_centers.csv
-          python -m cli.console mfg:routing:load --dir fixtures/mfg/routings
-          python -m cli.console mfg:routing:capcheck --item PROD-100 --rev B --qty 1000
-          python -m cli.console mfg:wi:render --item PROD-100 --rev B
-          python -m cli.console mfg:spc:analyze --op OP-200 --window 50
-          python -m cli.console mfg:yield --period 2025-09
-          python -m cli.console mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv
-          python -m cli.console mfg:coq --period 2025-Q3
-      - name: Contract validation
-        run: python scripts/validate_contracts.py
-      - name: Reproducible artifacts hash
-        run: |
-          find artifacts -type f -print0 | sort -z | xargs -0 sha256sum > artifact_hashes.txt
-          cp artifact_hashes.txt artifact_hashes_prev.txt
-          diff -u artifact_hashes_prev.txt artifact_hashes.txt || true
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: apps/prism-console-web/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: apps/prism-console-web
+        run: pnpm install --ignore-workspace
+
+      - name: Pull Vercel environment information
+        working-directory: apps/prism-console-web
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: pnpm dlx vercel pull --yes --environment=preview
+
+      - name: Build preview
+        working-directory: apps/prism-console-web
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          NEXT_DISABLE_LOCKFILE_CHECK: "1"
+        run: pnpm dlx vercel build
+
+      - name: Deploy preview
+        working-directory: apps/prism-console-web
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: pnpm dlx vercel deploy --prebuilt
