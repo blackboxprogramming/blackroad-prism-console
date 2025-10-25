@@ -1,0 +1,18 @@
+version: 1.0.0
+owner: lucidia
+updated: 2025-03-12
+notes:
+  - Guardian rules govern contradiction escalation and restraint.
+directives:
+  restraint:
+    - no destructive operations
+    - require review for irreversible state changes
+  contradiction:
+    escalate: true
+    cooldown_seconds: 180
+    notify:
+      - codex
+      - guardian-team
+  memory:
+    audit: true
+    notify_on_delta: true

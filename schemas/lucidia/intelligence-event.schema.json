@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad.ai/schemas/lucidia/intelligence-event.json",
+  "title": "Lucidia Intelligence Event",
+  "type": "object",
+  "required": [
+    "id",
+    "topic",
+    "timestamp",
+    "source",
+    "channel",
+    "payload",
+    "meta"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{8,128}$"
+    },
+    "topic": {
+      "type": "string",
+      "pattern": "^(observations|intents|actions|guardian|codex|memory)(\\.[A-Za-z0-9_.-]+)+$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "reflex",
+        "prism",
+        "guardian",
+        "memory",
+        "codex"
+      ]
+    },
+    "payload": {
+      "type": "object"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "causal": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "parent": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
+        },
+        "chain": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "meta": {
+      "type": "object",
+      "required": ["schema", "version"],
+      "properties": {
+        "schema": {
+          "type": "string",
+          "format": "uri"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bridge": {
+          "type": "object",
+          "properties": {
+            "state": {"type": "string"},
+            "latency_ms": {"type": "number"}
+          },
+          "additionalProperties": true
+        },
+        "replay": {
+          "type": "object",
+          "properties": {
+            "offline": {"type": "boolean"},
+            "sequence": {"type": "integer", "minimum": 0}
+          },
+          "additionalProperties": true
+        },
+        "annotations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "by": {"type": "string"},
+              "note": {"type": "string"}
+            },
+            "required": ["by", "note"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
