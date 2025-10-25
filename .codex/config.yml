@@ -88,3 +88,166 @@ maintenance:
           docker system prune -af
           pm2 resurrect || true
         EOF
+version: 1
+project:
+  name: blackroad-prism-console
+  owner: blackroad
+  default_branch: main
+  environments:
+    production:
+      droplet: blackroad-prism-console
+      domains:
+        - https://blackroad.io
+        - https://blackroadinc.us
+notifications:
+  slack:
+    enabled: true
+    channel: deploy
+secrets:
+  required:
+    - HF_TOKEN
+    - DEPLOY_KEY
+  optional:
+    - DOCKER_HOST
+    - SLACK_WEBHOOK_URL
+workflows:
+  deploy:
+    description: Ship the latest build to the production droplet whenever main updates.
+    on:
+      push:
+        branches:
+          - main
+      workflow_dispatch: {}
+    concurrency: deploy-production
+    env:
+      NODE_ENV: production
+      DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      DOCKER_HOST: ${{ secrets.DOCKER_HOST }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build production bundle
+        run: pnpm build
+      - name: Package static export
+        run: pnpm export
+      - name: Configure deploy SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      - name: Deploy bundle
+        run: ./deploy/scripts/deploy.sh
+      - name: Notify Slack success
+        if: success()
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{"text":":rocket: Codex deploy succeeded for blackroad-prism-console"}' \
+              "$SLACK_WEBHOOK_URL"
+          fi
+      - name: Notify Slack failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{"text":":rotating_light: Codex deploy failed for blackroad-prism-console"}' \
+              "$SLACK_WEBHOOK_URL"
+          fi
+  hf-sync:
+    description: Publish and update Hugging Face models declared in prs-200.csv.
+    on:
+      push:
+        branches:
+          - main
+        paths:
+          - 'prs-200.csv'
+          - 'models/**'
+      workflow_dispatch:
+        inputs:
+          repo_id:
+            description: Optional override Hugging Face repo id
+            required: false
+          source_dir:
+            description: Optional path to a specific model directory
+            required: false
+      schedule:
+        - cron: '30 6 * * *'
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install tooling
+        run: pip install --upgrade pip && pip install -r requirements.txt
+      - name: Sync to Hugging Face
+        env:
+          REPO_ID: ${{ github.event.inputs.repo_id }}
+          SOURCE_DIR: ${{ github.event.inputs.source_dir }}
+        run: |
+          set -euo pipefail
+          ARGS=(--manifest prs-200.csv)
+          if [ -n "${REPO_ID:-}" ]; then
+            ARGS+=(--repo-id "$REPO_ID")
+          fi
+          if [ -n "${SOURCE_DIR:-}" ]; then
+            ARGS+=(--source-dir "$SOURCE_DIR")
+          fi
+          python scripts/hf_sync.py "${ARGS[@]}"
+      - name: Notify Slack failure
+        if: failure()
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{"text":":rotating_light: Codex Hugging Face sync failed"}' \
+              "$SLACK_WEBHOOK_URL"
+          fi
+  retrieval-rebuild:
+    description: Nightly rebuild of the Qdrant retrieval stack.
+    on:
+      schedule:
+        - cron: '0 7 * * *'
+      workflow_dispatch: {}
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install retrieval dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r retrieval/requirements.txt
+      - name: Rebuild Qdrant indexes
+        run: |
+          python retrieval/scripts/rebuild.py --reset --load-from=data/retrieval
+      - name: Publish retrieval snapshot artifact
+        run: |
+          tar -czf retrieval-snapshot.tar.gz retrieval/output
+          gh release upload nightly-retrieval retrieval-snapshot.tar.gz --clobber
+      - name: Notify Slack failure
+        if: failure()
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{"text":":rotating_light: Codex retrieval rebuild failed"}' \
+              "$SLACK_WEBHOOK_URL"
+          fi
