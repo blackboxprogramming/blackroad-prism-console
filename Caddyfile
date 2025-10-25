@@ -6,13 +6,16 @@
 blackroad.io, www.blackroad.io, blackroadinc.us {
   encode gzip
 
-  # API endpoints
-  handle /api/* {
-    reverse_proxy api:4000
+  handle_path /api/* {
+    uri strip_prefix /api
+    reverse_proxy api:8000
   }
 
-  # Main application
+  handle_path /metrics* {
+    reverse_proxy api:8000
+  }
+
   handle {
-    reverse_proxy web:8000
+    reverse_proxy frontend:3000
   }
 }

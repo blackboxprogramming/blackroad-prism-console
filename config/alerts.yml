@@ -1,0 +1,29 @@
+slack:
+  channel: "#dev-ops"
+  webhook_env: SLACK_WEBHOOK_URL
+  message: |
+    *Alert:* {{ .CommonAnnotations.summary }}
+    *Details:* {{ .CommonAnnotations.description }}
+    *Status:* {{ .Status | toUpper }}
+    *Service:* {{ .Labels.job }}
+    *Time:* {{ .StartsAt }}
+  blocks:
+    - type: section
+      text: |
+        *Alert:* {{ .CommonAnnotations.summary }}
+    - type: section
+      text: |
+        *Service:* {{ .Labels.job }}  •  *Status:* {{ .Status | toUpper }}
+    - type: section
+      text: |
+        {{ .CommonAnnotations.description }}
+    - type: context
+      elements:
+        - type: mrkdwn
+          text: "Triggered: {{ .StartsAt }}"
+        - type: mrkdwn
+          text: "Dashboard: ${NEXT_PUBLIC_GRAFANA_URL:-http://localhost:3001}"
+  notes: |
+    Inject the JSON block template into Alertmanager's slack_configs.blocks field when
+    rendering Block Kit messages. The plain-text `message` remains available for legacy
+    webhooks and incident systems.
