@@ -1,0 +1,112 @@
+# ============================================================
+#  Codex Automation Configuration
+#  File: .codex/config.yml
+# ============================================================
+
+version: 1
+description: >
+  Codex orchestration for BlackRoad Prism Console.
+  Handles:
+    • Web deployment to shellfish-droplet
+    • Automated Hugging Face model publishing
+    • Nightly retrieval-stack rebuild & cleanup
+
+env:
+  DROPLET_HOST: root@174.138.44.45
+  DROPLET_PATH: /srv/blackroad-site
+  GIT_BRANCH: main
+  HF_ORG: blackroad
+  HF_TOKEN: ${{ secrets.HF_TOKEN }}
+  DOCKER_COMPOSE_FILE: docker-compose.prod.yml
+  RETRIEVAL_PATH: /srv/blackroad-prism-console/retrieval
+  MODEL_LIST: prs-200.csv
+
+# ------------------------------------------------------------
+#  EVENT TRIGGERS
+# ------------------------------------------------------------
+triggers:
+  - on: push
+    branches: [main]
+    actions:
+      - deploy-droplet
+      - publish-hf-models
+      - rebuild-retrieval
+
+  - on: workflow_dispatch
+    actions:
+      - deploy-droplet
+      - publish-hf-models
+      - rebuild-retrieval
+
+# ------------------------------------------------------------
+#  TASKS
+# ------------------------------------------------------------
+tasks:
+  deploy-droplet:
+    name: Deploy site to shellfish-droplet
+    steps:
+      - name: SSH into droplet and pull latest
+        run: |
+          ssh -o StrictHostKeyChecking=no $DROPLET_HOST <<'EOF'
+            cd $DROPLET_PATH
+            git pull origin $GIT_BRANCH
+            docker compose -f $DOCKER_COMPOSE_FILE up -d --build
+            systemctl reload caddy || true
+            echo "✅ Web deployment complete on $DROPLET_HOST"
+          EOF
+
+  publish-hf-models:
+    name: Publish all Hugging Face models
+    steps:
+      - name: Prepare list of models
+        run: |
+          echo "Parsing model list from $MODEL_LIST"
+          MODELS=$(awk -F, '/^hf-/ {print $2}' $MODEL_LIST)
+          for MODEL in $MODELS; do
+            gh workflow run publish-to-hf.yml \
+              -f repo_id=$HF_ORG/${MODEL##*/} \
+              -f source_dir=models/${MODEL##*/} \
+              -f private=false
+          done
+          echo "✅ Hugging Face publication triggered."
+
+  rebuild-retrieval:
+    name: Rebuild retrieval stack (Qdrant + Embeddings)
+    steps:
+      - name: SSH into droplet and rebuild services
+        run: |
+          ssh -o StrictHostKeyChecking=no $DROPLET_HOST <<'EOF'
+            cd $RETRIEVAL_PATH
+            echo "🔄 Rebuilding retrieval docker services..."
+            docker compose down
+            docker compose build --no-cache
+            docker compose up -d
+            echo "✅ Retrieval stack rebuilt successfully."
+          EOF
+
+# ------------------------------------------------------------
+#  LOGGING & MONITORING
+# ------------------------------------------------------------
+logging:
+  level: info
+  output: codex/logs/codex.log
+  notify:
+    slack_webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    on_failure: true
+    on_success: false
+
+# ------------------------------------------------------------
+#  CLEANUP & MAINTENANCE
+# ------------------------------------------------------------
+maintenance:
+  cron: "0 3 * * *"     # nightly 3 AM UTC
+  actions:
+    - name: Prune Docker images, rebuild retrieval, and restart PM2
+      run: |
+        ssh -o StrictHostKeyChecking=no $DROPLET_HOST <<'EOF'
+          echo "🧹 Nightly maintenance started..."
+          docker system prune -af
+          cd $RETRIEVAL_PATH && docker compose down && docker compose up -d --build
+          pm2 resurrect || true
+          echo "✅ Nightly maintenance and retrieval rebuild complete."
+        EOF
