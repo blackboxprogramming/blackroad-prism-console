@@ -1,0 +1,18 @@
+name: Codex Watchdog
+
+on:
+  push:
+    paths:
+      - 'codex_prompts/prompts/*.yaml'
+  schedule:
+    - cron: '*/15 * * * *'
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: pip install networkx matplotlib pyyaml
+      - name: Run Codex Watchdog
+        run: python codex_watchdog.py
