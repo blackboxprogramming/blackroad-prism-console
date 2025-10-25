@@ -1,0 +1,36 @@
+name: RoadWork CI
+
+on:
+  push:
+    paths:
+      - 'apps/roadwork/**'
+      - '.github/workflows/roadwork-ci.yml'
+  pull_request:
+    paths:
+      - 'apps/roadwork/**'
+      - '.github/workflows/roadwork-ci.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.18.0'
+          cache: 'pnpm'
+      - run: pnpm install
+      - name: Lint
+        run: pnpm --filter @blackroad/roadwork lint
+      - name: Typecheck
+        run: pnpm --filter @blackroad/roadwork typecheck
+      - name: Unit tests
+        run: pnpm --filter @blackroad/roadwork test
+      - name: Accessibility tests
+        run: pnpm --filter @blackroad/roadwork a11y
+      - name: Build
+        run: pnpm --filter @blackroad/roadwork build

@@ -214,3 +214,17 @@ demo:
 >sh scripts/demo.sh
 coverage:
 >pytest --maxfail=1 --disable-warnings -q --cov=. --cov-report=term-missing
+roadwork-dev:
+>pnpm --filter @blackroad/roadwork dev
+
+roadwork-build:
+>pnpm --filter @blackroad/roadwork build
+
+roadwork-test:
+>pnpm --filter @blackroad/roadwork test
+
+roadwork-a11y:
+>pnpm --filter @blackroad/roadwork a11y
+
+roadwork-e2e:
+>pnpm --filter @blackroad/roadwork e2e

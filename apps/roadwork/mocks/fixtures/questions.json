@@ -1,0 +1,67 @@
+{
+  "math-functions": [
+    {
+      "id": "q-math-1",
+      "lessonId": "lesson-math-functions",
+      "stem": "What is f(2) if f(x) = 3x + 1?",
+      "kind": "numeric",
+      "difficulty": 1,
+      "hints": ["Substitute the input for x."]
+    },
+    {
+      "id": "q-math-2",
+      "lessonId": "lesson-math-functions",
+      "stem": "Which graph represents a linear function?",
+      "kind": "mcq",
+      "choices": [
+        { "id": "a", "text": "A straight line" },
+        { "id": "b", "text": "A circle" },
+        { "id": "c", "text": "A parabola" }
+      ],
+      "difficulty": 2,
+      "hints": ["Linear functions have constant rate of change."]
+    },
+    {
+      "id": "q-math-3",
+      "lessonId": "lesson-math-functions",
+      "stem": "Explain the difference between domain and range.",
+      "kind": "short",
+      "difficulty": 3
+    }
+  ],
+  "physics-kinematics": [
+    {
+      "id": "q-physics-1",
+      "lessonId": "lesson-physics-kinematics",
+      "stem": "Velocity is the rate of change of ______.",
+      "kind": "mcq",
+      "choices": [
+        { "id": "a", "text": "distance" },
+        { "id": "b", "text": "mass" },
+        { "id": "c", "text": "force" }
+      ],
+      "difficulty": 1
+    },
+    {
+      "id": "q-physics-2",
+      "lessonId": "lesson-physics-kinematics",
+      "stem": "A car accelerates from 0 to 20 m/s in 5 seconds. What is the acceleration?",
+      "kind": "numeric",
+      "difficulty": 2
+    }
+  ],
+  "cs-sorting": [
+    {
+      "id": "q-cs-1",
+      "lessonId": "lesson-cs-sorting",
+      "stem": "Bubble sort has worst case complexity of ______.",
+      "kind": "mcq",
+      "choices": [
+        { "id": "a", "text": "O(n)" },
+        { "id": "b", "text": "O(n log n)" },
+        { "id": "c", "text": "O(n^2)" }
+      ],
+      "difficulty": 1
+    }
+  ]
+}
