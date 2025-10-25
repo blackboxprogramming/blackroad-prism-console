@@ -1,0 +1,40 @@
+model:
+  name: br-seed-125m
+  d_model: 768
+  n_layers: 16
+  n_heads: 12
+  n_kv_heads: 12
+  ffn_mult: 3.5
+  vocab_size: 16000
+  max_position_embeddings: 4096
+  rope_theta: 1000000
+  dropout: 0.0
+optimizer:
+  name: adamw
+  lr: 0.0003
+  betas: [0.9, 0.95]
+  weight_decay: 0.1
+  eps: 1.0e-8
+scheduler:
+  name: cosine
+  warmup_steps: 6000
+  total_steps: 300000
+  min_lr_ratio: 0.05
+training:
+  precision: bf16
+  grad_clip: 1.0
+  gradient_accumulation_steps: 8
+  micro_batch_size: 8
+  global_batch_tokens: 2000000
+  seq_length: 4096
+  checkpoint_every: 1000
+  eval_every: 5000
+  save_milestones: [100000, 200000, 300000]
+datasets:
+  manifest: ../../data/manifests/seed.json
+  pack_sequences:
+    max_tokens: 4096
+    spillover_tolerance: 0.1
+logging:
+  run_card: ../../data/run_cards/seed.json
+  reflex_topic: inference.seed

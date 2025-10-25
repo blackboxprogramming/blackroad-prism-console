@@ -1,0 +1,22 @@
+{
+  "name": "nova-v1",
+  "description": "SentencePiece unigram-BPE hybrid tokenizer for BR-NOVA models.",
+  "normalization": "nfc",
+  "vocab_sizes": {
+    "seed": 16000,
+    "sprout": 32000,
+    "branch": 48000,
+    "canopy": 64000,
+    "grove": 64000
+  },
+  "training": {
+    "algorithm": "sentencepiece_unigram_bpe",
+    "character_coverage": 0.9995,
+    "max_sentence_length": 4096,
+    "seed": 42,
+    "pretokenizers": ["unicode_scripts", "digits_preserve"],
+    "postprocessors": ["byte_fallback"],
+    "reserved_tokens": ["<s>", "</s>", "<unk>", "<pad>", "<sep>"]
+  },
+  "hash": "REPLACE_WITH_ACTUAL_SHA256"
+}

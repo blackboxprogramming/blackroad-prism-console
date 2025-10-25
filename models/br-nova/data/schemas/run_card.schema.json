@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BR-NOVA Run Card",
+  "type": "object",
+  "required": ["run_id", "model", "config", "metrics", "lineage"],
+  "properties": {
+    "run_id": {"type": "string"},
+    "model": {
+      "type": "object",
+      "required": ["name", "parameters", "tokenizer"],
+      "properties": {
+        "name": {"type": "string"},
+        "parameters": {"type": "integer", "minimum": 1},
+        "tokenizer": {"type": "string"}
+      }
+    },
+    "config": {"type": "object"},
+    "metrics": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {"type": "number"}
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "required": ["dataset_manifest", "commit", "guardian_receipt"],
+      "properties": {
+        "dataset_manifest": {"type": "string"},
+        "commit": {"type": "string"},
+        "guardian_receipt": {"type": "string"}
+      }
+    }
+  }
+}

@@ -102,3 +102,7 @@ id_rsa
 *.pem
 *.key
 ssh-*
+
+!models/
+models/*
+!models/br-nova/
