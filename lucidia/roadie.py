@@ -1,31 +1,26 @@
 #!/usr/bin/env python3
-"""
-Roadie Agent
+"""Roadie Agent
 
 This agent monitors the system state, performs routine checks (health, disk
 usage, etc.), mints RoadCoins for contributions, and interacts with Guardian
 and Codex. It is intended to run continuously as part of the multi-agent loop.
 """
 
-import json
+from __future__ import annotations
+
 import shutil
 import time
-from pathlib import Path
+from typing import Dict
 
-STATE_DIR = Path("/srv/lucidia/state")
-EVENT_LOG_PATH = STATE_DIR / "events.log"
+from prism_event_bridge import publish_event
 
 
 class Roadie:
-    def __init__(self):
-        STATE_DIR.mkdir(parents=True, exist_ok=True)
+    def __init__(self) -> None:
         self.last_health_check = 0.0
 
-    def event(self, kind: str, payload: dict) -> None:
-        ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        rec = {"ts": ts, "kind": kind, "payload": payload}
-        with open(EVENT_LOG_PATH, "a", encoding="utf-8") as f:
-            f.write(json.dumps(rec) + "\n")
+    def event(self, topic: str, payload: Dict[str, object]) -> None:
+        publish_event(topic, payload, actor="roadie")
 
     def health_checks(self) -> None:
         total, used, free = shutil.disk_usage("/")
@@ -38,7 +33,7 @@ class Roadie:
 
     def mint_roadcoin(self, amount: float, reason: str) -> None:
         payload = {"amount": amount, "reason": reason}
-        self.event("roadcoin.mint", payload)
+        self.event("actions.roadcoin.mint", payload)
 
     def loop(self, interval: float = 60.0) -> None:
         while True:
@@ -50,7 +45,7 @@ class Roadie:
             time.sleep(interval)
 
 
-def main():
+def main() -> None:
     r = Roadie()
     r.loop()
 

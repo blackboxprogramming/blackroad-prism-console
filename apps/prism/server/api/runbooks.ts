@@ -3,20 +3,40 @@ import { z } from "zod";
 import { loadRunbooks } from "../runbooks/loader";
 import { findCandidates, runProbes, synthesizePlan } from "../runbooks/engine";
 import path from "path";
-import { EventEmitter } from "events";
+import { publishEvent } from "../events/bus";
 
-export const events = new EventEmitter();
+type RunbookContext = {
+  stderr: string;
+  stdout: string;
+  diffs: string[];
+  exitCode: number;
+  lang: string;
+};
 
-export async function runbookRoutes(fastify: FastifyInstance) {
+interface RunbookPluginOptions {
+  ctx?: Partial<RunbookContext>;
+}
+
+export async function runbookRoutes(
+  fastify: FastifyInstance,
+  options: RunbookPluginOptions = {}
+) {
   const runbooks = loadRunbooks();
 
-  fastify.decorate("ctx", {
+  const defaults: RunbookContext = {
     stderr: "",
     stdout: "",
-    diffs: [] as string[],
+    diffs: [],
     exitCode: 0,
     lang: "generic",
-  });
+  };
+  if (options.ctx) {
+    const ctx = { ...defaults, ...options.ctx };
+    Object.assign(options.ctx, ctx);
+    (fastify as any).ctx = options.ctx;
+  } else {
+    (fastify as any).ctx = { ...defaults };
+  }
 
   fastify.post("/runbooks/match", async (req) => {
     const body = z
@@ -59,7 +79,16 @@ export async function runbookRoutes(fastify: FastifyInstance) {
       const resolved = path.normalize(d.path);
       if (resolved.includes("..")) throw new Error("bad path");
     });
-    events.emit("plan", { id, diffs: plan.diffs.length, cmds: plan.cmds.length });
+    await publishEvent(
+      "intents.plan.synthesized",
+      {
+        runbookId: id,
+        projectId: body.projectId,
+        diffs: plan.diffs.length,
+        cmds: plan.cmds.length,
+      },
+      { actor: "kindest-coder" }
+    );
     return plan;
   });
 }

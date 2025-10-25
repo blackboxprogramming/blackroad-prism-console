@@ -20,9 +20,11 @@ describe("runbooks API", () => {
 
   it("matches python import error", async () => {
     const app = Fastify();
-    app.register(runbookRoutes);
-    app.ctx.stderr = "ModuleNotFoundError: x";
-    app.ctx.lang = "python";
+    const ctx: Record<string, any> = {};
+    await app.register(runbookRoutes, { ctx });
+    ctx.stderr = "ModuleNotFoundError: x";
+    ctx.lang = "python";
+    await app.ready();
     const res = await request(app.server)
       .post("/runbooks/match")
       .send({ projectId: "p1" });
@@ -33,7 +35,10 @@ describe("runbooks API", () => {
   it("env probe detects variable", async () => {
     process.env.GOOGLE_CLIENT_ID = "abc";
     const app = Fastify();
-    app.register(runbookRoutes);
+    const ctx: Record<string, any> = {};
+    await app.register(runbookRoutes, { ctx });
+    ctx.lang = "python";
+    await app.ready();
     const res = await request(app.server)
       .post("/runbooks/python-importerror/probe")
       .send({ projectId: "p1" });
@@ -42,7 +47,10 @@ describe("runbooks API", () => {
 
   it("synthesizes diff plan", async () => {
     const app = Fastify();
-    app.register(runbookRoutes);
+    const ctx: Record<string, any> = {};
+    await app.register(runbookRoutes, { ctx });
+    ctx.lang = "python";
+    await app.ready();
     const res = await request(app.server)
       .post("/runbooks/python-importerror/plan")
       .send({ projectId: "p1", answers: { venv: false, module_name: "foo" } });
@@ -58,8 +66,11 @@ describe("diff apply", () => {
 
   it("applies selected hunks only", async () => {
     const app = Fastify();
-    app.register(diffRoutes);
-    app.register(eventRoutes);
+    const ctx: Record<string, any> = {};
+    await app.register(runbookRoutes, { ctx });
+    await app.register(diffRoutes);
+    await app.register(eventRoutes);
+    await app.ready();
     const file = path.join(WORK_DIR, "test.txt");
     fs.writeFileSync(file, "base\n");
     const res = await request(app.server)
@@ -74,7 +85,7 @@ describe("diff apply", () => {
     expect(content).not.toContain("B");
 
     const eventsRes = await request(app.server).get("/events");
-    expect(eventsRes.body.events[0].type).toBe("file.write");
+    expect(eventsRes.body.events[0].topic).toBe("actions.file.write");
     expect(eventsRes.body.events[0].payload.path).toBe("test.txt");
   });
 });
@@ -86,8 +97,11 @@ describe("events API", () => {
 
   it("captures plan events emitted by runbooks", async () => {
     const app = Fastify();
-    app.register(runbookRoutes);
-    app.register(eventRoutes);
+    const ctx: Record<string, any> = {};
+    await app.register(runbookRoutes, { ctx });
+    ctx.lang = "python";
+    await app.register(eventRoutes);
+    await app.ready();
 
     await request(app.server)
       .post("/runbooks/python-importerror/plan")
@@ -97,14 +111,17 @@ describe("events API", () => {
     expect(res.status).toBe(200);
     expect(res.body.events.length).toBeGreaterThanOrEqual(1);
     const evt = res.body.events[0];
-    expect(evt.type).toBe("plan");
+    expect(evt.topic).toBe("intents.plan.synthesized");
     expect(evt.payload.diffs).toBeGreaterThanOrEqual(0);
   });
 
   it("filters events using the since cursor", async () => {
     const app = Fastify();
-    app.register(runbookRoutes);
-    app.register(eventRoutes);
+    const ctx: Record<string, any> = {};
+    await app.register(runbookRoutes, { ctx });
+    ctx.lang = "python";
+    await app.register(eventRoutes);
+    await app.ready();
 
     await request(app.server)
       .post("/runbooks/python-importerror/plan")
@@ -116,10 +133,26 @@ describe("events API", () => {
     const first = await request(app.server).get("/events");
     expect(first.body.events.length).toBeGreaterThanOrEqual(2);
     const cursor = first.body.cursor;
-    expect(typeof cursor).toBe("number");
+    expect(typeof cursor === "string" || cursor === null).toBeTruthy();
 
-    const second = await request(app.server).get(`/events?since=${cursor}`);
+    const sinceParam = cursor ? `?since=${cursor}` : "";
+    const second = await request(app.server).get(`/events${sinceParam}`);
     expect(second.body.events).toHaveLength(0);
     expect(second.body.cursor).toBe(cursor);
+  });
+
+  it("accepts external event publications", async () => {
+    const app = Fastify();
+    await app.register(eventRoutes);
+    await app.ready();
+
+    const publishRes = await request(app.server)
+      .post("/events")
+      .send({ topic: "guardian.signal", payload: { status: "ok" }, actor: "guardian" });
+    expect(publishRes.status).toBe(200);
+
+    const eventsRes = await request(app.server).get("/events");
+    expect(eventsRes.body.events[0].topic).toBe("guardian.signal");
+    expect(eventsRes.body.events[0].actor).toBe("guardian");
   });
 });

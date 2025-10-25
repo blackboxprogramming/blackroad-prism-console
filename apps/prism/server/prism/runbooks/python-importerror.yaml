@@ -1,0 +1,28 @@
+id: python-importerror
+title: Install missing Python module
+description: |
+  When a Python application crashes with ModuleNotFoundError, install the missing
+  dependency and ensure requirements.txt is updated.
+match:
+  - lang: ["python"]
+    errorRegex:
+      - "ModuleNotFoundError"
+questions: []
+probes:
+  - id: check-google-client
+    type: envPresent
+    set: google_client_id
+    args:
+      key: GOOGLE_CLIENT_ID
+plan:
+  steps:
+    - kind: diff
+      path: requirements.txt
+      template: "{{ answers.module_name }}\n"
+    - kind: cmd
+      cmd: "pip install {{ answers.module_name }}"
+  tests:
+    - framework: pytest
+      args:
+        - "-k"
+        - "{{ answers.module_name }}"

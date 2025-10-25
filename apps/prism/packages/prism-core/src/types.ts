@@ -1,21 +1,27 @@
-export type PrismEvent = {
+export type PrismActor =
+  | 'user'
+  | 'lucidia'
+  | 'guardian'
+  | 'kindest-coder'
+  | 'roadie'
+  | `agent:${string}`
+  | `service:${string}`;
+
+export type PrismMemoryDelta = {
+  scope: 'short_term' | 'working' | 'long_term';
+  op: 'append' | 'promote' | 'demote' | 'purge' | 'hydrate' | 'update';
+  summary?: string;
+  data?: Record<string, any>;
+};
+
+export type PrismEvent<T = any> = {
   id: string;
-  ts: string;                       // ISO
-  actor: 'user'|'lucidia'|`agent:${string}`;
-  kind:
-    | 'prompt'|'plan'
-    | 'file.write'|'file.diff'
-    | 'run.start'|'run.end'
-    | 'test.start'|'test.end'
-    | 'deploy.start'|'deploy.end'
-    | 'net.req'|'net.res'
-    | 'graph.update'
-    | 'error'|'warn';
-  projectId: string;
-  sessionId: string;
-  facet: 'time'|'space'|'intent';
-  summary: string;
-  ctx?: Record<string, any>;
+  at: string; // ISO timestamp
+  actor: PrismActor;
+  topic: string;
+  payload: T;
+  kpis?: Record<string, string | number>;
+  memory_deltas?: PrismMemoryDelta[];
 };
 
 export type PrismSpan = {

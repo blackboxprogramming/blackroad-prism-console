@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { z } from "zod";
 import path from "path";
 import fs from "fs";
-import { events } from "./runbooks";
+import { publishEvent } from "../events/bus";
 
 const WORK_DIR = path.resolve(process.cwd(), "prism/work");
 
@@ -25,13 +25,14 @@ export async function diffRoutes(fastify: FastifyInstance) {
       const lines = diff.hunks.filter((_, i) => selected.includes(i));
       const target = path.join(WORK_DIR, diff.path);
       fs.appendFileSync(target, lines.join("\n") + "\n");
-      events.emit("file.write", { path: diff.path });
+      await publishEvent(
+        "actions.file.write",
+        { path: diff.path },
+        { actor: "kindest-coder" }
+      );
     }
     return { applied: body.diffs.length };
   });
 }
 
 export default diffRoutes;
-// TODO: diffs API handlers
-
-export {};
