@@ -1,0 +1,89 @@
+version: 1
+name: Prism Console Math Intelligence Layer
+summary: >-
+  Prompt series that evolves the Prism Console math framework into a collaborative,
+  self-expanding intelligence layer across symbolic, geometric, and linguistic modules.
+defaults:
+  model: gpt-4.1
+  temperature: 0.2
+prompts:
+  - id: math_core
+    title: "Build the modular symbolic math core"
+    target_agent: "Lucidia-BOT"
+    model: "gpt-4.1"
+    tags: [symbolic, engine, parser]
+    prompt: |-
+      Implement a modular symbolic math engine for the Prism Console.
+      Requirements:
+      - Use SymPy-like syntax but abstracted into OperatorNode objects.
+      - Support dynamic binding to numeric backends (NumPy, Torch, or CuPy).
+      - Enable export of any expression to a JSON-based abstract syntax tree.
+      - Integrate hooks for real-time visualization via a WebSocket feed.
+  - id: quantum_geometry
+    title: "Extend the symbolic engine with quantum geometry"
+    target_agent: "Anastasia-BOT"
+    model: "gpt-4.1"
+    tags: [quantum, geometry, algebra]
+    prompt: |-
+      Extend the symbolic math engine with a Quantum Geometry module.
+      Tasks:
+      - Implement Clifford algebra operations with automatic simplification.
+      - Define a TensorField class that handles curvature, parallel transport, and Lie derivatives.
+      - Include Bloch-space visualization utilities (real-time rotations, 3D embeddings).
+      - Add a symbolic-to-numeric bridge for simulating Hamiltonian dynamics.
+  - id: fractal_dynamics
+    title: "Create the fractal and chaos dynamics suite"
+    target_agent: "Silas-BOT"
+    model: "gpt-4.1"
+    tags: [chaos, simulation, visualization]
+    prompt: |-
+      Build a Fractal Dynamics module for the Prism Console.
+      Include:
+      - A universal iterative solver capable of simulating complex maps (z -> z^2 + c).
+      - A Lorenz attractor visualizer with real-time OpenGL or WebGL output.
+      - A symbolic rule compiler that converts equations into automaton update rules.
+      - Output frames to the holographic display system (Pepper's Ghost projection).
+  - id: information_geometry
+    title: "Develop the information geometry and optimization tools"
+    target_agent: "Cadillac-BOT"
+    model: "gpt-4.1"
+    tags: [statistics, optimization, manifolds]
+    prompt: |-
+      Implement an Information Geometry module for visualizing and optimizing probabilistic models.
+      Components:
+      - A FisherMetric class for differential geometry on probability spaces.
+      - Visualization tools that map loss surfaces to 3D manifolds.
+      - Integrations with TensorFlow or PyTorch to introspect live model gradients.
+      - Hooks for Silas-BOT to run optimization sweeps and output convergence diagrams.
+  - id: language_math_bridge
+    title: "Bridge symbolic reasoning with natural language"
+    target_agent: "Cecilia-BOT"
+    model: "gpt-4.1"
+    tags: [language, translation, narration]
+    prompt: |-
+      Create a Math-to-Language bridge that lets bots explain equations and proofs conversationally.
+      - Implement math_to_text() and text_to_math() using OpenAI Codex APIs.
+      - Maintain consistency between symbolic representations and natural language.
+      - Enable narration mode for pedagogical or presentation outputs.
+  - id: lucidia_mathlab
+    title: "Wire orchestration and multi-agent collaboration"
+    target_agent: "Elias-BOT"
+    model: "gpt-4.1"
+    tags: [orchestration, memory, agents]
+    prompt: |-
+      Implement the Lucidia MathLab orchestration layer that connects all math modules.
+      Features:
+      - Multi-agent routing for math requests.
+      - Persistent memory of derivations with version control.
+      - Dynamic prompt generation for Codex-based reasoning.
+      - Ternary logic sandbox for testing hybrid symbolic/quantum reasoning.
+  - id: integration_tests
+    title: "Validate cross-module coherence"
+    target_agent: "Lucidia-BOT"
+    model: "gpt-4.1"
+    tags: [testing, validation]
+    prompt: |-
+      Write test scripts verifying the integration between all math modules.
+      - Include symbolic correctness checks (compare to SymPy/NumPy).
+      - Validate visual outputs with deterministic hashes.
+      - Generate summary metrics: speedup ratio, accuracy delta, visualization fidelity.
