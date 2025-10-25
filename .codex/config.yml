@@ -8,6 +8,10 @@ description: >
   Codex orchestration for BlackRoad Prism Console.
   Handles web deployment to the shellfish-droplet and
   automated Hugging Face model publishing.
+  Handles:
+    • Web deployment to shellfish-droplet
+    • Automated Hugging Face model publishing
+    • Nightly retrieval-stack rebuild & cleanup
 
 env:
   DROPLET_HOST: root@174.138.44.45
@@ -16,6 +20,7 @@ env:
   HF_ORG: blackroad
   HF_TOKEN: ${{ secrets.HF_TOKEN }}
   DOCKER_COMPOSE_FILE: docker-compose.prod.yml
+  RETRIEVAL_PATH: /srv/blackroad-prism-console/retrieval
   MODEL_LIST: prs-200.csv
 
 # ------------------------------------------------------------
@@ -27,11 +32,13 @@ triggers:
     actions:
       - deploy-droplet
       - publish-hf-models
+      - rebuild-retrieval
 
   - on: workflow_dispatch
     actions:
       - deploy-droplet
       - publish-hf-models
+      - rebuild-retrieval
 
 # ------------------------------------------------------------
 #  TASKS
@@ -48,6 +55,7 @@ tasks:
             docker compose -f $DOCKER_COMPOSE_FILE up -d --build
             systemctl reload caddy || true
             echo "✅ Deployment complete on $DROPLET_HOST"
+            echo "✅ Web deployment complete on $DROPLET_HOST"
           EOF
 
   publish-hf-models:
@@ -64,6 +72,20 @@ tasks:
               -f private=false
           done
           echo "✅ Hugging Face publication triggered."
+
+  rebuild-retrieval:
+    name: Rebuild retrieval stack (Qdrant + Embeddings)
+    steps:
+      - name: SSH into droplet and rebuild services
+        run: |
+          ssh -o StrictHostKeyChecking=no $DROPLET_HOST <<'EOF'
+            cd $RETRIEVAL_PATH
+            echo "🔄 Rebuilding retrieval docker services..."
+            docker compose down
+            docker compose build --no-cache
+            docker compose up -d
+            echo "✅ Retrieval stack rebuilt successfully."
+          EOF
 
 # ------------------------------------------------------------
 #  LOGGING & MONITORING
@@ -251,3 +273,12 @@ workflows:
               --data '{"text":":rotating_light: Codex retrieval rebuild failed"}' \
               "$SLACK_WEBHOOK_URL"
           fi
+    - name: Prune Docker images, rebuild retrieval, and restart PM2
+      run: |
+        ssh -o StrictHostKeyChecking=no $DROPLET_HOST <<'EOF'
+          echo "🧹 Nightly maintenance started..."
+          docker system prune -af
+          cd $RETRIEVAL_PATH && docker compose down && docker compose up -d --build
+          pm2 resurrect || true
+          echo "✅ Nightly maintenance and retrieval rebuild complete."
+        EOF
