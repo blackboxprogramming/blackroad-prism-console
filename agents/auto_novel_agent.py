@@ -7,6 +7,8 @@ from dataclasses import dataclass, field
 from typing import ClassVar, Iterable
 
 DEFAULT_SUPPORTED_ENGINES: tuple[str, ...] = ("unity", "unreal")
+from dataclasses import dataclass, field
+from typing import ClassVar
 
 
 @dataclass
@@ -51,6 +53,15 @@ class AutoNovelAgent:
             return self._normalize_engine(engine) in self.supported_engines
         except ValueError:
             return False
+    _DEFAULT_ENGINES: ClassVar[tuple[str, ...]] = ("unity", "unreal")
+    _supported_engines: set[str] = field(
+        default_factory=lambda: set(AutoNovelAgent._DEFAULT_ENGINES)
+    )
+
+    @property
+    def SUPPORTED_ENGINES(self) -> set[str]:
+        """Return the set of engines supported by this agent instance."""
+        return self._supported_engines
 
     def list_supported_engines(self) -> list[str]:
         """Return a sorted snapshot of supported engines."""
@@ -109,6 +120,18 @@ class AutoNovelAgent:
                 f"'{normalized}'. Supported engines: {supported}. "
                 "Use add_supported_engine to register new engines."
             )
+    def create_game(self, engine: str, include_weapons: bool = False) -> None:
+        """Create a basic game using a supported engine without weapons.
+
+        Args:
+            engine: Game engine to use.
+            include_weapons: If True, raise a ``ValueError`` because weapons are not
+                allowed.
+        """
+        engine_lower = engine.lower()
+        if engine_lower not in self._supported_engines:
+            supported = ", ".join(sorted(self._supported_engines))
+            raise ValueError(f"Unsupported engine. Choose one of: {supported}.")
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
 
@@ -304,6 +327,25 @@ class AutoNovelAgent:
                 "Requested scopes exceed least-privilege policy. "
                 f"Invalid scopes: {joined}."
             )
+    def add_engine(self, engine: str) -> None:
+        """Register a new supported game engine.
+
+        Args:
+            engine: Engine name to register.
+
+        Raises:
+            ValueError: If the engine name is invalid or already supported.
+        """
+        normalized = engine.strip().lower()
+        if not normalized.isalpha():
+            raise ValueError("Engine name must contain only letters.")
+        if normalized in self._supported_engines:
+            raise ValueError("Engine already supported.")
+        self._supported_engines.add(normalized)
+
+    def list_supported_engines(self) -> list[str]:
+        """Return a list of supported game engines."""
+        return sorted(self._supported_engines)
 
 
 if __name__ == "__main__":
