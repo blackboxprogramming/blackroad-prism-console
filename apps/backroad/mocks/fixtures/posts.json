@@ -1,0 +1,44 @@
+{
+  "thread-1": [
+    {
+      "id": "post-1",
+      "threadId": "thread-1",
+      "authorId": "ember",
+      "createdAt": "2024-10-01T08:10:00.000Z",
+      "visibleAt": "2024-10-01T11:10:00.000Z",
+      "state": "visible",
+      "markdown": "Welcome to BackRoad. Take your time, share intentionally, and hydrate."
+    },
+    {
+      "id": "post-2",
+      "threadId": "thread-1",
+      "authorId": "marsh",
+      "createdAt": "2024-10-01T09:00:00.000Z",
+      "visibleAt": "2024-10-01T12:00:00.000Z",
+      "state": "queued",
+      "markdown": "I'm excited to explore slow conversation rituals together."
+    }
+  ],
+  "thread-2": [
+    {
+      "id": "post-3",
+      "threadId": "thread-2",
+      "authorId": "ember",
+      "createdAt": "2024-10-03T10:45:00.000Z",
+      "visibleAt": "2024-10-03T13:45:00.000Z",
+      "state": "queued",
+      "markdown": "Experiment: write now, revisit before the delay ends."
+    }
+  ],
+  "room-1": [
+    {
+      "id": "post-4",
+      "roomId": "room-1",
+      "authorId": "ember",
+      "createdAt": "2024-10-04T18:05:00.000Z",
+      "visibleAt": "2024-10-04T21:05:00.000Z",
+      "state": "queued",
+      "markdown": "Gather close — share your favorite trail memories."
+    }
+  ]
+}

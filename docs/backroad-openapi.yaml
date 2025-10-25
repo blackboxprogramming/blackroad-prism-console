@@ -1,0 +1,258 @@
+openapi: 3.1.0
+info:
+  title: BackRoad Mock API
+  version: 0.1.0
+servers:
+  - url: https://localhost:3000
+paths:
+  /api/threads:
+    get:
+      summary: List threads
+      responses:
+        '200':
+          description: Threads list
+    post:
+      summary: Create thread (and optional first post)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewThread'
+      responses:
+        '201':
+          description: Thread created
+  /api/threads/{threadId}:
+    get:
+      summary: Fetch thread with posts
+      parameters:
+        - in: path
+          name: threadId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Thread detail
+  /api/threads/{threadId}/posts:
+    post:
+      summary: Queue post in thread
+      parameters:
+        - in: path
+          name: threadId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPost'
+      responses:
+        '201':
+          description: Post queued
+  /api/posts/{postId}:
+    patch:
+      summary: Edit post
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditPost'
+      responses:
+        '200':
+          description: Post updated
+  /api/rooms:
+    get:
+      summary: List campfire rooms
+      responses:
+        '200':
+          description: Rooms list
+    post:
+      summary: Create campfire room
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewRoom'
+      responses:
+        '201':
+          description: Room created
+  /api/rooms/{roomId}:
+    get:
+      summary: Fetch room with posts
+      parameters:
+        - in: path
+          name: roomId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Room detail
+  /api/rooms/{roomId}/posts:
+    post:
+      summary: Queue post in room
+      parameters:
+        - in: path
+          name: roomId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPost'
+      responses:
+        '201':
+          description: Post queued
+  /api/profile/me:
+    get:
+      summary: Fetch mock profile
+      responses:
+        '200':
+          description: Profile information
+  /api/search:
+    get:
+      summary: Search threads by query/tag
+      parameters:
+        - in: query
+          name: query
+          schema:
+            type: string
+        - in: query
+          name: tag
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Matching threads
+components:
+  schemas:
+    Thread:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+        threadId:
+          type: string
+        roomId:
+          type: string
+        authorId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        visibleAt:
+          type: string
+          format: date-time
+        state:
+          type: string
+          enum: [queued, visible, expired]
+        markdown:
+          type: string
+    CampfireRoom:
+      type: object
+      properties:
+        id:
+          type: string
+        topic:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        inviteOnly:
+          type: boolean
+        members:
+          type: array
+          items:
+            type: string
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+        displayName:
+          type: string
+        bio:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    NewThread:
+      type: object
+      properties:
+        title:
+          type: string
+        markdown:
+          type: string
+        visibleAt:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+    NewPost:
+      type: object
+      properties:
+        markdown:
+          type: string
+        visibleAt:
+          type: string
+          format: date-time
+    EditPost:
+      type: object
+      properties:
+        markdown:
+          type: string
+        visibleAt:
+          type: string
+          format: date-time
+    NewRoom:
+      type: object
+      properties:
+        topic:
+          type: string
+        inviteOnly:
+          type: boolean
+        expiresAt:
+          type: string
+          format: date-time
