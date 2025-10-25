@@ -1,0 +1,36 @@
+name: RoadGlitch CI
+
+on:
+  push:
+    paths:
+      - 'services/roadglitch/**'
+  pull_request:
+    paths:
+      - 'services/roadglitch/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Poetry
+        run: pip install poetry
+      - name: Install dependencies
+        working-directory: services/roadglitch
+        run: poetry install
+      - name: Lint
+        working-directory: services/roadglitch
+        run: make lint
+      - name: Tests
+        working-directory: services/roadglitch
+        run: make test
+      - name: Contract
+        working-directory: services/roadglitch
+        run: make contract
+      - name: Build image
+        working-directory: services/roadglitch
+        run: make build
