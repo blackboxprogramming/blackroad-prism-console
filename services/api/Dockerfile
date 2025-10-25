@@ -5,6 +5,9 @@ ENV NODE_ENV=production PORT=4000
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev
 COPY server.mjs healthcheck.mjs telemetry.mjs ./
+RUN npm install --omit=dev
+COPY server.mjs healthcheck.mjs ./
+
 # tiny runtime
 FROM node:20-alpine
 WORKDIR /app
