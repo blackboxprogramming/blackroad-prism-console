@@ -22,6 +22,13 @@ jobs:
           script: |
             # Navigate to project directory
             cd /root/blackroad-prism-console || exit 1
+            # Navigate to project directory or clone if it doesn't exist
+            if [ ! -d "/root/blackroad-prism-console" ]; then
+              cd /root
+              git clone https://github.com/${{ github.repository }}.git blackroad-prism-console
+            fi
+
+            cd /root/blackroad-prism-console
 
             # Pull latest changes
             git fetch origin main
@@ -44,6 +51,14 @@ jobs:
             # Show status
             echo "Deployment complete. Container status:"
             docker-compose -f docker-compose.prod.yml ps
+            # Stop existing containers
+            docker-compose -f docker-compose.prod.yml down || true
+
+            # Build the Docker image
+            docker build -t ghcr.io/blackroad-prism/blackroad-prism-console:latest .
+
+            # Start services with docker-compose
+            docker-compose -f docker-compose.prod.yml up -d
 
             # Clean up old images
             docker image prune -f
