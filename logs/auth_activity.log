@@ -1,0 +1,2 @@
+timestamp,actor,action,status,metadata
+2024-07-01T00:00:00+00:00,system,bootstrap,ok,{"note": "initial auth ledger created"}
