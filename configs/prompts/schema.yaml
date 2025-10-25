@@ -1,0 +1,12 @@
+schema_version: 1.0
+fields:
+  agent: string
+  base_model: string
+  domain: string
+  prompt_core: multiline string
+  learning_delta: list of changes with timestamps and triggers
+  tool_weights: mapping tool→float
+  evaluation_gates: list of pass/fail rules
+validation:
+  enforced_by: api/learning.py
+  rollback_supported: true
