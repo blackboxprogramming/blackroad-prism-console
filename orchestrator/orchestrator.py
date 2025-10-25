@@ -12,6 +12,7 @@ from tools import storage
 
 from .base import BaseBot, assert_guardrails
 from .memory_manager import MemoryManager, MemoryOperationError
+from lucidia.reflex import BUS
 from .perf import perf_timer
 from .protocols import BotResponse, Task
 from .slo import SLO_CATALOG
@@ -24,7 +25,7 @@ _memory_path = _module_path.with_name("memory.jsonl")
 _config_root = _module_path.parent.parent
 _memory_config_path = _config_root / "agents" / "memory" / "memory.yaml"
 
-memory_manager = MemoryManager.from_yaml(_memory_config_path)
+memory_manager = MemoryManager.from_yaml(_memory_config_path, event_dispatcher=BUS.emit)
 status_broadcaster = StatusBroadcaster(channel="#blackroad-status")
 import metrics
 import settings

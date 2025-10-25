@@ -49,12 +49,15 @@
   "dependencies": {
     "fastify": "^4.26.2",
     "@fastify/cors": "^8.4.0",
+    "@fastify/websocket": "^8.3.1",
     "zod": "^3.22.4",
     "better-sqlite3": "^9.0.0",
     "yaml": "^2.3.1",
     "diff": "^5.1.0",
     "nanoid": "^4.0.0",
-    "@prism/core": "workspace:*"
+    "@prism/core": "workspace:*",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

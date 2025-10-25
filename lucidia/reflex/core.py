@@ -32,6 +32,7 @@ class ReflexBus:
         env_disabled = os.environ.get("LUCIDIA_REFLEX_OFF", "0") == "1"
         self._enabled = not (disabled if disabled is not None else env_disabled)
         self._routes: Dict[str, List[Callable[[Any], None]]] = {}
+        self._wildcard_routes: Dict[str, List[Callable[[Any], None]]] = {}
         self._q: "queue.Queue[tuple[str, Any]]" = queue.Queue()
         self._thread: threading.Thread | None = None
         self._lock = threading.Lock()
@@ -80,7 +81,11 @@ class ReflexBus:
     def on(self, topic: str, fn: Callable[[Any], None]) -> Callable[[Any], None]:
         """Register a reflex handler for a topic."""
 
-        self._routes.setdefault(topic, []).append(fn)
+        if topic.endswith("*"):
+            prefix = topic[:-1]
+            self._wildcard_routes.setdefault(prefix, []).append(fn)
+        else:
+            self._routes.setdefault(topic, []).append(fn)
         return fn
 
     # ------------------------------------------------------------------
@@ -122,7 +127,11 @@ class ReflexBus:
 
         while True:
             topic, payload = self._q.get()
-            for fn in list(self._routes.get(topic, [])):
+            handlers: List[Callable[[Any], None]] = list(self._routes.get(topic, []))
+            for prefix, fns in self._wildcard_routes.items():
+                if topic.startswith(prefix):
+                    handlers.extend(fns)
+            for fn in handlers:
                 try:
                     fn(payload)
                 except Exception as exc:  # pragma: no cover - guardrail

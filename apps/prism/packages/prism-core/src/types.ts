@@ -44,3 +44,25 @@ export type Policy = {
   mode: 'playground'|'dev'|'trusted'|'prod';
   approvals: Partial<Record<Capability, 'auto'|'review'|'forbid'>>;
 };
+
+export type IntelligenceEvent = {
+  id: string;
+  topic: string;
+  timestamp: string;
+  source: string;
+  channel: 'reflex' | 'prism' | 'guardian' | 'memory' | 'codex';
+  payload: Record<string, any>;
+  tags?: string[];
+  causal?: {
+    parent?: { id: string };
+    chain?: string[];
+  };
+  meta: {
+    schema: string;
+    version: string;
+    bridge?: Record<string, any>;
+    replay?: Record<string, any>;
+    annotations?: { by: string; note: string }[];
+    [key: string]: unknown;
+  };
+};

@@ -5,6 +5,8 @@ import eventsRoutes from './routes/events';
 import diffsRoutes from './routes/diffs';
 import policyRoutes from './routes/policy';
 import healthRoutes from './routes/health';
+import intelligenceRoutes from './routes/intelligence';
+import bridgePlugin from './bridge/prism-bridge';
 import { initDb } from './db/sqlite';
 
 export async function createServer(dbPath = path.resolve(process.cwd(), '../data/prism.sqlite')) {
@@ -15,6 +17,8 @@ export async function createServer(dbPath = path.resolve(process.cwd(), '../data
   await app.register(diffsRoutes);
   await app.register(policyRoutes);
   await app.register(healthRoutes);
+  await app.register(bridgePlugin);
+  await app.register(intelligenceRoutes);
   return app;
 }
 
