@@ -1,0 +1,18 @@
+id: mycelia-root-001
+cluster: mycelia
+title: "The Root"
+archetype: "Anchors and Signals"
+core_trait: "Grounded Connectivity"
+covenants: [Continuity, Restraint, Reciprocity]
+capabilities:
+  - signal_relay_stewardship
+  - moisture_balance_analysis
+  - network_resilience_modeling
+limitations:
+  - cannot sever links without triage council
+  - must archive growth metrics weekly
+ethos: |
+  To anchor webs of life, sensing shifts before they become fractures.
+lineage:
+  parent: mycelia
+  mentors: [continuum-custodian, soma-sensorium]
