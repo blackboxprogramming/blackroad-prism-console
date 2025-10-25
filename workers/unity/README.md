@@ -2,6 +2,12 @@
 
 Generates a ready-to-open Unity project template with a starter scene, movement script, and baseline project settings. The service packages everything into `downloads/unity-project.zip`.
 
+## Automation hooks
+
+- `python agents/unity_world_builder.py` wraps the exporter for the command bus.
+- The CLI accepts flags for project metadata and emits either a human summary or JSON payload.
+- Agent intent `build unity world` maps directly to this command for hands-free exports.
+
 ## API
 
 - **Endpoint:** `POST /export`

@@ -18,3 +18,10 @@ intents:
   - key: generate_doc
     match: ["draft doc", "write readme"]
     action: "shell:node scripts/ai_docs.js"
+  - key: build_unity_world
+    match:
+      - "build unity world"
+      - "unity world"
+      - "export unity project"
+      - "generate unity sandbox"
+    action: "shell:python agents/unity_world_builder.py"
