@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Codex Agent Fabric - Spawn Agent</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark light;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 2rem;
+        background: #0f172a;
+        color: #e2e8f0;
+      }
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+        background: rgba(15, 23, 42, 0.85);
+        border-radius: 18px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.6);
+      }
+      h1 {
+        margin-top: 0;
+        font-size: 2rem;
+        letter-spacing: 0.04em;
+      }
+      p.description {
+        margin-bottom: 2rem;
+        color: #cbd5f5;
+      }
+      label {
+        display: block;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.35rem;
+        color: #94a3b8;
+      }
+      input[type="text"],
+      textarea,
+      select {
+        width: 100%;
+        padding: 0.75rem 0.9rem;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        background: rgba(30, 41, 59, 0.85);
+        color: #e2e8f0;
+        margin-bottom: 1.3rem;
+      }
+      textarea {
+        min-height: 90px;
+        resize: vertical;
+      }
+      button {
+        width: 100%;
+        padding: 0.9rem 1.2rem;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(135deg, #6366f1, #22d3ee);
+        color: #0f172a;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 30px rgba(79, 70, 229, 0.35);
+      }
+      pre {
+        background: rgba(15, 23, 42, 0.6);
+        padding: 1.2rem;
+        border-radius: 12px;
+        overflow-x: auto;
+        font-size: 0.85rem;
+      }
+      .result {
+        margin-top: 2rem;
+      }
+      .status {
+        font-weight: 600;
+        margin-bottom: 0.6rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Spawn a Codex Agent</h1>
+      <p class="description">
+        Generate a new agent lineage entry. The service calls
+        <code>scripts/spawn_agent.py</code> via the lightweight HTTP interface and
+        automatically updates <code>registry/lineage.json</code>.
+      </p>
+      <form id="spawn-form">
+        <label for="name">Agent Name</label>
+        <input id="name" name="name" type="text" placeholder="Ariadne" required />
+
+        <label for="baseModel">Base Model</label>
+        <select id="baseModel" name="base_model" required>
+          <option value="">Select a base model</option>
+          <option value="mistral-7b-instruct">mistral-7b-instruct</option>
+          <option value="llama-3-8b">llama-3-8b</option>
+          <option value="qwen2-7b">qwen2-7b</option>
+          <option value="gemma-7b">gemma-7b</option>
+          <option value="falcon-7b">falcon-7b</option>
+        </select>
+
+        <label for="domain">Domain</label>
+        <input id="domain" name="domain" type="text" placeholder="navigation" required />
+
+        <label for="temperament">Temperament</label>
+        <input id="temperament" name="temperament" type="text" placeholder="curious" />
+
+        <label for="description">Description</label>
+        <textarea id="description" name="description" placeholder="Short summary of the agent"></textarea>
+
+        <label for="traits">Traits (comma separated)</label>
+        <input id="traits" name="traits" type="text" placeholder="guidance, mapping, synthesis" />
+
+        <label for="parent">Parent Agent (optional)</label>
+        <input id="parent" name="parent" type="text" placeholder="Lucidia" />
+
+        <label for="namespace">Hugging Face Namespace (optional)</label>
+        <input id="namespace" name="namespace" type="text" placeholder="ariadne-ai" />
+
+        <label for="repoName">Hugging Face Repo Name (optional)</label>
+        <input id="repoName" name="repo_name" type="text" placeholder="thread" />
+
+        <label for="publish">
+          <input id="publish" name="publish" type="checkbox" checked /> Publish to Hugging Face
+        </label>
+
+        <label for="dryRun">
+          <input id="dryRun" name="dry_run" type="checkbox" /> Dry run only
+        </label>
+
+        <button type="submit">Spawn Agent</button>
+      </form>
+      <section class="result" hidden>
+        <div class="status" id="status"></div>
+        <pre id="result"></pre>
+      </section>
+    </main>
+    <script>
+      const form = document.getElementById('spawn-form');
+      const resultContainer = document.querySelector('.result');
+      const resultPre = document.getElementById('result');
+      const statusEl = document.getElementById('status');
+
+      function toTraits(value) {
+        return value
+          .split(/[,\n]/)
+          .map((item) => item.trim())
+          .filter(Boolean);
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const data = new FormData(form);
+        const payload = {
+          name: data.get('name'),
+          base_model: data.get('base_model'),
+          domain: data.get('domain') || 'general',
+          temperament: data.get('temperament') || 'balanced',
+          description: data.get('description') || '',
+          traits: toTraits(data.get('traits') || ''),
+          parent: data.get('parent') || null,
+          namespace: data.get('namespace') || null,
+          repo_name: data.get('repo_name') || null,
+          publish: data.get('publish') === 'on',
+          dry_run: data.get('dry_run') === 'on',
+        };
+
+        statusEl.textContent = 'Spawning agent…';
+        resultContainer.hidden = false;
+        resultPre.textContent = '';
+
+        try {
+          const response = await fetch('http://localhost:8000/spawn_agent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const json = await response.json();
+          if (!response.ok) {
+            throw new Error(json.error || 'Failed to spawn agent');
+          }
+          statusEl.textContent = json.published ? 'Agent spawned and published.' : 'Agent spawned locally.';
+          resultPre.textContent = JSON.stringify(json, null, 2);
+        } catch (error) {
+          statusEl.textContent = `Error: ${error.message}`;
+          resultPre.textContent = '';
+        }
+      });
+    </script>
+  </body>
+</html>
