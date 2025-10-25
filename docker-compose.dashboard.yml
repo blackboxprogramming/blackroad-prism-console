@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  api:
+    build: ./dash/api
+    command: uvicorn main:app --host 0.0.0.0 --port 5055
+    ports:
+      - "5055:5055"
+    volumes:
+      - ./:/app
+  web:
+    working_dir: /web
+    image: node:20-alpine
+    command: sh -c "npm i && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./dash/web:/web
+    environment:
+      - VITE_API_URL=http://localhost:5055
