@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.poetry/
+.env
+.venv/
+data/
+coverage.xml
+htmlcov/
