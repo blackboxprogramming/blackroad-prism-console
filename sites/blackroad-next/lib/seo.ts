@@ -1,13 +1,15 @@
-export const buildMeta = (title: string, description: string, path = '/') => ({
-  title: `${title} | Blackroad`,
+const BASE_URL = "https://blackroadinc.us";
+
+export const buildMeta = (title: string, description: string, path = "/") => ({
+  title: `${title} | BlackRoad Hub`,
   description,
-  canonical: `https://blackroad.com${path}`
+  canonical: `${BASE_URL}${path}`,
 });
 
 export const orgJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "Blackroad",
-  "url": "https://blackroad.com",
-  "logo": "https://blackroad.com/logo.png"
+  name: "BlackRoad",
+  url: BASE_URL,
+  logo: `${BASE_URL}/logo.png`,
 };

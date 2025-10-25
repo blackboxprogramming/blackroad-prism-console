@@ -12,7 +12,7 @@ const tiles: Tile[] = [
   { key: "radius", title: "Radius", blurb: "Signals, telemetry, and ops.", href: "/portal/radius", status: "stub" }
 ];
 
-export const metadata = { title: "Portal — BlackRoad.io" };
+export const metadata = { title: "Portal — BlackRoad Hub" };
 
 export default function PortalIndex() {
   return (

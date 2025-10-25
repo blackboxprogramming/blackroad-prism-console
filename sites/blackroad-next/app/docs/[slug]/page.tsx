@@ -1,12 +1,8 @@
-import { renderDoc } from "@/lib/docs";
+import { readIndex, renderDoc } from "@/lib/docs";
 
-export async function generateStaticParams() {
-  try {
-    const index = await import("../../../../public/docs.index.json");
-    return index.default.docs.map((doc: { slug: string }) => ({ slug: doc.slug }));
-  } catch (error) {
-    return [];
-  }
+export function generateStaticParams() {
+  const { docs } = readIndex();
+  return docs.map((doc) => ({ slug: doc.slug }));
 }
 
 export default function DocPage({ params }: { params: { slug: string } }) {

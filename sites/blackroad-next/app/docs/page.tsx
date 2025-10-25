@@ -1,7 +1,7 @@
 import { DocsList } from "@/components/docs-list";
 import { readIndex } from "@/lib/docs";
 
-export const metadata = { title: "Docs — BlackRoad.io" };
+export const metadata = { title: "Docs — BlackRoad Hub" };
 
 export default function DocsHome() {
   const { docs } = readIndex();

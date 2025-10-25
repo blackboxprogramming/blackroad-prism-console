@@ -46,7 +46,7 @@ function build(validateOnly = false) {
     const out = { ...data, html };
     listing.push({ id: data.id, slug: data.slug, title: data.title, summary: data.summary });
     fs.writeFileSync(path.join(OUT, `${data.slug}.json`), JSON.stringify(out, null, 2));
-    const htmlDoc = `<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="index,follow"><link rel="canonical" href="https://blackroadinc.us/codex/${data.slug}/"><meta property="og:title" content="${data.title}"><meta property="og:description" content="${data.summary}"><title>${data.title}</title></head><body>${html}</body></html>`;
+    const htmlDoc = `<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="index,follow"><link rel="canonical" href="https://blackroad.io/codex/${data.slug}/"><meta property="og:title" content="${data.title}"><meta property="og:description" content="${data.summary}"><title>${data.title}</title></head><body>${html}</body></html>`;
     fs.writeFileSync(path.join(OUT, `${data.slug}.html`), htmlDoc);
   }
   if (validateOnly) return;
@@ -58,7 +58,7 @@ function updateSitemap(slugs) {
   if (!fs.existsSync(SITEMAP)) return;
   let xml = fs.readFileSync(SITEMAP, 'utf8');
   for (const slug of slugs) {
-    const url = `https://blackroadinc.us/codex/${slug}/`;
+    const url = `https://blackroad.io/codex/${slug}/`;
     if (xml.includes(url)) continue;
     xml = xml.replace('</urlset>', `  <url><loc>${url}</loc></url>\n</urlset>`);
   }

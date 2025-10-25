@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  experimental: { appDir: true },
   async redirects() {
     const raw = process.env.BASE_PATH?.trim();
     const base = raw ? (raw.startsWith('/') ? raw : `/${raw}`) : '';
@@ -14,6 +13,5 @@ const nextConfig = {
       },
     ];
   },
-  experimental: { appDir: true }
 };
 export default nextConfig;
