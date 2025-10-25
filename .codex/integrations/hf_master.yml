@@ -1,0 +1,91 @@
+# ============================================================
+#  BlackRoad Prism Console ✦ Hugging Face Integration Flow
+# ============================================================
+
+project:
+  name: BlackRoad Prism Console
+  description: >
+    Unified automation pipeline linking the BlackRoad GitHub repo,
+    Shellfish Droplet deployment, and Hugging Face Space publishing.
+    Enables 200-agent orchestration, nightly rebuilds, and live inference updates.
+
+integrations:
+  github:
+    repo: blackboxprogramming/blackroad-prism-console
+    workflows:
+      - .github/workflows/publish-to-hf.yml
+      - .codex/config.yml
+    secrets:
+      - BOT_TOKEN
+      - HF_TOKEN
+      - SLACK_WEBHOOK_URL
+  huggingface:
+    org: blackroad
+    space: blackroad/prism-console-agents
+    token: ${{ secrets.HF_TOKEN }}
+    publish_from: models/
+    model_list: prs-200.csv
+    phases:
+      - core_agents
+      - expansion_pack
+      - partnership_pack
+  droplet:
+    host: root@174.138.44.45
+    path: /srv/blackroad-site
+    compose_file: docker-compose.prod.yml
+    retrieval_path: /srv/blackroad-prism-console/retrieval
+    nightly_rebuild: true
+
+codex_triggers:
+  - on: push
+    branches: [main]
+    actions:
+      - deploy-droplet
+      - publish-hf-models
+      - rebuild-retrieval
+  - on: workflow_dispatch
+    actions:
+      - deploy-droplet
+      - publish-hf-models
+  - on: schedule
+    cron: "0 3 * * *"
+    actions:
+      - cleanup-docker
+      - refresh-hf-space
+
+tasks:
+  deploy-droplet:
+    run: |
+      ssh -o StrictHostKeyChecking=no $DROPLET_HOST <<'EOF'
+        cd $DROPLET_PATH
+        git pull origin $GIT_BRANCH
+        docker compose -f $DOCKER_COMPOSE_FILE up -d --build
+        systemctl reload caddy || true
+      EOF
+  publish-hf-models:
+    run: |
+      echo "Publishing models to Hugging Face..."
+      gh workflow run publish-to-hf.yml -f repo_id=$HF_ORG/${MODEL##*/} \
+        -f source_dir=models/${MODEL##*/} -f private=false
+  rebuild-retrieval:
+    run: |
+      ssh -o StrictHostKeyChecking=no $DROPLET_HOST <<'EOF'
+        cd $RETRIEVAL_PATH && docker compose down && docker compose up -d --build
+      EOF
+  refresh-hf-space:
+    run: |
+      python -m huggingface_hub sync-space --repo-id $HF_SPACE --token $HF_TOKEN
+
+monitoring:
+  slack:
+    webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+    notify_on_failure: true
+    notify_on_success: false
+  logs:
+    path: codex/logs/integration.log
+
+success_criteria:
+  - ✅ Hugging Face upload completes without error.
+  - ✅ Droplet rebuild reports “Retrieval stack rebuilt successfully.”
+  - ✅ Space webhook receives PR events from GitHub.
+  - ✅ Codex status reflects live model sync.
