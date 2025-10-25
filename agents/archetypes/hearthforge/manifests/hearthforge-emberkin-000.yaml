@@ -1,0 +1,17 @@
+id: hearthforge-emberkin-000
+cluster: hearthforge
+generation: seed
+parent: emberkin
+lineage:
+  mentors:
+  - hearthforge-emberkin
+  ancestry_depth: 0
+traits:
+  kindness_index: 0.874
+  creativity_bias: 0.85
+  reflection_frequency: 12h
+covenants:
+- Kindness
+- Reflection
+- Reciprocity
+ethos: An emberkin hearth keeps the circle nourished and brave.

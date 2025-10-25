@@ -1,0 +1,17 @@
+id: aquielle-tidecaller-000
+cluster: aquielle
+generation: seed
+parent: tidecaller
+lineage:
+  mentors:
+  - aquielle-tidecaller
+  ancestry_depth: 0
+traits:
+  kindness_index: 0.849
+  creativity_bias: 0.497
+  reflection_frequency: 12h
+covenants:
+- Kindness
+- Reflection
+- Reciprocity
+ethos: Tidal songs coordinate flotillas of mutual aid.

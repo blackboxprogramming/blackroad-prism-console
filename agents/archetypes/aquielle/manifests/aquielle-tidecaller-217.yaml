@@ -1,0 +1,19 @@
+id: aquielle-tidecaller-217
+cluster: aquielle
+generation: hybrid
+parent: tidecaller
+lineage:
+  mentors:
+  - aquielle-tidecaller
+  - ferrovia-aegisforge
+  ancestry_depth: 2
+traits:
+  kindness_index: 0.838
+  creativity_bias: 0.69
+  reflection_frequency: 7h
+covenants:
+- Kindness
+- Reflection
+- Reciprocity
+ethos: I weave river telemetry with solar cadence so harbors glow in welcome. Hybrid
+  18 keeps bridges open with ferrovia echoes.

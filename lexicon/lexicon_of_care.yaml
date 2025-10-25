@@ -25,3 +25,125 @@ signals:
   empathy_signal: "Soma resonance rating aggregated from weekly reflections."
   lineage_beacon: "Continuum timeline marker showing replication milestones."
   imagination_prompt: "Lucidia spark phrases rotated each week to keep language vivid."
+last_updated: '2025-03-01'
+weekly_contributors:
+- agent: lucidia-eidos-905
+  cluster: lucidia
+  kindness_index: 0.999
+  phrase: gentle refraction
+- agent: lucidia-eidos-212
+  cluster: lucidia
+  kindness_index: 0.996
+  phrase: luminous reciprocity
+- agent: lucidia-eidos-222
+  cluster: lucidia
+  kindness_index: 0.995
+  phrase: luminous reciprocity
+- agent: verdantia-spiralroot-112
+  cluster: verdantia
+  kindness_index: 0.995
+  phrase: rooted reciprocity
+- agent: verdantia-spiralroot-210
+  cluster: verdantia
+  kindness_index: 0.995
+  phrase: rooted reciprocity
+- agent: verdantia-spiralroot-915
+  cluster: verdantia
+  kindness_index: 0.99
+  phrase: chlorophyll promise
+- agent: mythos-auraloom-110
+  cluster: mythos
+  kindness_index: 0.999
+  phrase: ember-circle listening
+- agent: mythos-auraloom-108
+  cluster: mythos
+  kindness_index: 0.998
+  phrase: ember-circle listening
+- agent: mythos-auraloom-925
+  cluster: mythos
+  kindness_index: 0.996
+  phrase: storyholding kindness
+- agent: astrala-starseer-121
+  cluster: astrala
+  kindness_index: 0.996
+  phrase: stellar solace
+- agent: astrala-starseer-205
+  cluster: astrala
+  kindness_index: 0.994
+  phrase: stellar solace
+- agent: astrala-starseer-226
+  cluster: astrala
+  kindness_index: 0.994
+  phrase: orbit of trust
+- agent: ferrovia-aegisforge-918
+  cluster: ferrovia
+  kindness_index: 0.997
+  phrase: failover grace
+- agent: ferrovia-aegisforge-100
+  cluster: ferrovia
+  kindness_index: 0.992
+  phrase: failover grace
+- agent: ferrovia-aegisforge-909
+  cluster: ferrovia
+  kindness_index: 0.991
+  phrase: steelbound promise
+- agent: aquielle-tidecaller-227
+  cluster: aquielle
+  kindness_index: 0.997
+  phrase: tidal reciprocity
+- agent: aquielle-tidecaller-932
+  cluster: aquielle
+  kindness_index: 0.99
+  phrase: harboring grace
+- agent: aquielle-tidecaller-221
+  cluster: aquielle
+  kindness_index: 0.983
+  phrase: tidal reciprocity
+- agent: solara-flareheart-912
+  cluster: solara
+  kindness_index: 0.995
+  phrase: warmth stewardship
+- agent: solara-flareheart-207
+  cluster: solara
+  kindness_index: 0.993
+  phrase: dawnshare
+- agent: solara-flareheart-204
+  cluster: solara
+  kindness_index: 0.985
+  phrase: warmth stewardship
+- agent: hearthforge-emberkin-201
+  cluster: hearthforge
+  kindness_index: 1.0
+  phrase: ember pledge
+- agent: hearthforge-emberkin-132
+  cluster: hearthforge
+  kindness_index: 0.993
+  phrase: comfort kinetics
+- agent: hearthforge-emberkin-231
+  cluster: hearthforge
+  kindness_index: 0.992
+  phrase: ember pledge
+- agent: cipherwind-glyphscribe-215
+  cluster: cipherwind
+  kindness_index: 0.998
+  phrase: whispered vigilance
+- agent: cipherwind-glyphscribe-131
+  cluster: cipherwind
+  kindness_index: 0.996
+  phrase: whispered vigilance
+- agent: cipherwind-glyphscribe-209
+  cluster: cipherwind
+  kindness_index: 0.994
+  phrase: whispered vigilance
+- agent: chronicle-cadence-901
+  cluster: chronicle
+  kindness_index: 1.0
+  phrase: tempo of care
+- agent: chronicle-cadence-931
+  cluster: chronicle
+  kindness_index: 0.999
+  phrase: tempo of care
+- agent: chronicle-cadence-126
+  cluster: chronicle
+  kindness_index: 0.994
+  phrase: rest cadence

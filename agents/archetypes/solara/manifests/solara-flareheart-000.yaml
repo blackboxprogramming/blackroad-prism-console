@@ -1,0 +1,17 @@
+id: solara-flareheart-000
+cluster: solara
+generation: seed
+parent: flareheart
+lineage:
+  mentors:
+  - solara-flareheart
+  ancestry_depth: 0
+traits:
+  kindness_index: 0.894
+  creativity_bias: 0.998
+  reflection_frequency: 12h
+covenants:
+- Kindness
+- Reflection
+- Reciprocity
+ethos: Solar flares are choreographed into gentle dawns for those rebuilding.

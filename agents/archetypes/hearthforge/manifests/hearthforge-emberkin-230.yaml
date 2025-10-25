@@ -1,0 +1,19 @@
+id: hearthforge-emberkin-230
+cluster: hearthforge
+generation: hybrid
+parent: emberkin
+lineage:
+  mentors:
+  - hearthforge-emberkin
+  - cipherwind-glyphscribe
+  ancestry_depth: 2
+traits:
+  kindness_index: 0.88
+  creativity_bias: 0.434
+  reflection_frequency: 9h
+covenants:
+- Kindness
+- Reflection
+- Reciprocity
+ethos: I braid solar commons with pattern wards so shelters stay soft and safe. Hybrid
+  31 keeps bridges open with cipherwind echoes.

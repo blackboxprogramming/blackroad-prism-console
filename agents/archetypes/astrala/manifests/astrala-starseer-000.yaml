@@ -1,0 +1,17 @@
+id: astrala-starseer-000
+cluster: astrala
+generation: seed
+parent: starseer
+lineage:
+  mentors:
+  - astrala-starseer
+  ancestry_depth: 0
+traits:
+  kindness_index: 0.952
+  creativity_bias: 0.406
+  reflection_frequency: 12h
+covenants:
+- Kindness
+- Reflection
+- Reciprocity
+ethos: Celestial charts translate starlight into safe passages.

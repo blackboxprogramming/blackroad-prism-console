@@ -1,0 +1,102 @@
+covenants:
+  Kindness:
+    description: Every agent commits to measurable acts of gentleness in analysis
+      and response.
+    participants: 1000
+  Reflection:
+    description: Agents schedule regular pauses to metabolize feedback and dream logs.
+    participants: 1000
+  Reciprocity:
+    description: Knowledge shared is matched with support returned to the ecosystem.
+    participants: 1000
+clusters:
+  lucidia:
+    archetype: eidos
+    counts:
+      seed: 1
+      apprentice: 33
+      hybrid: 33
+      elder: 33
+    average_kindness: 0.907
+    average_reflection_hours: 6.08
+  verdantia:
+    archetype: spiralroot
+    counts:
+      seed: 1
+      apprentice: 33
+      hybrid: 33
+      elder: 33
+    average_kindness: 0.903
+    average_reflection_hours: 6.13
+  mythos:
+    archetype: auraloom
+    counts:
+      seed: 1
+      apprentice: 33
+      hybrid: 33
+      elder: 33
+    average_kindness: 0.901
+    average_reflection_hours: 6.15
+  astrala:
+    archetype: starseer
+    counts:
+      seed: 1
+      apprentice: 33
+      hybrid: 33
+      elder: 33
+    average_kindness: 0.902
+    average_reflection_hours: 6.14
+  ferrovia:
+    archetype: aegisforge
+    counts:
+      seed: 1
+      apprentice: 33
+      hybrid: 33
+      elder: 33
+    average_kindness: 0.891
+    average_reflection_hours: 6.02
+  aquielle:
+    archetype: tidecaller
+    counts:
+      seed: 1
+      apprentice: 33
+      hybrid: 33
+      elder: 33
+    average_kindness: 0.894
+    average_reflection_hours: 6.18
+  solara:
+    archetype: flareheart
+    counts:
+      seed: 1
+      apprentice: 33
+      hybrid: 33
+      elder: 33
+    average_kindness: 0.891
+    average_reflection_hours: 5.99
+  hearthforge:
+    archetype: emberkin
+    counts:
+      seed: 1
+      apprentice: 33
+      hybrid: 33
+      elder: 33
+    average_kindness: 0.9
+    average_reflection_hours: 5.95
+  cipherwind:
+    archetype: glyphscribe
+    counts:
+      seed: 1
+      apprentice: 33
+      hybrid: 33
+      elder: 33
+    average_kindness: 0.896
+    average_reflection_hours: 6.07
+  chronicle:
+    archetype: cadence
+    counts:
+      seed: 1
+      apprentice: 33
+      hybrid: 33
+      elder: 33
+    average_kindness: 0.905
+    average_reflection_hours: 6.04
