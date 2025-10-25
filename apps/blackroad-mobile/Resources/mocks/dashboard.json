@@ -1,0 +1,43 @@
+{
+  "summary": "Leadership overview cached locally for offline use.",
+  "metrics": [
+    {
+      "id": "11111111-1111-1111-1111-111111111111",
+      "title": "Global Uptime",
+      "value": "99.992%",
+      "caption": "Across 12 regions",
+      "icon": "waveform.path.ecg",
+      "status": "healthy"
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222222",
+      "title": "Active Incidents",
+      "value": "0",
+      "caption": "Past 24h",
+      "icon": "shield",
+      "status": "healthy"
+    },
+    {
+      "id": "33333333-3333-3333-3333-333333333333",
+      "title": "Deploy Velocity",
+      "value": "7",
+      "caption": "Last 6 hours",
+      "icon": "arrow.up.circle",
+      "status": "warning"
+    }
+  ],
+  "shortcuts": [
+    {
+      "id": "44444444-4444-4444-4444-444444444444",
+      "title": "Major Runbooks",
+      "icon": "book",
+      "url": "https://console.blackroad.io/runbooks"
+    },
+    {
+      "id": "55555555-5555-5555-5555-555555555555",
+      "title": "Escalate to On-call",
+      "icon": "person.crop.circle.badge.exclam",
+      "url": "https://console.blackroad.io/agents"
+    }
+  ]
+}

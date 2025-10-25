@@ -1,0 +1,89 @@
+openapi: 3.0.3
+info:
+  title: BlackRoad API Gateway
+  version: 0.1.0
+servers:
+  - url: https://console.blackroad.io
+paths:
+  /api/mobile/dashboard:
+    get:
+      summary: Fetch leadership dashboard payload
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardPayload'
+        '401':
+          description: Unauthorized
+        '502':
+          description: Upstream failure
+  /health:
+    get:
+      summary: Gateway health
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  timestamp:
+                    type: string
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Metric:
+      type: object
+      required: [id, title, value, caption, icon, status]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        value:
+          type: string
+        caption:
+          type: string
+        icon:
+          type: string
+        status:
+          type: string
+          enum: [healthy, warning, critical]
+    Shortcut:
+      type: object
+      required: [id, title, icon, url]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        icon:
+          type: string
+        url:
+          type: string
+          format: uri
+    DashboardPayload:
+      type: object
+      required: [summary, metrics, shortcuts]
+      properties:
+        summary:
+          type: string
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/Metric'
+        shortcuts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Shortcut'

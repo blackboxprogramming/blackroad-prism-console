@@ -1,0 +1,7 @@
+# Top-level CODEOWNERS ensures consistent review coverage for new scaffolds.
+*       @blackboxprogramming/maintainers
+
+# Delegate ownership for newly scaffolded surfaces.
+/apps/blackroad-mobile/   @blackboxprogramming/mobile
+/apps/prism-console-web/  @blackboxprogramming/frontend
+/services/api-gateway/    @blackboxprogramming/platform

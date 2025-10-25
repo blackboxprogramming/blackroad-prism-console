@@ -1,0 +1,30 @@
+version: '3.9'
+services:
+  api-gateway:
+    build: .
+    environment:
+      PORT: 8080
+      AUTH_SERVICE_URL: http://mock-auth:8081
+      BLACKROAD_API_URL: http://mock-prism:5052/api/mobile/dashboard
+      SERVICE_TOKEN: local-token
+    ports:
+      - '8080:8080'
+    depends_on:
+      - mock-auth
+      - mock-prism
+  mock-auth:
+    image: node:20-alpine
+    working_dir: /srv
+    command: ["node", "mock-auth.js"]
+    volumes:
+      - ./mocks:/srv
+    environment:
+      PORT: 8081
+  mock-prism:
+    image: node:20-alpine
+    working_dir: /srv
+    command: ["node", "mock-prism.js"]
+    volumes:
+      - ./mocks:/srv
+    environment:
+      PORT: 5052

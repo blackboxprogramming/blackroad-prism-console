@@ -47,3 +47,9 @@ This document outlines the structure of the research pipeline used in this repos
 5) RoadChain explorer + Wallet
 6) Billing/Admin
 7) Polish/Accessibility [oai_citation:8‡codex-brief-blackroad.txt](file-service://file-5XetBpV4rRS3we1nWZ5FKc).
+
+## 2024Q1 Scaffolds
+
+- **BlackRoad Mobile (SwiftUI)** — iOS simulator project under `apps/blackroad-mobile/`. Fetches `DashboardPayload`, caches offline, and enforces biometrics when tokens are present. Local mocks live in `mocks/server.py` for parity with production.
+- **Prism Console Web (Next.js)** — Operator cockpit at `apps/prism-console-web/`. Uses React Query + Zod contract tests, Storybook stories, and Playwright happy-path verification.
+- **API Gateway (Fastify)** — Node service in `services/api-gateway/` performing auth delegation, tracing hooks, and proxying `/api/mobile/dashboard`. Ships with OpenAPI spec, Dockerfile, and dev docker-compose mocks.

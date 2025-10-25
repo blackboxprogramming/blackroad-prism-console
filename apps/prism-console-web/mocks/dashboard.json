@@ -1,0 +1,43 @@
+{
+  "summary": "Systems nominal. All SLAs green across cloud regions.",
+  "metrics": [
+    {
+      "id": "2c3c875f-5a77-4a80-9fa9-2bba9c8caebd",
+      "title": "Global Uptime",
+      "value": "99.992%",
+      "caption": "Across 15 regions",
+      "icon": "waveform.path.ecg",
+      "status": "healthy"
+    },
+    {
+      "id": "9a3e6d4d-9f92-4b22-9e6b-36fdfd44814f",
+      "title": "Active Incidents",
+      "value": "1",
+      "caption": "Mitigating API latency",
+      "icon": "exclamationmark.triangle",
+      "status": "warning"
+    },
+    {
+      "id": "c1f6d5bc-0e9f-4880-8667-d8af4bbccf6d",
+      "title": "Deploy Velocity",
+      "value": "12",
+      "caption": "Deploys past 24h",
+      "icon": "shippingbox",
+      "status": "healthy"
+    }
+  ],
+  "shortcuts": [
+    {
+      "id": "40b30139-9999-4b22-9e0a-3f14a1c7f016",
+      "title": "PagerDuty",
+      "icon": "bell",
+      "url": "https://pagerduty.com"
+    },
+    {
+      "id": "d3f0e57e-6c59-41e0-948f-65c217c3a8da",
+      "title": "Runbooks",
+      "icon": "book",
+      "url": "https://console.blackroad.io/runbooks"
+    }
+  ]
+}
