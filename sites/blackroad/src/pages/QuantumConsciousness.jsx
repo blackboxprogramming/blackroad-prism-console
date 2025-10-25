@@ -25,8 +25,6 @@ function Card({ title, metaphor, color, delay }) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setShow(true), delay);
-    return () => clearTimeout(timeout);
     const timeout = window.setTimeout(() => setShow(true), delay);
     return () => window.clearTimeout(timeout);
   }, [delay]);
@@ -50,67 +48,34 @@ export default function QuantumConsciousness() {
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  const fetchNotes = useCallback(
-    async (signal) => {
-      setLoading(true);
-      setError("");
-
-      try {
-        const response = await fetch("/api/quantum", {
-          cache: "no-store",
-          signal,
-        });
-
-        if (!response.ok) {
-          throw new Error(`Request failed: ${response.status}`);
-        }
-
-        const payload = await response.json();
-        if (!Array.isArray(payload.topics)) {
-          throw new Error("Invalid payload");
-        }
-
-        if (signal?.aborted) {
-          return;
-        }
-
-        setNotes(payload.topics);
-        setLastUpdated(new Date());
-      } catch (err) {
-        if (signal?.aborted) {
-          return;
-        }
-        console.error("quantum-console", err);
-        setNotes([]);
-        setError("Unable to reach the quantum research console.");
-      } finally {
-        if (!signal?.aborted) {
-          setLoading(false);
-        }
-      }
-    },
-    []
-  );
   const fetchNotes = useCallback(async (signal) => {
     setLoading(true);
     setError("");
+
     try {
       const response = await fetch("/api/quantum", { cache: "no-store", signal });
       if (!response.ok) {
         throw new Error(`Request failed: ${response.status}`);
       }
-      const data = await response.json();
-      if (!Array.isArray(data.topics)) {
+
+      const payload = await response.json();
+      if (!Array.isArray(payload.topics)) {
         throw new Error("Invalid payload");
       }
-      if (signal?.aborted) return;
-      setNotes(data.topics);
+
+      if (signal?.aborted) {
+        return;
+      }
+
+      setNotes(payload.topics);
       setLastUpdated(new Date());
     } catch (err) {
-      if (signal?.aborted) return;
+      if (signal?.aborted) {
+        return;
+      }
       console.error("quantum-console", err);
-      setError("Unable to reach the quantum research console.");
       setNotes([]);
+      setError("Unable to reach the quantum research console.");
     } finally {
       if (!signal?.aborted) {
         setLoading(false);
@@ -143,12 +108,11 @@ export default function QuantumConsciousness() {
     }
   }, [lastUpdated]);
 
-  const timestamp = useMemo(() => new Date().toISOString(), [notes, error, loading]);
+  const timestamp = useMemo(() => new Date().toISOString(), []);
 
   const handleRefresh = () => {
     fetchNotes();
   };
-  const timestamp = useMemo(() => new Date().toISOString(), []);
 
   return (
     <div className="flex min-h-screen flex-col items-center space-y-8 p-8">
@@ -168,25 +132,6 @@ export default function QuantumConsciousness() {
         </p>
       </header>
 
-      <section className="grid md:grid-cols-3 gap-4 w-full max-w-5xl">
-        <Card
-          title="Reasoning"
-          metaphor="Superposition lets minds hold multiple thoughts at once for quantum parallelism."
-          color="#FF4FD8"
-          delay={0}
-        />
-        <Card
-          title="Memory"
-          metaphor="Entangled quantum RAM could bind experiences across vast memory webs."
-          color="#0096FF"
-          delay={150}
-        />
-        <Card
-          title="Symbolic Processing"
-          metaphor="Interference patterns refine symbolic chains, amplifying the meaningful paths."
-          color="#FDBA2D"
-          delay={300}
-        />
       <section className="grid w-full max-w-5xl gap-4 md:grid-cols-3">
         {CARDS.map((card) => (
           <Card key={card.title} {...card} />
@@ -198,19 +143,13 @@ export default function QuantumConsciousness() {
           <span>Research console</span>
           <span>Last sync: {lastSynced}</span>
         </div>
-        <div className="bg-black text-green-400 font-mono p-4 rounded-md h-56 overflow-auto">
-          <pre>{loading ? "Loading research notes..." : researchLog}</pre>
         <div className="h-56 overflow-auto rounded-md bg-black p-4 font-mono text-green-400">
-          <pre>{log}</pre>
+          <pre>{researchLog}</pre>
         </div>
         <div className="flex justify-end">
           <button
             type="button"
             onClick={handleRefresh}
-            disabled={loading}
-            className={`px-4 py-2 rounded-md border border-white/20 transition ${
-              loading ? "opacity-60 cursor-not-allowed" : "hover:bg-white/10"
-            onClick={() => fetchNotes()}
             disabled={loading}
             className={`rounded-md border border-white/20 px-4 py-2 text-sm transition ${
               loading ? "cursor-not-allowed opacity-60" : "hover:bg-white/10"

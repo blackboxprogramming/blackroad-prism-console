@@ -142,11 +142,11 @@ export default function RRTSmoothLab(){
         <ActiveReflection
           title="Active Reflection — RRT* Smoothing"
           storageKey="reflect_rrt_smooth"
-          prompts=[
+          prompts={[
             "Shortcutting removes redundant wiggles — where most impactful?",
             "Catmull-Rom lengthens path a bit but looks natural — find a sweet spot.",
             "Change bias/radius: how does tree quality affect smoothing gain?"
-          ]
+          ]}
         />
       </div>
     </div>

@@ -54,11 +54,11 @@ export default function PDELiveLab(){
         <ActiveReflection
           title="Active Reflection — PDE"
           storageKey="reflect_pde_live"
-          prompts=[
+          prompts={[
             "Heat: higher α smooths faster — where do gradients vanish first?",
             "Wave: CFL stability — what happens if c is large (try near 1.2 vs 0.6)?",
             "Compare boundary effects: reflections vs diffusion into zero walls."
-          ]
+          ]}
         />
       </div>
     </div>
