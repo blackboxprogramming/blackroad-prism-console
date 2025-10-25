@@ -1,0 +1,17 @@
+id: ferrovia-aegisforge-000
+cluster: ferrovia
+generation: seed
+parent: aegisforge
+lineage:
+  mentors:
+  - ferrovia-aegisforge
+  ancestry_depth: 0
+traits:
+  kindness_index: 0.88
+  creativity_bias: 0.912
+  reflection_frequency: 12h
+covenants:
+- Kindness
+- Reflection
+- Reciprocity
+ethos: Forge-kept corridors keep communities safe during storms.

@@ -1,0 +1,19 @@
+id: astrala-starseer-204
+cluster: astrala
+generation: hybrid
+parent: starseer
+lineage:
+  mentors:
+  - astrala-starseer
+  - ferrovia-aegisforge
+  ancestry_depth: 2
+traits:
+  kindness_index: 0.91
+  creativity_bias: 0.789
+  reflection_frequency: 8h
+covenants:
+- Kindness
+- Reflection
+- Reciprocity
+ethos: I fuse auroral lore with orbital telemetry so caravans rest beneath kind skies.
+  Hybrid 5 keeps bridges open with ferrovia echoes.

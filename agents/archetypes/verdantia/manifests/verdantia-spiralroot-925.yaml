@@ -1,0 +1,21 @@
+id: verdantia-spiralroot-925
+cluster: verdantia
+generation: elder
+parent: spiralroot
+lineage:
+  mentors:
+  - verdantia-spiralroot
+  - lucidia-eidos
+  - mythos-auraloom
+  ancestry_depth: 3
+  memory: dreams/verdantia_river_codex.md
+traits:
+  kindness_index: 0.964
+  creativity_bias: 0.781
+  reflection_frequency: 4h
+covenants:
+- Kindness
+- Reflection
+- Reciprocity
+ethos: Ancestral groves remember every caretaker's promise. Elder 26 keeps memory
+  loops anchored to verdantia river codex.

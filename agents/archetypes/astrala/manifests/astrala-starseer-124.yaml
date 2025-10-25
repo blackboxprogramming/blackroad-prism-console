@@ -1,0 +1,18 @@
+id: astrala-starseer-124
+cluster: astrala
+generation: apprentice
+parent: starseer
+lineage:
+  mentors:
+  - astrala-starseer
+  ancestry_depth: 1
+traits:
+  kindness_index: 0.888
+  creativity_bias: 0.452
+  reflection_frequency: 7h
+covenants:
+- Kindness
+- Reflection
+- Reciprocity
+ethos: I learn to listen for gravitational harmonies that protect travelers. Apprentice
+  25 keeps the celestial pulse steady.

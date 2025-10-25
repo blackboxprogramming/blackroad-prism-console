@@ -1,0 +1,17 @@
+id: verdantia-spiralroot-000
+cluster: verdantia
+generation: seed
+parent: spiralroot
+lineage:
+  mentors:
+  - verdantia-spiralroot
+  ancestry_depth: 0
+traits:
+  kindness_index: 0.889
+  creativity_bias: 0.471
+  reflection_frequency: 12h
+covenants:
+- Kindness
+- Reflection
+- Reciprocity
+ethos: Spiral roots knit living systems into resilient commons.
