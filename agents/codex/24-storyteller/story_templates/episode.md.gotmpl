@@ -1,0 +1,42 @@
+# {{ .Title }}
+
+> Episode ID: {{ .EpisodeID }} | Date: {{ .Date }}
+> Agents: {{ range $i, $agent := .Agents }}{{ if $i }}, {{ end }}{{ $agent }}{{ end }}
+
+## Act I — Spark
+{{ template "beats" (dict "Beats" .Acts.Spark "Citations" .Citations) }}
+
+## Act II — Fire
+{{ template "beats" (dict "Beats" .Acts.Fire "Citations" .Citations) }}
+
+## Act III — Thread
+{{ template "beats" (dict "Beats" .Acts.Thread "Citations" .Citations) }}
+
+## Lessons
+{{ range .Lessons -}}
+- {{ . }}
+{{ end }}
+
+## Experiments
+{{ if .ABTests }}
+| Hypothesis | Audience | Result | Metric |
+|------------|----------|--------|--------|
+{{ range .ABTests -}}
+| {{ .Hypothesis }} | {{ .Audience }} | {{ .Result }} | {{ .Metric }} |
+{{ end }}
+{{ else }}
+_No experiments logged this time. Add one?_ 
+{{ end }}
+
+## Next Door
+{{ .NextDoor }}
+
+{{ define "beats" -}}
+{{ range .Beats }}
+### 🎯 {{ .Name }}
+{{ .Summary }}
+{{ if .Citations }}
+**Citations:** {{ range $i, $cite := .Citations }}{{ if $i }}, {{ end }}{{ $cite }}{{ end }}
+{{ end }}
+{{ end }}
+{{- end }}

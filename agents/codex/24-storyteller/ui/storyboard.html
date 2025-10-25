@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Storyteller Storyboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="stage">
+      <header>
+        <h1>Codex-24 Storyboard</h1>
+        <p class="subtitle">Stories are scaffolding for courage.</p>
+      </header>
+      <section class="timeline" aria-label="Canon timeline preview">
+        <h2>Canon Timeline</h2>
+        <ul id="timeline"></ul>
+      </section>
+      <section class="episodes" aria-label="Latest episodes">
+        <h2>Latest Episodes</h2>
+        <article class="episode" data-template>
+          <h3 class="episode-title"></h3>
+          <p class="episode-meta"></p>
+          <p class="episode-summary"></p>
+          <a class="episode-door" href="#">Next Door →</a>
+        </article>
+      </section>
+    </main>
+    <script type="module">
+      async function loadTimeline() {
+        const response = await fetch('../datasets/canon_timeline.json');
+        const data = await response.json();
+        const list = document.getElementById('timeline');
+        list.innerHTML = '';
+        data.forEach((entry) => {
+          const item = document.createElement('li');
+          item.innerHTML = `<time>${entry.date}</time> — <strong>${entry.title}</strong>`;
+          list.appendChild(item);
+        });
+      }
+      loadTimeline();
+    </script>
+  </body>
+</html>

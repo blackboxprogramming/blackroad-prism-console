@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Storyteller Episode",
+  "type": "object",
+  "required": ["episode_id", "title", "acts", "agents", "sources", "lessons", "next_door"],
+  "properties": {
+    "episode_id": {
+      "type": "string",
+      "pattern": "^E-\\d{4}-\\d{2}-\\d{2}-[a-z0-9-]+$",
+      "description": "Unique identifier for the episode including date and slug."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "acts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "beats"],
+        "properties": {
+          "name": { "type": "string" },
+          "beats": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["inciting", "complication", "insight", "decision", "consequence", "echo"]
+            },
+            "minItems": 1
+          }
+        }
+      }
+    },
+    "agents": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "id"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["pr", "reflex", "log", "metric", "artifact", "story"]
+          },
+          "id": { "type": "string" },
+          "url": { "type": "string", "format": "uri-reference" },
+          "notes": { "type": "string" }
+        }
+      },
+      "minItems": 1
+    },
+    "lessons": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "a_b_tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["hypothesis", "result"],
+        "properties": {
+          "hypothesis": { "type": "string" },
+          "audience": {
+            "type": "string",
+            "enum": ["engineers", "creators", "investors", "kids", "general"]
+          },
+          "result": { "type": "string" },
+          "metric": { "type": "string" }
+        }
+      }
+    },
+    "next_door": {
+      "type": "string",
+      "description": "Episode id or URL that continues the narrative."
+    }
+  }
+}

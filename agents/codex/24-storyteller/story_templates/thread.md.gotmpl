@@ -1,0 +1,11 @@
+# {{ .Title }} 🧵
+
+{{ range .Beats -}}
+- {{ if .Number }}{{ printf "%02d" .Number }}. {{ end }}{{ .Summary }}{{ if .Citation }} {{ .Citation }}{{ end }}
+{{ end }}
+
+**Chart:** {{ .Chart | default "(add chart link)" }}
+
+**Takeaway:** {{ .Takeaway }}
+
+**Next Door:** {{ .NextDoor }}

@@ -1,0 +1,25 @@
+# {{ .Title }} — Executive Brief
+
+**Episode ID:** {{ .EpisodeID }}  
+**Date:** {{ .Date }}  
+**Agents:** {{ range $index, $agent := .Agents }}{{ if $index }}, {{ end }}{{ $agent }}{{ end }}
+
+## Why
+{{ .Why }}
+
+## What Happened
+{{ range .Highlights -}}
+- {{ . }}
+{{ end }}
+
+## So What
+{{ .SoWhat }}
+
+## Next
+- 🎯 {{ .NextDecision }}
+- 🚪 Next Door: {{ .NextDoor }}
+
+## Citations
+{{ range .Citations -}}
+- {{ . }}
+{{ end }}
