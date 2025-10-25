@@ -89,11 +89,11 @@ export default function PerlinTerrainLab(){
         <ActiveReflection
           title="Active Reflection — Perlin Terrain"
           storageKey="reflect_perlin"
-          prompts=[
+          prompts={[
             "Increase lacunarity: frequencies spread — what happens to texture?",
             "Lower gain: high-octave contribution shrinks — which features fade?",
             "Try different seeds: which global structure persists?"
-          ]
+          ]}
         />
       </div>
     </div>

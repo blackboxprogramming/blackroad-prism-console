@@ -81,11 +81,11 @@ export default function DiffusionMapsLab(){
           <ActiveReflection
             title="Active Reflection — Diffusion Maps"
             storageKey="reflect_diffmaps"
-            prompts=[
+            prompts={[
               "Small σ: local geometry preserved; when does the embedding fragment?",
               "Increase t: diffusion “blurs” short-scale detail — what stabilizes?",
               "Why does the first nontrivial eigenvector already separate the moons?"
-            ]
+            ]}
           />
         </section>
       </div>

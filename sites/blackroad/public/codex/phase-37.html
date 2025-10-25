@@ -1,0 +1,207 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="index,follow"><link rel="canonical" href="https://blackroad.io/codex/phase-37/"><meta property="og:title" content="Phase 37 — PLM & MANUFACTURING OPS (BOMs, ECO/ECR, Routings, Work Instructions, SPC, Yield, COQ)"><meta property="og:description" content="Offline PLM & Manufacturing Ops layer for blackboxprogramming/blackroad-prism-console."><title>Phase 37 — PLM & MANUFACTURING OPS (BOMs, ECO/ECR, Routings, Work Instructions, SPC, Yield, COQ)</title></head><body><p>Here’s Phase 37 — PLM &amp; MANUFACTURING OPS (BOMs, ECO/ECR, Routings, Work Instructions, SPC, Yield, COQ). Paste this into Codex.</p>
+<p>───</p>
+<p><strong>Codex Prompt — Phase 37 (offline PLM &amp; MFG: product lifecycle, BOM &amp; versions, engineering change control, routings/work centers, work instructions, SPC/yield tracking, cost-of-quality)</strong></p>
+<p>Continue in blackboxprogramming/blackroad-prism-console. Add an offline Product Lifecycle &amp; Manufacturing Ops layer: versioned BOMs, Engineering Change Orders (ECO/ECR), routings &amp; work centers, printable work instructions, Statistical Process Control (SPC) with yield/defect analytics, and Cost-of-Quality (COQ). Everything is deterministic, file-backed, and air-gapped.</p>
+<p><strong>Objectives (acceptance criteria)</strong></p>
+<ol>
+<li>Product &amp; BOM Management (Versioned)</li>
+</ol>
+<ul>
+<li>New: /plm/bom.py</li>
+<li>Entities: Item(id, rev, type: &quot;assembly|component|raw&quot;, uom, lead_time_days, cost, suppliers:list)</li>
+<li>BOM(item_id, rev, lines:[{component_id, qty, refdes?, scrap_pct?}])</li>
+<li>APIs: load_items(...), load_boms(...), explode(bom, level=N), where_used(component_id)</li>
+<li>Persist normalized catalogs to /artifacts/plm/items.json and /artifacts/plm/boms.json.</li>
+<li>CLI:<ul>
+<li>plm:items:load --dir fixtures/plm/items</li>
+<li>plm:bom:load --dir fixtures/plm/boms</li>
+<li>plm:bom:explode --item PROD-100 --rev A --level 3</li>
+</ul>
+</li>
+<li>Lake &amp; contracts: write items, boms, where_used facts; validate with schemas.</li>
+</ul>
+<ol start="2">
+<li>Engineering Change Control (ECO/ECR)</li>
+</ol>
+<ul>
+<li>New: /plm/eco.py</li>
+<li>Change(id, type:&quot;ECR|ECO&quot;, item_id, from_rev, to_rev, reason, risk, status:&quot;draft|review|approved|released|rejected&quot;, effects:[items])</li>
+<li>Workflow: create → impact analysis (cost, supply, routing) → approvals (Legal/QA/Manufacturing) → release.</li>
+<li>Tie-ins: Approvals (Phase 5), e-Sign (Phase 18), Duty-of-Care (block if SPC shows instability).</li>
+<li>Artifacts: /artifacts/plm/changes/{id}.json + eco_{id}.md.</li>
+<li>CLI:<ul>
+<li>plm:eco:new --item PROD-100 --from A --to B --reason &quot;Connector change&quot;</li>
+<li>plm:eco:impact --id ECO-001</li>
+<li>plm:eco:approve --id ECO-001 --as-user U_QA</li>
+<li>plm:eco:release --id ECO-001</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li>Routings, Work Centers, and Standard Times</li>
+</ol>
+<ul>
+<li>New: /mfg/routing.py</li>
+<li>Entities: WorkCenter(id, name, capacity_per_shift, skills, cost_rate)</li>
+<li>Routing(item_rev, steps:[{wc, op, std_time_min, yield_pct, instructions_path?}])</li>
+<li>Validate capacity vs plan; compute theoretical throughput &amp; labor cost.</li>
+<li>CLI:<ul>
+<li>mfg:wc:load --file fixtures/mfg/work_centers.csv</li>
+<li>mfg:routing:load --dir fixtures/mfg/routings</li>
+<li>mfg:routing:capcheck --item PROD-100 --rev B --qty 1000</li>
+</ul>
+</li>
+</ul>
+<ol start="4">
+<li>Work Instructions (Printable, Version-locked)</li>
+</ol>
+<ul>
+<li>New: /mfg/work_instructions.py</li>
+<li>Markdown instructions with placeholders for revision, torque tables, images (local only).</li>
+<li>render(item_rev, routing)-&gt;/artifacts/mfg/wi/PROD-100_B.md (+ .html with inline CSS).</li>
+<li>CLI:<ul>
+<li>mfg:wi:render --item PROD-100 --rev B</li>
+</ul>
+</li>
+</ul>
+<ol start="5">
+<li>SPC &amp; Yield Tracking</li>
+</ol>
+<ul>
+<li>New: /mfg/spc.py</li>
+<li>Ingest local inspection logs fixtures/mfg/spc/*.csv (measurements by op/station).</li>
+<li>Compute X-bar/R and p-charts deterministically; detect out-of-control &amp; trend with rule codes:<ul>
+<li>SPC_POINT_BEYOND_3SIG, SPC_TREND_7, SPC_RUN_8_ONE_SIDE.</li>
+</ul>
+</li>
+<li>Outputs: /artifacts/mfg/spc/{charts.md, findings.json} (ASCII charts acceptable; no external libs required).</li>
+<li>CLI:<ul>
+<li>mfg:spc:analyze --op OP-200 --window 50</li>
+</ul>
+</li>
+</ul>
+<ol start="6">
+<li>Yield, Defects, and COQ</li>
+</ol>
+<ul>
+<li>New: /mfg/yield.py</li>
+<li>Compute first-pass yield (FPY), rolled throughput yield (RTY), top defects Pareto by station/cause.</li>
+<li>New: /mfg/coq.py</li>
+<li>Cost of Quality buckets: Prevention, Appraisal, Internal Failure, External Failure from fixtures/ledger.</li>
+<li>Outputs: /artifacts/mfg/yield/{summary.md, pareto.csv}, /artifacts/mfg/coq/{coq.md, coq.csv}.</li>
+<li>CLI:<ul>
+<li>mfg:yield --period 2025-09</li>
+<li>mfg:coq --period 2025-Q3</li>
+</ul>
+</li>
+</ul>
+<ol start="7">
+<li>Build Plan &amp; Kitting (Deterministic MRP-lite)</li>
+</ol>
+<ul>
+<li>New: /mfg/mrp.py</li>
+<li>Inputs: demand (from S&amp;OP, Phase 23), inventory on-hand, open POs (fixtures).</li>
+<li>Explosion → netting → planned orders by lead time; generate kitting lists.</li>
+<li>Artifacts: /artifacts/mfg/mrp/{plan.json, kitting_{wo}.csv}.</li>
+<li>CLI:<ul>
+<li>mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv</li>
+</ul>
+</li>
+</ul>
+<ol start="8">
+<li>Governance &amp; Safety</li>
+</ol>
+<ul>
+<li>Duty-of-care gates:<ul>
+<li>Block plm:eco:release if SPC has critical findings on affected ops (DUTY_SPC_UNSTABLE).</li>
+<li>Block mfg:wi:render for release if routing &amp; BOM revs mismatch (DUTY_REV_MISMATCH).</li>
+</ul>
+</li>
+<li>Policy pack:<ul>
+<li>Require dual approval on ECOs with risk=high.</li>
+<li>Enforce supplier dual-source for critical items when BOM changes (tie-in to Phase 23 procurement).</li>
+</ul>
+</li>
+</ul>
+<ol start="9">
+<li>Lake &amp; Contracts</li>
+</ol>
+<ul>
+<li>New tables: plm_items, plm_boms, plm_changes, mfg_routings, mfg_wi, mfg_spc, mfg_yield, mfg_mrp, mfg_coq.</li>
+<li>Add schemas under /contracts/schemas/ and validate before writes.</li>
+<li>Emit metrics: plm_items_written, plm_changes_released, routing_cap_checked, wi_rendered, spc_findings, yield_reported, mrp_planned, coq_built.</li>
+</ul>
+<ol start="10">
+<li>Docs &amp; Samples</li>
+</ol>
+<ul>
+<li>Fixtures:<ul>
+<li>fixtures/plm/items/<em>.csv, fixtures/plm/boms/</em>.csv</li>
+<li>fixtures/mfg/work_centers.csv, fixtures/mfg/routings/<em>.yaml, fixtures/mfg/spc/</em>.csv, fixtures/mfg/inventory.csv, fixtures/mfg/open_pos.csv</li>
+</ul>
+</li>
+<li>Docs:<ul>
+<li>/docs/plm.md (BOMs, ECO flow)</li>
+<li>/docs/mfg-routing.md (work centers, capacity, WI)</li>
+<li>/docs/spc-yield.md (SPC rules, FPY/RTY)</li>
+<li>/docs/mrp-lite.md (planning &amp; kitting)</li>
+<li>README: &quot;PLM &amp; Manufacturing Ops&quot; quickstart.</li>
+</ul>
+</li>
+</ul>
+<ol start="11">
+<li>Tests &amp; Quality (≥80% coverage)</li>
+</ol>
+<ul>
+<li>tests/test_bom.py (explode/where-used)</li>
+<li>tests/test_eco.py (impact calc, approvals, gate blocks)</li>
+<li>tests/test_routing_cap.py (throughput &amp; cost math)</li>
+<li>tests/test_wi.py (revision locks)</li>
+<li>tests/test_spc.py (rule detections)</li>
+<li>tests/test_yield_coq.py (FPY/RTY, COQ rollups)</li>
+<li>tests/test_mrp.py (netting, lead-time offset)</li>
+<li>Contract validation tests for all new lake tables.</li>
+</ul>
+<p><strong>Demo sequence (print expected output at end)</strong></p>
+<ol>
+<li>python -m cli.console plm:items:load --dir fixtures/plm/items &amp;&amp; python -m cli.console plm:bom:load --dir fixtures/plm/boms</li>
+<li>python -m cli.console plm:bom:explode --item PROD-100 --rev A --level 3</li>
+<li>python -m cli.console plm:eco:new --item PROD-100 --from A --to B --reason &quot;Connector change&quot; &amp;&amp; python -m cli.console plm:eco:impact --id ECO-001</li>
+<li>python -m cli.console mfg:wc:load --file fixtures/mfg/work_centers.csv &amp;&amp; python -m cli.console mfg:routing:load --dir fixtures/mfg/routings &amp;&amp; python -m cli.console mfg:routing:capcheck --item PROD-100 --rev B --qty 1000</li>
+<li>python -m cli.console mfg:wi:render --item PROD-100 --rev B</li>
+<li>python -m cli.console mfg:spc:analyze --op OP-200 --window 50 &amp;&amp; python -m cli.console mfg:yield --period 2025-09</li>
+<li>python -m cli.console mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv</li>
+<li>python -m cli.console mfg:coq --period 2025-Q3</li>
+</ol>
+<p><strong>Implementation notes</strong></p>
+<ul>
+<li>Deterministic calculations everywhere; fixed control limits (calc from fixtures) and stable sorting.</li>
+<li>No external plotting libraries required; ASCII charts or inline HTML are fine.</li>
+<li>Reuse existing storage, signing, lineage, approvals, duty-of-care, and lake I/O.</li>
+<li>Keep tables phrases/numbers only; narrative explanations live in .md outputs.</li>
+</ul>
+<p>JSON Schema (keeps prompts uniform)</p>
+<p>/static/schemas/codex_prompt.schema.json</p>
+<p>{
+  &quot;$schema&quot;: &quot;<a href="https://json-schema.org/draft/2020-12/schema">https://json-schema.org/draft/2020-12/schema</a>&quot;,
+  &quot;title&quot;: &quot;CodexPrompt&quot;,
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;required&quot;: [&quot;type&quot;,&quot;id&quot;,&quot;slug&quot;,&quot;title&quot;,&quot;summary&quot;,&quot;tags&quot;,&quot;updated&quot;,&quot;version&quot;,&quot;copy_filename&quot;],
+  &quot;properties&quot;: {
+    &quot;type&quot;: {&quot;const&quot;: &quot;codex-prompt&quot;},
+    &quot;id&quot;: {&quot;type&quot;:&quot;string&quot;},
+    &quot;slug&quot;: {&quot;type&quot;:&quot;string&quot;},
+    &quot;title&quot;: {&quot;type&quot;:&quot;string&quot;},
+    &quot;summary&quot;: {&quot;type&quot;:&quot;string&quot;},
+    &quot;owner&quot;: {&quot;type&quot;:&quot;string&quot;},
+    &quot;tags&quot;: {&quot;type&quot;:&quot;array&quot;,&quot;items&quot;:{&quot;type&quot;:&quot;string&quot;}},
+    &quot;model_hint&quot;: {&quot;type&quot;:&quot;string&quot;},
+    &quot;temperature&quot;: {&quot;type&quot;:&quot;number&quot;},
+    &quot;updated&quot;: {&quot;type&quot;:&quot;string&quot;,&quot;format&quot;:&quot;date&quot;},
+    &quot;version&quot;: {&quot;type&quot;:&quot;string&quot;},
+    &quot;canonical_repo&quot;: {&quot;type&quot;:&quot;string&quot;},
+    &quot;copy_filename&quot;: {&quot;type&quot;:&quot;string&quot;}
+  }
+}</p>
+<p>Validate at build time (e.g., a tiny script that reads frontmatter → JSON → Ajv / Python jsonschema).</p>
+</body></html>

@@ -1,0 +1,87 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="index,follow"><link rel="canonical" href="https://blackroad.io/codex/phase-2/"><meta property="og:title" content="Phase 2 — Pi Bring-Up & First Light"><meta property="og:description" content="Bench bring-up card and Codex prompt set for spinning up the hologram stack from blank SD cards."><title>Phase 2 — Pi Bring-Up & First Light</title></head><body><p>Here’s Phase 2 — Pi Bring-Up &amp; First Light. Paste this into Codex.</p>
+<p>⸻</p>
+<p><strong>Codex Prompt — Phase 2 (bench bring-up: Pi images, services, MQTT wiring, sanity checks)</strong></p>
+<p>Move from blank SD cards to first-light renders in one sitting. Capture the bench card, systemd services, Codex prompt blocks, and helper scripts so a tech can flash and boot every Pi, wire MQTT, and validate the stack without referring elsewhere.</p>
+<h2>Bring-up card (print this)</h2>
+<ol>
+<li><p><strong>Flash images</strong></p>
+<ul>
+<li>Use Raspberry Pi Imager per board.</li>
+<li>Profiles: <code>pi-holo</code> (Pi 5, Desktop), <code>pi-ops</code> (Pi 5, Lite), <code>pi-sim</code> (Pi Zero W, Lite), <code>pi-400</code> (Desktop).</li>
+<li>In the gear ⚙️ panel set hostname, user, SSH, locale; add Wi-Fi only for the Zero W.</li>
+</ul>
+</li>
+<li><p><strong>First boot order</strong></p>
+<ol>
+<li><strong>Pi-Ops → broker</strong><pre><code class="language-bash">sudo apt update
+sudo apt install -y mosquitto mosquitto-clients
+sudo systemctl enable --now mosquitto
+mosquitto_sub -h localhost -t &#39;#&#39; -v   # leave running in one terminal
+</code></pre>
+</li>
+<li><strong>Pi-Holo → renderer deps</strong><pre><code class="language-bash">sudo apt update
+sudo apt install -y git python3-pip libatlas-base-dev
+git clone git@github.com:blackboxprogramming/blackroad-prism-console.git ~/blackroad
+cd ~/blackroad/pi_holo
+./install.sh
+</code></pre>
+</li>
+<li><strong>Pi-Sim → simulator</strong><pre><code class="language-bash">sudo apt update
+sudo apt install -y python3-pip
+git clone git@github.com:blackboxprogramming/blackroad-prism-console.git ~/blackroad
+cd ~/blackroad/pi_sim
+./install.sh
+</code></pre>
+</li>
+<li><strong>Pi-400 → operator console</strong><pre><code class="language-bash">sudo apt update
+sudo apt install -y nodejs npm
+git clone git@github.com:blackboxprogramming/blackroad-prism-console.git ~/blackroad
+cd ~/blackroad/prism-console
+npm install
+npm run dev
+</code></pre>
+</li>
+</ol>
+</li>
+<li><p><strong>Network &amp; MQTT wiring</strong></p>
+<ul>
+<li>Set <code>/etc/hosts</code> across devices with static IPs.</li>
+<li>Verify broker reachable: <code>mosquitto_sub -h pi-ops -t &#39;holo/#&#39;</code>.</li>
+<li>Publish heartbeat from Pi-Holo: <code>mosquitto_pub -h pi-ops -t &#39;holo/status&#39; -m &#39;{&quot;status&quot;:&quot;up&quot;}&#39;</code>.</li>
+</ul>
+</li>
+<li><p><strong>Service checklist</strong></p>
+<ul>
+<li><code>systemctl status holo-renderer</code></li>
+<li><code>systemctl status holo-simulator</code></li>
+<li><code>systemctl status holo-orchestrator</code></li>
+</ul>
+</li>
+<li><p><strong>Smoke tests</strong></p>
+<ul>
+<li>Render test frame: <code>python3 -m holo.render --pattern grid</code></li>
+<li>Simulator emit telemetry: <code>python3 -m holo.sim --mode telemetry</code></li>
+<li>Console subscribe dashboard tiles update.</li>
+</ul>
+</li>
+</ol>
+<h2>Codex prompt blocks</h2>
+<ul>
+<li><code>codex_phase_02.txt</code> → canonical instructions for Codex (checked into repo).</li>
+<li>Mirror the sections above; ensure ASCII only.</li>
+<li>Keep deterministic outputs for CI comparison.</li>
+</ul>
+<h2>Hand-off artifacts</h2>
+<ul>
+<li><code>/artifacts/pi/bring_up_card_phase_2.pdf</code></li>
+<li><code>/artifacts/pi/systemd/</code></li>
+<li><code>/artifacts/pi/mqtt_wiring.json</code></li>
+<li><code>/artifacts/pi/smoke_results_phase_2.json</code></li>
+</ul>
+<h2>Validation</h2>
+<ol>
+<li>Run <code>python -m pi.verify --phase 2</code>.</li>
+<li>Expect <code>OK: 15 checks, 0 failures</code>.</li>
+<li>Archive artifacts + logs to <code>/archive/pi/phase_2/YYYYMMDD</code>.</li>
+</ol>
+</body></html>

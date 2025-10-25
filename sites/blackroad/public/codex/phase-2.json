@@ -1,0 +1,22 @@
+{
+  "type": "codex-prompt",
+  "id": "phase-2",
+  "slug": "phase-2",
+  "title": "Phase 2 — Pi Bring-Up & First Light",
+  "summary": "Bench bring-up card and Codex prompt set for spinning up the hologram stack from blank SD cards.",
+  "owner": "blackroad",
+  "tags": [
+    "codex",
+    "pi",
+    "mqtt",
+    "hologram",
+    "sim"
+  ],
+  "model_hint": "Codex",
+  "temperature": 0,
+  "updated": "2025-09-13",
+  "version": "1.0.0",
+  "canonical_repo": "blackboxprogramming/blackroad-prism-console",
+  "copy_filename": "codex_phase_02.txt",
+  "html": "<p>Here’s Phase 2 — Pi Bring-Up &amp; First Light. Paste this into Codex.</p>\n<p>⸻</p>\n<p><strong>Codex Prompt — Phase 2 (bench bring-up: Pi images, services, MQTT wiring, sanity checks)</strong></p>\n<p>Move from blank SD cards to first-light renders in one sitting. Capture the bench card, systemd services, Codex prompt blocks, and helper scripts so a tech can flash and boot every Pi, wire MQTT, and validate the stack without referring elsewhere.</p>\n<h2>Bring-up card (print this)</h2>\n<ol>\n<li><p><strong>Flash images</strong></p>\n<ul>\n<li>Use Raspberry Pi Imager per board.</li>\n<li>Profiles: <code>pi-holo</code> (Pi 5, Desktop), <code>pi-ops</code> (Pi 5, Lite), <code>pi-sim</code> (Pi Zero W, Lite), <code>pi-400</code> (Desktop).</li>\n<li>In the gear ⚙️ panel set hostname, user, SSH, locale; add Wi-Fi only for the Zero W.</li>\n</ul>\n</li>\n<li><p><strong>First boot order</strong></p>\n<ol>\n<li><strong>Pi-Ops → broker</strong><pre><code class=\"language-bash\">sudo apt update\nsudo apt install -y mosquitto mosquitto-clients\nsudo systemctl enable --now mosquitto\nmosquitto_sub -h localhost -t &#39;#&#39; -v   # leave running in one terminal\n</code></pre>\n</li>\n<li><strong>Pi-Holo → renderer deps</strong><pre><code class=\"language-bash\">sudo apt update\nsudo apt install -y git python3-pip libatlas-base-dev\ngit clone git@github.com:blackboxprogramming/blackroad-prism-console.git ~/blackroad\ncd ~/blackroad/pi_holo\n./install.sh\n</code></pre>\n</li>\n<li><strong>Pi-Sim → simulator</strong><pre><code class=\"language-bash\">sudo apt update\nsudo apt install -y python3-pip\ngit clone git@github.com:blackboxprogramming/blackroad-prism-console.git ~/blackroad\ncd ~/blackroad/pi_sim\n./install.sh\n</code></pre>\n</li>\n<li><strong>Pi-400 → operator console</strong><pre><code class=\"language-bash\">sudo apt update\nsudo apt install -y nodejs npm\ngit clone git@github.com:blackboxprogramming/blackroad-prism-console.git ~/blackroad\ncd ~/blackroad/prism-console\nnpm install\nnpm run dev\n</code></pre>\n</li>\n</ol>\n</li>\n<li><p><strong>Network &amp; MQTT wiring</strong></p>\n<ul>\n<li>Set <code>/etc/hosts</code> across devices with static IPs.</li>\n<li>Verify broker reachable: <code>mosquitto_sub -h pi-ops -t &#39;holo/#&#39;</code>.</li>\n<li>Publish heartbeat from Pi-Holo: <code>mosquitto_pub -h pi-ops -t &#39;holo/status&#39; -m &#39;{&quot;status&quot;:&quot;up&quot;}&#39;</code>.</li>\n</ul>\n</li>\n<li><p><strong>Service checklist</strong></p>\n<ul>\n<li><code>systemctl status holo-renderer</code></li>\n<li><code>systemctl status holo-simulator</code></li>\n<li><code>systemctl status holo-orchestrator</code></li>\n</ul>\n</li>\n<li><p><strong>Smoke tests</strong></p>\n<ul>\n<li>Render test frame: <code>python3 -m holo.render --pattern grid</code></li>\n<li>Simulator emit telemetry: <code>python3 -m holo.sim --mode telemetry</code></li>\n<li>Console subscribe dashboard tiles update.</li>\n</ul>\n</li>\n</ol>\n<h2>Codex prompt blocks</h2>\n<ul>\n<li><code>codex_phase_02.txt</code> → canonical instructions for Codex (checked into repo).</li>\n<li>Mirror the sections above; ensure ASCII only.</li>\n<li>Keep deterministic outputs for CI comparison.</li>\n</ul>\n<h2>Hand-off artifacts</h2>\n<ul>\n<li><code>/artifacts/pi/bring_up_card_phase_2.pdf</code></li>\n<li><code>/artifacts/pi/systemd/</code></li>\n<li><code>/artifacts/pi/mqtt_wiring.json</code></li>\n<li><code>/artifacts/pi/smoke_results_phase_2.json</code></li>\n</ul>\n<h2>Validation</h2>\n<ol>\n<li>Run <code>python -m pi.verify --phase 2</code>.</li>\n<li>Expect <code>OK: 15 checks, 0 failures</code>.</li>\n<li>Archive artifacts + logs to <code>/archive/pi/phase_2/YYYYMMDD</code>.</li>\n</ol>\n"
+}

@@ -46,56 +46,25 @@ import EigenmapsLab from "./pages/EigenmapsLab.jsx";
 import EikonalLab from "./pages/EikonalLab.jsx";
 import EikonalPathLab from "./pages/EikonalPathLab.jsx";
 import EllipsoidGeodesicLab from "./pages/EllipsoidGeodesicLab.jsx";
-import FareyTreeLab from "./pages/FareyTreeLab.jsx";
 import FastMarchTreeLab from "./pages/FastMarchTreeLab.jsx";
 import FourierLab from "./pages/FourierLab.jsx";
-import FourierOpticsLab from "./pages/FourierOpticsLab.jsx";
-import AutoDiffLab from "./pages/AutoDiffLab.jsx";
-import AStarLab from "./pages/AStarLab.jsx";
-import Backroad from "./pages/Backroad.jsx";
-import BezierBSplineLab from "./pages/BezierBSplineLab.jsx";
-import BezierShadedSurfaceLab from "./pages/BezierShadedSurfaceLab.jsx";
-import BezierSurfaceLab from "./pages/BezierSurfaceLab.jsx";
-import BeltramiTorusLab from "./pages/BeltramiTorusLab.jsx";
-import BifurcationLab from "./pages/BifurcationLab.jsx";
-import BlueNoiseTSPLab from "./pages/BlueNoiseTSPLab.jsx";
-import BrushfirePathLab from "./pages/BrushfirePathLab.jsx";
-import Canvas from "./pages/Canvas.jsx";
-import Chat from "./pages/Chat.jsx";
-import Editor from "./pages/Editor.jsx";
-import ClusteringCompareLab from "./pages/ClusteringCompareLab.jsx";
-import ComplexBarycentricLab from "./pages/ComplexBarycentricLab.jsx";
-import ConformalGridLab from "./pages/ConformalGridLab.jsx";
-import ContinuedFractionsLab from "./pages/ContinuedFractionsLab.jsx";
-import CreatorLightpath from "./pages/CreatorLightpath.jsx";
-import Desktop from "./pages/Desktop.jsx";
-import DLALab from "./pages/DLALab.jsx";
-import DrumWaveLab from "./pages/DrumWaveLab.jsx";
-import EigenmapsLab from "./pages/EigenmapsLab.jsx";
-import EikonalLab from "./pages/EikonalLab.jsx";
-import EllipsoidGeodesicLab from "./pages/EllipsoidGeodesicLab.jsx";
-import FastMarchTreeLab from "./pages/FastMarchTreeLab.jsx";
 import FourierPainterLab from "./pages/FourierPainterLab.jsx";
 import GrayScottGalleryLab from "./pages/GrayScottGalleryLab.jsx";
 import HilbertMortonLab from "./pages/HilbertMortonLab.jsx";
 import HungarianLab from "./pages/HungarianLab.jsx";
 import Ising2DLab from "./pages/Ising2DLab.jsx";
 import IsingMaxCutLab from "./pages/IsingMaxCutLab.jsx";
-import IsoSliceLab from "./pages/IsoSliceLab.jsx";
-import InfinityMath from "./pages/InfinityMath.jsx";
-import Ising2DLab from "./pages/Ising2DLab.jsx";
-import IsingMaxCutLab from "./pages/IsingMaxCutLab.jsx";
 import Kalman2DTrackerLab from "./pages/Kalman2DTrackerLab.jsx";
 import KernelPCALab from "./pages/KernelPCALab.jsx";
-import LSystemLab from "./pages/LSystemLab.jsx";
 import LaplaceConductorsLab from "./pages/LaplaceConductorsLab.jsx";
+import LSystemLab from "./pages/LSystemLab.jsx";
 import MarchingSquaresLab from "./pages/MarchingSquaresLab.jsx";
 import MaxFlowLab from "./pages/MaxFlowLab.jsx";
 import MinimalSurfaceLab from "./pages/MinimalSurfaceLab.jsx";
 import NBodyLab from "./pages/NBodyLab.jsx";
 import OTLab from "./pages/OTLab.jsx";
-import OULab from "./pages/OULab.jsx";
 import OptimalTransportLab from "./pages/OptimalTransportLab.jsx";
+import OULab from "./pages/OULab.jsx";
 import PCALab from "./pages/PCALab.jsx";
 import PDELiveLab from "./pages/PDELiveLab.jsx";
 import PendulumLab from "./pages/PendulumLab.jsx";
@@ -112,12 +81,12 @@ import PrimeGapsLab from "./pages/PrimeGapsLab.jsx";
 import QuasiConformalEggLab from "./pages/QuasiConformalEggLab.jsx";
 import QuatJuliaLab from "./pages/QuatJuliaLab.jsx";
 import QuaternionRotLab from "./pages/QuaternionRotLab.jsx";
-import RRTSmoothLab from "./pages/RRTSmoothLab.jsx";
-import RRTStarLab from "./pages/RRTStarLab.jsx";
-import RSAToyLab from "./pages/RSAToyLab.jsx";
 import RansacPlane3DLab from "./pages/RansacPlane3DLab.jsx";
 import RidgeRegressionLab from "./pages/RidgeRegressionLab.jsx";
 import RiemannMappingToy from "./pages/RiemannMappingToy.jsx";
+import RRTSmoothLab from "./pages/RRTSmoothLab.jsx";
+import RRTStarLab from "./pages/RRTStarLab.jsx";
+import RSAToyLab from "./pages/RSAToyLab.jsx";
 import SIRLab from "./pages/SIRLab.jsx";
 import SpectralClusteringLab from "./pages/SpectralClusteringLab.jsx";
 import SpectralGraphLab from "./pages/SpectralGraphLab.jsx";
@@ -141,7 +110,7 @@ const NAV_LINKS = [
   { to: "/lucidia", label: "Lucidia" },
   { to: "/math", label: "Infinity Math", accent: true },
   { to: "/monitoring", label: "Monitoring" },
-  { to: "/quantum-consciousness", label: "Quantum Consciousness" },
+  { to: "/quantum-consciousness", label: "Quantum Consciousness" }
 ];
 
 const PRIMARY_ROUTE_COMPONENTS = {
@@ -157,7 +126,7 @@ const PRIMARY_ROUTE_COMPONENTS = {
   roadview: RoadView,
   status: StatusPage,
   subscribe: Subscribe,
-  terminal: Terminal,
+  terminal: Terminal
 };
 
 const LAB_ROUTE_COMPONENTS = {
@@ -225,33 +194,8 @@ const LAB_ROUTE_COMPONENTS = {
   tsp: TSPLab,
   vor: VoronoiLloydLab,
   vorticity: VorticityStreamLab,
-  wavelet: WaveletLab,
+  wavelet: WaveletLab
 };
-import PendulumLab from "./pages/PendulumLab.jsx";
-import PenroseToyLab from "./pages/PenroseToyLab.jsx";
-import PoissonBlendLab from "./pages/PoissonBlendLab.jsx";
-import PoissonBoltzmannLab from "./pages/PoissonBoltzmannLab.jsx";
-import PoissonDiskLab from "./pages/PoissonDiskLab.jsx";
-import PowerJuliaLab from "./pages/PowerJuliaLab.jsx";
-import QuantumConsciousness from "./pages/QuantumConsciousness.jsx";
-import QuaternionRotLab from "./pages/QuaternionRotLab.jsx";
-import QuasiConformalEggLab from "./pages/QuasiConformalEggLab.jsx";
-import QuatJuliaLab from "./pages/QuatJuliaLab.jsx";
-import RansacPlane3DLab from "./pages/RansacPlane3DLab.jsx";
-import RidgeRegressionLab from "./pages/RidgeRegressionLab.jsx";
-import RoadView from "./pages/RoadView.jsx";
-import RSAToyLab from "./pages/RSAToyLab.jsx";
-import RRTStarLab from "./pages/RRTStarLab.jsx";
-import SIRLab from "./pages/SIRLab.jsx";
-import SpectralClusteringLab from "./pages/SpectralClusteringLab.jsx";
-import SpectralPoissonLab from "./pages/SpectralPoissonLab.jsx";
-import StableFluidsLab from "./pages/StableFluidsLab.jsx";
-import StatusPage from "./pages/StatusPage.jsx";
-import Subscribe from "./pages/Subscribe.jsx";
-import Terminal from "./pages/Terminal.jsx";
-import TSPLab from "./pages/TSPLab.jsx";
-import VorticityStreamLab from "./pages/VorticityStreamLab.jsx";
-import WaveletLab from "./pages/WaveletLab.jsx";
 
 const FEATURE_ROUTES = [
   { path: "chat", label: "Chat", component: Chat },
@@ -350,18 +294,31 @@ function useApiHealth() {
           return { ok: false, info: "" };
         }
 
-        const response = await fetchFn(path, { cache: "no-store" });
-        const text = await response.text();
-        const res = await fetch(path, { cache: "no-store" });
-        const text = await res.text();
+        const primary = await fetchFn(path, { cache: "no-store" });
+        const primaryText = await primary.text();
+        let ok = primary.ok;
         let info = "";
+
         try {
-          const json = JSON.parse(text);
+          const json = JSON.parse(primaryText);
           info = `${json.status || "ok"}${json.time ? ` • ${json.time}` : ""}`;
         } catch {
           info = "";
         }
-        return { ok: res.ok, info };
+
+        if (!ok) {
+          const fallback = await fetch(path, { cache: "no-store" });
+          const fallbackText = await fallback.text();
+          ok = fallback.ok;
+          try {
+            const json = JSON.parse(fallbackText);
+            info = `${json.status || "ok"}${json.time ? ` • ${json.time}` : ""}`;
+          } catch {
+            info = "";
+          }
+        }
+
+        return { ok, info };
       } catch {
         return { ok: false, info: "" };
       }
@@ -394,7 +351,7 @@ function StatusPill() {
     <span className={`text-xs uppercase tracking-wide ${tone}`}>
       {info ? `${label} — ${info}` : label}
     </span>
-  return <span className={`text-xs uppercase tracking-wide ${tone}`}>{info ? `${label} — ${info}` : label}</span>;
+  );
 }
 
 function CardLink({ path, label, accent }) {
@@ -428,8 +385,6 @@ function LegacyApp() {
         <nav className="mt-6 flex flex-col gap-2">
           {NAV_LINKS.map(({ to, label, accent }) => (
             <NavLink key={to} className={navLinkClassName} to={to} end={to === "/chat"}>
-          {FEATURE_ROUTES.map(({ path, label, accent }) => (
-            <NavLink key={path} className={navLinkClassName} to={`/${path}`}>
               {accent ? (
                 <span
                   className="mr-1 font-semibold"
@@ -445,9 +400,6 @@ function LegacyApp() {
               {label}
             </NavLink>
           ))}
-          <NavLink className={navLinkClassName} to="/quantum-consciousness">
-            Quantum Consciousness
-          </NavLink>
         </nav>
         <div className="mt-8">
           <StatusPill />
@@ -488,12 +440,6 @@ function LegacyApp() {
             ))}
             {Object.entries(LAB_ROUTE_COMPONENTS).map(([path, Component]) => (
               <Route key={path} path={path} element={<Component />} />
-            <Route path="/" element={<Chat />} />
-            {FEATURE_ROUTES.map(({ path, component: Component }) => (
-              <Route key={path} path={`/${path}`} element={<Component />} />
-            ))}
-            {LAB_ROUTES.map(({ path, component: Component }) => (
-              <Route key={path} path={`/${path}`} element={<Component />} />
             ))}
             <Route path="codex/:slug" element={<CodexPromptPage />} />
             <Route path="*" element={<NotFound />} />

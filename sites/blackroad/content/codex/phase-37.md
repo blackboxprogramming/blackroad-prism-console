@@ -1,14 +1,9 @@
 ---
-title: Phase 37
-slug: phase-37
----
-
-Offline PLM & Manufacturing Ops (Phase 37) — deterministic, file-backed.
 type: codex-prompt
 id: phase-37
-slug: phase-37-plm-manufacturing-ops
+slug: phase-37
 title: "Phase 37 — PLM & MANUFACTURING OPS (BOMs, ECO/ECR, Routings, Work Instructions, SPC, Yield, COQ)"
-summary: "Offline PLM & Manufacturing Ops layer for blackboxprogramming/blackroad-prism-console"
+summary: "Offline PLM & Manufacturing Ops layer for blackboxprogramming/blackroad-prism-console."
 owner: "blackroad"
 tags: ["codex","plm","manufacturing","spc","mrp","eco","coq"]
 model_hint: "Codex"
@@ -119,7 +114,7 @@ Continue in blackboxprogramming/blackroad-prism-console. Add an offline Product 
   - /docs/mfg-routing.md (work centers, capacity, WI)
   - /docs/spc-yield.md (SPC rules, FPY/RTY)
   - /docs/mrp-lite.md (planning & kitting)
-  - README: “PLM & Manufacturing Ops” quickstart.
+  - README: "PLM & Manufacturing Ops" quickstart.
 
 11) Tests & Quality (≥80% coverage)
 - tests/test_bom.py (explode/where-used)
@@ -132,13 +127,13 @@ Continue in blackboxprogramming/blackroad-prism-console. Add an offline Product 
 - Contract validation tests for all new lake tables.
 
 **Demo sequence (print expected output at end)**
-1. python -m cli.console plm:items:load --dir fixtures/plm/items && python -m cli.console plm:bom:load --dir fixtures/plm/boms  
-2. python -m cli.console plm:bom:explode --item PROD-100 --rev A --level 3  
-3. python -m cli.console plm:eco:new --item PROD-100 --from A --to B --reason "Connector change" && python -m cli.console plm:eco:impact --id ECO-001  
-4. python -m cli.console mfg:wc:load --file fixtures/mfg/work_centers.csv && python -m cli.console mfg:routing:load --dir fixtures/mfg/routings && python -m cli.console mfg:routing:capcheck --item PROD-100 --rev B --qty 1000  
-5. python -m cli.console mfg:wi:render --item PROD-100 --rev B  
-6. python -m cli.console mfg:spc:analyze --op OP-200 --window 50 && python -m cli.console mfg:yield --period 2025-09  
-7. python -m cli.console mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv  
+1. python -m cli.console plm:items:load --dir fixtures/plm/items && python -m cli.console plm:bom:load --dir fixtures/plm/boms
+2. python -m cli.console plm:bom:explode --item PROD-100 --rev A --level 3
+3. python -m cli.console plm:eco:new --item PROD-100 --from A --to B --reason "Connector change" && python -m cli.console plm:eco:impact --id ECO-001
+4. python -m cli.console mfg:wc:load --file fixtures/mfg/work_centers.csv && python -m cli.console mfg:routing:load --dir fixtures/mfg/routings && python -m cli.console mfg:routing:capcheck --item PROD-100 --rev B --qty 1000
+5. python -m cli.console mfg:wi:render --item PROD-100 --rev B
+6. python -m cli.console mfg:spc:analyze --op OP-200 --window 50 && python -m cli.console mfg:yield --period 2025-09
+7. python -m cli.console mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv
 8. python -m cli.console mfg:coq --period 2025-Q3
 
 **Implementation notes**
