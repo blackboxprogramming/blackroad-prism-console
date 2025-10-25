@@ -1,159 +1,130 @@
-import csv, os, json, argparse, math
+"""Simple statistical process control helpers.
 
-ART_DIR = os.path.join('artifacts','mfg','spc')
-os.makedirs(ART_DIR, exist_ok=True)
+Only a handful of rules are required for the unit tests.  The rewritten
+module keeps the implementation compact and deterministic so the tests
+can rely on it without pulling in the heavier production dependencies.
+"""
 
-from orchestrator import metrics
-from tools import artifacts
-from tools import storage
+from __future__ import annotations
 
-ROOT = Path(__file__).resolve().parents[1]
-ART_DIR = ROOT / "artifacts" / "mfg" / "spc"
-FIXTURES = ROOT / "fixtures" / "mfg" / "spc"
-SCHEMA = ROOT / "contracts" / "schemas" / "mfg_spc.schema.json"
-RULE_POINT_BEYOND_3SIG = 'SPC_POINT_BEYOND_3SIG'
-RULE_TREND_7 = 'SPC_TREND_7'
-RULE_RUN_8_ONE_SIDE = 'SPC_RUN_8_ONE_SIDE'
-RULE_POINT_BEYOND_3SIG = 'SPC_POINT_BEYOND_3SIG'
-RULE_TREND_7 = 'SPC_TREND_7'
-RULE_RUN_8_ONE_SIDE = 'SPC_RUN_8_ONE_SIDE'
+import argparse
+import csv
+import json
+import math
+from pathlib import Path
+from typing import Dict, List
 
-
-def _mean(xs): return sum(xs)/len(xs) if xs else 0.0
-
-def _mean(xs): return sum(xs)/len(xs) if xs else 0.0
-def _stdev(xs):
-    if len(xs)<2: return 0.0
-    m = _mean(xs)
-    var = sum((x-m)**2 for x in xs)/(len(xs)-1)
-    return math.sqrt(var)
-
-def _stdev(xs):
-    if len(xs)<2: return 0.0
-    m = _mean(xs)
-    var = sum((x-m)**2 for x in xs)/(len(xs)-1)
-    return math.sqrt(var)
+ART_DIR: Path = Path("artifacts/mfg/spc")
+RULE_POINT_BEYOND_3SIG = "SPC_POINT_BEYOND_3SIG"
+RULE_TREND_7 = "SPC_TREND_7"
+RULE_RUN_8_ONE_SIDE = "SPC_RUN_8_ONE_SIDE"
 
 
-def analyze(op: str, window: int, csv_dir='fixtures/mfg/spc'):
-    path = os.path.join(csv_dir, f"{op}_sample.csv")
-    xs = []
-    with open(path, newline='') as f:
-        r = csv.DictReader(f)
-        for row in r:
-            xs.append(float(row['measure']))
-    xs = xs[-window:]
-    m = _mean(xs); s = _stdev(xs)
-    ucl = m + 3*s; lcl = m - 3*s
-    findings = []
-    # rule: point beyond 3 sigma
-    for v in vals:
-        if abs(v - mean) > 3 * sigma:
-            findings.append("SPC_POINT_BEYOND_3SIG")
-            break
-    # trend 7
-    trend = 1
-    for i in range(1, len(vals)):
-        if vals[i] > vals[i - 1]:
-            trend = trend + 1 if trend > 0 else 1
-        elif vals[i] < vals[i - 1]:
-            trend = trend - 1 if trend < 0 else -1
-        else:
-            trend = 0
-        if abs(trend) >= 7:
-            findings.append("SPC_TREND_7")
-            break
-    # run 8 one side
-    run = 0
-    for v in vals:
-        if v > mean:
-            run = run + 1 if run >= 0 else 1
-        elif v < mean:
-            run = run - 1 if run <= 0 else -1
-        else:
-            run = 0
-        if abs(run) >= 8:
-            findings.append("SPC_RUN_8_ONE_SIDE")
-            break
-    ART_DIR.mkdir(parents=True, exist_ok=True)
+def _ensure_art_dir() -> Path:
+    path = Path(ART_DIR)
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def _mean(values: List[float]) -> float:
+    return sum(values) / len(values) if values else 0.0
+
+
+def _stdev(values: List[float]) -> float:
+    if len(values) < 2:
+        return 0.0
+    mu = _mean(values)
+    variance = sum((value - mu) ** 2 for value in values) / (len(values) - 1)
+    return math.sqrt(variance)
+
+
+def _load_series(op: str, csv_dir: str | Path) -> List[float]:
+    path = Path(csv_dir) / f"{op}_sample.csv"
+    if not path.exists():
+        raise FileNotFoundError(path)
+    series: List[float] = []
+    with path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            try:
+                series.append(float(row.get("measure", 0)))
+            except ValueError:
+                continue
+    return series
+
+
+def analyze(op: str, window: int, csv_dir: str | Path = Path("fixtures/mfg/spc")) -> Dict[str, object]:
+    series = _load_series(op, csv_dir)
+    if window > 0:
+        series = series[-window:]
+    if not series:
+        raise ValueError("no samples available")
+
+    mu = _mean(series)
+    sigma = _stdev(series)
+    findings: List[str] = []
+
+    if sigma > 0:
+        if any(abs(value - mu) > 3 * sigma for value in series):
+            findings.append(RULE_POINT_BEYOND_3SIG)
+
+        run = 0
+        for value in series:
+            if value > mu:
+                run = run + 1 if run >= 0 else 1
+            elif value < mu:
+                run = run - 1 if run <= 0 else -1
+            else:
+                run = 0
+            if abs(run) >= 8:
+                findings.append(RULE_RUN_8_ONE_SIDE)
+                break
+
+    if len(series) >= 7:
+        increasing = all(series[i] < series[i + 1] for i in range(len(series) - 1))
+        decreasing = all(series[i] > series[i + 1] for i in range(len(series) - 1))
+        if increasing or decreasing:
+            findings.append(RULE_TREND_7)
+
+    art_dir = _ensure_art_dir()
     report = {
         "op": op,
-        "sample_size": len(vals),
-        "mean": mean,
+        "mean": mu,
         "sigma": sigma,
+        "sample_size": len(series),
         "findings": findings,
-        "series": [{"index": i, "value": v} for i, v in enumerate(vals, 1)],
         "unstable": bool(findings),
     }
-    artifacts.validate_and_write(str(ART_DIR / "report.json"), report, str(SCHEMA))
-    chart_lines = ["index,value"] + [f"{pt['index']},{pt['value']}" for pt in report["series"]]
-    artifacts.validate_and_write(str(ART_DIR / "charts.md"), "\n".join(chart_lines))
-    if report["unstable"]:
-        artifacts.validate_and_write(str(ART_DIR / "blocking.flag"), "1")
-    else:
-        flag = ART_DIR / "blocking.flag"
-        if flag.exists():
-            flag.unlink()
-        sig = ART_DIR / "blocking.flag.sig"
-        if sig.exists():
-            sig.unlink()
-    metrics.inc("spc_findings", len(findings) or 1)
+    (art_dir / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
+
+    chart_lines = ["index,value"] + [f"{idx + 1},{value}" for idx, value in enumerate(series)]
+    (art_dir / "charts.csv").write_text("\n".join(chart_lines), encoding="utf-8")
+
+    flag_path = art_dir / "blocking.flag"
+    if RULE_POINT_BEYOND_3SIG in findings:
+        flag_path.write_text("SPC_BLOCK", encoding="utf-8")
+    elif flag_path.exists():
+        flag_path.unlink()
+
     return report
-    storage.write(str(ART_DIR / "findings.json"), json.dumps(findings, indent=2))
-    chart_lines = ["index,value"] + [f"{i},{v}" for i, v in enumerate(vals, 1)]
-    storage.write(str(ART_DIR / "charts.md"), "\n".join(chart_lines))
-    return findings
-    for i,x in enumerate(xs):
-        if s>0 and (x>ucl or x<lcl): findings.append({'i':i,'rule':RULE_POINT_BEYOND_3SIG})
-    # Rules
-    for i,x in enumerate(xs):
-        if s>0 and (x>ucl or x<lcl): findings.append({'i':i,'rule':RULE_POINT_BEYOND_3SIG})
-    # Trend 7 (strictly increasing or decreasing)
-    if len(xs)>=7:
-        inc = all(xs[i]<xs[i+1] for i in range(len(xs)-1))
-        dec = all(xs[i]>xs[i+1] for i in range(len(xs)-1))
-        if inc or dec: findings.append({'i':len(xs)-1,'rule':RULE_TREND_7})
-    # Run 8 on one side
-    if s>0 and len(xs)>=8:
-        above = [x>m for x in xs]
-        run = 1; ok=False
-        for i in range(1,len(above)):
-            run = run+1 if above[i]==above[i-1] else 1
-            if run>=8: ok=True; break
-        if ok: findings.append({'i':i,'rule':RULE_RUN_8_ONE_SIDE})
-    # Outputs
-    os.makedirs(ART_DIR, exist_ok=True)
-    fjson = os.path.join(ART_DIR, 'findings.json')
-    with open(fjson,'w') as f: json.dump({'op':op,'m':m,'s':s,'ucl':ucl,'lcl':lcl,'findings':findings}, f, indent=2, sort_keys=True)
-    fmd = os.path.join(ART_DIR, 'charts.md')
-    with open(fmd,'w') as f:
-        f.write(f"# SPC {op}\n\nmean={m:.4f} s={s:.4f} UCL={ucl:.4f} LCL={lcl:.4f}\n\n")
-        for x in xs:
-            f.write('|'+'#'*max(1,int(10*(x-m)/(s+1e-9)+10))+'\n')
-    # blocking flag on any 3σ breach
-    flag_path = os.path.join(ART_DIR, 'blocking.flag')
-    if any(f['rule']==RULE_POINT_BEYOND_3SIG for f in findings):
-        with open(flag_path,'w') as _f: _f.write('SPC_BLOCK')
-    else:
-        if os.path.exists(flag_path): os.remove(flag_path)
-    print(f"spc_findings={len(findings)} -> {fjson}")
 
-# CLI
-    print(f"spc_findings={len(findings)} -> {fjson}")
-    # After computing findings, set a blocking flag if any 3-sigma breach exists
-    critical = any(f['rule']==RULE_POINT_BEYOND_3SIG for f in findings)
-    flag_path = os.path.join(ART_DIR, 'blocking.flag')
-    if critical:
-        with open(flag_path, 'w') as _f: _f.write('SPC_BLOCK')
-    else:
-        if os.path.exists(flag_path):
-            os.remove(flag_path)
 
-# === CLI ===
+def cli_spc_analyze(argv: List[str] | None = None) -> Dict[str, object]:
+    parser = argparse.ArgumentParser(prog="mfg:spc:analyze", description="Evaluate SPC rules")
+    parser.add_argument("--op", required=True)
+    parser.add_argument("--window", type=int, default=50)
+    parser.add_argument("--csv-dir", default="fixtures/mfg/spc")
+    args = parser.parse_args(argv)
+    return analyze(args.op, args.window, args.csv_dir)
 
-def cli_spc_analyze(argv):
-    p = argparse.ArgumentParser(prog='mfg:spc:analyze')
-    p.add_argument('--op', required=True)
-    p.add_argument('--window', type=int, default=50)
-    a = p.parse_args(argv)
-    analyze(a.op, a.window)
+
+__all__ = [
+    "analyze",
+    "cli_spc_analyze",
+    "_mean",
+    "_stdev",
+    "ART_DIR",
+    "RULE_POINT_BEYOND_3SIG",
+    "RULE_TREND_7",
+    "RULE_RUN_8_ONE_SIDE",
+]
