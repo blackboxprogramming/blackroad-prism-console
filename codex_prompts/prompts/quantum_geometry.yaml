@@ -1,0 +1,7 @@
+agent: Silas
+prompt: |
+  Extend the symbolic math engine with a Quantum Geometry module.
+  - Implement Clifford algebra operations with automatic simplification.
+  - Define TensorField handling curvature, covariant derivatives, Lie derivatives.
+  - Integrate Bloch-sphere visualization using WebGL.
+  - Bridge symbolic to numeric simulation of Hamiltonian systems.
