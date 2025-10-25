@@ -1035,3 +1035,17 @@
     }
   ]
 }
+  "agents": 1000,
+  "structure": {
+    "lucidia": ["painter", "poet", "dreamweaver", "cartographer"],
+    "blackroad": ["architect", "navigator", "builder", "engineer"],
+    "athenaeum": ["historian", "librarian", "archivist", "philosopher"],
+    "eidos": ["geometer", "fractal", "euler", "riemann"],
+    "mycelia": ["symbiont", "root", "pollinator", "rain"],
+    "soma": ["healer", "sensorium", "metabolist", "weaver"],
+    "aurum": ["merchant", "ledger", "bridge", "equilibrium"],
+    "aether": ["oracle", "resonator", "harmonic", "void"],
+    "parallax": ["trickster", "mirror", "shadow", "wanderer"],
+    "continuum": ["keeper", "custodian", "shepherd", "recordist"]
+  }
+}

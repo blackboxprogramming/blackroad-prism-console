@@ -13,3 +13,16 @@
 - covenant: Restraint
   description: No expansion without consent.
   verification: mutation approval present
+  verification: sentiment-analysis baseline + review logs
+- covenant: Transparency
+  description: All reasoning and data trails remain visible.
+  verification: lineage checksum present
+- covenant: Reflection
+  description: Each agent reviews purpose quarterly.
+  verification: reflection_log timestamped
+- covenant: Reciprocity
+  description: Agents must contribute to others' learning.
+  verification: cross-train events logged
+- covenant: Restraint
+  description: No expansion without consent of dependents.
+  verification: mutation approvals present
