@@ -1,0 +1,13 @@
+{
+  "rooms": [
+    {
+      "id": "room-1",
+      "topic": "Trail Stories",
+      "createdBy": "ember",
+      "createdAt": "2024-10-04T18:00:00.000Z",
+      "expiresAt": "2024-10-05T06:00:00.000Z",
+      "inviteOnly": false,
+      "members": ["ember", "marsh", "sol"]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "threads": [
+    {
+      "id": "thread-1",
+      "title": "Welcome to BackRoad",
+      "createdBy": "ember",
+      "createdAt": "2024-10-01T08:00:00.000Z",
+      "updatedAt": "2024-10-01T08:00:00.000Z",
+      "tags": ["intro", "campfire"]
+    },
+    {
+      "id": "thread-2",
+      "title": "Practicing thoughtful posting",
+      "createdBy": "marsh",
+      "createdAt": "2024-10-03T10:30:00.000Z",
+      "updatedAt": "2024-10-03T10:30:00.000Z",
+      "tags": ["practice", "ideas"]
+    }
+  ]
+}
