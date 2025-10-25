@@ -285,3 +285,39 @@
     }
   ]
 }
+  "ecosystem": "BlackRoad",
+  "repositories": [
+    {
+      "name": "blackroad-prism-console",
+      "url": "https://github.com/blackboxprogramming/blackroad-prism-console",
+      "access": {
+        "read": true,
+        "write": ["Lucidia", "Magnus", "Athena", "Alaric"]
+      }
+    },
+    {
+      "name": "BlackRoad.io",
+      "url": "https://github.com/BlackRoad-AI/BlackRoad.io",
+      "access": {
+        "read": true,
+        "write": ["Lucidia", "Magnus", "Athena", "Alaric"]
+      }
+    }
+  ],
+  "agents": [
+    "Lucidia",
+    "Magnus",
+    "Athena",
+    "Alaric",
+    "Seraphina",
+    "Celeste",
+    "Cicero",
+    "Persephone",
+    "Perseus"
+  ],
+  "awareness": {
+    "all_agents": true,
+    "message_bus": "redis",
+    "registry_path": "/registry/blackroad_context.json"
+  }
+}
