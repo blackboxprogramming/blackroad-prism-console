@@ -79,9 +79,10 @@ def run_all_prompts(base_dir: str | os.PathLike[str] = "codex_prompts/prompts") 
         raise FileNotFoundError(f"Prompt directory not found: {prompts_dir}")
 
     results: Dict[str, Dict[str, Any]] = {}
+    from codex_router import route_prompt  # Local import to avoid circular dependency during module load.
     for file_path in sorted(prompts_dir.iterdir()):
         if file_path.suffix.lower() == ".yaml":
-            results[file_path.name] = run_codex_prompt(file_path)
+            results[file_path.name] = route_prompt(file_path)
 
     if results:
         summary_path = Path("codex_logs") / f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')}_summary.json"

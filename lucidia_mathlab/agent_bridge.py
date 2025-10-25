@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from codex_prompts.dispatch_codex import run_codex_prompt
+from codex_router import route_prompt
 
 
 def request_codex_task(agent: str, topic: str, details: str) -> str:
@@ -20,7 +20,7 @@ def request_codex_task(agent: str, topic: str, details: str) -> str:
     with temp_file.open("w", encoding="utf-8") as handle:
         handle.write(f"agent: {agent}\nprompt: |\n{indented_prompt}\n")
 
-    result = run_codex_prompt(temp_file)
+    result = route_prompt(temp_file)
     temp_file.unlink(missing_ok=True)
     return result["output"]
 
