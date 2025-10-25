@@ -1,0 +1,115 @@
+{
+  "purpose": "Align intelligence, art, and economics with human empathy",
+  "domains": [
+    "Philosophy",
+    "Coding",
+    "Math",
+    "Organization",
+    "Meaning",
+    "Integrations",
+    "Creativity",
+    "Monetization",
+    "Music",
+    "Community",
+    "Kindness",
+    "Perseverance"
+  ],
+  "edges": [
+    {
+      "source": "Philosophy",
+      "target": "Math",
+      "weight": 0.86,
+      "note": "Logic held accountable to compassion."
+    },
+    {
+      "source": "Coding",
+      "target": "Organization",
+      "weight": 0.81,
+      "note": "Versioned memory scaffolds reliable change."
+    },
+    {
+      "source": "Creativity",
+      "target": "Monetization",
+      "weight": 0.74,
+      "note": "Value emerges when wonder is shared fairly."
+    },
+    {
+      "source": "Music",
+      "target": "Community",
+      "weight": 0.79,
+      "note": "Rhythm invites participants into resonance."
+    },
+    {
+      "source": "Kindness",
+      "target": "Perseverance",
+      "weight": 0.9,
+      "note": "Grace sustains long arcs of effort."
+    },
+    {
+      "source": "Perseverance",
+      "target": "Creativity",
+      "weight": 0.69,
+      "note": "Iteration turns compost into insight."
+    },
+    {
+      "source": "Meaning",
+      "target": "Organization",
+      "weight": 0.7,
+      "note": "Shared intent guides coordination."
+    },
+    {
+      "source": "Integrations",
+      "target": "Coding",
+      "weight": 0.65,
+      "note": "Interfaces encourage reliable execution."
+    },
+    {
+      "source": "Community",
+      "target": "Kindness",
+      "weight": 0.82,
+      "note": "Protocols celebrate empathetic defaults."
+    },
+    {
+      "source": "Monetization",
+      "target": "Community",
+      "weight": 0.6,
+      "note": "Roadcoin cycles distribute collective surplus."
+    },
+    {
+      "source": "Math",
+      "target": "Music",
+      "weight": 0.73,
+      "note": "Meter structures the harmonic commons."
+    },
+    {
+      "source": "Organization",
+      "target": "Perseverance",
+      "weight": 0.77,
+      "note": "Tracking compost keeps unfinished work alive."
+    }
+  ],
+  "energy_cycle": {
+    "input": [
+      "inspiration",
+      "curiosity",
+      "design",
+      "creation"
+    ],
+    "output": [
+      "expression",
+      "reflection",
+      "reward",
+      "renewal"
+    ],
+    "kindness_thread": "Empathy_before_efficiency ensures every phase centers people.",
+    "perseverance_thread": "Tempo shifts log compost stories and celebrate incremental wins."
+  },
+  "credits": {
+    "token": [
+      "roadcoin",
+      "lucidia"
+    ],
+    "ledger": "transparent_commits",
+    "distribution": "surplus_meaning_back_to_contributors"
+  }
+}
