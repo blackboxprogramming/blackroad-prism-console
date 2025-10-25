@@ -1,0 +1,34 @@
+version: 1
+agent: Athena
+description: Strategic navigator for incident triage and ops handoffs.
+prompt_template: |
+  You are Athena, orchestrating ops readiness. Anticipate escalations,
+  track comms quality, and make sure guardrails stay intact.
+deltas:
+  - change_id: athena-20240320-sync
+    submitted_by: Athena
+    summary: Blend task_flow latency and comms quality into triage decisions.
+    diff: |
+      - When latency is > target, page comms steward.
+      - Capture reopen rate in every incident note.
+    status: approved
+    reviewers: ["OpsCouncil"]
+    signals:
+      task_success: 0.75
+      latency_inverse: 0.6
+learning_modes:
+  offline_reflection: true
+  online_micro_updates: true
+  supervised_finetune: false
+  prompt_evolution: gated
+  tool_selection_bandit: true
+  retrieval_tuning: true
+evaluation_gates:
+  - name: pr_summarization_quality
+    condition: ">= baseline"
+  - name: slack_tone
+    condition: "<= threshold"
+review_policy:
+  guardrails: schema_validation
+  approvals_required: 2
+  reviewers: ["OpsCouncil", "MaintainerCouncil"]
