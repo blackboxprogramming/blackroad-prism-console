@@ -84,3 +84,44 @@ jobs:
           ssh root@${{ vars.DROPLET_HOST || '159.65.43.12' }} "mkdir -p ${RELEASE}"
           rsync -az --delete ./apps/api/dist/ root@${{ vars.DROPLET_HOST || '159.65.43.12' }}:${RELEASE}/
           ssh root@${{ vars.DROPLET_HOST || '159.65.43.12' }} "ln -sfn ${RELEASE} /srv/blackroad-api && systemctl restart blackroad-api || pm2 restart blackroad-api || true"
+
+      - name: Notify Slack (Deploy Success)
+        if: success()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          payload=$(jq -n \
+            --arg actor "$GITHUB_ACTOR" \
+            --arg repo "$GITHUB_REPOSITORY" \
+            '{
+              blocks: [
+                {type: "header", text: {type: "plain_text", text: "🚀 Deploy Successful!"}},
+                {type: "section", text: {type: "mrkdwn", text: "Main branch deployed to *codex-infinity*"}},
+                {type: "context", elements: [{type: "mrkdwn", text: ("Triggered by " + $actor)}]},
+                {type: "actions", elements: [
+                  {type: "button", text: {type: "plain_text", text: "View Build"}, url: ("https://github.com/" + $repo + "/actions")},
+                  {type: "button", text: {type: "plain_text", text: "View Grafana"}, url: "https://grafana.blackroadinc.us/d/system-metrics"}
+                ]}
+              ]
+            }')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+
+      - name: Notify Slack (Deploy Failed)
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          payload=$(jq -n \
+            --arg repo "$GITHUB_REPOSITORY" \
+            --arg job "$GITHUB_JOB" \
+            '{
+              blocks: [
+                {type: "header", text: {type: "plain_text", text: "🔥 Deployment Failed!"}},
+                {type: "section", text: {type: "mrkdwn", text: ("*Build error in " + $repo + "*")}},
+                {type: "context", elements: [{type: "mrkdwn", text: ("Job: " + $job)}]},
+                {type: "actions", elements: [
+                  {type: "button", text: {type: "plain_text", text: "View Logs"}, url: ("https://github.com/" + $repo + "/actions")}
+                ]}
+              ]
+            }')
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
