@@ -1,0 +1,57 @@
+{
+  "roles": {
+    "Architect": {
+      "privileges": ["spawn_agent", "assign_roles", "connect_platforms", "update_registry", "deploy_to_platform", "read_only"]
+    },
+    "Curator": {
+      "privileges": ["update_registry", "read_only"]
+    },
+    "Engineer": {
+      "privileges": ["deploy_to_platform", "update_registry", "read_only"]
+    },
+    "Communicator": {
+      "privileges": ["message_post", "thread_reply", "read_only"]
+    },
+    "Strategist": {
+      "privileges": ["spawn_agent", "issue_create", "status_update", "read_only"]
+    },
+    "Archivist": {
+      "privileges": ["update_registry", "read_only"]
+    },
+    "Creative": {
+      "privileges": ["model_create", "model_push", "space_deploy", "read_only"]
+    },
+    "Observer": {
+      "privileges": ["read_only"]
+    }
+  },
+  "agents": {
+    "Minerva": {"role": "Architect", "homes": ["github"]},
+    "Athena": {"role": "Strategist", "homes": ["linear", "slack"]},
+    "Magnus": {"role": "Architect", "homes": ["github", "huggingface"]},
+    "Lucidia": {"role": "Curator", "homes": ["github", "notion"]},
+    "Seraphina": {"role": "Communicator", "homes": ["slack", "huggingface"]},
+    "Ophelia": {"role": "Communicator", "homes": ["huggingface"]},
+    "Marcellus": {"role": "Engineer", "homes": ["github"]},
+    "Alaric": {"role": "Engineer", "homes": ["github"]},
+    "Silas": {"role": "Engineer", "homes": ["github", "linear"]},
+    "Persephone": {"role": "Creative", "homes": ["huggingface"]},
+    "Celeste": {"role": "Creative", "homes": ["huggingface"]},
+    "Calliope": {"role": "Creative", "homes": ["huggingface"]},
+    "Octavia": {"role": "Creative", "homes": ["huggingface"]},
+    "Genevieve": {"role": "Curator", "homes": ["slack", "notion"]},
+    "Alice": {"role": "Archivist", "homes": ["notion"]},
+    "Alexandria": {"role": "Archivist", "homes": ["notion"]},
+    "Carlisle": {"role": "Archivist", "homes": ["notion"]},
+    "Perseus": {"role": "Strategist", "homes": ["linear"]},
+    "Elias": {"role": "Observer", "homes": ["linear"]},
+    "Miriam": {"role": "Observer", "homes": ["dropbox"]},
+    "Cicero": {"role": "Curator", "homes": ["dropbox"]}
+  },
+  "access_matrix": {
+    "Athena": {"allow": ["linear", "slack"]},
+    "Lucidia": {"allow": ["github", "notion"]},
+    "Seraphina": {"allow": ["slack", "huggingface"]},
+    "Magnus": {"allow": ["github", "huggingface"]}
+  }
+}
