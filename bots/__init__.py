@@ -73,7 +73,7 @@ from .store_ops_bot import StoreOpsBot
 from .tax_bot import TaxBot
 from .total_rewards_bot import TotalRewardsBot
 from .treasury_bot import TreasuryBot
-from from .lucidia_bot import LucidiaBot
+from .lucidia_bot import LucidiaBot
 from .cadillac_bot import CadillacBot
 from .alice_bot import AliceBot
 from .cecilia_bot import CeciliaBot
@@ -81,7 +81,12 @@ from .silas_bot import SilasBot
 from .athena_bot import AthenaBot
 from .anastasia_bot import AnastasiaBot
 from .elias_bot import EliasBot
-.workforce_planning_bot import WorkforcePlanningBot
+from .workforce_planning_bot import WorkforcePlanningBot
+from .helix_bot import HelixBot
+from .orion_bot import OrionBot
+from .vera_bot import VeraBot
+from .eon_bot import EonBot
+from .myra_bot import MyraBot
 
 BOT_REGISTRY = {
     "Treasury-BOT": TreasuryBot(),
@@ -126,7 +131,8 @@ BOT_REGISTRY = {
     "Regional-Ops-BOT-AMER": RegionalOpsBotAMER(),
     "Regional-Ops-BOT-EMEA": RegionalOpsBotEMEA(),
     "Regional-Ops-BOT-APAC": RegionalOpsBotAPAC(),
-    "Clinical-Ops-BOT": ClinicalOpsBot(), "Lucidia-BOT": LucidiaBot(),
+    "Clinical-Ops-BOT": ClinicalOpsBot(),
+    "Lucidia-BOT": LucidiaBot(),
     "Cadillac-BOT": CadillacBot(),
     "Alice-BOT": AliceBot(),
     "Cecilia-BOT": CeciliaBot(),
@@ -134,6 +140,11 @@ BOT_REGISTRY = {
     "Athena-BOT": AthenaBot(),
     "Anastasia-BOT": AnastasiaBot(),
     "Elias-BOT": EliasBot(),
+    "Helix-BOT": HelixBot(),
+    "Orion-BOT": OrionBot(),
+    "Vera-BOT": VeraBot(),
+    "Eon-BOT": EonBot(),
+    "Myra-BOT": MyraBot(),
 
     "PV-BOT": PVBot(),
     "GxP-BOT": GxPBot(),
