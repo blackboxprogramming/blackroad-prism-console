@@ -1,0 +1,38 @@
+# --- CODEx PROMPT ---
+id: asana_merge_gate_v1
+name: Asana Merge Gate
+owner: Eng
+systems_of_record: [GitHub, Asana]
+triggers: [webhook:github.pull_request.labeled, pr_comment:/asana approve]
+secrets: [ASANA_AUTH_BOT_TOKEN]
+risk_level: L2
+kpis: [approvals, denials, latency_ms]
+# --------------------
+
+Goal
+----
+Ensure merges only proceed when the linked Asana approval task is marked ready or when `/asana approve` passes validation.
+
+Inputs
+------
+- pr.labels
+- pr.comment_cmd
+- asana.task_gid
+
+Outputs
+-------
+- GitHub status `probot/manual-approval: success|failure`
+- PR comment confirming approval decision
+
+Steps
+-----
+1. When label `asana-approval` is added, create or update the Asana task and assign the approver.
+2. On `/asana approve`, query the Asana task status via API to confirm readiness.
+3. Set the GitHub status context `probot/manual-approval` to success for approved tasks; otherwise leave or set to failure.
+4. Reply on the PR thread summarizing the approval result and next steps.
+
+Guardrails
+----------
+- Log every action to `logs/asana-auth-bot/` for traceability.
+- If the Asana API times out or is unreachable, fail safe by keeping merge blocked.
+- Avoid storing or echoing sensitive tokens outside secure storage.

@@ -1,0 +1,37 @@
+# --- CODEx PROMPT ---
+id: friday_retro_seed_v1
+name: Friday Retro Seed
+owner: Product
+systems_of_record: [Asana, Slack]
+triggers: [cron:FRI@15:00-0500]
+secrets: [ASANA_TOKEN, SLACK_WEBHOOK_URL]
+risk_level: L1
+kpis: [retro_completion_rate]
+# --------------------
+
+Goal
+----
+Automatically create the weekly Friday Retro task with a standard agenda and nudge owners to participate.
+
+Inputs
+------
+- board: PRISM
+- owners[]
+
+Outputs
+-------
+- Asana task `Retro – YYYY-MM-DD` with agenda template
+- Slack reminder in `#products-prism`
+
+Steps
+-----
+1. Generate an Asana task titled `Retro – YYYY-MM-DD` including agenda sections (Start/Stop/Continue, improvements, owners) and assign product and engineering leads.
+2. Ensure the task is placed in the appropriate Asana project section and due the following Monday.
+3. Post a Slack reminder in `#products-prism` tagging the assigned owners with the meeting details.
+4. Automatically close retro tasks older than 14 days to keep the board clean.
+
+Guardrails
+----------
+- Skip task creation if a retro for the week already exists.
+- Confirm Slack channel visibility before posting reminders to avoid private channels.
+- Respect holiday overrides by checking calendar exceptions when provided.

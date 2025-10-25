@@ -1,0 +1,39 @@
+# --- CODEx PROMPT ---
+id: roadchain_stage_to_ops_v1
+name: Financing Stage → Ops
+owner: RevOps
+systems_of_record: [Airtable/Supabase, Asana, Slack]
+triggers: [webhook:deal.updated]
+secrets: [ASANA_TOKEN, SLACK_WEBHOOK_URL]
+risk_level: L2
+kpis: [task_sla_breaches, stage_latency]
+# --------------------
+
+Goal
+----
+Convert RoadChain financing stage updates into actionable Asana tasks and Slack communications for the Ops team.
+
+Inputs
+------
+- deal.id
+- stage
+- amount
+- owner
+- docs[]
+
+Outputs
+-------
+- Stage-specific Asana task with checklist items
+- Slack digest message for the relevant channels with stage, owner, and due date
+
+Steps
+-----
+1. On stages `Negotiation` or `Closed Won`, create or update an Asana task with checklist items and assign the owner with stage-based SLA.
+2. Attach supporting documents or evidence links to the Asana task for auditability.
+3. Post a Slack update to `#sales` and `#exec` summarizing the stage, owner, due date, and key documents.
+
+Guardrails
+----------
+- Enforce idempotency by deduplicating on `deal.id + stage`.
+- Redact personally identifiable information or sensitive deal notes from Slack messages.
+- Record SLA timers and alert if tasks approach breach thresholds.

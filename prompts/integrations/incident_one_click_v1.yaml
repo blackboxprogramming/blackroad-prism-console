@@ -1,0 +1,40 @@
+# --- CODEx PROMPT ---
+id: incident_one_click_v1
+name: Incident One-Click
+owner: Reliability
+systems_of_record: [Status, Asana, Slack]
+triggers: [manual, webhook:monitor.alert]
+secrets: [SLACK_WEBHOOK_URL, ASANA_TOKEN]
+risk_level: L2
+kpis: [time_to_post, time_to_close]
+# --------------------
+
+Goal
+----
+Create the Asana incident task, publish a status page update, and announce in Slack from a single triggering action.
+
+Inputs
+------
+- service
+- severity
+- summary
+- links[]
+
+Outputs
+-------
+- Asana task titled `INCIDENT: <service> <summary>`
+- Status page entry with initial incident state
+- Slack messages in `#announcements` and `#security` channels
+
+Steps
+-----
+1. Create an Asana task with severity mapped into the incident custom field and attach reference links.
+2. Publish a status update via the status API (or S3 asset) marking the incident as “Investigating”.
+3. Post structured Slack blocks highlighting owner, severity, ETA, and status page link to `#announcements` and `#security`.
+4. On resolution, update the Asana task to completed and transition the status entry to “Resolved”.
+
+Guardrails
+----------
+- Require owner and ETA fields before announcing publicly.
+- Strip stack traces or sensitive payloads from public-facing updates.
+- Ensure idempotent task creation by checking existing incidents with the same summary and service.
