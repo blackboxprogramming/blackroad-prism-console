@@ -1,0 +1,254 @@
+// !$*UTF8*$!
+{
+archiveVersion = 1;
+classes = {};
+objectVersion = 55;
+objects = {
+
+/* Begin PBXBuildFile section */
+ Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF5C2BDF7A200010F9D1; };
+tentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF5D2BDF7A200010F9D1; };
+sPulseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF5E2BDF7A200010F9D1; };
+ Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF5F2BDF7A200010F9D1; };
+ Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF602BDF7A200010F9D1; };
+ Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF612BDF7A200010F9D1; };
+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF622BDF7A200010F9D1; };
+ Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF732BDF7A3B0010F9D1; };
+ Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF752BDF7A440010F9D1; };
+sPulseSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF772BDF7A4C0010F9D1; };
+ Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF7B2BDF7A650010F9D1; };
+ Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF7D2BDF7A700010F9D1; };
+ Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF7F2BDF7A7C0010F9D1; };
+ Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF812BDF7A860010F9D1; };
+ Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF832BDF7A920010F9D1; };
+ Sources */ = {isa = PBXBuildFile; fileRef = 1A01CF852BDF7AA00010F9D1; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+tainerItemProxy */ = {
+tainerItemProxy;
+tainerPortal = 1A01CF532BDF7A200010F9D1 /* Project object */;
+g = 1A01CF5A2BDF7A200010F9D1;
+fo = BlackRoadMobile;
+d PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+ce; explicitFileType = wrapper.application; includeInIndex = 0; path = BlackRoadMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
+ce; lastKnownFileType = sourcecode.swift; path = BlackRoadMobileApp.swift; sourceTree = "<group>"; };
+tentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+sPulseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationsPulseView.swift; sourceTree = "<group>"; };
+ce; lastKnownFileType = sourcecode.swift; path = MetricsGridView.swift; sourceTree = "<group>"; };
+ce; lastKnownFileType = sourcecode.swift; path = ShortcutsView.swift; sourceTree = "<group>"; };
+ce; lastKnownFileType = sourcecode.swift; path = BiometricsGate.swift; sourceTree = "<group>"; };
+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+ce; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BlackRoadMobileTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+ce; lastKnownFileType = sourcecode.swift; path = DashboardViewModelTests.swift; sourceTree = "<group>"; };
+ce; lastKnownFileType = sourcecode.swift; path = TelemetryTests.swift; sourceTree = "<group>"; };
+sPulseSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperationsPulseSnapshotTests.swift; sourceTree = "<group>"; };
+ce; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+ce; lastKnownFileType = sourcecode.swift; path = DashboardAPI.swift; sourceTree = "<group>"; };
+ce; lastKnownFileType = sourcecode.swift; path = DashboardCache.swift; sourceTree = "<group>"; };
+ce; lastKnownFileType = sourcecode.swift; path = Telemetry.swift; sourceTree = "<group>"; };
+ce; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
+ce; lastKnownFileType = sourcecode.swift; path = AppBootstrapper.swift; sourceTree = "<group>"; };
+apshotTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BlackRoadMobileSnapshotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+Mask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+Mask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+Mask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+ = (
+ = (
+tentView.swift */,
+sPulseView.swift */,
+.swift */
+ = (
+Tests */ = {
+ = (
+sPulseSnapshotTests.swift */
+ = (
+apshotTests.xctest */
+ame = Products;
+d PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+ativeTarget;
+figurationList = 1A01CF672BDF7A200010F9D1 /* Build configuration list for PBXNativeTarget "BlackRoadMobile" */;
+dencies = ();
+ame = BlackRoadMobile;
+ame = BlackRoadMobile;
+ce = 1A01CF5A2BDF7A200010F9D1 /* BlackRoadMobile.app */;
+";
+ativeTarget;
+figurationList = 1A01CF6B2BDF7A200010F9D1 /* Build configuration list for PBXNativeTarget "BlackRoadMobileTests" */;
+dencies = (
+dency */
+ame = BlackRoadMobileTests;
+ame = BlackRoadMobileTests;
+ce = 1A01CF682BDF7A200010F9D1 /* BlackRoadMobileTests.xctest */;
+dle.unit-test";
+apshotTests */ = {
+ativeTarget;
+figurationList = 1A01CF8D2BDF7AC30010F9D1 /* Build configuration list for PBXNativeTarget "BlackRoadMobileSnapshotTests" */;
+dencies = (
+dency */
+ame = BlackRoadMobileSnapshotTests;
+ame = BlackRoadMobileSnapshotTests;
+ce = 1A01CF8C2BDF7AC30010F9D1 /* BlackRoadMobileSnapshotTests.xctest */;
+dle.unit-test";
+d PBXNativeTarget section */
+
+/* Begin PBXProject section */
+IZATIONNAME = "BlackRoad";
+figurationList = 1A01CF562BDF7A200010F9D1 /* Build configuration list for PBXProject "BlackRoadMobile" */;
+ = "Xcode 15.0";
+tRegion = en;
+nedForEncodings = 0;
+ownRegions = (
+,
+Group = 1A01CF522BDF7A200010F9D1;
+apshotTests */
+d PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+Mask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+Mask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+Mask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+Mask = 2147483647;
+ Sources */,
+ Sources */,
+ Sources */,
+ Sources */,
+ Sources */,
+sPulseView.swift in Sources */,
+ Sources */,
+tentView.swift in Sources */,
+ Sources */,
+ Sources */,
+.swift in Sources */,
+ Sources */,
+ Sources */
+OnlyForDeploymentPostprocessing = 0;
+Mask = 2147483647;
+ Sources */,
+ Sources */
+OnlyForDeploymentPostprocessing = 0;
+Mask = 2147483647;
+sPulseSnapshotTests.swift in Sources */
+OnlyForDeploymentPostprocessing = 0;
+d PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+dency */ = {isa = PBXTargetDependency; target = 1A01CF5A2BDF7A200010F9D1 /* BlackRoadMobile */; targetProxy = 1A01CF8A2BDF7AC30010F9D1 /* PBXContainerItemProxy */; };
+dency */ = {isa = PBXTargetDependency; target = 1A01CF5A2BDF7A200010F9D1 /* BlackRoadMobile */; targetProxy = 1A01CF8A2BDF7AC30010F9D1 /* PBXContainerItemProxy */; };
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+figuration;
+gs = {
+_NAME = AppIcon;
+_STYLE = Automatic;
+T_PROJECT_VERSION = 1;
+T_TEAM = "";
+FOPLIST_KEY_CFBundleDisplayName = "BlackRoad Mobile";
+FOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+FOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+FOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+FOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+FOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+EOS_DEPLOYMENT_TARGET = 16.0;
+DLE_IDENTIFIER = io.blackroad.mobile;
+AME = "$(TARGET_NAME)";
+GS = YES;
+ = 5.0;
+ame = Debug;
+figuration;
+gs = {
+_NAME = AppIcon;
+_STYLE = Automatic;
+T_PROJECT_VERSION = 1;
+T_TEAM = "";
+FOPLIST_KEY_CFBundleDisplayName = "BlackRoad Mobile";
+FOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+FOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+FOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+FOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+FOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+EOS_DEPLOYMENT_TARGET = 16.0;
+DLE_IDENTIFIER = io.blackroad.mobile;
+AME = "$(TARGET_NAME)";
+GS = YES;
+ = 5.0;
+ame = Release;
+figuration;
+gs = {
+DLE_LOADER = "$(TEST_HOST)";
+_STYLE = Automatic;
+T_TEAM = "";
+EOS_DEPLOYMENT_TARGET = 16.0;
+DLE_IDENTIFIER = io.blackroad.mobile.tests;
+AME = "$(TARGET_NAME)";
+ = 5.0;
+ame = Debug;
+figuration;
+gs = {
+DLE_LOADER = "$(TEST_HOST)";
+_STYLE = Automatic;
+T_TEAM = "";
+EOS_DEPLOYMENT_TARGET = 16.0;
+DLE_IDENTIFIER = io.blackroad.mobile.tests;
+AME = "$(TARGET_NAME)";
+ = 5.0;
+ame = Release;
+figuration;
+gs = {
+_STYLE = Automatic;
+T_TEAM = "";
+EOS_DEPLOYMENT_TARGET = 16.0;
+DLE_IDENTIFIER = io.blackroad.mobile.snapshotTests;
+AME = "$(TARGET_NAME)";
+ = 5.0;
+ame = Debug;
+figuration;
+gs = {
+_STYLE = Automatic;
+T_TEAM = "";
+EOS_DEPLOYMENT_TARGET = 16.0;
+DLE_IDENTIFIER = io.blackroad.mobile.snapshotTests;
+AME = "$(TARGET_NAME)";
+ = 5.0;
+ame = Release;
+d XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+figuration list for PBXProject "BlackRoadMobile" */ = {
+figurationList;
+figurations = (
+figurationIsVisible = 0;
+figurationName = Release;
+figuration list for PBXNativeTarget "BlackRoadMobile" */ = {
+figurationList;
+figurations = (
+figurationIsVisible = 0;
+figurationName = Release;
+figuration list for PBXNativeTarget "BlackRoadMobileTests" */ = {
+figurationList;
+figurations = (
+figurationIsVisible = 0;
+figurationName = Release;
+figuration list for PBXNativeTarget "BlackRoadMobileSnapshotTests" */ = {
+figurationList;
+figurations = (
+figurationIsVisible = 0;
+figurationName = Release;
+d XCConfigurationList section */
+};
+rootObject = 1A01CF532BDF7A200010F9D1 /* Project object */;
+}

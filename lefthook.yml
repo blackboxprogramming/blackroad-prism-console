@@ -5,6 +5,10 @@ pre-commit:
       run: |
         npm run lint --if-present
         make lint
+    format:
+      run: |
+        npm run format --if-present
+        make format
     test:
       run: |
         npm test --if-present -- --watch=false
