@@ -109,3 +109,62 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: pnpm dlx vercel deploy --prebuilt
+  test:
+    uses: ./.github/workflows/reusable-node20.yml
+    with:
+      run: npm test -- --ci --reporters=default || pnpm test -- --ci --reporters=default || yarn test --ci --reporters=default
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -U pip pytest jsonschema
+      - run: python -m pip install -e .
+      - name: Unit tests
+        run: pytest -q
+      - name: Demo run (deterministic)
+        run: |
+          python -m cli.console plm:items:load --dir fixtures/plm/items
+          python -m cli.console plm:bom:load --dir fixtures/plm/boms
+          python -m cli.console mfg:wc:load --file fixtures/mfg/work_centers.csv
+          python -m cli.console mfg:routing:load --dir fixtures/mfg/routings
+          python -m cli.console mfg:routing:capcheck --item PROD-100 --rev B --qty 1000
+          python -m cli.console mfg:wi:render --item PROD-100 --rev B
+          python -m cli.console mfg:spc:analyze --op OP-200 --window 50
+          python -m cli.console mfg:yield --period 2025-09
+          python -m cli.console mfg:mrp --demand artifacts/sop/allocations.csv --inventory fixtures/mfg/inventory.csv --pos fixtures/mfg/open_pos.csv
+          python -m cli.console mfg:coq --period 2025-Q3
+      - name: Contract validation
+        run: python scripts/validate_contracts.py
+      - name: Reproducible artifacts hash
+        run: |
+          find artifacts -type f -print0 | sort -z | xargs -0 sha256sum > artifact_hashes.txt
+          cp artifact_hashes.txt artifact_hashes_prev.txt
+          diff -u artifact_hashes_prev.txt artifact_hashes.txt || true
+  roadview-web:
+    name: RoadView Web Quality
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/roadview
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: apps/roadview/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile=false
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm storybook:build
+      - run: pnpm e2e
