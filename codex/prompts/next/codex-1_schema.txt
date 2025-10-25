@@ -1,0 +1,9 @@
+┌──────────┐
+│ OBSERVE  │
+│ DESIGN   │
+│ SIMULATE │
+│ BUILD    │
+│ VERIFY   │
+│ TEACH    │
+│ REST     │
+└──────────┘

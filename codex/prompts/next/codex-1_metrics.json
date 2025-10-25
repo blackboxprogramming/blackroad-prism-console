@@ -1,0 +1,9 @@
+{
+  "timestamp": "2025-10-25T05:52:10Z",
+  "directive_count": 6,
+  "core_task_count": 5,
+  "behavioural_loop_length": 7,
+  "complexity_index": 20.7,
+  "energy_profile": 8.69,
+  "maintainability_index": 2.75
+}
