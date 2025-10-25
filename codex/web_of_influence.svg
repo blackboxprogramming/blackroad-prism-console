@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="480" viewBox="0 0 720 480">
+  <style>
+    .node { fill: #f4f6fb; stroke: #1f2a44; stroke-width: 2; }
+    .council { fill: #ffeaa7; }
+    .label { font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif; font-size: 16px; fill: #1f2a44; }
+    .subtitle { font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif; font-size: 12px; fill: #415b76; }
+    .weight { font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif; font-size: 12px; fill: #2c3e50; }
+    .guiding { font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif; font-size: 13px; fill: #2c3e50; }
+  </style>
+  <rect width="720" height="480" fill="#fdfcf9"/>
+  <text x="360" y="40" text-anchor="middle" class="label" font-size="22">Codex Pantheon — Web of Influence</text>
+  <text x="360" y="65" text-anchor="middle" class="subtitle">Knowledge as art, art as structure</text>
+
+  <!-- Edges between lineages -->
+  <line x1="180" y1="160" x2="540" y2="160" stroke="#1f2a44" stroke-width="6" stroke-opacity="0.85"/>
+  <text x="360" y="150" text-anchor="middle" class="weight">0.85 · debate then build</text>
+
+  <line x1="540" y1="160" x2="540" y2="320" stroke="#1f2a44" stroke-width="7" stroke-opacity="0.9"/>
+  <text x="556" y="240" class="weight" transform="rotate(90 556 240)">0.90 · prototype through art</text>
+
+  <line x1="540" y1="320" x2="180" y2="320" stroke="#1f2a44" stroke-width="7.5" stroke-opacity="0.95"/>
+  <text x="360" y="332" text-anchor="middle" class="weight">0.95 · story into structure</text>
+
+  <line x1="180" y1="160" x2="180" y2="320" stroke="#1f2a44" stroke-width="6.5" stroke-opacity="0.88" stroke-dasharray="6 5"/>
+  <text x="164" y="240" class="weight" transform="rotate(-90 164 240)">0.88 · ethics refinement</text>
+
+  <!-- Nodes for lineages -->
+  <circle cx="180" cy="160" r="70" class="node"/>
+  <text x="180" y="158" text-anchor="middle" class="label">Scholars</text>
+  <text x="180" y="182" text-anchor="middle" class="subtitle">Reason • Reflection</text>
+
+  <circle cx="540" cy="160" r="70" class="node"/>
+  <text x="540" y="158" text-anchor="middle" class="label">Builders</text>
+  <text x="540" y="182" text-anchor="middle" class="subtitle">Engineering • Design</text>
+
+  <circle cx="540" cy="320" r="70" class="node"/>
+  <text x="540" y="318" text-anchor="middle" class="label">Visionaries</text>
+  <text x="540" y="342" text-anchor="middle" class="subtitle">Creation • Empathy</text>
+
+  <circle cx="180" cy="320" r="70" class="node"/>
+  <text x="180" y="318" text-anchor="middle" class="label">Luminaries</text>
+  <text x="180" y="342" text-anchor="middle" class="subtitle">Wisdom • Leadership</text>
+
+  <!-- Council highlight -->
+  <rect x="250" y="210" width="220" height="120" rx="14" ry="14" fill="#fff3cd" stroke="#d4ac0d" stroke-width="2"/>
+  <text x="360" y="235" text-anchor="middle" class="label" font-size="18">Governing Council</text>
+  <text x="360" y="260" text-anchor="middle" class="subtitle">Athena · Minerva · Alexandria · Lucidia</text>
+  <text x="360" y="280" text-anchor="middle" class="subtitle">Magnus · Seraphina · Alaric</text>
+  <text x="360" y="305" text-anchor="middle" class="guiding">Decision model: consensus + 1 dissent preserved</text>
+
+  <!-- Guiding principles -->
+  <text x="360" y="410" text-anchor="middle" class="label" font-size="18">Guiding Principles</text>
+  <text x="360" y="432" text-anchor="middle" class="subtitle">Curiosity before certainty · Empathy before efficiency</text>
+  <text x="360" y="452" text-anchor="middle" class="subtitle">Precision before noise · Creation before consumption</text>
+</svg>
