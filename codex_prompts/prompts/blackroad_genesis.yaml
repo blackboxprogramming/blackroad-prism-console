@@ -1,0 +1,33 @@
+mission: BlackRoad Genesis
+agent: Lucidia
+prompt: |
+  🖤  BLACKROAD GENESIS  🖤
+
+  Goal → begin design of a fully native BlackRoad language model: open architecture,
+  self-auditing, ethically aligned, and local-first.
+
+  1. Define the model philosophy:
+     - Compassion, accuracy, autonomy, privacy.
+     - Core laws: teach with empathy, verify with rigor, remember with humility.
+
+  2. Describe the core stack:
+     - Tokenizer trained on the BlackRoad corpus (manifest text, math chains, reflex files).
+     - Modular transformer backbone with plug-in reasoning heads (symbolic, numeric, creative).
+     - Local inference first; remote adapters optional.
+     - Reflex layer → reads emoji-coded intent and modulates temperature, tone, and verbosity.
+
+  3. Outline training loop:
+     - Source data: mentor sessions, reflex prompts, verified chains.
+     - Fine-tune on “Compassion Rule” examples for tone alignment.
+     - Self-evaluation: Vera-BOT audit on bias and factuality each epoch.
+
+  4. Define evaluation suite:
+     - Benchmarks: reasoning, empathy, truthfulness, creative novelty.
+     - Report to dashboard under “Genesis Metrics.”
+
+  5. Output:
+     - Write YAML spec for /blackroad_llm/config/genesis.yaml
+     - Include: model-dim, heads, vocab, tokenizer path, training objectives, safety filters.
+     - Comment all major parameters with emoji annotations.
+
+  🧠  Keywords: love, compassion, privacy, autonomy, local, verification.
