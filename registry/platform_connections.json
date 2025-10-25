@@ -1,0 +1,287 @@
+{
+  "generated_at": "2025-10-25T03:29:43.274707Z",
+  "agents": [
+    {
+      "name": "Athena",
+      "role": "admin",
+      "email": "athena.ops@example.com",
+      "key_id": "538f9d205c0f8de0",
+      "key_fingerprint": "003cfbb6164cd3d1",
+      "permissions": [
+        "github:org:admin",
+        "github:repos:full",
+        "linear:issues:manage",
+        "linear:projects:manage",
+        "monitoring:alerts:manage",
+        "monitoring:dashboards:configure",
+        "notion:databases:manage",
+        "notion:pages:publish",
+        "slack:channels:manage",
+        "slack:chat:write"
+      ],
+      "platforms": [
+        {
+          "name": "GitHub",
+          "integration_id": "github",
+          "status": "connected",
+          "scopes": [
+            "repos:full",
+            "org:admin"
+          ],
+          "credential_source": "seed",
+          "verified_at": "2025-10-25T03:29:42.640728Z",
+          "details": null
+        },
+        {
+          "name": "Slack",
+          "integration_id": "slack",
+          "status": "connected",
+          "scopes": [
+            "chat:write",
+            "channels:manage"
+          ],
+          "credential_source": "seed",
+          "verified_at": "2025-10-25T03:29:42.640844Z",
+          "details": null
+        },
+        {
+          "name": "Linear",
+          "integration_id": "linear",
+          "status": "connected",
+          "scopes": [
+            "issues:manage"
+          ],
+          "credential_source": "seed",
+          "verified_at": "2025-10-25T03:29:42.640922Z",
+          "details": null
+        }
+      ]
+    },
+    {
+      "name": "Lucidia",
+      "role": "maintainer",
+      "email": "lucidia.ops@example.com",
+      "key_id": "9e41a98e9db4a5b5",
+      "key_fingerprint": "23f5d31cebd4f771",
+      "permissions": [
+        "github:issues:triage",
+        "github:repos:write",
+        "hubspot:crm.objects.contacts.write",
+        "huggingface:models:write",
+        "huggingface:spaces:manage",
+        "monitoring:dashboards:view",
+        "notion:databases:write",
+        "notion:pages:update",
+        "slack:channels:read",
+        "slack:chat:write"
+      ],
+      "platforms": [
+        {
+          "name": "GitHub",
+          "integration_id": "github",
+          "status": "connected",
+          "scopes": [
+            "repos:write",
+            "issues:triage"
+          ],
+          "credential_source": "seed",
+          "verified_at": "2025-10-25T03:29:43.256704Z",
+          "details": null
+        },
+        {
+          "name": "Notion",
+          "integration_id": "notion",
+          "status": "connected",
+          "scopes": [
+            "databases:write",
+            "pages:update"
+          ],
+          "credential_source": "seed",
+          "verified_at": "2025-10-25T03:29:43.256761Z",
+          "details": null
+        }
+      ]
+    },
+    {
+      "name": "Seraphina",
+      "role": "maintainer",
+      "email": "seraphina.ops@example.com",
+      "key_id": "a9e66372fbd2389a",
+      "key_fingerprint": "0175d3cfe564d19b",
+      "permissions": [
+        "github:issues:triage",
+        "github:repos:write",
+        "hubspot:crm.objects.contacts.write",
+        "huggingface:models:write",
+        "huggingface:spaces:manage",
+        "monitoring:dashboards:view",
+        "notion:databases:write",
+        "notion:pages:update",
+        "slack:channels:read",
+        "slack:chat:write"
+      ],
+      "platforms": [
+        {
+          "name": "Slack",
+          "integration_id": "slack",
+          "status": "connected",
+          "scopes": [
+            "chat:write",
+            "channels:read"
+          ],
+          "credential_source": "seed",
+          "verified_at": "2025-10-25T03:29:43.257625Z",
+          "details": null
+        },
+        {
+          "name": "Linear",
+          "integration_id": "linear",
+          "status": "connected",
+          "scopes": [
+            "issues:manage"
+          ],
+          "credential_source": "seed",
+          "verified_at": "2025-10-25T03:29:43.257680Z",
+          "details": null
+        }
+      ]
+    },
+    {
+      "name": "Genevieve",
+      "role": "maintainer",
+      "email": "genevieve.crm@example.com",
+      "key_id": "4cf5b5214b874c32",
+      "key_fingerprint": "ab42b341fd5d651c",
+      "permissions": [
+        "github:issues:triage",
+        "github:repos:write",
+        "hubspot:crm.objects.contacts.write",
+        "huggingface:models:write",
+        "huggingface:spaces:manage",
+        "monitoring:dashboards:view",
+        "notion:databases:write",
+        "notion:pages:update",
+        "slack:channels:read",
+        "slack:chat:write"
+      ],
+      "platforms": [
+        {
+          "name": "HubSpot",
+          "integration_id": "hubspot",
+          "status": "expired",
+          "scopes": [
+            "crm.objects.contacts.write"
+          ],
+          "credential_source": "seed",
+          "verified_at": "2025-10-25T03:29:43.258443Z",
+          "details": "Token expired at 2023-01-01T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "name": "Calliope",
+      "role": "contributor",
+      "email": "calliope.ml@example.com",
+      "key_id": "641af8b2ba589a24",
+      "key_fingerprint": "04c9033cb92e98fb",
+      "permissions": [
+        "github:issues:create",
+        "huggingface:models:read",
+        "linear:issues:create",
+        "notion:pages:create"
+      ],
+      "platforms": [
+        {
+          "name": "Hugging Face",
+          "integration_id": "huggingface",
+          "status": "connected",
+          "scopes": [
+            "models:write",
+            "spaces:manage"
+          ],
+          "credential_source": "seed",
+          "verified_at": "2025-10-25T03:29:43.259372Z",
+          "details": null
+        }
+      ]
+    },
+    {
+      "name": "Kai",
+      "role": "contributor",
+      "email": "kai.ops@example.com",
+      "key_id": "7fbd300aea6eeba3",
+      "key_fingerprint": "5dc23b0afa3521ea",
+      "permissions": [
+        "github:issues:create",
+        "huggingface:models:read",
+        "linear:issues:create",
+        "notion:pages:create"
+      ],
+      "platforms": [
+        {
+          "name": "GitHub",
+          "integration_id": "github",
+          "status": "missing_credentials",
+          "scopes": [
+            "issues:create"
+          ],
+          "credential_source": "unavailable",
+          "verified_at": "2025-10-25T03:29:43.260278Z",
+          "details": "No credential found in environment or seed data."
+        }
+      ]
+    },
+    {
+      "name": "Alice",
+      "role": "observer",
+      "email": "alice.memory@example.com",
+      "key_id": "fbeed12d4a88bffd",
+      "key_fingerprint": "763cc301ade325c5",
+      "permissions": [
+        "dropbox:files.metadata.read",
+        "github:repos:read",
+        "monitoring:dashboards:view",
+        "notion:pages:read"
+      ],
+      "platforms": [
+        {
+          "name": "Notion",
+          "integration_id": "notion",
+          "status": "connected",
+          "scopes": [
+            "pages:read"
+          ],
+          "credential_source": "seed",
+          "verified_at": "2025-10-25T03:29:43.261115Z",
+          "details": null
+        }
+      ]
+    },
+    {
+      "name": "Miriam",
+      "role": "observer",
+      "email": "miriam.archive@example.com",
+      "key_id": "2e14136e1e5307cd",
+      "key_fingerprint": "5a34e992f05bf9e9",
+      "permissions": [
+        "dropbox:files.metadata.read",
+        "github:repos:read",
+        "monitoring:dashboards:view",
+        "notion:pages:read"
+      ],
+      "platforms": [
+        {
+          "name": "Dropbox",
+          "integration_id": "dropbox",
+          "status": "connected",
+          "scopes": [
+            "files.metadata.read"
+          ],
+          "credential_source": "seed",
+          "verified_at": "2025-10-25T03:29:43.261936Z",
+          "details": null
+        }
+      ]
+    }
+  ]
+}

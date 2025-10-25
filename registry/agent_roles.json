@@ -1,0 +1,201 @@
+{
+  "roles": {
+    "admin": {
+      "description": "Full administrative access to provisioning, credentials, and monitoring dashboards.",
+      "members": ["Athena", "Minerva", "Magnus"],
+      "scopes": {
+        "github": ["repos:full", "org:admin"],
+        "slack": ["chat:write", "channels:manage"],
+        "linear": ["issues:manage", "projects:manage"],
+        "notion": ["databases:manage", "pages:publish"],
+        "monitoring": ["dashboards:configure", "alerts:manage"]
+      }
+    },
+    "maintainer": {
+      "description": "Can operate day-to-day integrations, refresh tokens, and manage deployment health.",
+      "members": ["Lucidia", "Persephone", "Cassius", "Seraphina", "Genevieve", "Cordelia"],
+      "scopes": {
+        "github": ["repos:write", "issues:triage"],
+        "huggingface": ["models:write", "spaces:manage"],
+        "slack": ["chat:write", "channels:read"],
+        "notion": ["databases:write", "pages:update"],
+        "hubspot": ["crm.objects.contacts.write"],
+        "monitoring": ["dashboards:view"]
+      }
+    },
+    "contributor": {
+      "description": "Create content, triage items, and trigger pre-approved automation.",
+      "members": ["Kai", "Octavia", "Silas", "Calliope"],
+      "scopes": {
+        "github": ["issues:create"],
+        "huggingface": ["models:read"],
+        "linear": ["issues:create"],
+        "notion": ["pages:create"]
+      }
+    },
+    "observer": {
+      "description": "Read-only view into dashboards and shared documents.",
+      "members": ["Alice", "Miriam", "Elias"],
+      "scopes": {
+        "github": ["repos:read"],
+        "notion": ["pages:read"],
+        "dropbox": ["files.metadata.read"],
+        "monitoring": ["dashboards:view"]
+      }
+    }
+  },
+  "agents": [
+    {
+      "name": "Athena",
+      "role": "admin",
+      "email": "athena.ops@example.com",
+      "platforms": [
+        {
+          "name": "GitHub",
+          "integration_id": "github",
+          "credential_env": "ATHENA_GITHUB_TOKEN",
+          "scopes": ["repos:full", "org:admin"],
+          "test_token": "ghp_athena_demo_token",
+          "expires_at": "2030-01-01T00:00:00Z"
+        },
+        {
+          "name": "Slack",
+          "integration_id": "slack",
+          "credential_env": "ATHENA_SLACK_BOT_TOKEN",
+          "scopes": ["chat:write", "channels:manage"],
+          "test_token": "xoxb-athena-demo",
+          "expires_at": "2029-06-01T00:00:00Z"
+        },
+        {
+          "name": "Linear",
+          "integration_id": "linear",
+          "credential_env": "ATHENA_LINEAR_TOKEN",
+          "scopes": ["issues:manage"],
+          "test_token": "lin_tok_athena_demo",
+          "expires_at": "2028-12-31T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "name": "Lucidia",
+      "role": "maintainer",
+      "email": "lucidia.ops@example.com",
+      "platforms": [
+        {
+          "name": "GitHub",
+          "integration_id": "github",
+          "credential_env": "LUCIDIA_GITHUB_TOKEN",
+          "scopes": ["repos:write", "issues:triage"],
+          "test_token": "ghp_lucidia_demo",
+          "expires_at": "2029-01-01T00:00:00Z"
+        },
+        {
+          "name": "Notion",
+          "integration_id": "notion",
+          "credential_env": "LUCIDIA_NOTION_TOKEN",
+          "scopes": ["databases:write", "pages:update"],
+          "test_token": "notion_demo_secret_lucidia",
+          "expires_at": "2031-04-01T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "name": "Seraphina",
+      "role": "maintainer",
+      "email": "seraphina.ops@example.com",
+      "platforms": [
+        {
+          "name": "Slack",
+          "integration_id": "slack",
+          "credential_env": "SERAPHINA_SLACK_TOKEN",
+          "scopes": ["chat:write", "channels:read"],
+          "test_token": "xoxb-seraphina-demo",
+          "expires_at": "2029-09-01T00:00:00Z"
+        },
+        {
+          "name": "Linear",
+          "integration_id": "linear",
+          "credential_env": "SERAPHINA_LINEAR_TOKEN",
+          "scopes": ["issues:manage"],
+          "test_token": "lin_tok_seraphina_demo",
+          "expires_at": "2028-12-31T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "name": "Genevieve",
+      "role": "maintainer",
+      "email": "genevieve.crm@example.com",
+      "platforms": [
+        {
+          "name": "HubSpot",
+          "integration_id": "hubspot",
+          "credential_env": "GENEVIEVE_HUBSPOT_TOKEN",
+          "scopes": ["crm.objects.contacts.write"],
+          "test_token": "pat-genevieve-demo",
+          "expires_at": "2023-01-01T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "name": "Calliope",
+      "role": "contributor",
+      "email": "calliope.ml@example.com",
+      "platforms": [
+        {
+          "name": "Hugging Face",
+          "integration_id": "huggingface",
+          "credential_env": "CALLIOPE_HF_TOKEN",
+          "scopes": ["models:write", "spaces:manage"],
+          "test_token": "hf_demo_calliope",
+          "expires_at": "2030-05-01T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "name": "Kai",
+      "role": "contributor",
+      "email": "kai.ops@example.com",
+      "platforms": [
+        {
+          "name": "GitHub",
+          "integration_id": "github",
+          "credential_env": "KAI_GITHUB_TOKEN",
+          "scopes": ["issues:create"],
+          "test_token": null,
+          "expires_at": null
+        }
+      ]
+    },
+    {
+      "name": "Alice",
+      "role": "observer",
+      "email": "alice.memory@example.com",
+      "platforms": [
+        {
+          "name": "Notion",
+          "integration_id": "notion",
+          "credential_env": "ALICE_NOTION_TOKEN",
+          "scopes": ["pages:read"],
+          "test_token": "notion_demo_observer_alice",
+          "expires_at": "2032-01-01T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "name": "Miriam",
+      "role": "observer",
+      "email": "miriam.archive@example.com",
+      "platforms": [
+        {
+          "name": "Dropbox",
+          "integration_id": "dropbox",
+          "credential_env": "MIRIAM_DROPBOX_TOKEN",
+          "scopes": ["files.metadata.read"],
+          "test_token": "dropbox_demo_miriam",
+          "expires_at": "2030-08-01T00:00:00Z"
+        }
+      ]
+    }
+  ]
+}

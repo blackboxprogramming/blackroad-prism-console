@@ -1,0 +1,39 @@
+2025-10-25 03:29:42,639 [INFO] Starting agent onboarding pipeline
+2025-10-25 03:29:42,640 [INFO] Loaded 8 agent definitions
+2025-10-25 03:29:42,640 [INFO] Generated credential set for Athena (key id 538f9d205c0f8de0)
+2025-10-25 03:29:42,640 [INFO] [github] GitHub credential check → connected
+2025-10-25 03:29:42,640 [INFO] [slack] Slack credential check → connected
+2025-10-25 03:29:42,640 [INFO] [linear] Linear credential check → connected
+2025-10-25 03:29:43,256 [INFO] Registered Athena with status registered
+2025-10-25 03:29:43,256 [INFO] Generated credential set for Lucidia (key id 9e41a98e9db4a5b5)
+2025-10-25 03:29:43,256 [INFO] [github] GitHub credential check → connected
+2025-10-25 03:29:43,256 [INFO] [notion] Notion credential check → connected
+2025-10-25 03:29:43,257 [INFO] Registered Lucidia with status registered
+2025-10-25 03:29:43,257 [INFO] Generated credential set for Seraphina (key id a9e66372fbd2389a)
+2025-10-25 03:29:43,257 [INFO] [slack] Slack credential check → connected
+2025-10-25 03:29:43,257 [INFO] [linear] Linear credential check → connected
+2025-10-25 03:29:43,258 [INFO] Registered Seraphina with status registered
+2025-10-25 03:29:43,258 [INFO] Generated credential set for Genevieve (key id 4cf5b5214b874c32)
+2025-10-25 03:29:43,258 [INFO] [hubspot] HubSpot credential check → expired
+2025-10-25 03:29:43,259 [INFO] Registered Genevieve with status registered
+2025-10-25 03:29:43,259 [INFO] Generated credential set for Calliope (key id 641af8b2ba589a24)
+2025-10-25 03:29:43,259 [INFO] [huggingface] Hugging Face credential check → connected
+2025-10-25 03:29:43,260 [INFO] Registered Calliope with status registered
+2025-10-25 03:29:43,260 [INFO] Generated credential set for Kai (key id 7fbd300aea6eeba3)
+2025-10-25 03:29:43,260 [INFO] [github] GitHub credential check → missing_credentials
+2025-10-25 03:29:43,260 [INFO] Registered Kai with status registered
+2025-10-25 03:29:43,261 [INFO] Generated credential set for Alice (key id fbeed12d4a88bffd)
+2025-10-25 03:29:43,261 [INFO] [notion] Notion credential check → connected
+2025-10-25 03:29:43,261 [INFO] Registered Alice with status registered
+2025-10-25 03:29:43,261 [INFO] Generated credential set for Miriam (key id 2e14136e1e5307cd)
+2025-10-25 03:29:43,261 [INFO] [dropbox] Dropbox credential check → connected
+2025-10-25 03:29:43,274 [INFO] Registered Miriam with status registered
+2025-10-25 03:29:43,275 [INFO] Onboarding summary ready
+2025-10-25 03:29:43,275 [INFO] SUMMARY ✅ Athena — GitHub + Slack + Linear linked
+2025-10-25 03:29:43,275 [INFO] SUMMARY ✅ Lucidia — GitHub + Notion linked
+2025-10-25 03:29:43,275 [INFO] SUMMARY ✅ Seraphina — Slack + Linear linked
+2025-10-25 03:29:43,275 [INFO] SUMMARY ⚠️ Genevieve — HubSpot key expired
+2025-10-25 03:29:43,275 [INFO] SUMMARY ✅ Calliope — Hugging Face linked
+2025-10-25 03:29:43,275 [INFO] SUMMARY ❌ Kai — GitHub credentials missing
+2025-10-25 03:29:43,275 [INFO] SUMMARY ✅ Alice — Notion linked
+2025-10-25 03:29:43,275 [INFO] SUMMARY ✅ Miriam — Dropbox linked
