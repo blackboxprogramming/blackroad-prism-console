@@ -1,0 +1,17 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: 'slack'
+
+receivers:
+  - name: 'slack'
+    slack_configs:
+      - api_url: ${SLACK_WEBHOOK_URL}
+        channel: '#dev-ops'
+        text: |
+          *Alert:* {{ .CommonAnnotations.summary }}
+          *Details:* {{ .CommonAnnotations.description }}
+          *Status:* {{ .Status | toUpper }}
+          *Service:* {{ .Labels.job }}
+          *Time:* {{ .StartsAt }}

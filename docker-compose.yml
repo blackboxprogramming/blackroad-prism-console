@@ -1,35 +1,97 @@
 version: "3.9"
+
 services:
-  app:
-    build: .
-    image: blackroad/prism-console:dev
-    volumes:
-      - .:/workspace
-    working_dir: /workspace
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    env_file:
+      - .env
+    environment:
+      AI_CONSOLE_REDIS_URL: redis://redis:6379/0
+      AI_CONSOLE_API_URL: http://api:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    env_file:
+      - .env
+    environment:
+      AI_CONSOLE_API_URL: http://api:8000
+      NEXT_PUBLIC_GRAFANA_URL: ${NEXT_PUBLIC_GRAFANA_URL:-http://localhost:3001}
     ports:
       - "3000:3000"
-    command: bash -lc "npm run dev --if-present || bash"
-
-  tests:
-    build: .
-    image: blackroad/prism-console:test
-    volumes:
-      - .:/workspace
-    working_dir: /workspace
-    command: bash -lc "pytest -q"
-
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.103.0
-    command: ["--config=/etc/otel-collector.yaml"]
-    volumes:
-      - ./otel/otel-collector.yaml:/etc/otel-collector.yaml:ro
-    ports:
-      - "4318:4318"
     depends_on:
-      - jaeger
+      - api
+    restart: unless-stopped
 
-  jaeger:
-    image: jaegertracing/all-in-one:1.57
+  redis:
+    image: redis:7.4-alpine
     ports:
-      - "16686:16686"
-      - "14250:14250"
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alerts.yml:/etc/prometheus/alerts.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - api
+      - frontend
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    environment:
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    ports:
+      - "9093:9093"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: 'true'
+      GF_AUTH_DISABLE_LOGIN_FORM: 'false'
+    depends_on:
+      - prometheus
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.8
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - frontend
+      - api
+    restart: unless-stopped
+
+volumes:
+  grafana-data:
+  redis-data:

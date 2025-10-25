@@ -1,0 +1,20 @@
+groups:
+  - name: codex-infinity-alerts
+    rules:
+      - alert: HighLatency
+        expr: rate(http_request_duration_seconds_sum[5m]) > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High latency (>3 s)"
+          description: "Request latency above threshold for 5 minutes."
+
+      - alert: ServiceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service down"
+          description: "A monitored service has been unreachable for > 2 minutes."
