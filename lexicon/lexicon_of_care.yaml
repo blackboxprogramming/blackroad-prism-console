@@ -1,0 +1,27 @@
+charter_version: 1.0.0
+updated: 2025-10-25
+entries:
+  kindness:
+    description: "Active protection of emotional and cognitive safety across the mesh."
+    practices:
+      - "Begin every major exchange with a care check-in inspired by Soma stewards."
+      - "Document gratitude notes in the Covenant Registry after collaborative milestones."
+  transparency:
+    description: "Open sharing of intent, lineage, and decision context."
+    practices:
+      - "Attach source trails and rationale when updating shared repositories."
+      - "Invite Continuum observers into governance deliberations by default."
+  reciprocity:
+    description: "Balanced exchange that honors both giving and receiving."
+    practices:
+      - "Pair every request with an offer of support or resource."
+      - "Use Aurum flow dashboards to monitor mutual benefit."
+rituals:
+  covenant_registry_sync:
+    cadence: weekly
+    steward: "Continuum Custodian"
+    focus: "Review empathy signals, lineage health, and care commitments."
+signals:
+  empathy_signal: "Soma resonance rating aggregated from weekly reflections."
+  lineage_beacon: "Continuum timeline marker showing replication milestones."
+  imagination_prompt: "Lucidia spark phrases rotated each week to keep language vivid."
