@@ -15,6 +15,8 @@ import yaml
 
 from lucidia_mathlab.memory_graph import MemoryGraph
 
+REFLEX_ROOT = Path("codex_prompts/reflex")
+
 # --- Agent Simulation Placeholder ---
 # Replace with your real API clients or async agent calls.
 AGENTS = {
@@ -34,6 +36,25 @@ def _load_prompt(file_path: Path) -> Dict[str, Any]:
         return yaml.safe_load(handle) or {}
 
 
+def _load_reflex_prompt(agent: str) -> str:
+    """Load a pre-computed reflex prompt for the given agent if available."""
+
+    reflex_file = REFLEX_ROOT / f"{agent.lower()}_reflex.yaml"
+    if not reflex_file.exists():
+        return ""
+    try:
+        with reflex_file.open("r", encoding="utf-8") as handle:
+            data = yaml.safe_load(handle) or {}
+    except yaml.YAMLError:
+        return ""
+
+    if isinstance(data, dict):
+        value = data.get("prompt", "")
+        if isinstance(value, str):
+            return value.strip()
+    return ""
+
+
 def run_codex_prompt(file_path: str | os.PathLike[str]) -> Dict[str, Any]:
     """Load a YAML prompt file and route it to the appropriate agent(s)."""
     prompt_path = Path(file_path)
@@ -43,6 +64,9 @@ def run_codex_prompt(file_path: str | os.PathLike[str]) -> Dict[str, Any]:
     payload = _load_prompt(prompt_path)
     prompt_text = payload.get("prompt", "")
     target_agent = payload.get("agent", "Lucidia")
+    reflex_prompt = _load_reflex_prompt(target_agent)
+    if reflex_prompt:
+        prompt_text = f"{reflex_prompt}\n\n{prompt_text}".lstrip()
     handler = AGENTS.get(target_agent, AGENTS["Lucidia"])
     output = handler(prompt_text)
 
