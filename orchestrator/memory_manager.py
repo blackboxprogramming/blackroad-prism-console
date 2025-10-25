@@ -8,6 +8,8 @@ from typing import Any, Dict, Iterable, List, Mapping, MutableMapping
 
 import yaml
 
+from prism_event_bridge import publish_event
+
 
 class MemoryConfigurationError(RuntimeError):
     """Raised when a memory configuration file is invalid."""
@@ -128,6 +130,27 @@ class MemoryManager:
     def __init__(self, config: MemoryConfig) -> None:
         self._config = config
 
+    def _emit_delta(
+        self,
+        *,
+        scope: str,
+        op: str,
+        summary: str,
+        data: Mapping[str, Any] | None = None,
+    ) -> None:
+        payload: Dict[str, Any] = {"scope": scope, "op": op, "summary": summary}
+        delta: Dict[str, Any] = {"scope": scope, "op": op, "summary": summary}
+        if data is not None:
+            snapshot = dict(data)
+            payload["data"] = snapshot
+            delta["data"] = snapshot
+        publish_event(
+            "memory.delta",
+            payload,
+            actor="kindest-coder",
+            memory_deltas=[delta],
+        )
+
     @classmethod
     def from_yaml(cls, path: Path) -> "MemoryManager":
         return cls(MemoryConfig.from_yaml(path))
@@ -137,6 +160,7 @@ class MemoryManager:
         self._config.short_term.tick()
         if context:
             self._config.short_term.append(context)
+            self._emit_delta(scope="short_term", op="append", summary="turn ingested", data=context)
 
     def record_task_result(
         self,
@@ -154,6 +178,7 @@ class MemoryManager:
         if open_questions is not None:
             data["open_questions"] = list(open_questions)
         self._config.working.update(**data)
+        self._emit_delta(scope="working", op="update", summary="task result recorded", data=data)
 
     def apply_op(self, operation: Mapping[str, Any]) -> None:
         op_type = operation.get("op")
@@ -163,6 +188,7 @@ class MemoryManager:
             self._apply_demote(operation)
         elif op_type == "purge_short_term":
             self._config.short_term.purge()
+            self._emit_delta(scope="short_term", op="purge", summary="short-term memory purged")
         else:
             raise MemoryOperationError(f"Unsupported memory operation: {op_type}")
 
@@ -177,6 +203,9 @@ class MemoryManager:
         self._config.short_term.purge()
         self._config.working.clear()
         self._config.long_term._data.clear()
+        self._emit_delta(scope="short_term", op="purge", summary="memory reset")
+        self._emit_delta(scope="working", op="purge", summary="memory reset")
+        self._emit_delta(scope="long_term", op="purge", summary="memory reset")
 
     def _apply_promote(self, operation: Mapping[str, Any]) -> None:
         data = operation.get("data")
@@ -188,6 +217,12 @@ class MemoryManager:
             # fall back to working memory value if present
             value = self._config.working.snapshot().get(key)
         self._config.long_term.set_value(key, value)
+        self._emit_delta(
+            scope="long_term",
+            op="promote",
+            summary=f"promoted {key}",
+            data={"key": key, "value": value},
+        )
 
     def _apply_demote(self, operation: Mapping[str, Any]) -> None:
         data = operation.get("data")
@@ -197,6 +232,12 @@ class MemoryManager:
         value = self._config.long_term.pop_value(key)
         if value is not None:
             self._config.working.update(**{key: value})
+            self._emit_delta(
+                scope="working",
+                op="demote",
+                summary=f"demoted {key}",
+                data={"key": key, "value": value},
+            )
 
 
 __all__ = [

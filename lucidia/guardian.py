@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Guardian Agent
+"""Guardian Agent
 
 Listens for new events and contradictions, applies policy logic to enforce
 truth filtering and contradiction escalation, and interacts with other agents
@@ -8,63 +7,46 @@ such as Roadie. This agent runs in a loop and should be supervised by an
 external process manager (systemd, supervisord, etc.).
 """
 
-import json
-import time
-from pathlib import Path
-from typing import Any, Dict
+from __future__ import annotations
 
-STATE_DIR = Path("/srv/lucidia/state")
-EVENT_LOG_PATH = STATE_DIR / "events.log"
-CONTRA_PATH = STATE_DIR / "contradictions.log"
+import time
+from typing import Any, Iterable, Mapping, Optional
+
+from prism_event_bridge import fetch_events
 
 
 class Guardian:
-    def __init__(self):
-        self.event_pos = 0
-        self.contra_pos = 0
+    def __init__(self) -> None:
+        self.cursor: Optional[str] = None
 
-    def tail_file(self, path: Path, last_pos: int) -> (list, int):
-        if not path.exists():
-            return [], last_pos
-        with open(path, "r", encoding="utf-8") as f:
-            f.seek(last_pos)
-            lines = f.readlines()
-            last_pos = f.tell()
-        return [line.strip() for line in lines], last_pos
-
-    def handle_event(self, rec: Dict[str, Any]) -> None:
-        kind = rec.get("kind")
-        if kind == "contradiction":
-            return
-        print(f"[guardian] Event: {rec}")
-
-    def handle_contra(self, rec: Dict[str, Any]) -> None:
-        print(f"[guardian] CONTRADICTION flagged: {rec.get('context')}")
+    def handle_event(self, record: Mapping[str, Any]) -> None:
+        topic = record.get("topic", "?")
+        payload = record.get("payload", {})
+        kpis = record.get("kpis")
+        memory_deltas = record.get("memory_deltas")
+        print(f"[guardian] event {topic}: {payload}")
+        if kpis:
+            print(f"[guardian]  KPIs: {kpis}")
+        if isinstance(memory_deltas, Iterable):
+            for delta in memory_deltas:
+                print(f"[guardian]  memory delta: {delta}")
 
     def loop(self, poll_interval: float = 2.0) -> None:
         while True:
-            events, self.event_pos = self.tail_file(EVENT_LOG_PATH, self.event_pos)
-            for line in events:
+            events, cursor = fetch_events(since=self.cursor)
+            if cursor:
+                self.cursor = cursor
+            for record in events:
                 try:
-                    rec = json.loads(line)
-                    self.handle_event(rec)
-                except Exception:
-                    continue
-
-            contras, self.contra_pos = self.tail_file(CONTRA_PATH, self.contra_pos)
-            for line in contras:
-                try:
-                    rec = json.loads(line)
-                    self.handle_contra(rec)
-                except Exception:
-                    continue
-
+                    self.handle_event(record)
+                except Exception as exc:  # noqa: BLE001 - Guardian must keep running
+                    print(f"[guardian] failed to handle event: {exc}")
             time.sleep(poll_interval)
 
 
-def main():
-    g = Guardian()
-    g.loop()
+def main() -> None:
+    guardian = Guardian()
+    guardian.loop()
 
 
 if __name__ == "__main__":
