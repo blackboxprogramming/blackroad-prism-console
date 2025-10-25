@@ -3,7 +3,16 @@
   email you@blackroad.io
 }
 
-blackroad.io, www.blackroad.io {
+blackroad.io, www.blackroad.io, blackroadinc.us {
   encode gzip
-  reverse_proxy web:3000
+
+  # API endpoints
+  handle /api/* {
+    reverse_proxy api:4000
+  }
+
+  # Main application
+  handle {
+    reverse_proxy web:8000
+  }
 }

@@ -1,0 +1,27 @@
+# Production Dockerfile for BlackRoad API
+FROM node:20-alpine AS base
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
+# Copy application code
+COPY srv/blackroad-api ./srv/blackroad-api
+COPY src ./src
+COPY scripts ./scripts
+
+# Create necessary directories
+RUN mkdir -p /app/data /app/logs
+
+# Set environment
+ENV NODE_ENV=production \
+    PORT=8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:8000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+EXPOSE 8000
+
+CMD ["node", "srv/blackroad-api/server_full.js"]

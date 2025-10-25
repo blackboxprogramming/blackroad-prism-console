@@ -1,11 +1,35 @@
 services:
-  web:
-    image: ghcr.io/blackroad-prism/blackroad-prism-console:latest
+  api:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    image: blackroad-api:latest
     restart: always
     env_file: .env
     networks: [webnet]
     expose:
-      - "3000"
+      - "4000"
+    healthcheck:
+      test: ["CMD", "node", "/app/healthcheck.mjs"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: blackroad-web:latest
+    restart: always
+    env_file: .env
+    networks: [webnet]
+    expose:
+      - "8000"
+    volumes:
+      - app_data:/app/data
+      - app_logs:/app/logs
+    depends_on:
+      - api
 
   caddy:
     image: caddy:2
@@ -20,10 +44,13 @@ services:
     networks: [webnet]
     depends_on:
       - web
+      - api
 
 volumes:
   caddy_data:
   caddy_config:
+  app_data:
+  app_logs:
 
 networks:
   webnet:
