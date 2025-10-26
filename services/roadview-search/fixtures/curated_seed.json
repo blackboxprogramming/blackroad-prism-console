@@ -1,0 +1,34 @@
+{
+  "docs": [
+    {
+      "title": "Climate Research Advances",
+      "url": "https://research.example.org/climate",
+      "sourceType": "paper",
+      "bias": "na",
+      "publishedAt": "2023-07-10T00:00:00Z",
+      "content": "Climate change research highlights new mitigation strategies with structured data and expert authorship.",
+      "author": "Dr. Rivera",
+      "hasCanonical": true
+    },
+    {
+      "title": "Local Policy Update",
+      "url": "https://news.example.com/policy-update",
+      "sourceType": "news",
+      "bias": "center",
+      "publishedAt": "2022-05-04T00:00:00Z",
+      "content": "City council approves new sustainable transport measures after months of debate and cross-party input.",
+      "author": "Alex Johnson",
+      "hasCanonical": false
+    },
+    {
+      "title": "Open Data Release",
+      "url": "https://gov.example.gov/data-release",
+      "sourceType": "gov",
+      "bias": "na",
+      "publishedAt": "2021-12-01T00:00:00Z",
+      "content": "Government releases open data portal featuring transportation, health, and environmental datasets for public use.",
+      "author": "",
+      "hasCanonical": true
+    }
+  ]
+}
