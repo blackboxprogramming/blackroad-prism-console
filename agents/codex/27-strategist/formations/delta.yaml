@@ -1,0 +1,10 @@
+name: DELTA
+focus: "Fast build and deployment"
+signals:
+  cadence: "hourly standups"
+  risk_token: "green"
+  exit: "feature delivered"
+roles:
+  Builder: "ship feature"
+  Linguist: "docs and comms"
+  Roadie: "systems health"

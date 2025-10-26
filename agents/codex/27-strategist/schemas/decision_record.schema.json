@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad.io/schemas/codex27/decision_record.json",
+  "title": "Codex-27 Decision Record",
+  "type": "object",
+  "required": [
+    "id",
+    "mission_id",
+    "timestamp",
+    "call",
+    "context",
+    "energy",
+    "risk",
+    "reversal"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "pattern": "^dr-[a-z0-9-]+$"},
+    "mission_id": {"type": "string", "minLength": 1},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "call": {"type": "string", "enum": ["GO", "HOLD", "NO-GO"]},
+    "context": {
+      "type": "object",
+      "required": ["playbook", "formation", "summary"],
+      "additionalProperties": false,
+      "properties": {
+        "playbook": {"type": "string", "minLength": 1},
+        "formation": {"type": "string", "minLength": 1},
+        "summary": {"type": "string", "minLength": 1}
+      }
+    },
+    "energy": {
+      "type": "object",
+      "required": ["joules_spent", "joules_forecast"],
+      "additionalProperties": false,
+      "properties": {
+        "joules_spent": {"type": "number", "minimum": 0},
+        "joules_forecast": {"type": "number", "minimum": 0},
+        "notes": {"type": "string"}
+      }
+    },
+    "risk": {
+      "type": "object",
+      "required": ["token", "owner"],
+      "additionalProperties": false,
+      "properties": {
+        "token": {"type": "string", "enum": ["green", "amber", "red"]},
+        "owner": {"type": "string", "minLength": 1},
+        "notes": {"type": "string"}
+      }
+    },
+    "reversal": {
+      "type": "object",
+      "required": ["ready", "steps"],
+      "additionalProperties": false,
+      "properties": {
+        "ready": {"type": "boolean"},
+        "steps": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "credits": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}

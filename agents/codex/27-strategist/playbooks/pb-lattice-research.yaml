@@ -1,0 +1,32 @@
+id: pb-lattice-research
+name: LATTICE (research lattice)
+trigger:
+  topic: "research:explore"
+  guards:
+    - "sponsor:approved"
+roles:
+  - agent: "Researcher"
+    task: "frame_experiment"
+  - agent: "Analyst"
+    task: "model_outcomes"
+  - agent: "Strategist"
+    task: "balance_portfolio"
+budget:
+  joules_max: 350
+steps:
+  - emit:
+      topic: "formation:lattice:start"
+  - run: "scripts/setup_sandbox.sh"
+  - run: "scripts/run_research_notebook.sh"
+  - gate:
+      topic: "guardian:decision"
+      allow: true
+  - emit:
+      topic: "formation:lattice:complete"
+rollback:
+  - run: "scripts/teardown_sandbox.sh"
+  - emit:
+      topic: "formation:lattice:reverted"
+exit:
+  success: "experiment logged + insights shared"
+  failure: "sandbox reset + DR filed"
