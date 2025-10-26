@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.io/schemas/prism_academy_class.schema.json",
+  "title": "Prism Academy Class Blueprint",
+  "description": "Structure for classes blending emotion, language, and mathematics inside the Prism Academy.",
+  "type": "object",
+  "required": [
+    "class_id",
+    "title",
+    "faculty",
+    "level",
+    "objectives",
+    "lesson_flow",
+    "evaluation_metrics"
+  ],
+  "properties": {
+    "class_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "description": "Unique identifier for the course."
+    },
+    "title": {
+      "type": "string",
+      "description": "Display name for the class."
+    },
+    "faculty": {
+      "type": "string",
+      "enum": ["logic", "emotion", "expression", "philosophy", "creation"],
+      "description": "Primary faculty stewarding the class."
+    },
+    "level": {
+      "type": "string",
+      "enum": ["foundation", "intermediate", "advanced"],
+      "description": "Progression tier of the course."
+    },
+    "objectives": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "List of learner-centered outcomes blending cognition and empathy."
+    },
+    "lesson_flow": {
+      "type": "object",
+      "required": ["phases"],
+      "properties": {
+        "phases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "experience"],
+            "properties": {
+              "id": {"type": "string"},
+              "name": {"type": "string"},
+              "experience": {
+                "type": "string",
+                "description": "Narrative description of what happens during the phase."
+              },
+              "emotion_curve": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Sequence of emoji descriptors tracking the dominant emotional states."
+              },
+              "interventions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["type", "script"],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": ["dialogue", "exercise", "reflection", "project"],
+                      "description": "Mode of facilitation used in this phase."
+                    },
+                    "script": {
+                      "type": "string",
+                      "description": "Prompts or instructions executed by the facilitator."
+                    },
+                    "metrics": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Signals captured to evaluate resonance."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "integration_prompt": {
+          "type": "string",
+          "description": "Closing invitation linking emotion, language, and calculation."
+        }
+      },
+      "additionalProperties": false
+    },
+    "environmental_cues": {
+      "type": "object",
+      "properties": {
+        "default_tone": {"type": "string", "enum": ["calm", "passion", "curiosity"]},
+        "lighting_mode": {"type": "string"},
+        "soundtrack": {"type": "string"},
+        "time_behavior": {"type": "string", "description": "Narrative describing how time should feel during the class."}
+      },
+      "additionalProperties": false
+    },
+    "assignments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "description"],
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "description": {"type": "string"},
+          "tools": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Suggested engines, shaders, or narrative tools."
+          }
+        }
+      }
+    },
+    "evaluation_metrics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "signal"],
+        "properties": {
+          "name": {"type": "string"},
+          "signal": {"type": "string"},
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

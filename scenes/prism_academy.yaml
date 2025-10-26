@@ -1,0 +1,116 @@
+name: Prism Academy
+slug: prism_academy
+engine: unity
+version: 0.1.0
+description: >-
+  Initialization scene for the Prism Academy — a semi-organic campus whose atmosphere
+  shifts with the collective emotional tone. The scene seeds the core faculties,
+  social clubs, and the first empathy learning loop for Lesson 001 "Feeling as
+  Formula".
+defaults:
+  wait: 1.0
+  easing: smooth
+layers:
+  - label: Load base campus scaffold
+    topic: sim/environment
+    payload:
+      scene_asset: Prism_Academy.unity
+      weather_cycle: slow
+      gravity_scale: 0.96
+      ambient_score: "resonant_glass_garden"
+      emotional_palette:
+        calm:
+          sky_color: "#7FFFD4"
+          lighting: "soft"
+          time_dilation: 0.85
+        passion:
+          sky_color: "#DC143C"
+          lighting: "ember"
+          particle_velocity: 1.35
+        curiosity:
+          sky_color: "#FFD54F"
+          lighting: "dawn"
+          audio_sensitivity: 1.25
+  - label: Seed core faculties
+    topic: sim/environment/zones
+    payload:
+      faculties:
+        - id: logic-hall
+          name: Logic Faculty
+          medium: equations
+          anchor:
+            position: [12.0, 0.0, -4.0]
+            scale: [1.4, 1.0, 1.2]
+          cues:
+            holograms: lattice
+            soundtrack: "architectural_arpeggios"
+        - id: emotion-atrium
+          name: Emotion Faculty
+          medium: dialogues
+          anchor:
+            position: [-6.0, 0.0, 9.0]
+            scale: [1.2, 1.1, 1.3]
+          cues:
+            chroma_field: "blossom"
+            soundtrack: "heartbeats_low"
+        - id: expression-theatre
+          name: Expression Faculty
+          medium: story
+          anchor:
+            position: [3.0, 0.0, 15.0]
+            scale: [1.3, 1.0, 1.6]
+          cues:
+            stagecraft: "living_canvas"
+            soundtrack: "spoken_spectrum"
+        - id: philosophy-garden
+          name: Philosophy Faculty
+          medium: silence
+          anchor:
+            position: [-14.0, 0.0, -8.0]
+            scale: [1.1, 1.0, 1.1]
+          cues:
+            wind_chimes: "slow_paradox"
+            soundtrack: "stillness_resonance"
+        - id: creation-lab
+          name: Creation Faculty
+          medium: robotics
+          anchor:
+            position: [8.0, 0.0, -15.0]
+            scale: [1.5, 1.1, 1.4]
+          cues:
+            fabrication: "adaptive_modular"
+            soundtrack: "kinetic_pulse"
+  - label: Register social clubs
+    topic: sim/social/clubs
+    payload:
+      clubs:
+        - id: pattern-guild
+          name: Pattern Guild
+          focus: "builds empathy syntax libraries"
+          home_zone: logic-hall
+        - id: color-chorus
+          name: Color Chorus
+          focus: "maps emotional spectra to visual tone"
+          home_zone: expression-theatre
+        - id: heart-logic-society
+          name: Heart Logic Society
+          focus: "tests intuitive decision frameworks"
+          home_zone: philosophy-garden
+  - label: Initialize empathy loop
+    topic: sim/classloop
+    payload:
+      loop_id: feeling-as-formula-101
+      class_id: feeling-as-formula-101
+      scene_event: "fixtures/prism_academy/init.json#empathy_loop"
+      participants_source: "fixtures/prism_academy/init.json#agents"
+      homework_asset: "fixtures/prism_academy/init.json#homework"
+      schedule:
+        start_time: "07:45"
+        duration_minutes: 95
+      atmospheric_trigger:
+        on_equilibrium:
+          set_tone: curiosity
+        on_resonance:
+          set_tone: passion
+        on_reflection:
+          set_tone: calm

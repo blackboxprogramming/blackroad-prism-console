@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.io/schemas/prism_academy_agent.schema.json",
+  "title": "Prism Academy Agent Archetype",
+  "description": "Definition for simulated agents within the Prism Academy learning ecosystem.",
+  "type": "object",
+  "required": [
+    "agent_id",
+    "name",
+    "role",
+    "faculty_alignment",
+    "intelligences",
+    "interaction_style"
+  ],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "description": "Stable identifier for the agent archetype."
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name rendered within academy interfaces."
+    },
+    "role": {
+      "type": "string",
+      "enum": ["teacher", "student", "researcher", "artist", "friend"],
+      "description": "Primary function performed inside the academy loop."
+    },
+    "faculty_alignment": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["faculty", "affinity"],
+        "properties": {
+          "faculty": {
+            "type": "string",
+            "enum": ["logic", "emotion", "expression", "philosophy", "creation"]
+          },
+          "affinity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Degree of resonance with the faculty focus."
+          },
+          "medium_preference": {
+            "type": "string",
+            "description": "Preferred teaching or learning medium within the faculty."
+          }
+        }
+      },
+      "description": "Ordered affinities that describe how the agent engages each faculty."
+    },
+    "intelligences": {
+      "type": "object",
+      "required": ["emotional", "linguistic", "mathematical"],
+      "properties": {
+        "emotional": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Empathy sensitivity level."
+        },
+        "linguistic": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Language dexterity score."
+        },
+        "mathematical": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Symbolic reasoning strength."
+        }
+      },
+      "additionalProperties": false
+    },
+    "interaction_style": {
+      "type": "object",
+      "required": ["tone", "tempo", "signature_motif"],
+      "properties": {
+        "tone": {
+          "type": "string",
+          "description": "Default affect used during dialogue simulation."
+        },
+        "tempo": {
+          "type": "string",
+          "enum": ["slow", "steady", "lively"],
+          "description": "Cadence for delivering content and feedback."
+        },
+        "signature_motif": {
+          "type": "string",
+          "description": "Short textual or sonic phrase associated with the agent."
+        }
+      },
+      "additionalProperties": false
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["target_agent_id", "connection"],
+        "properties": {
+          "target_agent_id": {
+            "type": "string",
+            "description": "Identifier of the agent with whom this archetype has a predefined rapport."
+          },
+          "connection": {
+            "type": "string",
+            "enum": ["mentor", "peer", "collaborator", "reflector"],
+            "description": "How the relationship manifests in simulation."
+          },
+          "shared_memory": {
+            "type": "string",
+            "description": "Brief note describing the shared experience they reference."
+          }
+        }
+      },
+      "description": "Optional list of pre-modeled relational hooks."
+    },
+    "schedule": {
+      "type": "object",
+      "properties": {
+        "primary_class": {
+          "type": "string",
+          "description": "Identifier of the class this agent is currently assigned to."
+        },
+        "daily_cycle": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["block", "location"],
+            "properties": {
+              "block": {"type": "string"},
+              "location": {"type": "string"},
+              "intention": {"type": "string"}
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
