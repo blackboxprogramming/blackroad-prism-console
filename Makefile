@@ -228,3 +228,12 @@ roadwork-a11y:
 
 roadwork-e2e:
 >pnpm --filter @blackroad/roadwork e2e
+
+CONSENT ?= prism/reproduction/consent-schema.json
+OPERATOR ?= module_crossover
+.PHONY: child
+child:
+>	@test -n "$(P1)" || (echo "P1=<parentA> is required" >&2 && exit 1)
+>	@test -n "$(P2)" || (echo "P2=<parentB> is required" >&2 && exit 1)
+>	@test -n "$(CHILD)" || (echo "CHILD=<child_name> is required" >&2 && exit 1)
+>	python prism/reproduction/reproduce.py --consent $(CONSENT) --operator $(OPERATOR) --parent-a $(P1) --parent-b $(P2) --child $(CHILD)

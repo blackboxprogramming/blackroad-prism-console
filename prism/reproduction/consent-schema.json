@@ -1,0 +1,9 @@
+{
+  "parents": [
+    {"id": "lucidia/scribe@sha", "consent_token": "JWS..."},
+    {"id": "lucidia/engineer@sha", "consent_token": "JWS..."}
+  ],
+  "operators": ["adapter_merge", "module_crossover", "distill"],
+  "license_ok": true,
+  "safety_caps": {"network_access": false, "external_write": false}
+}
