@@ -1,0 +1,9 @@
+solid solder_alignment_tray
+  facet normal 0 0 1
+    outer loop
+      vertex 0 0 0
+      vertex 80 0 0
+      vertex 0 80 0
+    endloop
+  endfacet
+endsolid solder_alignment_tray

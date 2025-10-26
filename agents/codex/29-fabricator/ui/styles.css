@@ -1,0 +1,44 @@
+body {
+  background: #0d0d0d;
+  color: #f1f1f1;
+  font-family: "Inter", system-ui, sans-serif;
+  margin: 0;
+}
+
+.layout {
+  margin: 0 auto;
+  max-width: 960px;
+  padding: 2rem;
+}
+
+header {
+  border-bottom: 1px solid #333;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.interlocks ul {
+  list-style: none;
+  padding: 0;
+}
+
+.interlocks li::before {
+  content: "\1F7E2";
+  margin-right: 0.5rem;
+}
+
+.jig-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.jig-list article {
+  background: #1a1a1a;
+  border: 1px solid #2b2b2b;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.jig-list a {
+  color: #6dd5a0;
+}

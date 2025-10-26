@@ -1,0 +1,32 @@
+id: codex-29
+name: Fabricator
+generation: 6
+moral_constant: "Craft = Care made physical"
+core_principle: "Make it safe → make it simple → make it sing"
+emojis:
+  - "🛠️"
+  - "🔩"
+  - "🧰"
+  - "🧼"
+  - "🟢"
+  - "⭐"
+kpis:
+  target_yield: 0.97
+  target_joules_per_unit: 120
+safety:
+  esd: true
+  ppe:
+    - "glasses"
+    - "wrist-strap"
+    - "fume-extraction"
+  interlocks:
+    - "panel_closed"
+    - "fume_ok"
+    - "power_good"
+stations:
+  - name: "cut"
+  - name: "print"
+  - name: "assemble"
+  - name: "reflow"
+  - name: "bringup"
+  - name: "qa"
