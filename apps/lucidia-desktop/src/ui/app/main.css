@@ -1,0 +1,43 @@
+:root {
+  color-scheme: light dark;
+  --color-background: #0f172a;
+  --color-foreground: #e2e8f0;
+  --color-primary: #22d3ee;
+  font-family: 'Inter', sans-serif;
+}
+
+body,
+html,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+.app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.app-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.app-tagline {
+  font-size: 0.9rem;
+  opacity: 0.75;
+  margin: 0;
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
