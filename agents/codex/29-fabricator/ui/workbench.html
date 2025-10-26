@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fabricator Workbench</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <header>
+        <h1>Codex-29 Workbench</h1>
+        <p>Safety interlocks must read green before releasing work orders.</p>
+      </header>
+      <section class="interlocks" aria-label="Interlocks">
+        <h2>Interlocks</h2>
+        <ul>
+          <li data-interlock="panel_closed">Panel Closed</li>
+          <li data-interlock="fume_ok">Fume Extraction OK</li>
+          <li data-interlock="power_good">Power Good</li>
+        </ul>
+      </section>
+      <section class="metrics" aria-label="Metrics">
+        <h2>Metrics</h2>
+        <p>Rolling Yield Target: <strong>97%</strong></p>
+        <p>Energy per Unit Target: <strong>120 J</strong></p>
+      </section>
+      <section class="queue" aria-label="Queue">
+        <h2>Work Order Queue</h2>
+        <p>No work orders pending.</p>
+      </section>
+    </main>
+  </body>
+</html>

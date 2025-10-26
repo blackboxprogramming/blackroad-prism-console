@@ -1,0 +1,18 @@
+lead_free:
+  preheat_temp_c: 150
+  soak_temp_c: 180
+  peak_temp_c: 245
+  time_above_liquidus_s: 60
+  cooldown_rate_c_per_s: 3
+leaded:
+  preheat_temp_c: 140
+  soak_temp_c: 170
+  peak_temp_c: 215
+  time_above_liquidus_s: 45
+  cooldown_rate_c_per_s: 3
+low_temp:
+  preheat_temp_c: 120
+  soak_temp_c: 150
+  peak_temp_c: 180
+  time_above_liquidus_s: 40
+  cooldown_rate_c_per_s: 2

@@ -1,0 +1,16 @@
+M2:
+  plastic: 0.12
+  aluminum: 0.18
+  steel: 0.22
+M2_5:
+  plastic: 0.22
+  aluminum: 0.30
+  steel: 0.36
+M3:
+  plastic: 0.35
+  aluminum: 0.50
+  steel: 0.60
+M4:
+  plastic: 0.60
+  aluminum: 0.90
+  steel: 1.10

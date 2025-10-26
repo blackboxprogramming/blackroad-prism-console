@@ -1,0 +1,20 @@
+{
+  "R100": {
+    "description": "100Ω ±1% resistor, 0603",
+    "vendor": "Digi-Key",
+    "mpn": "RMCF0603FT100R",
+    "substitutes": ["RK73H1JTTD1000F", "CPF0603B100RE"]
+  },
+  "C1U": {
+    "description": "1µF 16V X7R capacitor, 0603",
+    "vendor": "Mouser",
+    "mpn": "GRM188R71C105KA12",
+    "substitutes": ["CL10B105KA8NNNC"]
+  },
+  "U-PMIC": {
+    "description": "Buck regulator 3.3V",
+    "vendor": "Arrow",
+    "mpn": "TPS62172DSGR",
+    "substitutes": ["TPS62160DSGR", "LMR33630ADDA"]
+  }
+}
