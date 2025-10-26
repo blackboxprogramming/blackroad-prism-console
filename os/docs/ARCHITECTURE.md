@@ -74,3 +74,4 @@ BlackRoad OS provides a Raspberry Pi focused deployment for the Prism Console. T
 - **Kiosk unit (optional)** – launches Chromium in kiosk mode pointed at the local web UI.
 
 See `os/docs/TROUBLESHOOTING.md` for operational guidance.
+See `os/docs/OBSERVABILITY.md` for Grafana, Loki, and Promtail usage.

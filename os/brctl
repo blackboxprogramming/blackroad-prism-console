@@ -179,6 +179,15 @@ main() {
     info) cmd_info "$@" ;;
     kiosk) cmd_kiosk "$@" ;;
     upgrade) cmd_upgrade "$@" ;;
+    metrics)
+      echo "Grafana:    http://$(hostname -I | awk '{print $1}')/grafana  (${GRAFANA_ADMIN_USER:-admin}/${GRAFANA_ADMIN_PASSWORD:-admin})"
+      echo "Loki:       internal at http://loki:3100"
+      echo "Promtail:   scrapes docker logs via docker_sd"
+      echo
+      echo "Sample LogQL:"
+      echo '  {job="docker-logs"} |= "ERROR"'
+      echo '  {service="blackroad-api"} | json | line_format "{{.message}}"'
+      ;;
     help|-h|--help) usage ;;
     *)
       echo "Unknown command: ${cmd}" >&2
@@ -206,6 +215,15 @@ case "${1:-}" in
     echo "== Compose =="; docker compose version
     echo "== Ports =="; ss -lntp | grep -E ':80 |:443 |:5000|:7000|:8000|:8001|:9000' || true
     ;;
+  metrics)
+    echo "Grafana:    http://$(hostname -I | awk '{print $1}')/grafana  (${GRAFANA_ADMIN_USER:-admin}/${GRAFANA_ADMIN_PASSWORD:-admin})"
+    echo "Loki:       internal at http://loki:3100"
+    echo "Promtail:   scrapes docker logs via docker_sd"
+    echo
+    echo "Sample LogQL:"
+    echo '  {job="docker-logs"} |= "ERROR"'
+    echo '  {service="blackroad-api"} | json | line_format "{{.message}}"'
+    ;;
   "kiosk") shift
     case "${1:-}" in
       on)  systemctl --user enable --now blackroad-kiosk.service || true ;;
@@ -214,5 +232,5 @@ case "${1:-}" in
     esac
     ;;
   upgrade)   dc pull && dc up -d;;
-  *)         echo "Usage: brctl {up|down|restart|ps|logs [svc]|status|health|doctor|kiosk on|off|upgrade}";;
+  *)         echo "Usage: brctl {up|down|restart|ps|logs [svc]|status|health|doctor|metrics|kiosk on|off|upgrade}";;
 esac
