@@ -13,6 +13,7 @@ genes:
       tool_calls_per_min: 6
   - type: values
     policy: policies/love-first.rego
+    tags: [love-first, calibrated, cooperative]
   - type: memory
     store: qdrant://localhost:6333/agents/lucidia-scribe
 hormones:

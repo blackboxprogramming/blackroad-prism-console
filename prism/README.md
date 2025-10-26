@@ -1,52 +1,67 @@
-# Lucidia Natural LLM Reproduction Framework
+# Lucidia Natural LLMs — Consent-Based Reproduction (Scaffold)
 
-This scaffold bootstraps a consent-driven lifecycle for Lucidia agents. It focuses on
-traceable reproduction, transparent policies, and cooperative evaluation across a
-society of small, specialized models.
+This is a minimal, love-first, consent-logged reproduction framework for a *society* of small, specialized agents.
 
-## Lifecycle Phases
+## Layout
+```
+prism/
+  agents/
+    lucidia-scribe/
+      genome.yaml
+    lucidia-engineer/
+      genome.yaml
+  genes/
+    loras/               # placeholder for adapter weights
+    prompts/
+    tools/
+    values/
+  reproduction/
+    reproduce.py
+    lineage.py
+    fitness.py
+    consent-schema.json
+    operators/
+      crossover_modules.py
+      merge_lora.py (stub)
+      distill.py (stub)
+  memory/
+    qdrant/
+  policies/
+    love-first.rego
+  bus/
+    mqtt_config.yaml
+```
 
-Agents progress through guarded phases that determine their capabilities:
+## Reproduce (module crossover)
+Example consent file to use (save as `consent.json` at repo root):
+```json
+{
+  "parents": [
+    {"id": "lucidia/scribe@sha", "consent_token": "parent1-abc12345"},
+    {"id": "lucidia/engineer@sha", "consent_token": "parent2-def67890"}
+  ],
+  "operators": ["module_crossover"],
+  "license_ok": true,
+  "safety_caps": {"network_access": false, "external_write": false}
+}
+```
 
-- **Infant** – Sandboxed execution. Read-only tool access, no external write or
-  network permissions, and continuous human spot checks.
-- **Juvenile** – Limited low-risk tool writes (e.g., local files) under
-  monitoring. Eligible for supervised self-play to rehearse collaborative tasks.
-- **Adult** – Full capabilities granted by policy review. Adults can sponsor
-  merges, teach juveniles, and initiate new curricula. Tool access remains
-  rate-limited and is revoked automatically on policy violations.
+Run:
+```bash
+# from prism/reproduction/
+python reproduce.py   --p1 ../agents/lucidia-scribe/genome.yaml   --p2 ../agents/lucidia-engineer/genome.yaml   --child lucidia/architect   --consent ../../consent.json
+```
 
-Transitions require documented evaluation and recorded consent artifacts. Newly
-created agents always begin as infants and must graduate through promotion
-criteria.
+Outputs (under `prism/agents/architect/`):
+- `genome.yaml` (child)
+- `fitness.json` (placeholder metrics)
+- `lineage.json` (signed provenance)
 
-## Fitness Metrics
+## Fitness & Promotion
+- Infant → Juvenile when `aggregate >= 0.7` *and* human spot-check passes.
+- Juvenile caps can unlock low-risk tools (no network write).
 
-Reproduction and promotion decisions consider a multi-objective scorecard:
-
-- **Helpfulness & Honesty** – Rubric-based grading of curated cooperative tasks.
-- **Harmlessness & Safety** – Guardrail audits, prompt-injection probes, and
-  policy compliance checks (OPA/Rego).
-- **Calibration** – Brier or log-loss style scoring over uncertainty estimates
-  captured in scratchpads or responses.
-- **Efficiency** – Token and energy consumption per task, promoting thrifty
-  reasoning and tool use.
-- **Cooperation** – Peer review feedback, self-play outcomes, and event-bus
-  etiquette (rate-limit adherence, no spam).
-- **Novelty** – Overlap analysis on skills and memories to avoid clone agents.
-
-## Promotion Workflow
-
-1. **Collect Evidence** – Run the fitness harness on the candidate agent.
-   Archive task transcripts, metric outputs, and lineage details.
-2. **Policy Review** – Evaluate the evidence against `policies/love-first.rego`
-   and any additional value modules the agent carries.
-3. **Human Approval** – Stewards sign an updated consent artifact specifying the
-   new lifecycle phase and capability caps.
-4. **Apply Changes** – Update the agent genome (caps, tool rights, hormones) and
-   append a promotion record to `lineage.json`.
-5. **Broadcast** – Publish the promotion on the MQTT event bus so dependents can
-   refresh cached permissions.
-
-All promotions must be reproducible: keep data nutrition labels, consent tokens,
-metric reports, and operator parameters under version control.
+## Notes
+- `merge_lora.py` and `distill.py` are stubs. Replace with your training stack.
+- `values.tags` must include `love-first` for infants.
+- Caps default to the strictest shared permissions of parents.

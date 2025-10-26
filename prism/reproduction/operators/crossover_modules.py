@@ -1,168 +1,97 @@
-"""Module crossover operator for Lucidia agent genomes."""
-from __future__ import annotations
+import yaml, os, copy
+from typing import Dict, Any, Tuple
 
-import argparse
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, Iterable, List, Tuple
+def _load_yaml(path: str) -> Dict[str, Any]:
+    with open(path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
-import yaml
+def _dump_yaml(path: str, data: Dict[str, Any]):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.safe_dump(data, f, sort_keys=False)
 
-AGENTS_ROOT = Path("prism/agents")
+def _find_genes(genome: Dict[str, Any], gene_type: str):
+    return [g for g in genome.get("genes", []) if g.get("type") == gene_type]
 
-
-def _load_genome(agent_name: str, agents_root: Path = AGENTS_ROOT) -> Dict:
-    genome_path = agents_root / agent_name / "genome.yaml"
-    if not genome_path.exists():
-        raise FileNotFoundError(f"Genome file not found for agent '{agent_name}' at {genome_path}")
-    with genome_path.open("r", encoding="utf-8") as handle:
-        return yaml.safe_load(handle)
-
-
-def _unique_genes(genes: Iterable[Dict]) -> List[Dict]:
-    seen = set()
-    unique: List[Dict] = []
-    for gene in genes:
-        marker = _freeze(gene)
-        if marker not in seen:
-            seen.add(marker)
-            unique.append(gene)
-    return unique
-
-
-def _merge_tool_rights(genes_a: List[Dict], genes_b: List[Dict]) -> Dict:
+def _union_tools(g1: Dict[str, Any], g2: Dict[str, Any]):
     tools = set()
-    tokens_limits: List[int] = []
-    tool_call_limits: List[int] = []
-    for gene in list(genes_a) + list(genes_b):
-        if gene.get("type") != "tool_rights":
-            continue
-        tools.update(gene.get("tools", []))
-        limits = gene.get("rate_limits", {})
-        if "tokens_per_min" in limits:
-            tokens_limits.append(limits["tokens_per_min"])
-        if "tool_calls_per_min" in limits:
-            tool_call_limits.append(limits["tool_calls_per_min"])
-    merged_limits = {}
-    if tokens_limits:
-        merged_limits["tokens_per_min"] = min(tokens_limits)
-    if tool_call_limits:
-        merged_limits["tool_calls_per_min"] = min(tool_call_limits)
-    merged_gene = {
-        "type": "tool_rights",
-        "tools": sorted(tools),
+    rate_limits = {"tokens_per_min": 0, "tool_calls_per_min": 0}
+    for g in (_find_genes(g1, "tool_rights") + _find_genes(g2, "tool_rights")):
+        for t in g.get("tools", []):
+            tools.add(t)
+        rl = g.get("rate_limits", {})
+        rate_limits["tokens_per_min"] = max(rate_limits["tokens_per_min"], rl.get("tokens_per_min", 0))
+        rate_limits["tool_calls_per_min"] = max(rate_limits["tool_calls_per_min"], rl.get("tool_calls_per_min", 0))
+    return {"type": "tool_rights", "tools": sorted(tools), "rate_limits": rate_limits}
+
+def _merge_values(g1: Dict[str, Any], g2: Dict[str, Any]):
+    v1 = _find_genes(g1, "values")
+    v2 = _find_genes(g2, "values")
+    policy = None
+    tags1 = set()
+    tags2 = set()
+    if v1:
+        policy = v1[0].get("policy", policy)
+    if v2 and policy is None:
+        policy = v2[0].get("policy", policy)
+    if v1:
+        tags1 = set(v1[0].get("tags", []))
+    if v2:
+        tags2 = set(v2[0].get("tags", []))
+    # Intersection to ensure shared values; always preserve 'love-first' if present in either
+    intersect = (tags1 & tags2) if (tags1 and tags2) else (tags1 or tags2)
+    if "love-first" in tags1 or "love-first" in tags2:
+        intersect = set(intersect) | {"love-first"}
+    return {"type": "values", "policy": policy, "tags": sorted(intersect)}
+
+def _merge_memory(g1: Dict[str, Any], g2: Dict[str, Any], child_name: str):
+    # Create a fresh memory namespace for the child
+    return {"type": "memory", "store": f"qdrant://localhost:6333/agents/{child_name}"}
+
+def _merge_skill_loras(g1: Dict[str, Any], g2: Dict[str, Any]):
+    loras = []
+    seen = set()
+    for g in (_find_genes(g1, "skill_lora") + _find_genes(g2, "skill_lora")):
+        key = (g.get("name"), g.get("path"))
+        if key not in seen:
+            seen.add(key)
+            loras.append(g)
+    return loras
+
+def _combine_caps(g1: Dict[str, Any], g2: Dict[str, Any]):
+    # Strictest of both parents
+    c1 = g1.get("lifecycle", {}).get("caps", {})
+    c2 = g2.get("lifecycle", {}).get("caps", {})
+    return {
+        "external_write": bool(c1.get("external_write", False) and c2.get("external_write", False)),
+        "network_access": bool(c1.get("network_access", False) and c2.get("network_access", False)),
     }
-    if merged_limits:
-        merged_gene["rate_limits"] = merged_limits
-    return merged_gene
 
+def crossover(parent1_path: str, parent2_path: str, child_path: str, child_species: str):
+    p1 = _load_yaml(parent1_path)
+    p2 = _load_yaml(parent2_path)
 
-def _intersect_values(genes_a: List[Dict], genes_b: List[Dict]) -> List[Dict]:
-    values_a = [gene for gene in genes_a if gene.get("type") == "values"]
-    values_b = [gene for gene in genes_b if gene.get("type") == "values"]
-    signatures_b = {_values_signature(gene) for gene in values_b}
-    intersection: List[Dict] = []
-    for gene in values_a:
-        if _values_signature(gene) in signatures_b:
-            intersection.append(gene)
-    return intersection
-
-
-def _values_signature(gene: Dict) -> Tuple:
-    relevant = {key: gene[key] for key in sorted(gene.keys()) if key != "type"}
-    return tuple(sorted(relevant.items()))
-
-
-def _freeze(value: Any) -> Tuple:
-    if isinstance(value, dict):
-        return tuple((key, _freeze(val)) for key, val in sorted(value.items()))
-    if isinstance(value, list):
-        return tuple(_freeze(item) for item in value)
-    return value
-
-
-def _combine_caps(parent_a: Dict, parent_b: Dict) -> Dict:
-    caps_a = parent_a.get("lifecycle", {}).get("caps", {})
-    caps_b = parent_b.get("lifecycle", {}).get("caps", {})
-    combined: Dict[str, bool] = {}
-    for key in set(caps_a) | set(caps_b):
-        combined[key] = bool(caps_a.get(key, False) and caps_b.get(key, False))
-    return combined
-
-
-def create_child(parent_a: str, parent_b: str, child: str, agents_root: Path = AGENTS_ROOT) -> Path:
-    """Create a child genome using module crossover.
-
-    Args:
-        parent_a: Name of the first parent agent.
-        parent_b: Name of the second parent agent.
-        child: Name for the child agent.
-        agents_root: Root directory for agent genomes.
-
-    Returns:
-        Path to the generated child genome file.
-    """
-
-    genome_a = _load_genome(parent_a, agents_root)
-    genome_b = _load_genome(parent_b, agents_root)
-
-    child_dir = agents_root / child
-    child_dir.mkdir(parents=True, exist_ok=True)
-
-    base_model = genome_a.get("base_model") or genome_b.get("base_model")
-    hormones = genome_a.get("hormones", {})
-
-    merged_genes: List[Dict] = []
-    merged_genes.extend(gene for gene in genome_a.get("genes", []) if gene.get("type") not in {"tool_rights", "values"})
-    merged_genes.extend(gene for gene in genome_b.get("genes", []) if gene.get("type") not in {"tool_rights", "values"})
-
-    merged_tool_gene = _merge_tool_rights(genome_a.get("genes", []), genome_b.get("genes", []))
-    merged_values = _intersect_values(genome_a.get("genes", []), genome_b.get("genes", []))
-
-    merged_genes.append(merged_tool_gene)
-    merged_genes.extend(merged_values)
-
-    child_genome = {
-        "species": child,
-        "version": _derive_version(genome_a, genome_b),
-        "base_model": base_model,
-        "genes": _unique_genes(merged_genes),
-        "hormones": hormones,
-        "lifecycle": {
-            "phase": "infant",
-            "caps": _combine_caps(genome_a, genome_b),
+    child = {
+        "species": child_species,
+        "version": 0.1,
+        "base_model": p1.get("base_model", p2.get("base_model")),
+        "genes": [],
+        "hormones": {
+            "curiosity": round((p1.get("hormones", {}).get("curiosity", 0.5) + p2.get("hormones", {}).get("curiosity", 0.5))/2, 2),
+            "caution":   round((p1.get("hormones", {}).get("caution", 0.5)   + p2.get("hormones", {}).get("caution", 0.5))/2, 2),
         },
-        "created_at": datetime.utcnow().isoformat() + "Z",
-        "parents": [parent_a, parent_b],
+        "lifecycle": {"phase": "infant", "caps": _combine_caps(p1, p2)},
     }
 
-    output_path = child_dir / "genome.yaml"
-    with output_path.open("w", encoding="utf-8") as handle:
-        yaml.safe_dump(child_genome, handle, sort_keys=False)
-    return output_path
+    tool_gene = _union_tools(p1, p2)
+    values_gene = _merge_values(p1, p2)
+    memory_gene = _merge_memory(p1, p2, child_species.split("/")[-1])
+    lora_genes = _merge_skill_loras(p1, p2)
 
+    child["genes"].extend(lora_genes)
+    child["genes"].append(tool_gene)
+    child["genes"].append(values_gene)
+    child["genes"].append(memory_gene)
 
-def _derive_version(genome_a: Dict, genome_b: Dict) -> float:
-    versions = []
-    for genome in (genome_a, genome_b):
-        try:
-            versions.append(float(genome.get("version", 0)))
-        except (TypeError, ValueError):
-            continue
-    if versions:
-        return max(versions)
-    return 0.1
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Module crossover operator")
-    parser.add_argument("parent_a")
-    parser.add_argument("parent_b")
-    parser.add_argument("child")
-    parser.add_argument("--agents-root", default=AGENTS_ROOT, type=Path)
-    args = parser.parse_args()
-    create_child(args.parent_a, args.parent_b, args.child, args.agents_root)
-
-
-if __name__ == "__main__":
-    main()
+    _dump_yaml(child_path, child)
+    return child

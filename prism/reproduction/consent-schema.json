@@ -1,9 +1,33 @@
 {
-  "parents": [
-    {"id": "lucidia/scribe@sha", "consent_token": "JWS..."},
-    {"id": "lucidia/engineer@sha", "consent_token": "JWS..."}
-  ],
-  "operators": ["adapter_merge","module_crossover","distill"],
-  "license_ok": true,
-  "safety_caps": {"network_access": false, "external_write": false}
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LucidiaConsent",
+  "type": "object",
+  "required": ["parents", "operators", "license_ok", "safety_caps"],
+  "properties": {
+    "parents": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["id", "consent_token"],
+        "properties": {
+          "id": {"type": "string"},
+          "consent_token": {"type": "string", "minLength": 8}
+        }
+      }
+    },
+    "operators": {
+      "type": "array",
+      "items": {"type": "string", "enum": ["adapter_merge", "module_crossover", "distill"]}
+    },
+    "license_ok": {"type": "boolean"},
+    "safety_caps": {
+      "type": "object",
+      "required": ["network_access", "external_write"],
+      "properties": {
+        "network_access": {"type": "boolean"},
+        "external_write": {"type": "boolean"}
+      }
+    }
+  }
 }

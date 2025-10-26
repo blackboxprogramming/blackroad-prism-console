@@ -1,12 +1,7 @@
-host: localhost
-port: 1883
-client_id: lucidia-prism-bus
-keepalive: 60
-username: null
-password: null
-tls: false
-topics:
-  - name: agents/events
-    qos: 1
-  - name: agents/control
-    qos: 1
+mqtt:
+  host: 127.0.0.1
+  port: 1883
+  client_id: lucidia-prism
+  topics:
+    - "lucidia/agents/#"
+  qos: 1
