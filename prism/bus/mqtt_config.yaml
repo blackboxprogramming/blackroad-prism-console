@@ -1,0 +1,6 @@
+host: localhost
+port: 1883
+username: prism
+password: prism
+keepalive: 60
+tls: false
