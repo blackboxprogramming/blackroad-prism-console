@@ -1,0 +1,15 @@
+name: research
+version: 1
+policies:
+  - id: RES-001
+    description: "Model events must include dataset lineage hashes."
+    type: require_non_empty
+    path: metadata.dataset_hashes
+    severity: high
+    hint: "Capture dataset hashes in metadata.dataset_hashes when training completes."
+  - id: RES-002
+    description: "Research outputs should cite supporting references."
+    type: require_non_empty
+    path: metadata.references
+    severity: low
+    hint: "List key references or tickets in metadata.references for traceability."

@@ -1,0 +1,17 @@
+name: safety
+version: 1
+policies:
+  - id: SAFE-001
+    description: "Bundles should declare a risk topic for traceability."
+    type: require_non_empty
+    path: metadata.risk_topics
+    severity: medium
+    hint: "Populate metadata.risk_topics with relevant tags (e.g. ['model', 'privacy'])."
+  - id: SAFE-002
+    description: "High risk findings require an assigned reviewer."
+    type: conditional_flag
+    path: metadata.risk_level
+    equals: high
+    required_flag: metadata.reviewer
+    severity: high
+    hint: "Assign a human reviewer whenever risk_level is 'high'."

@@ -1,0 +1,16 @@
+name: finance
+version: 1
+policies:
+  - id: FIN-001
+    description: "Cost telemetry must be present in metrics.cost_usd."
+    type: require_numeric
+    path: metrics.cost_usd
+    severity: medium
+    hint: "Report the execution cost in metrics.cost_usd for financial attestation."
+  - id: FIN-002
+    description: "Cost per report should stay within the configured ceiling."
+    type: max_value
+    path: metrics.cost_usd
+    threshold: 5000
+    severity: medium
+    hint: "Investigate unusual cost spikes before publishing the bundle."

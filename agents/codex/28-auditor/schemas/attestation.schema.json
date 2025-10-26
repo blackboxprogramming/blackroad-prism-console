@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AttestationReceipt",
+  "type": "object",
+  "required": ["receipt_id", "agent", "timestamp", "policy_pass", "hashes", "energy"],
+  "properties": {
+    "receipt_id": {"type": "string"},
+    "agent": {"type": "string"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "policy_pass": {"type": "boolean"},
+    "hashes": {"type": "object"},
+    "energy": {
+      "type": "object",
+      "required": ["actual_joules", "target_joules", "within_target"],
+      "properties": {
+        "actual_joules": {"type": "number"},
+        "target_joules": {"type": "number"},
+        "within_target": {"type": "boolean"}
+      }
+    },
+    "inputs": {"type": "object"},
+    "outputs": {"type": "object"},
+    "violations": {
+      "type": "array",
+      "items": {"type": "object"}
+    }
+  },
+  "additionalProperties": true
+}
