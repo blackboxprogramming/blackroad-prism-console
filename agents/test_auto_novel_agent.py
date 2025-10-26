@@ -42,6 +42,21 @@ def test_add_supported_engine_and_create_game(agent: AutoNovelAgent, capsys: pyt
 def test_create_game_disallows_weapons(agent: AutoNovelAgent) -> None:
     """Weaponised games are rejected."""
 
+def test_remove_supported_engine():
+    agent = AutoNovelAgent()
+    agent.add_supported_engine("godot")
+    agent.remove_supported_engine("godot")
+    assert not agent.supports_engine("godot")
+
+
+def test_remove_supported_engine_raises_for_unknown_engine():
+    agent = AutoNovelAgent()
+    with pytest.raises(ValueError, match="Engine 'godot' is not supported"):
+        agent.remove_supported_engine("godot")
+
+
+def test_create_game_disallows_weapons():
+    agent = AutoNovelAgent()
     with pytest.raises(ValueError, match="Weapons are not allowed"):
         agent.create_game("unity", include_weapons=True)
 

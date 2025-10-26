@@ -120,6 +120,23 @@ class AutoNovelAgent:
                 f"'{normalized}'. Supported engines: {supported}. "
                 "Use add_supported_engine to register new engines."
             )
+    def remove_supported_engine(self, engine: str) -> None:
+        """Remove an engine from the supported list.
+
+        Args:
+            engine: Name of the engine to remove.
+
+        Raises:
+            ValueError: If the provided engine is not currently supported.
+        """
+        engine_lower = engine.lower()
+        if engine_lower not in self.SUPPORTED_ENGINES:
+            supported = ", ".join(sorted(self.SUPPORTED_ENGINES))
+            raise ValueError(
+                f"Engine '{engine}' is not supported. Choose one of: {supported}."
+            )
+        self.SUPPORTED_ENGINES.remove(engine_lower)
+
     def create_game(self, engine: str, include_weapons: bool = False) -> None:
         """Create a basic game using a supported engine without weapons.
 
@@ -155,6 +172,9 @@ class AutoNovelAgent:
             f"Imagine a {theme_clean} adventure crafted with "
             f"{normalized.capitalize()} where creativity reigns."
         )
+    def list_supported_engines(self) -> List[str]:
+        """Return a list of supported game engines."""
+        return sorted(self.SUPPORTED_ENGINES)
 
     def generate_story(self, theme: str, protagonist: str = "An adventurer") -> str:
         """Generate a short themed story."""
