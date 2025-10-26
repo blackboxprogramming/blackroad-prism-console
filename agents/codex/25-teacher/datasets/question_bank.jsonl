@@ -1,0 +1,12 @@
+{"id": "Q-001", "topic": "events", "difficulty": 0.4, "prompt": "Name two reflex hooks Teacher registers by default.", "answer": ["on_pr_merged", "on_episode_published"]}
+{"id": "Q-002", "topic": "events", "difficulty": 0.55, "prompt": "Which topic broadcasts completion of a new practice set?", "answer": "teacher:practice.next"}
+{"id": "Q-003", "topic": "energy", "difficulty": 0.5, "prompt": "What is the default energy budget for a high mastery learner?", "answer": "1.0 joule"}
+{"id": "Q-004", "topic": "energy", "difficulty": 0.35, "prompt": "Which YAML file stores the moral constant?", "answer": "codex25.yaml"}
+{"id": "Q-005", "topic": "mastery", "difficulty": 0.6, "prompt": "How many cohorts must the mastery dashboard display?", "answer": "At least three"}
+{"id": "Q-006", "topic": "mastery", "difficulty": 0.48, "prompt": "Which metric tracks speed from event to lesson?", "answer": "lesson_latency_minutes"}
+{"id": "Q-007", "topic": "curriculum", "difficulty": 0.42, "prompt": "Where would you find checks for foundational modules?", "answer": "curriculum/modules/m01-foundations/checks.json"}
+{"id": "Q-008", "topic": "curriculum", "difficulty": 0.65, "prompt": "What is the reflection prompt in Safety Gates?", "answer": "What additional guard would you add before emailing a mastery report to a cohort lead?"}
+{"id": "Q-009", "topic": "rubrics", "difficulty": 0.5, "prompt": "Which rubric criterion asks for alert energy projections?", "answer": "Observability (engineer rubric)"}
+{"id": "Q-010", "topic": "rubrics", "difficulty": 0.58, "prompt": "What energy hint accompanies Teaching level for Learning Hooks?", "answer": "Close loop within 3 minutes of merge."}
+{"id": "Q-011", "topic": "datasets", "difficulty": 0.45, "prompt": "Which schema defines hint node telemetry logs?", "answer": "schemas/hint_tree.schema.json"}
+{"id": "Q-012", "topic": "pipelines", "difficulty": 0.62, "prompt": "What fallback validation occurs when jsonschema is missing?", "answer": "Manual validation in pipelines/make_lessons.py"}

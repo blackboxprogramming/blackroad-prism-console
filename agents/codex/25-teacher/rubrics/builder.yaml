@@ -1,0 +1,35 @@
+id: rubric-builder-v1
+role: builder
+summary: "Clarity, safety, and energy awareness in shipped changes."
+criteria:
+  - name: Clarity of Narrative
+    description: "The change log and lesson references should tell a short story."
+    levels:
+      - label: Emerging
+        evidence: "No lesson links or unclear summary."
+        energy_hint: "Spend 0.2J capturing intent in plain language."
+      - label: Ready
+        evidence: "Lesson link with context plus a readable summary."
+      - label: Teaching
+        evidence: "Story explains trade-offs and points to practice sets."
+        energy_hint: "Bundle context to save review cycles (<1J)."
+  - name: Safety Signals
+    description: "Tests, gates, and guardrails triggered by the change."
+    levels:
+      - label: Emerging
+        evidence: "Tests missing or untagged energy costs."
+      - label: Ready
+        evidence: "Core tests listed with energy expectations."
+      - label: Teaching
+        evidence: "Safety gates described with telemetry hooks."
+        energy_hint: "Document throttle to keep bus responsive."
+  - name: Learning Hooks
+    description: "How the change produces teachable moments."
+    levels:
+      - label: Emerging
+        evidence: "No reflex or practice follow-up."
+      - label: Ready
+        evidence: "One lesson or practice hook is wired."
+      - label: Teaching
+        evidence: "Multiple hooks with mastery criteria included."
+        energy_hint: "Close loop within 3 minutes of merge."

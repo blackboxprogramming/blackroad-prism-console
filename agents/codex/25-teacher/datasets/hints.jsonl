@@ -1,0 +1,6 @@
+{"id": "H-001", "topic": "events", "level": 0, "prompt": "Which bus topic does this action belong to?"}
+{"id": "H-002", "topic": "events", "level": 1, "prompt": "Check hooks/on_pr_merged.reflex.py for the topic signature."}
+{"id": "H-003", "topic": "practice", "level": 0, "prompt": "What is the learner's current mastery?"}
+{"id": "H-004", "topic": "practice", "level": 1, "prompt": "Compare mastery against the 0.85 threshold to choose difficulty."}
+{"id": "H-005", "topic": "energy", "level": 0, "prompt": "Does the lesson mention joules explicitly?"}
+{"id": "H-006", "topic": "energy", "level": 1, "prompt": "Check energy_hint fields in lesson cards for the target."}

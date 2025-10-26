@@ -1,0 +1,19 @@
+tracks:
+  builders:
+    focus: "Ship safely and teach along the way"
+    modules:
+      - modules/m01-foundations/01-why-events.md
+      - modules/m01-foundations/02-memory-as-graph.md
+      - modules/m02-reflexes/01-bus-topics.md
+  engineers:
+    focus: "Maintain systems that teach themselves"
+    modules:
+      - modules/m01-foundations/01-why-events.md
+      - modules/m02-reflexes/02-safety-gates.md
+      - modules/m02-reflexes/checks.json
+  researchers:
+    focus: "Prove and replicate mastery gains"
+    modules:
+      - modules/m01-foundations/02-memory-as-graph.md
+      - modules/m02-reflexes/02-safety-gates.md
+      - ../rubrics/researcher.yaml
