@@ -1,0 +1,55 @@
+apiVersion: rb.blackroad.io/v1
+kind: Runbook
+metadata:
+  id: slo_report
+  title: Generate SLO Report
+  summary: Produces a 5m SLO report for a service and posts to #ops.
+  owners: ["team-ops"]
+  tags: ["slo", "report"]
+  severity: minor
+  lastReviewedAt: "2024-09-01"
+preconditions:
+  - "Auth service is healthy"
+rollback:
+  - "None; reporting only"
+contacts:
+  team: "ops"
+  slack: "#ops"
+  email: "ops@blackroad.io"
+steps:
+  - id: validate_service
+    title: Validate service parameter
+    kind: verify
+    verify:
+      description: "Ensure SERVICE variable matches a known backend"
+    guards:
+      - description: "SERVICE must be one of gateway, auth, prism"
+        required: true
+  - id: run_report
+    title: Run SLO report
+    kind: execute
+    execute:
+      action: "connector.http.post"
+      inputs:
+        url: "${GATEWAY_BASE_URL}/automation/runs"
+        payload:
+          workflowName: "slo_report"
+          version: "1.0.0"
+          input:
+            service: "${SERVICE}"
+            window: "${WINDOW}"
+execution:
+  workflowName: slo_report
+  version: "1.0.0"
+  idempotencyKeyHint: "rb-slo-${SERVICE}-${WINDOW}-${ts}"
+  variables:
+    - name: SERVICE
+      type: enum
+      enum: ["gateway", "auth", "prism"]
+      description: "Target service"
+      required: true
+    - name: WINDOW
+      type: enum
+      enum: ["5m", "15m", "1h"]
+      description: "Lookback window"
+      required: true

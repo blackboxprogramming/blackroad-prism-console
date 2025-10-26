@@ -1,0 +1,57 @@
+name: Docs & Runbooks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "runbooks/**.yaml"
+      - "apps/docs-portal/**"
+      - "packages/runbook-*/**"
+  push:
+    branches: [main]
+    paths:
+      - "runbooks/**.yaml"
+      - "apps/docs-portal/**"
+      - "packages/runbook-*/**"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Lint runbooks
+        run: pnpm run runbook:lint -- --path ./runbooks --report ./runbooks/report.json --strict
+      - name: Link check (docs)
+        run: pnpm --filter @blackroad/docs-portal run link:check
+      - name: Build docs
+        run: pnpm --filter @blackroad/docs-portal run build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-portal
+          path: apps/docs-portal/.next/**
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm --filter @blackroad/docs-portal run build
+      - name: Export static (if using static export)
+        run: pnpm --filter @blackroad/docs-portal run export || echo "Skipping static export"
+      - name: Deploy to Vercel
+        if: env.VERCEL_TOKEN
+        run: pnpm --filter @blackroad/docs-portal run vercel:deploy

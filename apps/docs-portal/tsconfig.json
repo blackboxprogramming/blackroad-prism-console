@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/components/*": ["./components/*"],
+      "@/lib/*": ["./lib/*"],
+      "@blackroad/runbook-types": ["../../packages/runbook-types/src/index.ts"],
+      "@blackroad/runbook-types/*": ["../../packages/runbook-types/src/*"]
+    },
+    "jsx": "preserve",
+    "allowJs": false,
+    "noEmit": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "scripts/**/*.ts",
+    ".generated/**/*.json"
+  ],
+  "exclude": ["node_modules", ".next"]
+}

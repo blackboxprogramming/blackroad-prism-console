@@ -9,6 +9,11 @@ pip install -r requirements.txt
 python cli/console.py bot:list
 ```
 
+## Docs & Runbooks Portal
+
+- Preview docs locally: `pnpm --filter @blackroad/docs-portal dev`
+- Validate YAML runbooks: `pnpm run runbook:lint -- --path ./runbooks --strict`
+
 ## Architecture
 
 ```
