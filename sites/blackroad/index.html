@@ -1,378 +1,885 @@
-<!doctype html>
-<html lang="en" class="h-full">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>BlackRoad — Creator-OS for code, media, and multi-agent ops</title>
-    <meta
-      name="description"
-      content="Build software, video, and simulations with the BlackRoad Creator-OS. Enter the portal, enable RoadView, and ship new work with multi-agent speed."
-    />
-    <link rel="icon" type="image/svg+xml" href="/public/favicon.svg" />
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              brand: {
-                pink: '#FF4FD8',
-                blue: '#0096FF',
-                gold: '#FDBA2D',
-              },
-            },
-          },
-        },
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackRoad - The New Internet of Intelligence</title>
+  <style>
+    :root {
+      /* Deep Spectrum Gradient System */
+      --spectrum-gold: #fdba2d;
+      --spectrum-orange: #ff6b35;
+      --spectrum-pink: #ff4fd8;
+      --spectrum-purple: #c753ff;
+      --spectrum-indigo: #6366f1;
+      --spectrum-blue: #3b82f6;
+      --spectrum-cyan: #06b6d4;
+      
+      /* Core Palette */
+      --void: #000000;
+      --void-lighter: #0a0a0f;
+      --obsidian: #13131a;
+      --slate: #1a1a24;
+      --steel: #202030;
+      --border: rgba(255,255,255,0.08);
+      --border-glow: rgba(255,79,216,0.2);
+      
+      /* Text */
+      --text: #ffffff;
+      --text-secondary: rgba(255,255,255,0.7);
+      --text-tertiary: rgba(255,255,255,0.5);
+      
+      /* Gradients */
+      --gradient-spectrum: linear-gradient(135deg, 
+        var(--spectrum-gold) 0%, 
+        var(--spectrum-orange) 15%, 
+        var(--spectrum-pink) 35%, 
+        var(--spectrum-purple) 55%, 
+        var(--spectrum-indigo) 75%, 
+        var(--spectrum-blue) 100%
+      );
+      
+      --gradient-void: radial-gradient(ellipse at center, 
+        rgba(255,79,216,0.15) 0%, 
+        rgba(99,102,241,0.1) 40%, 
+        transparent 70%
+      );
+      
+      --gradient-prism: conic-gradient(from 180deg at 50% 50%,
+        var(--spectrum-gold) 0deg,
+        var(--spectrum-orange) 60deg,
+        var(--spectrum-pink) 120deg,
+        var(--spectrum-purple) 180deg,
+        var(--spectrum-indigo) 240deg,
+        var(--spectrum-blue) 300deg,
+        var(--spectrum-gold) 360deg
+      );
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+      background: var(--void);
+      color: var(--text);
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* Animated Background */
+    .background {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      background: var(--void);
+    }
+
+    .gradient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.3;
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .orb-1 {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--spectrum-pink) 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+      animation-delay: 0s;
+    }
+
+    .orb-2 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, var(--spectrum-indigo) 0%, transparent 70%);
+      top: 50%;
+      right: -150px;
+      animation-delay: -7s;
+    }
+
+    .orb-3 {
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, var(--spectrum-purple) 0%, transparent 70%);
+      bottom: -250px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation-delay: -14s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(50px, -50px) scale(1.1); }
+      66% { transform: translate(-30px, 30px) scale(0.9); }
+    }
+
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.1;
+      animation: gridPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.1; }
+      50% { opacity: 0.15; }
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 24px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(20px);
+      background: rgba(10,10,15,0.8);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--gradient-prism);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 24px;
+      color: var(--void);
+      box-shadow: 0 0 40px rgba(255,79,216,0.5);
+      animation: logoGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes logoGlow {
+      0%, 100% { box-shadow: 0 0 40px rgba(255,79,216,0.5); }
+      50% { box-shadow: 0 0 60px rgba(255,79,216,0.8), 0 0 100px rgba(99,102,241,0.4); }
+    }
+
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      position: relative;
+      padding: 8px 0;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-spectrum);
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+    }
+
+    .nav-link:hover::after {
+      transform: scaleX(1);
+    }
+
+    .btn-launch {
+      padding: 12px 32px;
+      background: var(--gradient-spectrum);
+      border: none;
+      border-radius: 12px;
+      color: var(--void);
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 20px rgba(255,79,216,0.3);
+    }
+
+    .btn-launch:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(255,79,216,0.5);
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 48px 80px;
+    }
+
+    .prism-cube {
+      width: 200px;
+      height: 200px;
+      margin-bottom: 60px;
+      position: relative;
+      animation: prismFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes prismFloat {
+      0%, 100% { transform: translateY(0) rotateX(0) rotateY(0); }
+      25% { transform: translateY(-20px) rotateX(10deg) rotateY(90deg); }
+      50% { transform: translateY(0) rotateX(0) rotateY(180deg); }
+      75% { transform: translateY(-20px) rotateX(-10deg) rotateY(270deg); }
+    }
+
+    .prism-face {
+      width: 200px;
+      height: 200px;
+      background: var(--gradient-prism);
+      border-radius: 20px;
+      box-shadow: 
+        0 0 60px rgba(255,79,216,0.6),
+        0 0 120px rgba(99,102,241,0.4),
+        inset 0 0 60px rgba(255,255,255,0.1);
+      animation: prismRotate 8s linear infinite;
+    }
+
+    @keyframes prismRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .hero-title {
+      font-size: 5rem;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -2px;
+      animation: titleGlow 4s ease-in-out infinite;
+    }
+
+    @keyframes titleGlow {
+      0%, 100% { filter: drop-shadow(0 0 20px rgba(255,79,216,0.3)); }
+      50% { filter: drop-shadow(0 0 40px rgba(255,79,216,0.6)); }
+    }
+
+    .hero-subtitle {
+      font-size: 1.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 48px;
+      max-width: 800px;
+      line-height: 1.5;
+      font-weight: 300;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 80px;
+    }
+
+    .btn-primary {
+      padding: 20px 48px;
+      background: var(--gradient-spectrum);
+      border: none;
+      border-radius: 16px;
+      color: var(--void);
+      font-weight: 800;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 8px 32px rgba(255,79,216,0.4);
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 48px rgba(255,79,216,0.6);
+    }
+
+    .btn-secondary {
+      padding: 20px 48px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid var(--border-glow);
+      border-radius: 16px;
+      color: var(--text);
+      font-weight: 700;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: var(--spectrum-pink);
+      transform: translateY(-4px);
+    }
+
+    /* Portal Grid */
+    .portals-section {
+      position: relative;
+      z-index: 1;
+      padding: 120px 48px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: 3rem;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 20px;
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      margin-bottom: 80px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .portal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 32px;
+    }
+
+    .portal-card {
+      background: rgba(10,10,15,0.8);
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      cursor: pointer;
+      transition: all 0.4s;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+    }
+
+    .portal-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-spectrum);
+      transform: scaleX(0);
+      transition: transform 0.4s;
+    }
+
+    .portal-card:hover {
+      border-color: var(--spectrum-pink);
+      transform: translateY(-12px);
+      box-shadow: 0 24px 48px rgba(255,79,216,0.3);
+    }
+
+    .portal-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .portal-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--gradient-prism);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px rgba(255,79,216,0.4);
+    }
+
+    .portal-name {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .portal-description {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .portal-tags {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      padding: 6px 16px;
+      background: rgba(255,79,216,0.1);
+      border: 1px solid rgba(255,79,216,0.3);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--spectrum-pink);
+      font-weight: 600;
+    }
+
+    /* Features Section */
+    .features-section {
+      position: relative;
+      z-index: 1;
+      padding: 120px 48px;
+      background: var(--gradient-void);
+    }
+
+    .features-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 40px;
+    }
+
+    .feature-card {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .feature-icon {
+      width: 100px;
+      height: 100px;
+      background: var(--gradient-prism);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      margin: 0 auto 24px;
+      box-shadow: 0 8px 32px rgba(255,79,216,0.4);
+    }
+
+    .feature-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .feature-text {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* Footer */
+    .footer {
+      position: relative;
+      z-index: 1;
+      padding: 80px 48px 40px;
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+    }
+
+    .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 60px;
+      margin-bottom: 60px;
+    }
+
+    .footer-brand {
+      max-width: 300px;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .footer-logo-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--gradient-prism);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 24px;
+      color: var(--void);
+    }
+
+    .footer-logo-text {
+      font-size: 1.5rem;
+      font-weight: 900;
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .footer-description {
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .footer-column h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer-link:hover {
+      color: var(--spectrum-pink);
+    }
+
+    .footer-bottom {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-tertiary);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 3rem;
       }
-    </script>
-  </head>
-  <body class="min-h-full bg-slate-950 text-slate-100">
-    <div class="relative overflow-hidden">
-      <div class="pointer-events-none absolute inset-0">
-        <div class="absolute -top-40 right-10 h-96 w-96 rounded-full bg-brand-pink/40 blur-3xl"></div>
-        <div class="absolute bottom-0 left-1/2 h-96 w-[32rem] -translate-x-1/2 rounded-full bg-brand-blue/30 blur-3xl"></div>
+
+      .hero-subtitle {
+        font-size: 1.2rem;
+      }
+
+      .hero-cta {
+        flex-direction: column;
+      }
+
+      .portal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="background">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">K3</div>
+      <div class="logo-text">BlackRoad</div>
+    </div>
+
+    <nav class="nav">
+      <a href="#portals" class="nav-link">Portals</a>
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#docs" class="nav-link">Docs</a>
+      <a href="#community" class="nav-link">Community</a>
+      <button class="btn-launch">Launch Console</button>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="prism-cube">
+      <div class="prism-face"></div>
+    </div>
+
+    <h1 class="hero-title">The New Internet<br>of Intelligence</h1>
+    <p class="hero-subtitle">
+      Where creation meets computation. Build, share, and scale with AI-powered tools 
+      that understand your vision.
+    </p>
+
+    <div class="hero-cta">
+      <a href="blackroad-nexus.html" class="btn-primary">Enter Console →</a>
+      <a href="blackroad-social.html" class="btn-secondary">Explore Community</a>
+    </div>
+
+    <div style="color: var(--text-tertiary); font-size: 0.9rem;">
+      "The road isn't made. It's remembered."
+    </div>
+  </section>
+
+  <!-- Portals Section -->
+  <section class="portals-section" id="portals">
+    <h2 class="section-title">Your Universe</h2>
+    <p class="section-subtitle">
+      Five interconnected portals. One seamless experience. Build anything.
+    </p>
+
+    <div class="portal-grid">
+      <!-- Nexus Console -->
+      <div class="portal-card" onclick="window.open('blackroad-nexus.html', '_blank')">
+        <div class="portal-icon">🤖</div>
+        <h3 class="portal-name">Nexus Console</h3>
+        <p class="portal-description">
+          AI development hub with native code execution, multi-platform integration, 
+          and automated workflows. Connect GitHub, Docker, Cloud, and more.
+        </p>
+        <div class="portal-tags">
+          <span class="tag">Development</span>
+          <span class="tag">Automation</span>
+          <span class="tag">Integration</span>
+        </div>
       </div>
-      <div class="relative z-10 mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">
-        <nav class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/5 bg-slate-900/60 px-5 py-4 shadow-xl shadow-black/40 backdrop-blur">
-          <a class="flex items-center gap-3" href="#top">
-            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-pink via-brand-gold to-brand-blue text-lg font-semibold text-slate-950">BR</span>
-            <div class="text-left">
-              <p class="text-sm font-semibold uppercase tracking-[0.3em] text-brand-blue">BlackRoad</p>
-              <p class="text-xs text-slate-400">Creator-OS</p>
-            </div>
-          </a>
-          <div class="flex flex-1 flex-wrap items-center justify-center gap-3 text-sm text-slate-300 sm:justify-end">
-            <a class="rounded-lg px-3 py-2 font-medium hover:text-white" href="#features">Features</a>
-            <a class="rounded-lg px-3 py-2 font-medium hover:text-white" href="/docs">Docs</a>
-            <a class="rounded-lg px-3 py-2 font-medium hover:text-white" href="/portal.html">Portal</a>
-            <a class="rounded-lg px-3 py-2 font-medium hover:text-white" href="#pricing">Pricing</a>
-            <a class="rounded-lg px-3 py-2 font-medium hover:text-white" href="#support">Support</a>
-          </div>
-          <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-300">
-            API healthy · <span class="text-white">32ms</span>
-          </span>
-        </nav>
 
-        <header id="top" class="mt-16 grid gap-12 rounded-3xl border border-white/5 bg-slate-900/70 p-8 shadow-2xl shadow-black/50 backdrop-blur-lg md:grid-cols-[1.4fr_1fr]">
-          <div class="space-y-6">
-            <p class="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm uppercase tracking-[0.3em] text-brand-blue">
-              Applied multi-agent studio
-            </p>
-            <div class="space-y-3">
-              <h1 class="text-4xl font-bold leading-tight text-white sm:text-5xl">Welcome to BlackRoad</h1>
-              <p class="max-w-xl text-lg text-slate-300">
-                Ship video, software, and live experiences from a single workspace. The BlackRoad Creator-OS links multi-agent workflows, simulation, and revenue so teams can move from concept to launch in minutes.
-              </p>
-            </div>
-            <div class="flex flex-wrap gap-3">
-              <a
-                class="rounded-2xl bg-gradient-to-r from-brand-pink via-brand-gold to-brand-blue px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-brand-pink/40 transition hover:translate-y-[-2px] hover:shadow-xl"
-                href="/portal.html"
-              >
-                Enter Portal
-              </a>
-              <a
-                class="rounded-2xl border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/5"
-                href="/roadview"
-              >
-                Enable RoadView
-              </a>
-              <a
-                class="rounded-2xl border border-brand-blue/40 px-5 py-3 text-sm font-semibold text-brand-blue transition hover:border-brand-blue/60 hover:bg-brand-blue/10"
-                href="#new-work"
-              >
-                Meet New Work
-              </a>
-            </div>
-          </div>
-          <div class="grid gap-4">
-            <div class="rounded-2xl border border-white/5 bg-white/5 p-5">
-              <h3 class="text-sm font-semibold uppercase tracking-wide text-brand-blue">Quick brief</h3>
-              <ul class="mt-4 space-y-3 text-sm text-slate-300">
-                <li>🚀 Launch-ready portals, docs, and knowledge flows</li>
-                <li>🧠 Agent mesh tuned for creative, ops, and finance teams</li>
-                <li>💸 Built-in wallets, splits, and usage-based billing</li>
-              </ul>
-            </div>
-            <div class="rounded-2xl border border-white/5 bg-slate-900/80 p-5 text-sm text-slate-400">
-              <p class="font-semibold uppercase tracking-wide text-slate-300">Signal</p>
-              <p class="mt-3 text-slate-200">100+ launches · 24/7 ops coverage · 35 countries live</p>
-            </div>
-          </div>
-        </header>
+      <!-- Social Portal -->
+      <div class="portal-card" onclick="window.open('blackroad-social.html', '_blank')">
+        <div class="portal-icon">📱</div>
+        <h3 class="portal-name">Social Portal</h3>
+        <p class="portal-description">
+          The best of every platform. Reddit's communities, Twitter's speed, 
+          Instagram's visuals, plus AI assistants and built-in games.
+        </p>
+        <div class="portal-tags">
+          <span class="tag">Community</span>
+          <span class="tag">Content</span>
+          <span class="tag">Games</span>
+        </div>
+      </div>
 
-        <section id="features" class="mt-16 space-y-8">
-          <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h2 class="text-2xl font-semibold text-white">Focused features for builders</h2>
-              <p class="text-sm text-slate-400">Everything you need to design, ship, and scale ambitious productions.</p>
-            </div>
-            <a class="text-sm font-semibold text-brand-blue hover:text-brand-gold" href="/docs/guide/getting-started">
-              View product overview →
-            </a>
-          </div>
-          <div class="grid gap-6 lg:grid-cols-3">
-            <article class="flex h-full flex-col gap-4 rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
-              <div>
-                <p class="text-xs uppercase tracking-[0.4em] text-brand-blue">Build</p>
-                <h3 class="mt-2 text-lg font-semibold text-white">High velocity dev + ops</h3>
-              </div>
-              <p class="text-sm text-slate-300">
-                Lucidia IDE pairs with agents that plan sprints, review diffs, and keep every environment in sync.
-              </p>
-              <ul class="space-y-2 text-sm text-slate-400">
-                <li>• Branch-aware code reviews with automatic merges</li>
-                <li>• Integrated observability and incident playbooks</li>
-                <li>• Ship web, native, and game builds side-by-side</li>
-              </ul>
-            </article>
-            <article class="flex h-full flex-col gap-4 rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
-              <div>
-                <p class="text-xs uppercase tracking-[0.4em] text-brand-blue">Create</p>
-                <h3 class="mt-2 text-lg font-semibold text-white">Scene-to-screen pipelines</h3>
-              </div>
-              <p class="text-sm text-slate-300">
-                RoadView stitches simulations, edit bays, and interactive exports so every prompt can premiere instantly.
-              </p>
-              <ul class="space-y-2 text-sm text-slate-400">
-                <li>• Multi-track timeline with version snapshots</li>
-                <li>• GPU render bursts streamed under 3 seconds</li>
-                <li>• Export to broadcast, social, or in-world builds</li>
-              </ul>
-            </article>
-            <article class="flex h-full flex-col gap-4 rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
-              <div>
-                <p class="text-xs uppercase tracking-[0.4em] text-brand-blue">Monetize</p>
-                <h3 class="mt-2 text-lg font-semibold text-white">Wallets, splits, and funding</h3>
-              </div>
-              <p class="text-sm text-slate-300">
-                Built-in commerce handles tips, subscriptions, licensing, and instant payouts across global teams.
-              </p>
-              <ul class="space-y-2 text-sm text-slate-400">
-                <li>• Programmable revenue splits per asset bundle</li>
-                <li>• Fiat + stablecoin rails with compliance baked in</li>
-                <li>• Funding brief highlights traction + forecast</li>
-              </ul>
-            </article>
-          </div>
-        </section>
+      <!-- Infinity Engine -->
+      <div class="portal-card" onclick="window.open('blackroad-infinity.html', '_blank')">
+        <div class="portal-icon">∞</div>
+        <h3 class="portal-name">Infinity Engine</h3>
+        <p class="portal-description">
+          Advanced web intelligence beyond search. AI-synthesized answers, 
+          multi-source analysis, data visualization, and real-time insights.
+        </p>
+        <div class="portal-tags">
+          <span class="tag">Research</span>
+          <span class="tag">Intelligence</span>
+          <span class="tag">Analytics</span>
+        </div>
+      </div>
 
-        <section id="new-work" class="mt-16 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
-          <article class="rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
-            <h2 class="text-xl font-semibold text-white">Creator pipeline &amp; funding brief</h2>
-            <p class="mt-3 text-sm text-slate-300">
-              Give partners a live look at roadmap, metrics, and deal flow. RoadShow mode transforms updates into shareable stories.
-            </p>
-            <dl class="mt-6 grid gap-4 text-sm text-slate-300 md:grid-cols-2">
-              <div>
-                <dt class="font-semibold text-white">Start projects faster</dt>
-                <dd class="mt-1 text-slate-400">Creator onboarding, templates, and policy guardrails launch in under 5 minutes.</dd>
-              </div>
-              <div>
-                <dt class="font-semibold text-white">Stack projects &amp; ATV</dt>
-                <dd class="mt-1 text-slate-400">Blend memberships, drops, and brand work with automated accounting.</dd>
-              </div>
-              <div>
-                <dt class="font-semibold text-white">Built for scale</dt>
-                <dd class="mt-1 text-slate-400">Segment cohorts, run A/B creative experiments, and forecast demand with live data.</dd>
-              </div>
-              <div>
-                <dt class="font-semibold text-white">Guardian ready</dt>
-                <dd class="mt-1 text-slate-400">Trust, compliance, and safety agents monitor every surface in real-time.</dd>
-              </div>
-            </dl>
-          </article>
-          <aside class="flex flex-col justify-between gap-4 rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
-            <div>
-              <h2 class="text-xl font-semibold text-white">Status pulses</h2>
-              <p class="mt-2 text-sm text-slate-400">Key metrics refresh from your ops graph.</p>
-              <ul class="mt-4 space-y-3 text-sm text-slate-300">
-                <li class="flex items-center justify-between rounded-2xl bg-white/5 px-4 py-3">
-                  <span>Avg. build deploy</span>
-                  <span class="font-semibold text-emerald-300">12m</span>
-                </li>
-                <li class="flex items-center justify-between rounded-2xl bg-white/5 px-4 py-3">
-                  <span>Creator payout time</span>
-                  <span class="font-semibold text-brand-gold">&lt; 60s</span>
-                </li>
-                <li class="flex items-center justify-between rounded-2xl bg-white/5 px-4 py-3">
-                  <span>Ops interventions</span>
-                  <span class="font-semibold text-brand-blue">Automated</span>
-                </li>
-              </ul>
-            </div>
-            <a
-              class="inline-flex items-center justify-center rounded-2xl border border-white/20 px-4 py-3 text-sm font-semibold text-white transition hover:border-brand-pink/60 hover:bg-brand-pink/10"
-              href="mailto:team@blackroad.io"
-            >
-              Request briefing deck →
-            </a>
-          </aside>
-        </section>
+      <!-- Quantum Lab -->
+      <div class="portal-card">
+        <div class="portal-icon">⚛️</div>
+        <h3 class="portal-name">Quantum Lab</h3>
+        <p class="portal-description">
+          Experimental research hub. Simulators, equation solvers, fractal generators, 
+          and the Edenroot computational core. Coming soon.
+        </p>
+        <div class="portal-tags">
+          <span class="tag">Research</span>
+          <span class="tag">Simulation</span>
+          <span class="tag">Experimental</span>
+        </div>
+      </div>
 
-        <section class="mt-16 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <article class="rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
-            <div class="flex items-center justify-between gap-3">
-              <h2 class="text-xl font-semibold text-white">API Quickstart</h2>
-              <span class="rounded-full bg-brand-blue/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-blue">5 min setup</span>
-            </div>
-            <p class="mt-3 text-sm text-slate-300">
-              Automate ingest, ops hand-offs, and live story playback with a single authenticated client.
-            </p>
-            <pre class="mt-6 overflow-x-auto rounded-2xl bg-slate-950/80 p-6 text-sm text-slate-200 shadow-inner shadow-black/40">
-<span class="text-brand-blue">import</span> { Client } from '@blackroad/prism'
+      <!-- Codex Infinity -->
+      <div class="portal-card" onclick="window.open('blackroad-codex.html', '_blank')">
+        <div class="portal-icon">💻</div>
+        <h3 class="portal-name">Codex Infinity</h3>
+        <p class="portal-description">
+          Collaborative coding platform with real-time editing, AI pair programming, 
+          integrated terminal, and team chat. VS Code, reimagined.
+        </p>
+        <div class="portal-tags">
+          <span class="tag">Coding</span>
+          <span class="tag">Collaboration</span>
+          <span class="tag">AI Assistant</span>
+        </div>
+      </div>
 
-const client = <span class="text-brand-blue">new</span> Client({
-  token: process.env.BLACKROAD_TOKEN,
-  workspace: '<span class="text-brand-gold">creator-os</span>',
-})
-
-<span class="text-brand-blue">await</span> client.brief.send({
-  title: 'Launch RoadShow',
-  payload: {
-    script: 'v4.2',
-    channels: ['portal', 'broadcast'],
-  },
-})
-
-<span class="text-brand-blue">await</span> client.portal.publish()
-            </pre>
-          </article>
-          <aside class="flex h-full flex-col gap-5 rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
-            <div class="space-y-2">
-              <h2 class="text-xl font-semibold text-white">Join the beta</h2>
-              <p class="text-sm text-slate-300">
-                Cohorts open monthly for studios, educators, and frontier labs. We tailor the agent mesh to your workflows.
-              </p>
-            </div>
-            <ul class="space-y-2 text-sm text-slate-300">
-              <li>• 1:1 onboarding session with the ops crew</li>
-              <li>• Dedicated Guardian safety review</li>
-              <li>• Migration support for repos + media</li>
-            </ul>
-            <a
-              class="mt-auto inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-brand-pink via-brand-gold to-brand-blue px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-brand-pink/40 transition hover:translate-y-[-2px]"
-              href="https://blackroad.typeform.com/to/portal"
-            >
-              Apply for access
-            </a>
-          </aside>
-        </section>
-
-        <section class="mt-16 space-y-8">
-          <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h2 class="text-2xl font-semibold text-white">Portal preview</h2>
-              <p class="text-sm text-slate-400">Live dashboards, AI copilots, and publishing pipelines in one place.</p>
-            </div>
-            <a class="text-sm font-semibold text-brand-blue hover:text-brand-gold" href="/portal.html">Launch interactive demo →</a>
-          </div>
-          <div class="grid gap-6 lg:grid-cols-3">
-            <article class="space-y-3 rounded-3xl border border-white/5 bg-white/5 p-6 shadow-lg shadow-black/40">
-              <h3 class="text-lg font-semibold text-white">RoadView story desk</h3>
-              <p class="text-sm text-slate-300">
-                Run creative reviews, mark selects, and spin up auto-edits with frame-perfect control and clip intelligence.
-              </p>
-              <span class="inline-flex items-center rounded-full bg-brand-blue/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-blue">Version sync</span>
-            </article>
-            <article class="space-y-3 rounded-3xl border border-white/5 bg-white/5 p-6 shadow-lg shadow-black/40">
-              <h3 class="text-lg font-semibold text-white">Agent feed</h3>
-              <p class="text-sm text-slate-300">
-                Follow decisions from Lucidia, Guardian, and finance bots with full audit trails and human-in-the-loop controls.
-              </p>
-              <span class="inline-flex items-center rounded-full bg-brand-pink/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-pink">Real-time</span>
-            </article>
-            <article class="space-y-3 rounded-3xl border border-white/5 bg-white/5 p-6 shadow-lg shadow-black/40">
-              <h3 class="text-lg font-semibold text-white">Creator CRM</h3>
-              <p class="text-sm text-slate-300">
-                Manage drops, memberships, and campaigns with automated payouts and clear revenue forecasting.
-              </p>
-              <span class="inline-flex items-center rounded-full bg-brand-gold/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-gold">Commerce ready</span>
-            </article>
-          </div>
-        </section>
-
-        <section id="pricing" class="mt-16 space-y-8">
-          <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h2 class="text-2xl font-semibold text-white">Simple, transparent options</h2>
-              <p class="text-sm text-slate-400">Every plan includes multi-agent ops, RoadView, and wallet infrastructure.</p>
-            </div>
-            <span class="rounded-full border border-white/10 px-3 py-1 text-xs uppercase tracking-wide text-slate-300">Monthly &amp; annual pricing</span>
-          </div>
-          <div class="grid gap-6 lg:grid-cols-3">
-            <article class="flex h-full flex-col gap-4 rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
-              <div class="space-y-1">
-                <h3 class="text-lg font-semibold text-white">Starter</h3>
-                <p class="text-sm text-slate-400">For solo builders launching their first portal.</p>
-              </div>
-              <p class="text-3xl font-semibold text-white">$0</p>
-              <ul class="space-y-2 text-sm text-slate-300">
-                <li>• Creator-OS workspace</li>
-                <li>• RoadView previews</li>
-                <li>• 5GB asset vault</li>
-              </ul>
-              <a class="mt-auto inline-flex items-center justify-center rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/5" href="https://app.blackroad.io/signup">Start free</a>
-            </article>
-            <article class="flex h-full flex-col gap-4 rounded-3xl border border-brand-pink/40 bg-gradient-to-br from-brand-pink/15 via-brand-gold/10 to-brand-blue/15 p-6 shadow-lg shadow-brand-pink/40">
-              <div class="space-y-1">
-                <h3 class="text-lg font-semibold text-white">Studio</h3>
-                <p class="text-sm text-slate-100/80">For teams orchestrating multi-surface launches.</p>
-              </div>
-              <p class="text-3xl font-semibold text-white">$49<span class="text-base font-medium text-slate-200">/seat</span></p>
-              <ul class="space-y-2 text-sm text-slate-100">
-                <li>• Shared ops graph &amp; automations</li>
-                <li>• GPU render minutes + sim bursts</li>
-                <li>• Wallets with programmable splits</li>
-              </ul>
-              <a class="mt-auto inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200" href="mailto:studio@blackroad.io">Talk to sales</a>
-            </article>
-            <article class="flex h-full flex-col gap-4 rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
-              <div class="space-y-1">
-                <h3 class="text-lg font-semibold text-white">Enterprise</h3>
-                <p class="text-sm text-slate-400">Purpose-built for networks, campuses, and partners.</p>
-              </div>
-              <p class="text-3xl font-semibold text-white">Custom</p>
-              <ul class="space-y-2 text-sm text-slate-300">
-                <li>• Dedicated Guardian &amp; compliance lanes</li>
-                <li>• Embedded ops and integrations squad</li>
-                <li>• Private data residency &amp; support</li>
-              </ul>
-              <a class="mt-auto inline-flex items-center justify-center rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/5" href="mailto:partners@blackroad.io">Schedule briefing</a>
-            </article>
-          </div>
-        </section>
-
-        <section id="support" class="mt-16 grid gap-6 lg:grid-cols-3">
-          <article class="rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
-            <h3 class="text-lg font-semibold text-white">Docs &amp; research</h3>
-            <p class="mt-2 text-sm text-slate-300">Browse how-to guides, API references, and live experiments.</p>
-            <a class="mt-4 inline-flex items-center text-sm font-semibold text-brand-blue hover:text-brand-gold" href="/docs">Explore docs →</a>
-          </article>
-          <article class="rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
-            <h3 class="text-lg font-semibold text-white">Status desk</h3>
-            <p class="mt-2 text-sm text-slate-300">Realtime health, incidents, and change history across services.</p>
-            <a class="mt-4 inline-flex items-center text-sm font-semibold text-brand-blue hover:text-brand-gold" href="/status">View status →</a>
-          </article>
-          <article class="rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
-            <h3 class="text-lg font-semibold text-white">Creator community</h3>
-            <p class="mt-2 text-sm text-slate-300">Join weekly syncs, beta drops, and partner spotlight sessions.</p>
-            <a class="mt-4 inline-flex items-center text-sm font-semibold text-brand-blue hover:text-brand-gold" href="mailto:community@blackroad.io">Request invite →</a>
-          </article>
-        </section>
-
-        <footer class="mt-20 flex flex-col items-center justify-between gap-4 rounded-3xl border border-white/5 bg-slate-900/80 px-6 py-5 text-xs text-slate-400 sm:flex-row">
-          <p>© <span id="year"></span> BlackRoad Labs. All rights reserved.</p>
-          <div class="flex flex-wrap items-center gap-4">
-            <a class="hover:text-white" href="/privacy">Privacy</a>
-            <a class="hover:text-white" href="/terms">Terms</a>
-            <a class="hover:text-white" href="mailto:hello@blackroad.io">Contact</a>
-          </div>
-        </footer>
+      <!-- Marketplace -->
+      <div class="portal-card">
+        <div class="portal-icon">💎</div>
+        <h3 class="portal-name">Marketplace</h3>
+        <p class="portal-description">
+          Trade tokenized assets, RoadCoin, compute credits, and creator economy. 
+          Financial intelligence meets decentralized creativity. Coming soon.
+        </p>
+        <div class="portal-tags">
+          <span class="tag">Trading</span>
+          <span class="tag">Economy</span>
+          <span class="tag">Blockchain</span>
+        </div>
       </div>
     </div>
-    <script>
-      document.getElementById('year').textContent = new Date().getFullYear()
-    </script>
-  </body>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section" id="features">
+    <h2 class="section-title">Built for Creators</h2>
+    <p class="section-subtitle">
+      Everything you need to build, share, and scale your ideas.
+    </p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3 class="feature-title">Build</h3>
+        <p class="feature-text">
+          Code with AI assistance, deploy instantly, and scale effortlessly 
+          with integrated cloud infrastructure.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <h3 class="feature-title">Create</h3>
+        <p class="feature-text">
+          Share posts, videos, code, and ideas across a unified platform 
+          designed for modern creators.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3 class="feature-title">Learn</h3>
+        <p class="feature-text">
+          AI-powered research tools, quantum simulators, and collaborative 
+          learning environments.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3 class="feature-title">Trade</h3>
+        <p class="feature-text">
+          Monetize your work, trade compute credits, and participate 
+          in the creator economy.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="footer-logo-icon">K3</div>
+          <div class="footer-logo-text">BlackRoad</div>
+        </div>
+        <p class="footer-description">
+          The New Internet of Intelligence. A unified platform for creators, 
+          developers, and visionaries to build the future.
+        </p>
+      </div>
+
+      <div class="footer-column">
+        <h3>Portals</h3>
+        <div class="footer-links">
+          <a href="blackroad-nexus.html" class="footer-link">Nexus Console</a>
+          <a href="blackroad-social.html" class="footer-link">Social Portal</a>
+          <a href="blackroad-infinity.html" class="footer-link">Infinity Engine</a>
+          <a href="blackroad-codex.html" class="footer-link">Codex Infinity</a>
+        </div>
+      </div>
+
+      <div class="footer-column">
+        <h3>Resources</h3>
+        <div class="footer-links">
+          <a href="#" class="footer-link">Documentation</a>
+          <a href="#" class="footer-link">API Reference</a>
+          <a href="#" class="footer-link">Tutorials</a>
+          <a href="#" class="footer-link">Blog</a>
+        </div>
+      </div>
+
+      <div class="footer-column">
+        <h3>Company</h3>
+        <div class="footer-links">
+          <a href="#" class="footer-link">About</a>
+          <a href="#" class="footer-link">Careers</a>
+          <a href="#" class="footer-link">Contact</a>
+          <a href="#" class="footer-link">Legal</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2025 BlackRoad. The road isn't made. It's remembered.</p>
+    </div>
+  </footer>
+</body>
 </html>
