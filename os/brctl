@@ -1,0 +1,191 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOCKER_DIR="${SCRIPT_DIR}/docker"
+COMPOSE="docker compose"
+SYSTEMD_SERVICE="blackroad-compose.service"
+KIOSK_SERVICE="blackroad-kiosk.service"
+STACK_NAME="blackroad"
+
+usage() {
+  cat <<USAGE
+Usage: brctl <command> [args]
+
+Commands:
+  up                Start the docker compose stack
+  down              Stop the stack
+  restart           Restart the stack
+  ps                Show container status
+  logs [service]    Tail logs (defaults to all)
+  status            Summarise stack and systemd status
+  health            Query all HTTP health endpoints via Traefik
+  doctor            Run environment diagnostics
+  info              Show version, image tags, and environment info
+  kiosk on|off      Enable/disable kiosk user service
+  upgrade           Pull latest images and redeploy
+  help              Show this message
+USAGE
+}
+
+require_compose() {
+  if [[ ! -d "${DOCKER_DIR}" ]]; then
+    echo "Docker directory not found at ${DOCKER_DIR}" >&2
+    exit 1
+  fi
+}
+
+compose_cmd() {
+  (cd "${DOCKER_DIR}" && ${COMPOSE} "$@")
+}
+
+cmd_up() {
+  require_compose
+  compose_cmd up -d --remove-orphans
+}
+
+cmd_down() {
+  require_compose
+  compose_cmd down
+}
+
+cmd_restart() {
+  cmd_down
+  cmd_up
+}
+
+cmd_ps() {
+  require_compose
+  compose_cmd ps
+}
+
+cmd_logs() {
+  require_compose
+  if [[ $# -gt 0 ]]; then
+    compose_cmd logs -f "$1"
+  else
+    compose_cmd logs -f
+  fi
+}
+
+cmd_status() {
+  printf "Systemd status (sudo may be required)\n"
+  systemctl --no-pager status "${SYSTEMD_SERVICE}" 2>/dev/null || echo "systemd status unavailable"
+  echo
+  require_compose
+  compose_cmd ps
+}
+
+cmd_health() {
+  HOST="${BLACKROAD_HOST:-localhost}"
+  declare -a endpoints=(
+    "http://${HOST}/api/health"
+    "http://${HOST}/autopal/health"
+    "http://${HOST}/aicode/api/health"
+    "http://${HOST}/pi-ops/health"
+    "http://${HOST}/health"
+  )
+
+  for endpoint in "${endpoints[@]}"; do
+    echo "Checking ${endpoint}"
+    if curl -fsS "${endpoint}" >/tmp/brctl_health 2>&1; then
+      echo "  OK"
+    else
+      echo "  FAILED"
+    fi
+  done
+}
+
+cmd_doctor() {
+  echo "Docker: $(docker --version 2>/dev/null || echo missing)"
+  echo "Docker Compose: $(docker compose version 2>/dev/null || echo missing)"
+  echo "Disk usage:"
+  df -h /
+  echo
+  echo "cgroup memory:"
+  if [[ -f /proc/meminfo ]]; then
+    grep -i memtotal /proc/meminfo
+  fi
+  echo
+  echo "Checking required ports"
+  for port in 80 443 1883; do
+    if ss -tulpn | grep -q ":${port} "; then
+      echo "  Port ${port}: in use"
+    else
+      echo "  Port ${port}: available"
+    fi
+  done
+  echo
+  cmd_health || true
+}
+
+cmd_info() {
+  require_compose
+  echo "Stack: ${STACK_NAME}"
+  echo "Repository: $(git -C "${SCRIPT_DIR}/.." rev-parse --short HEAD 2>/dev/null || echo unknown)"
+  echo "Environment file:"
+  if [[ -f "${DOCKER_DIR}/.env" ]]; then
+    grep -v '^#' "${DOCKER_DIR}/.env"
+  else
+    echo "  Missing .env (copy from .env.example)"
+  fi
+  echo
+  compose_cmd images
+}
+
+cmd_kiosk() {
+  if [[ $# -ne 1 ]]; then
+    echo "Usage: brctl kiosk on|off" >&2
+    exit 1
+  fi
+  case "$1" in
+    on)
+      systemctl --user enable --now "${KIOSK_SERVICE}" || echo "Enable kiosk user service manually."
+      ;;
+    off)
+      systemctl --user disable --now "${KIOSK_SERVICE}" || echo "Disable kiosk user service manually."
+      ;;
+    *)
+      echo "Usage: brctl kiosk on|off" >&2
+      exit 1
+      ;;
+  esac
+}
+
+cmd_upgrade() {
+  require_compose
+  compose_cmd pull
+  compose_cmd up -d --remove-orphans
+}
+
+main() {
+  if [[ $# -lt 1 ]]; then
+    usage
+    exit 1
+  fi
+
+  cmd="$1"
+  shift || true
+
+  case "$cmd" in
+    up) cmd_up "$@" ;;
+    down) cmd_down "$@" ;;
+    restart) cmd_restart "$@" ;;
+    ps) cmd_ps "$@" ;;
+    logs) cmd_logs "$@" ;;
+    status) cmd_status "$@" ;;
+    health) cmd_health "$@" ;;
+    doctor) cmd_doctor "$@" ;;
+    info) cmd_info "$@" ;;
+    kiosk) cmd_kiosk "$@" ;;
+    upgrade) cmd_upgrade "$@" ;;
+    help|-h|--help) usage ;;
+    *)
+      echo "Unknown command: ${cmd}" >&2
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

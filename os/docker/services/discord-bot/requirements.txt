@@ -1,0 +1,1 @@
+# Add discord bot runtime dependencies here (e.g., discord.py)
