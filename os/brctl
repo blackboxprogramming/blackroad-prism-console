@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="/opt/blackroad/os/docker"
+
+dc () { (cd "$ROOT" && docker compose "$@"); }
+
+case "${1:-}" in
+  up)        dc up -d;;
+  down)      dc down;;
+  restart)   dc down && dc up -d;;
+  ps)        dc ps;;
+  logs)      shift; dc logs -f "${@:-}";;
+  status)    dc ps && echo && curl -fsS http://localhost/health || true;;
+  health)    bash /opt/blackroad/os/tests/smoke.sh;;
+  doctor)
+    echo "== Docker =="; docker --version; docker info | sed -n '1,30p'
+    echo "== Compose =="; docker compose version
+    echo "== Ports =="; ss -lntp | grep -E ':80 |:443 |:5000|:7000|:8000|:8001|:9000' || true
+    ;;
+  "kiosk") shift
+    case "${1:-}" in
+      on)  systemctl --user enable --now blackroad-kiosk.service || true ;;
+      off) systemctl --user disable --now blackroad-kiosk.service || true ;;
+      *)   echo "Usage: brctl kiosk on|off" ;;
+    esac
+    ;;
+  upgrade)   dc pull && dc up -d;;
+  *)         echo "Usage: brctl {up|down|restart|ps|logs [svc]|status|health|doctor|kiosk on|off|upgrade}";;
+esac

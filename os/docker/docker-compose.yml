@@ -1,0 +1,141 @@
+version: "3.9"
+name: blackroad
+
+x-common-env: &common_env
+  TZ: ${TZ}
+  REDIS_URL: ${REDIS_URL}
+
+services:
+  reverse-proxy:
+    image: traefik:v3.0
+    command:
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      # Enable TLS later:
+      # - "--entrypoints.websecure.address=:443"
+    ports:
+      - "80:80"
+      # - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+
+  blackroad-api:
+    build:
+      context: ../..
+      dockerfile: ./os/docker/services/blackroad-api/Dockerfile
+    environment:
+      <<: *common_env
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=PathPrefix(`/api`)
+      - traefik.http.services.api.loadbalancer.server.port=8000
+    healthcheck:
+      test: ["CMD","curl","-fsS","http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  autopal:
+    build:
+      context: ../..
+      dockerfile: ./os/docker/services/autopal/Dockerfile
+    environment:
+      <<: *common_env
+      BR_API_KEY: ${BR_API_KEY}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.autopal.rule=PathPrefix(`/autopal`)
+      - traefik.http.services.autopal.loadbalancer.server.port=8001
+    healthcheck:
+      test: ["CMD","curl","-fsS","http://localhost:8001/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  aicodecloud:
+    build:
+      context: ../..
+      dockerfile: ./os/docker/services/aicodecloud/Dockerfile
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.aicode.rule=PathPrefix(`/aicode`)
+      - traefik.http.services.aicode.loadbalancer.server.port=5000
+    healthcheck:
+      test: ["CMD","curl","-fsS","http://localhost:5000/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  pi-ops:
+    build:
+      context: ../..
+      dockerfile: ./os/docker/services/pi-ops/Dockerfile
+    environment:
+      <<: *common_env
+      MQTT_URL: ${MQTT_URL}
+    depends_on:
+      - mqtt
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.piops.rule=PathPrefix(`/pi-ops`)
+      - traefik.http.services.piops.loadbalancer.server.port=7000
+    healthcheck:
+      test: ["CMD","curl","-fsS","http://localhost:7000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  var-www:
+    build:
+      context: ../..
+      dockerfile: ./os/docker/services/var-www/Dockerfile
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.web.rule=PathPrefix(`/`)
+      - traefik.http.services.web.loadbalancer.server.port=9000
+    healthcheck:
+      test: ["CMD","curl","-fsS","http://localhost:9000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  discord-bot:
+    build:
+      context: ../..
+      dockerfile: ./os/docker/services/discord-bot/Dockerfile
+    environment:
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+    healthcheck:
+      test: ["CMD","python","/app/healthcheck.py"]
+      interval: 20s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  mqtt:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+    volumes:
+      - mosq-data:/mosquitto/data
+      - mosq-conf:/mosquitto/config
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD","redis-cli","ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+volumes:
+  mosq-data:
+  mosq-conf:

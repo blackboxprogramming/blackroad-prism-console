@@ -1,0 +1,12 @@
+[Unit]
+Description=BlackRoad Kiosk
+After=graphical.target
+
+[Service]
+Environment=DISPLAY=:0
+ExecStart=/usr/bin/startx /usr/bin/chromium --kiosk --no-first-run --fast --fast-start --window-size=1920,1080 http://localhost/
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target
