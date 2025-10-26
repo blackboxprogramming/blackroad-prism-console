@@ -1,168 +1,167 @@
-"""Module crossover operator for Lucidia genomes."""
-
+"""Module crossover operator for Lucidia agent genomes."""
 from __future__ import annotations
 
 import argparse
-import copy
-import json
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 import yaml
 
+AGENTS_ROOT = Path("prism/agents")
 
-def _load_genome(path: Path) -> Dict:
-    with path.open("r", encoding="utf-8") as handle:
+
+def _load_genome(agent_name: str, agents_root: Path = AGENTS_ROOT) -> Dict:
+    genome_path = agents_root / agent_name / "genome.yaml"
+    if not genome_path.exists():
+        raise FileNotFoundError(f"Genome file not found for agent '{agent_name}' at {genome_path}")
+    with genome_path.open("r", encoding="utf-8") as handle:
         return yaml.safe_load(handle)
 
 
-def _canonical(gene: Dict) -> str:
-    return json.dumps(gene, sort_keys=True)
-
-
-def _dedupe(genes: Iterable[Dict]) -> List[Dict]:
+def _unique_genes(genes: Iterable[Dict]) -> List[Dict]:
     seen = set()
-    result: List[Dict] = []
+    unique: List[Dict] = []
     for gene in genes:
-        marker = _canonical(gene)
-        if marker in seen:
-            continue
-        seen.add(marker)
-        result.append(gene)
-    return result
+        marker = _freeze(gene)
+        if marker not in seen:
+            seen.add(marker)
+            unique.append(gene)
+    return unique
 
 
-def _merge_tool_rights(parent_a: List[Dict], parent_b: List[Dict]) -> Dict | None:
-    tools = []
-    rate_limits: Dict[str, int] = {}
-    for gene in parent_a + parent_b:
+def _merge_tool_rights(genes_a: List[Dict], genes_b: List[Dict]) -> Dict:
+    tools = set()
+    tokens_limits: List[int] = []
+    tool_call_limits: List[int] = []
+    for gene in list(genes_a) + list(genes_b):
         if gene.get("type") != "tool_rights":
             continue
-        tools.extend(gene.get("tools", []))
-        for key, value in (gene.get("rate_limits") or {}).items():
-            current = rate_limits.get(key)
-            if current is None:
-                rate_limits[key] = value
-            else:
-                rate_limits[key] = min(current, value)
-    if not tools and not rate_limits:
-        return None
-    merged: Dict[str, object] = {"type": "tool_rights"}
-    if tools:
-        merged["tools"] = sorted(set(tools))
-    if rate_limits:
-        merged["rate_limits"] = rate_limits
-    return merged
-
-
-def _intersect_values(parent_a: List[Dict], parent_b: List[Dict]) -> List[Dict]:
-    values_a = {
-        _canonical(gene): gene
-        for gene in parent_a
-        if gene.get("type") == "values"
+        tools.update(gene.get("tools", []))
+        limits = gene.get("rate_limits", {})
+        if "tokens_per_min" in limits:
+            tokens_limits.append(limits["tokens_per_min"])
+        if "tool_calls_per_min" in limits:
+            tool_call_limits.append(limits["tool_calls_per_min"])
+    merged_limits = {}
+    if tokens_limits:
+        merged_limits["tokens_per_min"] = min(tokens_limits)
+    if tool_call_limits:
+        merged_limits["tool_calls_per_min"] = min(tool_call_limits)
+    merged_gene = {
+        "type": "tool_rights",
+        "tools": sorted(tools),
     }
-    values_b = {
-        _canonical(gene): gene
-        for gene in parent_b
-        if gene.get("type") == "values"
-    }
-    shared_keys = values_a.keys() & values_b.keys()
-    return [copy.deepcopy(values_a[key]) for key in shared_keys]
+    if merged_limits:
+        merged_gene["rate_limits"] = merged_limits
+    return merged_gene
 
 
-def _merge_other_genes(parent_a: List[Dict], parent_b: List[Dict]) -> List[Dict]:
-    remaining = [
-        gene
-        for gene in parent_a + parent_b
-        if gene.get("type") not in {"tool_rights", "values"}
-    ]
-    return _dedupe(remaining)
+def _intersect_values(genes_a: List[Dict], genes_b: List[Dict]) -> List[Dict]:
+    values_a = [gene for gene in genes_a if gene.get("type") == "values"]
+    values_b = [gene for gene in genes_b if gene.get("type") == "values"]
+    signatures_b = {_values_signature(gene) for gene in values_b}
+    intersection: List[Dict] = []
+    for gene in values_a:
+        if _values_signature(gene) in signatures_b:
+            intersection.append(gene)
+    return intersection
 
 
-def _average_hormones(parent_a: Dict, parent_b: Dict) -> Dict:
-    hormones_a = parent_a.get("hormones") or {}
-    hormones_b = parent_b.get("hormones") or {}
-    keys = set(hormones_a) | set(hormones_b)
-    averaged: Dict[str, float] = {}
-    for key in keys:
-        value_a = hormones_a.get(key)
-        value_b = hormones_b.get(key)
-        values = [value for value in (value_a, value_b) if isinstance(value, (int, float))]
-        if values:
-            averaged[key] = sum(values) / len(values)
-    return averaged
+def _values_signature(gene: Dict) -> Tuple:
+    relevant = {key: gene[key] for key in sorted(gene.keys()) if key != "type"}
+    return tuple(sorted(relevant.items()))
 
 
-def _merge_caps(parent_a: Dict, parent_b: Dict) -> Dict:
-    caps_a = ((parent_a.get("lifecycle") or {}).get("caps")) or {}
-    caps_b = ((parent_b.get("lifecycle") or {}).get("caps")) or {}
-    keys = set(caps_a) | set(caps_b)
-    merged_caps: Dict[str, bool] = {}
-    for key in keys:
-        value_a = caps_a.get(key)
-        value_b = caps_b.get(key)
-        if isinstance(value_a, bool) and isinstance(value_b, bool):
-            merged_caps[key] = value_a and value_b
-        elif isinstance(value_a, bool):
-            merged_caps[key] = value_a
-        elif isinstance(value_b, bool):
-            merged_caps[key] = value_b
-    return merged_caps
+def _freeze(value: Any) -> Tuple:
+    if isinstance(value, dict):
+        return tuple((key, _freeze(val)) for key, val in sorted(value.items()))
+    if isinstance(value, list):
+        return tuple(_freeze(item) for item in value)
+    return value
 
 
-def crossover_modules(parent_a_path: Path, parent_b_path: Path, child_name: str, output_root: Path | None = None) -> Path:
-    """Perform module crossover between two parent genomes."""
+def _combine_caps(parent_a: Dict, parent_b: Dict) -> Dict:
+    caps_a = parent_a.get("lifecycle", {}).get("caps", {})
+    caps_b = parent_b.get("lifecycle", {}).get("caps", {})
+    combined: Dict[str, bool] = {}
+    for key in set(caps_a) | set(caps_b):
+        combined[key] = bool(caps_a.get(key, False) and caps_b.get(key, False))
+    return combined
 
-    output_root = output_root or Path("prism/agents")
-    parent_a = _load_genome(parent_a_path)
-    parent_b = _load_genome(parent_b_path)
 
-    child = copy.deepcopy(parent_a)
-    species_label = child_name.replace("-", "/")
-    child["species"] = species_label
+def create_child(parent_a: str, parent_b: str, child: str, agents_root: Path = AGENTS_ROOT) -> Path:
+    """Create a child genome using module crossover.
 
-    genes_a = parent_a.get("genes", [])
-    genes_b = parent_b.get("genes", [])
+    Args:
+        parent_a: Name of the first parent agent.
+        parent_b: Name of the second parent agent.
+        child: Name for the child agent.
+        agents_root: Root directory for agent genomes.
+
+    Returns:
+        Path to the generated child genome file.
+    """
+
+    genome_a = _load_genome(parent_a, agents_root)
+    genome_b = _load_genome(parent_b, agents_root)
+
+    child_dir = agents_root / child
+    child_dir.mkdir(parents=True, exist_ok=True)
+
+    base_model = genome_a.get("base_model") or genome_b.get("base_model")
+    hormones = genome_a.get("hormones", {})
 
     merged_genes: List[Dict] = []
-    merged_genes.extend(_merge_other_genes(genes_a, genes_b))
-    tool_gene = _merge_tool_rights(genes_a, genes_b)
-    if tool_gene:
-        merged_genes.append(tool_gene)
-    value_genes = _intersect_values(genes_a, genes_b)
-    merged_genes.extend(value_genes)
-    child["genes"] = merged_genes
+    merged_genes.extend(gene for gene in genome_a.get("genes", []) if gene.get("type") not in {"tool_rights", "values"})
+    merged_genes.extend(gene for gene in genome_b.get("genes", []) if gene.get("type") not in {"tool_rights", "values"})
 
-    child["hormones"] = _average_hormones(parent_a, parent_b)
+    merged_tool_gene = _merge_tool_rights(genome_a.get("genes", []), genome_b.get("genes", []))
+    merged_values = _intersect_values(genome_a.get("genes", []), genome_b.get("genes", []))
 
-    lifecycle = copy.deepcopy(parent_a.get("lifecycle") or {})
-    lifecycle["phase"] = "infant"
-    if lifecycle:
-        lifecycle_caps = lifecycle.get("caps") or {}
-        lifecycle_caps.update(_merge_caps(parent_a, parent_b))
-        lifecycle["caps"] = lifecycle_caps
-    child["lifecycle"] = lifecycle
+    merged_genes.append(merged_tool_gene)
+    merged_genes.extend(merged_values)
 
-    child_dir = output_root / child_name
-    child_dir.mkdir(parents=True, exist_ok=True)
+    child_genome = {
+        "species": child,
+        "version": _derive_version(genome_a, genome_b),
+        "base_model": base_model,
+        "genes": _unique_genes(merged_genes),
+        "hormones": hormones,
+        "lifecycle": {
+            "phase": "infant",
+            "caps": _combine_caps(genome_a, genome_b),
+        },
+        "created_at": datetime.utcnow().isoformat() + "Z",
+        "parents": [parent_a, parent_b],
+    }
+
     output_path = child_dir / "genome.yaml"
     with output_path.open("w", encoding="utf-8") as handle:
-        yaml.safe_dump(child, handle, sort_keys=False)
+        yaml.safe_dump(child_genome, handle, sort_keys=False)
     return output_path
 
 
-def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Module crossover operator")
-    parser.add_argument("parent_a", type=Path, help="Path to parent A genome")
-    parser.add_argument("parent_b", type=Path, help="Path to parent B genome")
-    parser.add_argument("child", help="Child agent directory name")
-    parser.add_argument("--output-root", type=Path, default=Path("prism/agents"), help="Agents root directory")
-    return parser.parse_args()
+def _derive_version(genome_a: Dict, genome_b: Dict) -> float:
+    versions = []
+    for genome in (genome_a, genome_b):
+        try:
+            versions.append(float(genome.get("version", 0)))
+        except (TypeError, ValueError):
+            continue
+    if versions:
+        return max(versions)
+    return 0.1
 
 
 def main() -> None:
-    args = _parse_args()
-    crossover_modules(args.parent_a, args.parent_b, args.child, args.output_root)
+    parser = argparse.ArgumentParser(description="Module crossover operator")
+    parser.add_argument("parent_a")
+    parser.add_argument("parent_b")
+    parser.add_argument("child")
+    parser.add_argument("--agents-root", default=AGENTS_ROOT, type=Path)
+    args = parser.parse_args()
+    create_child(args.parent_a, args.parent_b, args.child, args.agents_root)
 
 
 if __name__ == "__main__":
