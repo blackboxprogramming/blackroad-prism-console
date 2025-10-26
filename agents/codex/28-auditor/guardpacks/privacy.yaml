@@ -1,0 +1,23 @@
+name: privacy
+version: 1
+policies:
+  - id: PRIV-001
+    description: "Bundles must record that PII scrubbing has been applied."
+    type: require_flag
+    path: metadata.pii_scrubbed
+    severity: high
+    hint: "Invoke scrub_pii.scrub before validation to set metadata.pii_scrubbed."
+  - id: PRIV-002
+    description: "Evidence payloads must not contain email addresses."
+    type: regex_forbidden
+    targets: [artifacts, logs]
+    pattern: "(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}"
+    severity: high
+    hint: "Mask emails with the configured redaction token."
+  - id: PRIV-003
+    description: "Evidence payloads must not contain phone numbers."
+    type: regex_forbidden
+    targets: [artifacts, logs]
+    pattern: "(?i)\\b(?:\\+?\\d{1,3}[-.\\s]?)?(?:\\(\\d{3}\\)|\\d{3})[-.\\s]?\\d{3}[-.\\s]?\\d{4}\\b"
+    severity: medium
+    hint: "Remove or hash phone numbers before publishing."
