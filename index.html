@@ -1,1058 +1,1140 @@
-<!doctype html><html><head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>BlackRoad</title>
-<style>
-:root{--accent:#FF4FD8;--accent-2:#0096FF;--accent-3:#FDBA2D}
-html,body{margin:0;height:100%;background:#0b0b0f;color:#eaeaf0;font-family:Inter,system-ui,sans-serif}
-.wrap{min-height:100dvh;display:grid;place-items:center}
-.card{padding:24px;border:1px solid #222;border-radius:16px;background:linear-gradient(180deg,#0f0f16,#0b0b0f)}
-.badge{display:inline-block;padding:6px 10px;border-radius:9999px;background:var(--accent);color:#0b0b0f;font-weight:700}
-a{color:var(--accent-2);text-decoration:none}
-</style></head><body>
-<!-- BLACKROAD OK -->
-<div class="wrap"><div class="card">
-  <div class="badge">BlackRoad</div>
-  <h1>We’re online.</h1>
-  <p>Daily proof: <code id="proof">%%PROOF%%</code></p>
-  <p><a href="/health.json">/health.json</a> &nbsp; <a href="/health/">/health/</a></p>
-  <small>Palette: #FF4FD8 · #0096FF · #FDBA2D</small>
-</div></div>
-</body></html>
-<!-- FILE: /var/www/blackroad/index.html -->
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>BlackRoad.io — Codex Portal</title>
-    <meta
-      name="description"
-      content="BlackRoad.io — AI-native co-coding portal (Codex + Lucidia)."
-    />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>" />
-    <!-- Fonts (optional, safe fallbacks) -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      :root {
-        --bg: #0c0f14; /* deep slate */
-        --panel: #12161d; /* card/side panels */
-        --panel-2: #0f141b;
-        --text: #e7ecf3; /* high-contrast on dark */
-        --muted: #91a0b3;
-        --border: #1f2632;
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackRoad DevHub - GitHub &amp; VS Code Portal</title>
+  <style>
+    :root {
+      --void: #000000;
+      --void-10: #0a0a0f;
+      --void-20: #13131a;
+      --void-30: #1a1a24;
+      --void-40: #202030;
 
-        /* Brand palette (locked) */
-        --accent: #ff4fd8; /* primary neon magenta  */
-        --accent-2: #0096ff; /* electric blue         */
-        --accent-3: #fdba2d; /* amber                 */
+      --spectrum-gold: #fdba2d;
+      --spectrum-orange: #ff6b35;
+      --spectrum-pink: #ff4fd8;
+      --spectrum-purple: #c753ff;
+      --spectrum-indigo: #6366f1;
+      --spectrum-blue: #3b82f6;
+      --spectrum-cyan: #06b6d4;
+      --spectrum-green: #10b981;
 
-        --ok: #19c37d;
-        --warn: #f5a524;
-        --err: #ef4444;
+      --text: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-tertiary: rgba(255, 255, 255, 0.5);
 
-        --radius: 10px;
-        --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-      }
-      * {
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        height: 100%;
-      }
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--text);
-        font-family:
-          Inter,
-          system-ui,
-          -apple-system,
-          Segoe UI,
-          Roboto,
-          Ubuntu,
-          'Helvetica Neue',
-          Arial,
-          'Noto Sans',
-          sans-serif;
-        letter-spacing: 0.2px;
-      }
-      a {
-        color: var(--accent-2);
-        text-decoration: none;
-      }
-      a:hover {
-        text-decoration: underline;
-      }
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(255, 79, 216, 0.2);
 
-      .skip-link {
-        position: absolute;
-        left: -999px;
-        top: auto;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-      }
-      .skip-link:focus {
-        left: 10px;
-        top: 10px;
-        width: auto;
-        height: auto;
-        background: var(--accent-2);
-        color: #000;
-        padding: 8px;
-        border-radius: var(--radius);
-        z-index: 1000;
-      }
+      --gradient-spectrum: linear-gradient(
+        135deg,
+        var(--spectrum-gold) 0%,
+        var(--spectrum-orange) 20%,
+        var(--spectrum-pink) 40%,
+        var(--spectrum-purple) 60%,
+        var(--spectrum-indigo) 80%,
+        var(--spectrum-blue) 100%
+      );
 
-      .app {
-        display: grid;
-        grid-template-columns: 260px 1fr;
-        grid-template-rows: 56px 1fr;
-        grid-template-areas:
-          'sidebar header'
-          'sidebar main';
-        height: 100%;
+      --gradient-prism: conic-gradient(
+        from 180deg,
+        var(--spectrum-gold) 0deg,
+        var(--spectrum-orange) 60deg,
+        var(--spectrum-pink) 120deg,
+        var(--spectrum-purple) 180deg,
+        var(--spectrum-indigo) 240deg,
+        var(--spectrum-blue) 300deg,
+        var(--spectrum-gold) 360deg
+      );
+
+      --glow-pink: 0 0 40px rgba(255, 79, 216, 0.5);
+      --glow-spectrum:
+        0 0 20px rgba(255, 79, 216, 0.4),
+        0 0 40px rgba(199, 83, 255, 0.3),
+        0 0 60px rgba(99, 102, 241, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      background: var(--void);
+      color: var(--text);
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* Code Matrix Background */
+    .code-background {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: var(--void);
+      overflow: hidden;
+    }
+
+    .code-rain {
+      position: absolute;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--spectrum-green);
+      opacity: 0.15;
+      animation: codefall 10s linear infinite;
+      white-space: pre;
+    }
+
+    @keyframes codefall {
+      0% {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      10%,
+      90% {
+        opacity: 0.15;
+      }
+      100% {
+        transform: translateY(100vh);
+        opacity: 0;
+      }
+    }
+
+    .code-rain:nth-child(1) { left: 5%; animation-delay: 0s; }
+    .code-rain:nth-child(2) { left: 15%; animation-delay: -2s; }
+    .code-rain:nth-child(3) { left: 25%; animation-delay: -4s; }
+    .code-rain:nth-child(4) { left: 35%; animation-delay: -6s; }
+    .code-rain:nth-child(5) { left: 45%; animation-delay: -8s; }
+    .code-rain:nth-child(6) { left: 55%; animation-delay: -1s; }
+    .code-rain:nth-child(7) { left: 65%; animation-delay: -3s; }
+    .code-rain:nth-child(8) { left: 75%; animation-delay: -5s; }
+    .code-rain:nth-child(9) { left: 85%; animation-delay: -7s; }
+    .code-rain:nth-child(10) { left: 95%; animation-delay: -9s; }
+
+    /* Header */
+    .header {
+      position: relative;
+      z-index: 1000;
+      height: 70px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(10, 10, 15, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 2px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--gradient-prism);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: var(--glow-pink);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%,
+      100% {
+        box-shadow: var(--glow-pink);
+      }
+      50% {
+        box-shadow: var(--glow-spectrum);
+      }
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .logo-title {
+      font-size: 1.5rem;
+      font-weight: 900;
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+
+    .logo-subtitle {
+      font-size: 0.65rem;
+      color: var(--text-tertiary);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .btn-header {
+      padding: 10px 20px;
+      background: var(--void-30);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .btn-header:hover {
+      background: var(--void-40);
+      border-color: var(--spectrum-pink);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: var(--gradient-spectrum);
+      color: var(--void);
+      border: none;
+      box-shadow: var(--glow-pink);
+    }
+
+    .btn-primary:hover {
+      box-shadow: var(--glow-spectrum);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--gradient-prism);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--void);
+      cursor: pointer;
+    }
+
+    /* Main Layout */
+    .main-container {
+      position: relative;
+      z-index: 1;
+      height: calc(100vh - 70px);
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: rgba(10, 10, 15, 0.95);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      backdrop-filter: blur(20px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-section {
+      padding: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Repository List */
+    .repo-item {
+      background: var(--void-20);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .repo-item:hover,
+    .repo-item.active {
+      background: var(--void-30);
+      border-color: var(--spectrum-pink);
+      transform: translateX(4px);
+      box-shadow: var(--glow-pink);
+    }
+
+    .repo-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .repo-icon {
+      font-size: 20px;
+    }
+
+    .repo-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .repo-meta {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .repo-stat {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--spectrum-green);
+      box-shadow: 0 0 8px var(--spectrum-green);
+    }
+
+    /* Main Content */
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    /* Editor Tabs */
+    .editor-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+      background: rgba(10, 10, 15, 0.95);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .editor-tab {
+      padding: 8px 16px;
+      background: var(--void-30);
+      border: 1px solid var(--border);
+      border-radius: 8px 8px 0 0;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .editor-tab:hover,
+    .editor-tab.active {
+      background: rgba(10, 10, 15, 0.95);
+      border-color: var(--spectrum-pink);
+      color: var(--text);
+    }
+
+    .tab-close {
+      opacity: 0.5;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .tab-close:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Code Editor */
+    .code-editor {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .editor-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: rgba(10, 10, 15, 0.9);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .editor-info {
+      display: flex;
+      gap: 16px;
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+    }
+
+    .editor-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-editor {
+      padding: 6px 12px;
+      background: var(--void-30);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-editor:hover {
+      background: var(--void-40);
+      border-color: var(--spectrum-pink);
+      color: var(--text);
+    }
+
+    .editor-content {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .line-numbers {
+      width: 60px;
+      background: rgba(10, 10, 15, 0.9);
+      border-right: 1px solid var(--border);
+      padding: 20px 12px;
+      text-align: right;
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      user-select: none;
+      overflow: hidden;
+    }
+
+    .code-area {
+      flex: 1;
+      padding: 20px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--text);
+      overflow: auto;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .code-line {
+      margin-bottom: 4px;
+    }
+
+    /* Syntax Highlighting */
+    .keyword { color: #c586c0; }
+    .string { color: #ce9178; }
+    .comment { color: #6a9955; font-style: italic; }
+    .function { color: #dcdcaa; }
+    .variable { color: #9cdcfe; }
+    .number { color: #b5cea8; }
+    .operator { color: #d4d4d4; }
+
+    /* AI Assistant Panel */
+    .ai-panel {
+      width: 400px;
+      background: rgba(10, 10, 15, 0.95);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(20px);
+    }
+
+    .ai-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10, 10, 15, 0.95);
+    }
+
+    .ai-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ai-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+    }
+
+    .ai-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .ai-suggestion {
+      background: var(--void-20);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--spectrum-pink);
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .ai-suggestion:hover {
+      background: var(--void-30);
+      border-color: var(--spectrum-pink);
+      box-shadow: var(--glow-pink);
+    }
+
+    .suggestion-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .suggestion-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .suggestion-code {
+      background: var(--void);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: var(--spectrum-cyan);
+      overflow-x: auto;
+    }
+
+    /* Bottom Panel */
+    .bottom-panel {
+      height: 250px;
+      background: rgba(10, 10, 15, 0.95);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(20px);
+    }
+
+    .panel-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 8px 16px;
+      background: rgba(10, 10, 15, 0.9);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-tab {
+      padding: 6px 16px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: var(--text-tertiary);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .panel-tab:hover,
+    .panel-tab.active {
+      background: rgba(255, 79, 216, 0.1);
+      border-color: var(--spectrum-pink);
+      color: var(--text);
+    }
+
+    .panel-content {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    .terminal-line {
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+    }
+
+    .terminal-line.success {
+      color: var(--spectrum-green);
+    }
+
+    .terminal-line.error {
+      color: var(--spectrum-orange);
+    }
+
+    .terminal-line.info {
+      color: var(--spectrum-cyan);
+    }
+
+    /* Git Changes */
+    .git-change {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      background: var(--void-20);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .git-change:hover {
+      background: var(--void-30);
+      border-color: var(--spectrum-pink);
+    }
+
+    .change-status {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .change-status.added { background: var(--spectrum-green); }
+    .change-status.modified { background: var(--spectrum-orange); }
+    .change-status.deleted { background: #ef4444; }
+
+    .change-file {
+      flex: 1;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--void-10);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--void-40);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 79, 216, 0.3);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .ai-panel {
+        display: none;
       }
 
       .sidebar {
-        grid-area: sidebar;
-        background: linear-gradient(180deg, var(--panel), var(--panel-2));
-        border-right: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        padding: 14px;
+        width: 250px;
       }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 8px 10px;
-        border-radius: 8px;
-        background: linear-gradient(90deg, rgba(255, 79, 216, 0.14), rgba(0, 150, 255, 0.08));
-        border: 1px solid var(--border);
-      }
-      .brand .dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: var(--accent);
-        box-shadow: 0 0 16px var(--accent);
-      }
-      .brand .title {
-        font-weight: 700;
-        letter-spacing: 0.4px;
-      }
-      .brand .subtitle {
-        font-size: 12px;
-        color: var(--muted);
-      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Code Background -->
+  <div class="code-background">
+    <div class="code-rain">function init() {
+  const repo = await fetchRepo();
+  console.log(repo);
+}</div>
+    <div class="code-rain">class Component {
+  render() {
+    return &lt;div /&gt;;
+  }
+}</div>
+    <div class="code-rain">const data = items.map(x =&gt; {
+  return x.value * 2;
+});</div>
+    <div class="code-rain">if (isValid) {
+  process();
+} else {
+  throw new Error();
+}</div>
+    <div class="code-rain">async function fetch() {
+  const res = await api();
+  return res.json();
+}</div>
+    <div class="code-rain">export default {
+  name: 'App',
+  data() {}
+}</div>
+    <div class="code-rain">interface User {
+  id: number;
+  name: string;
+}</div>
+    <div class="code-rain">try {
+  connect();
+} catch (err) {
+  log(err);
+}</div>
+    <div class="code-rain">const sum = (a, b) =&gt; {
+  return a + b;
+};</div>
+    <div class="code-rain">import React from 'react';
+const App = () =&gt; {
+  return null;
+};</div>
+  </div>
 
-      .nav {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin-top: 4px;
-      }
-      .nav button {
-        appearance: none;
-        border: 1px solid var(--border);
-        background: transparent;
-        color: var(--text);
-        text-align: left;
-        padding: 10px 12px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 500;
-      }
-      .nav button:hover {
-        background: #131925;
-      }
-      .nav button.active {
-        background: linear-gradient(90deg, rgba(0, 150, 255, 0.12), rgba(255, 79, 216, 0.1));
-        border-color: rgba(0, 150, 255, 0.35);
-        outline: 1px solid rgba(255, 79, 216, 0.35);
-      }
-
-      .presence {
-        margin-top: auto;
-        border: 1px dashed var(--border);
-        border-radius: 8px;
-        padding: 10px;
-        font-size: 12px;
-        color: var(--muted);
-      }
-      .presence strong {
-        color: var(--text);
-      }
-      .presence .chip {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 999px;
-        border: 1px solid var(--border);
-        margin-right: 6px;
-      }
-      .presence .ok {
-        border-color: rgba(25, 195, 125, 0.5);
-        color: #a5f3d6;
-      }
-      .presence .warn {
-        border-color: rgba(245, 165, 36, 0.5);
-        color: #fde3b3;
-      }
-
-      .header {
-        grid-area: header;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 16px;
-        border-bottom: 1px solid var(--border);
-        background: rgba(10, 14, 19, 0.65);
-        backdrop-filter: blur(10px);
-        position: sticky;
-        top: 0;
-        z-index: 2;
-      }
-      .search {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        width: 520px;
-        max-width: 60vw;
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        padding: 6px 10px;
-      }
-      .search input {
-        flex: 1;
-        border: none;
-        outline: none;
-        background: transparent;
-        color: var(--text);
-        font-family: inherit;
-        font-size: 14px;
-      }
-      .btn {
-        appearance: none;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 8px 12px;
-        background: transparent;
-        color: var(--text);
-        cursor: pointer;
-      }
-      .btn.acc {
-        border-color: rgba(255, 79, 216, 0.35);
-        background: linear-gradient(90deg, rgba(255, 79, 216, 0.16), rgba(0, 150, 255, 0.12));
-      }
-      .btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .main {
-        grid-area: main;
-        padding: 16px;
-        overflow: auto;
-      }
-
-      .card {
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        padding: 16px;
-      }
-      .two-col {
-        display: grid;
-        grid-template-columns: 1.2fr 1fr;
-        gap: 16px;
-      }
-      .row {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      .muted {
-        color: var(--muted);
-      }
-      .mono {
-        font-family:
-          'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-          'Liberation Mono', 'Courier New', monospace;
-      }
-
-      /* Chat */
-      .chat-wrap {
-        display: grid;
-        grid-template-rows: 1fr auto;
-        height: 60vh;
-        min-height: 420px;
-      }
-      .chat-stream {
-        overflow: auto;
-        padding: 12px;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        background: #0d1219;
-      }
-      .bubble {
-        padding: 10px 12px;
-        border-radius: 8px;
-        border: 1px solid var(--border);
-        margin-bottom: 10px;
-        white-space: pre-wrap;
-      }
-      .bubble.user {
-        background: rgba(0, 150, 255, 0.08);
-      }
-      .bubble.ai {
-        background: rgba(255, 79, 216, 0.08);
-      }
-      .input-row {
-        display: flex;
-        gap: 8px;
-        margin-top: 10px;
-      }
-      textarea.input {
-        resize: vertical;
-        min-height: 48px;
-        max-height: 240px;
-        flex: 1;
-        border-radius: 8px;
-        border: 1px solid var(--border);
-        background: #0d1219;
-        color: var(--text);
-        padding: 10px;
-      }
-
-      /* Editor */
-      .editor-area {
-        width: 100%;
-        min-height: 55vh;
-        font-size: 13.5px;
-        line-height: 1.5;
-        padding: 12px;
-        border-radius: 8px;
-        color: var(--text);
-        background: #0d1219;
-        border: 1px solid var(--border);
-      }
-
-      /* Canvas */
-      .canvas-board {
-        width: 100%;
-        height: 55vh;
-        background: #0d1219;
-        border: 1px dashed #1e2532;
-        border-radius: 8px;
-        cursor: crosshair;
-      }
-
-      /* Table */
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 14px;
-      }
-      th,
-      td {
-        border-bottom: 1px solid var(--border);
-        padding: 10px;
-        text-align: left;
-      }
-      tbody tr:hover {
-        background: #121826;
-      }
-
-      /* Login gate */
-      .gate {
-        position: fixed;
-        inset: 0;
-        display: none;
-        place-items: center;
-        background: rgba(8, 11, 16, 0.8);
-        backdrop-filter: blur(6px);
-        z-index: 9999;
-      }
-      .gate .panel {
-        width: min(480px, 92vw);
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 18px;
-        box-shadow: var(--shadow);
-      }
-      .gate input {
-        width: 100%;
-        padding: 10px 12px;
-        border-radius: 8px;
-        border: 1px solid var(--border);
-        background: #0d1219;
-        color: var(--text);
-      }
-      .gate .row {
-        margin-top: 10px;
-      }
-
-      /* Tiny helpers */
-      .k {
-        color: #94a3b8;
-        font-size: 12px;
-      }
-      .kbd {
-        border: 1px solid var(--border);
-        border-bottom-color: #0a0d12;
-        padding: 1px 6px;
-        border-radius: 6px;
-        background: #0d1219;
-      }
-    </style>
-  </head>
-  <body>
-    <a class="skip-link" href="#main">Skip to main content</a>
-    <div class="app">
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="dot" aria-hidden="true"></div>
-          <div>
-            <div class="title">BlackRoad Codex</div>
-            <div class="subtitle">AI‑Native Co‑Coding Portal</div>
-          </div>
-        </div>
-        <nav class="nav" id="nav"></nav>
-
-        <div class="presence" id="presence">
-          <div><strong>Presence</strong> <span class="muted">/ live metrics</span></div>
-          <div class="row" style="margin-top: 8px">
-            <span class="chip ok" id="p-api">API</span>
-            <span class="chip ok" id="p-llm">LLM</span>
-            <span class="chip warn" id="p-sock">Socket</span>
-          </div>
-          <div class="k" style="margin-top: 8px">
-            ⌘/Ctrl + K to switch views • <span id="version"></span>
-          </div>
-        </div>
-      </aside>
-
-      <!-- Header -->
-      <header class="header">
-        <div class="search">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M21 21l-4.2-4.2M10.8 18A7.2 7.2 0 1010.8 3.6a7.2 7.2 0 000 14.4z"
-              stroke="rgba(255,255,255,.7)"
-            />
-          </svg>
-          <input id="globalSearch" placeholder="Search projects, agents, datasets…" />
-          <button class="btn" id="btnSearch">Search</button>
-        </div>
-        <div style="margin-left: auto" class="row">
-          <button class="btn" id="btnLogout" title="Sign out">Logout</button>
-          <button class="btn acc" id="btnMint" title="Mint RoadCoin">Mint RC</button>
-        </div>
-      </header>
-
-      <!-- Main -->
-      <main class="main" id="main"></main>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">
+        <div class="logo-title">BlackRoad DevHub</div>
+        <div class="logo-subtitle">GITHUB • VS CODE PORTAL</div>
+      </div>
     </div>
+    <div class="header-actions">
+      <button class="btn-header">
+        <span>🔄</span>
+        <span>Sync</span>
+      </button>
+      <button class="btn-header">
+        <span>🌿</span>
+        <span>Branch: main</span>
+      </button>
+      <button class="btn-header btn-primary">
+        <span>💾</span>
+        <span>Commit &amp; Push</span>
+      </button>
+      <div class="user-avatar">JD</div>
+    </div>
+  </header>
 
-    <!-- Login Gate -->
-    <div class="gate" id="gate">
-      <div class="panel">
-        <h2 style="margin: 0 0 12px 0">Sign in to BlackRoad</h2>
-        <p class="muted" style="margin: 0 0 12px 0">
-          Cookie‑session auth via API. Use your dev credentials.
-        </p>
-        <label class="k">Username</label>
-        <input id="u" autocomplete="username" />
-        <div class="row">
-          <div style="flex: 1">
-            <label class="k">Password</label>
-            <input id="p" type="password" autocomplete="current-password" />
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="section-title">
+          <span>📁</span>
+          <span>Your Repositories</span>
+        </div>
+        <div class="repo-item active">
+          <div class="repo-header">
+            <span class="repo-icon">📦</span>
+            <span class="repo-name">blackroad-apps</span>
           </div>
-          <div>
-            <label class="k"> </label>
-            <button class="btn acc" id="btnLogin">Login</button>
+          <div class="repo-meta">
+            <span class="repo-stat">⭐ 247</span>
+            <span class="repo-stat">🔀 34</span>
+            <span class="repo-stat">
+              <span class="status-indicator"></span>
+              <span>Active</span>
+            </span>
           </div>
         </div>
-        <p class="k">
-          Dev note: defaults (if enabled) → <code class="kbd">root / Codex2025</code>.
-        </p>
-        <p class="k">
-          If login fails, ensure Nginx proxies <code>/api</code> to the Node API and cookies are
-          allowed.
-        </p>
+        <div class="repo-item">
+          <div class="repo-header">
+            <span class="repo-icon">🚀</span>
+            <span class="repo-name">ai-music-generator</span>
+          </div>
+          <div class="repo-meta">
+            <span class="repo-stat">⭐ 892</span>
+            <span class="repo-stat">🔀 127</span>
+            <span class="repo-stat">
+              <span class="status-indicator"></span>
+              <span>Active</span>
+            </span>
+          </div>
+        </div>
+        <div class="repo-item">
+          <div class="repo-header">
+            <span class="repo-icon">🎓</span>
+            <span class="repo-name">visual-learning-ai</span>
+          </div>
+          <div class="repo-meta">
+            <span class="repo-stat">⭐ 1.2k</span>
+            <span class="repo-stat">🔀 203</span>
+            <span class="repo-stat">
+              <span class="status-indicator"></span>
+              <span>Active</span>
+            </span>
+          </div>
+        </div>
+        <div class="repo-item">
+          <div class="repo-header">
+            <span class="repo-icon">💰</span>
+            <span class="repo-name">roadchain-mining</span>
+          </div>
+          <div class="repo-meta">
+            <span class="repo-stat">⭐ 3.4k</span>
+            <span class="repo-stat">🔀 847</span>
+            <span class="repo-stat">
+              <span class="status-indicator"></span>
+              <span>Active</span>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="section-title">
+          <span>📊</span>
+          <span>Quick Stats</span>
+        </div>
+        <div style="color: var(--text-secondary); font-size: 0.85rem; line-height: 2;">
+          <div>💻 Commits Today: <strong style="color: var(--text);">24</strong></div>
+          <div>🔥 Streak: <strong style="color: var(--spectrum-orange);">47 days</strong></div>
+          <div>⭐ Total Stars: <strong style="color: var(--spectrum-gold);">5.7k</strong></div>
+          <div>🚀 Active Repos: <strong style="color: var(--text);">12</strong></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="content-area">
+      <!-- Editor Tabs -->
+      <div class="editor-tabs">
+        <div class="editor-tab active">
+          <span>📄</span>
+          <span>index.html</span>
+          <span class="tab-close">×</span>
+        </div>
+        <div class="editor-tab">
+          <span>🎨</span>
+          <span>styles.css</span>
+          <span class="tab-close">×</span>
+        </div>
+        <div class="editor-tab">
+          <span>⚡</span>
+          <span>app.js</span>
+          <span class="tab-close">×</span>
+        </div>
+        <div class="editor-tab">
+          <span>📝</span>
+          <span>README.md</span>
+          <span class="tab-close">×</span>
+        </div>
+      </div>
+
+      <!-- Code Editor -->
+      <div class="code-editor">
+        <div class="editor-toolbar">
+          <div class="editor-info">
+            <span>HTML</span>
+            <span>UTF-8</span>
+            <span>LF</span>
+            <span>Ln 24, Col 12</span>
+          </div>
+          <div class="editor-actions">
+            <button class="btn-editor">🤖 AI Assist</button>
+            <button class="btn-editor">💡 Suggest</button>
+            <button class="btn-editor">🔍 Find</button>
+            <button class="btn-editor">📋 Format</button>
+          </div>
+        </div>
+
+        <div class="editor-content">
+          <div class="line-numbers">
+            1<br />
+            2<br />
+            3<br />
+            4<br />
+            5<br />
+            6<br />
+            7<br />
+            8<br />
+            9<br />
+            10<br />
+            11<br />
+            12<br />
+            13<br />
+            14<br />
+            15<br />
+            16<br />
+            17<br />
+            18<br />
+            19<br />
+            20<br />
+            21<br />
+            22<br />
+            23<br />
+            24<br />
+            25
+          </div>
+          <div class="code-area">
+            <div class="code-line"><span class="operator">&lt;</span><span class="keyword">!DOCTYPE</span> <span class="variable">html</span><span class="operator">&gt;</span></div>
+            <div class="code-line"><span class="operator">&lt;</span><span class="keyword">html</span> <span class="variable">lang</span>=<span class="string">"en"</span><span class="operator">&gt;</span></div>
+            <div class="code-line"><span class="operator">&lt;</span><span class="keyword">head</span><span class="operator">&gt;</span></div>
+            <div class="code-line">  <span class="operator">&lt;</span><span class="keyword">meta</span> <span class="variable">charset</span>=<span class="string">"UTF-8"</span><span class="operator">&gt;</span></div>
+            <div class="code-line">  <span class="operator">&lt;</span><span class="keyword">title</span><span class="operator">&gt;</span>BlackRoad Apps<span class="operator">&lt;/</span><span class="keyword">title</span><span class="operator">&gt;</span></div>
+            <div class="code-line"><span class="operator">&lt;/</span><span class="keyword">head</span><span class="operator">&gt;</span></div>
+            <div class="code-line"><span class="operator">&lt;</span><span class="keyword">body</span><span class="operator">&gt;</span></div>
+            <div class="code-line">  <span class="comment">&lt;!-- Main Application --&gt;</span></div>
+            <div class="code-line">  <span class="operator">&lt;</span><span class="keyword">div</span> <span class="variable">class</span>=<span class="string">"app-container"</span><span class="operator">&gt;</span></div>
+            <div class="code-line">    <span class="operator">&lt;</span><span class="keyword">header</span><span class="operator">&gt;</span></div>
+            <div class="code-line">      <span class="operator">&lt;</span><span class="keyword">h1</span><span class="operator">&gt;</span>Welcome to BlackRoad<span class="operator">&lt;/</span><span class="keyword">h1</span><span class="operator">&gt;</span></div>
+            <div class="code-line">    <span class="operator">&lt;/</span><span class="keyword">header</span><span class="operator">&gt;</span></div>
+            <div class="code-line">    <span class="operator">&lt;</span><span class="keyword">main</span><span class="operator">&gt;</span></div>
+            <div class="code-line">      <span class="operator">&lt;</span><span class="keyword">section</span> <span class="variable">class</span>=<span class="string">"hero"</span><span class="operator">&gt;</span></div>
+            <div class="code-line">        <span class="operator">&lt;</span><span class="keyword">p</span><span class="operator">&gt;</span>Revolutionary AI-powered applications<span class="operator">&lt;/</span><span class="keyword">p</span><span class="operator">&gt;</span></div>
+            <div class="code-line">      <span class="operator">&lt;/</span><span class="keyword">section</span><span class="operator">&gt;</span></div>
+            <div class="code-line">    <span class="operator">&lt;/</span><span class="keyword">main</span><span class="operator">&gt;</span></div>
+            <div class="code-line">  <span class="operator">&lt;/</span><span class="keyword">div</span><span class="operator">&gt;</span></div>
+            <div class="code-line">  </div>
+            <div class="code-line">  <span class="operator">&lt;</span><span class="keyword">script</span> <span class="variable">src</span>=<span class="string">"app.js"</span><span class="operator">&gt;&lt;/</span><span class="keyword">script</span><span class="operator">&gt;</span></div>
+            <div class="code-line"><span class="operator">&lt;/</span><span class="keyword">body</span><span class="operator">&gt;</span></div>
+            <div class="code-line"><span class="operator">&lt;/</span><span class="keyword">html</span><span class="operator">&gt;</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Panel -->
+      <div class="bottom-panel">
+        <div class="panel-tabs">
+          <div class="panel-tab active">Terminal</div>
+          <div class="panel-tab">Output</div>
+          <div class="panel-tab">Problems</div>
+          <div class="panel-tab">Git Changes</div>
+        </div>
+        <div class="panel-content">
+          <div class="terminal-line info">$ git status</div>
+          <div class="terminal-line">On branch main</div>
+          <div class="terminal-line">Your branch is up to date with 'origin/main'.</div>
+          <div class="terminal-line"></div>
+          <div class="terminal-line">Changes not staged for commit:</div>
+          <div class="terminal-line">  modified:   index.html</div>
+          <div class="terminal-line">  modified:   styles.css</div>
+          <div class="terminal-line"></div>
+          <div class="terminal-line success">$ npm run build</div>
+          <div class="terminal-line">Building for production...</div>
+          <div class="terminal-line success">✓ Build complete in 2.4s</div>
+          <div class="terminal-line info">$ _</div>
+        </div>
       </div>
     </div>
 
-    <!-- Socket.IO (optional presence) -->
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" defer></script>
-
-    <script>
-      (function () {
-        const routes = [
-          ['chat', 'Chat'],
-          ['canvas', 'Canvas'],
-          ['editor', 'Editor'],
-          ['terminal', 'Terminal'],
-          ['roadview', 'RoadView'],
-          ['backroad', 'BackRoad'],
-          ['projects', 'Projects'],
-          ['agents', 'Agents'],
-          ['datasets', 'Datasets'],
-          ['models', 'Models'],
-          ['integrations', 'Integrations'],
-        ];
-
-        const qs = (s) => document.querySelector(s);
-        const elNav = qs('#nav');
-        const elMain = qs('#main');
-        const elGate = qs('#gate');
-
-        // Version stamp
-        qs('#version').textContent = 'v1.0 ' + new Date().toISOString().split('T')[0];
-
-        // --- Navigation
-        routes.forEach(([key, label]) => {
-          const b = document.createElement('button');
-          b.textContent = label;
-          b.dataset.key = key;
-          b.onclick = () => navigate(key);
-          elNav.appendChild(b);
-        });
-
-        function setActive(key) {
-          [...elNav.querySelectorAll('button')].forEach((btn) => {
-            btn.classList.toggle('active', btn.dataset.key === key);
-          });
-        }
-
-        window.addEventListener('keydown', (e) => {
-          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-            e.preventDefault();
-            const keys = routes.map((r) => r[0]);
-            const now = location.hash.replace(/^#\//, '') || keys[0];
-            const idx = keys.indexOf(now);
-            const nxt = keys[(idx + 1) % keys.length];
-            navigate(nxt);
-          }
-        });
-
-        // --- Auth & API helpers
-        const API = {
-          base: '',
-          async get(path) {
-            const r = await fetch(API.base + path, { credentials: 'include' });
-            if (!r.ok) throw new Error((await safeText(r)) || r.statusText);
-            return r.json();
-          },
-          async post(path, body) {
-            const r = await fetch(API.base + path, {
-              method: 'POST',
-              credentials: 'include',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(body || {}),
-            });
-            if (!r.ok) throw new Error((await safeText(r)) || r.statusText);
-            try {
-              return await r.json();
-            } catch {
-              return {};
-            }
-          },
-          async del(path) {
-            const r = await fetch(API.base + path, { method: 'DELETE', credentials: 'include' });
-            if (!r.ok) throw new Error((await safeText(r)) || r.statusText);
-            try {
-              return await r.json();
-            } catch {
-              return {};
-            }
-          },
-        };
-
-        async function safeText(r) {
-          try {
-            return await r.text();
-          } catch {
-            return '';
-          }
-        }
-
-        async function checkSession() {
-          // Prefer /api/session; fallback /api/auth/session
-          try {
-            return await API.get('/api/session');
-          } catch {
-            try {
-              return await API.get('/api/auth/session');
-            } catch (e) {
-              return null;
-            }
-          }
-        }
-
-        async function login(u, p) {
-          try {
-            return await API.post('/api/login', { username: u, password: p });
-          } catch (e) {
-            // Fallback optional path
-            return await API.post('/api/auth/login', { username: u, password: p });
-          }
-        }
-
-        async function logout() {
-          try {
-            await API.post('/api/logout');
-          } catch {
-            try {
-              await API.post('/api/auth/logout');
-            } catch {}
-          }
-        }
-
-        // --- Presence checks
-        async function ping(path) {
-          try {
-            const r = await fetch(path, { method: 'HEAD', credentials: 'include' });
-            return r.ok;
-          } catch {
-            return false;
-          }
-        }
-
-        async function initPresence() {
-          const apiOK = await ping('/api/health').catch(() => false);
-          document.getElementById('p-api').classList.toggle('ok', apiOK);
-          document.getElementById('p-api').classList.toggle('warn', !apiOK);
-          document.getElementById('p-api').textContent = apiOK ? 'API ✓' : 'API ?';
-
-          // LLM ping via lightweight POST (may still be false if model not warmed)
-          try {
-            const r = await fetch('/api/llm/chat', {
-              method: 'POST',
-              credentials: 'include',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                messages: [{ role: 'user', content: 'ping' }],
-                stream: false,
-                max_tokens: 2,
-              }),
-            });
-            const ok = r.ok;
-            document.getElementById('p-llm').classList.toggle('ok', ok);
-            document.getElementById('p-llm').classList.toggle('warn', !ok);
-            document.getElementById('p-llm').textContent = ok ? 'LLM ✓' : 'LLM ?';
-          } catch {
-            document.getElementById('p-llm').classList.remove('ok');
-            document.getElementById('p-llm').classList.add('warn');
-            document.getElementById('p-llm').textContent = 'LLM ?';
-          }
-
-          // Socket.IO
-          try {
-            const ioClient = window.io ? window.io() : null;
-            if (ioClient) {
-              ioClient.on('connect', () => {
-                const el = document.getElementById('p-sock');
-                el.classList.remove('warn');
-                el.classList.add('ok');
-                el.textContent = 'Socket ✓';
-              });
-              ioClient.on('disconnect', () => {
-                const el = document.getElementById('p-sock');
-                el.classList.remove('ok');
-                el.classList.add('warn');
-                el.textContent = 'Socket ?';
-              });
-            }
-          } catch {}
-        }
-
-        // --- Views
-        const Views = {
-          chat() {
-            setActive('chat');
-            elMain.innerHTML = `
-          <div class="two-col">
-            <section class="card chat-wrap">
-              <div id="chatStream" class="chat-stream mono" aria-live="polite"></div>
-              <div class="input-row">
-                <textarea id="chatInput" class="input" placeholder="Ask Lucidia / Codex..."></textarea>
-                <button class="btn acc" id="btnSend">Send</button>
-              </div>
-            </section>
-            <section class="card">
-              <h3 style="margin-top:0">Session Notes</h3>
-              <textarea id="notes" class="editor-area" placeholder="Scratchpad…"></textarea>
-              <div class="row" style="margin-top:10px">
-                <button class="btn" id="btnSaveNotes">Save</button>
-                <span class="k">Saved locally. (Wire to /api/notes when ready.)</span>
-              </div>
-            </section>
+    <!-- AI Assistant Panel -->
+    <aside class="ai-panel">
+      <div class="ai-header">
+        <div class="ai-title">
+          <span>🤖</span>
+          <span>AI Code Assistant</span>
+        </div>
+        <div class="ai-subtitle">Powered by BlackRoad Intelligence</div>
+      </div>
+      <div class="ai-content">
+        <div class="ai-suggestion">
+          <div class="suggestion-title">
+            <span>💡</span>
+            <span>Optimization Suggestion</span>
           </div>
-        `;
-            qs('#btnSend').onclick = sendChat;
-            qs('#btnSaveNotes').onclick = () =>
-              localStorage.setItem('br_notes', qs('#notes').value);
-            qs('#notes').value = localStorage.getItem('br_notes') || '';
-          },
-
-          canvas() {
-            setActive('canvas');
-            elMain.innerHTML = `
-          <section class="card">
-            <h3 style="margin-top:0">Canvas</h3>
-            <canvas id="board" class="canvas-board"></canvas>
-            <div class="row" style="margin-top:10px">
-              <button class="btn" id="clear">Clear</button>
-              <span class="k">Simple sketch board for flow diagrams.</span>
-            </div>
-          </section>
-        `;
-            const c = qs('#board');
-            const ctx = c.getContext('2d');
-            const fit = () => {
-              c.width = c.clientWidth;
-              c.height = c.clientHeight;
-            };
-            new ResizeObserver(fit).observe(c.parentElement);
-            fit();
-            let down = false,
-              last = null;
-            c.addEventListener('pointerdown', (e) => {
-              down = true;
-              last = [e.offsetX, e.offsetY];
-            });
-            c.addEventListener('pointerup', () => {
-              down = false;
-              last = null;
-            });
-            c.addEventListener('pointermove', (e) => {
-              if (!down) return;
-              ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue(
-                '--accent'
-              );
-              ctx.lineWidth = 2.0;
-              ctx.lineCap = 'round';
-              ctx.beginPath();
-              ctx.moveTo(last[0], last[1]);
-              ctx.lineTo(e.offsetX, e.offsetY);
-              ctx.stroke();
-              last = [e.offsetX, e.offsetY];
-            });
-            qs('#clear').onclick = () => ctx.clearRect(0, 0, c.width, c.height);
-          },
-
-          editor() {
-            setActive('editor');
-            elMain.innerHTML = `
-          <section class="card">
-            <h3 style="margin-top:0">Editor</h3>
-            <textarea id="code" class="editor-area mono" spellcheck="false" placeholder="Paste code for Codex review…"></textarea>
-            <div class="row" style="margin-top:10px">
-              <button class="btn acc" id="run">Ask Codex</button>
-              <button class="btn" id="fmt">Format</button>
-              <span class="k">Client-only placeholder. Wire to /api/actions/run when backend ready.</span>
-            </div>
-            <pre id="out" class="mono" style="margin-top:10px"></pre>
-          </section>
-        `;
-            qs('#run').onclick = async () => {
-              const src = qs('#code').value;
-              qs('#out').textContent = 'Sending to /api/actions/run (stub)…';
-              try {
-                const r = await API.post('/api/actions/run', { source: src });
-                qs('#out').textContent = JSON.stringify(r, null, 2);
-              } catch (e) {
-                qs('#out').textContent = 'Run disabled or endpoint missing.';
-              }
-            };
-            qs('#fmt').onclick = () => {
-              const t = qs('#code');
-              t.value = t.value.replace(/\t/g, '  ').trimEnd() + '\n';
-            };
-          },
-
-          terminal() {
-            setActive('terminal');
-            elMain.innerHTML = `
-          <section class="card">
-            <h3 style="margin-top:0">Terminal</h3>
-            <div class="mono" id="term" style="white-space:pre-wrap; border:1px solid var(--border); border-radius:8px; padding:12px; background:#0d1219; height:50vh; overflow:auto">Shell disabled (ALLOW_SHELL=false). Enable on server to activate.</div>
-            <div class="row" style="margin-top:10px">
-              <input id="cmd" class="editor-area mono" style="min-height:42px; height:42px" placeholder="whoami" />
-              <button class="btn" id="exec">Exec</button>
-            </div>
-            <p class="k">When enabled: POST /api/exec {cmd}, stream output over Socket.IO.</p>
-          </section>
-        `;
-            qs('#exec').onclick = async () => {
-              const cmd = qs('#cmd').value.trim();
-              if (!cmd) return;
-              const el = qs('#term');
-              el.textContent += '\n$ ' + cmd + '\n';
-              try {
-                const r = await API.post('/api/exec', { cmd });
-                el.textContent += r && r.out ? r.out : '(no output)\n';
-              } catch {
-                el.textContent += '(exec disabled)\n';
-              }
-              el.scrollTop = el.scrollHeight;
-            };
-          },
-
-          roadview() {
-            setActive('roadview');
-            elMain.innerHTML = viewList('Roads / Flows', 'projects');
-          },
-          backroad() {
-            setActive('backroad');
-            elMain.innerHTML = viewList('BackRoad / Pipelines', 'pipelines');
-          },
-
-          projects() {
-            setActive('projects');
-            renderCRUD('projects');
-          },
-          agents() {
-            setActive('agents');
-            renderCRUD('agents');
-          },
-          datasets() {
-            setActive('datasets');
-            renderCRUD('datasets');
-          },
-          models() {
-            setActive('models');
-            renderCRUD('models');
-          },
-          integrations() {
-            setActive('integrations');
-            renderCRUD('integrations');
-          },
-        };
-
-        function viewList(title, key) {
-          return `
-        <section class="card">
-          <h3 style="margin-top:0">${title}</h3>
-          <div id="list-${key}">Loading…</div>
-        </section>
-      `;
-        }
-
-        async function renderCRUD(kind) {
-          elMain.innerHTML = `
-        <section class="card">
-          <div class="row" style="justify-content:space-between">
-            <h3 style="margin:0">${uc(kind)}</h3>
-            <button class="btn acc" id="new">New ${uc(kind).slice(0, -1)}</button>
+          <div class="suggestion-desc">
+            Consider lazy-loading images to improve page load time. This can reduce initial bundle size by ~40%.
           </div>
-          <div id="wrap">
-            <table>
-              <thead><tr><th>ID</th><th>Name</th><th>Updated</th><th style="width:180px">Actions</th></tr></thead>
-              <tbody id="tbody"><tr><td colspan="4">Loading…</td></tr></tbody>
-            </table>
+          <pre class="suggestion-code">&lt;img loading="lazy" src="..." /&gt;</pre>
+        </div>
+        <div class="ai-suggestion">
+          <div class="suggestion-title">
+            <span>🔒</span>
+            <span>Security Alert</span>
           </div>
-        </section>
-      `;
-          const tbody = qs('#tbody');
-          try {
-            const rows = await API.get(`/api/${kind}`);
-            tbody.innerHTML =
-              (rows || [])
-                .map(
-                  (r) => `
-            <tr>
-              <td class="mono">${r.id ?? ''}</td>
-              <td>${r.name ?? ''}</td>
-              <td class="k">${r.updated_at ?? ''}</td>
-              <td>
-                <button class="btn" data-id="${r.id}" data-act="edit">Edit</button>
-                <button class="btn" data-id="${r.id}" data-act="delete">Delete</button>
-              </td>
-            </tr>
-        `
-                )
-                .join('') || `<tr><td colspan="4">No data.</td></tr>`;
-          } catch {
-            tbody.innerHTML = `<tr><td colspan="4">Endpoint /api/${kind} unavailable.</td></tr>`;
-          }
+          <div class="suggestion-desc">
+            Detected potential XSS vulnerability in user input handling. Sanitize HTML before rendering.
+          </div>
+          <pre class="suggestion-code">import DOMPurify from 'dompurify';
+const clean = DOMPurify.sanitize(dirty);</pre>
+        </div>
+        <div class="ai-suggestion">
+          <div class="suggestion-title">
+            <span>⚡</span>
+            <span>Performance Tip</span>
+          </div>
+          <div class="suggestion-desc">
+            Using Array.forEach() here. Consider Array.map() for better functional style and readability.
+          </div>
+          <pre class="suggestion-code">const results = items.map(item =&gt;
+  item.value * 2
+);</pre>
+        </div>
+        <div class="ai-suggestion">
+          <div class="suggestion-title">
+            <span>📦</span>
+            <span>Dependency Update</span>
+          </div>
+          <div class="suggestion-desc">
+            3 packages have updates available. Update to get security patches and new features.
+          </div>
+          <pre class="suggestion-code">npm update react react-dom lodash</pre>
+        </div>
+        <div class="ai-suggestion">
+          <div class="suggestion-title">
+            <span>🎨</span>
+            <span>Code Style</span>
+          </div>
+          <div class="suggestion-desc">
+            Inconsistent indentation detected. Run prettier to auto-format your code for consistency.
+          </div>
+          <pre class="suggestion-code">npx prettier --write "**/*.{js,jsx}"</pre>
+        </div>
+      </div>
+    </aside>
+  </div>
 
-          elMain.querySelector('#new').onclick = async () => {
-            const name = prompt('Name');
-            if (!name) return;
-            try {
-              await API.post(`/api/${kind}`, { name });
-              navigate(kind); // reload view
-            } catch (e) {
-              alert('Create failed.');
-            }
-          };
+  <script>
+    // Repository selection
+    document.querySelectorAll('.repo-item').forEach((item) => {
+      item.addEventListener('click', function () {
+        document.querySelectorAll('.repo-item').forEach((repo) => repo.classList.remove('active'));
+        this.classList.add('active');
 
-          elMain.addEventListener(
-            'click',
-            async (e) => {
-              const t = e.target.closest('button[data-act]');
-              if (!t) return;
-              const id = t.dataset.id;
-              if (t.dataset.act === 'delete') {
-                if (!confirm('Delete item ' + id + '?')) return;
-                try {
-                  await API.del(`/api/${kind}/${id}`);
-                  navigate(kind);
-                } catch {
-                  alert('Delete failed.');
-                }
-              }
-              if (t.dataset.act === 'edit') {
-                const name = prompt('New name');
-                if (!name) return;
-                try {
-                  await API.post(`/api/${kind}/${id}`, { name });
-                  navigate(kind);
-                } catch {
-                  alert('Update failed.');
-                }
-              }
-            },
-            { once: true }
-          );
+        const repoName = this.querySelector('.repo-name').textContent;
+        alert(`📦 Opening: ${repoName}\n\nIn production:\n• Clone repository\n• Load files in editor\n• Show git status\n• Connect to GitHub API\n• Enable live collaboration`);
+      });
+    });
+
+    // Editor tab switching
+    document.querySelectorAll('.editor-tab').forEach((tab) => {
+      tab.addEventListener('click', function (event) {
+        if (event.target.classList.contains('tab-close')) {
+          this.remove();
+        } else {
+          document.querySelectorAll('.editor-tab').forEach((t) => t.classList.remove('active'));
+          this.classList.add('active');
+
+          const fileName = this.textContent.replace('×', '').trim();
+          alert(`Opening: ${fileName}\n\nFile loaded in editor!`);
         }
+      });
+    });
 
-        function uc(s) {
-          return (s || '').charAt(0).toUpperCase() + s.slice(1);
+    // Panel tab switching
+    document.querySelectorAll('.panel-tab').forEach((tab) => {
+      tab.addEventListener('click', function () {
+        document.querySelectorAll('.panel-tab').forEach((t) => t.classList.remove('active'));
+        this.classList.add('active');
+
+        const panelName = this.textContent;
+        const content = document.querySelector('.panel-content');
+
+        if (panelName === 'Git Changes') {
+          content.innerHTML = `
+            <div class="git-change">
+              <div class="change-status modified"></div>
+              <div class="change-file">index.html</div>
+            </div>
+            <div class="git-change">
+              <div class="change-status modified"></div>
+              <div class="change-file">styles.css</div>
+            </div>
+            <div class="git-change">
+              <div class="change-status added"></div>
+              <div class="change-file">app.js</div>
+            </div>
+          `;
+        } else if (panelName === 'Problems') {
+          content.innerHTML = `
+            <div class="terminal-line error">⚠️ Line 24: Missing semicolon</div>
+            <div class="terminal-line">ℹ️ Line 42: Consider using const instead of let</div>
+            <div class="terminal-line error">⚠️ Line 67: Unused variable 'result'</div>
+          `;
+        } else if (panelName === 'Output') {
+          content.innerHTML = `
+            <div class="terminal-line success">✓ Compilation successful</div>
+            <div class="terminal-line">Built in 1.2s</div>
+            <div class="terminal-line info">Watching for file changes...</div>
+          `;
+        } else {
+          content.innerHTML = `
+            <div class="terminal-line info">$ git status</div>
+            <div class="terminal-line">On branch main</div>
+            <div class="terminal-line">Your branch is up to date with 'origin/main'.</div>
+            <div class="terminal-line"></div>
+            <div class="terminal-line">Changes not staged for commit:</div>
+            <div class="terminal-line">  modified:   index.html</div>
+            <div class="terminal-line">  modified:   styles.css</div>
+            <div class="terminal-line"></div>
+            <div class="terminal-line success">$ npm run build</div>
+            <div class="terminal-line">Building for production...</div>
+            <div class="terminal-line success">✓ Build complete in 2.4s</div>
+            <div class="terminal-line info">$ _</div>
+          `;
         }
+      });
+    });
 
-        // --- Chat logic (streaming)
-        async function sendChat() {
-          const input = qs('#chatInput');
-          const stream = qs('#chatStream');
-          const text = (input.value || '').trim();
-          if (!text) return;
+    // AI Suggestions
+    document.querySelectorAll('.ai-suggestion').forEach((suggestion) => {
+      suggestion.addEventListener('click', function () {
+        const title = this.querySelector('.suggestion-title').textContent.trim();
+        alert(`🤖 AI Suggestion: ${title}\n\nIn production:\n• Apply fix automatically\n• Explain in detail\n• Show before/after diff\n• Learn from your choice`);
+      });
+    });
 
-          addBubble(stream, text, 'user');
-          input.value = '';
-          input.focus();
+    // Editor actions
+    document.querySelectorAll('.btn-editor').forEach((button) => {
+      button.addEventListener('click', function () {
+        const action = this.textContent.trim();
+        alert(`${action}\n\nIn production:\n• AI analyzes your code\n• Provides smart suggestions\n• Auto-completes intelligently\n• Refactors code safely`);
+      });
+    });
 
-          // Create assistant bubble and stream into it
-          const ai = addBubble(stream, '', 'ai');
-          stream.scrollTop = stream.scrollHeight;
-
-          try {
-            const r = await fetch('/api/llm/chat', {
-              method: 'POST',
-              credentials: 'include',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ messages: [{ role: 'user', content: text }], stream: true }),
-            });
-
-            if (!r.ok || !r.body) {
-              ai.textContent = '(chat error)';
-              return;
-            }
-
-            const reader = r.body.getReader();
-            const dec = new TextDecoder();
-            let done, chunk;
-            while (true) {
-              ({ done, value: chunk } = await reader.read());
-              if (done) break;
-              ai.textContent += dec.decode(chunk, { stream: true });
-              stream.scrollTop = stream.scrollHeight;
-            }
-          } catch {
-            ai.textContent = '(no response)';
-          }
+    // Header actions
+    document.querySelectorAll('.btn-header').forEach((button) => {
+      button.addEventListener('click', function () {
+        const action = this.textContent.trim();
+        if (action.includes('Commit')) {
+          alert(`💾 Commit & Push\n\nChanges:\n• index.html (modified)\n• styles.css (modified)\n• app.js (added)\n\nCommit message:\n"Add new features and optimize performance"\n\nPushing to GitHub...✓`);
+        } else if (action.includes('Sync')) {
+          alert(`🔄 Sync with GitHub\n\n• Pulling latest changes...\n• Your branch is up to date\n• No conflicts detected\n✓ Sync complete!`);
+        } else if (action.includes('Branch')) {
+          alert(`🌿 Switch Branch\n\nAvailable branches:\n• main (current)\n• develop\n• feature/new-ui\n• hotfix/security-patch\n\nSelect a branch to switch`);
         }
-
-        function addBubble(stream, text, who) {
-          const b = document.createElement('div');
-          b.className = 'bubble ' + (who === 'user' ? 'user' : 'ai');
-          b.textContent = text;
-          stream.appendChild(b);
-          return b;
-        }
-
-        // --- Routing
-        function navigate(key) {
-          history.replaceState(null, '', '#/' + key);
-          (Views[key] || Views.chat)();
-        }
-
-        window.addEventListener('hashchange', () => {
-          const k = location.hash.replace(/^#\//, '') || 'chat';
-          (Views[k] || Views.chat)();
-        });
-
-        // --- Search
-        qs('#btnSearch').onclick = () => {
-          const q = qs('#globalSearch').value.trim();
-          if (!q) {
-            alert('Enter a query');
-            return;
-          }
-          navigate('projects');
-          // As an example, filter on client after fetch; server-side search can replace this.
-          setTimeout(() => {
-            alert("Search stub: '" + q + "' — wire to /api/search");
-          }, 0);
-        };
-
-        // --- Auth flows
-        (async function boot() {
-          // Presence pings (non-fatal)
-          initPresence();
-
-          const sess = await checkSession();
-          if (!sess || !sess.user) {
-            elGate.style.display = 'grid';
-          } else {
-            elGate.style.display = 'none';
-          }
-          // default route
-          const initial = location.hash.replace(/^#\//, '') || 'chat';
-          navigate(initial);
-        })();
-
-        qs('#btnLogin').onclick = async () => {
-          const u = qs('#u').value.trim();
-          const p = qs('#p').value;
-          try {
-            await login(u, p);
-            elGate.style.display = 'none';
-            navigate('chat');
-          } catch (e) {
-            alert('Login failed. Check API / Nginx / credentials.');
-          }
-        };
-
-        qs('#btnLogout').onclick = async () => {
-          await logout();
-          elGate.style.display = 'grid';
-        };
-
-        // Mint RC (stub)
-        qs('#btnMint').onclick = async () => {
-          try {
-            const r = await API.post('/api/actions/mint', { amount: 1 });
-            alert('Mint result: ' + JSON.stringify(r));
-          } catch {
-            alert('Mint endpoint not yet enabled.');
-          }
-        };
-      })();
-    </script>
-  </body>
+      });
+    });
+  </script>
+</body>
 </html>
