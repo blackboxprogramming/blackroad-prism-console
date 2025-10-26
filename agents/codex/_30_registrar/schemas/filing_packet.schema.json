@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FilingPacket",
+  "type": "object",
+  "required": [
+    "entity_id",
+    "jurisdiction",
+    "documents",
+    "checklist",
+    "receipt"
+  ],
+  "properties": {
+    "entity_id": {"type": "string"},
+    "jurisdiction": {"type": "string"},
+    "documents": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "checklist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["item", "status"],
+        "properties": {
+          "item": {"type": "string"},
+          "status": {"type": "string"}
+        }
+      }
+    },
+    "receipt": {
+      "type": "object",
+      "required": ["digest", "issued_at", "prepared_by"],
+      "properties": {
+        "digest": {"type": "string"},
+        "issued_at": {"type": "string", "format": "date-time"},
+        "prepared_by": {"type": "string"},
+        "notes": {"type": "string"}
+      }
+    }
+  },
+  "additionalProperties": false
+}

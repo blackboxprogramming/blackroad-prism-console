@@ -1,0 +1,28 @@
+# Jurisdictional compliance rules. Each rule defines a base month/day and optional offsets.
+# The calendar pipeline combines these rules with entity and license assignments.
+- id: de-annual-report
+  jurisdiction: DE
+  name: Delaware Annual Report
+  month: 3
+  day: 1
+  lead_days: 30
+  entities:
+    - br-holdings
+  packet: https://files.blackroad/receipts/br-holdings-annual-report.pdf
+- id: mn-registered-agent
+  jurisdiction: MN
+  name: Minnesota Registered Agent Renewal
+  month: 12
+  day: 31
+  lead_days: 45
+  entities:
+    - br-advisors
+- id: sec-adv-update
+  jurisdiction: SEC
+  name: Form ADV Annual Amendment
+  month: 3
+  day: 31
+  lead_days: 40
+  licenses:
+    - ria-123
+  packet: https://files.blackroad/receipts/ria-123-adv.pdf

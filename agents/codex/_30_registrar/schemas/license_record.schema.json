@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LicenseRecord",
+  "type": "object",
+  "required": ["license_id", "entity_id", "jurisdiction", "renewal_month"],
+  "properties": {
+    "license_id": {"type": "string"},
+    "entity_id": {"type": "string"},
+    "jurisdiction": {"type": "string"},
+    "renewal_month": {"type": "integer", "minimum": 1, "maximum": 12},
+    "renewal_day": {"type": "integer", "minimum": 1, "maximum": 31},
+    "documents": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "additionalProperties": false
+}

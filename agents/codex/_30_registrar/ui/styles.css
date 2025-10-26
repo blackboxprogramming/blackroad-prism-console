@@ -1,0 +1,48 @@
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background: #f7f9fa;
+  color: #2f3b45;
+  margin: 0;
+  padding: 2rem;
+}
+
+header {
+  border-bottom: 2px solid #d4dde2;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+}
+
+h1 {
+  margin: 0;
+}
+
+.tagline {
+  color: #6b7a88;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5ebef;
+  text-align: left;
+}
+
+.diff tbody tr:nth-child(even) {
+  background: #eef3f6;
+}
+
+.receipts {
+  list-style: none;
+  padding-left: 0;
+}
+
+.receipts li::before {
+  content: "🧾";
+  margin-right: 0.5rem;
+}
