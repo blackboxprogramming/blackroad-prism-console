@@ -53,4 +53,9 @@ for u in "${urls[@]}"; do
   echo "Checking $u"
   if curl -fsS "$u" >/dev/null; then echo "OK $u"; ((ok++)); else echo "FAIL $u"; fi
 done
+if curl -fsS http://localhost/grafana/login >/dev/null; then
+  echo "OK grafana"
+else
+  echo "WARN grafana"
+fi
 test "$ok" -ge 3 || (echo "Smoke failed"; exit 1)
