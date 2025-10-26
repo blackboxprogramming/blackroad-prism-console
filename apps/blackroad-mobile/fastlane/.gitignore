@@ -1,0 +1,5 @@
+# Never commit App Store Connect API keys or build artifacts
+AuthKey_*.p8
+build/
+report.xml
+

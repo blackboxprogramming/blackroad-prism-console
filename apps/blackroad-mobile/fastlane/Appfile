@@ -1,0 +1,4 @@
+app_identifier("io.blackroad.console")
+apple_id("ios@blackroad.local")
+itc_team_id("000000")
+team_id(ENV["APPLE_TEAM_ID"])

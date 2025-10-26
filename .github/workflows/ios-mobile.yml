@@ -1,0 +1,95 @@
+name: iOS • BlackRoad Mobile
+
+on:
+  push:
+    branches: [main]
+    paths: ["apps/blackroad-mobile/**"]
+  pull_request:
+    branches: [main]
+    paths: ["apps/blackroad-mobile/**"]
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  build-testflight:
+    runs-on: macos-14
+
+    defaults:
+      run:
+        working-directory: apps/blackroad-mobile
+
+    env:
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+      API_URL: https://console.blackroad.io/api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: apps/blackroad-mobile
+
+      - name: Install fastlane
+        run: bundle install
+
+      - name: Recreate App Store Connect API key
+        run: |
+          mkdir -p fastlane
+          echo "$ASC_KEY_CONTENT" | base64 --decode > fastlane/AuthKey_${ASC_KEY_ID}.p8
+          ls -la fastlane
+
+      - name: Export API key environment
+        run: |
+          {
+            echo "APP_STORE_CONNECT_API_KEY_PATH=fastlane/AuthKey_${ASC_KEY_ID}.p8"
+            echo "APP_STORE_CONNECT_API_KEY_ID=${ASC_KEY_ID}"
+            echo "APP_STORE_CONNECT_ISSUER_ID=${ASC_ISSUER_ID}"
+          } >> "$GITHUB_ENV"
+
+      - name: Select Xcode
+        run: sudo xcode-select -s "/Applications/Xcode_15.4.app" || true
+
+      - name: Xcode version
+        run: xcodebuild -version
+
+      - name: Set build number (PRs only)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          NEW_BUILD="$(date -u +%Y%m%d%H%M)"
+          agvtool new-version -all "$NEW_BUILD"
+
+      - name: Unit tests
+        run: bundle exec fastlane unit_tests
+
+      - name: Build IPA (PRs store artifact)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: bundle exec fastlane build_ipa
+
+      - name: Upload Artifact (PR)
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlackRoad-PR-ipa
+          path: apps/blackroad-mobile/fastlane/build
+
+      - name: Beta lane (main push or release publish)
+        if: ${{ github.event_name != 'pull_request' }}
+        run: bundle exec fastlane beta
+
+      - name: Upload dSYM Artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlackRoad-dSYMs
+          path: apps/blackroad-mobile/fastlane/build/**/*.dSYM.zip
+          if-no-files-found: ignore
