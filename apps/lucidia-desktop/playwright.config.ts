@@ -9,4 +9,7 @@ export default defineConfig({
   projects: [
     { name: 'chromium', use: { browserName: 'chromium' } }
   ]
+  use: {
+    baseURL: 'http://localhost:5173'
+  }
 });

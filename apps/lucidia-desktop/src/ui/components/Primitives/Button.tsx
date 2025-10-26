@@ -16,6 +16,19 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           'bg-slate-700 text-slate-100 hover:bg-slate-600': variant === 'secondary',
           'bg-transparent text-slate-200 hover:bg-slate-800': variant === 'ghost'
         },
+import { ButtonHTMLAttributes } from 'react';
+import clsx from 'classnames';
+
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: 'primary' | 'secondary' | 'ghost';
+};
+
+export function Button({ className, variant = 'primary', ...props }: ButtonProps) {
+  return (
+    <button
+      className={clsx(
+        'lucidia-button',
+        `lucidia-button-${variant}`,
         className
       )}
       {...props}
@@ -24,3 +37,5 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 );
 
 Button.displayName = 'Button';
+  );
+}

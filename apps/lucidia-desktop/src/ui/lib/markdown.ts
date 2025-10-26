@@ -22,3 +22,11 @@ export const renderMarkdown = async (markdown: string): Promise<string> => {
   const raw = await marked.parse(markdown, { mangle: false, headerIds: true });
   return sanitizeHtml(raw.toString());
 };
+import DOMPurify from 'dompurify';
+
+marked.use({ mangle: false, headerIds: false });
+
+export function renderMarkdown(content: string): string {
+  const html = marked.parse(content, { async: false });
+  return DOMPurify.sanitize(html);
+}

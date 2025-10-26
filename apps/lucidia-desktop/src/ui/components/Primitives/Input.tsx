@@ -15,3 +15,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({ className, ...p
 ));
 
 Input.displayName = 'Input';
+import clsx from 'classnames';
+
+export type InputProps = InputHTMLAttributes<HTMLInputElement>;
+
+export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  { className, ...props },
+  ref
+) {
+  return <input ref={ref} className={clsx('lucidia-input', className)} {...props} />;
+});

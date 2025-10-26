@@ -5,6 +5,10 @@
     "beforeDevCommand": "pnpm vite -- --host",
     "devPath": "http://localhost:5173",
     "distDir": "dist"
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/v1/schema.json",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "beforeBuildCommand": "pnpm build"
   },
   "package": {
     "productName": "Lucidia Desktop",
@@ -28,6 +32,31 @@
     },
     "security": {
       "csp": null
+    "windows": [
+      {
+        "title": "Lucidia Desktop",
+        "width": 1280,
+        "height": 800,
+        "fullscreen": false,
+        "resizable": true
+      }
+    ],
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": false
+      },
+      "fs": {
+        "all": false
+      }
+    },
+    "security": {
+      "csp": null
+    },
+    "bundle": {
+      "identifier": "com.blackroad.lucidia",
+      "icon": [],
+      "targets": ["app", "dmg", "msi", "appimage"]
     }
   }
 }

@@ -4,3 +4,6 @@ export const TELEMETRY_FILE = 'telemetry.jsonl';
 export const MEMORY_FILE = 'memory.jsonl';
 export const TASKS_FILE = 'tasks.json';
 export const SETTINGS_FILE = 'settings.json';
+export const DEFAULT_DATA_DIR = 'lucidia';
+export const DEFAULT_TOP_K = 5;
+export const TELEMETRY_FILE = 'telemetry.jsonl';

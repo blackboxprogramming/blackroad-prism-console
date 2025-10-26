@@ -21,3 +21,12 @@ export const importBundle = async (archive: ArrayBuffer): Promise<BundleMetadata
   const result = await invoke('import_bundle', { payload: parsed });
   return result as BundleMetadata;
 };
+import { ipc } from './fs';
+
+export async function exportBundle() {
+  return ipc.exportBundle();
+}
+
+export async function importBundle(path: string) {
+  return ipc.importBundle({ path });
+}

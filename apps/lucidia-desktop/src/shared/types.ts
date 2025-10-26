@@ -16,6 +16,11 @@ export interface ChatThread {
   createdAt: string;
   updatedAt: string;
   messages: ChatMessage[];
+  systemPrompt: string;
+  temperature: number;
+  messages: ChatMessage[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CodexDoc {
@@ -53,6 +58,14 @@ export interface Settings {
   keybindings: Record<string, string>;
   modelRouting: 'local' | 'gateway';
   dataDirectory: string;
+  log: TaskLogEntry[];
+}
+
+export interface Settings {
+  theme: 'light' | 'dark' | 'system';
+  keybindings: Record<string, string>;
+  modelRouting: 'local' | 'gateway';
+  dataDir: string;
   network: {
     allowGateway: boolean;
     allowTelemetry: boolean;

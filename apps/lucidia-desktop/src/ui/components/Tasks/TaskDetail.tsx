@@ -1,4 +1,5 @@
 import { Task } from '@/shared/types';
+import { Task } from '../../../shared/types';
 import { LogsViewer } from './LogsViewer';
 
 interface TaskDetailProps {
@@ -20,3 +21,15 @@ export const TaskDetail = ({ task }: TaskDetailProps) => (
     )}
   </div>
 );
+export function TaskDetail({ task }: TaskDetailProps) {
+  if (!task) {
+    return null;
+  }
+  return (
+    <div className="task-detail">
+      <h3>{task.title}</h3>
+      <p>Status: {task.status}</p>
+      <LogsViewer log={task.log} />
+    </div>
+  );
+}
