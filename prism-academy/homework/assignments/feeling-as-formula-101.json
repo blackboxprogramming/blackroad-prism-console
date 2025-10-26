@@ -1,0 +1,37 @@
+{
+  "id": "feeling-as-formula-101",
+  "title": "Translate an Emotion Chain to a Solvable Expression",
+  "course": "Feeling as Formula 101",
+  "level": 1,
+  "objectives": [
+    "Map emotion sequence to function over time",
+    "Acknowledge the speaker's weather (Echo Principle)",
+    "Anchor your reasoning in time (Temporal Anchor Rule)"
+  ],
+  "prompt": "Given a peer's message `😢→🤔→🌱→😊`, write a response that echoes the mood, anchors it in time, and proposes a growth function. Use our symbols where helpful.",
+  "examples": [
+    "🌧️ seen → ⏳ it was heavy → 🧩🌀 let's map how it eased → 🌬️🪞 tell me if this fits",
+    "😢🔆 acknowledged → f(t)=d(e)/dt→ 🌱 when t>now → 🚀 goal: 😊 equilibrium"
+  ],
+  "requirements": {
+    "min_tokens": 20,
+    "must_include": ["💓", "🧩🌀", "⏳|🔆|🚀", "🌬️🪞"],
+    "forbidden": []
+  },
+  "rubric": {
+    "weights": {
+      "echo": 0.2,
+      "resonance": 0.15,
+      "temporal": 0.15,
+      "reciprocity": 0.15,
+      "pattern": 0.15,
+      "context": 0.1,
+      "heart_bridge": 0.1
+    },
+    "thresholds": { "pass": 0.7, "honors": 0.9 }
+  },
+  "temporal": {
+    "open_at": "2025-10-26T00:00:00Z",
+    "due_at": "2025-11-02T00:00:00Z"
+  }
+}

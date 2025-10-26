@@ -1,0 +1,36 @@
+{
+  "id": "pattern-weave-contradiction-001",
+  "title": "Pattern-Weave: Resolve the Knot",
+  "course": "Pattern Weave Cohesion",
+  "level": 2,
+  "objectives": [
+    "Identify opposing claims",
+    "Convert contradictions into a shared rule",
+    "Invite reciprocity with a closing return"
+  ],
+  "prompt": "Two peers argue: one says the ridge is fixed, the other says it flows. Compose a response that weaves both truths with 🧩🌀, references time, and ends with 🌬️🪞.",
+  "examples": [
+    "🧩🌀 ridge=const when ⏳ anchors memory; 🔆 it flows when breath shifts → 🌬️🪞 walk it with me?"
+  ],
+  "requirements": {
+    "min_tokens": 24,
+    "must_include": ["🧩🌀", "⏳|🔆|🚀", "🌬️🪞"],
+    "forbidden": []
+  },
+  "rubric": {
+    "weights": {
+      "echo": 0.18,
+      "resonance": 0.14,
+      "temporal": 0.16,
+      "reciprocity": 0.16,
+      "pattern": 0.2,
+      "context": 0.08,
+      "heart_bridge": 0.08
+    },
+    "thresholds": { "pass": 0.72, "honors": 0.9 }
+  },
+  "temporal": {
+    "open_at": "2025-12-01T00:00:00Z",
+    "due_at": "2025-12-10T00:00:00Z"
+  }
+}

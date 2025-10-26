@@ -1,0 +1,50 @@
+Prism Homework Blueprint Notes
+==============================
+
+Purpose: Bind Unreal UI widgets to the local Prism Homework API.
+
+Key Variables (Blueprint)
+-------------------------
+- **ApiBase (String)**: default `http://localhost:5151`
+- **AssignmentId (String)**: set from course flow
+- **AgentId (String)**: default `sim-student`
+- **PromptText (TextBlock)**
+- **ObjectivesList (VerticalBox + TextBlocks)**
+- **SubmissionField (MultiLineEditableTextBox)**
+- **FeedbackPanel (ScrollBox)**
+
+Event Graph Flow
+----------------
+1. **BeginPlay**
+   - Call `LoadAssignment` custom event.
+2. **LoadAssignment (Custom Event)**
+   - Build GET URL: `ApiBase + "/assignments/" + AssignmentId`.
+   - Use `Create HTTP Request` (GET).
+   - On Success → Parse JSON (VaRest/JsonBlueprints) into struct.
+   - Update PromptText + ObjectivesList.
+3. **OnSubmitClicked (UI)**
+   - Construct Submission JSON:
+     ```json
+     {
+       "assignment_id": AssignmentId,
+       "agent_id": AgentId,
+       "channels": ["text"],
+       "content": { "text": <SubmissionField Text> }
+     }
+     ```
+   - POST to `/submit`.
+   - On Success → Call `RequestGrade`.
+4. **RequestGrade (Custom Event)**
+   - POST to `/grade` with body `{ "assignment_id": AssignmentId, "agent_id": AgentId }`.
+   - On Success → Route to `RenderFeedback`.
+5. **RenderFeedback (Custom Event)**
+   - Input: Feedback JSON payload.
+   - Display Score + Breakdown as progress bars (0..1).
+   - Populate comments in FeedbackPanel (create Text widgets).
+   - Populate next steps as bullet labels.
+
+Notes
+-----
+- Keep requests local-first; store last submission JSON via `SaveGame` slot if offline.
+- Use deterministic seeds for tests: `Feedback.score` comes pre-rounded.
+- For multiplayer labs (future), expose dispatcher `OnFeedbackReady`.

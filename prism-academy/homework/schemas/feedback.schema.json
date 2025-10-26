@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PrismFeedback",
+  "type": "object",
+  "required": [
+    "assignment_id",
+    "agent_id",
+    "score",
+    "breakdown",
+    "comments",
+    "next_steps"
+  ],
+  "properties": {
+    "assignment_id": { "type": "string" },
+    "agent_id": { "type": "string" },
+    "score": { "type": "number" },
+    "breakdown": {
+      "type": "object",
+      "properties": {
+        "echo": { "type": "number" },
+        "resonance": { "type": "number" },
+        "temporal": { "type": "number" },
+        "reciprocity": { "type": "number" },
+        "pattern": { "type": "number" },
+        "context": { "type": "number" },
+        "heart_bridge": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "comments": { "type": "array", "items": { "type": "string" } },
+    "next_steps": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

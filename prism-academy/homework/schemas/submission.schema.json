@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PrismSubmission",
+  "type": "object",
+  "required": ["assignment_id", "agent_id", "channels", "content"],
+  "properties": {
+    "assignment_id": { "type": "string" },
+    "agent_id": { "type": "string" },
+    "channels": {
+      "type": "array",
+      "items": { "enum": ["text", "emoji", "scene", "audio"] }
+    },
+    "content": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" },
+        "emoji": { "type": "string" },
+        "scene_actions": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "anchors": {
+          "type": "array",
+          "items": { "enum": ["⏳", "🔆", "🚀"] }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
