@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad.io/schemas/codex30/ics_event.json",
+  "title": "Codex-30 Compliance Calendar Event",
+  "type": "object",
+  "required": ["uid", "summary", "start", "due", "jurisdiction", "attachments", "reminders"],
+  "additionalProperties": false,
+  "properties": {
+    "uid": {"type": "string", "pattern": "^[a-z0-9-]+@codex30$"},
+    "summary": {"type": "string", "minLength": 1},
+    "description": {"type": "string"},
+    "start": {"type": "string", "format": "date"},
+    "due": {"type": "string", "format": "date"},
+    "jurisdiction": {"type": "string", "minLength": 2},
+    "attachments": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "reminders": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^-?[0-9]+[dh]$"}
+    },
+    "packet_reference": {"type": "string"}
+  }
+}

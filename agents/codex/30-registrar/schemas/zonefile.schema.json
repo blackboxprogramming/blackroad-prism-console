@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad.io/schemas/codex30/zonefile.json",
+  "title": "Codex-30 DNS Zone",
+  "type": "object",
+  "required": ["domain", "records"],
+  "additionalProperties": false,
+  "properties": {
+    "domain": {"type": "string", "pattern": "^[A-Za-z0-9.-]+$"},
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type", "value", "ttl"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string"},
+          "type": {"type": "string", "enum": ["A", "AAAA", "CAA", "CNAME", "MX", "NS", "TXT"]},
+          "value": {"type": "string", "minLength": 1},
+          "ttl": {"type": "integer", "minimum": 60},
+          "priority": {"type": "integer", "minimum": 0}
+        }
+      }
+    }
+  }
+}
