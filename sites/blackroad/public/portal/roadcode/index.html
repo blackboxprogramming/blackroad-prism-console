@@ -1,4 +1,717 @@
-<!doctype html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackRoad Codex - Collaborative Coding Portal</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg-secondary: #13131a;
+      --bg-tertiary: #1a1a24;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-tertiary: rgba(255, 255, 255, 0.5);
+      --gradient: linear-gradient(135deg, #fdba2d 0%, #ff6b35 20%, #ff4fd8 45%, #c753ff 65%, #6366f1 85%, #3b82f6 100%);
+      --accent-yellow: #fdba2d;
+      --accent-orange: #ff6b35;
+      --accent-pink: #ff4fd8;
+      --accent-purple: #c753ff;
+      --accent-blue: #3b82f6;
+    }
 
-<title>Roadcode | BlackRoad.io</title><style>body{margin:0;background:#0b0b10;color:#e8e8f0;font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}.wrap{max-width:880px;margin:40px auto;padding:24px;border-radius:16px;background:#14141d;box-shadow:0 10px 30px rgba(0,0,0,.35)}</style>
-</head><body><div class="wrap"><h1>Roadcode</h1><p>Collaborative coding & AI co-creation. Back to <a href="/">home</a>.</p></div></body></html>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      height: 60px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--gradient);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 18px;
+      color: #000;
+    }
+
+    .logo-text {
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+    }
+
+    .user-avatar {
+      width: 24px;
+      height: 24px;
+      background: var(--gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #000;
+      font-weight: 700;
+    }
+
+    .memory-indicator {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+    }
+
+    .btn-logout {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--accent-pink);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .btn-logout:hover {
+      background: rgba(255, 79, 216, 0.1);
+      border-color: var(--accent-pink);
+    }
+
+    /* Main Layout */
+    .main-container {
+      display: flex;
+      height: calc(100vh - 60px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-section {
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-tertiary);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .folder,
+    .file-item,
+    .conversation-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .folder:hover,
+    .file-item:hover,
+    .conversation-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text);
+    }
+
+    .folder.active,
+    .file-item.active,
+    .conversation-item.active {
+      background: rgba(255, 79, 216, 0.15);
+      color: var(--text);
+      border-left: 3px solid var(--accent-pink);
+    }
+
+    .icon {
+      font-size: 16px;
+    }
+
+    .folder-content {
+      margin-left: 20px;
+    }
+
+    .btn-create {
+      width: 100%;
+      padding: 10px;
+      margin-top: 12px;
+      background: var(--gradient);
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .btn-create:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 20px rgba(255, 79, 216, 0.4);
+    }
+
+    /* Editor Area */
+    .editor-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 2px;
+      background: var(--bg-secondary);
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .tab {
+      padding: 12px 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+      font-size: 0.9rem;
+    }
+
+    .tab:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .tab.active {
+      color: var(--text);
+      border-bottom-color: var(--accent-pink);
+    }
+
+    .editor {
+      flex: 1;
+      padding: 24px;
+      overflow: auto;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .line-numbers {
+      display: inline-block;
+      width: 40px;
+      text-align: right;
+      color: var(--text-tertiary);
+      user-select: none;
+      margin-right: 20px;
+    }
+
+    .code-line {
+      display: flex;
+    }
+
+    .keyword {
+      color: var(--accent-pink);
+    }
+
+    .function {
+      color: var(--accent-blue);
+    }
+
+    .string {
+      color: var(--accent-yellow);
+    }
+
+    .comment {
+      color: var(--text-tertiary);
+    }
+
+    .number {
+      color: var(--accent-purple);
+    }
+
+    .terminal {
+      height: 180px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 16px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+    }
+
+    .terminal-line {
+      margin-bottom: 4px;
+    }
+
+    .terminal-prompt {
+      color: var(--accent-blue);
+    }
+
+    .terminal-output {
+      color: var(--text-secondary);
+    }
+
+    /* Chat Panel */
+    .chat-panel {
+      width: 360px;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    .chat-search {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chat-search input {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin-bottom: 16px;
+    }
+
+    .message-time {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+
+    .message-content {
+      background: var(--bg-tertiary);
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 3px solid var(--accent-blue);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .message.user .message-content {
+      border-left-color: var(--accent-pink);
+    }
+
+    .chat-input {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .chat-input-box {
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-input-box input {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .btn-send {
+      padding: 12px 20px;
+      background: var(--gradient);
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-send:hover {
+      box-shadow: 0 0 20px rgba(255, 79, 216, 0.5);
+    }
+
+    /* Collaborators */
+    .collaborators {
+      display: flex;
+      gap: 8px;
+      margin-left: 20px;
+    }
+
+    .collaborator {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #000;
+      border: 2px solid var(--bg-secondary);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .collaborator:hover {
+      transform: scale(1.1);
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      border: 2px solid var(--bg-secondary);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 79, 216, 0.3);
+    }
+
+    @keyframes blink {
+      0%,
+      50% {
+        opacity: 1;
+      }
+      51%,
+      100% {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">K3</div>
+      <div class="logo-text">Codex Infinity</div>
+    </div>
+
+    <div class="collaborators">
+      <div class="collaborator" style="position: relative;">
+        U1
+        <span class="status-indicator"></span>
+      </div>
+      <div class="collaborator" style="position: relative;">
+        U2
+        <span class="status-indicator"></span>
+      </div>
+      <div class="collaborator" style="position: relative;">
+        U3
+        <span class="status-indicator"></span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <div class="user-info">
+        <div class="user-avatar">U</div>
+        <span>User</span>
+        <span class="memory-indicator">Memory 48%</span>
+      </div>
+      <button class="btn-logout">Logout</button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">Projects</div>
+        <div class="folder active">
+          <span class="icon">📁</span>
+          <span>fort_light</span>
+        </div>
+        <div class="folder">
+          <span class="icon">📁</span>
+          <span>fibonacci_engine</span>
+        </div>
+        <button class="btn-create">+ New Project</button>
+      </div>
+
+      <div class="sidebar-section" style="flex: 1; overflow-y: auto;">
+        <div class="sidebar-title">Files</div>
+        <div class="file-item">
+          <span class="icon">📄</span>
+          <span>notes.txt</span>
+        </div>
+        <div class="file-item active">
+          <span class="icon">📄</span>
+          <span>fibonacci_engine.py</span>
+        </div>
+        <div class="file-item">
+          <span class="icon">📄</span>
+          <span>README.md</span>
+        </div>
+        <div class="file-item">
+          <span class="icon">📄</span>
+          <span>config.json</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">Conversations</div>
+        <div class="conversation-item active">
+          <span class="icon">💬</span>
+          <span>Chat Codex</span>
+        </div>
+        <div class="conversation-item">
+          <span class="icon">💬</span>
+          <span>Project Discussion</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Editor Area -->
+    <main class="editor-container">
+      <div class="tabs">
+        <button class="tab active">fibonacci_engine.py</button>
+        <button class="tab">notes.txt</button>
+        <button class="tab">README.md</button>
+      </div>
+
+      <div class="editor">
+        <div class="code-line">
+          <span class="line-numbers">1</span>
+          <span><span class="keyword">def</span> <span class="function">fibonacci</span>(n):</span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">2</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> n == <span class="number">0</span>:</span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">3</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="number">0</span></span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">4</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">elif</span> n == <span class="number">1</span>:</span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">5</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="number">1</span></span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">6</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">else</span>:</span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">7</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="function">fibonacci</span>(n - <span class="number">1</span>) + <span class="function">fibonacci</span>(n - <span class="number">2</span>)</span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">8</span>
+          <span></span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">9</span>
+          <span><span class="comment"># Optimized version with memoization</span></span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">10</span>
+          <span><span class="keyword">def</span> <span class="function">fibonacci_memo</span>(n, memo={}):</span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">11</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> n <span class="keyword">in</span> memo:</span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">12</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> memo[n]</span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">13</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> n == <span class="number">0</span>:</span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">14</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="number">0</span></span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">15</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">elif</span> n == <span class="number">1</span>:</span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">16</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="number">1</span></span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">17</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;memo[n] = <span class="function">fibonacci_memo</span>(n - <span class="number">1</span>, memo) + <span class="function">fibonacci_memo</span>(n - <span class="number">2</span>, memo)</span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">18</span>
+          <span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> memo[n]</span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">19</span>
+          <span></span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">20</span>
+          <span><span class="comment"># Test the function</span></span>
+        </div>
+        <div class="code-line">
+          <span class="line-numbers">21</span>
+          <span><span class="function">print</span>(<span class="string">"Fibonacci of 10:"</span>, <span class="function">fibonacci_memo</span>(<span class="number">10</span>))</span>
+        </div>
+      </div>
+
+      <div class="terminal">
+        <div class="terminal-line">
+          <span class="terminal-prompt">&gt;&gt;&gt; </span>
+          <span class="terminal-output">fibonacci(10)</span>
+        </div>
+        <div class="terminal-line">
+          <span class="terminal-output">55</span>
+        </div>
+        <div class="terminal-line"></div>
+        <div class="terminal-line">
+          <span class="terminal-prompt">&gt;&gt;&gt; </span>
+          <span class="terminal-output">fibonacci_memo(10)</span>
+        </div>
+        <div class="terminal-line">
+          <span class="terminal-output">55</span>
+        </div>
+        <div class="terminal-line"></div>
+        <div class="terminal-line">
+          <span class="terminal-prompt">&gt;&gt;&gt; </span>
+          <span style="animation: blink 1s infinite;">_</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Chat Panel -->
+    <aside class="chat-panel">
+      <div class="chat-header">
+        💬 Chat
+      </div>
+      <div class="chat-search">
+        <input type="text" placeholder="Search the memones that...">
+      </div>
+      <div class="chat-messages">
+        <div class="message">
+          <div class="message-time">3:04 PM</div>
+          <div class="message-content">Hello.</div>
+        </div>
+        <div class="message user">
+          <div class="message-time">3:04 PM</div>
+          <div class="message-content">How can I assist you today?</div>
+        </div>
+        <div class="message">
+          <div class="message-time">3:04 PM</div>
+          <div class="message-content">Please tell me something interesting.</div>
+        </div>
+        <div class="message user">
+          <div class="message-time">3:05 PM</div>
+          <div class="message-content">The Fibonacci sequence appears throughout nature - in the spiral of shells, the branching of trees, and the arrangement of leaves. It's a mathematical pattern that emerged billions of years before humans discovered it.</div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <div class="chat-input-box">
+          <input type="text" placeholder="Ask a question">
+          <button class="btn-send">➤</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>
