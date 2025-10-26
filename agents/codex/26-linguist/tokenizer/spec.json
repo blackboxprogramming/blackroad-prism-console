@@ -1,0 +1,8 @@
+{
+  "name": "nova-v1",
+  "type": "sentencepiece",
+  "vocab_size": 16000,
+  "normalizer": "nfkc",
+  "pretokenizer": ["whitespace", "emoji"],
+  "special_tokens": ["<pad>", "<s>", "</s>", "<unk>"]
+}

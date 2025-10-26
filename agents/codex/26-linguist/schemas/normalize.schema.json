@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Normalization Result",
+  "type": "object",
+  "required": ["text", "emoji_map", "clarifier_needed"],
+  "properties": {
+    "text": {"type": "string"},
+    "emoji_map": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "clarifier_needed": {"type": "boolean"},
+    "notes": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "additionalProperties": false
+}

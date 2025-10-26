@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BlackRoad Dialect Pack",
+  "type": "object",
+  "required": ["id", "tone", "emojis", "style", "phrasing", "safety"],
+  "properties": {
+    "id": {"type": "string"},
+    "tone": {"type": "string"},
+    "emojis": {
+      "type": "object",
+      "additionalProperties": {"type": "string"}
+    },
+    "style": {
+      "type": "object",
+      "properties": {
+        "contractions": {"type": "boolean"},
+        "sentence_length_target": {"type": "integer", "minimum": 1},
+        "bullets_max": {"type": "integer", "minimum": 1},
+        "code_blocks_ok": {"type": "boolean"}
+      },
+      "required": ["contractions", "sentence_length_target", "bullets_max", "code_blocks_ok"],
+      "additionalProperties": true
+    },
+    "phrasing": {
+      "type": "object",
+      "properties": {
+        "prefer": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "avoid": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "required": ["prefer", "avoid"],
+      "additionalProperties": false
+    },
+    "safety": {
+      "type": "object",
+      "properties": {
+        "refusal_prefix": {"type": "string"},
+        "redirect_suffix": {"type": "string"}
+      },
+      "required": ["refusal_prefix", "redirect_suffix"],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
