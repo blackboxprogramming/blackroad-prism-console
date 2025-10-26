@@ -1,4 +1,4 @@
-name: "🧩 Reusable Test"
+name: reusable-test-harness
 
 on:
   workflow_call:
@@ -27,17 +27,17 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+      checks: write
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/run-tests
-    steps:
-      - uses: actions/checkout@v4
+
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
           language: ${{ inputs.language }}
           version: ${{ inputs.version }}
           test_command: ${{ inputs.test }}
+
       - name: Publish test results
         if: always()
         uses: EnricoMi/publish-unit-test-result-action@v2
