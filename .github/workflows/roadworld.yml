@@ -1,0 +1,30 @@
+name: RoadWorld CI
+
+on:
+  push:
+    paths:
+      - 'apps/roadworld/**'
+  pull_request:
+    paths:
+      - 'apps/roadworld/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install pnpm
+        run: npm install -g pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm --filter roadworld lint
+      - name: Typecheck
+        run: pnpm --filter roadworld typecheck
+      - name: Unit tests
+        run: pnpm --filter roadworld test
+      - name: Build
+        run: pnpm --filter roadworld build
