@@ -1,0 +1,10 @@
+name: LATTICE
+focus: "Research and discovery"
+signals:
+  cadence: "daily synthesis"
+  risk_token: "green"
+  exit: "insights shared + DR filed"
+roles:
+  Researcher: "design experiment"
+  Analyst: "interpret data"
+  Strategist: "align portfolio"

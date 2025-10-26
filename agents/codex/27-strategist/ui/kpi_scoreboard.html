@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Strategist KPI Scoreboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="board">
+    <header class="board__header">
+      <h1>KPI Scoreboard</h1>
+      <p class="board__subtitle">Track joules, risk tokens, and mission KPIs in real time.</p>
+    </header>
+    <main class="board__grid board__grid--score">
+      <section class="card">
+        <h2>Energy Forecast</h2>
+        <p class="metric"><span class="metric__label">Forecast</span><span id="forecast-value">820 J</span></p>
+        <p class="metric"><span class="metric__label">Target</span><span id="target-value">750 J</span></p>
+        <p class="metric metric--warning"><span class="metric__label">Posture</span><span id="posture">warning</span></p>
+      </section>
+      <section class="card">
+        <h2>Risk Signals</h2>
+        <ul class="token-list">
+          <li data-token="green">Telemetry steady</li>
+          <li data-token="amber">Guardian reviewing load test</li>
+        </ul>
+      </section>
+      <section class="card">
+        <h2>KPI Drift</h2>
+        <p class="card__hint">Automatic HOLD/NO-GO when drift exceeds thresholds.</p>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>KPI</th>
+              <th>Delta</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Latency</td>
+              <td>+0.18</td>
+              <td>🟡 HOLD</td>
+            </tr>
+            <tr>
+              <td>Error Rate</td>
+              <td>+0.36</td>
+              <td>🔴 NO-GO</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+    <footer class="board__footer">
+      <p>Alerts escalate to Guardian when joules exceed maximum budget.</p>
+    </footer>
+  </body>
+</html>

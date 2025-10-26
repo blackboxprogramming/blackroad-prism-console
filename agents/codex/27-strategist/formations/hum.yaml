@@ -1,0 +1,10 @@
+name: HUM
+focus: "Maintenance and reliability"
+signals:
+  cadence: "weekly tune-ups"
+  risk_token: "green"
+  exit: "maintenance backlog cleared"
+roles:
+  Roadie: "lead maintenance"
+  Builder: "apply patches"
+  Strategist: "rebalance load"

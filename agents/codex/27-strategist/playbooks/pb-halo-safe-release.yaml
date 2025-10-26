@@ -1,0 +1,35 @@
+id: pb-halo-safe-release
+name: HALO (safety-first release)
+trigger:
+  topic: "release:prepare"
+  guards:
+    - "tests:green"
+    - "guardian:ok"
+roles:
+  - agent: "Guardian"
+    task: "final_policy_gate"
+  - agent: "Roadie"
+    task: "health_check"
+  - agent: "Builder"
+    task: "cut_release"
+  - agent: "Linguist"
+    task: "draft_announcement"
+budget:
+  joules_max: 500
+steps:
+  - emit:
+      topic: "formation:halo:start"
+  - run: "scripts/release_dry_run.sh"
+  - gate:
+      topic: "guardian:decision"
+      allow: true
+  - run: "scripts/release_apply.sh"
+  - emit:
+      topic: "formation:halo:complete"
+rollback:
+  - run: "scripts/release_revert.sh"
+  - emit:
+      topic: "formation:halo:reverted"
+exit:
+  success: "release tagged + announcement drafted"
+  failure: "rollback executed + DR filed"

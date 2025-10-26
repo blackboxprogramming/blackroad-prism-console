@@ -1,0 +1,10 @@
+name: CAMPFIRE
+focus: "Knowledge share and teaching"
+signals:
+  cadence: "bi-weekly circles"
+  risk_token: "green"
+  exit: "story captured + lesson shared"
+roles:
+  Storyteller: "curate narrative"
+  Teacher: "facilitate teaching"
+  Strategist: "capture decisions"

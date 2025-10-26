@@ -1,0 +1,138 @@
+:root {
+  --bg: #0f172a;
+  --card: #111c2f;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --accent: #38bdf8;
+  --amber: #fbbf24;
+  --red: #f87171;
+  --green: #4ade80;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+body.board {
+  background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.1), transparent),
+    var(--bg);
+  color: var(--text);
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.board__header,
+.board__footer {
+  padding: 2rem 4rem;
+  text-align: center;
+}
+
+.board__subtitle {
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.board__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  padding: 0 4rem 3rem;
+}
+
+.board__grid--score {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.card {
+  background: rgba(17, 28, 47, 0.85);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(12px);
+}
+
+.card__hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.button {
+  background: var(--accent);
+  border: none;
+  border-radius: 999px;
+  color: var(--bg);
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  transition: transform 0.2s ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.call-status {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.call-status[data-token="amber"] {
+  color: var(--amber);
+}
+
+.call-status[data-token="red"] {
+  color: var(--red);
+}
+
+.token-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.token-list li {
+  margin-bottom: 0.5rem;
+}
+
+.token-list li[data-token="green"] {
+  color: var(--green);
+}
+
+.token-list li[data-token="amber"] {
+  color: var(--amber);
+}
+
+.token-list li[data-token="red"] {
+  color: var(--red);
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.metric__label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.metric--warning {
+  color: var(--amber);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}

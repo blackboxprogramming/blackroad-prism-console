@@ -1,0 +1,11 @@
+name: HALO
+focus: "Safety-first incident and release response"
+signals:
+  cadence: "15 min incident loops"
+  risk_token: "amber"
+  exit: "incident resolved or release verified"
+roles:
+  Guardian: "policy gate + risk call"
+  Roadie: "health telemetry"
+  Builder: "apply or rollback change"
+  Linguist: "stakeholder updates"

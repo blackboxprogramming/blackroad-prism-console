@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Strategist Mission Board</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="board">
+    <header class="board__header">
+      <h1>Codex-27 Mission Board</h1>
+      <p class="board__subtitle">Win gently; leave the field better than you found it.</p>
+    </header>
+    <main class="board__grid">
+      <section class="card">
+        <h2>Current Call</h2>
+        <div class="call-status" data-token="green">🟢 GO</div>
+        <p class="call-detail">All systems nominal. Joules within target.</p>
+      </section>
+      <section class="card">
+        <h2>Active Mission</h2>
+        <dl>
+          <dt>Goal</dt>
+          <dd id="mission-goal">Coordinate release for BlackRoad console.</dd>
+          <dt>Formation</dt>
+          <dd id="mission-formation">HALO</dd>
+          <dt>Budget</dt>
+          <dd id="mission-budget">≤ 1000 joules</dd>
+          <dt>Exit</dt>
+          <dd id="mission-exit">Release tagged + announcement drafted</dd>
+        </dl>
+      </section>
+      <section class="card">
+        <h2>Risk Tokens</h2>
+        <ul class="token-list">
+          <li>🟢 Green — go</li>
+          <li>🟡 Amber — watch</li>
+          <li>🔴 Red — block</li>
+        </ul>
+      </section>
+      <section class="card">
+        <h2>Decision Record</h2>
+        <p class="card__hint">Every call files a DR with energy and risk posture.</p>
+        <button class="button" type="button">View Latest DR</button>
+      </section>
+    </main>
+    <footer class="board__footer">
+      <p>Strategist patches: 🧭ClearCall • 🛟SafeRevert • 🌱LowJoules • 🤝FairCredit</p>
+    </footer>
+  </body>
+</html>

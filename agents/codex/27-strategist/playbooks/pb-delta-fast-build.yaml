@@ -1,0 +1,32 @@
+id: pb-delta-fast-build
+name: DELTA (fast build)
+trigger:
+  topic: "build:sprint"
+  guards:
+    - "tests:green"
+roles:
+  - agent: "Builder"
+    task: "assemble_feature"
+  - agent: "Linguist"
+    task: "document_updates"
+  - agent: "Roadie"
+    task: "monitor_health"
+budget:
+  joules_max: 400
+steps:
+  - emit:
+      topic: "formation:delta:start"
+  - run: "scripts/bootstrap_delta.sh"
+  - run: "scripts/run_ci.sh"
+  - gate:
+      topic: "guardian:decision"
+      allow: true
+  - emit:
+      topic: "formation:delta:complete"
+rollback:
+  - run: "scripts/revert_delta.sh"
+  - emit:
+      topic: "formation:delta:reverted"
+exit:
+  success: "feature merged + docs updated"
+  failure: "rollback executed + DR filed"

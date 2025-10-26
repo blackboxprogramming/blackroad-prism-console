@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad.io/schemas/codex27/mission.json",
+  "title": "Codex-27 Mission Canvas",
+  "type": "object",
+  "required": [
+    "goal",
+    "constraints",
+    "roles",
+    "budget",
+    "timeline",
+    "exit"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "goal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "roles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "agent"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "agent": {"type": "string", "minLength": 1},
+          "backup": {"type": "string"}
+        }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "required": ["joules_target", "joules_max"],
+      "additionalProperties": false,
+      "properties": {
+        "joules_target": {"type": "number", "minimum": 0},
+        "joules_max": {"type": "number", "minimum": 0}
+      }
+    },
+    "timeline": {
+      "type": "object",
+      "required": ["start", "checkpoints", "deadline"],
+      "additionalProperties": false,
+      "properties": {
+        "start": {"type": "string", "format": "date-time"},
+        "deadline": {"type": "string", "format": "date-time"},
+        "checkpoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "time"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "time": {"type": "string", "format": "date-time"}
+            }
+          }
+        }
+      }
+    },
+    "exit": {
+      "type": "object",
+      "required": ["success", "abort"],
+      "additionalProperties": false,
+      "properties": {
+        "success": {"type": "string", "minLength": 1},
+        "abort": {"type": "string", "minLength": 1}
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}
