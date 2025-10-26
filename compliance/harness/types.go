@@ -7,7 +7,7 @@ import (
 )
 
 // ErrPolicyViolation is returned when a rule decides to deny a request.
-var ErrPolicyViolation = errors.New("policy violation")
+var ErrPolicyViolation = errors.New("policy_violation")
 
 // OnMatch describes what to do when a rule expression evaluates to true.
 type OnMatch struct {

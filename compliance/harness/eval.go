@@ -1,11 +1,6 @@
 package harness
 
-import (
-	"errors"
-	"fmt"
-)
-
-var ErrPolicyViolation = errors.New("policy_violation")
+import "fmt"
 
 func EvaluateEvent(rule CompiledRule, event map[string]any) (RuleDecision, error) {
 	ev := NormalizeEvent(event)

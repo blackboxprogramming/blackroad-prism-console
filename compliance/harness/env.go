@@ -2,7 +2,6 @@ package harness
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/google/cel-go/cel"
@@ -10,19 +9,8 @@ import (
 	"github.com/blackroad/prism-console/compliance/rules"
 )
 
-type RuleDecision struct {
-	Decision string         `json:"decision"`
-	Reason   string         `json:"reason"`
-	RuleID   string         `json:"rule_id"`
-	Details  map[string]any `json:"details,omitempty"`
-}
-
-func EnvWithBuiltins() *cel.Env {
-	env, err := rules.NewComplianceEnv()
-	if err != nil {
-		panic(fmt.Sprintf("cel env: %v", err))
-	}
-	return env
+func EnvWithBuiltins() (*cel.Env, error) {
+	return rules.NewComplianceEnv()
 }
 
 func NormalizeEvent(event map[string]any) map[string]any {
