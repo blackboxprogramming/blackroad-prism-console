@@ -297,6 +297,7 @@ export default function App(){
     { key: 'manifesto', to: '/manifesto', text: 'Manifesto', icon: <BookOpen size={18} /> },
     { key: 'git', to: '/git', text: 'Git', icon: <GitCommit size={18} /> },
     { key: 'subscribe', href: '/subscribe', text: 'Subscribe', icon: <Rocket size={18} /> },
+    { key: 'nexus', href: '/nexus', text: 'Nexus Console', icon: <LayoutGrid size={18} /> },
     { key: 'novelty', to: '/novelty', text: 'Novelty Dashboard', icon: <Sparkles size={18} /> },
   ]
   if (isSubscribe) {
