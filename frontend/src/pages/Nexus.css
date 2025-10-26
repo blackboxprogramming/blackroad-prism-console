@@ -1,0 +1,705 @@
+.nexus-page {
+  --nexus-bg: #0a0a0f;
+  --nexus-bg-secondary: #13131a;
+  --nexus-bg-tertiary: #1a1a24;
+  --nexus-bg-elevated: #202030;
+  --nexus-border: rgba(255, 255, 255, 0.08);
+  --nexus-text: #ffffff;
+  --nexus-text-secondary: rgba(255, 255, 255, 0.7);
+  --nexus-text-tertiary: rgba(255, 255, 255, 0.5);
+  --nexus-gradient: linear-gradient(
+    135deg,
+    #fdba2d 0%,
+    #ff6b35 20%,
+    #ff4fd8 45%,
+    #c753ff 65%,
+    #6366f1 85%,
+    #3b82f6 100%
+  );
+  --nexus-accent-yellow: #fdba2d;
+  --nexus-accent-orange: #ff6b35;
+  --nexus-accent-pink: #ff4fd8;
+  --nexus-accent-purple: #c753ff;
+  --nexus-accent-indigo: #6366f1;
+  --nexus-accent-blue: #3b82f6;
+  --nexus-success: #22c55e;
+  --nexus-warning: #f59e0b;
+  --nexus-error: #ef4444;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter',
+    sans-serif;
+  background: var(--nexus-bg);
+  color: var(--nexus-text);
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.nexus-page * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.nexus-page .header {
+  height: 64px;
+  background: var(--nexus-bg-secondary);
+  border-bottom: 1px solid var(--nexus-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1000;
+}
+
+.nexus-page .logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nexus-page .logo-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--nexus-gradient);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 20px;
+  color: #000;
+  box-shadow: 0 0 20px rgba(255, 79, 216, 0.3);
+}
+
+.nexus-page .logo-text {
+  font-size: 1.3rem;
+  font-weight: 700;
+  background: var(--nexus-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nexus-page .header-center {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.nexus-page .model-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: var(--nexus-bg-tertiary);
+  border: 1px solid var(--nexus-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nexus-page .model-selector:hover {
+  border-color: var(--nexus-accent-pink);
+  background: var(--nexus-bg-elevated);
+}
+
+.nexus-page .model-status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--nexus-success);
+  box-shadow: 0 0 8px var(--nexus-success);
+}
+
+.nexus-page .header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nexus-page .header-button {
+  padding: 8px 16px;
+  background: var(--nexus-bg-tertiary);
+  border: 1px solid var(--nexus-border);
+  border-radius: 8px;
+  color: var(--nexus-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nexus-page .header-button:hover {
+  border-color: var(--nexus-accent-blue);
+  color: var(--nexus-text);
+}
+
+.nexus-page .header-button.active {
+  background: rgba(255, 79, 216, 0.15);
+  border-color: var(--nexus-accent-pink);
+  color: var(--nexus-text);
+}
+
+.nexus-page .main-container {
+  display: flex;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+}
+
+.nexus-page .sidebar {
+  width: 280px;
+  background: var(--nexus-bg-secondary);
+  border-right: 1px solid var(--nexus-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.nexus-page .sidebar-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--nexus-border);
+  background: var(--nexus-bg-tertiary);
+}
+
+.nexus-page .sidebar-tab {
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+  color: var(--nexus-text-secondary);
+  background: transparent;
+  border: none;
+  font-family: inherit;
+}
+
+.nexus-page .sidebar-tab:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--nexus-text);
+}
+
+.nexus-page .sidebar-tab.active {
+  border-bottom-color: var(--nexus-accent-pink);
+  color: var(--nexus-text);
+}
+
+.nexus-page .sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.nexus-page .integration-section {
+  margin-bottom: 24px;
+}
+
+.nexus-page .section-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--nexus-text-tertiary);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.nexus-page .integration-card {
+  background: var(--nexus-bg-tertiary);
+  border: 1px solid var(--nexus-border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nexus-page .integration-card:hover {
+  border-color: var(--nexus-accent-pink);
+  background: var(--nexus-bg-elevated);
+  transform: translateX(4px);
+}
+
+.nexus-page .integration-card.connected {
+  border-color: var(--nexus-success);
+}
+
+.nexus-page .integration-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--nexus-gradient);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.nexus-page .integration-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.nexus-page .integration-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.nexus-page .integration-status {
+  font-size: 0.75rem;
+  color: var(--nexus-text-tertiary);
+}
+
+.nexus-page .integration-status.connected {
+  color: var(--nexus-success);
+}
+
+.nexus-page .connection-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--nexus-text-tertiary);
+  flex-shrink: 0;
+}
+
+.nexus-page .connection-indicator.connected {
+  background: var(--nexus-success);
+  box-shadow: 0 0 8px var(--nexus-success);
+}
+
+.nexus-page .sidebar-placeholder {
+  color: var(--nexus-text-tertiary);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.nexus-page .content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.nexus-page .chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.nexus-page .messages-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.nexus-page .message {
+  margin-bottom: 24px;
+  display: flex;
+  gap: 12px;
+}
+
+.nexus-page .message-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--nexus-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #000;
+  flex-shrink: 0;
+}
+
+.nexus-page .message-avatar.user {
+  background: var(--nexus-bg-tertiary);
+  color: var(--nexus-text);
+  border: 1px solid var(--nexus-border);
+}
+
+.nexus-page .message-content {
+  flex: 1;
+}
+
+.nexus-page .message-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.nexus-page .message-author {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.nexus-page .message-time {
+  font-size: 0.75rem;
+  color: var(--nexus-text-tertiary);
+}
+
+.nexus-page .message-text {
+  line-height: 1.6;
+  color: var(--nexus-text-secondary);
+  font-size: 0.95rem;
+}
+
+.nexus-page .message-list {
+  margin-top: 8px;
+  padding-left: 20px;
+  line-height: 2;
+}
+
+.nexus-page .code-block {
+  background: var(--nexus-bg-tertiary);
+  border: 1px solid var(--nexus-border);
+  border-radius: 8px;
+  margin: 12px 0;
+  overflow: hidden;
+}
+
+.nexus-page .code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--nexus-border);
+  background: var(--nexus-bg-secondary);
+}
+
+.nexus-page .code-language {
+  font-size: 0.8rem;
+  color: var(--nexus-text-secondary);
+  font-family: monospace;
+}
+
+.nexus-page .code-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.nexus-page .code-action-btn {
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid var(--nexus-border);
+  border-radius: 4px;
+  color: var(--nexus-text-secondary);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.nexus-page .code-action-btn:hover {
+  background: var(--nexus-bg-elevated);
+  border-color: var(--nexus-accent-pink);
+  color: var(--nexus-text);
+}
+
+.nexus-page .code-content {
+  padding: 16px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.nexus-page .execution-result {
+  background: var(--nexus-bg-secondary);
+  border: 1px solid var(--nexus-border);
+  border-left: 3px solid var(--nexus-success);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-family: monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.nexus-page .execution-result.error {
+  border-left-color: var(--nexus-error);
+}
+
+.nexus-page .input-area {
+  border-top: 1px solid var(--nexus-border);
+  background: var(--nexus-bg-secondary);
+  padding: 20px 24px;
+}
+
+.nexus-page .input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nexus-page .input-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nexus-page .tool-button {
+  padding: 6px 12px;
+  background: var(--nexus-bg-tertiary);
+  border: 1px solid var(--nexus-border);
+  border-radius: 6px;
+  color: var(--nexus-text-secondary);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nexus-page .tool-button:hover {
+  border-color: var(--nexus-accent-blue);
+  color: var(--nexus-text);
+}
+
+.nexus-page .tool-button.active {
+  background: rgba(255, 79, 216, 0.15);
+  border-color: var(--nexus-accent-pink);
+  color: var(--nexus-text);
+}
+
+.nexus-page .input-box {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.nexus-page .input-field {
+  flex: 1;
+  min-height: 60px;
+  max-height: 200px;
+  padding: 12px 16px;
+  background: var(--nexus-bg-tertiary);
+  border: 1px solid var(--nexus-border);
+  border-radius: 12px;
+  color: var(--nexus-text);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.nexus-page .input-field:focus {
+  border-color: var(--nexus-accent-pink);
+}
+
+.nexus-page .send-button {
+  padding: 12px 24px;
+  background: var(--nexus-gradient);
+  border: none;
+  border-radius: 12px;
+  color: #000;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nexus-page .send-button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 24px rgba(255, 79, 216, 0.5);
+}
+
+.nexus-page .send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.nexus-page .right-panel {
+  width: 360px;
+  background: var(--nexus-bg-secondary);
+  border-left: 1px solid var(--nexus-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.nexus-page .panel-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--nexus-border);
+}
+
+.nexus-page .panel-tab {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+  color: var(--nexus-text-secondary);
+  background: transparent;
+  border: none;
+  font-family: inherit;
+}
+
+.nexus-page .panel-tab:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--nexus-text);
+}
+
+.nexus-page .panel-tab.active {
+  border-bottom-color: var(--nexus-accent-pink);
+  color: var(--nexus-text);
+}
+
+.nexus-page .panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.nexus-page .activity-item,
+.nexus-page .context-item,
+.nexus-page .stat-card {
+  background: var(--nexus-bg-tertiary);
+  border: 1px solid var(--nexus-border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.nexus-page .activity-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.nexus-page .activity-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--nexus-gradient);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.nexus-page .activity-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  flex: 1;
+}
+
+.nexus-page .activity-time {
+  font-size: 0.7rem;
+  color: var(--nexus-text-tertiary);
+}
+
+.nexus-page .activity-description {
+  font-size: 0.85rem;
+  color: var(--nexus-text-secondary);
+  line-height: 1.5;
+}
+
+.nexus-page .context-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--nexus-text-tertiary);
+  margin-bottom: 8px;
+}
+
+.nexus-page .context-value {
+  font-size: 0.9rem;
+  color: var(--nexus-text-secondary);
+  line-height: 1.5;
+}
+
+.nexus-page .stat-label {
+  font-size: 0.75rem;
+  color: var(--nexus-text-tertiary);
+  margin-bottom: 4px;
+}
+
+.nexus-page .stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: var(--nexus-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nexus-page .progress-bar {
+  height: 4px;
+  background: var(--nexus-bg-secondary);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.nexus-page .progress-fill {
+  height: 100%;
+  background: var(--nexus-gradient);
+  transition: width 0.3s;
+}
+
+.nexus-page ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.nexus-page ::-webkit-scrollbar-track {
+  background: var(--nexus-bg);
+}
+
+.nexus-page ::-webkit-scrollbar-thumb {
+  background: var(--nexus-bg-tertiary);
+  border-radius: 4px;
+}
+
+.nexus-page ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 79, 216, 0.3);
+}
+
+.nexus-page .loading {
+  animation: nexus-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes nexus-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.nexus-page .sidebar-placeholder strong {
+  color: var(--nexus-text-secondary);
+}
+
+.nexus-page .panel-placeholder {
+  color: var(--nexus-text-tertiary);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
