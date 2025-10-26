@@ -1,32 +1,46 @@
 import pytest
 
-from roadview.models import Domain, IndexRequestDocument
+from roadview.models import BulkDocumentInput
+from sqlmodel import select
+
+from roadview.models import Document, PolicyEnum
+from roadview.repo import bulk_index, get_domain, get_session, list_domains, upsert_domain
 
 
 @pytest.mark.asyncio
-async def test_bulk_index_skips_blocked_domain(repository):
-    domain = Domain(name="blocked.example", policy="block")
-    await repository.upsert_domain(domain)
-    doc = IndexRequestDocument(
-        title="Blocked",
-        url="https://blocked.example/news",
+async def test_bulk_index_creates_documents_and_tokens():
+    doc = BulkDocumentInput(
+        title="Test",
+        url="https://example.com/article",
         sourceType="news",
-        content="Important coverage about infrastructure.",
+        bias="center",
+        publishedAt="2024-01-01",
+        content="Example content with meaningful science insights",
+        author="Reporter",
     )
-    indexed = await repository.bulk_index_documents([doc])
-    assert indexed == 0
+    async with get_session() as session:
+        count = await bulk_index(session, [doc])
+        assert count == 1
+        domains = await list_domains(session)
+        assert domains[0].name == "example.com"
+        result = await session.exec(select(Document))
+        inserted_doc = result.first()
+        assert inserted_doc is not None
+        tokens = inserted_doc.tokens.split()
+        assert "science" in tokens or "example" in tokens
 
 
 @pytest.mark.asyncio
-async def test_query_documents_respects_noindex(repository):
-    domain = Domain(name="noindex.example", policy="noindex")
-    await repository.upsert_domain(domain)
-    doc = IndexRequestDocument(
-        title="Hidden",
-        url="https://noindex.example/post",
-        sourceType="blog",
-        content="Thorough analysis of governance policy and public data." * 50,
-    )
-    await repository.bulk_index_documents([doc])
-    results = await repository.query_documents()
-    assert all(row[1].name != "noindex.example" for row in results)
+async def test_block_policy_prevents_ingest():
+    async with get_session() as session:
+        await upsert_domain(session, "blocked.com", policy="block")
+        doc = BulkDocumentInput(
+            title="Blocked",
+            url="https://blocked.com/item",
+            sourceType="blog",
+            content="Content",  # type: ignore[arg-type]
+        )
+        count = await bulk_index(session, [doc])
+        assert count == 0
+        domain = await get_domain(session, "blocked.com")
+        assert domain.policy == PolicyEnum.block

@@ -1,190 +1,244 @@
 from __future__ import annotations
 
 import time
-from collections import Counter
-from typing import Optional
+from datetime import datetime
+from typing import Any, Dict, Iterable, List, Tuple
 
-from dateutil import parser as date_parser
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+import structlog
+from dateutil import parser
+from fastapi import APIRouter, Depends, Query
 
-from ..config import Settings, get_settings
-from ..models import BiasEnum, FacetCounts, SearchResponse, SearchResult, SourceTypeEnum
-from ..observability import metrics
-from ..observability.logging import get_logger
-from ..ranking.scoring import scale_confidence, score_document, to_breakdown
-from ..ranking.tfidf import compute_idf, compute_tfidf, cosine_similarity
-from ..repo import RoadviewRepository
-from ..services.tokenizer import Tokenizer
+from ..config import get_settings
+from ..models import PolicyEnum, ScoreBreakdown, SearchQuery, SearchResponse, SearchResult
+from ..observability.logging import bind_request, log_search
+from ..ranking.scoring import (
+    RankedDocument,
+    bias_recency_adjustment,
+    normalize_confidence,
+    penalty_score,
+    recency_score,
+    structure_score,
+)
+from ..ranking.tfidf import cosine_similarity, query_vector, tfidf
+from ..repo import (
+    get_session,
+    load_documents_with_domains,
+    tokens_from_document,
+)
+from ..services.tokenizer import tokenize
 
-router = APIRouter()
+router = APIRouter(tags=["search"])
+logger = structlog.get_logger("roadview.search")
+settings = get_settings()
 
 
-def get_repository(request: Request) -> RoadviewRepository:
-    return request.app.state.repository
-
-
-def get_tokenizer(request: Request) -> Tokenizer:
-    return request.app.state.tokenizer
-
-
-@router.get("/api/search", response_model=SearchResponse)
-async def search_endpoint(
-    request: Request,
-    q: str,
-    sourceType: Optional[str] = None,
-    bias: Optional[str] = None,
-    minCred: Optional[int] = None,
-    from_: Optional[str] = None,
-    to: Optional[str] = None,
-    sort: str = "relevance",
-    page: int = 1,
-    pageSize: int = 25,
-    repo: RoadviewRepository = Depends(get_repository),
-    tokenizer: Tokenizer = Depends(get_tokenizer),
-    settings: Settings = Depends(get_settings),
-) -> SearchResponse:
-    if not q.strip():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Query required")
-
-    start = time.perf_counter()
-    logger = get_logger(route="/api/search", request_id=getattr(request.state, "request_id", None))
-    query_tokens = tokenizer.tokenize(q)
-
-    from_date = _safe_parse_date(from_)
-    to_date = _safe_parse_date(to)
-
-    try:
-        source_enum = SourceTypeEnum(sourceType) if sourceType else None
-    except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid sourceType") from exc
-    try:
-        bias_enum = BiasEnum(bias) if bias else None
-    except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid bias") from exc
-
-    documents = await repo.query_documents(
-        source_type=source_enum,
-        bias=bias_enum,
-        min_cred=minCred,
-        from_date=from_date,
-        to_date=to_date,
+async def get_query(
+    q: str = Query(..., min_length=1),
+    sourceType: str | None = Query(default=None, pattern="^(journal|news|blog|paper|gov|repo)$"),
+    bias: str | None = Query(default=None, pattern="^(left|center|right|na)$"),
+    minCred: int | None = Query(default=None, ge=0, le=100),
+    from_: str | None = Query(default=None, alias="from"),
+    to: str | None = Query(default=None),
+    sort: str | None = Query(default=None, pattern="^(recency|credibility|domain|relevance)$"),
+    page: int = Query(default=1, ge=1),
+    pageSize: int | None = Query(default=None, ge=1),
+) -> SearchQuery:
+    normalized_source = sourceType if sourceType not in {"", "null"} else None
+    normalized_bias = bias if bias not in {"", "null"} else None
+    return SearchQuery(
+        q=q,
+        sourceType=normalized_source,  # type: ignore[arg-type]
+        bias=normalized_bias,  # type: ignore[arg-type]
+        minCred=minCred,
+        from_=from_,
+        to=to,
+        sort=sort,  # type: ignore[arg-type]
+        page=page,
+        pageSize=pageSize,
     )
 
-    limited_documents = documents[:5000]
-    doc_tokens = [doc.tokens.split() for doc, _domain in limited_documents]
-    idf = compute_idf(doc_tokens)
-    query_vector = compute_tfidf(query_tokens, idf)
 
-    weights = {
-        "text": settings.weight_text,
-        "domain": settings.weight_domain,
-        "recency": settings.weight_recency,
-        "structure": settings.weight_structure,
+def _parse_filter_date(raw: str | None) -> datetime | None:
+    if not raw:
+        return None
+    try:
+        dt = parser.parse(raw)
+        if dt.tzinfo:
+            dt = dt.astimezone(tz=None)
+        return dt.replace(tzinfo=None)
+    except (ValueError, OverflowError, TypeError):
+        return None
+
+
+def _snippet(content: str) -> str:
+    tokens = tokenize(content)
+    return " ".join(tokens[:40])
+
+
+def _facet_counts(items: Iterable[Tuple[Any, Any]]) -> Dict[str, Dict[str, int]]:
+    source_counts: Dict[str, int] = {}
+    bias_counts: Dict[str, int] = {}
+    domain_counts: Dict[str, int] = {}
+    for doc, domain in items:
+        source_counts[str(doc.sourceType.value)] = source_counts.get(str(doc.sourceType.value), 0) + 1
+        bias_counts[str(doc.bias.value)] = bias_counts.get(str(doc.bias.value), 0) + 1
+        domain_counts[domain.name] = domain_counts.get(domain.name, 0) + 1
+    return {
+        "sourceType": source_counts,
+        "bias": bias_counts,
+        "domains": domain_counts,
     }
 
-    scored_documents = []
-    for document, domain in limited_documents:
-        doc_vector = compute_tfidf(document.tokens.split(), idf)
-        similarity = cosine_similarity(query_vector, doc_vector)
-        scored = score_document(
-            document=document,
-            domain=domain,
-            text_similarity=similarity,
-            weights=weights,
-            query_tokens=query_tokens,
+
+def _apply_sort(sort: str | None, ranked: List[RankedDocument]) -> List[RankedDocument]:
+    if sort == "recency":
+        return sorted(ranked, key=lambda doc: doc.published_at or datetime.min, reverse=True)
+    if sort == "credibility":
+        return sorted(ranked, key=lambda doc: doc.cred_score, reverse=True)
+    if sort == "domain":
+        return sorted(ranked, key=lambda doc: doc.domain)
+    return sorted(ranked, key=lambda doc: doc.total_score, reverse=True)
+
+
+@router.get("/search", response_model=SearchResponse)
+async def search_endpoint(query: SearchQuery = Depends(get_query)) -> SearchResponse:
+    start = time.perf_counter()
+    async with get_session() as session:
+        raw_docs = await load_documents_with_domains(session)
+
+    from_date = _parse_filter_date(query.from_)
+    to_date = _parse_filter_date(query.to)
+
+    filtered: List[Tuple[Any, Any]] = []
+    for doc, domain in raw_docs:
+        if domain.policy == PolicyEnum.noindex:
+            continue
+        if query.sourceType and doc.sourceType != query.sourceType:
+            continue
+        if query.bias and doc.bias != query.bias:
+            continue
+        if query.minCred is not None and domain.baseCred < query.minCred:
+            continue
+        if from_date and (doc.publishedAt or datetime.min) < from_date:
+            continue
+        if to_date and (doc.publishedAt or datetime.max) > to_date:
+            continue
+        filtered.append((doc, domain))
+
+    if not filtered:
+        took = (time.perf_counter() - start) * 1000
+        return SearchResponse(
+            results=[],
+            facets={"sourceType": {}, "bias": {}, "domains": {}},
+            meta={
+                "tookMs": round(took, 2),
+                "total": 0,
+                "page": query.page,
+                "pageSize": query.pageSize or settings.default_page_size,
+            },
         )
-        scored_documents.append(scored)
 
-    sort_key = {
-        "relevance": lambda item: item.total,
-        "credibility": lambda item: item.domain.baseCred,
-        "domain": lambda item: item.domain.name.lower(),
-        "recency": lambda item: item.document.publishedAt.timestamp() if item.document.publishedAt else 0,
-    }.get(sort, lambda item: item.total)
+    facets = _facet_counts(filtered)
 
-    reverse = sort != "domain"
-    scored_documents = sorted(scored_documents, key=sort_key, reverse=reverse)
+    corpus_tokens = [tokens_from_document(doc) for doc, _ in filtered]
+    idf = {}
+    if corpus_tokens:
+        from ..repo import compute_idf
 
-    scores = [item.total for item in scored_documents]
+        idf = compute_idf(corpus_tokens)
+    query_vector_data = query_vector(query.q, idf)
+    query_tokens = tokenize(query.q)
 
-    total_results = len(scored_documents)
-    start_idx = max(page - 1, 0) * pageSize
-    end_idx = start_idx + pageSize
-    paginated = scored_documents[start_idx:end_idx]
-
-    paginated_scores = scores[start_idx:end_idx]
-    paginated_conf = scale_confidence(paginated_scores) if paginated else []
-
-    results: list[SearchResult] = []
-    for idx, scored in enumerate(paginated):
-        confidence = paginated_conf[idx] if paginated_conf else 1.0
-        breakdown = to_breakdown(scored)
-        results.append(
-            SearchResult(
-                id=scored.document.id,
-                title=scored.document.title,
-                snippet=scored.document.snippet or scored.document.content[:200],
-                url=scored.document.url,
-                domain=scored.domain.name,
-                sourceType=scored.document.sourceType,
-                bias=scored.document.bias,
-                credScore=scored.document.credScore,
-                publishedAt=scored.document.publishedAt,
-                confidence=confidence,
-                score=scored.total,
-                scoreBreakdown=breakdown,
+    ranked_docs: List[RankedDocument] = []
+    for doc, domain in filtered:
+        doc_tokens = tokens_from_document(doc)
+        doc_vector = tfidf(doc_tokens, idf)
+        text_similarity = cosine_similarity(query_vector_data, doc_vector)
+        domain_score_value = domain.baseCred / 100
+        recency_value = recency_score(doc.publishedAt)
+        recency_value += bias_recency_adjustment(query_tokens, domain.bias)
+        recency_value = min(recency_value, 1.0)
+        structure_value = structure_score(doc.hasAuthor, doc.hasDate, doc.hasCanonical)
+        penalty_value = penalty_score(doc.publishedAt, len(doc_tokens))
+        ranked_docs.append(
+            RankedDocument(
+                id=doc.id,
+                title=doc.title,
+                snippet=_snippet(doc.content),
+                url=doc.url,
+                domain=doc.domain,
+                source_type=doc.sourceType,
+                bias=doc.bias,
+                published_at=doc.publishedAt,
+                cred_score=domain.baseCred,
+                text_score=text_similarity,
+                domain_score=domain_score_value,
+                recency_score=recency_value,
+                structure_score=structure_value,
+                penalty=penalty_value,
             )
         )
 
-    facets = _build_facets(limited_documents)
+    ranked_docs = _apply_sort(query.sort or "relevance", ranked_docs)
+    total = len(ranked_docs)
 
-    took_ms = (time.perf_counter() - start) * 1000
-    metrics.REQUEST_DURATION.observe(took_ms / 1000)
-    metrics.REQUESTS_TOTAL.labels(status="ok").inc()
+    page_size = query.pageSize or settings.default_page_size
+    page_size = min(page_size, settings.max_page_size)
+    start_index = (query.page - 1) * page_size
+    end_index = start_index + page_size
+    page_docs = ranked_docs[start_index:end_index]
 
-    logger.info(
-        "search.completed",
-        took_ms=took_ms,
-        q_len=len(q),
-        results=len(results),
-        filters={
-            "sourceType": sourceType,
-            "bias": bias,
-            "minCred": minCred,
-            "from": from_,
-            "to": to,
-            "sort": sort,
-            "page": page,
-            "pageSize": pageSize,
+    scores = [doc.total_score for doc in page_docs]
+    confidences = normalize_confidence(scores)
+
+    results_payload: List[SearchResult] = []
+    for doc, confidence in zip(page_docs, confidences):
+        breakdown = doc.breakdown()
+        results_payload.append(
+            SearchResult(
+                id=doc.id,
+                title=doc.title,
+                snippet=doc.snippet,
+                url=doc.url,
+                domain=doc.domain,
+                sourceType=doc.source_type,  # type: ignore[arg-type]
+                bias=doc.bias,  # type: ignore[arg-type]
+                credScore=doc.cred_score,
+                publishedAt=doc.published_at,
+                confidence=confidence,
+                score=doc.total_score,
+                scoreBreakdown=ScoreBreakdown(**breakdown.model_dump()),
+            )
+        )
+
+    took = (time.perf_counter() - start) * 1000
+    log_search(
+        bind_request(
+            logger,
+            q=query.q,
+            filters={
+                "sourceType": query.sourceType,
+                "bias": query.bias,
+                "minCred": query.minCred,
+                "from": query.from_,
+                "to": query.to,
+                "sort": query.sort,
+            },
+        ),
+        {
+            "took_ms": round(took, 2),
+            "results": len(results_payload),
+            "total": total,
         },
     )
 
     return SearchResponse(
-        results=results,
+        results=results_payload,
         facets=facets,
-        meta={"tookMs": round(took_ms, 2), "total": total_results, "page": page, "pageSize": pageSize},
+        meta={
+            "tookMs": round(took, 2),
+            "total": total,
+            "page": query.page,
+            "pageSize": page_size,
+        },
     )
-
-
-def _build_facets(documents: list[tuple]) -> FacetCounts:
-    source_counter: Counter[str] = Counter()
-    bias_counter: Counter[str] = Counter()
-    domain_counter: Counter[str] = Counter()
-    for document, domain in documents:
-        source_counter[document.sourceType.value] += 1
-        bias_counter[document.bias.value] += 1
-        domain_counter[domain.name] += 1
-    return FacetCounts(
-        sourceType=dict(source_counter),
-        bias=dict(bias_counter),
-        domains=dict(domain_counter),
-    )
-
-
-def _safe_parse_date(date_str: Optional[str]):
-    if not date_str:
-        return None
-    try:
-        return date_parser.parse(date_str)
-    except (ValueError, TypeError, OverflowError):
-        return None

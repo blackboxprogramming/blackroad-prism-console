@@ -1,34 +1,32 @@
 {
   "docs": [
     {
-      "title": "Climate Research Advances",
-      "url": "https://research.example.org/climate",
-      "sourceType": "paper",
-      "bias": "na",
-      "publishedAt": "2023-07-10T00:00:00Z",
-      "content": "Climate change research highlights new mitigation strategies with structured data and expert authorship.",
-      "author": "Dr. Rivera",
-      "hasCanonical": true
-    },
-    {
-      "title": "Local Policy Update",
-      "url": "https://news.example.com/policy-update",
-      "sourceType": "news",
-      "bias": "center",
-      "publishedAt": "2022-05-04T00:00:00Z",
-      "content": "City council approves new sustainable transport measures after months of debate and cross-party input.",
-      "author": "Alex Johnson",
-      "hasCanonical": false
-    },
-    {
-      "title": "Open Data Release",
-      "url": "https://gov.example.gov/data-release",
+      "title": "NIH releases new clinical guidance",
+      "url": "https://nih.gov/press/2024/guidance",
       "sourceType": "gov",
       "bias": "na",
-      "publishedAt": "2021-12-01T00:00:00Z",
-      "content": "Government releases open data portal featuring transportation, health, and environmental datasets for public use.",
-      "author": "",
+      "publishedAt": "2024-02-01T00:00:00Z",
+      "content": "National Institutes of Health guidance on clinical best practices with extensive research updates repeated for emphasis. Research insights continue to expand evidence based protocols across hospitals and clinics worldwide ensuring patient safety and equity. This release summarizes over one hundred peer reviewed studies, providing clarity for practitioners.",
+      "author": "NIH Communications"
+    },
+    {
+      "title": "Open science consortium announces breakthrough",
+      "url": "https://journal.example.org/2023/open-science",
+      "sourceType": "journal",
+      "bias": "center",
+      "publishedAt": "2023-09-12",
+      "content": "Consortium of universities publishes open science results with detailed methodology and reproducibility commitments. Datasets, code, and peer commentary are provided to support continued exploration in climate resilience and biomedical discovery.",
+      "author": "Jane Smith",
       "hasCanonical": true
+    },
+    {
+      "title": "Decade-old blog opinion",
+      "url": "https://opinion.example.com/archive/2012/insight",
+      "sourceType": "blog",
+      "bias": "right",
+      "publishedAt": "2012-01-05",
+      "content": "A reflective blog post on historical events and ideological debates, capturing the writer's perspective from the early 2010s. While thoughtful, it predates recent developments and lacks contemporary sources.",
+      "author": "John Doe"
     }
   ]
 }
