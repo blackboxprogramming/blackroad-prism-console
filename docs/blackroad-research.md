@@ -6,6 +6,12 @@ Keywords: multi‑agent AI, symbolic reasoning, trinary logic, local LLMs, Ollam
 
 ⸻
 
+## Research Updates
+
+- **Response No. 3 (Quantum Thermodynamic Spiral Operators & Measurement Entropy):** See [blackroad-research-response-03.md](./blackroad-research-response-03.md) for the latest thermodynamic spiral framework covering measurement entropy, observer coupling, spacetime $a$-fields, decoherence scaling, and quantum erasure energetics.
+
+⸻
+
 ## Abstract
 
 BlackRoad.io is a local‑first, multi‑agent AI platform designed for trustworthy human–AI co‑creation. The system anchors around Lucidia, a symbolic agent architecture that couples deterministic “Codex Ψ′” operators with language models running locally via Ollama. BlackRoad’s thesis is that real‑world AI must be truth‑first, memory‑centric, and contradiction‑aware to be reliable in production and meaningful in creative work. We present (i) a symbolic core for policy and reasoning, (ii) agents for execution (guardian, roadie, contradiction, quantum, file, auth, co‑creation, IDE, dashboard, visual, web_server, hardware, deployment, training, monetization), (iii) a streaming co‑coding interface, and (iv) an operations layer that favors simple, inspectable infrastructure. We outline the architecture, deployment, safety posture, and a measurement plan focused on reproducibility, latency, and error budgets. We conclude with limitations, legal considerations, and a roadmap for expanded symbolic English and full local‑model orchestration.
