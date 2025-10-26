@@ -1,11 +1,9 @@
 import argparse, json, os, yaml, sys, uuid
+import argparse, json, sys, uuid
+from pathlib import Path
 from operators.crossover_modules import crossover
 from lineage import write_lineage
 from fitness import evaluate_child
-
-def _load_yaml(p):
-    with open(p, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
 
 def _require(b, msg):
     if not b:
@@ -24,7 +22,12 @@ def main():
     ap.add_argument("--outdir", default="../../agents", help="Agents directory to write child into")
     ap.add_argument("--adapter-weights", default=None,
                     help="Comma list of weights for adapter_merge, e.g. '0.6,0.4' (requires operators/merge_lora.py)")
+    default_outdir = Path(__file__).resolve().parent.parent / "agents"
+    ap.add_argument("--outdir", default=None, help="Agents directory to write child into")
     args = ap.parse_args()
+
+    outdir = Path(args.outdir).expanduser() if args.outdir else default_outdir
+    outdir.mkdir(parents=True, exist_ok=True)
 
     # Validate consent
     with open(args.consent, "r", encoding="utf-8") as f:
@@ -43,12 +46,12 @@ def main():
     _require(caps.get("external_write") is False, "external_write must be false for infants")
 
     child_name = args.child.split("/")[-1]
-    child_dir = os.path.join(os.path.dirname(args.outdir), child_name) if args.outdir.endswith(args.child) else os.path.join(args.outdir, child_name)
-    os.makedirs(child_dir, exist_ok=True)
-    child_genome_path = os.path.join(child_dir, "genome.yaml")
+    child_dir = (outdir / child_name).resolve()
+    child_dir.mkdir(parents=True, exist_ok=True)
+    child_genome_path = child_dir / "genome.yaml"
 
     # Perform crossover
-    child = crossover(args.p1, args.p2, child_genome_path, args.child)
+    child = crossover(args.p1, args.p2, str(child_genome_path), args.child)
 
     # Optional: adapter_merge
     if "adapter_merge" in ops:
@@ -87,21 +90,23 @@ def main():
 
     # Evaluate
     metrics = evaluate_child(child)
-    with open(os.path.join(child_dir, "fitness.json"), "w", encoding="utf-8") as f:
+    with open(child_dir / "fitness.json", "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2)
 
     # Lineage
-    lineage_path = os.path.join(child_dir, "lineage.json")
+    lineage_path = child_dir / "lineage.json"
     child_id = f"{child_name}-{uuid.uuid4().hex[:8]}"
     from lineage import write_lineage
     write_lineage(lineage_path,
+    write_lineage(
+                  str(lineage_path),
                   child_id=child_id,
                   parents=[p["id"] for p in parents],
                   operators=ops,
-                  genome_path=child_genome_path)
+                  genome_path=str(child_genome_path))
 
     print("[OK] child:", child_id)
-    print("[OK] genome:", child_genome_path)
+    print("[OK] genome:", str(child_genome_path))
     print("[OK] fitness:", metrics)
 
 if __name__ == "__main__":

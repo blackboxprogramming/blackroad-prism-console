@@ -48,8 +48,15 @@ Example consent file to use (save as `consent.json` at repo root):
 
 Run:
 ```bash
-# from prism/reproduction/
-python reproduce.py   --p1 ../agents/lucidia-scribe/genome.yaml   --p2 ../agents/lucidia-engineer/genome.yaml   --child lucidia/architect   --consent ../../consent.json
+# from prism/
+make child P1=lucidia-scribe P2=lucidia-engineer CHILD=architect
+
+# or directly
+python reproduction/reproduce.py \
+  --p1 agents/lucidia-scribe/genome.yaml \
+  --p2 agents/lucidia-engineer/genome.yaml \
+  --child lucidia/architect \
+  --consent consent.json
 ```
 
 Outputs (under `prism/agents/architect/`):
