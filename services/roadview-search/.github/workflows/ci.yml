@@ -1,0 +1,49 @@
+name: RoadView Search CI
+
+on:
+  push:
+    paths:
+      - 'services/roadview-search/**'
+  pull_request:
+    paths:
+      - 'services/roadview-search/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/roadview-search
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Poetry
+        run: pip install poetry==1.8.2
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction
+      - name: Lint
+        run: poetry run ruff check src
+      - name: Type check
+        run: poetry run mypy src
+      - name: Test
+        run: poetry run pytest --cov=src --cov-report=xml
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: services/roadview-search/coverage.xml
+      - name: Export OpenAPI
+        run: poetry run python -m scripts.export_openapi
+      - name: Build contract tests
+        run: |
+          poetry run uvicorn roadview.main:app --host 0.0.0.0 --port 4001 &
+          APP_PID=$!
+          sleep 3
+          poetry run schemathesis run http://127.0.0.1:4001/openapi.json --checks all --hypothesis-max-examples 25
+          kill $APP_PID
+      - name: Docker build
+        run: docker build -t roadview-search-ci .
