@@ -79,6 +79,7 @@ import ControlPanel from './pages/ControlPanel.jsx'
 import PeriodicTableOfEquations from './pages/PeriodicTableOfEquations.jsx'
 import Resilience from './pages/Resilience.jsx'
 import AgentLineage from './pages/AgentLineage.jsx'
+import WebEngine from './pages/WebEngine.jsx'
 
 export default function App(){
   const location = useLocation()
@@ -284,6 +285,7 @@ export default function App(){
     { key: 'dashboard', to: '/dashboard', text: 'Dashboard', icon: <Activity size={18} />, match: path => path === '/' || path === '/dashboard' },
     { key: 'you', to: '/you', text: 'You', icon: <User size={18} /> },
     { key: 'roadview', to: '/roadview', text: 'RoadView', icon: <LayoutGrid size={18} /> },
+    { key: 'web-engine', to: '/web-engine', text: 'Web Engine', icon: <span className="text-lg" aria-hidden="true">🌐</span> },
     { key: 'autoheal', to: '/autoheal', text: 'Auto-Heal', icon: <HeartPulse size={18} /> },
     { key: 'security', to: '/security', text: 'Security Spotlights', icon: <Shield size={18} /> },
     { key: 'guardian', to: '/guardian', text: 'Guardian', icon: <ShieldCheck size={18} /> },
@@ -335,6 +337,7 @@ export default function App(){
               <Route path="/dashboard" element={<HomeView tab={tab} setTab={setTab} timeline={timeline} tasks={tasks} commits={commits} onAction={handleAction} />} />
               <Route path="/you" element={<Section><You /></Section>} />
               <Route path="/roadview" element={<Section><RoadView agents={agents} /></Section>} />
+              <Route path="/web-engine" element={<WebEngine />} />
               <Route path="/autoheal" element={<Section><AutoHeal /></Section>} />
               <Route path="/security" element={<Section><SecuritySpotlights /></Section>} />
               <Route path="/guardian" element={<Guardian />} />
