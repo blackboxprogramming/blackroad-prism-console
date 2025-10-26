@@ -1,0 +1,67 @@
+name: Lucidia Desktop CI
+
+on:
+  push:
+    paths:
+      - 'apps/lucidia-desktop/**'
+  pull_request:
+    paths:
+      - 'apps/lucidia-desktop/**'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies
+        run: pnpm install --filter @blackroad/lucidia-desktop...
+      - name: Lint
+        run: pnpm --filter @blackroad/lucidia-desktop lint
+      - name: Unit tests
+        run: pnpm --filter @blackroad/lucidia-desktop test -- --run
+      - name: Build Storybook
+        run: pnpm --filter @blackroad/lucidia-desktop build-storybook
+      - name: Build installers
+        run: pnpm --filter @blackroad/lucidia-desktop tauri build
+      - name: Upload artifacts
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lucidia-desktop-playwright
+          path: apps/lucidia-desktop/playwright-report
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies
+        run: pnpm install --filter @blackroad/lucidia-desktop...
+      - name: Install Playwright browsers
+        run: pnpm --filter @blackroad/lucidia-desktop exec playwright install --with-deps chromium
+      - name: Run e2e tests
+        run: pnpm --filter @blackroad/lucidia-desktop exec playwright test
+      - name: Upload e2e report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lucidia-desktop-e2e-report
+          path: apps/lucidia-desktop/playwright-report

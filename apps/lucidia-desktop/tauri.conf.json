@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/v1/tauri.conf.json",
+  "build": {
+    "beforeBuildCommand": "pnpm build",
+    "beforeDevCommand": "pnpm vite -- --host",
+    "devPath": "http://localhost:5173",
+    "distDir": "dist"
+  },
+  "package": {
+    "productName": "Lucidia Desktop",
+    "version": "0.1.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "fs": {
+        "all": false,
+        "scope": ["$APP/*"]
+      },
+      "shell": {
+        "open": false
+      }
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "com.blackroad.lucidia.desktop"
+    },
+    "security": {
+      "csp": null
+    }
+  }
+}

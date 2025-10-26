@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@/shared/*": ["shared/*"],
+      "@/ui/*": ["ui/*"],
+      "@/tauri/*": ["tauri/*"]
+    },
+    "types": ["vitest", "vite/client"]
+  },
+  "include": ["src", "tests", "vite.config.ts", "storybook"],
+  "exclude": ["dist", "node_modules"]
+}
