@@ -1,0 +1,23 @@
+{
+  "name": "@blackroad/runbook-types",
+  "version": "0.1.0",
+  "description": "Shared schemas and types for BlackRoad runbooks",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.7",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "@blackroad/docs-portal",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "predev": "pnpm run build:runbooks",
+    "prebuild": "pnpm run build:runbooks",
+    "build:runbooks": "tsx scripts/build-runbooks.ts",
+    "dev": "next dev",
+    "build": "next build",
+    "export": "next export",
+    "start": "next start",
+    "link:check": "node scripts/link-check.mjs",
+    "test": "vitest run",
+    "vercel:deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@contentlayer/core": "^0.3.4",
+    "@blackroad/runbook-types": "workspace:^",
+    "@radix-ui/react-dialog": "^1.1.1",
+    "clsx": "^2.1.0",
+    "contentlayer": "^0.3.4",
+    "fast-glob": "^3.3.2",
+    "fuse.js": "^7.0.0",
+    "lucide-react": "^0.460.0",
+    "next": "14.2.5",
+    "next-contentlayer": "^0.3.4",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "uuid": "^9.0.1",
+    "yaml": "^2.5.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^14.2.2",
+    "@types/node": "^20.14.9",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "linkinator": "^4.0.0",
+    "tsx": "^4.11.0",
+    "typescript": "^5.6.3",
+    "vitest": "^1.6.0"
+  }
+}
