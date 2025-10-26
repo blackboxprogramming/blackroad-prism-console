@@ -1,0 +1,7 @@
+required:
+  spf: "v=spf1 include:_spf.blackroad.io ~all"
+  dmarc: "v=DMARC1; p=quarantine; rua=mailto:dmarc@blackroad.io"
+  caa: "0 issue ""letsencrypt.org"""
+recommendations:
+  ttl: 300
+  mx_backup: mail.backup.blackroad.io

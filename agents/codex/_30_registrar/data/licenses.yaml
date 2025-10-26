@@ -1,0 +1,17 @@
+licenses:
+  corp-annual:
+    license_id: corp-annual
+    entity_id: br-holdings
+    jurisdiction: DE
+    renewal_month: 3
+    renewal_day: 1
+    documents:
+      - franchise-tax-confirmation.pdf
+  ria-123:
+    license_id: ria-123
+    entity_id: br-advisors
+    jurisdiction: SEC
+    renewal_month: 3
+    renewal_day: 31
+    documents:
+      - form-adv.pdf

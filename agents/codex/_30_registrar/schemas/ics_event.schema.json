@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ICSEvent",
+  "type": "object",
+  "required": ["uid", "summary", "start", "end", "reminders"],
+  "properties": {
+    "uid": {"type": "string"},
+    "summary": {"type": "string"},
+    "start": {"type": "string", "format": "date-time"},
+    "end": {"type": "string", "format": "date-time"},
+    "description": {"type": "string"},
+    "reminders": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "href"],
+        "properties": {
+          "title": {"type": "string"},
+          "href": {"type": "string", "format": "uri"}
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

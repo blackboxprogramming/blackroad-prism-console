@@ -1,0 +1,31 @@
+entities:
+  br-holdings:
+    name: BlackRoad Holdings Inc.
+    jurisdiction: DE
+    resident_agent: Harbor Compliance
+    documents:
+      - articles-of-incorporation.pdf
+      - bylaws.pdf
+    checklist:
+      - Confirm officer list current
+      - Verify Delaware franchise tax receipt attached
+    licenses:
+      - corp-annual
+    contacts:
+      compliance:
+        email: filings@blackroad.io
+        home_address: 123 Compliance Way, Wilmington, DE
+  br-advisors:
+    name: BlackRoad Advisors LLC
+    jurisdiction: MN
+    resident_agent: Minnesota Registered Agents LLC
+    documents:
+      - operating-agreement.pdf
+    checklist:
+      - Confirm registered agent invoice paid
+    licenses:
+      - ria-123
+    contacts:
+      compliance:
+        email: ria@blackroad.io
+        account: 987654321
