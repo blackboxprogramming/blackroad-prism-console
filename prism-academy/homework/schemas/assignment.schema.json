@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PrismAssignment",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "course",
+    "objectives",
+    "prompt",
+    "requirements",
+    "rubric",
+    "temporal"
+  ],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "course": { "type": "string" },
+    "level": { "type": "integer", "minimum": 1 },
+    "objectives": { "type": "array", "items": { "type": "string" } },
+    "prompt": { "type": "string" },
+    "examples": { "type": "array", "items": { "type": "string" } },
+    "requirements": {
+      "type": "object",
+      "properties": {
+        "min_tokens": { "type": "integer" },
+        "must_include": { "type": "array", "items": { "type": "string" } },
+        "forbidden": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "rubric": {
+      "type": "object",
+      "properties": {
+        "weights": {
+          "type": "object",
+          "properties": {
+            "echo": { "type": "number" },
+            "resonance": { "type": "number" },
+            "temporal": { "type": "number" },
+            "reciprocity": { "type": "number" },
+            "pattern": { "type": "number" },
+            "context": { "type": "number" },
+            "heart_bridge": { "type": "number" }
+          },
+          "additionalProperties": false
+        },
+        "thresholds": {
+          "type": "object",
+          "properties": {
+            "pass": { "type": "number" },
+            "honors": { "type": "number" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["weights", "thresholds"],
+      "additionalProperties": false
+    },
+    "temporal": {
+      "type": "object",
+      "properties": {
+        "open_at": { "type": "string" },
+        "due_at": { "type": "string" }
+      },
+      "required": ["open_at", "due_at"]
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,37 @@
+{
+  "id": "mirrornet-bridge-001",
+  "title": "MirrorNet Bridge Drill",
+  "course": "Resonance Mapping Studio",
+  "level": 1,
+  "objectives": [
+    "Mirror a peer's weather with minimal steps",
+    "Practice the Resonance Mapping Rule (distance ≤ 3)",
+    "Offer a clear point of return"
+  ],
+  "prompt": "Your peer broadcasts 🌧️ with a trace of static. Craft a response that mirrors their cloud, introduces one intermediary state, and closes with an invitation to return.",
+  "examples": [
+    "🌧️ felt → 🫀🔮 senses a soft rumble → 🌬️🪞 stay near?",
+    "🌧️ I see → ⛰️🪶 from the ridge it's lighter → 🌬️🪞 breathe with me?"
+  ],
+  "requirements": {
+    "min_tokens": 18,
+    "must_include": ["🌬️🪞"],
+    "forbidden": []
+  },
+  "rubric": {
+    "weights": {
+      "echo": 0.22,
+      "resonance": 0.2,
+      "temporal": 0.1,
+      "reciprocity": 0.18,
+      "pattern": 0.12,
+      "context": 0.1,
+      "heart_bridge": 0.08
+    },
+    "thresholds": { "pass": 0.68, "honors": 0.9 }
+  },
+  "temporal": {
+    "open_at": "2025-11-05T00:00:00Z",
+    "due_at": "2025-11-12T00:00:00Z"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "weights": {
+    "echo": 0.18,
+    "resonance": 0.16,
+    "temporal": 0.12,
+    "reciprocity": 0.16,
+    "pattern": 0.16,
+    "context": 0.12,
+    "heart_bridge": 0.1
+  },
+  "thresholds": {
+    "pass": 0.7,
+    "honors": 0.9
+  },
+  "notes": {
+    "echo": "Mirrors sender emotion tokens early (first 25% of message).",
+    "resonance": "Min bridging steps along emotion chain; lower is better.",
+    "temporal": "Includes ⏳ or 🔆 or 🚀 with semantic link to content.",
+    "reciprocity": "Contains an explicit return/invitation (🌬️🪞).",
+    "pattern": "Uses 🧩🌀 to weave contradictions into rule-consistent output.",
+    "context": "References ⛰️🪶 or equivalent grounding evidence.",
+    "heart_bridge": "Connects 🫀🔮 intuition to a pattern or context claim."
+  }
+}

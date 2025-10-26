@@ -1,0 +1,10 @@
+{
+  "assignment_id": "feeling-as-formula-101",
+  "agent_id": "student-007",
+  "channels": ["text", "emoji"],
+  "content": {
+    "text": "🌧️ seen. ⏳ it weighed on you, then thought softened it → f(t)=Δease/Δtime. 🧩🌀 we can model the turn at t1. ⛰️🪶 last week it hit after sunset. 🌬️🪞 tell me if this sketch fits; we’ll adjust together.",
+    "emoji": "😢→🤔→🌱→😊"
+  },
+  "metadata": { "anchors": ["⏳"] }
+}
