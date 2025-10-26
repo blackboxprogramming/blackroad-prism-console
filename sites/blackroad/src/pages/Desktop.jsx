@@ -1,677 +1,469 @@
-const PATHWAYS = [
-  {
-    title: "Create",
-    description:
-      "Launch a production-ready studio in minutes. Prompt the system and watch scripts, storyboards, and assets assemble themselves.",
-    bullets: [
-      "Conversational onboarding with ready-to-run starter kits",
-      "Real-time collaboration between you and specialized AI agents",
-      "Template library tuned to every niche — adapt tone, pacing, and visuals instantly",
-    ],
-    cta: { label: "Start building", href: "/chat" },
-  },
-  {
-    title: "Build",
-    description:
-      "Ship code, games, and simulations without juggling dozens of disconnected tools. Lucidia, Genesis Road, and RoadView share one brain.",
-    bullets: [
-      "Voice-to-code IDE with guardrails and instant previews",
-      "Natural language game engine that composes physics, AI, and art",
-      "Unified analytics so every iteration learns from the last",
-    ],
-    cta: { label: "Explore the stack", href: "/roadview" },
-  },
-  {
-    title: "Learn",
-    description:
-      "Guided paths turn research into mastery. Study cohorts, interactive labs, and certification tie directly into your live projects.",
-    bullets: [
-      "20-week learning paths spanning creative, technical, and business tracks",
-      "Interactive labs with auto-feedback and community reviews",
-      "RoadCoin rewards for teaching, mentoring, and publishing research",
-    ],
-    cta: { label: "Enter the Academy", href: "/status" },
-  },
-];
+import { Link } from 'react-router-dom'
 
-const AGENT_FLEET = [
+const FEATURE_CARDS = [
   {
-    name: "API Agent",
-    role: "Operations autopilot",
-    summary:
-      "Keeps production services healthy with intelligent monitors, synthetic probes, and auto-remediation playbooks.",
-    capabilities: [
-      "Observability desk with latency, error rate, and load clustering",
-      "Contextual runbooks suggested with every anomaly",
-      "PagerDuty, Slack, and email hooks for zero-friction escalation",
-    ],
-  },
-  {
-    name: "LLM Agent",
-    role: "Engineering copilot",
-    summary:
-      "Turns conversations into shipping code. Understands your repos, tests, and deployment rituals across every surface.",
-    capabilities: [
-      "Pair-programming canvas with inline previews and diff aware planning",
-      "Multi-branch orchestration with guardrails and automated reviews",
-      "Bridges Lucidia IDE, GitHub, and deployment pipelines in one loop",
-    ],
-  },
-  {
-    name: "Math Agent",
-    role: "Modeling + analytics",
-    summary:
-      "Explains complex systems in plain language while generating proofs, simulations, and parameter sweeps for your teams.",
-    capabilities: [
-      "Symbolic + numeric solver that collaborates with the visual labs",
-      "Scenario generator for finance, physics, and growth experiments",
-      "Exports structured notebooks straight into RoadView stories",
-    ],
-  },
-  {
-    name: "Guardian Agent",
-    role: "Compliance + trust",
-    summary:
-      "Governance guardian that watches prompts, assets, and payments so the ecosystem stays safe and accountable.",
-    capabilities: [
-      "Policy engine with explainable decisions and override workflows",
-      "Brand safety scanning for uploads, ad inventory, and marketplace listings",
-      "RoadCoin KYC, royalty splits, and contract management baked in",
-    ],
-  },
-  {
-    name: "Explorer Agent",
-    role: "Knowledge navigation",
-    summary:
-      "Prism Explorer maps your research, briefs, and production assets so every agent knows the full story before acting.",
-    capabilities: [
-      "Vectorized knowledge graph that merges docs, data, and experiments",
-      "Temporal memory so decisions reference past launches and learnings",
-      "Instant publishing to docs, blog, and internal portals from one view",
-    ],
-  },
-];
-
-const EMPATHY_GRID = [
-  {
-    name: "Sarah · Filmmaker",
-    pain: "Spent 14 tools and $3k/year to launch a pilot episode.",
-    promise: "BlackRoad shipped her next series from a single AI-guided hub in 28 minutes.",
-  },
-  {
-    name: "Jae · Solo Developer",
-    pain: "Lost momentum switching between Git, Unity, analytics, and docs.",
-    promise: "Lucidia and Genesis Road deploy playable builds on every prompt.",
-  },
-  {
-    name: "Amara · Educator",
-    pain: "Course tooling fragmented across LMS, forums, grading, and CRM.",
-    promise: "BlackRoad Academy stitched content, homework, and payments into one flow.",
-  },
-  {
-    name: "Noah · Studio Lead",
-    pain: "Couldn’t scale ops — hiring, finance, and IP protection were disconnected silos.",
-    promise: "Business Suite agents now automate onboarding, payroll, and compliance.",
-  },
-];
-
-const DEEP_DIVES = [
-  {
-    title: "RoadView Studio",
-    stat: "10× faster video iterations",
-    description:
-      "Prompt-to-premiere pipeline with live thumbnail experiments, multi-format export, and revenue-ready ad slots.",
-  },
-  {
-    title: "Lucidia Code Portal",
-    stat: "95% intent-to-build accuracy",
-    description:
-      "Voice-coded IDE that learns your patterns, keeps repos synchronized, and reasons over your knowledge base.",
-  },
-  {
-    title: "Genesis Road Engine",
-    stat: "60-minute playable prototypes",
-    description:
-      "Natural language 3D/world builder with physics, NPC brains, and asset licensing wired into RoadCoin commerce.",
-  },
-  {
-    title: "Business Ops Suite",
-    stat: "70% revenue retention",
-    description:
-      "CRM, finance, and legal autopilot. Every transaction clears in RoadCoin or fiat with transparent splits.",
-  },
-];
-
-const STACK_BLUEPRINT = [
-  {
-    title: "Conversation Core",
-    description:
-      "Intent router, long-term memory, and multi-turn orchestration that lets every agent understand your goals instantly.",
+    eyebrow: 'Build',
+    title: 'High velocity dev + ops',
+    body:
+      'Lucidia IDE pairs with agents that plan sprints, review diffs, and keep every environment in sync.',
     bullets: [
-      "Real-time voice, chat, and canvas interactions",
-      "Semantic session memory with privacy controls",
-      "Policy aware prompt compiler for safe execution",
+      'Branch-aware code reviews with automatic merges',
+      'Integrated observability and incident playbooks',
+      'Ship web, native, and game builds side-by-side',
     ],
   },
   {
-    title: "Agent Mesh",
-    description:
-      "Dynamic swarms route tasks between creative, technical, and business specialists while sharing a single workspace.",
+    eyebrow: 'Create',
+    title: 'Scene-to-screen pipelines',
+    body:
+      'RoadView stitches simulations, edit bays, and interactive exports so every prompt can premiere instantly.',
     bullets: [
-      "Composable agent teams for productions, launches, and ops",
-      "Shared state transitions so hand-offs never lose context",
-      "Observability hooks for humans to intervene or learn",
+      'Multi-track timeline with version snapshots',
+      'GPU render bursts streamed under 3 seconds',
+      'Export to broadcast, social, or in-world builds',
     ],
   },
   {
-    title: "Unified Data Layer",
-    description:
-      "Secure foundation for knowledge, assets, and telemetry powering creation, monetization, and learning loops.",
+    eyebrow: 'Monetize',
+    title: 'Wallets, splits, and funding',
+    body:
+      'Built-in commerce handles tips, subscriptions, licensing, and instant payouts across global teams.',
     bullets: [
-      "RoadGraph unifies docs, media, code, and structured data",
-      "Fine-grained permissions for partners, cohorts, and agents",
-      "Exports to warehouse, notebooks, or partner APIs with one click",
+      'Programmable revenue splits per asset bundle',
+      'Fiat + stablecoin rails with compliance baked in',
+      'Funding brief highlights traction + forecast',
     ],
   },
-  {
-    title: "RoadCoin Commerce",
-    description:
-      "Programmable economy that rewards creators instantly while keeping licensing, payouts, and compliance transparent.",
-    bullets: [
-      "Fiat and token rails with split management",
-      "Marketplace smart contracts with DRM hooks",
-      "Revenue analytics tied to campaigns and cohorts",
-    ],
-  },
-];
+]
 
-const ECONOMY_FLOWS = [
-  "Publish in RoadView and launch optional creator-run ad inventory.",
-  "Offer assets, code, and templates in the marketplace with programmable royalties.",
-  "Reward your community instantly — tipping, patronage, or gated drops in RoadCoin.",
-  "Spin up courses and APIs with built-in DRM and usage-based billing.",
-];
+const PIPELINE_POINTS = [
+  {
+    title: 'Start projects faster',
+    description:
+      'Creator onboarding, templates, and policy guardrails launch in under 5 minutes.',
+  },
+  {
+    title: 'Stack projects & ATV',
+    description: 'Blend memberships, drops, and brand work with automated accounting.',
+  },
+  {
+    title: 'Built for scale',
+    description: 'Segment cohorts, run A/B creative experiments, and forecast demand with live data.',
+  },
+  {
+    title: 'Guardian ready',
+    description: 'Trust, compliance, and safety agents monitor every surface in real-time.',
+  },
+]
+
+const STATUS_METRICS = [
+  { label: 'Avg. build deploy', value: '12m', tone: 'text-emerald-300' },
+  { label: 'Creator payout time', value: '< 60s', tone: 'text-brand-gold' },
+  { label: 'Ops interventions', value: 'Automated', tone: 'text-brand-blue' },
+]
+
+const PORTAL_PREVIEW = [
+  {
+    title: 'RoadView story desk',
+    description:
+      'Run creative reviews, mark selects, and spin up auto-edits with frame-perfect control and clip intelligence.',
+    badge: { label: 'Version sync', tone: 'text-brand-blue', bg: 'bg-brand-blue/15' },
+  },
+  {
+    title: 'Agent feed',
+    description:
+      'Follow decisions from Lucidia, Guardian, and finance bots with full audit trails and human-in-the-loop controls.',
+    badge: { label: 'Real-time', tone: 'text-brand-pink', bg: 'bg-brand-pink/15' },
+  },
+  {
+    title: 'Creator CRM',
+    description:
+      'Manage drops, memberships, and campaigns with automated payouts and clear revenue forecasting.',
+    badge: { label: 'Commerce ready', tone: 'text-brand-gold', bg: 'bg-brand-gold/15' },
+  },
+]
 
 const PRICING = [
   {
-    name: "Free",
-    price: "$0",
-    description: "Prototype with daily limits and access to core agents.",
-    perks: ["Conversational onboarding", "RoadView basic export", "Community access"],
+    name: 'Starter',
+    price: '$0',
+    description: 'For solo builders launching their first portal.',
+    perks: ['Creator-OS workspace', 'RoadView previews', '5GB asset vault'],
+    cta: { label: 'Start free', href: 'https://app.blackroad.io/signup', variant: 'outline' },
   },
   {
-    name: "Creator",
-    price: "$29",
-    description: "Unlimited creative suite, monetization tools, and audience CRM.",
-    highlight: true,
+    name: 'Studio',
+    price: '$49',
+    suffix: '/seat',
+    description: 'For teams orchestrating multi-surface launches.',
     perks: [
-      "Unlimited generation and exports",
-      "Integrated analytics and split testing",
-      "RoadCoin wallet + instant payouts",
+      'Shared ops graph & automations',
+      'GPU render minutes + sim bursts',
+      'Wallets with programmable splits',
     ],
+    cta: { label: 'Talk to sales', href: 'mailto:studio@blackroad.io', variant: 'solid' },
+    featured: true,
   },
   {
-    name: "Business",
-    price: "$99",
-    description: "Operational agents, finance automation, and team workspaces.",
+    name: 'Enterprise',
+    price: 'Custom',
+    description: 'Purpose-built for networks, campuses, and partners.',
     perks: [
-      "Advanced task orchestration",
-      "Legal and HR automations",
-      "Priority support + compliance reporting",
+      'Dedicated Guardian & compliance lanes',
+      'Embedded ops and integrations squad',
+      'Private data residency & support',
     ],
+    cta: { label: 'Schedule briefing', href: 'mailto:partners@blackroad.io', variant: 'outline' },
   },
-  {
-    name: "Enterprise",
-    price: "Let’s talk",
-    description: "Private models, custom agents, and white-label deployments.",
-    perks: [
-      "Dedicated success squad",
-      "Sovereign data residency options",
-      "Platform roadmap influence",
-    ],
-  },
-];
+]
 
-const ROADMAP = [
+const SUPPORT_LINKS = [
   {
-    phase: "Phase 1 · MVP",
-    timeline: "Q1 – Q2 2026",
-    focus: "RoadView, Lucidia, conversational shell, RoadCoin beta",
-    kpi: "1K creators · 80% retention",
+    title: 'Docs & research',
+    description: 'Browse how-to guides, API references, and live experiments.',
+    href: '/docs',
+    label: 'Explore docs →',
   },
   {
-    phase: "Phase 2 · Creative Expansion",
-    timeline: "Q3 – Q4 2026",
-    focus: "Genesis Road + Design Studio, AI assistive loop",
-    kpi: "10× iteration speed validated",
+    title: 'Status desk',
+    description: 'Realtime health, incidents, and change history across services.',
+    href: '/status',
+    label: 'View status →',
   },
   {
-    phase: "Phase 3 · Business Layer",
-    timeline: "Q1 – Q2 2027",
-    focus: "Ops suite, legal/finance agents, RoadCoin liquidity",
-    kpi: "$1M RoadCoin TVL",
+    title: 'Creator community',
+    description: 'Join weekly syncs, beta drops, and partner spotlight sessions.',
+    href: 'mailto:community@blackroad.io',
+    label: 'Request invite →',
   },
-  {
-    phase: "Phase 4 · Knowledge Ecosystem",
-    timeline: "Q3 – Q4 2027",
-    focus: "Academy launch, research ingestion, collaborative labs",
-    kpi: "5K courses · 20% engagement",
-  },
-  {
-    phase: "Phase 5 · Scale",
-    timeline: "2028+",
-    focus: "Extensibility APIs, enterprise deployments, global partners",
-    kpi: "$10M ARR · 100K creators",
-  },
-];
+]
 
-const TESTIMONIALS = [
-  {
-    quote: "“BlackRoad replaced 17 tools and gave me back my weekends.”",
-    name: "Mira — Narrative Designer",
-  },
-  {
-    quote: "“We prototyped a fully playable vertical slice in 54 minutes.”",
-    name: "Atlas Forge Studio",
-  },
-  {
-    quote: "“Students finally learn and ship in the same space. My drop-out rate fell by 60%.”",
-    name: "Prof. Delgado — Quantum Academy",
-  },
-];
+const CODE_SNIPPET = `import { Client } from '@blackroad/prism'
 
-export default function Desktop() {
-  const currentYear = new Date().getFullYear();
+const client = new Client({
+  token: process.env.BLACKROAD_TOKEN,
+  workspace: 'creator-os',
+})
+
+await client.brief.send({
+  title: 'Launch RoadShow',
+  payload: {
+    script: 'v4.2',
+    channels: ['portal', 'broadcast'],
+  },
+})
+
+await client.portal.publish()`
+
+function GradientBackground() {
+  return (
+    <div className="pointer-events-none absolute inset-0">
+      <div className="absolute -top-40 right-10 h-96 w-96 rounded-full bg-brand-pink/40 blur-3xl" />
+      <div className="absolute bottom-0 left-1/2 h-96 w-[32rem] -translate-x-1/2 rounded-full bg-brand-blue/30 blur-3xl" />
+    </div>
+  )
+}
+
+function FeatureCard({ eyebrow, title, body, bullets }) {
+  return (
+    <article className="flex h-full flex-col gap-4 rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
+      <div>
+        <p className="text-xs uppercase tracking-[0.4em] text-brand-blue">{eyebrow}</p>
+        <h3 className="mt-2 text-lg font-semibold text-white">{title}</h3>
+      </div>
+      <p className="text-sm text-slate-300">{body}</p>
+      <ul className="space-y-2 text-sm text-slate-400">
+        {bullets.map((bullet) => (
+          <li key={bullet}>• {bullet}</li>
+        ))}
+      </ul>
+    </article>
+  )
+}
+
+function PricingCard({ name, price, suffix, description, perks, cta, featured }) {
+  const wrapperClass = featured
+    ? 'bg-gradient-to-br from-brand-pink/15 via-brand-gold/10 to-brand-blue/15 border-brand-pink/40 shadow-brand-pink/40'
+    : 'bg-slate-900/80 border-white/10 shadow-black/40'
 
   return (
-    <div className="min-h-screen bg-[#05070F] text-white">
-      <header className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-32 -left-40 h-72 w-72 rounded-full bg-[#FF4FD8]/30 blur-3xl" />
-          <div className="absolute top-24 -right-32 h-80 w-80 rounded-full bg-[#0096FF]/30 blur-3xl" />
-          <div className="absolute bottom-0 left-1/3 h-72 w-72 translate-x-1/2 rounded-full bg-[#FDBA2D]/20 blur-3xl" />
-        </div>
-        <div className="relative mx-auto flex max-w-6xl flex-col gap-10 px-6 pb-24 pt-24 md:flex-row md:items-center">
-          <div className="flex-1 space-y-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-300">
-              BLACKROAD MASTER VISION
-            </p>
-            <h1 className="text-4xl font-extrabold leading-tight md:text-6xl">
-              Stop learning tools.
-              <br className="hidden md:block" /> Start creating.
-            </h1>
-            <p className="max-w-xl text-lg text-slate-300">
-              Everything inside BlackRoad flows from one conversation. Ideate, prototype, launch, and monetize without hopping between 14 different platforms. Cut setup time from 630 hours to under 30 minutes.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <a className="btn" href="/chat">
-                Talk to the platform
-              </a>
-              <a className="btn-secondary" href="#pricing">
-                View pricing
-              </a>
-            </div>
-            <dl className="grid gap-4 pt-6 text-sm text-slate-300 md:grid-cols-3">
-              <div>
-                <dt className="font-semibold text-white">10×</dt>
-                <dd>Average production speed increase</dd>
-              </div>
-              <div>
-                <dt className="font-semibold text-white">70%</dt>
-                <dd>Revenue retained by creators</dd>
-              </div>
-              <div>
-                <dt className="font-semibold text-white">Q2 2026</dt>
-                <dd>MVP launch timeline</dd>
-              </div>
-            </dl>
-          </div>
-          <div className="flex-1 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-            <h2 className="text-lg font-semibold text-white">Creator flow — before vs. after</h2>
-            <div className="mt-6 space-y-4 text-sm text-slate-200">
-              <div>
-                <p className="font-semibold text-white">Fragmented Stack</p>
-                <p>14 logins · $3.2k/year · 630 hours before first revenue.</p>
-              </div>
-              <div>
-                <p className="font-semibold text-white">BlackRoad Unified</p>
-                <p>Single conversation · auto-orchestrated workflows · revenue in minutes.</p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-black/40 p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-400">Primary principle</p>
-                <p className="mt-2 text-base font-semibold text-white">Natural language is the operating system.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+    <article
+      className={`flex h-full flex-col gap-4 rounded-3xl border p-6 shadow-lg ${wrapperClass}`}
+    >
+      <div className="space-y-1">
+        <h3 className="text-lg font-semibold text-white">{name}</h3>
+        <p className="text-sm text-slate-400">{description}</p>
+      </div>
+      <p className="text-3xl font-semibold text-white">
+        {price}
+        {suffix ? <span className="text-base font-medium text-slate-200">{suffix}</span> : null}
+      </p>
+      <ul className={`space-y-2 text-sm ${featured ? 'text-slate-100' : 'text-slate-300'}`}>
+        {perks.map((perk) => (
+          <li key={perk}>• {perk}</li>
+        ))}
+      </ul>
+      <a
+        className={
+          cta.variant === 'solid'
+            ? 'mt-auto inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200'
+            : 'mt-auto inline-flex items-center justify-center rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/5'
+        }
+        href={cta.href}
+      >
+        {cta.label}
+      </a>
+    </article>
+  )
+}
 
-      <main className="relative z-10">
-        <section className="border-t border-white/5 bg-[#070B18]/90 py-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Paths</p>
-              <h2 className="mt-3 text-3xl font-bold">Choose how you enter the BlackRoad ecosystem</h2>
+export default function Desktop() {
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
+      <GradientBackground />
+      <div className="relative z-10 mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">
+        <nav className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/5 bg-slate-900/60 px-5 py-4 shadow-xl shadow-black/40 backdrop-blur">
+          <a className="flex items-center gap-3" href="#top">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-pink via-brand-gold to-brand-blue text-lg font-semibold text-slate-950">
+              BR
+            </span>
+            <div className="text-left">
+              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-brand-blue">BlackRoad</p>
+              <p className="text-xs text-slate-400">Creator-OS</p>
             </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {PATHWAYS.map((path) => (
-                <article
-                  key={path.title}
-                  className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur"
-                >
-                  <header className="space-y-2">
-                    <h3 className="text-2xl font-semibold">{path.title}</h3>
-                    <p className="text-sm text-slate-300">{path.description}</p>
-                  </header>
-                  <ul className="flex flex-1 list-disc flex-col gap-2 pl-5 text-sm text-slate-200/90">
-                    {path.bullets.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                  <a className="link-cta text-sm font-semibold" href={path.cta.href}>
-                    {path.cta.label} →
-                  </a>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-[#05070F] py-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Agent Control Room</p>
-              <h2 className="mt-3 text-3xl font-bold">Specialized copilots that ship with the operating system</h2>
-              <p className="mt-4 max-w-2xl text-slate-300">
-                Each agent inherits your voice, goals, and guardrails. Mix and match them into swarms or deploy them individually to accelerate every workflow across creation, operations, and growth.
-              </p>
-            </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
-              {AGENT_FLEET.map((agent) => (
-                <article key={agent.name} className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                  <header className="space-y-1">
-                    <p className="text-xs uppercase tracking-[0.3em] text-[#FF4FD8]">{agent.role}</p>
-                    <h3 className="text-2xl font-semibold">{agent.name}</h3>
-                    <p className="text-sm text-slate-300">{agent.summary}</p>
-                  </header>
-                  <ul className="mt-6 grid gap-2 text-sm text-slate-200">
-                    {agent.capabilities.map((item) => (
-                      <li key={item} className="flex items-start gap-3">
-                        <span className="mt-1 h-2 w-2 rounded-full bg-[#FF4FD8]" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-[#05070F] py-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="grid gap-8 md:grid-cols-[1.1fr_1fr] md:items-center">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Empathy Grid</p>
-                <h2 className="mt-3 text-3xl font-bold">Creators shouldn’t burn out just to ship</h2>
-                <p className="mt-4 max-w-xl text-slate-300">
-                  We mapped every bottleneck in the creator lifecycle. BlackRoad responds with guided AI agents, unified workspaces, and a native economy so momentum never stalls.
-                </p>
-              </div>
-              <div className="grid gap-4 text-sm">
-                {EMPATHY_GRID.map((persona) => (
-                  <div key={persona.name} className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                    <p className="text-xs uppercase tracking-wide text-slate-400">{persona.name}</p>
-                    <p className="mt-2 font-semibold text-white">{persona.pain}</p>
-                    <p className="mt-2 text-slate-300">{persona.promise}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="border-y border-white/5 bg-[#070B18]/90 py-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Suites</p>
-              <h2 className="mt-3 text-3xl font-bold">One platform that replaces 47 disconnected tools</h2>
-            </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
-              {DEEP_DIVES.map((suite) => (
-                <article
-                  key={suite.title}
-                  className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/0 p-6"
-                >
-                  <header className="flex items-baseline justify-between gap-4">
-                    <h3 className="text-2xl font-semibold">{suite.title}</h3>
-                    <span className="text-xs font-semibold uppercase tracking-wide text-[#FDBA2D]">{suite.stat}</span>
-                  </header>
-                  <p className="mt-3 text-sm text-slate-200">{suite.description}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-[#05070F] py-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Architecture</p>
-              <h2 className="mt-3 text-3xl font-bold">The BlackRoad stack is opinionated by design</h2>
-              <p className="mt-4 max-w-2xl text-slate-300">
-                Every layer is tuned for human + AI co-creation. The result is a studio-grade operating system that you can run from a single conversation, whether you are shipping a music video or scaling a company.
-              </p>
-            </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
-              {STACK_BLUEPRINT.map((item) => (
-                <article key={item.title} className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                  <h3 className="text-2xl font-semibold">{item.title}</h3>
-                  <p className="mt-3 text-sm text-slate-300">{item.description}</p>
-                  <ul className="mt-6 grid gap-2 text-sm text-slate-200">
-                    {item.bullets.map((bullet) => (
-                      <li key={bullet} className="flex items-start gap-3">
-                        <span className="mt-1 h-2 w-2 rounded-full bg-[#0096FF]" />
-                        <span>{bullet}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-[#05070F] py-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-center">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Economy</p>
-                <h2 className="mt-3 text-3xl font-bold">RoadCoin keeps value circulating with creators</h2>
-                <p className="mt-4 max-w-xl text-slate-300">
-                  Four native monetization streams compound into sustainable revenue. Instant settlement, transparent splits, and programmable royalties ensure you own the upside.
-                </p>
-                <ul className="mt-6 grid gap-3 text-sm text-slate-200">
-                  {ECONOMY_FLOWS.map((step) => (
-                    <li key={step} className="flex items-start gap-3">
-                      <span className="mt-1 h-2 w-2 rounded-full bg-[#FF4FD8]" />
-                      <span>{step}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-slate-200">
-                <h3 className="text-lg font-semibold text-white">Revenue Simulation</h3>
-                <p className="mt-2 text-slate-300">A single coffee-brewing tutorial with 10K monthly viewers yields $880:</p>
-                <ul className="mt-4 space-y-2">
-                  <li className="flex justify-between">
-                    <span>Ad inventory (70%)</span>
-                    <span className="font-semibold text-white">$350</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>Tips & patronage</span>
-                    <span className="font-semibold text-white">$200</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>Asset licensing</span>
-                    <span className="font-semibold text-white">$130</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>Course/API access</span>
-                    <span className="font-semibold text-white">$200</span>
-                  </li>
-                </ul>
-                <p className="mt-4 text-xs uppercase tracking-wide text-slate-400">2.5× revenue retention vs. legacy platforms</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="border-y border-white/5 bg-[#070B18]/90 py-20" id="pricing">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Pricing</p>
-              <h2 className="mt-3 text-3xl font-bold">Scale from your first prototype to a full studio</h2>
-            </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-4">
-              {PRICING.map((tier) => (
-                <article
-                  key={tier.name}
-                  className={`flex h-full flex-col gap-4 rounded-2xl border border-white/10 p-6 ${
-                    tier.highlight ? "bg-[#FF4FD8]/10" : "bg-white/5"
-                  }`}
-                >
-                  <header>
-                    <h3 className="text-xl font-semibold text-white">{tier.name}</h3>
-                    <p className="mt-1 text-sm text-slate-300">{tier.description}</p>
-                    <p className="mt-4 text-3xl font-bold text-white">{tier.price}</p>
-                  </header>
-                  <ul className="flex flex-1 list-disc flex-col gap-2 pl-5 text-sm text-slate-200">
-                    {tier.perks.map((perk) => (
-                      <li key={perk}>{perk}</li>
-                    ))}
-                  </ul>
-                  <a className="link-cta text-sm font-semibold" href="/subscribe">
-                    Talk to sales →
-                  </a>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-[#05070F] py-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="grid gap-8 md:grid-cols-[1.1fr_1fr] md:items-center">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Knowledge</p>
-                <h2 className="mt-3 text-3xl font-bold">BlackRoad Academy + Research Hub</h2>
-                <p className="mt-4 max-w-xl text-slate-300">
-                  5,000+ hours of guided curricula feed directly into hands-on projects. The research repository powers 30% of our platform intelligence — every whitepaper, dataset, and model becomes fuel for your agents.
-                </p>
-                <ul className="mt-6 grid gap-3 text-sm text-slate-200">
-                  <li>Interactive coursework with auto-graded labs and peer reviews.</li>
-                  <li>Research graph linking theory to in-product demos and simulations.</li>
-                  <li>Earn RoadCoin by publishing, reviewing, and mentoring.</li>
-                </ul>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-slate-200">
-                <h3 className="text-lg font-semibold text-white">Repository Blueprint</h3>
-                <pre className="mt-3 whitespace-pre-wrap rounded-xl bg-black/60 p-4 text-xs text-slate-300">
-{`/BlackRoad-Research
-  /AI-ML → Model optimization, Lucidia playbooks
-  /Creator-Economy → Monetization strategies, retention data
-  /Design → Cognitive load studies powering predictive UI`}
-                </pre>
-                <p className="mt-3 text-xs uppercase tracking-wide text-slate-400">Theoretical rigor meets practical application.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="border-y border-white/5 bg-[#070B18]/90 py-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Roadmap</p>
-              <h2 className="mt-3 text-3xl font-bold">Phased execution with measurable milestones</h2>
-            </div>
-            <div className="mt-10 grid gap-4">
-              {ROADMAP.map((phase) => (
-                <div
-                  key={phase.phase}
-                  className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-slate-200 md:flex-row md:items-center md:justify-between"
-                >
-                  <div>
-                    <p className="text-xs uppercase tracking-wide text-slate-400">{phase.timeline}</p>
-                    <p className="text-lg font-semibold text-white">{phase.phase}</p>
-                  </div>
-                  <p className="max-w-lg text-slate-300">{phase.focus}</p>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#FDBA2D]">{phase.kpi}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-[#05070F] py-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="max-w-3xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Proof</p>
-              <h2 className="mt-3 text-3xl font-bold">Creators already feel the difference</h2>
-            </div>
-            <div className="mt-10 grid gap-6 md:grid-cols-3">
-              {TESTIMONIALS.map((item) => (
-                <blockquote key={item.name} className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                  <p className="text-base text-slate-100">{item.quote}</p>
-                  <footer className="mt-4 text-xs uppercase tracking-wide text-slate-400">{item.name}</footer>
-                </blockquote>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="border-y border-white/5 bg-[#070B18]/95 py-20">
-          <div className="mx-auto max-w-4xl px-6 text-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Next Steps</p>
-            <h2 className="mt-3 text-4xl font-bold">Ready to help us build the creator operating system?</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-slate-300">
-              Join the founding cohort, contribute research, or co-create the initial product suite. BlackRoad is the master vision that unifies creation, monetization, and learning for the next generation of builders.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
-              <a className="btn" href="mailto:hello@blackroad.io">
-                Partner with BlackRoad
-              </a>
-              <a className="btn-secondary" href="/subscribe">
-                Join the waitlist
-              </a>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="border-t border-white/10 bg-[#04060C] py-12 text-sm text-slate-400">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="brand-gradient text-lg font-semibold">BlackRoad.io</p>
-            <p className="mt-2 text-xs uppercase tracking-wide">Conversation-first creation.</p>
-          </div>
-          <div className="flex flex-wrap gap-6 text-xs uppercase tracking-wide">
-            <a className="hover:text-slate-200" href="/roadmap">
-              Roadmap
+          </a>
+          <div className="flex flex-1 flex-wrap items-center justify-center gap-3 text-sm text-slate-300 sm:justify-end">
+            <a className="rounded-lg px-3 py-2 font-medium hover:text-white" href="#features">
+              Features
             </a>
-            <a className="hover:text-slate-200" href="/blog">
-              Blog
-            </a>
-            <a className="hover:text-slate-200" href="/docs">
+            <a className="rounded-lg px-3 py-2 font-medium hover:text-white" href="/docs">
               Docs
             </a>
-            <a className="hover:text-slate-200" href="/support">
+            <Link className="rounded-lg px-3 py-2 font-medium hover:text-white" to="/chat">
+              Portal
+            </Link>
+            <a className="rounded-lg px-3 py-2 font-medium hover:text-white" href="#pricing">
+              Pricing
+            </a>
+            <a className="rounded-lg px-3 py-2 font-medium hover:text-white" href="#support">
               Support
             </a>
           </div>
-          <p className="text-xs text-slate-500">© {currentYear} BlackRoad Labs. All rights reserved.</p>
-        </div>
-      </footer>
+          <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-300">
+            API healthy · <span className="text-white">32ms</span>
+          </span>
+        </nav>
+
+        <header
+          id="top"
+          className="mt-16 grid gap-12 rounded-3xl border border-white/5 bg-slate-900/70 p-8 shadow-2xl shadow-black/50 backdrop-blur-lg md:grid-cols-[1.4fr_1fr]"
+        >
+          <div className="space-y-6">
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-sm uppercase tracking-[0.3em] text-brand-blue">
+              Applied multi-agent studio
+            </p>
+            <div className="space-y-3">
+              <h1 className="text-4xl font-bold leading-tight text-white sm:text-5xl">Welcome to BlackRoad</h1>
+              <p className="max-w-xl text-lg text-slate-300">
+                Ship video, software, and live experiences from a single workspace. The BlackRoad Creator-OS links multi-agent workflows, simulation, and revenue so teams can move from concept to launch in minutes.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                className="rounded-2xl bg-gradient-to-r from-brand-pink via-brand-gold to-brand-blue px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-brand-pink/40 transition hover:-translate-y-0.5 hover:shadow-xl"
+                to="/chat"
+              >
+                Enter Portal
+              </Link>
+              <Link
+                className="rounded-2xl border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/5"
+                to="/roadview"
+              >
+                Enable RoadView
+              </Link>
+              <a
+                className="rounded-2xl border border-brand-blue/40 px-5 py-3 text-sm font-semibold text-brand-blue transition hover:border-brand-blue/60 hover:bg-brand-blue/10"
+                href="#new-work"
+              >
+                Meet New Work
+              </a>
+            </div>
+          </div>
+          <div className="grid gap-4">
+            <div className="rounded-2xl border border-white/5 bg-white/5 p-5">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-brand-blue">Quick brief</h3>
+              <ul className="mt-4 space-y-3 text-sm text-slate-300">
+                <li>🚀 Launch-ready portals, docs, and knowledge flows</li>
+                <li>🧠 Agent mesh tuned for creative, ops, and finance teams</li>
+                <li>💸 Built-in wallets, splits, and usage-based billing</li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-white/5 bg-slate-900/80 p-5 text-sm text-slate-400">
+              <p className="font-semibold uppercase tracking-wide text-slate-300">Signal</p>
+              <p className="mt-3 text-slate-200">100+ launches · 24/7 ops coverage · 35 countries live</p>
+            </div>
+          </div>
+        </header>
+
+        <section id="features" className="mt-16 space-y-8">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-white">Focused features for builders</h2>
+              <p className="text-sm text-slate-400">Everything you need to design, ship, and scale ambitious productions.</p>
+            </div>
+            <a className="text-sm font-semibold text-brand-blue hover:text-brand-gold" href="/docs/guide/getting-started">
+              View product overview →
+            </a>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-3">
+            {FEATURE_CARDS.map((card) => (
+              <FeatureCard key={card.title} {...card} />
+            ))}
+          </div>
+        </section>
+
+        <section id="new-work" className="mt-16 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
+          <article className="rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
+            <h2 className="text-xl font-semibold text-white">Creator pipeline &amp; funding brief</h2>
+            <p className="mt-3 text-sm text-slate-300">
+              Give partners a live look at roadmap, metrics, and deal flow. RoadShow mode transforms updates into shareable stories.
+            </p>
+            <dl className="mt-6 grid gap-4 text-sm text-slate-300 md:grid-cols-2">
+              {PIPELINE_POINTS.map(({ title, description }) => (
+                <div key={title}>
+                  <dt className="font-semibold text-white">{title}</dt>
+                  <dd className="mt-1 text-slate-400">{description}</dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+          <aside className="flex flex-col justify-between gap-4 rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
+            <div>
+              <h2 className="text-xl font-semibold text-white">Status pulses</h2>
+              <p className="mt-2 text-sm text-slate-400">Key metrics refresh from your ops graph.</p>
+              <ul className="mt-4 space-y-3 text-sm text-slate-300">
+                {STATUS_METRICS.map(({ label, value, tone }) => (
+                  <li key={label} className="flex items-center justify-between rounded-2xl bg-white/5 px-4 py-3">
+                    <span>{label}</span>
+                    <span className={`font-semibold ${tone}`}>{value}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <a
+              className="inline-flex items-center justify-center rounded-2xl border border-white/20 px-4 py-3 text-sm font-semibold text-white transition hover:border-brand-pink/60 hover:bg-brand-pink/10"
+              href="mailto:team@blackroad.io"
+            >
+              Request briefing deck →
+            </a>
+          </aside>
+        </section>
+
+        <section className="mt-16 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <article className="rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-xl font-semibold text-white">API Quickstart</h2>
+              <span className="rounded-full bg-brand-blue/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-blue">
+                5 min setup
+              </span>
+            </div>
+            <p className="mt-3 text-sm text-slate-300">
+              Automate ingest, ops hand-offs, and live story playback with a single authenticated client.
+            </p>
+            <pre className="mt-6 overflow-x-auto rounded-2xl bg-slate-950/80 p-6 text-sm text-slate-200 shadow-inner shadow-black/40">
+              {CODE_SNIPPET}
+            </pre>
+          </article>
+          <aside className="flex h-full flex-col gap-5 rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold text-white">Join the beta</h2>
+              <p className="text-sm text-slate-300">
+                Cohorts open monthly for studios, educators, and frontier labs. We tailor the agent mesh to your workflows.
+              </p>
+            </div>
+            <ul className="space-y-2 text-sm text-slate-300">
+              <li>• 1:1 onboarding session with the ops crew</li>
+              <li>• Dedicated Guardian safety review</li>
+              <li>• Migration support for repos + media</li>
+            </ul>
+            <a
+              className="mt-auto inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-brand-pink via-brand-gold to-brand-blue px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-brand-pink/40 transition hover:-translate-y-0.5"
+              href="https://blackroad.typeform.com/to/portal"
+            >
+              Apply for access
+            </a>
+          </aside>
+        </section>
+
+        <section className="mt-16 space-y-8">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-white">Portal preview</h2>
+              <p className="text-sm text-slate-400">Live dashboards, AI copilots, and publishing pipelines in one place.</p>
+            </div>
+            <Link className="text-sm font-semibold text-brand-blue hover:text-brand-gold" to="/chat">
+              Launch interactive demo →
+            </Link>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-3">
+            {PORTAL_PREVIEW.map(({ title, description, badge }) => (
+              <article key={title} className="space-y-3 rounded-3xl border border-white/5 bg-white/5 p-6 shadow-lg shadow-black/40">
+                <h3 className="text-lg font-semibold text-white">{title}</h3>
+                <p className="text-sm text-slate-300">{description}</p>
+                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${badge.bg} ${badge.tone}`}>
+                  {badge.label}
+                </span>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section id="pricing" className="mt-16 space-y-8">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-white">Simple, transparent options</h2>
+              <p className="text-sm text-slate-400">Every plan includes multi-agent ops, RoadView, and wallet infrastructure.</p>
+            </div>
+            <span className="rounded-full border border-white/10 px-3 py-1 text-xs uppercase tracking-wide text-slate-300">
+              Monthly &amp; annual pricing
+            </span>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-3">
+            {PRICING.map((tier) => (
+              <PricingCard key={tier.name} {...tier} />
+            ))}
+          </div>
+        </section>
+
+        <section id="support" className="mt-16 grid gap-6 lg:grid-cols-3">
+          {SUPPORT_LINKS.map(({ title, description, href, label }) => (
+            <article key={title} className="rounded-3xl border border-white/5 bg-slate-900/80 p-6 shadow-lg shadow-black/40">
+              <h3 className="text-lg font-semibold text-white">{title}</h3>
+              <p className="mt-2 text-sm text-slate-300">{description}</p>
+              <a className="mt-4 inline-flex items-center text-sm font-semibold text-brand-blue hover:text-brand-gold" href={href}>
+                {label}
+              </a>
+            </article>
+          ))}
+        </section>
+
+        <footer className="mt-20 flex flex-col items-center justify-between gap-4 rounded-3xl border border-white/5 bg-slate-900/80 px-6 py-5 text-xs text-slate-400 sm:flex-row">
+          <p>
+            © {new Date().getFullYear()} BlackRoad Labs. All rights reserved.
+          </p>
+          <div className="flex flex-wrap items-center gap-4">
+            <a className="hover:text-white" href="/privacy">
+              Privacy
+            </a>
+            <a className="hover:text-white" href="/terms">
+              Terms
+            </a>
+            <a className="hover:text-white" href="mailto:hello@blackroad.io">
+              Contact
+            </a>
+          </div>
+        </footer>
+      </div>
     </div>
-  );
+  )
 }
