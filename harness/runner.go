@@ -1,27 +1,94 @@
 package harness
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 )
 
-type CompiledRule interface{}
-
-type RuleDecision struct {
-	Decision string         `json:"decision"`
-	Reason   string         `json:"reason"`
-	RuleID   string         `json:"rule_id"`
-	Details  map[string]any `json:"details,omitempty"`
+// EvaluateRuleForEvent normalises and evaluates a single event against the
+// compiled rule. The event is appended to the backing window store (if
+// configured) before evaluation to ensure CEL rate() calls observe the updated
+// window contents.
+func EvaluateRuleForEvent(rule CompiledRule, event Event) (RuleDecision, error) {
+	return evaluateWithTimestamp(rule, event, time.Now().UTC())
 }
 
-func EvaluateRuleForEvent(rule CompiledRule, event map[string]any) (RuleDecision, error) {
-	// TODO: integrate rule evaluation engine
-	return RuleDecision{}, fmt.Errorf("not implemented")
+// EvaluateRuleForSeries evaluates a batch of events against the rule in
+// chronological order. Events are distributed across the provided window when
+// no explicit timestamp is present so relative ordering is preserved for the
+// rate() helper.
+func EvaluateRuleForSeries(rule CompiledRule, series []Event, window time.Duration) (RuleDecision, error) {
+	if len(series) == 0 {
+		return RuleDecision{}, fmt.Errorf("series must contain at least one event")
+	}
+	if window <= 0 {
+		return RuleDecision{}, fmt.Errorf("window must be positive")
+	}
+
+	now := time.Now().UTC()
+	step := window / time.Duration(len(series)+1)
+	if step <= 0 {
+		step = time.Second
+	}
+
+	var dec RuleDecision
+	var err error
+	for i, ev := range series {
+		fallback := now.Add(-window).Add(time.Duration(i+1) * step)
+		dec, err = evaluateWithTimestamp(rule, ev, fallback)
+		if err != nil {
+			return RuleDecision{}, err
+		}
+	}
+	return dec, nil
 }
 
-func EvaluateRuleForSeries(rule CompiledRule, series []map[string]any, window time.Duration) (RuleDecision, error) {
-	// TODO: integrate time-series rule evaluation engine
-	return RuleDecision{}, fmt.Errorf("not implemented")
+func evaluateWithTimestamp(rule CompiledRule, event Event, fallback time.Time) (RuleDecision, error) {
+	ev := NormalizeEvent(event)
+	ts := extractTimestamp(ev, fallback)
+	ev["ts"] = ts
+
+	if rule.Store != nil {
+		rule.Store.Append(ts, ev)
+	}
+
+	return EvaluateEvent(rule, ev)
+}
+
+func extractTimestamp(ev Event, fallback time.Time) time.Time {
+	raw, ok := ev["ts"]
+	if !ok {
+		return fallback
+	}
+
+	switch v := raw.(type) {
+	case time.Time:
+		return v
+	case string:
+		if t, err := time.Parse(time.RFC3339Nano, v); err == nil {
+			return t
+		}
+		if t, err := time.Parse(time.RFC3339, v); err == nil {
+			return t
+		}
+	case json.Number:
+		if secs, err := v.Float64(); err == nil {
+			return fallbackFromSeconds(secs)
+		}
+	case float64:
+		return fallbackFromSeconds(v)
+	case int64:
+		return time.Unix(v, 0).UTC()
+	case int:
+		return time.Unix(int64(v), 0).UTC()
+	}
+
+	return fallback
+}
+
+func fallbackFromSeconds(secs float64) time.Time {
+	return time.Unix(0, int64(secs*float64(time.Second))).UTC()
 }
 
 func EnforceDecision(dec RuleDecision) error {

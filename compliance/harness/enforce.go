@@ -2,63 +2,63 @@ package harness
 
 import "fmt"
 
-func EnforceOrNotify(rule CompiledRule, dec RuleDecision) error {
 // EnforceOrNotify performs side effects for the supplied decision.
 func EnforceOrNotify(rule CompiledRule, dec RuleDecision) error {
 	if dec.Decision == "" || dec.Decision == "allow" {
 		return nil
 	}
+
 	if rule.Canary && dec.Decision == "deny" {
 		dec.Decision = "notify"
-		dec.Reason = dec.Reason + "_canary"
+		if dec.Reason != "" {
+			dec.Reason += "_canary"
+		} else {
+			dec.Reason = rule.ID + "_canary"
+		}
 	}
 
 	switch dec.Decision {
 	case "deny":
 		return fmt.Errorf("%w:%s:%s", ErrPolicyViolation, dec.Reason, dec.RuleID)
 	case "notify":
-		details := map[string]any{}
-		if dec.Details != nil {
-			details = dec.Details
-		}
 		payload := map[string]any{
-			"text":    details["message"],
+			"text":    messageFromDetails(dec.Details),
 			"rule_id": dec.RuleID,
 			"reason":  dec.Reason,
-			"details": details,
+			"details": ensureDetails(dec.Details),
 		}
-		channel := ""
-		if ch := GetEnv("SLACK_CHANNEL", ""); ch != "" {
-			channel = ch
-		} else if len(rule.Notify.Channels) > 0 {
-			channel = rule.Notify.Channels[0]
-		}
-		_ = PostSlackMessage(channel, payload)
-	}
-		payload := map[string]any{
-			"text":    dec.Details["message"],
-			"rule_id": dec.RuleID,
-			"reason":  dec.Reason,
-			"details": dec.Details,
-		}
-		channel := pickChannel(rule)
-		return PostSlackMessage(channel, payload)
+		return PostSlackMessage(pickChannel(rule), payload)
 	default:
 		return nil
 	}
 }
 
 func pickChannel(rule CompiledRule) string {
+	if ch := GetEnv("SLACK_CHANNEL", ""); ch != "" {
+		return ch
+	}
 	if len(rule.Notify.Channels) == 0 {
 		return ""
 	}
 	return rule.Notify.Channels[0]
 }
 
-// PostSlackMessage is a hook for sending structured notifications. The default
-// implementation is a no-op to keep the harness dependency-free.
-func PostSlackMessage(channel string, payload map[string]any) error {
-	_ = channel
-	_ = payload
-	return nil
+func ensureDetails(details map[string]any) map[string]any {
+	if details == nil {
+		return map[string]any{}
+	}
+	return details
+}
+
+func messageFromDetails(details map[string]any) string {
+	if details == nil {
+		return ":rotating_light: Compliance notification"
+	}
+	if msg, ok := details["message"]; ok {
+		if s, ok := msg.(string); ok {
+			return s
+		}
+		return fmt.Sprintf("%v", msg)
+	}
+	return ":rotating_light: Compliance notification"
 }

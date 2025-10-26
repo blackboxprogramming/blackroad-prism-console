@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	harness "github.com/blackroad-prism-console/harness"
+	harness "github.com/blackroad/prism-console/harness"
 )
 
 func main() {
