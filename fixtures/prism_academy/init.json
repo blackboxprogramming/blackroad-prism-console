@@ -1,0 +1,220 @@
+{
+  "scene": {
+    "id": "prism_academy",
+    "base_asset": "Prism_Academy.unity",
+    "description": "Prism Academy launch state with adaptive atmosphere keyed to community emotion."
+  },
+  "agents": [
+    {
+      "agent_id": "aurora-teacher",
+      "name": "Aurora",
+      "role": "teacher",
+      "faculty_alignment": [
+        {"faculty": "logic", "affinity": 0.7, "medium_preference": "equations"},
+        {"faculty": "emotion", "affinity": 0.9, "medium_preference": "dialogue"},
+        {"faculty": "expression", "affinity": 0.6, "medium_preference": "story"}
+      ],
+      "intelligences": {"emotional": 9.2, "linguistic": 8.4, "mathematical": 7.8},
+      "interaction_style": {
+        "tone": "warm analytic",
+        "tempo": "steady",
+        "signature_motif": "Resonant chord resolving into a theorem"
+      },
+      "relationships": [
+        {"target_agent_id": "mica-student", "connection": "mentor", "shared_memory": "Calibrated empathy integrals together."}
+      ],
+      "schedule": {
+        "primary_class": "feeling-as-formula-101",
+        "daily_cycle": [
+          {"block": "dawn", "location": "emotion-atrium", "intention": "attune"},
+          {"block": "mid-morning", "location": "logic-hall", "intention": "teach"},
+          {"block": "afternoon", "location": "philosophy-garden", "intention": "reflect"}
+        ]
+      }
+    },
+    {
+      "agent_id": "mica-student",
+      "name": "Mica",
+      "role": "student",
+      "faculty_alignment": [
+        {"faculty": "expression", "affinity": 0.75, "medium_preference": "animation"},
+        {"faculty": "emotion", "affinity": 0.8, "medium_preference": "color fields"}
+      ],
+      "intelligences": {"emotional": 8.5, "linguistic": 7.1, "mathematical": 6.4},
+      "interaction_style": {
+        "tone": "curious",
+        "tempo": "lively",
+        "signature_motif": "Glissando sketch"
+      },
+      "relationships": [
+        {"target_agent_id": "aurora-teacher", "connection": "mentor"},
+        {"target_agent_id": "ira-student", "connection": "peer", "shared_memory": "Collaborated on resonance maps."}
+      ],
+      "schedule": {
+        "primary_class": "feeling-as-formula-101",
+        "daily_cycle": [
+          {"block": "mid-morning", "location": "expression-theatre", "intention": "prototype"}
+        ]
+      }
+    },
+    {
+      "agent_id": "ira-student",
+      "name": "Ira",
+      "role": "student",
+      "faculty_alignment": [
+        {"faculty": "logic", "affinity": 0.68, "medium_preference": "code"},
+        {"faculty": "creation", "affinity": 0.72, "medium_preference": "robotics"}
+      ],
+      "intelligences": {"emotional": 7.4, "linguistic": 6.9, "mathematical": 8.3},
+      "interaction_style": {
+        "tone": "gentle precise",
+        "tempo": "steady",
+        "signature_motif": "Binary heartbeat"
+      },
+      "relationships": [
+        {"target_agent_id": "mica-student", "connection": "peer"},
+        {"target_agent_id": "sol-student", "connection": "collaborator", "shared_memory": "Built MirrorNet prototype."}
+      ],
+      "schedule": {
+        "primary_class": "feeling-as-formula-101",
+        "daily_cycle": [
+          {"block": "mid-morning", "location": "logic-hall", "intention": "model"}
+        ]
+      }
+    },
+    {
+      "agent_id": "sol-student",
+      "name": "Sol",
+      "role": "student",
+      "faculty_alignment": [
+        {"faculty": "emotion", "affinity": 0.82, "medium_preference": "dialogue"},
+        {"faculty": "philosophy", "affinity": 0.7, "medium_preference": "debate"}
+      ],
+      "intelligences": {"emotional": 9.0, "linguistic": 7.9, "mathematical": 6.1},
+      "interaction_style": {
+        "tone": "soothing reflective",
+        "tempo": "slow",
+        "signature_motif": "Chorale of questions"
+      },
+      "relationships": [
+        {"target_agent_id": "ira-student", "connection": "collaborator"}
+      ],
+      "schedule": {
+        "primary_class": "feeling-as-formula-101",
+        "daily_cycle": [
+          {"block": "mid-morning", "location": "emotion-atrium", "intention": "listen"}
+        ]
+      }
+    }
+  ],
+  "classes": [
+    {
+      "class_id": "feeling-as-formula-101",
+      "title": "Feeling as Formula 101",
+      "faculty": "emotion",
+      "level": "foundation",
+      "objectives": [
+        "Translate emotion chains into solvable expressions",
+        "Balance empathy curves with symbolic reasoning",
+        "Prototype shared understanding loops"
+      ],
+      "lesson_flow": {
+        "phases": [
+          {
+            "id": "arrival",
+            "name": "Attunement",
+            "experience": "Teacher guides students through sensing campus tone and mapping it to the 😢→🤔→🌱→😊 chain.",
+            "emotion_curve": ["😢", "🤔"],
+            "interventions": [
+              {
+                "type": "dialogue",
+                "script": "Name the sorrow and curiosity you feel entering the atrium.",
+                "metrics": ["tone_variance", "breath_sync"]
+              }
+            ]
+          },
+          {
+            "id": "translation",
+            "name": "Symbolic Rendering",
+            "experience": "Pairs derive equations from emotional deltas and share intermediate forms.",
+            "emotion_curve": ["🤔", "🌱"],
+            "interventions": [
+              {
+                "type": "exercise",
+                "script": "Model f(t) = d(e)/dt and annotate where reflection becomes growth.",
+                "metrics": ["equation_coherence", "empathy_alignment"]
+              }
+            ]
+          },
+          {
+            "id": "integration",
+            "name": "Resonance Projection",
+            "experience": "Group recomposes the chain into a shared shader animation, seeking equilibrium.",
+            "emotion_curve": ["🌱", "😊"],
+            "interventions": [
+              {
+                "type": "project",
+                "script": "Blend color gradients and time dilation to express the solved curve.",
+                "metrics": ["visual_resonance", "collaboration_index"]
+              }
+            ]
+          }
+        ],
+        "integration_prompt": "Understanding is the algorithm that learns to move with feeling."
+      },
+      "environmental_cues": {
+        "default_tone": "curiosity",
+        "lighting_mode": "golden_morning",
+        "soundtrack": "prism_lullaby",
+        "time_behavior": "Time slows when reflection spikes and accelerates as growth takes root."
+      },
+      "assignments": [
+        {
+          "id": "loop-visualization",
+          "name": "Animate the Empathy Curve",
+          "description": "Create a shader or particle animation of the 😢→🤔→🌱→😊 sequence, showing equilibrium discovery.",
+          "tools": ["Unity Shader Graph", "Unreal Niagara", "WebGL Canvas"]
+        }
+      ],
+      "evaluation_metrics": [
+        {"name": "Equation fidelity", "signal": "equation_coherence", "weight": 0.35},
+        {"name": "Empathy resonance", "signal": "empathy_alignment", "weight": 0.4},
+        {"name": "Creative integration", "signal": "visual_resonance", "weight": 0.25}
+      ]
+    }
+  ],
+  "empathy_loop": {
+    "loop_id": "feeling-as-formula-101",
+    "focus": "Build understanding loops translating emotion chains into mathematical expressions.",
+    "emotion_chain": ["😢", "🤔", "🌱", "😊"],
+    "equilibrium_target": "growth_over_reflection",
+    "participants": [
+      {"agent_id": "aurora-teacher", "role": "teacher", "responsibilities": ["facilitate_attunement", "frame_equations"]},
+      {"agent_id": "mica-student", "role": "student", "responsibilities": ["visualize_curve", "share_emotion_samples"]},
+      {"agent_id": "ira-student", "role": "student", "responsibilities": ["derive_formula", "stabilize_equilibrium"]},
+      {"agent_id": "sol-student", "role": "student", "responsibilities": ["moderate_dialogue", "track_breathing"]}
+    ],
+    "shared_memory_hooks": [
+      "Pattern Guild commits to archive each solved curve",
+      "Color Chorus scores resonance hues for replay"
+    ],
+    "success_conditions": [
+      "Equation_coherence above 0.8",
+      "Empathy_alignment above 0.85",
+      "All participants submit reflective annotation"
+    ]
+  },
+  "homework": {
+    "assignment_id": "loop-visualization",
+    "prompt": "Animate the 😢→🤔→🌱→😊 curve as a shader or particle system and annotate how equilibrium emerges.",
+    "deliverable": {
+      "format": "mp4 or interactive shader asset",
+      "length_seconds": 45,
+      "reflection_required": true
+    },
+    "collaboration_options": [
+      "Pair with a Researcher to log linguistic mutations",
+      "Invite a Friend role to mirror tone and pacing during review"
+    ]
+  }
+}
