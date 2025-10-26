@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { localeFromPath, withPrefix } from '../lib/i18n.ts'
+import { localeFromPath, setLocale, t, withPrefix } from '../lib/i18n.ts'
 import { logToWorker } from '../lib/logger.ts'
+import { recordConversion } from '../lib/convert.ts'
 
 const proofBlocks = [
   {
@@ -119,80 +120,173 @@ const faqs = [
   },
 ]
 
+const heroStats = [
+  { label: 'Agent response time', value: '< 200 ms' },
+  { label: 'Active creator workspaces', value: '1.8K+' },
+  { label: 'Creator payouts processed', value: '$12M' },
+]
+
+const heroHighlights = [
+  'Branch-aware coding, storyboard, and review inside a single chat.',
+  'GPU simulations stream inline so teams iterate on live scenes.',
+  'Creator Wallet handles tips, splits, and instant settlement.',
+]
+
+const trustBadges = ['Trusted by frontier labs', 'Backed by realtime ops', 'Deployed to 35 countries']
+
+const productDeck = [
+  {
+    name: 'Studio',
+    description: 'Multi-agent coding with files, canvas, and playback all inside chat.',
+    to: '/studio',
+  },
+  {
+    name: 'Animator',
+    description: 'Drop assets, storyboard, and render directly to MP4 or WebGL.',
+    to: '/animator',
+  },
+  {
+    name: 'Game Maker',
+    description: 'Collect assets and export Unity or Unreal project templates instantly.',
+    to: '/game',
+  },
+  {
+    name: 'Homework',
+    description: 'Research, draft, cite, and export with citations generated automatically.',
+    to: '/homework',
+  },
+]
+
 export default function Home() {
   const location = useLocation()
   const lang = localeFromPath(location.pathname)
+
+  useEffect(() => {
+    setLocale(lang)
+  }, [lang])
 
   useEffect(() => {
     const url = import.meta.env.VITE_LOG_WRITE_URL
     if (url) logToWorker(url, 'info', 'home_view', { hint: 'home page mounted' })
   }, [])
 
+  const quickLinks = [
+    { label: t('coCodingPortal'), description: 'Launch the shared workspace with Roadie and Guardian on-call.', path: '/portal' },
+    {
+      label: `${t('status')} • ${t('snapshot')}`,
+      description: 'Track platform uptime and see the latest deployment snapshot.',
+      path: '/status',
+      secondary: '/snapshot',
+      secondaryLabel: t('snapshot'),
+    },
+    { label: t('docs'), description: 'Browse playbooks, API guides, and runbooks tuned for agents.', path: '/docs' },
+    {
+      label: t('quantumConsciousness'),
+      description: 'Explore Lucidia research and the frontier models powering creation.',
+      path: '/quantum-consciousness',
+    },
+  ]
+
   return (
     <main className="space-y-16">
-      <section className="card relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-        <div className="absolute inset-0 opacity-20" aria-hidden="true">
-          <div className="h-full w-full bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.45),_transparent_60%)]" />
-        </div>
-        <div className="relative z-10 flex flex-col gap-6">
-          <p className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-800/70 px-4 py-1 text-sm font-medium uppercase tracking-wider text-cyan-200">
-            Creator-OS for code + media
-          </p>
-          <h1 className="text-4xl font-bold leading-tight md:text-5xl">
-            Build, simulate, and publish with multi-agent speed.
-          </h1>
-          <p className="max-w-2xl text-lg text-slate-100">
-            Chat to ship apps, videos, and games with agents that handle review, simulation, and payouts—no context switching, no extra tabs.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              className="btn"
-              onClick={() => recordConversion('cta_click', 1, { where: 'home.start-creating' })}
-              to={withPrefix('/studio', lang)}
-            >
-              Start creating
-            </Link>
-            <Link className="btn-secondary" to={withPrefix('/docs', lang)}>
-              See how it works
-            </Link>
+      <section className="hero-surface relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 px-8 py-12 text-white shadow-2xl">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.35),_transparent_65%)] opacity-80" aria-hidden="true" />
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(15,23,42,0.6)_0%,_rgba(12,74,110,0.15)_60%,_rgba(15,23,42,0.9)_100%)]" aria-hidden="true" />
+        <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-cyan-400/30 blur-3xl" aria-hidden="true" />
+        <div className="relative flex flex-col gap-12 md:flex-row md:items-center">
+          <div className="space-y-6 md:w-1/2">
+            <p className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-cyan-200">
+              Creator-OS for code + media
+            </p>
+            <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
+              Launch code, media, and simulations with multi-agent speed.
+            </h1>
+            <p className="max-w-xl text-lg text-slate-200">
+              Chat to ship apps, videos, and games with agents that handle review, simulation, and payouts—no context switching and no extra tabs.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                className="btn"
+                onClick={() => recordConversion('cta_click', 1, { where: 'home.start-creating' })}
+                to={withPrefix('/studio', lang)}
+              >
+                Start creating
+              </Link>
+              <Link className="btn-secondary" to={withPrefix('/docs', lang)}>
+                See how it works
+              </Link>
+            </div>
+            <dl className="grid gap-4 sm:grid-cols-3">
+              {heroStats.map((stat) => (
+                <div key={stat.label} className="rounded-xl border border-white/10 bg-white/5 p-4">
+                  <dt className="text-xl font-semibold text-white">{stat.value}</dt>
+                  <dd className="mt-1 text-xs uppercase tracking-widest text-white/60">{stat.label}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <div className="md:w-1/2">
+            <div className="glass-panel space-y-6">
+              <header>
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-100/80">Live production board</p>
+                <h2 className="text-2xl font-semibold text-white">Every launch stays in flow</h2>
+              </header>
+              <ul className="space-y-3 text-sm text-slate-100/90">
+                {heroHighlights.map((line) => (
+                  <li key={line} className="flex items-start gap-3">
+                    <span className="mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-cyan-300" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="rounded-xl border border-white/15 bg-white/5 p-5 text-left shadow-[0_0_40px_rgba(14,165,233,0.15)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-200">Live run</p>
+                <p className="mt-2 text-base font-semibold text-white">Sim-to-studio export completes in 2m 04s</p>
+                <p className="mt-2 text-xs text-slate-100/70">Roadie orchestrates tests while Guardian patches drift in the repo.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="card flex flex-wrap items-center justify-between gap-6">
-        <div>
-          <h2 className="text-sm font-semibold uppercase tracking-widest text-slate-500">Launch proof</h2>
-          <p className="text-lg font-medium text-slate-700">100+ Creator-OS projects shipped since Q1</p>
+        <div className="space-y-1">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">Launch proof</h2>
+          <p className="text-lg font-medium text-slate-200">100+ Creator-OS projects shipped since Q1</p>
         </div>
-        <div className="flex flex-wrap gap-4 text-sm text-slate-500">
-          <span>Trusted by frontier labs</span>
-          <span>Backed by realtime ops</span>
-          <span>Deployed to 35 countries</span>
+        <div className="flex flex-wrap gap-4 text-sm text-slate-400">
+          {trustBadges.map((badge) => (
+            <span key={badge} className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
+              {badge}
+            </span>
+          ))}
         </div>
       </section>
 
-      <section className="space-y-8">
+      <section className="space-y-10">
         <header className="space-y-3">
-          <h2 className="text-2xl font-bold">Prove the Creator-OS for code + media</h2>
-          <p className="text-slate-600">
-            Every block shows how BlackRoad turns multi-agent creation into shipped software, stories, and worlds.
-          </p>
+          <h2 className="text-2xl font-bold text-white">Prove the Creator-OS for code + media</h2>
+          <p className="text-slate-400">Every block shows how BlackRoad turns multi-agent creation into shipped software, stories, and worlds.</p>
         </header>
         <div className="grid gap-8 md:grid-cols-2">
           {proofBlocks.map((block) => (
-            <article key={block.id} className="card h-full space-y-5">
+            <article key={block.id} className="card h-full space-y-5 bg-slate-900/40">
               <div className="space-y-2">
-                <h3 className="text-sm font-semibold uppercase tracking-widest text-slate-500">{block.title}</h3>
-                <p className="text-lg text-slate-700">{block.outcome}</p>
+                <h3 className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">{block.title}</h3>
+                <p className="text-lg text-slate-100/90">{block.outcome}</p>
               </div>
               <img
                 alt={block.alt}
-                className="w-full rounded-lg border border-slate-200 bg-white object-cover"
+                className="w-full rounded-xl border border-slate-800 bg-slate-900/50 object-cover"
                 src={block.image}
               />
-              <ul className="list-disc space-y-1 pl-5 text-sm text-slate-600">
+              <ul className="space-y-2 text-sm text-slate-400">
                 {block.receipts.map((receipt) => (
-                  <li key={receipt}>{receipt}</li>
+                  <li key={receipt} className="flex items-start gap-3">
+                    <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-cyan-400" />
+                    <span>{receipt}</span>
+                  </li>
                 ))}
               </ul>
             </article>
@@ -201,64 +295,92 @@ export default function Home() {
       </section>
 
       <section className="card space-y-8">
-        <header className="space-y-2 text-center">
+        <header className="space-y-2 text-center text-white">
           <h2 className="text-2xl font-bold">How it works</h2>
-          <p className="text-slate-600">Three steps from idea to revenue-ready launch.</p>
+          <p className="text-slate-400">Three steps from idea to revenue-ready launch.</p>
         </header>
         <div className="grid gap-6 md:grid-cols-3">
-          {howItWorks.map((step) => (
-            <div key={step.title} className="rounded-xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-slate-800">{step.title}</h3>
-              <p className="mt-3 text-sm text-slate-600">{step.description}</p>
+          {howItWorks.map((step, index) => (
+            <div key={step.title} className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 text-left">
+              <span className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-300">Step {index + 1}</span>
+              <h3 className="mt-3 text-lg font-semibold text-white">{step.title}</h3>
+              <p className="mt-3 text-sm text-slate-400">{step.description}</p>
             </div>
           ))}
         </div>
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-2">{t('explore')}</h2>
-          <ul className="list-disc ml-5">
-            <li><Link to={withPrefix('/portal', lang)}>{t('coCodingPortal')}</Link></li>
-            <li><Link to={withPrefix('/status', lang)}>{t('status')}</Link> &nbsp; • &nbsp;<Link to={withPrefix('/snapshot', lang)}>{t('snapshot')}</Link></li>
-            <li><Link to={withPrefix('/docs', lang)}>{t('docs')}</Link></li>
-            <li>
-              <Link to={withPrefix('/quantum-consciousness', lang)}>
-                {t('quantumConsciousness')}
-              </Link>
-            </li>
-          </ul>
-      </section>
-
-      <section className="card space-y-6" id="pricing">
-        <header className="space-y-2 text-center">
-          <h2 className="text-2xl font-bold">Pricing</h2>
-          <p className="text-slate-600">Choose the Creator-OS plan that fits your team.</p>
-        </header>
-        <div className="grid gap-6 md:grid-cols-3">
-          {pricingTiers.map((tier) => (
-            <div key={tier.name} className="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm">
-              <h3 className="text-lg font-semibold text-slate-800">{tier.name}</h3>
-              <p className="mt-2 text-3xl font-bold text-slate-900">{tier.price}</p>
-              <p className="mt-3 text-sm text-slate-600">{tier.description}</p>
+        <div className="grid gap-4 md:grid-cols-2">
+          {quickLinks.map((link) => (
+            <div key={link.label} className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <h3 className="text-sm font-semibold text-white">{link.label}</h3>
+              <p className="mt-2 text-sm text-slate-400">{link.description}</p>
+              <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold text-cyan-300">
+                <Link className="underline decoration-dotted decoration-cyan-500/60 underline-offset-4" to={withPrefix(link.path, lang)}>
+                  Open {link.label}
+                </Link>
+                {link.secondary && (
+                  <Link
+                    className="underline decoration-dotted decoration-cyan-500/60 underline-offset-4"
+                    to={withPrefix(link.secondary, lang)}
+                  >
+                    View {link.secondaryLabel ?? 'snapshot'}
+                  </Link>
+                )}
+              </div>
             </div>
           ))}
         </div>
       </section>
 
       <section className="card space-y-6">
-        <header className="space-y-2 text-center">
+        <header className="space-y-2 text-center text-white">
+          <h2 className="text-2xl font-bold">Product deck</h2>
+          <p className="text-slate-400">Pick the workspace that matches your next launch.</p>
+        </header>
+        <div className="grid gap-6 md:grid-cols-2">
+          {productDeck.map((product) => (
+            <div key={product.name} className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <h3 className="text-lg font-semibold text-white">{product.name}</h3>
+              <p className="mt-3 text-sm text-slate-400">{product.description}</p>
+              <Link className="btn-secondary mt-4 inline-flex items-center gap-2" to={withPrefix(product.to, lang)}>
+                Explore {product.name}
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="card space-y-6" id="pricing">
+        <header className="space-y-2 text-center text-white">
+          <h2 className="text-2xl font-bold">Pricing</h2>
+          <p className="text-slate-400">Choose the Creator-OS plan that fits your team.</p>
+        </header>
+        <div className="grid gap-6 md:grid-cols-3">
+          {pricingTiers.map((tier) => (
+            <div key={tier.name} className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 text-center">
+              <h3 className="text-lg font-semibold text-white">{tier.name}</h3>
+              <p className="mt-2 text-3xl font-bold text-white">{tier.price}</p>
+              <p className="mt-3 text-sm text-slate-400">{tier.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="card space-y-6">
+        <header className="space-y-2 text-center text-white">
           <h2 className="text-2xl font-bold">FAQ</h2>
-          <p className="text-slate-600">Answers to the questions creators ask first.</p>
+          <p className="text-slate-400">Answers to the questions creators ask first.</p>
         </header>
         <dl className="space-y-4">
           {faqs.map((faq) => (
-            <div key={faq.question} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <dt className="text-base font-semibold text-slate-800">{faq.question}</dt>
-              <dd className="mt-2 text-sm text-slate-600">{faq.answer}</dd>
+            <div key={faq.question} className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
+              <dt className="text-base font-semibold text-white">{faq.question}</dt>
+              <dd className="mt-2 text-sm text-slate-400">{faq.answer}</dd>
             </div>
           ))}
         </dl>
       </section>
 
-      <section className="card bg-slate-900 text-center text-white">
+      <section className="card bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-center text-white">
         <h2 className="text-3xl font-bold">Creator-OS for code + media</h2>
         <p className="mt-3 text-lg text-slate-200">
           Bring your team, plug in your stack, and let agents help you build, simulate, and publish every launch.
@@ -277,38 +399,5 @@ export default function Home() {
         </div>
       </section>
     </main>
-    <>
-      <section className="grid grid-2 gap-4">
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-2">Studio</h2>
-          <p>Multi-agent coding with files and canvas all in chat.</p>
-          <Link className="btn mt-4" to={withPrefix('/studio', lang)}>Open Studio</Link>
-        </div>
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-2">Animator</h2>
-          <p>Drop assets, storyboard, and render directly to MP4.</p>
-          <Link className="btn mt-4" to={withPrefix('/animator', lang)}>Try Animator</Link>
-        </div>
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-2">Game Maker</h2>
-          <p>Collect assets and export Unity/Unreal project templates.</p>
-          <Link className="btn mt-4" to={withPrefix('/game', lang)}>Build a Game</Link>
-        </div>
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-2">Homework</h2>
-          <p>Research, draft, cite, and export from chat alone.</p>
-          <Link className="btn mt-4" to={withPrefix('/homework', lang)}>Do Homework</Link>
-        </div>
-      </section>
-
-      <section className="card mt-6">
-        <h2 className="text-2xl font-bold mb-2">Pricing</h2>
-        <ul className="list-disc ml-5">
-          <li>Free: explore with local agents</li>
-          <li>Pro $20/mo: cloud workers and priority builds</li>
-          <li>Enterprise: contact us for custom agent graphs</li>
-        </ul>
-      </section>
-    </>
   )
 }
