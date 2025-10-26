@@ -23,7 +23,10 @@ Commands:
   doctor            Run environment diagnostics
   info              Show version, image tags, and environment info
   kiosk on|off      Enable/disable kiosk user service
-  upgrade           Pull latest images and redeploy
+  version           Show release channel, current tag, and last-good
+  channel           Switch between stable and edge channels
+  upgrade           Upgrade to the latest tagged release
+  rollback          Roll back to the last-known-good release
   help              Show this message
 USAGE
 }
@@ -133,6 +136,25 @@ cmd_info() {
   compose_cmd images
 }
 
+cmd_version() {
+  echo "Channel: $(cat /opt/blackroad/os/releases/channel 2>/dev/null || echo stable)"
+  echo "Current: $(git -C /opt/blackroad describe --tags --abbrev=0 2>/dev/null || git -C /opt/blackroad rev-parse --short HEAD)"
+  echo "LastGood: $(cat /opt/blackroad/os/releases/last-good 2>/dev/null || echo none)"
+}
+
+cmd_channel() {
+  case "${1:-}" in
+    stable|edge)
+      echo "$1" | sudo tee /opt/blackroad/os/releases/channel >/dev/null
+      echo "Channel set to $1"
+      ;;
+    *)
+      echo "Usage: brctl channel {stable|edge}" >&2
+      return 1
+      ;;
+  esac
+}
+
 cmd_kiosk() {
   if [[ $# -ne 1 ]]; then
     echo "Usage: brctl kiosk on|off" >&2
@@ -148,14 +170,16 @@ cmd_kiosk() {
     *)
       echo "Usage: brctl kiosk on|off" >&2
       exit 1
-      ;;
+      ;; 
   esac
 }
 
 cmd_upgrade() {
-  require_compose
-  compose_cmd pull
-  compose_cmd up -d --remove-orphans
+  sudo /opt/blackroad/os/upgrade/upgrade.sh
+}
+
+cmd_rollback() {
+  sudo /opt/blackroad/os/upgrade/rollback.sh
 }
 
 main() {
@@ -177,8 +201,11 @@ main() {
     health) cmd_health "$@" ;;
     doctor) cmd_doctor "$@" ;;
     info) cmd_info "$@" ;;
+    version) cmd_version "$@" ;;
+    channel) cmd_channel "$@" ;;
     kiosk) cmd_kiosk "$@" ;;
     upgrade) cmd_upgrade "$@" ;;
+<<<<<<< main
     metrics)
       echo "Grafana:    http://$(hostname -I | awk '{print $1}')/grafana  (${GRAFANA_ADMIN_USER:-admin}/${GRAFANA_ADMIN_PASSWORD:-admin})"
       echo "Loki:       internal at http://loki:3100"
@@ -188,6 +215,9 @@ main() {
       echo '  {job="docker-logs"} |= "ERROR"'
       echo '  {service="blackroad-api"} | json | line_format "{{.message}}"'
       ;;
+=======
+    rollback) cmd_rollback "$@" ;;
+>>>>>>> origin/codex/add-ota-update-flow-with-rollback
     help|-h|--help) usage ;;
     *)
       echo "Unknown command: ${cmd}" >&2
@@ -231,6 +261,14 @@ case "${1:-}" in
       *)   echo "Usage: brctl kiosk on|off" ;;
     esac
     ;;
+<<<<<<< main
   upgrade)   dc pull && dc up -d;;
   *)         echo "Usage: brctl {up|down|restart|ps|logs [svc]|status|health|doctor|metrics|kiosk on|off|upgrade}";;
+=======
+  version)   cmd_version ;;
+  channel)   shift; cmd_channel "${1:-}" ;;
+  upgrade)   cmd_upgrade ;;
+  rollback)  cmd_rollback ;;
+  *)         echo "Usage: brctl {up|down|restart|ps|logs [svc]|status|health|doctor|kiosk on|off|version|channel {stable|edge}|upgrade|rollback}";;
+>>>>>>> origin/codex/add-ota-update-flow-with-rollback
 esac
