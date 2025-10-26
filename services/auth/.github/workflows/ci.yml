@@ -1,0 +1,51 @@
+name: Auth Service CI
+
+on:
+  push:
+    paths:
+      - 'services/auth/**'
+      - 'packages/auth-sdk/**'
+  pull_request:
+    paths:
+      - 'services/auth/**'
+      - 'packages/auth-sdk/**'
+
+jobs:
+  auth-service:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/auth
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Lint
+        run: make lint
+      - name: Type check
+        run: make type
+      - name: Test
+        run: make test
+
+  auth-sdk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/auth-sdk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: corepack enable
+      - name: Install dependencies
+        run: pnpm install
+      - name: Test
+        run: pnpm test
+      - name: Build
+        run: pnpm build

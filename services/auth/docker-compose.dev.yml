@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  auth:
+    build: .
+    ports:
+      - "8082:8082"
+    environment:
+      - AUTH_PORT=8082
+      - AUTH_ENV=dev
+      - AUTH_LOG_LEVEL=debug
+      - AUTH_JWT_HS_SECRET=dev-secret
+    volumes:
+      - ./data:/app/data
+    command: uvicorn auth.main:app --host 0.0.0.0 --port 8082 --reload
