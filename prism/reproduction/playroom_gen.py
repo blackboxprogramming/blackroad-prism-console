@@ -1,4 +1,8 @@
-import argparse, yaml, os, datetime
+import argparse
+import copy
+import os
+
+import yaml
 
 TEMPLATE = {
   "id": None,
@@ -38,11 +42,15 @@ def main():
     ap.add_argument("--parent-a", required=True, help="species name e.g. lucidia/scribe")
     ap.add_argument("--parent-b", required=True, help="species name e.g. lucidia/engineer")
     ap.add_argument("--child", required=True, help="species name e.g. lucidia/architect")
-    ap.add_argument("--out", default="../reproduction/curricula", help="output dir for YAML")
+    ap.add_argument(
+        "--out",
+        default=os.path.join("prism", "reproduction", "curricula"),
+        help="output dir for YAML",
+    )
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
-    item = dict(TEMPLATE)
+    item = copy.deepcopy(TEMPLATE)
     item["id"] = f"{args.child.replace('/','-')}-coop-play-001"
     item["title"] = f"Coop Play 001: {args.parent_a} × {args.parent_b} → {args.child}"
     item["roles"] = {"parent_a": args.parent_a, "parent_b": args.parent_b, "child": args.child}
