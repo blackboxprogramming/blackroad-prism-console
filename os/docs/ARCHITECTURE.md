@@ -75,3 +75,4 @@ BlackRoad OS provides a Raspberry Pi focused deployment for the Prism Console. T
 
 See `os/docs/TROUBLESHOOTING.md` for operational guidance.
 See `os/docs/OBSERVABILITY.md` for Grafana, Loki, and Promtail usage.
+See `os/docs/TROUBLESHOOTING.md` for operational guidance. For HTTPS and remote access recipes, refer to `os/docs/TLS_REMOTE.md`.
