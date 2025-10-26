@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackRoad Social - The Ultimate Community Platform</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg-secondary: #13131a;
+      --bg-tertiary: #1a1a24;
+      --bg-elevated: #202030;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-tertiary: rgba(255, 255, 255, 0.5);
+      --gradient: linear-gradient(
+        135deg,
+        #fdba2d 0%,
+        #ff6b35 20%,
+        #ff4fd8 45%,
+        #c753ff 65%,
+        #6366f1 85%,
+        #3b82f6 100%
+      );
+      --accent-yellow: #fdba2d;
+      --accent-orange: #ff6b35;
+      --accent-pink: #ff4fd8;
+      --accent-purple: #c753ff;
+      --accent-indigo: #6366f1;
+      --accent-blue: #3b82f6;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    .header {
+      height: 60px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--gradient);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 20px;
+      color: #000;
+      box-shadow: 0 0 20px rgba(255, 79, 216, 0.3);
+    }
+
+    .logo-text {
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-left: 20px;
+    }
+
+    .nav-tab {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-tab:hover {
+      background: var(--bg-tertiary);
+      color: var(--text);
+    }
+
+    .nav-tab.active {
+      background: rgba(255, 79, 216, 0.15);
+      border-color: var(--accent-pink);
+      color: var(--text);
+    }
+
+    .header-center {
+      flex: 1;
+      max-width: 600px;
+      margin: 0 20px;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 8px 16px;
+      transition: border-color 0.2s;
+    }
+
+    .search-bar:focus-within {
+      border-color: var(--accent-pink);
+    }
+
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .search-icon {
+      color: var(--text-tertiary);
+      margin-right: 8px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-icon-btn {
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 18px;
+      position: relative;
+    }
+
+    .header-icon-btn:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-pink);
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 18px;
+      height: 18px;
+      background: var(--error);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .create-post-btn {
+      padding: 8px 20px;
+      background: var(--gradient);
+      border: none;
+      border-radius: 20px;
+      color: #000;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .create-post-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(255, 79, 216, 0.5);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #000;
+      font-weight: 700;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .user-avatar:hover {
+      border-color: var(--accent-pink);
+    }
+
+    /* Main Container */
+    .main-container {
+      display: flex;
+      max-width: 1600px;
+      margin: 0 auto;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* Left Sidebar */
+    .sidebar-left {
+      width: 260px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 20px 0;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+    }
+
+    .sidebar-section {
+      padding: 0 16px;
+      margin-bottom: 24px;
+    }
+
+    .sidebar-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-tertiary);
+      margin-bottom: 12px;
+      font-weight: 600;
+      padding: 0 8px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .sidebar-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text);
+    }
+
+    .sidebar-item.active {
+      background: rgba(255, 79, 216, 0.15);
+      color: var(--text);
+      border-left: 3px solid var(--accent-pink);
+    }
+
+    .sidebar-icon {
+      font-size: 20px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .community-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 4px;
+    }
+
+    .community-item:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .community-avatar {
+      width: 28px;
+      height: 28px;
+      background: var(--gradient);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #000;
+      flex-shrink: 0;
+    }
+
+    .community-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .community-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .community-members {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+
+    /* Main Feed */
+    .feed-container {
+      flex: 1;
+      max-width: 800px;
+      padding: 20px;
+    }
+
+    /* Create Post Card */
+    .create-post-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .create-post-header {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .create-post-input {
+      flex: 1;
+      padding: 12px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+      cursor: pointer;
+    }
+
+    .create-post-input:focus {
+      border-color: var(--accent-pink);
+    }
+
+    .create-post-actions {
+      display: flex;
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .post-action-btn {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .post-action-btn:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-pink);
+      color: var(--text);
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px;
+    }
+
+    .filter-tab {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .filter-tab:hover {
+      background: var(--bg-tertiary);
+      color: var(--text);
+    }
+
+    .filter-tab.active {
+      background: var(--gradient);
+      color: #000;
+    }
+
+    /* Post Card */
+    .post-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: all 0.2s;
+    }
+
+    .post-card:hover {
+      border-color: var(--accent-pink);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .post-avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: #000;
+      cursor: pointer;
+    }
+
+    .post-avatar.anonymous {
+      background: var(--bg-tertiary);
+      color: var(--text-tertiary);
+      border: 1px solid var(--border);
+    }
+
+    .post-info {
+      flex: 1;
+    }
+
+    .post-author {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .anonymous-badge {
+      padding: 2px 8px;
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+
+    .verified-badge {
+      color: var(--accent-blue);
+      font-size: 16px;
+    }
+
+    .post-meta {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .post-options {
+      cursor: pointer;
+      color: var(--text-tertiary);
+      padding: 8px;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .post-options:hover {
+      background: var(--bg-tertiary);
+      color: var(--text);
+    }
+
+    .post-content {
+      margin-bottom: 12px;
+    }
+
+    .post-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .post-text {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    .post-media {
+      margin: 12px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .post-image {
+      width: 100%;
+      background: linear-gradient(
+        135deg,
+        rgba(253, 186, 45, 0.2) 0%,
+        rgba(255, 79, 216, 0.2) 50%,
+        rgba(59, 130, 246, 0.2) 100%
+      );
+      padding-bottom: 60%;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .post-video {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(
+        135deg,
+        rgba(253, 186, 45, 0.2) 0%,
+        rgba(255, 79, 216, 0.2) 50%,
+        rgba(59, 130, 246, 0.2) 100%
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .play-button {
+      width: 60px;
+      height: 60px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s;
+    }
+
+    .play-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(255, 79, 216, 0.6);
+    }
+
+    .vine-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 4px 12px;
+      background: var(--gradient);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #000;
+    }
+
+    .code-block-preview {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 12px 0;
+      font-family: 'Monaco', monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      position: relative;
+    }
+
+    .code-language-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 4px 10px;
+      background: var(--gradient);
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #000;
+    }
+
+    .post-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 12px 0;
+    }
+
+    .tag {
+      padding: 4px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tag:hover {
+      background: rgba(255, 79, 216, 0.15);
+      border-color: var(--accent-pink);
+      color: var(--text);
+    }
+
+    .post-footer {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .post-stat {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .post-stat:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .post-stat.active {
+      color: var(--accent-pink);
+      background: rgba(255, 79, 216, 0.1);
+    }
+
+    .post-stat.upvoted {
+      color: var(--accent-orange);
+    }
+
+    .post-stat-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    /* Right Sidebar */
+    .sidebar-right {
+      width: 340px;
+      padding: 20px;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+    }
+
+    .widget {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .widget-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .ai-assistant {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ai-assistant:hover {
+      border-color: var(--accent-pink);
+      background: var(--bg-elevated);
+    }
+
+    .ai-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .ai-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--gradient);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #000;
+    }
+
+    .ai-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .ai-status {
+      margin-left: auto;
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    .ai-description {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .game-card {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .game-card:hover {
+      border-color: var(--accent-pink);
+      transform: translateX(4px);
+    }
+
+    .game-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--gradient);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .game-info {
+      flex: 1;
+    }
+
+    .game-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+
+    .game-players {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+
+    .trending-item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .trending-item:last-child {
+      border-bottom: none;
+    }
+
+    .trending-item:hover {
+      padding-left: 8px;
+    }
+
+    .trending-tag {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .trending-posts {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 79, 216, 0.3);
+    }
+
+    /* Responsive */
+    @media (max-width: 1400px) {
+      .sidebar-right {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1000px) {
+      .sidebar-left {
+        display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-tabs {
+        display: none;
+      }
+
+      .header-center {
+        margin: 0 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-icon">K3</div>
+        <div class="logo-text">BlackRoad</div>
+      </div>
+      <div class="nav-tabs">
+        <button class="nav-tab active">
+          <span>🏠</span>
+          <span>Home</span>
+        </button>
+        <button class="nav-tab">
+          <span>🔥</span>
+          <span>Trending</span>
+        </button>
+        <button class="nav-tab">
+          <span>🎮</span>
+          <span>Games</span>
+        </button>
+        <button class="nav-tab">
+          <span>💻</span>
+          <span>Code</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" placeholder="Search communities, posts, code, people..." />
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button class="header-icon-btn">
+        <span>💬</span>
+      </button>
+      <button class="header-icon-btn">
+        <span>🔔</span>
+        <div class="notification-badge">5</div>
+      </button>
+      <button class="create-post-btn">+ Create</button>
+      <div class="user-avatar">U</div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Left Sidebar -->
+    <aside class="sidebar-left">
+      <div class="sidebar-section">
+        <div class="sidebar-item active">
+          <span class="sidebar-icon">🏠</span>
+          <span>Home</span>
+        </div>
+        <div class="sidebar-item">
+          <span class="sidebar-icon">🔥</span>
+          <span>Popular</span>
+        </div>
+        <div class="sidebar-item">
+          <span class="sidebar-icon">🌟</span>
+          <span>Following</span>
+        </div>
+        <div class="sidebar-item">
+          <span class="sidebar-icon">📱</span>
+          <span>Stories</span>
+        </div>
+        <div class="sidebar-item">
+          <span class="sidebar-icon">🎬</span>
+          <span>Clips (Vine)</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">Features</div>
+        <div class="sidebar-item">
+          <span class="sidebar-icon">🤖</span>
+          <span>AI Assistant</span>
+        </div>
+        <div class="sidebar-item">
+          <span class="sidebar-icon">🎮</span>
+          <span>Games Hub</span>
+        </div>
+        <div class="sidebar-item">
+          <span class="sidebar-icon">💻</span>
+          <span>Code Share</span>
+        </div>
+        <div class="sidebar-item">
+          <span class="sidebar-icon">👥</span>
+          <span>Friends</span>
+        </div>
+        <div class="sidebar-item">
+          <span class="sidebar-icon">🎭</span>
+          <span>Anonymous Mode</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">Your Communities</div>
+        <div class="community-item">
+          <div class="community-avatar">WD</div>
+          <div class="community-info">
+            <div class="community-name">r/webdev</div>
+            <div class="community-members">2.1M members</div>
+          </div>
+        </div>
+        <div class="community-item">
+          <div class="community-avatar">PY</div>
+          <div class="community-info">
+            <div class="community-name">r/Python</div>
+            <div class="community-members">1.8M members</div>
+          </div>
+        </div>
+        <div class="community-item">
+          <div class="community-avatar">GM</div>
+          <div class="community-info">
+            <div class="community-name">r/gaming</div>
+            <div class="community-members">38M members</div>
+          </div>
+        </div>
+        <div class="community-item">
+          <div class="community-avatar">AI</div>
+          <div class="community-info">
+            <div class="community-name">r/artificial</div>
+            <div class="community-members">895K members</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Feed -->
+    <main class="feed-container">
+      <!-- Create Post Card -->
+      <div class="create-post-card">
+        <div class="create-post-header">
+          <div class="user-avatar">U</div>
+          <input
+            type="text"
+            class="create-post-input"
+            placeholder="Share something... post as yourself or anonymously"
+          />
+        </div>
+        <div class="create-post-actions">
+          <button class="post-action-btn">
+            <span>📷</span>
+            <span>Photo</span>
+          </button>
+          <button class="post-action-btn">
+            <span>🎬</span>
+            <span>Clip</span>
+          </button>
+          <button class="post-action-btn">
+            <span>💻</span>
+            <span>Code</span>
+          </button>
+          <button class="post-action-btn">
+            <span>🎮</span>
+            <span>Game</span>
+          </button>
+          <button class="post-action-btn">
+            <span>🎭</span>
+            <span>Anonymous</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-tabs">
+        <button class="filter-tab active">Best</button>
+        <button class="filter-tab">Hot</button>
+        <button class="filter-tab">New</button>
+        <button class="filter-tab">Top</button>
+        <button class="filter-tab">Following</button>
+      </div>
+
+      <!-- Post: Regular with Image -->
+      <div class="post-card">
+        <div class="post-header">
+          <div class="post-avatar">JD</div>
+          <div class="post-info">
+            <div class="post-author">
+              <span>@johndeveloper</span>
+              <span class="verified-badge">✓</span>
+            </div>
+            <div class="post-meta">
+              <span>r/webdev</span>
+              <span>•</span>
+              <span>2 hours ago</span>
+            </div>
+          </div>
+          <div class="post-options">⋯</div>
+        </div>
+
+        <div class="post-content">
+          <div class="post-title">
+            Just launched my new portfolio site built with the BlackRoad gradient! 🎨
+          </div>
+          <div class="post-text">
+            After weeks of design iterations, I finally settled on this beautiful sunset-to-ocean gradient. The response has
+            been incredible! Using pure CSS and modern design principles.
+          </div>
+          <div class="post-media">
+            <div class="post-image"></div>
+          </div>
+          <div class="post-tags">
+            <span class="tag">#webdev</span>
+            <span class="tag">#design</span>
+            <span class="tag">#portfolio</span>
+            <span class="tag">#css</span>
+          </div>
+        </div>
+
+        <div class="post-footer">
+          <button class="post-stat upvoted">
+            <span>⬆</span>
+            <span>12.4K</span>
+          </button>
+          <button class="post-stat">
+            <span>⬇</span>
+          </button>
+          <div class="post-stat-divider"></div>
+          <button class="post-stat">
+            <span>💬</span>
+            <span>234</span>
+          </button>
+          <button class="post-stat">
+            <span>↗️</span>
+            <span>Share</span>
+          </button>
+          <button class="post-stat">
+            <span>🔖</span>
+            <span>Save</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Post: Anonymous with Code -->
+      <div class="post-card">
+        <div class="post-header">
+          <div class="post-avatar anonymous">?</div>
+          <div class="post-info">
+            <div class="post-author">
+              <span>Anonymous User</span>
+              <span class="anonymous-badge">ANON</span>
+            </div>
+            <div class="post-meta">
+              <span>r/Python</span>
+              <span>•</span>
+              <span>4 hours ago</span>
+            </div>
+          </div>
+          <div class="post-options">⋯</div>
+        </div>
+
+        <div class="post-content">
+          <div class="post-title">Here's a faster way to process large CSV files in Python</div>
+          <div class="post-text">
+            I've been working with massive datasets and found this approach to be 10x faster than pandas for simple operations.
+            Thought I'd share anonymously.
+          </div>
+          <div class="code-block-preview">
+            <div class="code-language-badge">Python</div>
+            <pre><code><span style="color: var(--accent-pink);">import</span> csv
+
+<span style="color: var(--accent-pink);">def</span> <span style="color: var(--accent-blue);">process_large_csv</span>(filename):
+    <span style="color: var(--accent-pink);">with</span> <span style="color: var(--accent-blue);">open</span>(filename, <span style="color: var(--accent-yellow);">'r'</span>) <span style="color: var(--accent-pink);">as</span> file:
+        reader = csv.reader(file)
+        <span style="color: var(--accent-pink);">for</span> row <span style="color: var(--accent-pink);">in</span> reader:
+            <span style="color: var(--text-tertiary);"># Process each row</span>
+            <span style="color: var(--accent-pink);">yield</span> process_row(row)
+</code></pre>
+          </div>
+          <div class="post-tags">
+            <span class="tag">#python</span>
+            <span class="tag">#performance</span>
+            <span class="tag">#csv</span>
+          </div>
+        </div>
+
+        <div class="post-footer">
+          <button class="post-stat">
+            <span>⬆</span>
+            <span>8.9K</span>
+          </button>
+          <button class="post-stat">
+            <span>⬇</span>
+          </button>
+          <div class="post-stat-divider"></div>
+          <button class="post-stat">
+            <span>💬</span>
+            <span>156</span>
+          </button>
+          <button class="post-stat">
+            <span>↗️</span>
+            <span>Share</span>
+          </button>
+          <button class="post-stat active">
+            <span>🔖</span>
+            <span>Saved</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Post: Vine-style Video -->
+      <div class="post-card">
+        <div class="post-header">
+          <div class="post-avatar">MK</div>
+          <div class="post-info">
+            <div class="post-author">
+              <span>@memekingdom</span>
+            </div>
+            <div class="post-meta">
+              <span>r/funny</span>
+              <span>•</span>
+              <span>6 hours ago</span>
+            </div>
+          </div>
+          <div class="post-options">⋯</div>
+        </div>
+
+        <div class="post-content">
+          <div class="post-title">When your code works on the first try 😂</div>
+          <div class="post-media">
+            <div class="post-video">
+              <div class="vine-badge">6s</div>
+              <div class="play-button">▶</div>
+            </div>
+          </div>
+          <div class="post-tags">
+            <span class="tag">#vine</span>
+            <span class="tag">#programming</span>
+            <span class="tag">#meme</span>
+          </div>
+        </div>
+
+        <div class="post-footer">
+          <button class="post-stat">
+            <span>⬆</span>
+            <span>45.2K</span>
+          </button>
+          <button class="post-stat">
+            <span>⬇</span>
+          </button>
+          <div class="post-stat-divider"></div>
+          <button class="post-stat">
+            <span>💬</span>
+            <span>892</span>
+          </button>
+          <button class="post-stat">
+            <span>↗️</span>
+            <span>Share</span>
+          </button>
+          <button class="post-stat">
+            <span>🔖</span>
+            <span>Save</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Post: AI Generated Content -->
+      <div class="post-card">
+        <div class="post-header">
+          <div class="post-avatar">🤖</div>
+          <div class="post-info">
+            <div class="post-author">
+              <span>AI Generated</span>
+              <span class="anonymous-badge">BOT</span>
+            </div>
+            <div class="post-meta">
+              <span>r/artificial</span>
+              <span>•</span>
+              <span>8 hours ago</span>
+            </div>
+          </div>
+          <div class="post-options">⋯</div>
+        </div>
+
+        <div class="post-content">
+          <div class="post-title">Daily AI Art Challenge: "Digital Sunset Over Silicon Valley"</div>
+          <div class="post-text">
+            Generated using Stable Diffusion XL with custom LoRA trained on tech architecture. Prompt included in comments.
+          </div>
+          <div class="post-media">
+            <div class="post-image"></div>
+          </div>
+          <div class="post-tags">
+            <span class="tag">#aiart</span>
+            <span class="tag">#stablediffusion</span>
+            <span class="tag">#generativeart</span>
+          </div>
+        </div>
+
+        <div class="post-footer">
+          <button class="post-stat">
+            <span>⬆</span>
+            <span>5.6K</span>
+          </button>
+          <button class="post-stat">
+            <span>⬇</span>
+          </button>
+          <div class="post-stat-divider"></div>
+          <button class="post-stat">
+            <span>💬</span>
+            <span>89</span>
+          </button>
+          <button class="post-stat">
+            <span>↗️</span>
+            <span>Share</span>
+          </button>
+          <button class="post-stat">
+            <span>🔖</span>
+            <span>Save</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Sidebar -->
+    <aside class="sidebar-right">
+      <!-- AI Assistant Widget -->
+      <div class="widget">
+        <div class="widget-title">🤖 AI Assistants</div>
+
+        <div class="ai-assistant">
+          <div class="ai-header">
+            <div class="ai-avatar">K3</div>
+            <div class="ai-name">Code Assistant</div>
+            <div class="ai-status"></div>
+          </div>
+          <div class="ai-description">Help with code review, debugging, and optimization</div>
+        </div>
+
+        <div class="ai-assistant">
+          <div class="ai-header">
+            <div class="ai-avatar">🎨</div>
+            <div class="ai-name">Creative AI</div>
+            <div class="ai-status"></div>
+          </div>
+          <div class="ai-description">Generate images, videos, and creative content</div>
+        </div>
+
+        <div class="ai-assistant">
+          <div class="ai-header">
+            <div class="ai-avatar">💬</div>
+            <div class="ai-name">Chat Companion</div>
+            <div class="ai-status"></div>
+          </div>
+          <div class="ai-description">General conversation and assistance</div>
+        </div>
+      </div>
+
+      <!-- Games Widget -->
+      <div class="widget">
+        <div class="widget-title">🎮 Play Games</div>
+
+        <div class="game-card">
+          <div class="game-icon">♟️</div>
+          <div class="game-info">
+            <div class="game-name">BlackRoad Chess</div>
+            <div class="game-players">2,453 playing</div>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <div class="game-icon">🎯</div>
+          <div class="game-info">
+            <div class="game-name">Code Battle</div>
+            <div class="game-players">1,892 playing</div>
+          </div>
+        </div>
+
+        <div class="game-card">
+          <div class="game-icon">🃏</div>
+          <div class="game-info">
+            <div class="game-name">Cards Against AI</div>
+            <div class="game-players">5,234 playing</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trending Widget -->
+      <div class="widget">
+        <div class="widget-title">🔥 Trending Now</div>
+
+        <div class="trending-item">
+          <div class="trending-tag">#BlackRoadLaunch</div>
+          <div class="trending-posts">12.4K posts</div>
+        </div>
+
+        <div class="trending-item">
+          <div class="trending-tag">#AIRevolution</div>
+          <div class="trending-posts">8.9K posts</div>
+        </div>
+
+        <div class="trending-item">
+          <div class="trending-tag">#CodeLife</div>
+          <div class="trending-posts">6.2K posts</div>
+        </div>
+
+        <div class="trending-item">
+          <div class="trending-tag">#VineIsBack</div>
+          <div class="trending-posts">15.7K posts</div>
+        </div>
+
+        <div class="trending-item">
+          <div class="trending-tag">#AnonymousPost</div>
+          <div class="trending-posts">4.5K posts</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    document.querySelectorAll('.post-stat').forEach((stat) => {
+      stat.addEventListener('click', function () {
+        this.classList.toggle('active');
+      });
+    });
+
+    document.querySelectorAll('.filter-tab').forEach((tab) => {
+      tab.addEventListener('click', function () {
+        document.querySelectorAll('.filter-tab').forEach((t) => t.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
