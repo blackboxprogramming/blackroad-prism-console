@@ -1,5 +1,5 @@
 # Top-level CODEOWNERS ensures consistent review coverage for new scaffolds.
-*       @blackboxprogramming/maintainers
+*       @blackboxprogramming/maintainers @blackboxprogramming/agents
 
 # Delegate ownership for newly scaffolded surfaces.
 /apps/blackroad-mobile/   @blackboxprogramming/mobile

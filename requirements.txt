@@ -1,6 +1,7 @@
 anthropic
 boto3
 fastapi
+python-socketio[client]
 httpx
 PyJWT[crypto]
 cryptography
