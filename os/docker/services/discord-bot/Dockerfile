@@ -14,3 +14,8 @@ COPY start.sh ./start.sh
 RUN chmod +x ./start.sh
 
 CMD ["/app/start.sh"]
+WORKDIR /app
+COPY services/discord-bot/src /app
+RUN pip install --no-cache-dir discord.py
+COPY os/docker/services/discord-bot/healthcheck.py /app/healthcheck.py
+CMD ["bash","-lc","python main.py"]

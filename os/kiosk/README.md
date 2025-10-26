@@ -39,3 +39,8 @@ The systemd service restarts Chromium if it exits unexpectedly. Use `journalctl 
 
 - Kiosk mode disables browser UI chrome; exit via `Ctrl+Alt+Backspace` or switching TTYs.
 - Ensure the kiosk user has minimal privileges and cannot access sensitive files.
+# Kiosk
+- Create a user `blackroad` (no sudo), log in once to create a user session.
+- Enable lingering: `loginctl enable-linger blackroad`
+- As that user: `systemctl --user enable --now blackroad-kiosk.service`
+- HDMI boots straight into http://localhost

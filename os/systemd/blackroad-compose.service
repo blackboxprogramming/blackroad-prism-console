@@ -1,5 +1,6 @@
 [Unit]
 Description=BlackRoad OS (Docker Compose Stack)
+Description=BlackRoad OS (Compose)
 After=network-online.target docker.service
 Wants=network-online.target docker.service
 
@@ -8,6 +9,8 @@ Type=oneshot
 WorkingDirectory=/opt/blackroad/os/docker
 Environment=COMPOSE_DOCKER_CLI_BUILD=1
 Environment=DOCKER_BUILDKIT=1
+Environment="COMPOSE_DOCKER_CLI_BUILD=1"
+Environment="DOCKER_BUILDKIT=1"
 ExecStart=/usr/bin/docker compose up -d --remove-orphans
 ExecStop=/usr/bin/docker compose down
 RemainAfterExit=yes
