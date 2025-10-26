@@ -1,0 +1,48 @@
+name: Lucidia Lineage & Fitness
+
+on:
+  pull_request:
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  lucidia-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: |
+          pip install -r prism/requirements.txt || true
+      - name: Optional: run a reproduction if consent present
+        run: |
+          if [ -f prism/consent.json ]; then
+            python prism/reproduction/reproduce.py \
+              --p1 prism/agents/lucidia-scribe/genome.yaml \
+              --p2 prism/agents/lucidia-engineer/genome.yaml \
+              --child lucidia/architect \
+              --consent prism/consent.json || true
+          fi
+      - name: Generate CI report
+        run: |
+          python prism/reproduction/ci_report.py | tee ci_report.md
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lucidia-ci-report
+          path: ci_report.md
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('ci_report.md', 'utf8');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body
+            });
