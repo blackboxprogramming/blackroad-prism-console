@@ -1,0 +1,12 @@
+{
+  "id": "resonance-palette",
+  "title": "Resonance Palette Cards",
+  "description": "Track resonance distance through synchronized color swatches.",
+  "objectives": [
+    "Create timeline of emotional anchors",
+    "Measure resonance distance per reply",
+    "Identify reciprocity invitations"
+  ],
+  "artifacts": ["palette.json", "timeline.svg", "reflection.md"],
+  "badges": ["badge-short-bridge", "badge-anchored", "badge-heart-link"]
+}

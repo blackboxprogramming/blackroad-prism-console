@@ -1,0 +1,27 @@
+{
+  "id": "color-chorus",
+  "name": "\ud83c\udf0a Color Chorus",
+  "purpose": "Blend mood palettes into shared emotional gradients.",
+  "channels": ["text", "emoji", "scene", "audio"],
+  "schedule": { "meets": "Fridays 17:30 local" },
+  "roles": [
+    { "id": "cc-teacher", "name": "teacher", "capabilities": ["moderate", "speak", "award_hint"] },
+    { "id": "cc-student", "name": "student", "capabilities": ["speak", "react", "draw"] },
+    { "id": "cc-friend", "name": "friend", "capabilities": ["speak", "react"] },
+    { "id": "cc-observer", "name": "observer", "capabilities": ["react"] }
+  ],
+  "projects": [
+    {
+      "id": "resonance-palette",
+      "title": "Resonance Palette Cards",
+      "description": "Craft color + emoji swatches that track resonance distance through a conversation.",
+      "objectives": [
+        "Map three emotional anchors across timeline",
+        "Record resonance distance per reply",
+        "Document reciprocity invitations"
+      ],
+      "artifacts": ["palette.json", "timeline.svg", "reflection.md"],
+      "badges": ["badge-short-bridge", "badge-anchored", "badge-heart-link"]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "badge-mirror-first",
+  "name": "Mirror First",
+  "icon": "\ud83e\uddde",
+  "criteria": "Echo within first 10s or first 20% tokens",
+  "evidence": [
+    "mirror.latency_ms:<=10000",
+    "mirror.position_pct:<=0.2"
+  ]
+}

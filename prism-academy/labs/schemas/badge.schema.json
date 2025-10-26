@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PrismBadge",
+  "type": "object",
+  "required": ["id", "name", "icon", "criteria", "evidence"],
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "icon": { "type": "string" },
+    "criteria": { "type": "string" },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

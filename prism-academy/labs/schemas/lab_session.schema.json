@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PrismLabSession",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "club_id",
+    "objectives",
+    "roles",
+    "timeline",
+    "rules",
+    "rubric"
+  ],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "club_id": { "type": "string" },
+    "objectives": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "roles": {
+      "type": "array",
+      "items": { "$ref": "role.schema.json" }
+    },
+    "timeline": {
+      "type": "object",
+      "properties": {
+        "open_at": { "type": "string", "format": "date-time" },
+        "start_at": { "type": "string", "format": "date-time" },
+        "end_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["open_at", "start_at", "end_at"],
+      "additionalProperties": false
+    },
+    "rules": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "rubric": {
+      "type": "object"
+    },
+    "scene": {
+      "type": "object",
+      "properties": {
+        "map": { "type": "string" },
+        "props": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["map"],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

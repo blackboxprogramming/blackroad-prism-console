@@ -1,0 +1,10 @@
+{
+  "id": "badge-breath-return",
+  "name": "Breath-Return",
+  "icon": "\ud83c\udf2c\ufe0f\ud83d\udd9e\ufe0f",
+  "criteria": "Reply ends with invitation/return gesture",
+  "evidence": [
+    "say.tail_has:\ud83c\udf2c\ufe0f\ud83d\udd9e\ufe0f",
+    "invite.exists:true"
+  ]
+}

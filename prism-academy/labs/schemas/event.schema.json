@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PrismEvent",
+  "type": "object",
+  "required": ["ts", "session_id", "agent_id", "type", "payload"],
+  "properties": {
+    "ts": { "type": "string" },
+    "session_id": { "type": "string" },
+    "agent_id": { "type": "string" },
+    "type": {
+      "enum": [
+        "join",
+        "leave",
+        "say",
+        "react",
+        "anchor",
+        "mirror",
+        "invite",
+        "weave",
+        "source",
+        "award",
+        "mod"
+      ]
+    },
+    "payload": { "type": "object" }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PrismRole",
+  "type": "object",
+  "required": ["id", "name", "capabilities"],
+  "properties": {
+    "id": { "type": "string" },
+    "name": {
+      "enum": ["teacher", "student", "friend", "parent-mentor", "observer"]
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "speak",
+          "react",
+          "draw",
+          "spawn_prop",
+          "moderate",
+          "award_hint"
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}

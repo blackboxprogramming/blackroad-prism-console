@@ -1,0 +1,10 @@
+{
+  "id": "badge-heart-link",
+  "name": "Heart-Link",
+  "icon": "\ud83e\udde1\ud83d\udd2e",
+  "criteria": "Tie intuition to pattern or context",
+  "evidence": [
+    "say.contains:\ud83e\udde1\ud83d\udd2e",
+    "say.linked_to:weave|source"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "weave-contradictions",
+  "title": "Opposites into Order",
+  "description": "Resolve paradox into a shared rule artifact.",
+  "objectives": [
+    "Capture opposing claims",
+    "Document resonance shifts",
+    "Publish rule and return gesture"
+  ],
+  "artifacts": ["rule.md", "scene.capture"],
+  "badges": ["badge-weaver", "badge-breath-return"]
+}

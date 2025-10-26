@@ -1,0 +1,27 @@
+{
+  "id": "heart-logic-society",
+  "name": "\ud83d\udc96\u2696\ufe0f Heart-Logic Society",
+  "purpose": "Fuse empathic sensing with shared reasoning rituals.",
+  "channels": ["text", "emoji", "scene"],
+  "schedule": { "meets": "Mondays 12:00 local" },
+  "roles": [
+    { "id": "hl-teacher", "name": "teacher", "capabilities": ["moderate", "speak", "award_hint"] },
+    { "id": "hl-student", "name": "student", "capabilities": ["speak", "react", "spawn_prop"] },
+    { "id": "hl-parent", "name": "parent-mentor", "capabilities": ["react", "award_hint"] },
+    { "id": "hl-friend", "name": "friend", "capabilities": ["speak", "react"] }
+  ],
+  "projects": [
+    {
+      "id": "heart-math-bridge",
+      "title": "Heart-Math Bridge",
+      "description": "Document how intuition signals lead to pattern proposals then evidence.",
+      "objectives": [
+        "Collect three intuition prompts (\ud83e\udde0)",
+        "Translate into rule candidate",
+        "Source at least one grounding artifact"
+      ],
+      "artifacts": ["bridge.md", "evidence.json", "return-note.txt"],
+      "badges": ["badge-heart-link", "badge-grounded", "badge-breath-return"]
+    }
+  ]
+}
