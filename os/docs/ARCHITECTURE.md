@@ -73,4 +73,4 @@ BlackRoad OS provides a Raspberry Pi focused deployment for the Prism Console. T
 - **Control CLI (`brctl`)** – convenience wrapper for lifecycle operations, health checks, and kiosk controls.
 - **Kiosk unit (optional)** – launches Chromium in kiosk mode pointed at the local web UI.
 
-See `os/docs/TROUBLESHOOTING.md` for operational guidance.
+See `os/docs/TROUBLESHOOTING.md` for operational guidance. For HTTPS and remote access recipes, refer to `os/docs/TLS_REMOTE.md`.

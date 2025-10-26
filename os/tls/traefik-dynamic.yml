@@ -1,0 +1,7 @@
+# Loaded by file provider. Switches based on ENABLE_TLS env.
+tls:
+  certificates:
+    - certFile: /certs/server.crt
+      keyFile: /certs/server.key
+
+# Middlewares, etc., can go here later.

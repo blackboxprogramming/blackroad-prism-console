@@ -1,8 +1,6 @@
 version: "3.9"
 name: blackroad
 
-x-traefik-labels: &traefik-labels
-  traefik.enable: "true"
 x-common-env: &common_env
   TZ: ${TZ}
   REDIS_URL: ${REDIS_URL}
@@ -11,112 +9,24 @@ services:
   reverse-proxy:
     image: traefik:v3.0
     command:
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --entrypoints.web.address=:80
-      # Uncomment to enable TLS and provide certificates/ACME settings.
-      # - --entrypoints.websecure.address=:443
       - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
       - "--entrypoints.web.address=:80"
-      # Enable TLS later:
-      # - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
     ports:
       - "80:80"
-      # - "443:443"
+      - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ../tls/traefik-dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ../tls/certs:/certs:ro
     healthcheck:
       test: ["CMD", "traefik", "healthcheck"]
       interval: 10s
       timeout: 3s
-      retries: 10
-    restart: unless-stopped
-
-  blackroad-api:
-    build: ./services/blackroad-api
-    env_file: .env
-    labels:
-      <<: *traefik-labels
-      traefik.http.routers.blackroad-api.rule: PathPrefix(`/api`)
-      traefik.http.services.blackroad-api.loadbalancer.server.port: "8000"
-    depends_on:
-      - redis
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
-      interval: 15s
-      timeout: 3s
-      retries: 10
-    restart: unless-stopped
-
-  autopal:
-    build: ./services/autopal
-    env_file: .env
-    labels:
-      <<: *traefik-labels
-      traefik.http.routers.autopal.rule: PathPrefix(`/autopal`)
-    depends_on:
-      - redis
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
-      interval: 15s
-      timeout: 3s
-      retries: 10
-    restart: unless-stopped
-
-  aicodecloud:
-    build: ./services/aicodecloud
-    env_file: .env
-    labels:
-      <<: *traefik-labels
-      traefik.http.routers.aicodecloud.rule: PathPrefix(`/aicode`)
-      traefik.http.services.aicodecloud.loadbalancer.server.port: "5000"
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:5000/api/health"]
-      interval: 15s
-      timeout: 3s
-      retries: 10
-    restart: unless-stopped
-
-  var-www:
-    build: ./services/var-www
-    env_file: .env
-    labels:
-      <<: *traefik-labels
-      traefik.http.routers.var-www.rule: PathPrefix(`/`)
-      traefik.http.services.var-www.loadbalancer.server.port: "9000"
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:9000/health"]
-      interval: 15s
-      timeout: 3s
-      retries: 10
-    restart: unless-stopped
-
-  pi-ops:
-    build: ./services/pi-ops
-    env_file: .env
-    depends_on:
-      mqtt:
-        condition: service_started
-    labels:
-      <<: *traefik-labels
-      traefik.http.routers.pi-ops.rule: PathPrefix(`/pi-ops`)
-      traefik.http.services.pi-ops.loadbalancer.server.port: "7000"
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:7000/health"]
-      interval: 15s
-      timeout: 3s
-      retries: 10
-    restart: unless-stopped
-
-  discord-bot:
-    build: ./services/discord-bot
-    env_file: .env
-    depends_on:
-      - redis
-    healthcheck:
-      test: ["CMD", "python", "healthcheck.py"]
-      interval: 30s
-      timeout: 5s
       retries: 10
     restart: unless-stopped
 
@@ -129,6 +39,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.api.rule=PathPrefix(`/api`)
+      - traefik.http.routers.api.entrypoints=websecure
       - traefik.http.services.api.loadbalancer.server.port=8000
     healthcheck:
       test: ["CMD","curl","-fsS","http://localhost:8000/health"]
@@ -147,6 +58,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.autopal.rule=PathPrefix(`/autopal`)
+      - traefik.http.routers.autopal.entrypoints=websecure
       - traefik.http.services.autopal.loadbalancer.server.port=8001
     healthcheck:
       test: ["CMD","curl","-fsS","http://localhost:8001/health"]
@@ -162,6 +74,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.aicode.rule=PathPrefix(`/aicode`)
+      - traefik.http.routers.aicode.entrypoints=websecure
       - traefik.http.services.aicode.loadbalancer.server.port=5000
     healthcheck:
       test: ["CMD","curl","-fsS","http://localhost:5000/api/health"]
@@ -182,6 +95,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.piops.rule=PathPrefix(`/pi-ops`)
+      - traefik.http.routers.piops.entrypoints=websecure
       - traefik.http.services.piops.loadbalancer.server.port=7000
     healthcheck:
       test: ["CMD","curl","-fsS","http://localhost:7000/health"]
@@ -197,6 +111,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.web.rule=PathPrefix(`/`)
+      - traefik.http.routers.web.entrypoints=websecure
       - traefik.http.services.web.loadbalancer.server.port=9000
     healthcheck:
       test: ["CMD","curl","-fsS","http://localhost:9000/health"]
@@ -251,12 +166,14 @@ services:
     profiles:
       - watchtower
 
-    healthcheck:
-      test: ["CMD","redis-cli","ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 30
+  cloudflared:
+    image: cloudflare/cloudflared:2025.2.0
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
     restart: unless-stopped
+    profiles:
+      - tunnel
 
 volumes:
   mosq-data:

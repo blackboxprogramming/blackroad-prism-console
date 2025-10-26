@@ -7,6 +7,7 @@ COMPOSE="docker compose"
 SYSTEMD_SERVICE="blackroad-compose.service"
 KIOSK_SERVICE="blackroad-kiosk.service"
 STACK_NAME="blackroad"
+ENV_FILE="${DOCKER_DIR}/.env"
 
 usage() {
   cat <<USAGE
@@ -23,6 +24,9 @@ Commands:
   doctor            Run environment diagnostics
   info              Show version, image tags, and environment info
   kiosk on|off      Enable/disable kiosk user service
+  tls on|off        Toggle self-signed TLS mode
+  tunnel on|off     Start/stop Cloudflare Tunnel sidecar
+  url               Print LAN / remote URLs
   upgrade           Pull latest images and redeploy
   help              Show this message
 USAGE
@@ -32,6 +36,15 @@ require_compose() {
   if [[ ! -d "${DOCKER_DIR}" ]]; then
     echo "Docker directory not found at ${DOCKER_DIR}" >&2
     exit 1
+  fi
+}
+
+load_env() {
+  if [[ -f "${ENV_FILE}" ]]; then
+    set -a
+    # shellcheck disable=SC1090
+    source "${ENV_FILE}"
+    set +a
   fi
 }
 
@@ -158,6 +171,73 @@ cmd_upgrade() {
   compose_cmd up -d --remove-orphans
 }
 
+cmd_tls() {
+  if [[ $# -ne 1 ]]; then
+    echo "Usage: brctl tls {on|off}" >&2
+    exit 1
+  fi
+
+  case "$1" in
+    on)
+      sudo sed -i 's/^ENABLE_TLS=.*/ENABLE_TLS=selfsigned/' "${ENV_FILE}" || true
+      load_env
+      echo "TLS set to selfsigned. Generate certs if needed:"
+      echo "  sudo /opt/blackroad/os/tls/generate-selfsigned.sh ${BLACKROAD_DOMAIN:-pi.local}"
+      echo "Restarting stack..."
+      compose_cmd up -d --remove-orphans
+      ;;
+    off)
+      sudo sed -i 's/^ENABLE_TLS=.*/ENABLE_TLS=none/' "${ENV_FILE}" || true
+      load_env
+      echo "TLS disabled. Restarting stack..."
+      compose_cmd up -d --remove-orphans
+      ;;
+    *)
+      echo "Usage: brctl tls {on|off}" >&2
+      exit 1
+      ;;
+  esac
+}
+
+cmd_tunnel() {
+  if [[ $# -ne 1 ]]; then
+    echo "Usage: brctl tunnel {on|off}" >&2
+    exit 1
+  fi
+
+  load_env
+
+  case "$1" in
+    on)
+      if [[ -z "${CF_TUNNEL_TOKEN:-}" ]]; then
+        echo "CF_TUNNEL_TOKEN not set in .env. Edit ${ENV_FILE}" >&2
+        exit 1
+      fi
+      compose_cmd --profile tunnel up -d cloudflared
+      echo "Cloudflare Tunnel started."
+      ;;
+    off)
+      compose_cmd --profile tunnel rm -sf cloudflared || true
+      echo "Cloudflare Tunnel stopped."
+      ;;
+    *)
+      echo "Usage: brctl tunnel {on|off}" >&2
+      exit 1
+      ;;
+  esac
+}
+
+cmd_url() {
+  load_env
+  IP="$(hostname -I | awk '{print $1}')"
+  echo "LAN HTTP:  http://${IP}"
+  if [[ "${ENABLE_TLS:-none}" == "selfsigned" ]]; then
+    echo "LAN HTTPS: https://${BLACKROAD_DOMAIN:-pi.local}  (self-signed)"
+  fi
+  echo "Grafana:   http(s)://${BLACKROAD_DOMAIN:-${IP}}/grafana"
+  echo "If Cloudflare Tunnel is on, use your Cloudflare hostname."
+}
+
 main() {
   if [[ $# -lt 1 ]]; then
     usage
@@ -178,6 +258,9 @@ main() {
     doctor) cmd_doctor "$@" ;;
     info) cmd_info "$@" ;;
     kiosk) cmd_kiosk "$@" ;;
+    tls) cmd_tls "$@" ;;
+    tunnel) cmd_tunnel "$@" ;;
+    url) cmd_url "$@" ;;
     upgrade) cmd_upgrade "$@" ;;
     help|-h|--help) usage ;;
     *)
@@ -188,31 +271,6 @@ main() {
   esac
 }
 
+load_env
 main "$@"
-ROOT="/opt/blackroad/os/docker"
-
-dc () { (cd "$ROOT" && docker compose "$@"); }
-
-case "${1:-}" in
-  up)        dc up -d;;
-  down)      dc down;;
-  restart)   dc down && dc up -d;;
-  ps)        dc ps;;
-  logs)      shift; dc logs -f "${@:-}";;
-  status)    dc ps && echo && curl -fsS http://localhost/health || true;;
-  health)    bash /opt/blackroad/os/tests/smoke.sh;;
-  doctor)
-    echo "== Docker =="; docker --version; docker info | sed -n '1,30p'
-    echo "== Compose =="; docker compose version
-    echo "== Ports =="; ss -lntp | grep -E ':80 |:443 |:5000|:7000|:8000|:8001|:9000' || true
-    ;;
-  "kiosk") shift
-    case "${1:-}" in
-      on)  systemctl --user enable --now blackroad-kiosk.service || true ;;
-      off) systemctl --user disable --now blackroad-kiosk.service || true ;;
-      *)   echo "Usage: brctl kiosk on|off" ;;
-    esac
-    ;;
-  upgrade)   dc pull && dc up -d;;
-  *)         echo "Usage: brctl {up|down|restart|ps|logs [svc]|status|health|doctor|kiosk on|off|upgrade}";;
-esac
+exit 0
