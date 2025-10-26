@@ -1,150 +1,122 @@
-"""CLI entrypoint for consent-aware reproduction."""
-
+"""Consent-aware reproduction CLI for Lucidia agents."""
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
-import sys
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, Iterable, Set
+import sys
 
-OPERATORS_DIR = Path(__file__).resolve().parent / "operators"
-if str(OPERATORS_DIR) not in sys.path:
-    sys.path.insert(0, str(OPERATORS_DIR))
+CONSENT_REQUIRED_KEYS = {"parents", "operators", "license_ok", "safety_caps"}
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-from crossover_modules import crossover_modules  # noqa: E402  pylint: disable=wrong-import-position
-
-
-def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Consent-based reproduction service")
-    parser.add_argument("--consent", type=Path, default=Path("prism/reproduction/consent-schema.json"), help="Path to consent JSON")
-    parser.add_argument("--parent-a", required=True, help="Identifier for parent A (e.g. lucidia/scribe@sha)")
-    parser.add_argument("--parent-b", required=True, help="Identifier for parent B")
-    parser.add_argument("--child", required=True, help="Child agent directory name (e.g. lucidia-hybrid)")
-    parser.add_argument("--operator", default="module_crossover", help="Reproduction operator to execute")
-    parser.add_argument("--agents-root", type=Path, default=Path("prism/agents"), help="Root directory for agent manifests")
-    return parser.parse_args()
+AGENTS_ROOT = PROJECT_ROOT / "prism" / "agents"
+OPERATORS_PACKAGE = "prism.reproduction.operators"
+OPERATOR_ALIASES = {
+    "crossover_modules": {"module_crossover"},
+}
 
 
-def _load_consent(path: Path) -> Dict:
+def load_json(path: Path) -> Dict[str, Any]:
     with path.open("r", encoding="utf-8") as handle:
         return json.load(handle)
 
 
-def _canonical_parent_id(identifier: str) -> str:
-    return identifier.split("@")[0]
+def validate_consent(consent: Dict[str, Any], required_operator: str, parent_ids: Iterable[str]) -> None:
+    missing = CONSENT_REQUIRED_KEYS - consent.keys()
+    if missing:
+        raise ValueError(f"Consent file missing required keys: {', '.join(sorted(missing))}")
+    if not consent.get("license_ok"):
+        raise ValueError("Consent validation failed: license_ok must be true.")
+    operators = set(consent.get("operators", []))
+    allowed_names = {required_operator}
+    allowed_names.update(OPERATOR_ALIASES.get(required_operator, set()))
+    if operators.isdisjoint(allowed_names):
+        raise ValueError(f"Consent does not allow operator '{required_operator}'.")
+
+    indexed_parents = _index_parents(consent.get("parents", []))
+    for parent in parent_ids:
+        if parent not in indexed_parents:
+            raise ValueError(f"Consent missing approval for parent '{parent}'.")
+        parent_entry = indexed_parents[parent]
+        if parent_entry.get("consent") is False:
+            raise ValueError(f"Parent '{parent}' explicitly denied consent.")
+        if not parent_entry.get("consent", True) and not parent_entry.get("consent_token"):
+            raise ValueError(f"Parent '{parent}' must provide consent boolean or token.")
+
+    safety = consent.get("safety_caps", {})
+    if safety.get("network_access") not in (False, None):
+        raise ValueError("Safety caps must disable network access for new agents.")
 
 
-def _agent_dir_name(identifier: str) -> str:
-    return _canonical_parent_id(identifier).replace("/", "-")
+def load_operator(name: str):
+    try:
+        return importlib.import_module(f"{OPERATORS_PACKAGE}.{name}")
+    except ModuleNotFoundError as exc:
+        raise ValueError(f"Unknown reproduction operator '{name}'.") from exc
 
 
-def _ensure_consent_flags(parent: Dict) -> Dict:
-    parent = dict(parent)
-    if "consent" not in parent:
-        parent["consent"] = bool(parent.get("consent_token"))
-    return parent
-
-
-def _validate_consent(consent: Dict, expected_parents: List[str], operator: str) -> List[str]:
-    errors: List[str] = []
-    parents = consent.get("parents")
-    if not isinstance(parents, list) or not parents:
-        errors.append("Consent must include a non-empty parents array")
-        return errors
-
-    parents = [_ensure_consent_flags(parent) for parent in parents]
-    consent["parents"] = parents
-
-    provided = {
-        _canonical_parent_id(parent.get("id", "")): parent
-        for parent in parents
-        if parent.get("id")
+def emit_lineage(child: str, parent_ids: Iterable[str], operator: str, consent_path: Path, agents_root: Path = AGENTS_ROOT) -> Path:
+    lineage = {
+        "child": child,
+        "parents": list(parent_ids),
+        "operator": operator,
+        "consent_artifact": str(consent_path),
+        "timestamp": datetime.utcnow().isoformat() + "Z",
     }
-    for expected in expected_parents:
-        if expected not in provided:
-            errors.append(f"Missing consent for parent '{expected}'")
-            continue
-        token = provided[expected].get("consent_token")
-        if not isinstance(token, str) or not token.strip():
-            errors.append(f"Parent '{expected}' is missing a consent_token")
-        if not provided[expected].get("consent"):
-            errors.append(f"Parent '{expected}' must explicitly consent")
-
-    operators = consent.get("operators")
-    if not isinstance(operators, list) or operator not in operators:
-        errors.append(f"Operator '{operator}' is not permitted by consent")
-
-    if consent.get("license_ok") is not True:
-        errors.append("License check failed; consent requires license_ok=true")
-
-    safety_caps = consent.get("safety_caps")
-    if not isinstance(safety_caps, dict):
-        errors.append("Consent must define safety_caps")
-    else:
-        for required_cap in ("network_access", "external_write"):
-            if safety_caps.get(required_cap) not in {False}:
-                errors.append(f"Safety cap '{required_cap}' must be false during reproduction")
-
-    return errors
-
-
-def _load_genome_path(root: Path, parent_identifier: str) -> Path:
-    agent_dir = root / _agent_dir_name(parent_identifier)
-    genome_path = agent_dir / "genome.yaml"
-    if not genome_path.exists():
-        raise FileNotFoundError(f"Missing genome for parent '{parent_identifier}' at {genome_path}")
-    return genome_path
-
-
-def _write_lineage(child_dir: Path, lineage: Dict) -> None:
-    lineage_path = child_dir / "lineage.json"
+    lineage_path = agents_root / child / "lineage.json"
+    lineage_path.parent.mkdir(parents=True, exist_ok=True)
     with lineage_path.open("w", encoding="utf-8") as handle:
         json.dump(lineage, handle, indent=2)
-    print(f"Lineage recorded at {lineage_path}")
+    return lineage_path
+
+
+def _index_parents(entries: Iterable[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+    index: Dict[str, Dict[str, Any]] = {}
+    for entry in entries:
+        aliases = _parent_aliases(entry.get("id"))
+        for alias in aliases:
+            index[alias] = entry
+    return index
+
+
+def _parent_aliases(identifier: Any) -> Set[str]:
+    aliases: Set[str] = set()
+    if not isinstance(identifier, str):
+        return aliases
+    aliases.add(identifier)
+    base = identifier.split("@", 1)[0]
+    aliases.add(base)
+    aliases.add(base.replace("/", "-"))
+    if "/" in base:
+        aliases.add(base.split("/", 1)[1])
+    return aliases
 
 
 def main() -> None:
-    args = _parse_args()
-    consent = _load_consent(args.consent)
+    parser = argparse.ArgumentParser(description="Consent-aware reproduction service")
+    parser.add_argument("--parent-a", required=True, help="First parent agent name")
+    parser.add_argument("--parent-b", required=True, help="Second parent agent name")
+    parser.add_argument("--child", required=True, help="Child agent name")
+    parser.add_argument("--consent", required=True, type=Path, help="Path to consent JSON file")
+    parser.add_argument("--operator", default="crossover_modules", help="Operator module to use")
+    parser.add_argument("--agents-root", default=AGENTS_ROOT, type=Path)
+    args = parser.parse_args()
 
-    expected_parents = [
-        _canonical_parent_id(args.parent_a),
-        _canonical_parent_id(args.parent_b),
-    ]
-    errors = _validate_consent(consent, expected_parents, args.operator)
-    if errors:
-        joined = "\n - ".join(errors)
-        raise ValueError(f"Consent validation failed:\n - {joined}")
+    consent_data = load_json(args.consent)
+    parent_ids = [args.parent_a, args.parent_b]
+    validate_consent(consent_data, args.operator, parent_ids)
 
-    operators = {"module_crossover": crossover_modules}
-    if args.operator not in operators:
-        raise ValueError(f"Unsupported operator '{args.operator}'")
+    operator_module = load_operator(args.operator)
+    if not hasattr(operator_module, "create_child"):
+        raise ValueError(f"Operator '{args.operator}' does not expose a create_child function.")
 
-    parent_a_path = _load_genome_path(args.agents_root, args.parent_a)
-    parent_b_path = _load_genome_path(args.agents_root, args.parent_b)
-
-    child_dir_name = args.child
-    output_path = operators[args.operator](parent_a_path, parent_b_path, child_dir_name, args.agents_root)
-
-    lineage = {
-        "child": child_dir_name,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "parents": [
-            _ensure_consent_flags(entry)
-            for entry in consent["parents"]
-            if _canonical_parent_id(entry.get("id", "")) in expected_parents
-        ],
-        "operators": [args.operator],
-        "license_ok": consent.get("license_ok"),
-        "safety_caps": consent.get("safety_caps"),
-        "outputs": {"genome": str(output_path)},
-    }
-
-    child_dir = args.agents_root / child_dir_name
-    child_dir.mkdir(parents=True, exist_ok=True)
-    _write_lineage(child_dir, lineage)
+    operator_module.create_child(args.parent_a, args.parent_b, args.child, args.agents_root)
+    emit_lineage(args.child, parent_ids, args.operator, args.consent, args.agents_root)
 
 
 if __name__ == "__main__":

@@ -3,23 +3,30 @@ version: 0.1
 base_model: local/8b-instruct.q4
 genes:
   - type: skill_lora
-    name: planner
-    path: ../../genes/loras/planner.safetensors
-    weight: 0.5
+    name: system_designer
+    path: ../../genes/loras/system_designer.safetensors
+    weight: 0.55
   - type: tool_rights
-    tools: [python, cli, file_read, file_write]
+    tools: [python, shell_exec, file_read, diagram_draw]
     rate_limits:
-      tokens_per_min: 6000
-      tool_calls_per_min: 4
+      tokens_per_min: 7000
+      tool_calls_per_min: 5
+  - type: tool_rights
+    tools: [issue_tracker, doc_search]
+    rate_limits:
+      tokens_per_min: 4000
+      tool_calls_per_min: 3
   - type: values
     policy: policies/love-first.rego
+  - type: values
+    policy: policies/safety-baseline.rego
   - type: memory
     store: qdrant://localhost:6333/agents/lucidia-engineer
 hormones:
   curiosity: 0.6
   caution: 0.7
 lifecycle:
-  phase: infant
+  phase: juvenile
   caps:
     external_write: false
     network_access: false
