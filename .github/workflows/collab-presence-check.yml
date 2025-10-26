@@ -1,0 +1,17 @@
+name: collaboration-presence-enforcement
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+jobs:
+  presence-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure collaboration discussion recorded
+        env:
+          COLLAB_DB_PATH: ${{ vars.COLLAB_DB_PATH }}
+        run: |
+          DB_PATH="${COLLAB_DB_PATH:-var/collab_bus.sqlite}"
+          python scripts/check_presence_discussion.py --pr "${{ github.event.number }}" --db "$DB_PATH"
