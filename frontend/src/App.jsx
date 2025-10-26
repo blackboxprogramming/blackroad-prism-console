@@ -32,6 +32,7 @@ import {
   Wallet,
   User,
   BookOpen,
+  GraduationCap,
 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
@@ -295,6 +296,7 @@ export default function App(){
     { key: 'orchestrator', to: '/orchestrator', text: 'Orchestrator', icon: <Rocket size={18} /> },
     { key: 'roadbook', to: '/roadbook', text: 'Roadbook', icon: <BookOpen size={18} /> },
     { key: 'manifesto', to: '/manifesto', text: 'Manifesto', icon: <BookOpen size={18} /> },
+    { key: 'homework', to: '/homework', text: 'Homework', icon: <GraduationCap size={18} /> },
     { key: 'git', to: '/git', text: 'Git', icon: <GitCommit size={18} /> },
     { key: 'subscribe', href: '/subscribe', text: 'Subscribe', icon: <Rocket size={18} /> },
     { key: 'nexus', href: '/nexus', text: 'Nexus Console', icon: <LayoutGrid size={18} /> },
