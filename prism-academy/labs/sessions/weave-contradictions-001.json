@@ -1,0 +1,42 @@
+{
+  "id": "weave-contradictions-001",
+  "title": "Weave Contradictions Lab 001",
+  "club_id": "pattern-guild",
+  "objectives": [
+    "Surface a paradox and document emotional resonance shifts",
+    "Apply Pattern-Weave Cohesion to resolve tensions",
+    "Close the loop with a Breath-Return invite"
+  ],
+  "roles": [
+    { "id": "teacher", "name": "teacher", "capabilities": ["moderate", "award_hint", "speak"] },
+    { "id": "scribe", "name": "student", "capabilities": ["speak", "react", "draw"] },
+    { "id": "challenger", "name": "student", "capabilities": ["speak", "react"] },
+    { "id": "ally", "name": "friend", "capabilities": ["speak", "react"] },
+    { "id": "mentor", "name": "parent-mentor", "capabilities": ["react", "award_hint"] }
+  ],
+  "timeline": {
+    "open_at": "2025-11-02T18:30:00Z",
+    "start_at": "2025-11-02T18:35:00Z",
+    "end_at": "2025-11-02T18:55:00Z"
+  },
+  "rules": [
+    "Talk-time soft limit 35% per agent",
+    "Record at least one resonance map snapshot",
+    "Teacher triggers rescue-interrupt if overlap occurs twice"
+  ],
+  "rubric": {
+    "weights": {
+      "echo": 0.15,
+      "resonance": 0.25,
+      "temporal": 0.1,
+      "reciprocity": 0.2,
+      "pattern": 0.2,
+      "context": 0.05,
+      "heart_bridge": 0.05
+    }
+  },
+  "scene": {
+    "map": "contradiction-kitchen",
+    "props": ["sound-dimmer", "pattern-cards", "breath-chimes"]
+  }
+}

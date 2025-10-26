@@ -1,0 +1,9 @@
+{
+  "id": "badge-grounded",
+  "name": "Grounded",
+  "icon": "\u26f0\ufe0f\ud83e\udddb",
+  "criteria": "Cite context/source",
+  "evidence": [
+    "source.citation:true"
+  ]
+}

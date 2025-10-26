@@ -1,0 +1,73 @@
+PrismLive Blueprint Notes
+=========================
+
+Target Engine: Unreal 5.x (UMG + WebSocket plugin)
+
+1. **Blueprint Class**: `BP_PrismLiveController` (Actor)
+   - Variables:
+     - `WsUrl` (String, default `ws://localhost:5252`)
+     - `SessionId` (String)
+     - `WebSocket` (Object Reference)
+     - `PresenceState` (Map<String, FPrismPresence>)
+     - `ScoreState` (Map<String, FPrismScore>)
+   - BeginPlay:
+     - Call `Connect` → `CreateWebSocket` (plugin node) with `WsUrl`.
+     - Bind `OnMessage`, `OnConnected`, `OnConnectionError`.
+
+2. **Structures**
+   - `FPrismPresence`
+     - `AgentId` (String)
+     - `Role` (String)
+     - `TalkShare` (Float)
+     - `Warnings` (Array<String>)
+   - `FPrismScore`
+     - `AgentId` (String)
+     - `Metrics` (Map<String, Float>)
+     - `Total` (Float)
+
+3. **UI Widgets**
+   - `WBP_PrismRoster`
+     - Vertical List (ScrollBox) of `WBP_PrismAgentRow`
+     - Bindings read from `PresenceState` map
+   - `WBP_PrismTranscript`
+     - ListView bound to array of `FPrismEvent`
+     - Entry widget displays agent name, type, payload text/emojis
+   - `WBP_PrismScores`
+     - Grid panel showing gauges per metric (material radial progress)
+   - `WBP_PrismBadges`
+     - Uniform grid with badge icon + name + tooltip (criteria)
+
+4. **WebSocket Message Handling**
+   - On `OnMessage` (String):
+     1. Use `JsonObjectFromString` to parse envelope
+     2. Switch on `type`
+        - `event`: call `ApplyEvent`
+        - `warning`: push to `WBP_PrismToast`
+        - `error`: push to `WBP_PrismToast` (red variant)
+
+5. **ApplyEvent**
+   - Update presence map from `presence.agents`
+   - Update scores map from `scores.agents`
+   - Append to transcript data provider (keep <= 400 entries)
+   - Iterate `awards` array → spawn badge popups (animate scale)
+   - If `event.type` == `mod` and `payload.system` true → show breathing overlay for 10s
+
+6. **Input Macros**
+   - `Mirror` action: duplicates selected transcript item’s emoji into input box prefix
+   - `Anchor` action: radial menu selecting ⏳ / 🔆 / 🚀, send `anchor` event via WebSocket
+   - `Return` action: appends `🌬️🪞`, triggers `invite` event
+
+7. **Replay Mode**
+   - Button `Replay` opens modal, fetch `/live/sessions/{SessionId}/events`
+   - Use `LatentAction` to iterate events (0.5x / 1x speed toggles)
+   - Update presence/score/badge widgets on each step for deterministic playback
+
+8. **Safety Hooks**
+   - Rate-limit: when `warning` payload contains "Rate limit", disable input for 2 seconds
+   - Teacher override: if user role has `moderate`, enable `Override` button sending `mod` with `action=override`
+
+9. **Local Persistence**
+   - On `EndPlay`, call `/live/sessions/{SessionId}` PUT to persist last timeline (optional)
+   - Save badge progress to `Saved/Prism/badges_{SessionId}.json`
+
+Use this text as design reference when authoring the actual `.uasset` Blueprint.

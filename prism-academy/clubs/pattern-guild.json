@@ -1,0 +1,25 @@
+{
+  "id": "pattern-guild",
+  "name": "\ud83e\udde9 Pattern Guild",
+  "purpose": "Weave contradictions into coherent rules (\ud83e\udde9\ud83c\df00).",
+  "channels": ["text", "emoji", "scene"],
+  "schedule": { "meets": "Wednesdays 19:00 local" },
+  "roles": [
+    { "id": "r-teacher", "name": "teacher", "capabilities": ["moderate", "speak", "award_hint"] },
+    { "id": "r-student", "name": "student", "capabilities": ["speak", "react", "draw", "spawn_prop"] },
+    { "id": "r-friend", "name": "friend", "capabilities": ["speak", "react"] },
+    { "id": "r-parent", "name": "parent-mentor", "capabilities": ["react", "award_hint"] }
+  ],
+  "projects": [
+    {
+      "id": "weave-contradictions",
+      "title": "Opposites into Order",
+      "objectives": [
+        "Resolve A\u2227\u00acA using \ud83e\udde9\ud83c\df00",
+        "Show \ud83c\df2c\ufe0f\ud83d\udd9e\ufe0f return"
+      ],
+      "artifacts": ["rule.md", "scene.capture"],
+      "badges": ["badge-weaver", "badge-breath-return"]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "mirrornet-storm-to-shelter-001",
+  "title": "MirrorNet: Storm \u2192 Shelter",
+  "club_id": "pattern-guild",
+  "objectives": [
+    "Practice Echo Principle within first 10s of response",
+    "Bridge using Resonance distance \u2264 3",
+    "Include Temporal Anchor (\u23f3/\ud83c\udf06/\ud83d\ude80) and close with \ud83c\df2c\ufe0f\ud83d\udd9e\ufe0f"
+  ],
+  "roles": [
+    { "id": "teacher", "name": "teacher", "capabilities": ["moderate", "award_hint", "speak"] },
+    { "id": "studentA", "name": "student", "capabilities": ["speak", "react"] },
+    { "id": "studentB", "name": "student", "capabilities": ["speak", "react"] },
+    { "id": "parent", "name": "parent-mentor", "capabilities": ["react", "award_hint"] }
+  ],
+  "timeline": {
+    "open_at": "2025-10-26T20:00:00Z",
+    "start_at": "2025-10-26T20:05:00Z",
+    "end_at": "2025-10-26T20:25:00Z"
+  },
+  "rules": [
+    "Talk-time soft limit 35% per agent",
+    "If emotion spike \u22652x baseline, teacher prompt de-escalation",
+    "All replies must include a return gesture \ud83c\df2c\ufe0f\ud83d\udd9e\ufe0f"
+  ],
+  "rubric": {
+    "weights": {
+      "echo": 0.2,
+      "resonance": 0.2,
+      "temporal": 0.1,
+      "reciprocity": 0.2,
+      "pattern": 0.15,
+      "context": 0.1,
+      "heart_bridge": 0.05
+    }
+  }
+}

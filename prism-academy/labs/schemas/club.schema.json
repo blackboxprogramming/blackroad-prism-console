@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PrismClub",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "purpose",
+    "channels",
+    "schedule",
+    "roles",
+    "projects"
+  ],
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "purpose": { "type": "string" },
+    "channels": {
+      "type": "array",
+      "items": { "enum": ["text", "emoji", "scene", "audio"] }
+    },
+    "schedule": {
+      "type": "object",
+      "properties": {
+        "meets": { "type": "string" }
+      },
+      "required": ["meets"],
+      "additionalProperties": false
+    },
+    "roles": {
+      "type": "array",
+      "items": { "$ref": "role.schema.json" }
+    },
+    "projects": {
+      "type": "array",
+      "items": { "$ref": "project.schema.json" }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,10 @@
+{
+  "id": "badge-anchored",
+  "name": "Anchored",
+  "icon": "\u23f3\ud83c\udf06\ud83d\ude80",
+  "criteria": "Uses proper temporal anchor linked to claim",
+  "evidence": [
+    "anchor.type:any",
+    "anchor.has_link:true"
+  ]
+}

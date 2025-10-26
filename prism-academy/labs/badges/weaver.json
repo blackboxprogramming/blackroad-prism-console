@@ -1,0 +1,10 @@
+{
+  "id": "badge-weaver",
+  "name": "Weaver",
+  "icon": "\ud83e\udde9\ud83c\df00",
+  "criteria": "Resolve contradiction into rule",
+  "evidence": [
+    "weave.claims:>=2",
+    "weave.rule:true"
+  ]
+}

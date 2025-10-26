@@ -1,0 +1,12 @@
+{
+  "id": "heart-math-bridge",
+  "title": "Heart-Math Bridge",
+  "description": "Tie intuition notes to shared rules and evidence.",
+  "objectives": [
+    "Collect three heart-notes",
+    "Translate into rule candidate",
+    "Ground with at least one source"
+  ],
+  "artifacts": ["bridge.md", "evidence.json", "return-note.txt"],
+  "badges": ["badge-heart-link", "badge-grounded", "badge-breath-return"]
+}
