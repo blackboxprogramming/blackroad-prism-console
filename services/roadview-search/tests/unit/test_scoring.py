@@ -1,64 +1,60 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
-import pytest
-
-from roadview.models import BiasEnum, Domain, Document
+from roadview.config import get_settings
 from roadview.ranking.scoring import (
-    BIAS_KEYWORDS,
-    apply_bias_normalizer,
-    scale_confidence,
-    score_document,
-    to_breakdown,
+    RankedDocument,
+    bias_recency_adjustment,
+    normalize_confidence,
+    penalty_score,
+    recency_score,
+    structure_score,
 )
 
 
-def _build_document(**overrides):
-    defaults = dict(
-        id="doc-1",
-        title="Sample",
-        snippet="",
-        url="https://example.com/sample",
+def test_recency_score_recent():
+    now = datetime.utcnow()
+    assert recency_score(now - timedelta(days=10), today=now) > recency_score(now - timedelta(days=400), today=now)
+
+
+def test_structure_score_weights():
+    assert structure_score(True, True, False) == 0.75
+
+
+def test_penalty_score_applies_old_and_short():
+    now = datetime.utcnow()
+    penalty = penalty_score(now - timedelta(days=365 * 6), 100, today=now)
+    assert penalty <= -0.15
+
+
+def test_bias_recency_adjustment_bounds():
+    adjustment = bias_recency_adjustment(["left", "policy"], "left")
+    settings = get_settings()
+    assert 0 < adjustment <= settings.weight_recency / 2
+
+
+def test_confidence_normalization():
+    confidences = normalize_confidence([0.2, 0.6, 0.6])
+    assert confidences[0] == 0.0
+    assert confidences[1] == 1.0
+
+
+def test_ranked_document_breakdown_sums():
+    doc = RankedDocument(
+        id="1",
+        title="Test",
+        snippet="Snippet",
+        url="https://example.com",
         domain="example.com",
-        sourceType="news",
+        source_type="news",
         bias="center",
-        credScore=80,
-        publishedAt=datetime.now(timezone.utc) - timedelta(days=30),
-        content="content",
-        author="author",
-        hasCanonical=True,
-        hasAuthor=True,
-        hasDate=True,
-        tokens="word " * 500,
+        published_at=datetime.utcnow(),
+        cred_score=80,
+        text_score=0.5,
+        domain_score=0.8,
+        recency_score=0.9,
+        structure_score=0.5,
+        penalty=-0.1,
     )
-    defaults.update(overrides)
-    return Document(**defaults)
-
-
-def test_score_breakdown_matches_total():
-    document = _build_document()
-    domain = Domain(name="example.com", baseCred=80, bias=BiasEnum.center)
-    weights = {"text": 0.55, "domain": 0.25, "recency": 0.15, "structure": 0.05}
-    scored = score_document(
-        document=document,
-        domain=domain,
-        text_similarity=0.8,
-        weights=weights,
-        query_tokens=["policy"],
-    )
-    breakdown = to_breakdown(scored)
-    reconstructed = (
-        breakdown.text + breakdown.domain + breakdown.recency + breakdown.structure + breakdown.penalty
-    )
-    assert abs(reconstructed - scored.total) < 1e-6
-
-
-def test_confidence_scaling_handles_identical_scores():
-    confidences = scale_confidence([0.5, 0.5])
-    assert confidences == [1.0, 1.0]
-
-
-def test_bias_normalizer_increases_recency_for_ideological_query():
-    base = 0.5
-    boosted = apply_bias_normalizer([next(iter(BIAS_KEYWORDS))], "left", base)
-    assert boosted >= base
-    assert pytest.approx(0.02, abs=1e-6) == boosted - base
+    breakdown = doc.breakdown()
+    total = breakdown.text + breakdown.domain + breakdown.recency + breakdown.structure + breakdown.penalty
+    assert abs(total - doc.total_score) < 1e-6

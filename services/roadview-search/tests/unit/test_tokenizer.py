@@ -1,15 +1,13 @@
-from roadview.services.tokenizer import Tokenizer
+from roadview.services.tokenizer import tokenize
 
 
-def test_tokenizer_removes_stopwords_and_lowercases():
-    tokenizer = Tokenizer()
-    tokens = tokenizer.tokenize("The Quick Brown Fox and the Lazy Dog")
-    assert "the" not in tokens
-    assert tokens[0] == "quick"
+def test_tokenize_removes_stopwords_and_lowercases():
+    text = "The Quick Brown Fox jumps over the Lazy Dog"
+    tokens = tokenize(text)
+    assert tokens == ["quick", "brown", "fox", "jumps", "over", "lazy", "dog"]
 
 
-def test_tokenizer_handles_unicode_words():
-    tokenizer = Tokenizer()
-    tokens = tokenizer.tokenize("Curaçao cafés serve crème brûlée")
-    assert "curaçao" in tokens
-    assert "cafés" in tokens
+def test_tokenize_handles_unicode():
+    text = "Café naïve façade résumé"
+    tokens = tokenize(text)
+    assert "café" in tokens and "naïve" in tokens

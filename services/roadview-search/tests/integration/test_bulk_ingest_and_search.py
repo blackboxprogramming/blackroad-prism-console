@@ -1,65 +1,41 @@
-import json
-from importlib import reload
-
 import pytest
-from httpx import ASGITransport, AsyncClient
+from httpx import AsyncClient
 
-import roadview.config
-import roadview.main
-from roadview.models import IndexRequestDocument
+from roadview.main import app
 
 
 @pytest.mark.asyncio
-async def test_bulk_ingest_and_search(tmp_path, monkeypatch):
-    db_path = tmp_path / "search.db"
-    monkeypatch.setenv("ROADVIEW_DB_URL", f"sqlite+aiosqlite:///{db_path}")
-    monkeypatch.setenv("ROADVIEW_ENV", "test")
-    reload(roadview.config)
-    reload(roadview.main)
-    app = roadview.main.app
+async def test_bulk_ingest_and_search_flow():
+    async with AsyncClient(app=app, base_url="http://test") as client:
+        payload = {
+            "docs": [
+                {
+                    "title": "Science policy update",
+                    "url": "https://updates.example.com/science",
+                    "sourceType": "news",
+                    "bias": "center",
+                    "publishedAt": "2024-01-10",
+                    "content": "Science policy update with new funding for research institutions.",
+                    "author": "Reporter",
+                },
+                {
+                    "title": "Government issues health advisory",
+                    "url": "https://gov.example.com/health",
+                    "sourceType": "gov",
+                    "bias": "na",
+                    "publishedAt": "2024-01-05",
+                    "content": "Health advisory for citizens with safety recommendations and statistics.",
+                    "author": "Agency",
+                },
+            ]
+        }
+        ingest_response = await client.post("/api/index/bulk", json=payload)
+        assert ingest_response.status_code == 200
+        assert ingest_response.json()["indexed"] == 2
 
-    docs = [
-        IndexRequestDocument(
-            title="Infrastructure Spotlight",
-            url="https://news.integration.test/infra",
-            sourceType="news",
-            bias="center",
-            publishedAt="2023-01-01T00:00:00Z",
-            content="In-depth infrastructure plan with data and accountability." * 10,
-            author="Jamie",
-            hasCanonical=True,
-        ),
-        IndexRequestDocument(
-            title="Policy Debate",
-            url="https://blog.integration.test/policy",
-            sourceType="blog",
-            bias="left",
-            publishedAt="2022-06-15T00:00:00Z",
-            content="Policy debate explores equitable transit-oriented development." * 12,
-            author="Sky",
-            hasCanonical=False,
-        ),
-    ]
-
-    await app.router.startup()
-    try:
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            response = await client.post(
-                "/api/index/bulk",
-                json={"docs": [json.loads(doc.json()) for doc in docs]},
-            )
-            assert response.status_code == 200
-            assert response.json()["indexed"] == len(docs)
-
-            search_response = await client.get("/api/search", params={"q": "infrastructure policy"})
-            assert search_response.status_code == 200
-            payload = search_response.json()
-            assert payload["meta"]["total"] >= 2
-            assert payload["results"][0]["scoreBreakdown"]
-            top = payload["results"][0]
-            breakdown = top["scoreBreakdown"]
-            reconstructed = breakdown["text"] + breakdown["domain"] + breakdown["recency"] + breakdown["structure"] + breakdown["penalty"]
-            assert pytest.approx(reconstructed, rel=1e-6) == top["score"]
-    finally:
-        await app.router.shutdown()
+        search_response = await client.get("/api/search", params={"q": "health"})
+        body = search_response.json()
+        assert body["meta"]["total"] >= 1
+        assert all("scoreBreakdown" in result for result in body["results"])
+        assert body["facets"]["domains"]
+        assert body["meta"]["page"] == 1

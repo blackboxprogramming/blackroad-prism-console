@@ -1,12 +1,15 @@
-POETRY ?= poetry
-
 .PHONY: dev lint type test contract build run openapi
 
+export POETRY := poetry
+
+venv:
+$(POETRY) install
+
 dev:
-$(POETRY) run uvicorn roadview.main:app --reload --port $${ROADVIEW_PORT:-4001}
+ROADVIEW_PORT=$${ROADVIEW_PORT:-4001} $(POETRY) run uvicorn src.roadview.main:app --reload --port $${ROADVIEW_PORT:-4001}
 
 lint:
-$(POETRY) run ruff check src
+$(POETRY) run ruff check .
 
 type:
 $(POETRY) run mypy src
@@ -16,13 +19,13 @@ $(POETRY) run pytest -q --maxfail=1 --disable-warnings --cov=src --cov-report=te
 
 contract:
 $(POETRY) run python -m scripts.export_openapi
-$(POETRY) run schemathesis run http://localhost:$${ROADVIEW_PORT:-4001}/openapi.json --checks all --hypothesis-max-examples 25
+$(POETRY) run schemathesis run http://localhost:4001/openapi.json --checks all --hypothesis-max-examples 25
 
 build:
-docker build -t blackroad-roadview:dev .
+$(POETRY) run docker build -t blackroad-roadview:dev .
 
 run:
-docker compose up --build
+docker-compose up --build
 
 openapi:
 $(POETRY) run python -m scripts.export_openapi

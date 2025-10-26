@@ -1,207 +1,218 @@
 from __future__ import annotations
 
-import json
+import math
+import uuid
+from collections import Counter, defaultdict
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
-from datetime import datetime
-from typing import Iterable, List, Optional
+from datetime import datetime, timezone
+from typing import AsyncGenerator, Iterable, Sequence
 from urllib.parse import urlparse
-from uuid import uuid4
 
-from dateutil import parser as date_parser
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
+from dateutil import parser
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-from .models import BiasEnum, Domain, DomainPolicyEnum, Document, IndexRequestDocument, SourceTypeEnum
-from .services.tokenizer import Tokenizer
-
-
-@dataclass
-class RepositoryConfig:
-    db_url: str
+from .config import get_settings
+from .models import BiasEnum, BulkDocumentInput, Document, Domain, PolicyEnum
+from .services.tokenizer import tokenize
 
 
-class RoadviewRepository:
-    def __init__(self, engine: AsyncEngine, tokenizer: Tokenizer):
-        self._engine = engine
-        self._tokenizer = tokenizer
-        self._session_factory = sessionmaker(
-            engine, expire_on_commit=False, class_=AsyncSession
-        )
+settings = get_settings()
+engine: AsyncEngine = create_async_engine(settings.db_url, echo=False, future=True)
+async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-    @property
-    def engine(self) -> AsyncEngine:
-        return self._engine
 
-    @asynccontextmanager
-    async def session(self) -> Iterable[AsyncSession]:
-        async with self._session_factory() as session:
-            yield session
+async def init_db() -> None:
+    async with engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.create_all)
 
-    async def init_db(self) -> None:
-        async with self._engine.begin() as conn:
-            await conn.run_sync(SQLModel.metadata.create_all)
 
-    async def list_domains(self) -> List[Domain]:
-        async with self.session() as session:
-            result = await session.execute(select(Domain))
-            domains = result.scalars().all()
-        return list(domains)
+@asynccontextmanager
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    async with async_session() as session:
+        yield session
 
-    async def upsert_domain(self, payload: Domain) -> tuple[Domain, bool]:
-        async with self.session() as session:
-            payload.updatedAt = datetime.utcnow()
-            domain = await session.get(Domain, payload.name)
-            created = domain is None
-            if domain:
-                for field in ("displayName", "bias", "baseCred", "policy"):
-                    setattr(domain, field, getattr(payload, field))
-                domain.updatedAt = payload.updatedAt
-            else:
-                domain = payload
-                session.add(domain)
-            await session.commit()
-            await session.refresh(domain)
-        return domain, created
 
-    async def ensure_domain(self, name: str) -> Domain:
-        domain = Domain(name=name)
-        domain, _ = await self.upsert_domain(domain)
-        return domain
+def _extract_domain(url: str, override: str | None = None) -> str:
+    if override:
+        return override.lower()
+    parsed = urlparse(url)
+    return parsed.netloc.lower()
 
-    async def bulk_index_documents(self, docs: List[IndexRequestDocument]) -> int:
-        indexed = 0
-        async with self.session() as session:
-            for payload in docs:
-                normalized = await self._normalize_index_payload(session, payload)
-                if not normalized:
-                    continue
-                session.add(normalized)
-                indexed += 1
-            await session.commit()
-        return indexed
 
-    async def _normalize_index_payload(
-        self, session: AsyncSession, payload: IndexRequestDocument
-    ) -> Optional[Document]:
-        domain_name = payload.domain or self._extract_domain(payload.url)
-        if not domain_name:
-            return None
-        domain = await session.get(Domain, domain_name)
-        if domain is None:
-            domain = Domain(name=domain_name)
-            session.add(domain)
-            await session.flush()
-        elif domain.policy == DomainPolicyEnum.block:
-            return None
+def _normalize_booleans(doc: BulkDocumentInput, content_tokens: list[str]) -> tuple[bool, bool, bool]:
+    has_author = bool((doc.author or "").strip())
+    has_date = doc.publishedAt is not None
+    has_canonical = doc.hasCanonical if doc.hasCanonical is not None else "rel=\"canonical\"" in doc.content
+    return has_author, has_date, has_canonical
 
-        published_at = self._parse_date(payload.publishedAt)
-        tokens = self._tokenizer.tokenize(payload.content)
-        if not tokens:
-            return None
 
-        has_author = bool(payload.author)
-        has_date = bool(published_at)
-        has_canonical = bool(payload.hasCanonical)
-        snippet = payload.content.strip().replace("\n", " ")[:320]
-        bias = payload.bias if payload.bias != BiasEnum.na else domain.bias
+def _parse_date(raw: str | None) -> datetime | None:
+    if not raw:
+        return None
+    try:
+        dt = parser.parse(raw)
+        if not dt.tzinfo:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except (ValueError, TypeError, OverflowError):
+        return None
+
+
+async def upsert_domain(
+    session: AsyncSession,
+    domain_name: str,
+    *,
+    display_name: str | None = None,
+    bias: BiasEnum | str | None = None,
+    base_cred: int | None = None,
+    policy: PolicyEnum | str | None = None,
+) -> Domain:
+    stmt = select(Domain).where(Domain.name == domain_name)
+    result = await session.exec(stmt)
+    existing = result.one_or_none()
+    now = datetime.now(timezone.utc)
+    if existing:
+        if display_name is not None:
+            existing.displayName = display_name
+        if bias is not None:
+            existing.bias = BiasEnum(bias)
+        if base_cred is not None:
+            existing.baseCred = base_cred
+        if policy is not None:
+            existing.policy = PolicyEnum(policy)
+        existing.updatedAt = now
+        session.add(existing)
+        await session.commit()
+        await session.refresh(existing)
+        existing.updatedAt = _ensure_timezone(existing.updatedAt)
+        return existing
+    domain = Domain(
+        name=domain_name,
+        displayName=display_name,
+        bias=BiasEnum(bias) if bias is not None else BiasEnum.na,
+        baseCred=base_cred or 60,
+        policy=PolicyEnum(policy) if policy is not None else PolicyEnum.allow,
+        updatedAt=now,
+    )
+    session.add(domain)
+    await session.commit()
+    await session.refresh(domain)
+    domain.updatedAt = _ensure_timezone(domain.updatedAt)
+    return domain
+
+
+def _ensure_timezone(value: datetime | None) -> datetime | None:
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
+async def get_domain(session: AsyncSession, domain_name: str) -> Domain | None:
+    stmt = select(Domain).where(Domain.name == domain_name)
+    result = await session.exec(stmt)
+    return result.one_or_none()
+
+
+async def list_domains(session: AsyncSession) -> list[Domain]:
+    stmt = select(Domain)
+    result = await session.exec(stmt)
+    return list(result)
+
+
+def _tokenize_content(content: str) -> tuple[str, list[str]]:
+    tokens = tokenize(content)
+    return " ".join(tokens), tokens
+
+
+def _tf(tokens: Iterable[str]) -> Counter[str]:
+    counts: Counter[str] = Counter(tokens)
+    total = sum(counts.values())
+    for term in list(counts):
+        counts[term] = counts[term] / total
+    return counts
+
+
+def compute_idf(documents: Sequence[list[str]]) -> dict[str, float]:
+    doc_count = len(documents)
+    df: defaultdict[str, int] = defaultdict(int)
+    for tokens in documents:
+        seen = set(tokens)
+        for token in seen:
+            df[token] += 1
+    idf: dict[str, float] = {}
+    for token, freq in df.items():
+        idf[token] = math.log((doc_count + 1) / (freq + 1)) + 1
+    return idf
+
+
+def compute_tfidf(tokens: list[str], idf: dict[str, float]) -> dict[str, float]:
+    tf = _tf(tokens)
+    return {term: tf[term] * idf.get(term, 0.0) for term in tf}
+
+
+async def bulk_index(session: AsyncSession, docs: list[BulkDocumentInput]) -> int:
+    indexed = 0
+    for doc in docs:
+        domain_name = _extract_domain(doc.url, doc.domain)
+        existing_domain = await get_domain(session, domain_name)
+        if existing_domain and existing_domain.policy == PolicyEnum.block:
+            continue
+        if existing_domain is None:
+            existing_domain = await upsert_domain(session, domain_name)
+        elif existing_domain.policy == PolicyEnum.block:
+            continue
+        content_tokens_str, tokens = _tokenize_content(doc.content)
+        has_author, has_date, has_canonical = _normalize_booleans(doc, tokens)
+        published_at = _parse_date(doc.publishedAt)
         document = Document(
-            id=str(uuid4()),
-            title=payload.title,
-            snippet=snippet,
-            url=payload.url,
-            domain=domain.name,
-            sourceType=payload.sourceType,
-            bias=bias,
-            credScore=domain.baseCred,
+            id=str(uuid.uuid4()),
+            title=doc.title,
+            url=doc.url,
+            domain=domain_name,
+            sourceType=doc.sourceType,
+            bias=doc.bias,
             publishedAt=published_at,
-            content=payload.content,
-            author=payload.author,
+            content=doc.content,
+            author=doc.author,
             hasCanonical=has_canonical,
             hasAuthor=has_author,
             hasDate=has_date,
-            tokens=" ".join(tokens),
+            tokens=content_tokens_str,
         )
-        return document
-
-    async def curated_seed_count(self, path: str) -> int:
-        with open(path, "r", encoding="utf-8") as handle:
-            data = json.load(handle)
-        docs = [IndexRequestDocument(**item) for item in data.get("docs", [])]
-        return await self.bulk_index_documents(docs)
-
-    async def get_corpus_size(self) -> int:
-        async with self.session() as session:
-            result = await session.execute(select(Document))
-            return len(result.scalars().all())
-
-    async def get_domains_count(self) -> int:
-        async with self.session() as session:
-            result = await session.execute(select(Domain))
-            return len(result.scalars().all())
-
-    async def get_documents_for_search(self) -> list[tuple[Document, Domain]]:
-        async with self.session() as session:
-            result = await session.execute(select(Document, Domain).join(Domain))
-            rows = result.all()
-        return [(row[0], row[1]) for row in rows]
-
-    async def query_documents(
-        self,
-        *,
-        source_type: Optional[SourceTypeEnum] = None,
-        bias: Optional[BiasEnum] = None,
-        min_cred: Optional[int] = None,
-        from_date: Optional[datetime] = None,
-        to_date: Optional[datetime] = None,
-    ) -> list[tuple[Document, Domain]]:
-        async with self.session() as session:
-            stmt = select(Document, Domain).join(Domain)
-            if source_type:
-                stmt = stmt.where(Document.sourceType == source_type)
-            if bias:
-                stmt = stmt.where(Document.bias == bias)
-            if min_cred is not None:
-                stmt = stmt.where(Document.credScore >= min_cred)
-            if from_date:
-                stmt = stmt.where(Document.publishedAt >= from_date)
-            if to_date:
-                stmt = stmt.where(Document.publishedAt <= to_date)
-            stmt = stmt.where(Domain.policy != DomainPolicyEnum.block)
-            result = await session.execute(stmt)
-            rows = [row for row in result.all() if row[1].policy != DomainPolicyEnum.noindex]
-        return [(row[0], row[1]) for row in rows]
-
-    async def upsert_domains_bulk(self, domains: List[Domain]) -> List[Domain]:
-        saved: List[Domain] = []
-        for domain in domains:
-            saved_domain, _ = await self.upsert_domain(domain)
-            saved.append(saved_domain)
-        return saved
-
-    def _extract_domain(self, url: str) -> Optional[str]:
-        try:
-            parsed = urlparse(url)
-        except ValueError:
-            return None
-        return parsed.netloc or None
-
-    def _parse_date(self, date_str: Optional[str]) -> Optional[datetime]:
-        if not date_str:
-            return None
-        try:
-            parsed = date_parser.parse(date_str)
-        except (ValueError, TypeError, OverflowError):
-            return None
-        return parsed
+        session.add(document)
+        indexed += 1
+    await session.commit()
+    return indexed
 
 
-def create_engine_from_config(config: RepositoryConfig) -> AsyncEngine:
-    return create_async_engine(config.db_url, future=True, echo=False)
+async def load_corpus(session: AsyncSession) -> list[Document]:
+    stmt = select(Document)
+    result = await session.exec(stmt)
+    return list(result)
 
 
-def create_repository(db_url: str, tokenizer: Tokenizer) -> RoadviewRepository:
-    engine = create_async_engine(db_url, future=True, echo=False)
-    return RoadviewRepository(engine, tokenizer)
+async def load_documents_with_domains(session: AsyncSession) -> list[tuple[Document, Domain]]:
+    stmt = select(Document, Domain).join(Domain, Document.domain == Domain.name)
+    result = await session.exec(stmt)
+    return [(doc, domain) for doc, domain in result]
+
+
+async def count_documents(session: AsyncSession) -> int:
+    stmt = select(Document)
+    result = await session.exec(stmt)
+    return len(list(result))
+
+
+async def count_domains(session: AsyncSession) -> int:
+    stmt = select(Domain)
+    result = await session.exec(stmt)
+    return len(list(result))
+
+
+def tokens_from_document(doc: Document) -> list[str]:
+    return doc.tokens.split() if doc.tokens else []
