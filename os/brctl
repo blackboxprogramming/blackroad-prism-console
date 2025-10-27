@@ -1,29 +1,119 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
 ROOT="/opt/blackroad/os/docker"
+STACK_SERVICE="blackroad-compose.service"
+KIOSK_SERVICE="blackroad-kiosk.service"
 
-dc () { (cd "$ROOT" && docker compose "$@"); }
+usage() {
+  cat <<USAGE
+Usage: brctl <command> [args]
 
-case "${1:-}" in
-  up)        dc up -d;;
-  down)      dc down;;
-  restart)   dc down && dc up -d;;
-  ps)        dc ps;;
-  logs)      shift; dc logs -f "${@:-}";;
-  status)    dc ps && echo && curl -fsS http://localhost/health || true;;
-  health)    bash /opt/blackroad/os/tests/smoke.sh;;
-  doctor)
-    echo "== Docker =="; docker --version; docker info | sed -n '1,30p'
-    echo "== Compose =="; docker compose version
-    echo "== Ports =="; ss -lntp | grep -E ':80 |:443 |:5000|:7000|:8000|:8001|:9000' || true
-    ;;
-  "kiosk") shift
-    case "${1:-}" in
-      on)  systemctl --user enable --now blackroad-kiosk.service || true ;;
-      off) systemctl --user disable --now blackroad-kiosk.service || true ;;
-      *)   echo "Usage: brctl kiosk on|off" ;;
-    esac
-    ;;
-  upgrade)   dc pull && dc up -d;;
-  *)         echo "Usage: brctl {up|down|restart|ps|logs [svc]|status|health|doctor|kiosk on|off|upgrade}";;
-esac
+Commands:
+  up                Start the docker compose stack
+  down              Stop the stack
+  restart           Restart the stack
+  ps                Show container status
+  logs [service]    Tail logs (defaults to all)
+  status            Summarise stack and systemd status
+  health            Run smoke tests against the stack
+  doctor            Run environment diagnostics
+  kiosk on|off      Enable/disable kiosk user service
+  upgrade           Pull latest images and redeploy
+  help              Show this message
+USAGE
+}
+
+require_stack() {
+  if [[ ! -d "${ROOT}" ]]; then
+    echo "Docker compose directory not found at ${ROOT}" >&2
+    exit 1
+  fi
+}
+
+dc() {
+  require_stack
+  (cd "${ROOT}" && docker compose "$@")
+}
+
+cmd_up() { dc up -d --remove-orphans; }
+cmd_down() { dc down; }
+cmd_restart() { cmd_down; cmd_up; }
+cmd_ps() { dc ps; }
+cmd_logs() {
+  if [[ $# -gt 0 ]]; then
+    dc logs -f "$1"
+  else
+    dc logs -f
+  fi
+}
+
+cmd_status() {
+  echo "systemd (${STACK_SERVICE}):"
+  systemctl --no-pager status "${STACK_SERVICE}" 2>/dev/null || echo "  unavailable"
+  echo
+  dc ps
+}
+
+cmd_health() {
+  bash /opt/blackroad/os/tests/smoke.sh
+}
+
+cmd_doctor() {
+  echo "== Docker =="
+  docker --version || echo "docker missing"
+  echo "== Compose =="
+  docker compose version || echo "compose missing"
+  echo "== Ports =="
+  ss -lntp | grep -E ':80 |:443 |:5000|:7000|:8000|:8001|:9000' || true
+  echo
+  cmd_health || true
+}
+
+cmd_kiosk() {
+  if [[ $# -ne 1 ]]; then
+    echo "Usage: brctl kiosk on|off" >&2
+    exit 1
+  fi
+  case "$1" in
+    on)  systemctl --user enable --now "${KIOSK_SERVICE}" || true ;;
+    off) systemctl --user disable --now "${KIOSK_SERVICE}" || true ;;
+    *)   echo "Usage: brctl kiosk on|off" >&2; exit 1 ;;
+  esac
+}
+
+cmd_upgrade() {
+  dc pull
+  dc up -d --remove-orphans
+}
+
+main() {
+  if [[ $# -lt 1 ]]; then
+    usage
+    exit 1
+  fi
+
+  cmd="$1"
+  shift || true
+
+  case "${cmd}" in
+    up) cmd_up "$@" ;;
+    down) cmd_down "$@" ;;
+    restart) cmd_restart "$@" ;;
+    ps) cmd_ps "$@" ;;
+    logs) cmd_logs "$@" ;;
+    status) cmd_status "$@" ;;
+    health) cmd_health "$@" ;;
+    doctor) cmd_doctor "$@" ;;
+    kiosk) cmd_kiosk "$@" ;;
+    upgrade) cmd_upgrade "$@" ;;
+    help|-h|--help) usage ;;
+    *)
+      echo "Unknown command: ${cmd}" >&2
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"
