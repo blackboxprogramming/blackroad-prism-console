@@ -5,10 +5,12 @@ from __future__ import annotations
 import asyncio
 import functools
 import json
+import re
 import subprocess
 import uuid
+from asyncio.subprocess import PIPE as ASYNC_PIPE
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from fastapi import FastAPI, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
@@ -44,6 +46,84 @@ def _local_transcribe(path: str, model: str, lang: str, beam: int) -> List[str]:
 
 
 _LOCAL_MODEL_CACHE: Dict[Tuple[str, str], object] = {}
+
+
+_PING_COUNT = 2
+_PING_TIMEOUT_S = 2
+_PING_PACKET_RE = re.compile(
+    r"(?P<sent>\d+)\s+packets transmitted,\s+(?P<received>\d+)\s+received,\s+"
+    r"(?P<loss>[\d.]+)% packet loss"
+)
+_PING_TIME_RE = re.compile(r"time=([\d.]+)\s*ms")
+
+
+def _trim_output(text: str, limit: int = 4000) -> str:
+    text = text.strip()
+    if len(text) <= limit:
+        return text
+    return f"{text[:limit]}… (truncated {len(text) - limit} chars)"
+
+
+def _parse_ping(stdout: str) -> Dict[str, Optional[float | int]]:
+    latency: Optional[float] = None
+    transmitted: Optional[int] = None
+    received: Optional[int] = None
+    packet_loss: Optional[float] = None
+
+    for line in stdout.splitlines():
+        match = _PING_TIME_RE.search(line)
+        if match:
+            try:
+                latency = float(match.group(1))
+            except ValueError:
+                latency = None
+            break
+
+    for line in stdout.splitlines():
+        if "packet loss" not in line:
+            continue
+        match = _PING_PACKET_RE.search(line)
+        if match:
+            try:
+                transmitted = int(match.group("sent"))
+            except ValueError:
+                transmitted = None
+            try:
+                received = int(match.group("received"))
+            except ValueError:
+                received = None
+            try:
+                packet_loss = float(match.group("loss"))
+            except ValueError:
+                packet_loss = None
+            break
+
+    return {
+        "latency_ms": latency,
+        "packets_transmitted": transmitted,
+        "packets_received": received,
+        "packet_loss_percent": packet_loss,
+    }
+
+
+async def _run_ping(host: str) -> Tuple[int, str, str]:
+    cmd = [
+        "ping",
+        "-c",
+        str(_PING_COUNT),
+        "-W",
+        str(_PING_TIMEOUT_S),
+        host,
+    ]
+    proc = await asyncio.create_subprocess_exec(
+        *cmd,
+        stdout=ASYNC_PIPE,
+        stderr=ASYNC_PIPE,
+    )
+    stdout_bytes, stderr_bytes = await proc.communicate()
+    stdout = stdout_bytes.decode("utf-8", errors="replace")
+    stderr = stderr_bytes.decode("utf-8", errors="replace")
+    return proc.returncode or 0, stdout, stderr
 
 
 @app.post("/transcribe/upload")
@@ -220,6 +300,37 @@ def get_transcript(session: str) -> JSONResponse:
     if not doc:
         return JSONResponse({"error": "not found"}, status_code=404)
     return JSONResponse(doc)
+
+
+@app.get("/ping")
+async def ping_pi() -> JSONResponse:
+    host, user = active_target()
+    if not host:
+        raise HTTPException(503, "no active target configured")
+
+    try:
+        exit_code, stdout, stderr = await _run_ping(host)
+    except FileNotFoundError as exc:  # pragma: no cover - system dependent
+        raise HTTPException(status_code=500, detail="ping command not available") from exc
+    except OSError as exc:  # pragma: no cover - defensive
+        raise HTTPException(status_code=500, detail=f"failed to execute ping: {exc}") from exc
+
+    parsed = _parse_ping(stdout)
+    payload: Dict[str, object] = {
+        "ok": exit_code == 0,
+        "host": host,
+        "user": user,
+        "exit_code": exit_code,
+        "latency_ms": parsed["latency_ms"],
+        "packet_loss_percent": parsed["packet_loss_percent"],
+        "packets_transmitted": parsed["packets_transmitted"],
+        "packets_received": parsed["packets_received"],
+        "stdout": _trim_output(stdout),
+    }
+    if stderr.strip():
+        payload["stderr"] = _trim_output(stderr)
+
+    return JSONResponse(payload, status_code=200)
 
 
 __all__ = ["app"]
