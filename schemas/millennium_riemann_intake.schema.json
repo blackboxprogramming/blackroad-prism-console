@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.io/schemas/millennium_riemann_intake.schema.json",
+  "title": "Millennium Problem Intake – Riemann Hypothesis",
+  "description": "Capture structure for analytical, geometric, or computational claims concerning the Riemann Hypothesis routed through Prism research infrastructure.",
+  "type": "object",
+  "required": [
+    "researcher_id",
+    "approach_class",
+    "key_identity"
+  ],
+  "properties": {
+    "researcher_id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9_-]{3,64}$",
+      "description": "Stable identifier for the submitting researcher or collaboration cell."
+    },
+    "submission_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp recorded when the intake file is generated."
+    },
+    "approach_class": {
+      "type": "string",
+      "enum": [
+        "analytic_continuation",
+        "spectral_analysis",
+        "random_matrix_theory",
+        "dynamical_systems",
+        "geometric_flow",
+        "computational_verification",
+        "novel_identity"
+      ],
+      "description": "High-level category signalling the strategy being pursued."
+    },
+    "critical_line_focus": {
+      "type": "boolean",
+      "description": "Indicates whether the submission concentrates on zeros on the critical line."
+    },
+    "key_identity": {
+      "type": "object",
+      "required": [
+        "description"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 32,
+          "description": "Narrative statement of the primary functional identity or argument."
+        },
+        "formal_expression": {
+          "type": "string",
+          "description": "LaTeX or plaintext rendering of the central equality, inequality, or transform."
+        },
+        "domain_constraints": {
+          "type": "string",
+          "description": "Statement of the domain or contour on which the identity is claimed to hold."
+        },
+        "dependence_on_prior_results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "reference"
+            ],
+            "properties": {
+              "reference": {
+                "type": "string",
+                "description": "Cited lemma, theorem, or conjecture supporting the identity."
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "established",
+                  "conditional",
+                  "conjectural"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "Foundational statements the submission depends upon."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Central mechanism claimed to advance the Riemann Hypothesis."
+    },
+    "analysis_tracks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "track",
+          "status"
+        ],
+        "properties": {
+          "track": {
+            "type": "string",
+            "enum": [
+              "dirichlet_series",
+              "theta_relations",
+              "explicit_formula",
+              "zero_density",
+              "prime_number_theorem",
+              "quantum_analogy",
+              "other"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "drafted",
+              "requires_review",
+              "validated"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Tracking for each analytical path supporting the submission."
+    },
+    "numerical_support": {
+      "type": "object",
+      "properties": {
+        "verification_range": {
+          "type": "string",
+          "description": "Range of imaginary parts of s for which computations were executed."
+        },
+        "methodology": {
+          "type": "string",
+          "description": "Algorithms or libraries used to generate the numerical evidence."
+        },
+        "replication_status": {
+          "type": "string",
+          "enum": [
+            "not_attempted",
+            "in_progress",
+            "completed",
+            "replicated"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "description": "Computational experiments relevant to the claim."
+    },
+    "godel_cross_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "logic_agent",
+          "status"
+        ],
+        "properties": {
+          "logic_agent": {
+            "type": "string",
+            "description": "Identifier for the Gödel consistency agent consulted."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_started",
+              "in_progress",
+              "complete"
+            ]
+          },
+          "findings": {
+            "type": "string",
+            "description": "Summary of contradictions or confirmations reported."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Consistency reviews performed within the Prism ecosystem."
+    },
+    "supporting_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "artifact_type",
+          "location"
+        ],
+        "properties": {
+          "artifact_type": {
+            "type": "string",
+            "enum": [
+              "manuscript",
+              "code_repository",
+              "dataset",
+              "visualization",
+              "correspondence"
+            ]
+          },
+          "location": {
+            "type": "string",
+            "format": "uri",
+            "description": "Resolvable link or storage reference for the artifact."
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Artifacts referenced within the submission."
+    },
+    "related_work": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "citation"
+        ],
+        "properties": {
+          "citation": {
+            "type": "string",
+            "description": "Bibliographic reference relevant to the claim."
+          },
+          "relationship": {
+            "type": "string",
+            "description": "Short note describing how the cited work connects to the submission."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Prior art acknowledged by the submitter."
+    }
+  },
+  "additionalProperties": false
+}

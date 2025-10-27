@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.io/schemas/millennium_p_vs_np_intake.schema.json",
+  "title": "Millennium Problem Intake – P vs NP",
+  "description": "Envelope for capturing prospective resolutions to the Clay Mathematics Institute Millennium problem on P versus NP for processing by Prism mathematician collectives.",
+  "type": "object",
+  "required": [
+    "researcher_id",
+    "claim_type",
+    "core_insight"
+  ],
+  "properties": {
+    "researcher_id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9_-]{3,64}$",
+      "description": "Stable identifier for the submitting researcher or collaboration cell."
+    },
+    "submission_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp recorded when the intake file is generated."
+    },
+    "claim_type": {
+      "type": "string",
+      "enum": [
+        "p_equals_np",
+        "p_not_equal_np",
+        "lower_bound_progress",
+        "algorithmic_construction",
+        "meta_analysis"
+      ],
+      "description": "Classification describing the nature of the submission."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Self-assessed probability that the claim withstands formal verification."
+    },
+    "core_insight": {
+      "type": "object",
+      "required": [
+        "summary"
+      ],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 32,
+          "description": "Concise articulation of the main idea supporting the claim."
+        },
+        "primary_constructs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Key mathematical tools or constructs leveraged by the approach."
+        },
+        "proof_outline": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "step",
+              "focus"
+            ],
+            "properties": {
+              "step": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Ordinal position within the proposed argument."
+              },
+              "focus": {
+                "type": "string",
+                "description": "Core action or transformation attempted at this stage."
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "drafted",
+                  "requires_review",
+                  "needs_counterexample_analysis",
+                  "validated"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "Sequential decomposition of the proof or algorithmic reasoning."
+        },
+        "computational_evidence": {
+          "type": "object",
+          "properties": {
+            "benchmark_class": {
+              "type": "string",
+              "description": "Problem family or dataset used to test the insight."
+            },
+            "runtime_profile": {
+              "type": "string",
+              "description": "Observed computational complexity behaviour."
+            },
+            "verification_status": {
+              "type": "string",
+              "enum": [
+                "not_executed",
+                "in_progress",
+                "completed",
+                "replicated"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "description": "Summary of experimental support when applicable."
+        },
+        "anticipated_challenges": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Known vulnerabilities, gaps, or areas requiring deeper scrutiny."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Substance of the mathematical or algorithmic contribution."
+    },
+    "validation_plan": {
+      "type": "object",
+      "properties": {
+        "peer_review_targets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Specific experts or agent faculties requested for focused review."
+        },
+        "formalization_targets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Systems (Lean, Coq, Isabelle, etc.) intended for encoding the proof."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Roadmap for independent validation and formal verification."
+    },
+    "supporting_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "artifact_type",
+          "location"
+        ],
+        "properties": {
+          "artifact_type": {
+            "type": "string",
+            "enum": [
+              "manuscript",
+              "code_repository",
+              "dataset",
+              "presentation",
+              "correspondence"
+            ]
+          },
+          "location": {
+            "type": "string",
+            "format": "uri",
+            "description": "Resolvable link or storage reference for the artifact."
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Artifacts referenced within the submission."
+    },
+    "related_work": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "citation"
+        ],
+        "properties": {
+          "citation": {
+            "type": "string",
+            "description": "Bibliographic reference relevant to the claim."
+          },
+          "relationship": {
+            "type": "string",
+            "description": "Short note describing how the cited work connects to the submission."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Prior art acknowledged by the submitter."
+    }
+  },
+  "additionalProperties": false
+}
