@@ -1,5 +1,6 @@
 """Tests for :func:`prism_utils.parse_numeric_prefix`."""
 """Unit tests for helper functions in ``prism_utils``."""
+import pytest
 
 from prism_utils import parse_numeric_prefix
 
@@ -24,3 +25,18 @@ def test_parse_numeric_prefix_invalid():
     assert parse_numeric_prefix("1a") == 1.0
     assert parse_numeric_prefix("") == 1.0
     assert parse_numeric_prefix("+a") == 1.0
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        ("2, rest", 2.0),
+        ("3.5", 3.5),
+        ("-4, things", -4.0),
+    ],
+)
+def test_parse_numeric_prefix_valid(text, expected):
+    assert parse_numeric_prefix(text) == expected
+
+
+@pytest.mark.parametrize("text", ["abc", "1a", "(", "True", "False"])
+def test_parse_numeric_prefix_invalid(text):
+    assert parse_numeric_prefix(text) == 1.0
