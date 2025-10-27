@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import re
-from typing import Dict, Iterable, List, Type
+from typing import Dict, Iterable, List, Set, Type
 
 from orchestrator.base import BaseBot
 from orchestrator.protocols import BotResponse, Task
@@ -23,6 +23,45 @@ from orchestrator.protocols import BotResponse, Task
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INTEGRATION_PLAN_PATH = REPO_ROOT / "docs" / "BLACKROAD_OPS_INTEGRATION_PLAN.md"
+
+PRIMARY_HANDLE = "@blackboxprogramming"
+PRIMARY_TEAM = "blackboxprogramming"
+PRIMARY_REPOSITORY = "blackboxprogramming/blackroad-prism-console"
+
+MENTION_ALIASES = {
+    "@blackboxprogramming": PRIMARY_HANDLE,
+    "blackboxprogramming": PRIMARY_HANDLE,
+    "@blackroad": PRIMARY_HANDLE,
+    "blackroad": PRIMARY_HANDLE,
+    "@copilot": PRIMARY_HANDLE,
+    "copilot": PRIMARY_HANDLE,
+    "@dependabot": PRIMARY_HANDLE,
+    "dependabot": PRIMARY_HANDLE,
+    "@cadillac": PRIMARY_HANDLE,
+    "cadillac": PRIMARY_HANDLE,
+    "@codex": PRIMARY_HANDLE,
+    "codex": PRIMARY_HANDLE,
+    "@lucidia": PRIMARY_HANDLE,
+    "lucidia": PRIMARY_HANDLE,
+    "@cecilia": PRIMARY_HANDLE,
+    "cecilia": PRIMARY_HANDLE,
+    "@gitguardian": PRIMARY_HANDLE,
+    "gitguardian": PRIMARY_HANDLE,
+    "@slackbot": PRIMARY_HANDLE,
+    "slackbot": PRIMARY_HANDLE,
+    "@slack": PRIMARY_HANDLE,
+    "slack": PRIMARY_HANDLE,
+    "@linear": PRIMARY_HANDLE,
+    "linear": PRIMARY_HANDLE,
+    "@asanabot": PRIMARY_HANDLE,
+    "asanabot": PRIMARY_HANDLE,
+    "@blackroadagents": PRIMARY_HANDLE,
+    "blackroadagents": PRIMARY_HANDLE,
+    "@blackroadbots": PRIMARY_HANDLE,
+    "blackroadbots": PRIMARY_HANDLE,
+    "@airtablebot": PRIMARY_HANDLE,
+    "airtablebot": PRIMARY_HANDLE,
+}
 
 
 def _parse_integration_rows() -> List[Dict[str, str]]:
@@ -81,27 +120,45 @@ def _class_name(platform: str) -> str:
     return "".join(part.capitalize() for part in parts if part) + "IntegrationBot"
 
 
-def _detect_mention(task: Task) -> bool:
-    """Return True when @blackboxprogramming is referenced in the task."""
+def _normalize_handle(value: str) -> str | None:
+    """Return the canonical BlackRoad routing handle for ``value`` if known."""
 
+    return MENTION_ALIASES.get(value.lower())
+
+
+def _collect_mentions(task: Task) -> Set[str]:
+    """Return the set of canonical handles detected in the task payload."""
+
+    detected: Set[str] = set()
     goal = task.goal.lower()
-    if "@blackboxprogramming" in goal:
-        return True
+    for alias, canonical in MENTION_ALIASES.items():
+        if alias in goal:
+            detected.add(canonical)
 
     context = task.context or {}
     mentions = context.get("mentions")
     if isinstance(mentions, Iterable) and not isinstance(mentions, (str, bytes)):
         for mention in mentions:
-            if isinstance(mention, str) and mention.lower() == "@blackboxprogramming":
-                return True
-    return False
+            if isinstance(mention, str):
+                canonical = _normalize_handle(mention)
+                if canonical:
+                    detected.add(canonical)
+
+    return detected
+
+
+def _detect_mention(task: Task) -> bool:
+    """Return True when a routed handle is referenced in the task."""
+
+    return bool(_collect_mentions(task))
 
 
 def _make_run(entry: Dict[str, str]):  # type: ignore[override]
     slug = _slugify(entry["platform"])
 
     def run(self, task: Task, _entry: Dict[str, str] = entry, _slug: str = slug) -> BotResponse:
-        mention_detected = _detect_mention(task)
+        detected_mentions = _collect_mentions(task)
+        mention_detected = bool(detected_mentions)
 
         state_word = "Prepared" if mention_detected else "Queued"
         summary = (
@@ -124,10 +181,22 @@ def _make_run(entry: Dict[str, str]):  # type: ignore[override]
             "owner": _entry["owner"],
             "notes": _entry["notes"],
             "mention_detected": mention_detected,
+            "detected_mentions": sorted(detected_mentions),
+            "routing": {
+                "primary_handle": PRIMARY_HANDLE,
+                "team": PRIMARY_TEAM,
+                "repository": PRIMARY_REPOSITORY,
+            },
             "linear_payload": {
-                "team": _entry["owner"],
+                "team": PRIMARY_TEAM,
                 "title": f"{_entry['platform']} follow-up for {task.goal}",
-                "tags": ["integration", _slug, "blackboxprogramming"],
+                "tags": [
+                    "integration",
+                    _slug,
+                    "blackboxprogramming",
+                    "blackboxprogramming-routing",
+                ],
+                "assignees": [PRIMARY_HANDLE],
                 "status": "pending-review",
             },
         }
