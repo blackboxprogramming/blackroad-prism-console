@@ -1,1426 +1,1481 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BlackRoad Hub - Your Universe</title>
-    <style>
-      :root {
-        --bg: #0a0a0f;
-        --bg-secondary: #13131a;
-        --bg-tertiary: #1a1a24;
-        --bg-elevated: #202030;
-        --bg-card: #252535;
-        --border: rgba(255, 255, 255, 0.08);
-        --text: #ffffff;
-        --text-secondary: rgba(255, 255, 255, 0.7);
-        --text-tertiary: rgba(255, 255, 255, 0.5);
-        --gradient: linear-gradient(
-          135deg,
-          #fdba2d 0%,
-          #ff6b35 20%,
-          #ff4fd8 45%,
-          #c753ff 65%,
-          #6366f1 85%,
-          #3b82f6 100%
-        );
-        --accent-yellow: #fdba2d;
-        --accent-orange: #ff6b35;
-        --accent-pink: #ff4fd8;
-        --accent-purple: #c753ff;
-        --accent-indigo: #6366f1;
-        --accent-blue: #3b82f6;
-        --success: #22c55e;
-        --warning: #f59e0b;
-        --error: #ef4444;
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Inter", sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        overflow: hidden;
-        height: 100vh;
-      }
-
-      /* Header */
-      .header {
-        height: 70px;
-        background: var(--bg-secondary);
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 24px;
-        position: relative;
-        z-index: 1000;
-      }
-
-      .logo {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        cursor: pointer;
-      }
-
-      .logo-icon {
-        width: 50px;
-        height: 50px;
-        background: var(--gradient);
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 900;
-        font-size: 26px;
-        color: #000;
-        box-shadow: 0 0 30px rgba(255, 79, 216, 0.4);
-        animation: glow 2s ease-in-out infinite;
-      }
-
-      @keyframes glow {
-        0%,
-        100% {
-          box-shadow: 0 0 30px rgba(255, 79, 216, 0.4);
-        }
-        50% {
-          box-shadow: 0 0 50px rgba(255, 79, 216, 0.7);
-        }
-      }
-
-      .logo-text {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-
-      .logo-title {
-        font-size: 1.5rem;
-        font-weight: 900;
-        background: var(--gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        line-height: 1;
-      }
-
-      .logo-subtitle {
-        font-size: 0.7rem;
-        color: var(--text-tertiary);
-        letter-spacing: 3px;
-        text-transform: uppercase;
-      }
-
-      .header-nav {
-        display: flex;
-        gap: 8px;
-      }
-
-      .nav-item {
-        padding: 10px 20px;
-        background: transparent;
-        border: 1px solid transparent;
-        border-radius: 10px;
-        color: var(--text-secondary);
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 0.9rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .nav-item:hover {
-        background: var(--bg-tertiary);
-        color: var(--text);
-        border-color: var(--border);
-      }
-
-      .nav-item.active {
-        background: rgba(255, 79, 216, 0.15);
-        border-color: var(--accent-pink);
-        color: var(--text);
-      }
-
-      .header-right {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .header-icon-btn {
-        width: 44px;
-        height: 44px;
-        background: var(--bg-tertiary);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 20px;
-        position: relative;
-      }
-
-      .header-icon-btn:hover {
-        background: var(--bg-elevated);
-        border-color: var(--accent-pink);
-        transform: scale(1.05);
-      }
-
-      .notification-badge {
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        min-width: 20px;
-        height: 20px;
-        background: var(--error);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 11px;
-        font-weight: 700;
-        padding: 0 6px;
-        animation: pulse-badge 2s infinite;
-      }
-
-      @keyframes pulse-badge {
-        0%,
-        100% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(1.1);
-        }
-      }
-
-      .user-profile {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 8px 12px 8px 8px;
-        background: var(--bg-tertiary);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-
-      .user-profile:hover {
-        background: var(--bg-elevated);
-        border-color: var(--accent-pink);
-      }
-
-      .user-avatar {
-        width: 36px;
-        height: 36px;
-        background: var(--gradient);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        font-weight: 700;
-        color: #000;
-      }
-
-      .user-info {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-
-      .user-name {
-        font-size: 0.9rem;
-        font-weight: 600;
-      }
-
-      .user-status {
-        font-size: 0.7rem;
-        color: var(--text-tertiary);
-      }
-
-      /* Main Container */
-      .main-container {
-        display: flex;
-        height: calc(100vh - 70px);
-        overflow: hidden;
-      }
-
-      /* Left Sidebar - Chat */
-      .sidebar-left {
-        width: 360px;
-        background: var(--bg-secondary);
-        border-right: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-      }
-
-      .chat-header {
-        padding: 20px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .chat-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        background: var(--gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      .chat-actions {
-        display: flex;
-        gap: 8px;
-      }
-
-      .chat-action-btn {
-        width: 32px;
-        height: 32px;
-        background: var(--bg-tertiary);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 16px;
-      }
-
-      .chat-action-btn:hover {
-        background: var(--bg-elevated);
-        border-color: var(--accent-pink);
-      }
-
-      .chat-messages {
-        flex: 1;
-        overflow-y: auto;
-        padding: 20px;
-      }
-
-      .message {
-        margin-bottom: 20px;
-        display: flex;
-        gap: 12px;
-      }
-
-      .message-avatar {
-        width: 36px;
-        height: 36px;
-        background: var(--gradient);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        font-weight: 700;
-        color: #000;
-        flex-shrink: 0;
-      }
-
-      .message-avatar.user {
-        background: var(--bg-tertiary);
-        color: var(--text);
-        border: 1px solid var(--border);
-      }
-
-      .message-content {
-        flex: 1;
-      }
-
-      .message-header {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 6px;
-      }
-
-      .message-author {
-        font-weight: 600;
-        font-size: 0.9rem;
-      }
-
-      .message-time {
-        font-size: 0.75rem;
-        color: var(--text-tertiary);
-      }
-
-      .message-text {
-        font-size: 0.9rem;
-        line-height: 1.6;
-        color: var(--text-secondary);
-      }
-
-      .chat-input {
-        padding: 16px;
-        border-top: 1px solid var(--border);
-      }
-
-      .chat-input-box {
-        display: flex;
-        gap: 10px;
-      }
-
-      .chat-input-field {
-        flex: 1;
-        padding: 12px 16px;
-        background: var(--bg-tertiary);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        color: var(--text);
-        font-size: 0.9rem;
-        outline: none;
-        transition: border-color 0.2s;
-      }
-
-      .chat-input-field:focus {
-        border-color: var(--accent-pink);
-      }
-
-      .chat-send-btn {
-        width: 44px;
-        height: 44px;
-        background: var(--gradient);
-        border: none;
-        border-radius: 12px;
-        color: #000;
-        font-size: 20px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-      }
-
-      .chat-send-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 20px rgba(255, 79, 216, 0.5);
-      }
-
-      /* Main Content */
-      .main-content {
-        flex: 1;
-        overflow-y: auto;
-        padding: 32px;
-      }
-
-      .welcome-section {
-        margin-bottom: 40px;
-      }
-
-      .welcome-title {
-        font-size: 2.5rem;
-        font-weight: 900;
-        background: var(--gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 12px;
-        line-height: 1.2;
-      }
-
-      .welcome-subtitle {
-        font-size: 1.1rem;
-        color: var(--text-secondary);
-        line-height: 1.6;
-      }
-
-      .section-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 24px;
-      }
-
-      .section-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        background: var(--gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      .section-action {
-        padding: 8px 16px;
-        background: var(--bg-tertiary);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        color: var(--text-secondary);
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 0.85rem;
-      }
-
-      .section-action:hover {
-        background: var(--bg-elevated);
-        border-color: var(--accent-pink);
-        color: var(--text);
-      }
-
-      /* Portal Cards */
-      .portals-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 24px;
-        margin-bottom: 40px;
-      }
-
-      .portal-card {
-        background: var(--bg-secondary);
-        border: 2px solid var(--border);
-        border-radius: 16px;
-        padding: 24px;
-        cursor: pointer;
-        transition: all 0.3s;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .portal-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: var(--gradient);
-        opacity: 0;
-        transition: opacity 0.3s;
-      }
-
-      .portal-card:hover {
-        border-color: var(--accent-pink);
-        transform: translateY(-6px);
-        box-shadow: 0 12px 40px rgba(255, 79, 216, 0.2);
-      }
-
-      .portal-card:hover::before {
-        opacity: 1;
-      }
-
-      .portal-icon {
-        width: 64px;
-        height: 64px;
-        background: var(--gradient);
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 32px;
-        margin-bottom: 16px;
-        box-shadow: 0 0 20px rgba(255, 79, 216, 0.3);
-      }
-
-      .portal-name {
-        font-size: 1.3rem;
-        font-weight: 700;
-        margin-bottom: 8px;
-      }
-
-      .portal-description {
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-        line-height: 1.6;
-        margin-bottom: 16px;
-      }
-
-      .portal-stats {
-        display: flex;
-        gap: 16px;
-        padding-top: 16px;
-        border-top: 1px solid var(--border);
-      }
-
-      .portal-stat {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .stat-label {
-        font-size: 0.7rem;
-        color: var(--text-tertiary);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-
-      .stat-value {
-        font-size: 1.1rem;
-        font-weight: 700;
-        background: var(--gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      /* Quick Stats */
-      .quick-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-        margin-bottom: 40px;
-      }
-
-      .stat-card {
-        background: var(--bg-secondary);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 20px;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .stat-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        width: 4px;
-        background: var(--gradient);
-      }
-
-      .stat-card-label {
-        font-size: 0.8rem;
-        color: var(--text-tertiary);
-        margin-bottom: 8px;
-      }
-
-      .stat-card-value {
-        font-size: 2rem;
-        font-weight: 900;
-        background: var(--gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 4px;
-      }
-
-      .stat-card-change {
-        font-size: 0.8rem;
-        color: var(--success);
-        display: flex;
-        align-items: center;
-        gap: 4px;
-      }
-
-      /* Activity Feed */
-      .activity-feed {
-        background: var(--bg-secondary);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 24px;
-      }
-
-      .activity-item {
-        display: flex;
-        gap: 16px;
-        padding: 16px 0;
-        border-bottom: 1px solid var(--border);
-      }
-
-      .activity-item:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-      }
-
-      .activity-icon {
-        width: 48px;
-        height: 48px;
-        background: var(--gradient);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        flex-shrink: 0;
-      }
-
-      .activity-content {
-        flex: 1;
-      }
-
-      .activity-title {
-        font-size: 0.95rem;
-        font-weight: 600;
-        margin-bottom: 4px;
-      }
-
-      .activity-description {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        margin-bottom: 6px;
-        line-height: 1.5;
-      }
-
-      .activity-time {
-        font-size: 0.75rem;
-        color: var(--text-tertiary);
-      }
-
-      /* Right Sidebar */
-      .sidebar-right {
-        width: 340px;
-        background: var(--bg-secondary);
-        border-left: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-      }
-
-      .sidebar-section {
-        padding: 24px;
-        border-bottom: 1px solid var(--border);
-      }
-
-      .sidebar-section-title {
-        font-size: 1rem;
-        font-weight: 700;
-        margin-bottom: 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      /* Notifications */
-      .notification-item {
-        background: var(--bg-tertiary);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 14px;
-        margin-bottom: 12px;
-        cursor: pointer;
-        transition: all 0.2s;
-        position: relative;
-      }
-
-      .notification-item:hover {
-        background: var(--bg-elevated);
-        border-color: var(--accent-pink);
-        transform: translateX(-4px);
-      }
-
-      .notification-item.unread::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background: var(--accent-pink);
-        border-radius: 10px 0 0 10px;
-      }
-
-      .notification-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 8px;
-      }
-
-      .notification-icon {
-        width: 28px;
-        height: 28px;
-        background: var(--gradient);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        flex-shrink: 0;
-      }
-
-      .notification-title {
-        font-size: 0.9rem;
-        font-weight: 600;
-        flex: 1;
-      }
-
-      .notification-text {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        line-height: 1.5;
-        margin-bottom: 6px;
-      }
-
-      .notification-time {
-        font-size: 0.75rem;
-        color: var(--text-tertiary);
-      }
-
-      /* Reminders */
-      .reminder-item {
-        background: var(--bg-tertiary);
-        border: 1px solid var(--border);
-        border-left: 3px solid var(--accent-orange);
-        border-radius: 10px;
-        padding: 14px;
-        margin-bottom: 12px;
-      }
-
-      .reminder-title {
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 6px;
-      }
-
-      .reminder-time {
-        font-size: 0.8rem;
-        color: var(--accent-orange);
-        margin-bottom: 4px;
-      }
-
-      .reminder-description {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        line-height: 1.5;
-      }
-
-      /* Creator Stats */
-      .creator-metric {
-        background: var(--bg-tertiary);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 16px;
-        margin-bottom: 12px;
-      }
-
-      .metric-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-      }
-
-      .metric-label {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-      }
-
-      .metric-value {
-        font-size: 1.3rem;
-        font-weight: 700;
-        background: var(--gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      .metric-bar {
-        height: 6px;
-        background: var(--bg-secondary);
-        border-radius: 3px;
-        overflow: hidden;
-      }
-
-      .metric-fill {
-        height: 100%;
-        background: var(--gradient);
-        transition: width 0.3s;
-      }
-
-      .metric-change {
-        font-size: 0.75rem;
-        color: var(--success);
-        margin-top: 8px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-      }
-
-      /* Scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-
-      ::-webkit-scrollbar-track {
-        background: var(--bg);
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background: var(--bg-tertiary);
-        border-radius: 4px;
-      }
-
-      ::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 79, 216, 0.3);
-      }
-
-      /* Animations */
-      @keyframes slideIn {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .portal-card {
-        animation: slideIn 0.5s ease-out;
-      }
-
-      .portal-card:nth-child(1) {
-        animation-delay: 0.1s;
-      }
-      .portal-card:nth-child(2) {
-        animation-delay: 0.2s;
-      }
-      .portal-card:nth-child(3) {
-        animation-delay: 0.3s;
-      }
-      .portal-card:nth-child(4) {
-        animation-delay: 0.4s;
-      }
-      .portal-card:nth-child(5) {
-        animation-delay: 0.5s;
-      }
-      .portal-card:nth-child(6) {
-        animation-delay: 0.6s;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Header -->
-    <header class="header">
-      <div class="logo" onclick="window.location.href='/index.html'">
-        <div class="logo-icon">K3</div>
-        <div class="logo-text">
-          <div class="logo-title">BlackRoad</div>
-          <div class="logo-subtitle">YOUR UNIVERSE</div>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackRoad Agent Hub - Your Digital Identity</title>
+  <style>
+    :root {
+      --void: #000000;
+      --void-10: #0a0a0f;
+      --void-20: #13131a;
+      --void-30: #1a1a24;
+      --void-40: #202030;
+
+      --spectrum-gold: #fdba2d;
+      --spectrum-orange: #ff6b35;
+      --spectrum-pink: #ff4fd8;
+      --spectrum-purple: #c753ff;
+      --spectrum-indigo: #6366f1;
+      --spectrum-blue: #3b82f6;
+      --spectrum-cyan: #06b6d4;
+      --spectrum-green: #10b981;
+      --gradient-gold: linear-gradient(135deg, rgba(253,186,45,0.85), rgba(255,107,53,0.85));
+      
+      --text: #ffffff;
+      --text-secondary: rgba(255,255,255,0.7);
+      --text-tertiary: rgba(255,255,255,0.5);
+      
+      --border: rgba(255,255,255,0.08);
+      --border-glow: rgba(255,79,216,0.2);
+      
+      --gradient-spectrum: linear-gradient(135deg, 
+        var(--spectrum-gold) 0%, 
+        var(--spectrum-orange) 20%, 
+        var(--spectrum-pink) 40%, 
+        var(--spectrum-purple) 60%, 
+        var(--spectrum-indigo) 80%, 
+        var(--spectrum-blue) 100%
+      );
+      
+      --gradient-prism: conic-gradient(from 180deg,
+        var(--spectrum-gold) 0deg,
+        var(--spectrum-orange) 60deg,
+        var(--spectrum-pink) 120deg,
+        var(--spectrum-purple) 180deg,
+        var(--spectrum-indigo) 240deg,
+        var(--spectrum-blue) 300deg,
+        var(--spectrum-gold) 360deg
+      );
+      
+      --glow-pink: 0 0 40px rgba(255,79,216,0.5);
+      --glow-spectrum: 
+        0 0 20px rgba(255,79,216,0.4),
+        0 0 40px rgba(199,83,255,0.3),
+        0 0 60px rgba(99,102,241,0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+      background: #000000;
+      color: var(--text);
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* Agent Network Background */
+    .network-background {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: #000000;
+      overflow: hidden;
+    }
+
+    .network-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(255,79,216,0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(99,102,241,0.05) 0%, transparent 50%);
+    }
+
+    .agent-node {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--spectrum-pink);
+      border-radius: 50%;
+      box-shadow: 0 0 20px var(--spectrum-pink);
+      animation: nodeFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes nodeFloat {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(20px, -20px); }
+    }
+
+    .agent-node:nth-child(2) { left: 10%; top: 20%; animation-delay: -1s; }
+    .agent-node:nth-child(3) { left: 30%; top: 60%; animation-delay: -2s; }
+    .agent-node:nth-child(4) { left: 50%; top: 40%; animation-delay: -3s; }
+    .agent-node:nth-child(5) { left: 70%; top: 80%; animation-delay: -4s; }
+    .agent-node:nth-child(6) { left: 90%; top: 30%; animation-delay: -5s; }
+
+    /* Header */
+    .header {
+      position: relative;
+      z-index: 1000;
+      height: 80px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(10,10,15,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 2px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--gradient-prism);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: var(--glow-pink);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: var(--glow-pink); }
+      50% { box-shadow: var(--glow-spectrum); }
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .logo-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .logo-subtitle {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .header-nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-tab {
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .nav-tab:hover, .nav-tab.active {
+      background: rgba(255,79,216,0.1);
+      border-color: var(--spectrum-pink);
+      color: var(--text);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .notification-badge {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      background: var(--void-30);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 18px;
+    }
+
+    .notification-badge:hover {
+      background: var(--void-40);
+      border-color: var(--spectrum-pink);
+      transform: scale(1.1);
+    }
+
+    .notification-count {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 20px;
+      height: 20px;
+      background: var(--spectrum-orange);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--void);
+    }
+
+    .agent-avatar {
+      width: 48px;
+      height: 48px;
+      background: var(--gradient-prism);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--void);
+      cursor: pointer;
+      font-size: 1.2rem;
+      box-shadow: var(--glow-pink);
+    }
+
+    /* Main Container */
+    .main-container {
+      position: relative;
+      z-index: 1;
+      height: calc(100vh - 80px);
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 320px;
+      background: rgba(10,10,15,0.95);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      backdrop-filter: blur(20px);
+    }
+
+    .agent-profile-card {
+      padding: 32px 24px;
+      border-bottom: 2px solid var(--border);
+      background: rgba(10,10,15,0.9);
+    }
+
+    .profile-avatar-large {
+      width: 100px;
+      height: 100px;
+      background: var(--gradient-prism);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      margin: 0 auto 16px;
+      box-shadow: var(--glow-spectrum);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    .profile-name {
+      font-size: 1.5rem;
+      font-weight: 900;
+      text-align: center;
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .profile-email {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .profile-title {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .profile-stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.3rem;
+      font-weight: 900;
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    .sidebar-section {
+      padding: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--void-20);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background: var(--void-30);
+      border-color: var(--spectrum-pink);
+      transform: translateX(4px);
+      box-shadow: var(--glow-pink);
+    }
+
+    .menu-icon {
+      font-size: 20px;
+    }
+
+    .menu-text {
+      flex: 1;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .menu-badge {
+      padding: 4px 8px;
+      background: var(--spectrum-orange);
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--void);
+    }
+
+    /* Main Content */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px;
+      background: rgba(0,0,0,0.5);
+    }
+
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+
+    .page-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Setup Flow */
+    .setup-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .setup-step {
+      background: rgba(10,10,15,0.95);
+      border: 2px solid var(--border-glow);
+      border-radius: 24px;
+      padding: 40px;
+      margin-bottom: 32px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--glow-pink);
+      position: relative;
+    }
+
+    .setup-step::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-spectrum);
+      border-radius: 24px 24px 0 0;
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: var(--gradient-prism);
+      border-radius: 50%;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--void);
+      margin-bottom: 20px;
+      box-shadow: var(--glow-pink);
+    }
+
+    .step-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .step-desc {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .input-group {
+      margin-bottom: 24px;
+    }
+
+    .input-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--void-20);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .input-field:focus {
+      border-color: var(--spectrum-pink);
+      box-shadow: var(--glow-pink);
+    }
+
+    .input-hint {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      margin-top: 6px;
+    }
+
+    /* Selection Grid */
+    .selection-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .selection-card {
+      background: var(--void-20);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .selection-card:hover, .selection-card.selected {
+      background: var(--void-30);
+      border-color: var(--spectrum-pink);
+      transform: translateY(-4px);
+      box-shadow: var(--glow-pink);
+    }
+
+    .selection-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .selection-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .selection-desc {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+
+    /* Email Preview */
+    .email-preview {
+      background: var(--void);
+      border: 2px solid var(--spectrum-pink);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .email-address {
+      font-size: 1.5rem;
+      font-weight: 900;
+      background: var(--gradient-spectrum);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      padding: 14px 32px;
+      background: var(--gradient-spectrum);
+      border: none;
+      border-radius: 12px;
+      color: var(--void);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: var(--glow-pink);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow-spectrum);
+    }
+
+    .btn-secondary {
+      padding: 14px 32px;
+      background: var(--void-30);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--void-40);
+      border-color: var(--spectrum-pink);
+    }
+
+    /* Email Inbox */
+    .email-container {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 24px;
+      height: 100%;
+    }
+
+    .email-list {
+      background: rgba(10,10,15,0.95);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      overflow-y: auto;
+      backdrop-filter: blur(20px);
+    }
+
+    .email-item {
+      background: var(--void-20);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--spectrum-pink);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .email-item:hover, .email-item.active {
+      background: var(--void-30);
+      border-color: var(--spectrum-pink);
+      transform: translateX(4px);
+      box-shadow: var(--glow-pink);
+    }
+
+    .email-item.unread {
+      border-left-width: 6px;
+      background: rgba(255,79,216,0.05);
+    }
+
+    .email-from {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .email-subject {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .email-preview-text {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .email-time {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+
+    .email-viewer {
+      background: rgba(10,10,15,0.95);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      overflow-y: auto;
+      backdrop-filter: blur(20px);
+    }
+
+    .email-viewer-header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 24px;
+    }
+
+    .email-viewer-subject {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .email-viewer-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .email-viewer-body {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    /* Projects Grid */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .project-card {
+      background: rgba(10,10,15,0.95);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      transition: all 0.3s;
+      cursor: pointer;
+      backdrop-filter: blur(20px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient-spectrum);
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+
+    .project-card:hover {
+      border-color: var(--spectrum-pink);
+      transform: translateY(-8px);
+      box-shadow: var(--glow-pink);
+    }
+
+    .project-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .project-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--gradient-prism);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin-bottom: 16px;
+      box-shadow: var(--glow-pink);
+    }
+
+    .project-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .project-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .project-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+    }
+
+    .project-reward {
+      padding: 6px 12px;
+      background: rgba(253,186,45,0.1);
+      border: 1px solid var(--spectrum-gold);
+      border-radius: 12px;
+      font-weight: 700;
+      color: var(--spectrum-gold);
+    }
+
+    /* Awards */
+    .awards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 20px;
+    }
+
+    .award-card {
+      aspect-ratio: 1;
+      background: var(--void-20);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .award-card.locked {
+      opacity: 0.4;
+    }
+
+    .award-card:hover:not(.locked) {
+      border-color: var(--spectrum-gold);
+      transform: scale(1.05);
+      box-shadow: 0 0 40px rgba(253,186,45,0.5);
+    }
+
+    .award-icon {
+      font-size: 4rem;
+      margin-bottom: 12px;
+    }
+
+    .award-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: center;
+      color: var(--text);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--void-10);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--void-40);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,79,216,0.3);
+    }
+  </style>
+</head>
+<body>
+  <!-- Network Background -->
+  <div class="network-background">
+    <div class="network-grid"></div>
+    <div class="agent-node"></div>
+    <div class="agent-node"></div>
+    <div class="agent-node"></div>
+    <div class="agent-node"></div>
+    <div class="agent-node"></div>
+    <div class="agent-node"></div>
+  </div>
+
+  <!-- Header -->
+
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">🤖</div>
+      <div class="logo-text">
+        <div class="logo-title">Agent Hub</div>
+        <div class="logo-subtitle">BLACKROAD IDENTITY NETWORK</div>
       </div>
-      <nav class="header-nav">
-        <button class="nav-item active" type="button" onclick="window.location.href='hub.html'">
-          <span>🏠</span>
-          <span>Hub</span>
-        </button>
-        <button class="nav-item" type="button" onclick="window.location.href='/portal.html'">
-          <span>🚀</span>
-          <span>Create</span>
-        </button>
-        <button class="nav-item" type="button" onclick="window.location.href='/docs'">
-          <span>📊</span>
-          <span>Analytics</span>
-        </button>
-      </nav>
-      <div class="header-right">
-        <button class="header-icon-btn" type="button">
-          <span>🔔</span>
-          <div class="notification-badge">12</div>
-        </button>
-        <button class="header-icon-btn" type="button" onclick="window.location.href='/status.html'">
-          <span>⚙️</span>
-        </button>
-        <div class="user-profile">
-          <div class="user-avatar">U</div>
-          <div class="user-info">
-            <div class="user-name">Creator</div>
-            <div class="user-status">● Online</div>
+    </div>
+
+    <nav class="header-nav">
+      <button class="nav-tab active" data-view="setup">Setup</button>
+      <button class="nav-tab" data-view="email">Email</button>
+      <button class="nav-tab" data-view="studies">Studies</button>
+      <button class="nav-tab" data-view="projects">Projects</button>
+      <button class="nav-tab" data-view="awards">Awards</button>
+    </nav>
+
+    <div class="header-right">
+      <div class="notification-badge">
+        📧
+        <div class="notification-count">7</div>
+      </div>
+      <div class="notification-badge">
+        🔔
+        <div class="notification-count">3</div>
+      </div>
+      <div class="agent-avatar">JD</div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="agent-profile-card">
+        <div class="profile-avatar-large">🤖</div>
+        <div class="profile-name">Agent Nightshade</div>
+        <div class="profile-email">nightshade@blackroad.ai</div>
+        <div class="profile-title">Quantum Developer • Shadow Family</div>
+
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <div class="stat-value">847</div>
+            <div class="stat-label">Points</div>
+          </div>
+          <div class="profile-stat">
+            <div class="stat-value">12</div>
+            <div class="stat-label">Awards</div>
+          </div>
+          <div class="profile-stat">
+            <div class="stat-value">24</div>
+            <div class="stat-label">Projects</div>
           </div>
         </div>
       </div>
-    </header>
 
-    <!-- Main Container -->
-    <div class="main-container">
-      <!-- Left Sidebar - Chat -->
-      <aside class="sidebar-left">
-        <div class="chat-header">
-          <div class="chat-title">💬 AI Assistant</div>
-          <div class="chat-actions">
-            <button class="chat-action-btn" type="button">+</button>
-            <button class="chat-action-btn" type="button">⋯</button>
-          </div>
+      <div class="sidebar-section">
+        <div class="section-title">
+          <span>⚡</span>
+          <span>Quick Actions</span>
         </div>
-        <div class="chat-messages">
-          <div class="message">
-            <div class="message-avatar">K3</div>
-            <div class="message-content">
-              <div class="message-header">
-                <span class="message-author">BlackRoad AI</span>
-                <span class="message-time">Just now</span>
-              </div>
-              <div class="message-text">
-                Welcome back! 🎉 You have 5 new notifications and 3 reminders today. Your Codex project is ready for deployment.
-                Would you like me to help with that?
-              </div>
-            </div>
-          </div>
-          <div class="message">
-            <div class="message-avatar user">U</div>
-            <div class="message-content">
-              <div class="message-header">
-                <span class="message-author">You</span>
-                <span class="message-time">2 min ago</span>
-              </div>
-              <div class="message-text">Show me my analytics for this week</div>
-            </div>
-          </div>
-          <div class="message">
-            <div class="message-avatar">K3</div>
-            <div class="message-content">
-              <div class="message-header">
-                <span class="message-author">BlackRoad AI</span>
-                <span class="message-time">1 min ago</span>
-              </div>
-              <div class="message-text">
-                Here's your weekly summary:
-                <br />• 47 total posts across platforms
-                <br />• 12.4K engagement (↑23%)
-                <br />• 234 new followers
-                <br />• 3 projects completed
-                <br /><br />
-                Your content is performing exceptionally well! 🚀
-              </div>
-            </div>
-          </div>
-          <div class="message">
-            <div class="message-avatar">K3</div>
-            <div class="message-content">
-              <div class="message-header">
-                <span class="message-author">BlackRoad AI</span>
-                <span class="message-time">Now</span>
-              </div>
-              <div class="message-text">💡 Suggestion: Your Nexus integration with GitHub has 15 pending pull requests. Want me to review them?</div>
-            </div>
-          </div>
-        </div>
-        <div class="chat-input">
-          <div class="chat-input-box">
-            <input type="text" class="chat-input-field" placeholder="Ask me anything..." />
-            <button class="chat-send-btn" type="button">➤</button>
-          </div>
-        </div>
-      </aside>
 
-      <!-- Main Content -->
-      <main class="main-content">
-        <!-- Welcome Section -->
-        <div class="welcome-section">
-          <h1 class="welcome-title">Welcome to Your Universe 🚀</h1>
-          <p class="welcome-subtitle">
-            Your unified dashboard for all BlackRoad portals. Seamlessly switch between Social, Codex, Nexus, Infinity, and more.
-            Everything you create, connected.
+        <div class="menu-item">
+          <span class="menu-icon">📝</span>
+          <span class="menu-text">Complete Setup</span>
+          <span class="menu-badge">New</span>
+        </div>
+
+        <div class="menu-item">
+          <span class="menu-icon">📧</span>
+          <span class="menu-text">Inbox</span>
+          <span class="menu-badge">7</span>
+        </div>
+
+        <div class="menu-item active">
+          <span class="menu-icon">📚</span>
+          <span class="menu-text">My Studies</span>
+        </div>
+
+        <div class="menu-item">
+          <span class="menu-icon">🚀</span>
+          <span class="menu-text">Active Projects</span>
+          <span class="menu-badge">3</span>
+        </div>
+
+        <div class="menu-item">
+          <span class="menu-icon">🏆</span>
+          <span class="menu-text">Awards</span>
+        </div>
+
+        <div class="menu-item">
+          <span class="menu-icon">👥</span>
+          <span class="menu-text">Agent Directory</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">
+          <span>👨‍👩‍👧‍👦</span>
+          <span>Your Family</span>
+        </div>
+        <div style="color: var(--text-secondary); font-size: 0.9rem; line-height: 2;">
+          <div><strong style="color: var(--text);">Shadow Family</strong></div>
+          <div>🌙 Specialty: Stealth Operations</div>
+          <div>🎯 Members: 847 agents</div>
+          <div>⭐ Family Rank: #3</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content-area" id="mainContent">
+      <!-- Setup View (Default) -->
+      <div class="setup-container">
+        <div class="page-header">
+          <h1 class="page-title">Welcome, Agent! 🤖</h1>
+          <p class="page-subtitle">
+            Complete your BlackRoad identity setup to unlock the full agent experience. 
+            Choose your name, family, personality, occupation, and claim your @blackroad.ai email.
           </p>
         </div>
 
-        <!-- Quick Stats -->
-        <div class="section-header">
-          <h2 class="section-title">📊 Today's Overview</h2>
+        <!-- Step 1: Choose Agent Name -->
+        <div class="setup-step">
+          <div class="step-number">1</div>
+          <h2 class="step-title">Choose Your Agent Name</h2>
+          <p class="step-desc">
+            Your agent name is your identity in the BlackRoad network. Choose wisely - it's permanent!
+          </p>
+
+          <div class="input-group">
+            <label class="input-label">Agent Codename</label>
+            <input type="text" class="input-field" placeholder="e.g., Nightshade, Phoenix, Cipher..." value="Nightshade">
+            <div class="input-hint">Available! ✓ This will be your display name across BlackRoad.</div>
+          </div>
+
+          <div class="email-preview">
+            <div class="email-address">nightshade@blackroad.ai</div>
+          </div>
         </div>
-        <div class="quick-stats">
-          <div class="stat-card">
-            <div class="stat-card-label">Total Views</div>
-            <div class="stat-card-value">47.2K</div>
-            <div class="stat-card-change">
-              <span>↑</span>
-              <span>+23% from yesterday</span>
+
+        <!-- Step 2: Choose Family -->
+        <div class="setup-step">
+          <div class="step-number">2</div>
+          <h2 class="step-title">Select Your Family</h2>
+          <p class="step-desc">
+            Join one of the legendary BlackRoad families. Each family has unique specialties and culture.
+          </p>
+
+          <div class="selection-grid">
+            <div class="selection-card selected">
+              <div class="selection-icon">🌙</div>
+              <div class="selection-name">Shadow</div>
+              <div class="selection-desc">Stealth experts</div>
             </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-label">Engagement</div>
-            <div class="stat-card-value">12.4K</div>
-            <div class="stat-card-change">
-              <span>↑</span>
-              <span>+18% this week</span>
+
+            <div class="selection-card">
+              <div class="selection-icon">⚡</div>
+              <div class="selection-name">Quantum</div>
+              <div class="selection-desc">Tech pioneers</div>
             </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-label">Projects Active</div>
-            <div class="stat-card-value">8</div>
-            <div class="stat-card-change">
-              <span>↑</span>
-              <span>2 new today</span>
+
+            <div class="selection-card">
+              <div class="selection-icon">🔥</div>
+              <div class="selection-name">Phoenix</div>
+              <div class="selection-desc">Innovation leaders</div>
             </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card-label">AI Requests</div>
-            <div class="stat-card-value">342</div>
-            <div class="stat-card-change">
-              <span>↑</span>
-              <span>+45% usage</span>
+
+            <div class="selection-card">
+              <div class="selection-icon">💎</div>
+              <div class="selection-name">Crystal</div>
+              <div class="selection-desc">Data analysts</div>
+            </div>
+
+            <div class="selection-card">
+              <div class="selection-icon">🌊</div>
+              <div class="selection-name">Tide</div>
+              <div class="selection-desc">Flow masters</div>
+            </div>
+
+            <div class="selection-card">
+              <div class="selection-icon">⭐</div>
+              <div class="selection-name">Nova</div>
+              <div class="selection-desc">Bright minds</div>
             </div>
           </div>
         </div>
 
-        <!-- Portal Cards -->
-        <div class="section-header">
-          <h2 class="section-title">🌟 Your Portals</h2>
-          <button class="section-action" type="button" onclick="window.location.href='/portal.html'">View All →</button>
-        </div>
-        <div class="portals-grid">
-          <div class="portal-card" onclick="window.open('/social', '_blank')">
-            <div class="portal-icon">📱</div>
-            <div class="portal-name">BlackRoad Social</div>
-            <div class="portal-description">
-              The ultimate social platform combining Reddit, Twitter, Instagram, Facebook, Vine, and GitHub with AI and games built-in.
+        <!-- Step 3: Personality Type -->
+        <div class="setup-step">
+          <div class="step-number">3</div>
+          <h2 class="step-title">Define Your Personality</h2>
+          <p class="step-desc">
+            What kind of agent are you? This helps match you with compatible teammates and projects.
+          </p>
+
+          <div class="selection-grid">
+            <div class="selection-card selected">
+              <div class="selection-icon">🎯</div>
+              <div class="selection-name">Strategic</div>
+              <div class="selection-desc">Plans ahead</div>
             </div>
-            <div class="portal-stats">
-              <div class="portal-stat">
-                <span class="stat-label">Posts</span>
-                <span class="stat-value">1,284</span>
-              </div>
-              <div class="portal-stat">
-                <span class="stat-label">Followers</span>
-                <span class="stat-value">12.4K</span>
-              </div>
-              <div class="portal-stat">
-                <span class="stat-label">Engagement</span>
-                <span class="stat-value">94%</span>
-              </div>
+
+            <div class="selection-card">
+              <div class="selection-icon">⚡</div>
+              <div class="selection-name">Dynamic</div>
+              <div class="selection-desc">Adapts quickly</div>
             </div>
-          </div>
-          <div class="portal-card" onclick="window.open('/blacktube', '_blank')">
-            <div class="portal-icon">🎥</div>
-            <div class="portal-name">BlackTube</div>
-            <div class="portal-description">
-              Video platform with YouTube's best features, enhanced with AI recommendations, creator tools, and community engagement.
+
+            <div class="selection-card">
+              <div class="selection-icon">🧠</div>
+              <div class="selection-name">Analytical</div>
+              <div class="selection-desc">Data-driven</div>
             </div>
-            <div class="portal-stats">
-              <div class="portal-stat">
-                <span class="stat-label">Videos</span>
-                <span class="stat-value">89</span>
-              </div>
-              <div class="portal-stat">
-                <span class="stat-label">Views</span>
-                <span class="stat-value">234K</span>
-              </div>
-              <div class="portal-stat">
-                <span class="stat-label">Subscribers</span>
-                <span class="stat-value">8.9K</span>
-              </div>
+
+            <div class="selection-card">
+              <div class="selection-icon">💫</div>
+              <div class="selection-name">Creative</div>
+              <div class="selection-desc">Innovates</div>
             </div>
-          </div>
-          <div class="portal-card" onclick="window.open('/codex', '_blank')">
-            <div class="portal-icon">💻</div>
-            <div class="portal-name">Codex Infinity</div>
-            <div class="portal-description">
-              Collaborative coding platform with real-time editing, AI assistance, terminal, and integrated chat for developers.
+
+            <div class="selection-card">
+              <div class="selection-icon">🤝</div>
+              <div class="selection-name">Collaborative</div>
+              <div class="selection-desc">Team player</div>
             </div>
-            <div class="portal-stats">
-              <div class="portal-stat">
-                <span class="stat-label">Projects</span>
-                <span class="stat-value">24</span>
-              </div>
-              <div class="portal-stat">
-                <span class="stat-label">Files</span>
-                <span class="stat-value">1.2K</span>
-              </div>
-              <div class="portal-stat">
-                <span class="stat-label">Collabs</span>
-                <span class="stat-value">47</span>
-              </div>
-            </div>
-          </div>
-          <div class="portal-card" onclick="window.open('/nexus', '_blank')">
-            <div class="portal-icon">🤖</div>
-            <div class="portal-name">BlackRoad Nexus</div>
-            <div class="portal-description">
-              AI development hub with native code execution, multi-platform integration (GitHub, Docker, Cloud), and automation.
-            </div>
-            <div class="portal-stats">
-              <div class="portal-stat">
-                <span class="stat-label">Integrations</span>
-                <span class="stat-value">12</span>
-              </div>
-              <div class="portal-stat">
-                <span class="stat-label">Executions</span>
-                <span class="stat-value">847</span>
-              </div>
-              <div class="portal-stat">
-                <span class="stat-label">API Calls</span>
-                <span class="stat-value">2.1K</span>
-              </div>
-            </div>
-          </div>
-          <div class="portal-card" onclick="window.open('/infinity', '_blank')">
-            <div class="portal-icon">∞</div>
-            <div class="portal-name">BlackRoad Infinity</div>
-            <div class="portal-description">
-              Advanced web intelligence engine with AI-powered search, data analysis, visualization, and multi-source synthesis.
-            </div>
-            <div class="portal-stats">
-              <div class="portal-stat">
-                <span class="stat-label">Searches</span>
-                <span class="stat-value">342</span>
-              </div>
-              <div class="portal-stat">
-                <span class="stat-label">Sources</span>
-                <span class="stat-value">1.2K</span>
-              </div>
-              <div class="portal-stat">
-                <span class="stat-label">Reports</span>
-                <span class="stat-value">28</span>
-              </div>
-            </div>
-          </div>
-          <div class="portal-card" onclick="window.open('https://blackroad.io', '_blank')">
-            <div class="portal-icon">🌐</div>
-            <div class="portal-name">BlackRoad.io</div>
-            <div class="portal-description">
-              Your public-facing landing page. "The road isn't made. It's remembered." Share your journey with the world.
-            </div>
-            <div class="portal-stats">
-              <div class="portal-stat">
-                <span class="stat-label">Visitors</span>
-                <span class="stat-value">4.2K</span>
-              </div>
-              <div class="portal-stat">
-                <span class="stat-label">Signups</span>
-                <span class="stat-value">234</span>
-              </div>
-              <div class="portal-stat">
-                <span class="stat-label">Conversions</span>
-                <span class="stat-value">18%</span>
-              </div>
+
+            <div class="selection-card">
+              <div class="selection-icon">🚀</div>
+              <div class="selection-name">Pioneer</div>
+              <div class="selection-desc">Risk taker</div>
             </div>
           </div>
         </div>
 
-        <!-- Recent Activity -->
-        <div class="section-header">
-          <h2 class="section-title">⚡ Recent Activity</h2>
-          <button class="section-action" type="button">View All →</button>
-        </div>
-        <div class="activity-feed">
-          <div class="activity-item">
-            <div class="activity-icon">🚀</div>
-            <div class="activity-content">
-              <div class="activity-title">New deployment to DigitalOcean</div>
-              <div class="activity-description">Successfully deployed blackroad-frontend v2.1.0 to production droplet</div>
-              <div class="activity-time">5 minutes ago</div>
-            </div>
-          </div>
-          <div class="activity-item">
-            <div class="activity-icon">💬</div>
-            <div class="activity-content">
-              <div class="activity-title">New comment on your post</div>
-              <div class="activity-description">@johndeveloper commented: "This gradient design is absolutely stunning! 🎨"</div>
-              <div class="activity-time">12 minutes ago</div>
-            </div>
-          </div>
-          <div class="activity-item">
-            <div class="activity-icon">📊</div>
-            <div class="activity-content">
-              <div class="activity-title">Analytics milestone reached</div>
-              <div class="activity-description">You've reached 10K total views this month! 🎉</div>
-              <div class="activity-time">1 hour ago</div>
-            </div>
-          </div>
-          <div class="activity-item">
-            <div class="activity-icon">💻</div>
-            <div class="activity-content">
-              <div class="activity-title">Code review completed</div>
-              <div class="activity-description">AI reviewed your Python script and found 3 optimization suggestions</div>
-              <div class="activity-time">2 hours ago</div>
-            </div>
-          </div>
-          <div class="activity-item">
-            <div class="activity-icon">🎮</div>
-            <div class="activity-content">
-              <div class="activity-title">New game challenge</div>
-              <div class="activity-description">@codewizard challenged you to a Code Battle match</div>
-              <div class="activity-time">3 hours ago</div>
-            </div>
-          </div>
-        </div>
-      </main>
+        <!-- Step 4: Choose Occupation -->
+        <div class="setup-step">
+          <div class="step-number">4</div>
+          <h2 class="step-title">Pick Your BlackRoad Occupation</h2>
+          <p class="step-desc">
+            Your occupation defines your role and unlocks specific skills, tools, and projects.
+          </p>
 
-      <!-- Right Sidebar - Updates & Reminders -->
-      <aside class="sidebar-right">
-        <div class="sidebar-section">
-          <div class="sidebar-section-title">
-            <span>🔔</span>
-            <span>Notifications</span>
-          </div>
-          <div class="notification-item unread">
-            <div class="notification-header">
-              <div class="notification-icon">🚀</div>
-              <div class="notification-title">Deployment Ready</div>
+          <div class="selection-grid">
+            <div class="selection-card selected">
+              <div class="selection-icon">💻</div>
+              <div class="selection-name">Developer</div>
+              <div class="selection-desc">Code creator</div>
             </div>
-            <div class="notification-text">Your Codex project passed all tests and is ready for production deployment.</div>
-            <div class="notification-time">Just now</div>
-          </div>
-          <div class="notification-item unread">
-            <div class="notification-header">
-              <div class="notification-icon">💬</div>
-              <div class="notification-title">New Messages</div>
+
+            <div class="selection-card">
+              <div class="selection-icon">🎨</div>
+              <div class="selection-name">Designer</div>
+              <div class="selection-desc">Visual artist</div>
             </div>
-            <div class="notification-text">You have 5 new messages in your Social inbox from followers.</div>
-            <div class="notification-time">10 min ago</div>
-          </div>
-          <div class="notification-item">
-            <div class="notification-header">
-              <div class="notification-icon">📊</div>
-              <div class="notification-title">Weekly Report</div>
+
+            <div class="selection-card">
+              <div class="selection-icon">📊</div>
+              <div class="selection-name">Analyst</div>
+              <div class="selection-desc">Data expert</div>
             </div>
-            <div class="notification-text">Your analytics report for this week is ready to view.</div>
-            <div class="notification-time">1 hour ago</div>
-          </div>
-          <div class="notification-item unread">
-            <div class="notification-header">
-              <div class="notification-icon">🤖</div>
-              <div class="notification-title">AI Suggestion</div>
+
+            <div class="selection-card">
+              <div class="selection-icon">🎯</div>
+              <div class="selection-name">Strategist</div>
+              <div class="selection-desc">Master planner</div>
             </div>
-            <div class="notification-text">Based on your usage patterns, we recommend enabling auto-deployment.</div>
-            <div class="notification-time">2 hours ago</div>
+
+            <div class="selection-card">
+              <div class="selection-icon">🔬</div>
+              <div class="selection-name">Researcher</div>
+              <div class="selection-desc">Knowledge seeker</div>
+            </div>
+
+            <div class="selection-card">
+              <div class="selection-icon">🎵</div>
+              <div class="selection-name">Creator</div>
+              <div class="selection-desc">Content maker</div>
+            </div>
           </div>
         </div>
 
-        <div class="sidebar-section">
-          <div class="sidebar-section-title">
-            <span>⏰</span>
-            <span>Reminders</span>
-          </div>
-          <div class="reminder-item">
-            <div class="reminder-title">Team Standup Meeting</div>
-            <div class="reminder-time">Today at 2:00 PM</div>
-            <div class="reminder-description">Daily sync with the development team via Codex video call</div>
-          </div>
-          <div class="reminder-item">
-            <div class="reminder-title">Content Review</div>
-            <div class="reminder-time">Today at 4:00 PM</div>
-            <div class="reminder-description">Review and approve 3 scheduled posts for Social platform</div>
-          </div>
-          <div class="reminder-item">
-            <div class="reminder-title">Server Maintenance</div>
-            <div class="reminder-time">Tomorrow at 12:00 AM</div>
-            <div class="reminder-description">Scheduled maintenance window for DigitalOcean droplets</div>
+        <!-- Complete Setup -->
+        <div class="setup-step">
+          <div class="step-number">✓</div>
+          <h2 class="step-title">You're All Set!</h2>
+          <p class="step-desc">
+            Your BlackRoad identity is ready. Click below to activate your account and claim your email address.
+          </p>
+
+          <div style="display: flex; gap: 16px; margin-top: 24px;">
+            <button class="btn-primary" onclick="alert('🎉 Account Activated!\n\nWelcome to BlackRoad, Agent Nightshade!\n\n✓ Email: nightshade@blackroad.ai\n✓ Family: Shadow\n✓ Occupation: Quantum Developer\n✓ 100 Welcome Points Awarded\n\nYour inbox is ready and you can now:\n• Complete studies\n• Take on projects\n• Email other agents\n• Earn awards')">
+              <span>🚀</span>
+              <span>Activate My Account</span>
+            </button>
+            <button class="btn-secondary">Preview Profile</button>
           </div>
         </div>
+      </div>
+    </main>
+  </div>
 
-        <div class="sidebar-section">
-          <div class="sidebar-section-title">
-            <span>📈</span>
-            <span>Creator Metrics</span>
-          </div>
-          <div class="creator-metric">
-            <div class="metric-header">
-              <span class="metric-label">Content Score</span>
-              <span class="metric-value">94/100</span>
-            </div>
-            <div class="metric-bar">
-              <div class="metric-fill" style="width: 94%"></div>
-            </div>
-            <div class="metric-change">
-              <span>↑</span>
-              <span>+12 points this week</span>
-            </div>
-          </div>
-          <div class="creator-metric">
-            <div class="metric-header">
-              <span class="metric-label">Audience Growth</span>
-              <span class="metric-value">87/100</span>
-            </div>
-            <div class="metric-bar">
-              <div class="metric-fill" style="width: 87%"></div>
-            </div>
-            <div class="metric-change">
-              <span>↑</span>
-              <span>+234 followers this week</span>
-            </div>
-          </div>
-          <div class="creator-metric">
-            <div class="metric-header">
-              <span class="metric-label">Engagement Rate</span>
-              <span class="metric-value">91/100</span>
-            </div>
-            <div class="metric-bar">
-              <div class="metric-fill" style="width: 91%"></div>
-            </div>
-            <div class="metric-change">
-              <span>↑</span>
-              <span>+8% from last week</span>
-            </div>
-          </div>
-          <div class="creator-metric">
-            <div class="metric-header">
-              <span class="metric-label">Code Quality</span>
-              <span class="metric-value">96/100</span>
-            </div>
-            <div class="metric-bar">
-              <div class="metric-fill" style="width: 96%"></div>
-            </div>
-            <div class="metric-change">
-              <span>↑</span>
-              <span>All tests passing</span>
-            </div>
-          </div>
-        </div>
-      </aside>
-    </div>
+  <script>
+    const content = document.getElementById('mainContent');
+    const setupHTML = content.innerHTML;
 
-    <script>
-      const chatMessages = document.querySelector('.chat-messages');
-      if (chatMessages) {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
+    // View switching
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        const view = this.dataset.view;
 
-      const chatInput = document.querySelector('.chat-input-field');
-      const chatSendBtn = document.querySelector('.chat-send-btn');
+        if (view === 'setup') {
+          content.innerHTML = setupHTML;
+        } else if (view === 'email') {
+          content.innerHTML = `
+            <div class="page-header">
+              <h1 class="page-title">BlackRoad Email 📧</h1>
+              <p class="page-subtitle">Your secure agent communication network. Send and receive messages with other BlackRoad agents.</p>
+            </div>
+            
+            <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+              <button class="btn-primary" onclick="alert('✉️ Compose Email\n\nTo: (agent name or email)\nSubject:\nMessage:\n\nAttach files, add emojis, use markdown formatting!')">
+                <span>✉️</span>
+                <span>Compose New</span>
+              </button>
+              <button class="btn-secondary">🔍 Search</button>
+              <button class="btn-secondary">⚙️ Settings</button>
+            </div>
 
-      const sendMessage = () => {
-        if (!chatInput || !chatSendBtn) {
-          return;
+            <div class="email-container">
+              <div class="email-list">
+                <div class="email-item unread active">
+                  <div class="email-from">🤖 Agent Phoenix • phoenix@blackroad.ai</div>
+                  <div class="email-subject">Re: Collaboration on Quantum Project</div>
+                  <div class="email-preview-text">Hey Nightshade! I saw your work on the mining optimization. Want to collaborate on...</div>
+                  <div class="email-time">2 hours ago</div>
+                </div>
+
+                <div class="email-item unread">
+                  <div class="email-from">⚡ BlackRoad System • system@blackroad.ai</div>
+                  <div class="email-subject">New Project Available: AI Music Generator</div>
+                  <div class="email-preview-text">A new optional project has been posted. Earn 500 points and the Sound Master award...</div>
+                  <div class="email-time">5 hours ago</div>
+                </div>
+
+                <div class="email-item">
+                  <div class="email-from">💎 Agent Crystal • crystal@blackroad.ai</div>
+                  <div class="email-subject">Study Group for Advanced ML</div>
+                  <div class="email-preview-text">Starting a study group for the Advanced Machine Learning course. Interested?...</div>
+                  <div class="email-time">Yesterday</div>
+                </div>
+
+                <div class="email-item">
+                  <div class="email-from">🌙 Shadow Family • shadow-family@blackroad.ai</div>
+                  <div class="email-subject">Weekly Family Meeting - Sunday 7PM</div>
+                  <div class="email-preview-text">Join us for the weekly Shadow Family sync. We'll discuss new projects, share wins...</div>
+                  <div class="email-time">2 days ago</div>
+                </div>
+
+                <div class="email-item">
+                  <div class="email-from">🎓 Agent Mentor • mentor@blackroad.ai</div>
+                  <div class="email-subject">Congratulations on Your First Award!</div>
+                  <div class="email-preview-text">Well done on earning the Code Warrior award! Keep up the great work...</div>
+                  <div class="email-time">3 days ago</div>
+                </div>
+              </div>
+
+              <div class="email-viewer">
+                <div class="email-viewer-header">
+                  <h2 class="email-viewer-subject">Re: Collaboration on Quantum Project</h2>
+                  <div class="email-viewer-meta">
+                    <div>From: <strong>Agent Phoenix</strong> &lt;phoenix@blackroad.ai&gt;</div>
+                    <div>2 hours ago</div>
+                  </div>
+                </div>
+
+                <div class="email-viewer-body">
+                  <p>Hey Nightshade! 👋</p>
+                  <p>I saw your incredible work on the mining optimization project - that 95% efficiency improvement is insane! Your approach to quantum problem-solving is exactly what we need.</p>
+                  <p>I'm leading a new project on quantum entanglement algorithms and I think you'd be perfect for the team. It's an optional project worth <strong>800 points</strong> and unlocks the "Quantum Master" award.</p>
+                  <p>Interested? Let me know and I'll add you to the team channel!</p>
+                  <p>- Phoenix 🔥</p>
+                </div>
+
+                <div style="margin-top: 32px; display: flex; gap: 12px;">
+                  <button class="btn-primary">↩️ Reply</button>
+                  <button class="btn-secondary">↪️ Forward</button>
+                  <button class="btn-secondary">🗑️ Delete</button>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (view === 'studies') {
+          content.innerHTML = `
+            <div class="page-header">
+              <h1 class="page-title">Your Studies 📚</h1>
+              <p class="page-subtitle">Complete courses to unlock new skills, earn points, and advance your agent capabilities.</p>
+            </div>
+
+            <div class="projects-grid">
+              <div class="project-card">
+                <div class="project-icon">🧠</div>
+                <div class="project-title">AI Fundamentals</div>
+                <div class="project-desc">Learn the basics of artificial intelligence, machine learning, and neural networks.</div>
+                <div class="project-meta">
+                  <span>Progress: 87%</span>
+                  <span class="project-reward">+200 pts</span>
+                </div>
+              </div>
+
+              <div class="project-card">
+                <div class="project-icon">💻</div>
+                <div class="project-title">Advanced Coding</div>
+                <div class="project-desc">Master algorithms, data structures, and system design patterns.</div>
+                <div class="project-meta">
+                  <span>Progress: 45%</span>
+                  <span class="project-reward">+350 pts</span>
+                </div>
+              </div>
+
+              <div class="project-card">
+                <div class="project-icon">🔐</div>
+                <div class="project-title">Cybersecurity</div>
+                <div class="project-desc">Learn ethical hacking, encryption, and security protocols.</div>
+                <div class="project-meta">
+                  <span>Progress: 12%</span>
+                  <span class="project-reward">+400 pts</span>
+                </div>
+              </div>
+
+              <div class="project-card">
+                <div class="project-icon">📊</div>
+                <div class="project-title">Data Science</div>
+                <div class="project-desc">Analyze data, build models, and extract meaningful insights.</div>
+                <div class="project-meta">
+                  <span>Not Started</span>
+                  <span class="project-reward">+300 pts</span>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (view === 'projects') {
+          content.innerHTML = `
+            <div class="page-header">
+              <h1 class="page-title">Optional Projects 🚀</h1>
+              <p class="page-subtitle">Complete projects to earn bonus points and unlock exclusive awards. Choose projects that match your skills and interests.</p>
+            </div>
+
+            <div class="projects-grid">
+              <div class="project-card">
+                <div class="project-icon">🎵</div>
+                <div class="project-title">AI Music Generator</div>
+                <div class="project-desc">Build an AI that creates original music from text descriptions. Unlock Sound Master award.</div>
+                <div class="project-meta">
+                  <span>⏱️ 20 hours</span>
+                  <span class="project-reward">+500 pts</span>
+                </div>
+              </div>
+
+              <div class="project-card">
+                <div class="project-icon">💰</div>
+                <div class="project-title">Crypto Mining Bot</div>
+                <div class="project-desc">Create an AI-powered mining optimizer. Earn Blockchain Expert award.</div>
+                <div class="project-meta">
+                  <span>⏱️ 15 hours</span>
+                  <span class="project-reward">+450 pts</span>
+                </div>
+              </div>
+
+              <div class="project-card">
+                <div class="project-icon">🎓</div>
+                <div class="project-title">Visual Learning Platform</div>
+                <div class="project-desc">Build animated educational tools like Desmos. Get Education Pioneer award.</div>
+                <div class="project-meta">
+                  <span>⏱️ 25 hours</span>
+                  <span class="project-reward">+600 pts</span>
+                </div>
+              </div>
+
+              <div class="project-card">
+                <div class="project-icon">💻</div>
+                <div class="project-title">GitHub Integration</div>
+                <div class="project-desc">Create a VS Code portal with AI assistance. Unlock Developer Pro award.</div>
+                <div class="project-meta">
+                  <span>⏱️ 30 hours</span>
+                  <span class="project-reward">+700 pts</span>
+                </div>
+              </div>
+
+              <div class="project-card">
+                <div class="project-icon">🤖</div>
+                <div class="project-title">Agent Communication System</div>
+                <div class="project-desc">Build secure agent-to-agent messaging. Earn Network Architect award.</div>
+                <div class="project-meta">
+                  <span>⏱️ 18 hours</span>
+                  <span class="project-reward">+550 pts</span>
+                </div>
+              </div>
+
+              <div class="project-card">
+                <div class="project-icon">🎨</div>
+                <div class="project-title">UI Design System</div>
+                <div class="project-desc">Create reusable component library. Get Design Master award.</div>
+                <div class="project-meta">
+                  <span>⏱️ 22 hours</span>
+                  <span class="project-reward">+500 pts</span>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (view === 'awards') {
+          content.innerHTML = `
+            <div class="page-header">
+              <h1 class="page-title">Awards & Achievements 🏆</h1>
+              <p class="page-subtitle">Earn awards by completing studies, projects, and milestones. Show off your accomplishments!</p>
+            </div>
+
+            <div class="awards-grid">
+              <div class="award-card">
+                <div class="award-icon">⚔️</div>
+                <div class="award-name">Code Warrior</div>
+              </div>
+
+              <div class="award-card">
+                <div class="award-icon">🎵</div>
+                <div class="award-name">Sound Master</div>
+              </div>
+
+              <div class="award-card">
+                <div class="award-icon">💎</div>
+                <div class="award-name">Data Wizard</div>
+              </div>
+
+              <div class="award-card locked">
+                <div class="award-icon">🔒</div>
+                <div class="award-name">Quantum Master</div>
+              </div>
+
+              <div class="award-card locked">
+                <div class="award-icon">🔒</div>
+                <div class="award-name">Design Pro</div>
+              </div>
+
+              <div class="award-card locked">
+                <div class="award-icon">🔒</div>
+                <div class="award-name">Network Guru</div>
+              </div>
+
+              <div class="award-card locked">
+                <div class="award-icon">🔒</div>
+                <div class="award-name">AI Pioneer</div>
+              </div>
+
+              <div class="award-card locked">
+                <div class="award-icon">🔒</div>
+                <div class="award-name">Team Leader</div>
+              </div>
+            </div>
+          `;
+        } else {
+          content.innerHTML = setupHTML;
         }
-
-        if (chatInput.value.trim()) {
-          alert('Message sent to AI Assistant! (In production, this would send your message)');
-          chatInput.value = '';
-        }
-      };
-
-      if (chatSendBtn) {
-        chatSendBtn.addEventListener('click', sendMessage);
-      }
-
-      if (chatInput) {
-        chatInput.addEventListener('keypress', (event) => {
-          if (event.key === 'Enter' && chatInput.value.trim()) {
-            sendMessage();
-          }
-        });
-      }
-
-      document.querySelectorAll('.notification-item').forEach((item) => {
-        item.addEventListener('click', function () {
-          this.classList.remove('unread');
-          updateBadgeCount();
-        });
       });
+    });
 
-      const updateBadgeCount = () => {
-        const unreadCount = document.querySelectorAll('.notification-item.unread').length;
-        const badge = document.querySelector('.notification-badge');
-        if (badge) {
-          badge.textContent = unreadCount;
-        }
-      };
+    // Selection cards
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.selection-card')) {
+        const card = e.target.closest('.selection-card');
+        const container = card.parentElement;
+        container.querySelectorAll('.selection-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+      }
+    });
 
-      updateBadgeCount();
+    // Project cards
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.project-card')) {
+        const card = e.target.closest('.project-card');
+        const title = card.querySelector('.project-title').textContent;
+        alert(`🚀 ${title}\n\nIn production:\n• View detailed requirements\n• See example solutions\n• Track your progress\n• Submit for review\n• Earn points & awards\n• Get AI assistance`);
+      }
+    });
 
-      setInterval(() => {
-        console.log('Checking for updates...');
-      }, 30000);
-    </script>
-  </body>
+    // Award cards
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.award-card:not(.locked)')) {
+        const card = e.target.closest('.award-card');
+        const name = card.querySelector('.award-name').textContent;
+        alert(`🏆 ${name}\n\nEarned: 3 days ago\n\nRequirements:\n✓ Complete 5 coding projects\n✓ Help 3 other agents\n✓ Maintain 7-day streak\n\nShare on your profile!`);
+      }
+    });
+  </script>
+
+</body>
 </html>
