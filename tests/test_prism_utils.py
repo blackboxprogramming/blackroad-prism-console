@@ -15,6 +15,6 @@ def test_parse_numeric_prefix_valid(text, expected):
     assert parse_numeric_prefix(text) == expected
 
 
-@pytest.mark.parametrize("text", ["abc", "1a", "("])
+@pytest.mark.parametrize("text", ["abc", "1a", "(", "True", "False"])
 def test_parse_numeric_prefix_invalid(text):
     assert parse_numeric_prefix(text) == 1.0
