@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.io/schemas/riemann_hypothesis_research.schema.json",
+  "title": "Riemann Hypothesis Research Intake",
+  "description": "Structured intake form for Riemann Hypothesis research using Prism mathematical agents",
+  "type": "object",
+  "required": ["researcher_id", "approach_class", "key_identity", "timestamp"],
+  "properties": {
+    "researcher_id": {
+      "type": "string",
+      "description": "Unique identifier for researcher"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approach_class": {
+      "type": "string",
+      "enum": [
+        "analytic_explicit_formula",
+        "moment_methods",
+        "mollifiers",
+        "random_matrix_heuristics_to_proof",
+        "zeros_free_region_sharpening",
+        "de_branges_beurling_nyman",
+        "hilbert_polya_operator",
+        "other"
+      ]
+    },
+    "approach_class_other": {
+      "type": "string"
+    },
+    "key_identity": {
+      "type": "object",
+      "required": ["description"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "The key mathematical identity or transform being used"
+        },
+        "formula_latex": {
+          "type": "string",
+          "description": "LaTeX representation of the key formula"
+        },
+        "contour_specification": {
+          "type": "string",
+          "description": "If using contour integration, specify the contour"
+        },
+        "test_function": {
+          "type": "object",
+          "properties": {
+            "definition": {
+              "type": "string"
+            },
+            "fourier_support": {
+              "type": "string"
+            },
+            "smoothness_properties": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "critical_step": {
+      "type": "object",
+      "required": ["description"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "The critical step that forces all zeros to Re(s) = 1/2"
+        },
+        "mechanism": {
+          "type": "string",
+          "enum": [
+            "zero_density_estimate",
+            "pair_correlation",
+            "moment_bound",
+            "positivity_argument",
+            "spectral_interpretation",
+            "other"
+          ]
+        },
+        "required_bound": {
+          "type": "object",
+          "properties": {
+            "bound_type": {
+              "type": "string",
+              "description": "Type of bound needed (e.g., B(T) < ...)"
+            },
+            "current_best": {
+              "type": "string",
+              "description": "Current best known bound"
+            },
+            "required_for_proof": {
+              "type": "string",
+              "description": "Bound required for proof to work"
+            },
+            "gap_analysis": {
+              "type": "string",
+              "description": "How close are we to closing the gap?"
+            }
+          }
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "functional_equation": {
+          "type": "object",
+          "properties": {
+            "form_used": {
+              "type": "string",
+              "description": "Which form of functional equation"
+            },
+            "verification_status": {
+              "type": "string",
+              "enum": ["standard", "modified", "new_derivation"]
+            }
+          }
+        },
+        "analytic_continuation": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string"
+            },
+            "region_validity": {
+              "type": "string"
+            }
+          }
+        },
+        "explicit_formula": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "string",
+              "description": "Which explicit formula (Riemann, von Mangoldt, weighted, etc.)"
+            },
+            "error_terms": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "All error terms that must be controlled"
+            }
+          }
+        },
+        "known_results_required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of established theorems this proof depends on"
+        }
+      }
+    },
+    "numerical_support": {
+      "type": "object",
+      "properties": {
+        "zeros_computed": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "description": "Number of zeros verified on critical line"
+            },
+            "max_height": {
+              "type": "number",
+              "description": "Maximum imaginary part checked"
+            },
+            "algorithm_used": {
+              "type": "string"
+            }
+          }
+        },
+        "moment_calculations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "moment_order": {
+                "type": "integer"
+              },
+              "computed_value": {
+                "type": "number"
+              },
+              "predicted_value": {
+                "type": "number"
+              },
+              "agreement": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "pair_correlation_data": {
+          "type": "object",
+          "properties": {
+            "matches_GUE": {
+              "type": "boolean"
+            },
+            "statistical_significance": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "manifold_to_topos_connection": {
+      "type": "object",
+      "description": "Connection to Prism's manifold→topos framework",
+      "properties": {
+        "geometric_interpretation": {
+          "type": "string",
+          "description": "How zeros map to geometric objects"
+        },
+        "symplectic_structure": {
+          "type": "string",
+          "description": "Symplectic form on parameter space"
+        },
+        "hamiltonian_flow": {
+          "type": "string",
+          "description": "Hamiltonian that governs zero dynamics"
+        },
+        "topos_logic_encoding": {
+          "type": "string",
+          "description": "How the problem encodes in topos logic"
+        }
+      }
+    },
+    "gmt_framework_application": {
+      "type": "object",
+      "description": "Application of Geometry-Memory Transport framework",
+      "properties": {
+        "information_geometry_metric": {
+          "type": "string",
+          "description": "Fisher information metric on parameter space"
+        },
+        "optimal_transport_formulation": {
+          "type": "string",
+          "description": "Optimal transport interpretation of zero distribution"
+        },
+        "conservation_laws": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Conserved quantities in the system"
+        }
+      }
+    },
+    "confidence_level": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "agent_assignments": {
+      "type": "object",
+      "properties": {
+        "primary_agents": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["math", "geometry", "godel", "infinity", "analysis"]
+          }
+        },
+        "geometry_specialization": {
+          "type": "boolean",
+          "description": "Does this require heavy geometric reasoning?"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "intake",
+        "agent_processing",
+        "numerical_verification",
+        "analytical_proof_stage",
+        "validation",
+        "contradiction_found",
+        "proof_complete",
+        "needs_revision"
+      ]
+    },
+    "agent_logs": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "contradictions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}
