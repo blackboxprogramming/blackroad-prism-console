@@ -13,6 +13,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import secrets
 import sys
 from dataclasses import dataclass
@@ -31,6 +32,12 @@ REGISTRY_DIR = ROOT / "registry"
 AGENT_ROLE_PATH = REGISTRY_DIR / "agent_roles.json"
 PLATFORM_CONNECTIONS_PATH = REGISTRY_DIR / "platform_connections.json"
 LOG_PATH = ROOT / "logs" / "deployment.log"
+SECRET_EXPORT_DIR = ROOT / "secrets" / "onboarding"
+
+# Minimum platform credential length chosen to approximate 96 bits of entropy.
+MIN_TOKEN_LENGTH = 12
+ONBOARDING_TOKEN_ENV = "ONBOARDING_REGISTRATION_TOKEN"
+ONBOARDING_AUTH_HEADER = "X-Onboarding-Token"
 
 STATUS_MESSAGES = {
     "connected": "connected",
@@ -188,8 +195,29 @@ def generate_api_keypair(agent_name: str) -> tuple[str, str, str]:
 
     key_id = secrets.token_hex(8)
     secret = secrets.token_urlsafe(32)
-    fingerprint = hashlib.sha256(f"{agent_name}:{secret}".encode("utf-8")).hexdigest()[:16]
+    fingerprint = hashlib.sha256(f"{agent_name}:{secret}".encode("utf-8")).hexdigest()[:32]
     return key_id, secret, fingerprint
+
+
+def persist_generated_secret(agent_name: str, key_id: str, secret: str) -> Path:
+    """Persist a generated secret to the onboarding secrets directory."""
+
+    SECRET_EXPORT_DIR.mkdir(parents=True, exist_ok=True)
+    safe_name = re.sub(r"[^a-zA-Z0-9_-]", "_", agent_name.lower()) or "agent"
+    path = SECRET_EXPORT_DIR / f"{safe_name}.json"
+    record = {
+        "agent": agent_name,
+        "key_id": key_id,
+        "secret": secret,
+        "generated_at": datetime.now(tz=timezone.utc).isoformat().replace("+00:00", "Z"),
+    }
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(record, handle, indent=2)
+    try:
+        os.chmod(path, 0o600)
+    except OSError:
+        logging.warning("Unable to adjust permissions for %s", path)
+    return path
 
 
 def verify_platform_credentials(platform: PlatformSpec) -> PlatformStatus:
@@ -211,7 +239,7 @@ def verify_platform_credentials(platform: PlatformSpec) -> PlatformStatus:
     elif platform.expires_at and platform.expires_at < now:
         status = "expired"
         details = f"Token expired at {platform.expires_at.isoformat().replace('+00:00', 'Z')}"
-    elif len(raw_token) < 12:
+    elif len(raw_token) < MIN_TOKEN_LENGTH:
         status = "invalid"
         details = "Token too short to satisfy basic validity heuristics."
 
@@ -239,14 +267,23 @@ def register_agent(payload: Mapping[str, Any]) -> Mapping[str, Any]:
     if api_root:
         url = f"{api_root.rstrip('/')}/auth/register_agent"
         try:
+            headers = {"Content-Type": "application/json"}
+            api_token = os.environ.get(ONBOARDING_TOKEN_ENV)
+            if api_token:
+                headers[ONBOARDING_AUTH_HEADER] = api_token
             request = urllib.request.Request(
                 url,
                 data=json.dumps(payload).encode("utf-8"),
-                headers={"Content-Type": "application/json"},
+                headers=headers,
                 method="POST",
             )
             with urllib.request.urlopen(request, timeout=10) as response:
-                return json.loads(response.read().decode("utf-8"))
+                body = response.read().decode("utf-8")
+            return json.loads(body)
+        except json.JSONDecodeError as exc:  # pragma: no cover - network optional
+            logging.warning(
+                "Remote registration at %s returned invalid JSON: %s", url, exc
+            )
         except urllib.error.URLError as exc:  # pragma: no cover - network optional
             logging.warning("Remote registration at %s failed: %s", url, exc)
 
@@ -305,7 +342,11 @@ def main() -> None:
         key_id, secret, fingerprint = generate_api_keypair(agent.name)
         logging.info("Generated credential set for %s (key id %s)", agent.name, key_id)
         # Secret is intentionally not logged beyond this point; a real deployment
-        # would store it in a vault. Here we retain the fingerprint for auditing.
+        # would store it in a vault. Here we persist the secret for operators and
+        # retain the fingerprint for auditing.
+
+        secret_path = persist_generated_secret(agent.name, key_id, secret)
+        logging.info("Stored API secret for %s at %s", agent.name, secret_path)
 
         permissions = resolve_role_permissions(agent.role, roles)
         platform_statuses: List[PlatformStatus] = [
@@ -322,7 +363,6 @@ def main() -> None:
             platforms=platform_statuses,
         )
         payload = agent_result.registration_payload()
-        payload["credentials"] = {"secret_preview": secret[:4] + "…" + secret[-4:]}
 
         response = register_agent(payload)
         logging.info("Registered %s with status %s", agent.name, response.get("status"))
