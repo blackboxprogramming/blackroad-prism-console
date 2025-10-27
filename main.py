@@ -11,8 +11,18 @@ st.set_page_config(layout="wide")
 st.title("BlackRoad Prism Generator with GPT + Voice Console")
 
 _api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=_api_key) if _api_key else None
-if not _api_key:
+_base_url = os.getenv("OPENAI_BASE_URL")
+_org_id = os.getenv("OPENAI_ORG_ID")
+
+client = None
+if _api_key:
+    _client_kwargs = {"api_key": _api_key}
+    if _base_url:
+        _client_kwargs["base_url"] = _base_url
+    if _org_id:
+        _client_kwargs["organization"] = _org_id
+    client = OpenAI(**_client_kwargs)
+else:
     st.warning("OpenAI API key not set; responses will be unavailable.")
 
 
@@ -48,7 +58,7 @@ if user_input:
     if not client:
         st.error("OpenAI API key not set.")
     else:
-        st.session_state.setdefault(
+        chat_history = st.session_state.setdefault(
             "chat_history",
             [
                 {
@@ -60,12 +70,21 @@ if user_input:
                 }
             ],
         )
-        st.session_state.chat_history.append({"role": "user", "content": user_input})
-        with st.spinner("Processing request..."):
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=st.session_state.chat_history,
+        messages = chat_history + [{"role": "user", "content": user_input}]
+        try:
+            with st.spinner("Processing request..."):
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=messages,
+                )
+        except Exception as exc:
+            st.error(f"Failed to fetch assistant response: {exc}")
+        else:
+            reply = response.choices[0].message.content
+            chat_history.extend(
+                [
+                    {"role": "user", "content": user_input},
+                    {"role": "assistant", "content": reply},
+                ]
             )
-        reply = response.choices[0].message.content
-        st.session_state.chat_history.append({"role": "assistant", "content": reply})
-        st.markdown(f"**Assistant:** {reply}")
+            st.markdown(f"**Assistant:** {reply}")
