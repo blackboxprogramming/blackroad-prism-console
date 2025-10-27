@@ -239,6 +239,8 @@ cmd_url() {
 }
 
 main() {
+  load_env
+
   if [[ $# -lt 1 ]]; then
     usage
     exit 1
@@ -271,6 +273,5 @@ main() {
   esac
 }
 
-load_env
 main "$@"
 exit 0
