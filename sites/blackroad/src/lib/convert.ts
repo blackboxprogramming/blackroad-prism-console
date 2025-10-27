@@ -2,39 +2,56 @@ import { getAssignments } from './ab.ts'
 
 // Client helper to record conversions to your worker.
 // Set VITE_ANALYTICS_BASE like "https://<worker-subdomain>.workers.dev"
-function base(){ return import.meta.env.VITE_ANALYTICS_BASE || '' }
-export function recordConversion(id: string, value?: number, meta: Record<string,unknown> = {}){
-  const endpoint = base() ? `${base()}/convert` : (import.meta.env.VITE_LOG_WRITE_URL ? import.meta.env.VITE_LOG_WRITE_URL.replace(/\/log$/, '/convert') : '')
+function base(): string {
+  return import.meta.env.VITE_ANALYTICS_BASE || ''
+}
+
+function getAnonId(): string {
+  const key = 'br_uid'
+  const match = document.cookie.match(new RegExp(`${key}=([^;]+)`))
+  if (match) return decodeURIComponent(match[1])
+
+  const value = Math.random().toString(36).slice(2) + Date.now().toString(36)
+  document.cookie = `${key}=${encodeURIComponent(value)}; path=/; max-age=${60 * 60 * 24 * 365}`
+  return value
+}
+
+function safeAB(): Record<string, unknown> {
+  try {
+    return getAssignments()
+  } catch {
+    return {}
+  }
+}
+
+export function recordConversion(id: string, value?: number, meta: Record<string, unknown> = {}): void {
+  const endpoint = base()
+    ? `${base()}/convert`
+    : import.meta.env.VITE_LOG_WRITE_URL
+    ? import.meta.env.VITE_LOG_WRITE_URL.replace(/\/log$/, '/convert')
+    : ''
+
   if (!endpoint) return
-  const ab = safeAB()
+
   const payload = {
     ts: new Date().toISOString(),
-    id, value,
+    id,
+    value,
     route: location.pathname,
     uid: getAnonId(),
-    meta: { ...meta, ab }
-    meta
+    meta: {
+      ...meta,
+      ab: safeAB(),
+    },
   }
+
   try {
     navigator.sendBeacon?.(endpoint, new Blob([JSON.stringify(payload)], { type: 'application/json' }))
   } catch {
-    fetch(endpoint, { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(payload) }).catch(()=>{})
+    fetch(endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).catch(() => {})
   }
-}
-function getAnonId(){
-  const k='br_uid'
-  const m=document.cookie.match(new RegExp(`${k}=([^;]+)`))
-  if (m) return decodeURIComponent(m[1])
-  const v = Math.random().toString(36).slice(2) + Date.now().toString(36)
-  document.cookie = `${k}=${encodeURIComponent(v)}; path=/; max-age=${60*60*24*365}`
-  return v
-}
-function safeAB(){
-  try { return getAssignments() } catch { return {} }
-}
-  const m=document.cookie.match(/br_uid=([^;]+)/)
-  if (m) return decodeURIComponent(m[1])
-  const v = Math.random().toString(36).slice(2) + Date.now().toString(36)
-  document.cookie = `br_uid=${encodeURIComponent(v)}; path=/; max-age=${60*60*24*365}`
-  return v
 }
