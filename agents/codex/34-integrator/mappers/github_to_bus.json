@@ -1,0 +1,21 @@
+{
+  "source": "github",
+  "version": "2024.09",
+  "fields": {
+    "id": "id",
+    "type": "event_type",
+    "timestamp": "ts"
+  },
+  "data": {
+    "repository": "repository.name",
+    "action": "action",
+    "actor": "actor.login"
+  },
+  "metadata": {
+    "consent_scope": ["read:repo"]
+  },
+  "defaults": {
+    "type": "event",
+    "timestamp": "__NOW__"
+  }
+}

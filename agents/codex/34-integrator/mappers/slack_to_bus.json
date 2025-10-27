@@ -1,0 +1,21 @@
+{
+  "source": "slack",
+  "version": "2024.09",
+  "fields": {
+    "id": "event_id",
+    "type": "type",
+    "timestamp": "event_ts"
+  },
+  "data": {
+    "channel": "channel",
+    "user": "user",
+    "text": "text"
+  },
+  "metadata": {
+    "consent_scope": ["post:chat"]
+  },
+  "defaults": {
+    "type": "message",
+    "timestamp": "__NOW__"
+  }
+}

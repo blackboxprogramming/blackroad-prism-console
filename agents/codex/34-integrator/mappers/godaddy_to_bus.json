@@ -1,0 +1,20 @@
+{
+  "source": "godaddy",
+  "version": "2024.09",
+  "fields": {
+    "id": "event_id",
+    "type": "category",
+    "timestamp": "timestamp"
+  },
+  "data": {
+    "domain": "domain",
+    "status": "status"
+  },
+  "metadata": {
+    "consent_scope": ["write:dns"]
+  },
+  "defaults": {
+    "type": "domain",
+    "timestamp": "__NOW__"
+  }
+}

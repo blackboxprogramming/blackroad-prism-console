@@ -1,0 +1,20 @@
+{
+  "source": "digitalocean",
+  "version": "2024.09",
+  "fields": {
+    "id": "uuid",
+    "type": "type",
+    "timestamp": "timestamp"
+  },
+  "data": {
+    "resource": "resource.id",
+    "region": "region"
+  },
+  "metadata": {
+    "consent_scope": ["read:infrastructure"]
+  },
+  "defaults": {
+    "type": "droplet",
+    "timestamp": "__NOW__"
+  }
+}

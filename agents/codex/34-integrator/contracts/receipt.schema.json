@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Integrator Sync Receipt",
+  "type": "object",
+  "required": ["receipt_id", "event_id", "status", "timestamp", "energy_j", "consent"],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["queued", "synced", "replayed", "failed"]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "energy_j": {
+      "type": "number",
+      "minimum": 0
+    },
+    "consent": {
+      "type": "object",
+      "required": ["scopes", "ttl_seconds"],
+      "properties": {
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "ttl_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "issued_by": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

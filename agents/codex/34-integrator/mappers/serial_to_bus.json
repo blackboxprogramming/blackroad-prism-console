@@ -1,0 +1,19 @@
+{
+  "source": "serial",
+  "version": "2024.09",
+  "fields": {
+    "id": "frame.id",
+    "type": "frame.type",
+    "timestamp": "frame.ts"
+  },
+  "data": {
+    "payload": "frame.payload"
+  },
+  "metadata": {
+    "consent_scope": ["read:device"]
+  },
+  "defaults": {
+    "type": "frame",
+    "timestamp": "__NOW__"
+  }
+}
