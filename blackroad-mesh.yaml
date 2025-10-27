@@ -1,0 +1,125 @@
+version: "0.1.0"
+network: blackroad-mesh
+description: >
+  Distributed agent workspace for the BlackRoad ecosystem.
+  Each node acts as a substrate for AI agents (Lucidia instances) coordinated by Alice.
+
+nodes:
+  - id: alice-pi400
+    role: planner_critic
+    hardware: Raspberry Pi 400
+    os: blackroad-os
+    capacity:
+      cores: 4
+      ram_gb: 4
+      max_agents: 8
+    orchestrator:
+      service: blackroad-orchestrator
+      port: 9090
+    tools:
+      - task_dispatch
+      - git_sync
+      - registry_merge
+      - audit_logger
+
+  - id: lucidia-pi5-a
+    role: world_model_memory
+    hardware: Raspberry Pi 5
+    os: blackroad-os
+    capacity:
+      cores: 4
+      ram_gb: 8
+      max_agents: 12
+    agents:
+      - name: lucidia-agent-a
+        type: memory_encode
+        parallelism: 4
+        stack: ["python3", "torch-lite", "faiss"]
+      - name: lucidia-agent-b
+        type: simulation
+        parallelism: 3
+        stack: ["docker", "numpy", "matplotlib"]
+    endpoints:
+      - port: 8081
+        service: /api/agent
+    supervisor: alice-pi400
+
+  - id: lucidia-pi5-b
+    role: world_model_memory
+    hardware: Raspberry Pi 5
+    os: blackroad-os
+    capacity:
+      cores: 4
+      ram_gb: 8
+      max_agents: 12
+    agents:
+      - name: lucidia-agent-c
+        type: retrieval
+        parallelism: 4
+        stack: ["sqlite", "langchain-lite"]
+      - name: lucidia-agent-d
+        type: data_viz
+        parallelism: 3
+        stack: ["dash", "plotly"]
+
+  - id: jetson-orin
+    role: gpu_inference_node
+    hardware: Jetson Orin Nano IO board
+    os: jetpack-5.1.2
+    capacity:
+      gpu_cores: 1024
+      ram_gb: 8
+      max_agents: 6
+    agents:
+      - name: lucid-infer-1
+        type: llm_inference
+        parallelism: 2
+        model: gguf-quantized
+        stack: ["llama.cpp", "cuda", "mosquitto-client"]
+      - name: telemetry_bridge
+        type: system_metrics
+        parallelism: 1
+        stack: ["tegrastats", "paho-mqtt"]
+    endpoints:
+      - port: 1883
+        service: mqtt://infinity.broker
+      - port: 5000
+        service: /metrics
+    supervisor: alice-pi400
+
+  - id: roadie-laptop
+    role: dev_console
+    hardware: MacBook
+    os: macos
+    capacity:
+      max_agents: 10
+    agents:
+      - name: prism-console
+        type: orchestrator_ui
+        parallelism: 1
+        stack: ["node", "react", "websocket"]
+      - name: atlas-codex
+        type: codegen
+        parallelism: 2
+        stack: ["python", "openai-sdk"]
+
+control:
+  orchestrator: alice-pi400
+  registry_file: /network/registry.json
+  sync_interval: 10m
+  mesh_protocol: mqtt
+  parallel_limit: 64  # total number of agents runnable cluster-wide
+  audit_log: /var/log/blackroad/mesh_audit.log
+
+governance:
+  permissions:
+    - action: shutdown_node
+      allowed: ["alice-pi400"]
+    - action: modify_agent
+      allowed: ["alice-pi400", "roadie-laptop"]
+    - action: read_only
+      allowed: ["lucidia-pi5-a", "lucidia-pi5-b", "jetson-orin"]
+  trust_model: signature_required
+  crypto:
+    signing_key: /etc/blackroad/keys/mesh_root.pem
+    verify_on_pull: true
