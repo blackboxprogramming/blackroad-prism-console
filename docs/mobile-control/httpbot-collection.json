@@ -1,0 +1,174 @@
+{
+  "info": {
+    "_postman_id": "7d9e7e6a-7b05-4a1c-9f3c-remote",
+    "name": "BlackRoad Mobile Control",
+    "description": "HTTPBot-ready collection for orchestrating Lucidia edge devices.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Backplane Health",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "X-BlackRoad-Key", "value": "{{api_key}}" },
+          { "key": "X-BlackRoad-Daily", "value": "{{daily_key}}" }
+        ],
+        "url": {
+          "raw": "{{backplane}}/api/health",
+          "host": ["{{backplane}}"],
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "Deploy Lucidia Stack",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-BlackRoad-Key", "value": "{{api_key}}" },
+          { "key": "X-BlackRoad-Daily", "value": "{{daily_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"deploy lucidia stack stable\",\n  \"source\": \"httpbot\"\n}"
+        },
+        "url": {
+          "raw": "{{backplane}}/api/agents/command",
+          "host": ["{{backplane}}"],
+          "path": ["api", "agents", "command"]
+        }
+      }
+    },
+    {
+      "name": "Restart Agent Service",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-BlackRoad-Key", "value": "{{api_key}}" },
+          { "key": "X-BlackRoad-Daily", "value": "{{daily_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"service.restart\",\n  \"service\": \"blackroad-agent\",\n  \"ttl_s\": 180\n}"
+        },
+        "url": {
+          "raw": "{{backplane}}/api/devices/{{device_id}}/command",
+          "host": ["{{backplane}}"],
+          "path": ["api", "devices", "{{device_id}}", "command"]
+        }
+      }
+    },
+    {
+      "name": "LED: Emotion",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-BlackRoad-Key", "value": "{{api_key}}" },
+          { "key": "X-BlackRoad-Daily", "value": "{{daily_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"led.emotion\",\n  \"emotion\": \"busy\",\n  \"ttl_s\": 60\n}"
+        },
+        "url": {
+          "raw": "{{backplane}}/api/devices/{{led_device}}/command",
+          "host": ["{{backplane}}"],
+          "path": ["api", "devices", "{{led_device}}", "command"]
+        }
+      }
+    },
+    {
+      "name": "Display: Show Status Card",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-BlackRoad-Key", "value": "{{api_key}}" },
+          { "key": "X-BlackRoad-Daily", "value": "{{daily_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"display.show\",\n  \"target\": \"{{display_target}}\",\n  \"mode\": \"url\",\n  \"src\": \"https://lucidia.blackroad.io/status\",\n  \"ttl_s\": 300\n}"
+        },
+        "url": {
+          "raw": "{{backplane}}/api/devices/{{display_device}}/command",
+          "host": ["{{backplane}}"],
+          "path": ["api", "devices", "{{display_device}}", "command"]
+        }
+      }
+    },
+    {
+      "name": "Display: Wake",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-BlackRoad-Key", "value": "{{api_key}}" },
+          { "key": "X-BlackRoad-Daily", "value": "{{daily_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"display.wake\",\n  \"ttl_s\": 30\n}"
+        },
+        "url": {
+          "raw": "{{backplane}}/api/devices/{{display_device}}/command",
+          "host": ["{{backplane}}"],
+          "path": ["api", "devices", "{{display_device}}", "command"]
+        }
+      }
+    },
+    {
+      "name": "Display: Clear",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-BlackRoad-Key", "value": "{{api_key}}" },
+          { "key": "X-BlackRoad-Daily", "value": "{{daily_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"display.clear\",\n  \"ttl_s\": 30\n}"
+        },
+        "url": {
+          "raw": "{{backplane}}/api/devices/{{display_device}}/command",
+          "host": ["{{backplane}}"],
+          "path": ["api", "devices", "{{display_device}}", "command"]
+        }
+      }
+    },
+    {
+      "name": "Jetson Inference Job",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-BlackRoad-Key", "value": "{{api_key}}" },
+          { "key": "X-BlackRoad-Daily", "value": "{{daily_key}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"run nightly vision job on jetson-01\",\n  \"source\": \"httpbot\"\n}"
+        },
+        "url": {
+          "raw": "{{backplane}}/api/agents/command",
+          "host": ["{{backplane}}"],
+          "path": ["api", "agents", "command"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "backplane", "value": "https://YOUR-BACKPLANE-HOST" },
+    { "key": "api_key", "value": "" },
+    { "key": "daily_key", "value": "" },
+    { "key": "device_id", "value": "lucidia-a" },
+    { "key": "led_device", "value": "pi-01" },
+    { "key": "display_device", "value": "display-main" },
+    { "key": "display_target", "value": "both" }
+  ]
+}
