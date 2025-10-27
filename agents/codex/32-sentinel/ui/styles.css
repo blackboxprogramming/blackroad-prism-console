@@ -1,0 +1,61 @@
+:root {
+  color-scheme: dark light;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: #0d1117;
+  color: #e6edf3;
+}
+
+body {
+  margin: 2rem auto;
+  max-width: 900px;
+  line-height: 1.6;
+  padding: 0 1.5rem;
+}
+
+header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+}
+
+.subtitle {
+  color: #7aa2f7;
+  margin-top: 0.25rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(13, 17, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+table th,
+table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+}
+
+.empty {
+  text-align: center;
+  color: rgba(230, 237, 243, 0.6);
+}
+
+.alert-feed {
+  list-style: none;
+  padding: 0;
+}
+
+.alert-feed li {
+  background: rgba(35, 134, 54, 0.2);
+  border: 1px solid rgba(35, 134, 54, 0.4);
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
+.alert-feed .empty {
+  background: none;
+  border: 1px dashed rgba(230, 237, 243, 0.3);
+}

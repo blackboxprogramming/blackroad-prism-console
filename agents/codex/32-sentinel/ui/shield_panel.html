@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sentinel Shield Panel</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="shield">
+    <header>
+      <h1>🔐 Codex-32 Sentinel</h1>
+      <p class="subtitle">Prevent quietly, prove completely.</p>
+    </header>
+    <section class="decision-stream">
+      <h2>Recent Decisions</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Policy</th>
+            <th>Decision</th>
+            <th>Hint</th>
+          </tr>
+        </thead>
+        <tbody id="decision-rows">
+          <tr>
+            <td colspan="4" class="empty">No decisions yet. Stay vigilant.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <section class="receipts">
+      <h2>Receipts</h2>
+      <p class="muted">Signed attestations are archived with the Auditor.</p>
+      <ul id="receipt-list"></ul>
+    </section>
+  </body>
+</html>
