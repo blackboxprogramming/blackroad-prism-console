@@ -1,0 +1,33 @@
+name: ProductEngDataBot Automation
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'product/**'
+      - 'engineering/**'
+      - 'data/**'
+      - 'bots/product_eng_data.py'
+      - 'bots/ProductEngDataBot.md'
+      - 'scripts/productengdatabot_handler.py'
+      - '.github/workflows/productengdatabot.yml'
+
+jobs:
+  run-productengdatabot:
+    if: github.event.action != 'labeled' || github.event.label.name == 'bot:product-eng-data'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Execute ProductEngDataBot handler
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/productengdatabot_handler.py

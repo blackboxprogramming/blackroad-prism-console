@@ -1,0 +1,32 @@
+name: GTMBot Automation
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'gtm/**'
+      - 'marketing/**'
+      - 'bots/gtm.py'
+      - 'bots/GTMBot.md'
+      - 'scripts/gtmbot_handler.py'
+      - '.github/workflows/gtmbot.yml'
+
+jobs:
+  run-gtmbot:
+    if: github.event.action != 'labeled' || github.event.label.name == 'bot:gtm'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Execute GTMBot handler
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/gtmbot_handler.py

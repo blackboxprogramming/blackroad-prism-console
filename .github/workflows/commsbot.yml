@@ -1,0 +1,32 @@
+name: CommsBot Automation
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'comms/**'
+      - 'communications/**'
+      - 'bots/comms.py'
+      - 'bots/CommsBot.md'
+      - 'scripts/commsbot_handler.py'
+      - '.github/workflows/commsbot.yml'
+
+jobs:
+  run-commsbot:
+    if: github.event.action != 'labeled' || github.event.label.name == 'bot:comms'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Execute CommsBot handler
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/commsbot_handler.py

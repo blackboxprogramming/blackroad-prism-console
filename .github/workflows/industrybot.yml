@@ -1,0 +1,32 @@
+name: IndustryBot Automation
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'industry/**'
+      - 'verticals/**'
+      - 'bots/industry.py'
+      - 'bots/IndustryBot.md'
+      - 'scripts/industrybot_handler.py'
+      - '.github/workflows/industrybot.yml'
+
+jobs:
+  run-industrybot:
+    if: github.event.action != 'labeled' || github.event.label.name == 'bot:industry'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Execute IndustryBot handler
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/industrybot_handler.py

@@ -1,0 +1,94 @@
+{
+  "bots": [
+    {
+      "name": "FinanceBot",
+      "active": true,
+      "trigger": "finance-*",
+      "label": "bot:finance",
+      "workflow": ".github/workflows/financebot.yml",
+      "manifest": "bots/FinanceBot.md",
+      "handler": "scripts/financebot_handler.py"
+    },
+    {
+      "name": "PeopleBot",
+      "active": true,
+      "trigger": "people-*",
+      "label": "bot:people",
+      "workflow": ".github/workflows/peoplebot.yml",
+      "manifest": "bots/PeopleBot.md",
+      "handler": "scripts/peoplebot_handler.py"
+    },
+    {
+      "name": "GTMBot",
+      "active": true,
+      "trigger": "gtm-*",
+      "label": "bot:gtm",
+      "workflow": ".github/workflows/gtmbot.yml",
+      "manifest": "bots/GTMBot.md",
+      "handler": "scripts/gtmbot_handler.py"
+    },
+    {
+      "name": "ProductEngDataBot",
+      "active": true,
+      "trigger": "product-eng-data-*",
+      "label": "bot:product-eng-data",
+      "workflow": ".github/workflows/productengdatabot.yml",
+      "manifest": "bots/ProductEngDataBot.md",
+      "handler": "scripts/productengdatabot_handler.py"
+    },
+    {
+      "name": "OpsBot",
+      "active": true,
+      "trigger": "ops-*",
+      "label": "bot:ops",
+      "workflow": ".github/workflows/opsbot.yml",
+      "manifest": "bots/OpsBot.md",
+      "handler": "scripts/opsbot_handler.py"
+    },
+    {
+      "name": "ITBot",
+      "active": true,
+      "trigger": "it-*",
+      "label": "bot:it",
+      "workflow": ".github/workflows/itbot.yml",
+      "manifest": "bots/ITBot.md",
+      "handler": "scripts/itbot_handler.py"
+    },
+    {
+      "name": "GRCBot",
+      "active": true,
+      "trigger": "grc-*",
+      "label": "bot:grc",
+      "workflow": ".github/workflows/grcbot.yml",
+      "manifest": "bots/GRCBot.md",
+      "handler": "scripts/grcbot_handler.py"
+    },
+    {
+      "name": "CommsBot",
+      "active": true,
+      "trigger": "comms-*",
+      "label": "bot:comms",
+      "workflow": ".github/workflows/commsbot.yml",
+      "manifest": "bots/CommsBot.md",
+      "handler": "scripts/commsbot_handler.py"
+    },
+    {
+      "name": "RegionalBot",
+      "active": true,
+      "trigger": "regional-*",
+      "label": "bot:regional",
+      "workflow": ".github/workflows/regionalbot.yml",
+      "manifest": "bots/RegionalBot.md",
+      "handler": "scripts/regionalbot_handler.py"
+    },
+    {
+      "name": "IndustryBot",
+      "active": true,
+      "trigger": "industry-*",
+      "label": "bot:industry",
+      "workflow": ".github/workflows/industrybot.yml",
+      "manifest": "bots/IndustryBot.md",
+      "handler": "scripts/industrybot_handler.py"
+    }
+  ]
+}

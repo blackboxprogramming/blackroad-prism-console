@@ -23,6 +23,8 @@ from .asset_ops_bot import AssetOpsBot
 from .base import BaseBot  # noqa: F401
 from .bi_bot import BIBot
 from .change_release_bot import ChangeReleaseBot
+from .comms import CommsBot
+from .finance import FinanceBot
 from .clinical_ops_bot import ClinicalOpsBot
 from .compliance_bot import ComplianceBot
 from .corpdev_ma_bot import CorpDevMABot
@@ -38,27 +40,34 @@ from .esg_sustainability_bot import ESGSustainabilityBot
 from .ethics_hotline_bot import EthicsHotlineBot
 from .finops_cost_opt_bot import FinOpsCostOptBot
 from .grants_bot import GrantsBot
+from .gtm import GTMBot
+from .grc import GRCBot as AdvisoryGRCBot
 from .grc_bot import GRCBot
 from .grid_reliability_bot import GridReliabilityBot
 from .gxp_bot import GxPBot
 from .iam_bot import IAMBot
 from .internal_audit_bot import InternalAuditBot
 from .investor_relations_bot import InvestorRelationsBot
+from .industry import IndustryBot
+from .it import ITBot
 from .it_helpdesk_bot import ITHelpdeskBot
 from .knowledge_mgmt_bot import KnowledgeMgmtBot
 from .l_d_bot import LDBot
 from .maintenance_ops_bot import MaintenanceOpsBot
 from .merchandising_bot import MerchandisingBot
 from .ml_platform_bot import MLPlatformBot
+from .ops import OpsBot
 from .model_risk_bot import ModelRiskBot
 from .partner_channel_bot import PartnerChannelBot
 from .pmo_epmo_bot import PMOEPMOBot
 from .pricing_bot import PricingBot
+from .product_eng_data import ProductEngDataBot
 from .privacy_bot import PrivacyBot
 from .procurement_bot import ProcurementBot
 from .public_policy_bot import PublicPolicyBot
 from .pv_bot import PVBot
 from .qa_bot import QABot
+from .regional import RegionalBot
 from .quality_mgmt_bot import QualityMgmtBot
 from .real_estate_workplace_bot import RealEstateWorkplaceBot
 from .regional_ops_bot_amer import RegionalOpsBotAMER
@@ -71,6 +80,7 @@ from .security_architecture_bot import SecurityArchitectureBot
 from .sre_bot import SREBot
 from .store_ops_bot import StoreOpsBot
 from .tax_bot import TaxBot
+from .people import PeopleBot
 from .total_rewards_bot import TotalRewardsBot
 from .treasury_bot import TreasuryBot
 from .lucidia_bot import LucidiaBot
@@ -159,4 +169,14 @@ BOT_REGISTRY = {
     "Store-Ops-BOT": StoreOpsBot(),
     "Grants-BOT": GrantsBot(),
     "Compliance-BOT": ComplianceBot(),
+    "Finance-BOT": FinanceBot(),
+    "People-BOT": PeopleBot(),
+    "GTM-BOT": GTMBot(),
+    "Product-Eng-Data-BOT": ProductEngDataBot(),
+    "Ops-BOT": OpsBot(),
+    "IT-BOT": ITBot(),
+    "Comms-BOT": CommsBot(),
+    "Regional-BOT": RegionalBot(),
+    "Industry-BOT": IndustryBot(),
+    "GRC-Advisory-BOT": AdvisoryGRCBot(),
 }
