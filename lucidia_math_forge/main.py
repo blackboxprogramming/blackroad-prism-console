@@ -12,6 +12,7 @@ from .numbers import Infinitesimal, SurrealNumber, WaveNumber
 from .operators import infinite_fold, paradox_merge
 from .proofs import ProofEngine
 from .sinewave import SineWave, test_properties
+from .unified_geometry import UnifiedGeometryEngine
 
 
 class LucidiaShell(cmd.Cmd):
@@ -22,6 +23,7 @@ class LucidiaShell(cmd.Cmd):
         super().__init__()
         self.engine = ProofEngine()
         self.history: list[dict[str, str]] = []
+        self.unified_engine = UnifiedGeometryEngine()
 
     def do_numbers(self, arg: str) -> None:
         """Demonstrate the alternative number systems."""
@@ -73,6 +75,31 @@ class LucidiaShell(cmd.Cmd):
         test_properties(waves)
         self.history.append({"sine_test": "done"})
         print("Sine wave algebra tested; see contradiction log for issues.")
+
+    def do_unified(self, arg: str) -> None:
+        """Run the Package 6 unified geometry engine demo."""
+
+        result = self.unified_engine.advance_cycle(
+            r_n=1.0,
+            r_prev=1.0,
+            coordinates=(1.0, 1.0, 1.0),
+            thermal_state={"energy": 1e-21, "temperature": 310.0},
+            ternary_probs=(0.2, 0.5, 0.3),
+            gradients={
+                "alpha": 1.0,
+                "mass": 0.8,
+                "symmetry": 0.6,
+                "theta": 0.4,
+                "theta_n": 0.1,
+                "theta_s": 0.2,
+            },
+            delta=0.15,
+            lam=0.25,
+            fractal_seed=complex(0.25, 0.3),
+        )
+        for key, value in result.items():
+            print(f"{key}: {value}")
+        self.history.append({"unified_engine": {k: str(v) for k, v in result.items()}})
 
     def do_save(self, arg: str) -> None:
         """Save session history to JSON: ``save <file>``."""
