@@ -1,0 +1,5 @@
+# List of BlackRoad nodes to receive repo updates
+# One hostname or IP per line. Lines starting with # are ignored.
+# Example:
+# lucidia-pi5.local
+# roadie-laptop.local

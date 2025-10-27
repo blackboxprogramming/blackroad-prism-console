@@ -1,0 +1,13 @@
+[Unit]
+Description=BlackRoad Sync Service (Alice)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/blackroad-sync.sh
+User=pi
+Group=pi
+
+[Install]
+WantedBy=multi-user.target
