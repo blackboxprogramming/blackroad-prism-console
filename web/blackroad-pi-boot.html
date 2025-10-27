@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackRoad OS - Retro Boot</title>
+  <style>
+    :root {
+      --spectrum-gold: #fdba2d;
+      --spectrum-orange: #ff6b35;
+      --spectrum-pink: #ff4fd8;
+      --spectrum-purple: #c753ff;
+      --spectrum-indigo: #6366f1;
+      --spectrum-blue: #3b82f6;
+      --spectrum-cyan: #06b6d4;
+      --spectrum-green: #10b981;
+
+      --retro-primary: var(--spectrum-cyan);
+      --retro-secondary: var(--spectrum-pink);
+      --retro-accent: var(--spectrum-gold);
+      --retro-white: #ffffff;
+      --retro-gray: #808080;
+      --screen-black: #000000;
+      --scanline-color: rgba(6, 182, 212, 0.03);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Courier New', 'Consolas', monospace;
+      background: var(--screen-black);
+      color: var(--retro-primary);
+      overflow: hidden;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* CRT Screen Effect */
+    .crt-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--screen-black);
+      overflow: hidden;
+      box-shadow: inset 0 0 100px rgba(255, 79, 216, 0.1);
+    }
+
+    /* Scanlines */
+    .crt-screen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        var(--scanline-color) 2px,
+        var(--scanline-color) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+      animation: scanlines 0.1s linear infinite;
+    }
+
+    @keyframes scanlines {
+      0% {
+        transform: translateY(0);
+      }
+      100% {
+        transform: translateY(4px);
+      }
+    }
+
+    /* Screen Flicker */
+    .crt-screen::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(6, 182, 212, 0.02);
+      pointer-events: none;
+      z-index: 999;
+      animation: flicker 0.15s infinite;
+    }
+
+    @keyframes flicker {
+      0% {
+        opacity: 0.95;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0.95;
+      }
+    }
+
+    /* Vignette */
+    .crt-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse at center,
+        transparent 60%,
+        rgba(0, 0, 0, 0.8) 100%
+      );
+      pointer-events: none;
+      z-index: 998;
+    }
+
+    /* Boot Content */
+    .boot-content {
+      position: relative;
+      z-index: 1;
+      padding: 30px 50px;
+      font-size: 16px;
+      line-height: 1.4;
+      letter-spacing: 0.5px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .boot-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    .boot-content {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Blinking Cursor */
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 18px;
+      background: var(--retro-primary);
+      animation: blink 0.8s infinite;
+      margin-left: 2px;
+    }
+
+    @keyframes blink {
+      0%,
+      49% {
+        opacity: 1;
+      }
+      50%,
+      100% {
+        opacity: 0;
+      }
+    }
+
+    /* Boot Line */
+    .boot-line {
+      opacity: 0;
+      animation: typeIn 0.05s forwards;
+      margin-bottom: 2px;
+      text-shadow: 0 0 8px currentColor;
+    }
+
+    @keyframes typeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .boot-line.cyan {
+      color: var(--spectrum-cyan);
+      text-shadow: 0 0 8px var(--spectrum-cyan);
+    }
+
+    .boot-line.pink {
+      color: var(--spectrum-pink);
+      text-shadow: 0 0 8px var(--spectrum-pink);
+    }
+
+    .boot-line.gold {
+      color: var(--spectrum-gold);
+      text-shadow: 0 0 8px var(--spectrum-gold);
+    }
+
+    .boot-line.purple {
+      color: var(--spectrum-purple);
+      text-shadow: 0 0 8px var(--spectrum-purple);
+    }
+
+    .boot-line.white {
+      color: var(--retro-white);
+      text-shadow: 0 0 8px var(--retro-white);
+    }
+
+    .boot-line.gray {
+      color: var(--retro-gray);
+      text-shadow: none;
+    }
+
+    .boot-line.green {
+      color: var(--spectrum-green);
+      text-shadow: 0 0 8px var(--spectrum-green);
+    }
+
+    /* Logo Container */
+    .logo-container {
+      margin: 30px 0;
+      text-align: center;
+      opacity: 0;
+      animation: logoFade 1s ease-out forwards;
+      animation-delay: 3s;
+    }
+
+    @keyframes logoFade {
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* ASCII Logo */
+    .ascii-logo {
+      font-size: 10px;
+      line-height: 1.1;
+      background: linear-gradient(
+        135deg,
+        var(--spectrum-cyan) 0%,
+        var(--spectrum-blue) 25%,
+        var(--spectrum-purple) 50%,
+        var(--spectrum-pink) 75%,
+        var(--spectrum-orange) 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.6));
+      white-space: pre;
+    }
+
+    /* Modern Logo */
+    .modern-logo {
+      display: inline-block;
+      width: 200px;
+      height: 200px;
+      position: relative;
+      margin: 20px auto;
+    }
+
+    .logo-rb {
+      font-size: 120px;
+      font-weight: 900;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(
+        135deg,
+        var(--spectrum-gold) 0%,
+        var(--spectrum-orange) 15%,
+        var(--spectrum-pink) 35%,
+        var(--spectrum-purple) 55%,
+        var(--spectrum-indigo) 75%,
+        var(--spectrum-blue) 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 30px rgba(255, 79, 216, 0.8));
+      animation: logoPulse 3s ease-in-out infinite;
+      letter-spacing: -8px;
+    }
+
+    .logo-road {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 3px;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--spectrum-cyan) 10%,
+        var(--spectrum-pink) 50%,
+        var(--spectrum-gold) 90%,
+        transparent 100%
+      );
+      border-radius: 2px;
+      box-shadow: 0 0 10px var(--spectrum-pink);
+    }
+
+    .logo-road::before,
+    .logo-road::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 15px;
+      height: 3px;
+      background: white;
+      transform: translateY(-50%);
+      box-shadow: 0 0 5px white;
+    }
+
+    .logo-road::before {
+      left: 30%;
+    }
+
+    .logo-road::after {
+      right: 30%;
+    }
+
+    @keyframes logoPulse {
+      0%,
+      100% {
+        filter: drop-shadow(0 0 30px rgba(255, 79, 216, 0.8));
+      }
+      50% {
+        filter: drop-shadow(0 0 50px rgba(6, 182, 212, 0.9));
+      }
+    }
+
+    /* OS Title */
+    .os-title {
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      margin: 20px 0;
+      background: linear-gradient(
+        90deg,
+        var(--spectrum-cyan) 0%,
+        var(--spectrum-purple) 50%,
+        var(--spectrum-pink) 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 8px;
+      font-family: 'Courier New', monospace;
+      filter: drop-shadow(0 0 15px rgba(255, 79, 216, 0.6));
+    }
+
+    .os-subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: var(--spectrum-gold);
+      text-shadow: 0 0 10px var(--spectrum-gold);
+      letter-spacing: 3px;
+      margin-bottom: 30px;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      margin: 30px auto;
+      max-width: 600px;
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+      animation-delay: 5s;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .progress-bar {
+      height: 30px;
+      border: 2px solid var(--spectrum-cyan);
+      position: relative;
+      background: var(--screen-black);
+      box-shadow:
+        0 0 10px var(--spectrum-cyan),
+        inset 0 0 10px rgba(6, 182, 212, 0.2);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        var(--spectrum-cyan) 0%,
+        var(--spectrum-blue) 25%,
+        var(--spectrum-purple) 50%,
+        var(--spectrum-pink) 75%,
+        var(--spectrum-orange) 100%
+      );
+      width: 0%;
+      animation: progressFill 3s ease-in-out forwards;
+      animation-delay: 5s;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(255, 79, 216, 0.6);
+    }
+
+    .progress-fill::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(0, 0, 0, 0.2) 10px,
+        rgba(0, 0, 0, 0.2) 20px
+      );
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100px;
+      width: 100px;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+      );
+      animation: shimmer 1s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        left: -100px;
+      }
+      100% {
+        left: 100%;
+      }
+    }
+
+    @keyframes progressFill {
+      to {
+        width: 100%;
+      }
+    }
+
+    .progress-text {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--spectrum-pink);
+      text-shadow: 0 0 8px var(--spectrum-pink);
+    }
+
+    /* System Specs Table */
+    .specs-table {
+      margin: 30px auto;
+      max-width: 700px;
+      border: 2px solid var(--spectrum-purple);
+      padding: 20px;
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+      animation-delay: 8s;
+      box-shadow:
+        0 0 20px rgba(199, 83, 255, 0.4),
+        inset 0 0 20px rgba(199, 83, 255, 0.1);
+    }
+
+    .spec-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      padding: 5px 0;
+      border-bottom: 1px dotted var(--retro-gray);
+    }
+
+    .spec-row:last-child {
+      border-bottom: none;
+    }
+
+    .spec-label {
+      color: var(--spectrum-gold);
+      text-shadow: 0 0 8px var(--spectrum-gold);
+    }
+
+    .spec-value {
+      color: var(--spectrum-cyan);
+      text-shadow: 0 0 8px var(--spectrum-cyan);
+      max-width: 70%;
+      text-align: right;
+    }
+
+    /* Press Key Message */
+    .press-key {
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn 0.5s forwards, pressBlink 1.5s infinite;
+      animation-delay: 10s, 10s;
+      font-size: 18px;
+      color: var(--spectrum-gold);
+      text-shadow: 0 0 15px var(--spectrum-gold);
+    }
+
+    @keyframes pressBlink {
+      0%,
+      49% {
+        opacity: 1;
+      }
+      50%,
+      100% {
+        opacity: 0.3;
+      }
+    }
+
+    /* Beep Flash */
+    .beep-flash {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(
+        ellipse at center,
+        var(--spectrum-pink) 0%,
+        var(--spectrum-purple) 50%,
+        transparent 100%
+      );
+      opacity: 0;
+      pointer-events: none;
+      z-index: 2000;
+    }
+
+    .beep-flash.active {
+      animation: beep 0.15s;
+    }
+
+    @keyframes beep {
+      0%,
+      100% {
+        opacity: 0;
+      }
+      50% {
+        opacity: 0.4;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .boot-content {
+        padding: 20px 25px;
+        font-size: 14px;
+      }
+
+      .modern-logo {
+        width: 150px;
+        height: 150px;
+      }
+
+      .logo-rb {
+        font-size: 90px;
+      }
+
+      .os-title {
+        font-size: 24px;
+        letter-spacing: 4px;
+      }
+
+      .specs-table {
+        font-size: 12px;
+      }
+
+      .spec-value {
+        max-width: 60%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- CRT Screen Effects -->
+  <div class="crt-screen">
+    <div class="crt-vignette"></div>
+  </div>
+
+  <!-- Beep Flash -->
+  <div class="beep-flash" id="beepFlash"></div>
+
+  <!-- Boot Content -->
+  <div class="boot-content" id="bootContent"></div>
+
+  <script>
+    const bootLines = [
+      { text: 'BlackRoad MediaLab BIOS v4.06RG', delay: 100, color: 'cyan' },
+      { text: 'Copyright (C) 2025, BlackRoad Technologies, Inc.', delay: 150, color: 'cyan' },
+      { text: '', delay: 100 },
+      { text: 'Version JK4353', delay: 100, color: 'gray' },
+      { text: '', delay: 100 },
+      { text: 'PENTIUM-S CPU at 2.4GHz', delay: 150, color: 'pink' },
+      { text: 'Memory Test : 8388608 OK', delay: 200, color: 'pink' },
+      { text: '', delay: 100 },
+      { text: 'BlackRoad Plug and Play BIOS Extension v1.0A', delay: 150, color: 'purple' },
+      { text: 'Copyright (C) 2025, BlackRoad Technologies, Inc.', delay: 100, color: 'purple' },
+      { text: '', delay: 100 },
+      { text: 'Detecting IDE Primary Master   ... 128GB NVMe SSD', delay: 300, color: 'gold' },
+      { text: 'Detecting IDE Secondary Master  ... None', delay: 200, color: 'gray' },
+      { text: 'Detecting IDE Secondary Slave   ... [Press F4 to skip]', delay: 200, color: 'gray' },
+      { text: '', delay: 500 },
+      { text: '> Initializing BlackRoad OS Kernel...', delay: 400, color: 'gold' },
+      { text: '> Loading device drivers...', delay: 300, color: 'gold' },
+      { text: '> Mounting filesystems...', delay: 300, color: 'gold' },
+      { text: '> Starting network services...', delay: 300, color: 'gold' },
+      { text: '', delay: 200 },
+      { text: '[ OK ] Hardware initialization complete', delay: 200, color: 'green' },
+      { text: '[ OK ] All systems operational', delay: 200, color: 'green' },
+      { text: '', delay: 500 },
+    ];
+
+    let currentLine = 0;
+
+    function beep() {
+      const flash = document.getElementById('beepFlash');
+      flash.classList.add('active');
+      setTimeout(() => flash.classList.remove('active'), 150);
+      playTone();
+    }
+
+    function playTone() {
+      if (!window.AudioContext && !window.webkitAudioContext) {
+        return;
+      }
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const context = playTone.context || new AudioCtx();
+      playTone.context = context;
+      const now = context.currentTime;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(880, now);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.3, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+
+      oscillator.start(now);
+      oscillator.stop(now + 0.2);
+    }
+
+    function addBootLine(text, color = 'cyan') {
+      const bootContent = document.getElementById('bootContent');
+      const line = document.createElement('div');
+      line.className = `boot-line ${color || ''}`.trim();
+      line.textContent = text;
+      line.style.animationDelay = '0s';
+      bootContent.appendChild(line);
+
+      if (text.includes('OK') || text.includes('Detecting') || text.includes('Initializing')) {
+        beep();
+      }
+
+      bootContent.scrollTop = bootContent.scrollHeight;
+    }
+
+    function typeBoot() {
+      if (currentLine < bootLines.length) {
+        const line = bootLines[currentLine];
+
+        setTimeout(() => {
+          addBootLine(line.text, line.color);
+          currentLine++;
+          typeBoot();
+        }, line.delay);
+      } else {
+        setTimeout(showLogo, 500);
+      }
+    }
+
+    function showLogo() {
+      const bootContent = document.getElementById('bootContent');
+
+      const asciiLogo = document.createElement('div');
+      asciiLogo.className = 'ascii-logo';
+      asciiLogo.textContent = `
+ ╔═══════════════════════════════════════════════════════╗
+ ║                                                       ║
+ ║   ██████╗ ██╗      █████╗  ██████╗██╗  ██╗           ║
+ ║   ██╔══██╗██║     ██╔══██╗██╔════╝██║ ██╔╝           ║
+ ║   ██████╔╝██║     ███████║██║     █████╔╝            ║
+ ║   ██╔══██╗██║     ██╔══██║██║     ██╔═██╗            ║
+ ║   ██████╔╝███████╗██║  ██║╚██████╗██║  ██╗           ║
+ ║   ╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝           ║
+ ║                                                       ║
+ ║   ██████╗  ██████╗  █████╗ ██████╗                   ║
+ ║   ██╔══██╗██╔═══██╗██╔══██╗██╔══██╗                  ║
+ ║   ██████╔╝██║   ██║███████║██║  ██║                  ║
+ ║   ██╔══██╗██║   ██║██╔══██║██║  ██║                  ║
+ ║   ██║  ██║╚██████╔╝██║  ██║██████╔╝                  ║
+ ║   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝                   ║
+ ║                                                       ║
+ ╚═══════════════════════════════════════════════════════╝
+      `;
+
+      const logoContainer = document.createElement('div');
+      logoContainer.className = 'logo-container';
+      logoContainer.appendChild(asciiLogo);
+
+      const modernLogo = document.createElement('div');
+      modernLogo.className = 'modern-logo';
+      modernLogo.innerHTML = `
+        <div class="logo-rb">RB</div>
+        <div class="logo-road"></div>
+      `;
+      logoContainer.appendChild(modernLogo);
+
+      const osTitle = document.createElement('div');
+      osTitle.className = 'os-title';
+      osTitle.textContent = 'BLACK ROAD OS';
+      logoContainer.appendChild(osTitle);
+
+      const osSubtitle = document.createElement('div');
+      osSubtitle.className = 'os-subtitle';
+      osSubtitle.textContent = 'RASPBERRY PI 5 EDITION • BUILD 2025.10.27';
+      logoContainer.appendChild(osSubtitle);
+
+      bootContent.appendChild(logoContainer);
+
+      setTimeout(() => {
+        const progressDiv = document.createElement('div');
+        progressDiv.className = 'progress-container';
+        progressDiv.innerHTML = `
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <div class="progress-text">LOADING OPERATING SYSTEM...</div>
+        `;
+        bootContent.appendChild(progressDiv);
+        bootContent.scrollTop = bootContent.scrollHeight;
+      }, 1000);
+
+      setTimeout(() => {
+        const specsDiv = document.createElement('div');
+        specsDiv.className = 'specs-table';
+        specsDiv.innerHTML = `
+          <div class="spec-row">
+            <span class="spec-label">PROCESSOR:</span>
+            <span class="spec-value">Broadcom BCM2712 (ARM Cortex-A76 Quad-Core @ 2.4GHz)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">MEMORY:</span>
+            <span class="spec-value">8192 MB LPDDR4X-4267 SDRAM</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">GRAPHICS:</span>
+            <span class="spec-value">VideoCore VII GPU (OpenGL ES 3.1, Vulkan 1.3)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">STORAGE:</span>
+            <span class="spec-value">128 GB NVMe SSD (PCIe 2.0 x1)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">NETWORK:</span>
+            <span class="spec-value">Gigabit Ethernet + Wi-Fi 6 (802.11ax)</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">USB:</span>
+            <span class="spec-value">2x USB 3.0 + 2x USB 2.0</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">DISPLAY:</span>
+            <span class="spec-value">Dual 4K @ 60Hz via Micro-HDMI</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">OS VERSION:</span>
+            <span class="spec-value">BlackRoad OS 1.0.0 (Kernel 6.6.31-blackroad)</span>
+          </div>
+        `;
+        bootContent.appendChild(specsDiv);
+        bootContent.scrollTop = bootContent.scrollHeight;
+      }, 3000);
+
+      setTimeout(() => {
+        const pressKey = document.createElement('div');
+        pressKey.className = 'press-key';
+        pressKey.innerHTML = 'Press DEL to enter SETUP, or any other key to continue...';
+        document.body.appendChild(pressKey);
+
+        beep();
+        setTimeout(beep, 200);
+      }, 5000);
+    }
+
+    setTimeout(typeBoot, 500);
+
+    document.addEventListener('keydown', (event) => {
+      if (currentLine >= bootLines.length) {
+        if (event.key === 'Delete') {
+          alert('🔧 BIOS SETUP\n\nIn production:\n• Hardware configuration\n• Boot order settings\n• Overclocking options\n• Security settings\n• System information\n• Save and exit');
+        } else {
+          alert('🚀 Loading Desktop...\n\nBlackRoad OS is starting...\n\n• Initializing window manager\n• Loading applications\n• Connecting to network\n• Starting user session\n\nWelcome to the spectrum!');
+        }
+      }
+    });
+
+    console.log(`
+╔═══════════════════════════════════════════════════════╗
+║                                                       ║
+║   ██████╗ ██╗      █████╗  ██████╗██╗  ██╗           ║
+║   ██╔══██╗██║     ██╔══██╗██╔════╝██║ ██╔╝           ║
+║   ██████╔╝██║     ███████║██║     █████╔╝            ║
+║   ██╔══██╗██║     ██╔══██║██║     ██╔═██╗            ║
+║   ██████╔╝███████╗██║  ██║╚██████╗██║  ██╗           ║
+║   ╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝           ║
+║                                                       ║
+║   ██████╗  ██████╗  █████╗ ██████╗                   ║
+║   ██╔══██╗██╔═══██╗██╔══██╗██╔══██╗                  ║
+║   ██████╔╝██║   ██║███████║██║  ██║                  ║
+║   ██╔══██╗██║   ██║██╔══██║██║  ██║                  ║
+║   ██║  ██║╚██████╔╝██║  ██║██████╔╝                  ║
+║   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝                   ║
+║                                                       ║
+║              RASPBERRY PI 5 EDITION v1.0.0            ║
+║                   BUILD 2025.10.27                    ║
+║                                                       ║
+╚═══════════════════════════════════════════════════════╝
+
+    SPECTRUM INITIALIZED
+    `);
+  </script>
+</body>
+</html>
