@@ -50,6 +50,31 @@ class FieldVault:
         return base64.urlsafe_b64encode(payload).decode("ascii")
 
 
+def _seal_list(
+    payload: List[Any],
+    vault: FieldVault,
+    sensitive_fields: Iterable[str],
+    prefix: str,
+    redactions: List[Redaction],
+    parent_is_sensitive: bool,
+) -> List[Any]:
+    sealed: List[Any] = []
+    for index, value in enumerate(payload):
+        path = f"{prefix}[{index}]"
+        if isinstance(value, dict):
+            sealed.append(_seal_dict(value, vault, sensitive_fields, path, redactions))
+        elif isinstance(value, list):
+            sealed.append(
+                _seal_list(value, vault, sensitive_fields, path, redactions, parent_is_sensitive)
+            )
+        elif parent_is_sensitive and isinstance(value, str):
+            redactions.append(Redaction(path=path, previous=value))
+            sealed.append(vault.seal(path, value))
+        else:
+            sealed.append(value)
+    return sealed
+
+
 def _seal_dict(
     payload: Dict[str, Any],
     vault: FieldVault,
@@ -62,6 +87,11 @@ def _seal_dict(
         path = f"{prefix}.{key}" if prefix else key
         if isinstance(value, dict):
             sealed[key] = _seal_dict(value, vault, sensitive_fields, path, redactions)
+            continue
+        if isinstance(value, list):
+            sealed[key] = _seal_list(
+                value, vault, sensitive_fields, path, redactions, key in sensitive_fields
+            )
             continue
         if key in sensitive_fields and isinstance(value, str):
             redactions.append(Redaction(path=path, previous=value))
