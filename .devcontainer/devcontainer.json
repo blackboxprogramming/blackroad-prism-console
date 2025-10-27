@@ -21,6 +21,31 @@
     "ghcr.io/devcontainers/features/redis:1": { "version": "7" },
     "ghcr.io/devcontainers/features/common-utils:2": {},
     "ghcr.io/devcontainers/features/pnpm:2": {}
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "version": "1.6.6"
+    },
+    "ghcr.io/devcontainers/features/aws-ssm-session-manager:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "forwardPorts": [3000, 8000, 4000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Website",
+      "onAutoForward": "notify"
+    },
+    "8000": {
+      "label": "LLM API",
+      "onAutoForward": "silent"
+    },
+    "4000": {
+      "label": "Backend API",
+      "onAutoForward": "silent"
+    }
   },
   "customizations": {
     "vscode": {
@@ -56,10 +81,27 @@
   "customizations": {
     "vscode": {
       "settings": { "editor.formatOnSave": true, "files.eol": "\\n" },
+        "terraform.codelens.enabled": true,
+        "editor.formatOnSave": true,
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": false,
+        "python.formatting.provider": "black",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.python"
+        }
+      },
       "extensions": [
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
         "ms-playwright.playwright"
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "eamodio.gitlens",
+        "ms-vscode.makefile-tools"
       ]
     }
   },

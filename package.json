@@ -23,6 +23,8 @@
     "test:api": "jest tests/api_health.test.js",
     "test:unit": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "test-agents-pack": "node tests/test_agents_mega.js",
+    "test": "npx jest",
+    "test:devcontainer": "node tests/validate-devcontainer.js",
     "guard:dev-mode": "node scripts/security/dev_mode_guard.js",
     "debug:scan-logs": "node scripts/guardrails/log_scan_stub.js",
     "typecheck": "tsc -p tsconfig.json",
