@@ -39,5 +39,15 @@ describe('Git API', () => {
     expect(typeof res.body.isDirty).toBe('boolean');
     expect(typeof res.body.shortHash).toBe('string');
     expect(typeof res.body.lastCommitMsg).toBe('string');
+    expect(res.body.lastCommit).toMatchObject({
+      hash: expect.any(String),
+      shortHash: expect.any(String),
+      message: expect.any(String),
+      author: {
+        name: expect.any(String),
+        email: expect.any(String),
+      },
+      authoredAt: expect.any(String),
+    });
   });
 });
