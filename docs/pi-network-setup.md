@@ -81,7 +81,31 @@ You can supply a custom list of users/hosts:
 
 Review the output for `[WARN]` entries and resolve any reported issues (network routing, SSH configuration, firewall rules, etc.).
 
-## 6. Keep Dependencies Updated
+## 6. Reach Alice's Raspberry Pi from VS Code
+
+Once ping and SSH succeed, you can open Alice's Pi directly in Visual Studio Code:
+
+1. Install the **Remote - SSH** extension in VS Code on your local workstation.
+2. From the command palette, choose **Remote-SSH: Connect to Host...** and enter `alice@raspberrypi` (or the IP address).
+3. VS Code will establish an SSH tunnel; reuse the same key that `ssh-copy-id` installed earlier.
+4. After the first connection, VS Code saves the host entry. You can reconnect later with:
+   ```bash
+   code --remote ssh-remote+alice@raspberrypi
+   ```
+5. If prompted to select the remote platform, choose **Linux** and allow VS Code to install the server components on the Pi.
+
+### Optional: enable a lightweight desktop session
+
+If Alice needs a graphical desktop, enable VNC on the Pi after SSHing in:
+
+```bash
+sudo raspi-config
+# Interface Options → VNC → Enable
+```
+
+Use a VNC client (RealVNC, Screens, etc.) to connect to `raspberrypi:5900` with Alice's credentials. Keep SSH enabled so VS Code and terminal sessions remain available.
+
+## 7. Keep Dependencies Updated
 
 For Debian-based Raspberry Pi systems:
 ```bash
@@ -94,7 +118,7 @@ brew update
 brew upgrade
 ```
 
-## 7. Troubleshooting Checklist
+## 8. Troubleshooting Checklist
 
 - Ping by IP first to rule out DNS issues.
 - Confirm that firewalls (UFW on Raspberry Pi, macOS Application Firewall) allow inbound SSH.
