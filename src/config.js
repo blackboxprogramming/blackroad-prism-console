@@ -1,7 +1,16 @@
 // FILE: /srv/blackroad-api/src/config.js
 'use strict';
 
+const path = require('path');
+
 require('dotenv').config();
+
+const defaultRoadviewStorage = path.resolve(
+  __dirname,
+  '..',
+  'storage',
+  'roadview'
+);
 
 const cfg = {
   NODE_ENV: process.env.NODE_ENV || 'development',
@@ -31,6 +40,9 @@ const cfg = {
   ROADCHAIN_WEBHOOK_SECRET: process.env.ROADCHAIN_WEBHOOK_SECRET || 'change-me',
   ROADCHAIN_PUBLISH_LIMITS:
     process.env.ROADCHAIN_PUBLISH_LIMITS || '{"creator":3,"builder":30,"oracle":300}'
+  ROADVIEW_STORAGE: path.resolve(
+    process.env.ROADVIEW_STORAGE || defaultRoadviewStorage
+  )
 };
 
 module.exports = cfg;

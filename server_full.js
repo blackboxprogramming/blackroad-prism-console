@@ -25,6 +25,9 @@ const {
   EVM_CHAIN_ID,
   ROADCHAIN_MAINNET_OK
 } = require('./src/config');
+  ROADVIEW_STORAGE
+} = require('./src/config');
+const subscribe = require('./src/routes/subscribe');
 
 // Ensure log dir exists
 if (LOG_DIR) {
@@ -410,6 +413,21 @@ roadchainRouter.get('/net', (_req, res) => {
 });
 
 app.use('/api/roadchain', roadchainRouter);
+// ROADVIEW
+const ROADVIEW_PROJECTS_DIR = path.join(ROADVIEW_STORAGE, 'projects');
+try {
+  fs.mkdirSync(ROADVIEW_PROJECTS_DIR, { recursive: true });
+} catch (err) {
+  console.error(
+    `Failed to ensure RoadView projects directory at ${ROADVIEW_PROJECTS_DIR}`,
+    err
+  );
+}
+app.use(
+  '/files/roadview',
+  express.static(ROADVIEW_STORAGE, { index: false, fallthrough: false })
+);
+
 // Routes
 const apiRouter = require('./src/routes');
 app.use('/api', apiRouter);
