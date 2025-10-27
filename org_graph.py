@@ -1,7 +1,7 @@
 from __future__ import annotations
 import json
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 class OrgGraph:
@@ -32,6 +32,30 @@ def apply_salesforce(evt, graph: OrgGraph):
         graph.add_edge(acc, "OWNS", opp)
 
 
+def _normalize_branch(ref: Optional[str]) -> Optional[str]:
+    if not ref:
+        return None
+    if ref.startswith("refs/heads/"):
+        return ref.split("/", 2)[-1]
+    return ref
+
+
 def apply_github(evt, graph: OrgGraph):
-    # no-op placeholder for now
+    repo = (evt.payload.get("repository") or {}).get("full_name")
+    if not repo:
+        return None
+
+    branch = None
+    event_id = evt.type.split(".", 1)[-1]
+    if event_id == "push":
+        branch = _normalize_branch(evt.payload.get("ref") or evt.payload.get("branch"))
+        rel = "HAS_BRANCH"
+    elif event_id == "branch.deleted":
+        branch = _normalize_branch(evt.payload.get("branch") or evt.payload.get("ref"))
+        rel = "DELETED_BRANCH"
+    else:
+        return None
+
+    if branch:
+        graph.add_edge(repo, rel, branch)
     return None
