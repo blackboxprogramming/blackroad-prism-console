@@ -3,9 +3,22 @@ from __future__ import annotations
 
 import cmd
 import json
+import math
 import sys
 from pathlib import Path
 
+from .consciousness import (
+    CategoryTensorNetwork,
+    ComplexQuaternionMapper,
+    EntropyInformationBridge,
+    FractalDynamics,
+    HilbertPhaseAnalyzer,
+    MeasurementOperator,
+    NoetherAnalyzer,
+    QuantumLogicMapper,
+    ScaleInvarianceAnalyzer,
+    SpinNetwork,
+)
 from .dimensions import HyperPoint, hyper_equation, plot_projection
 from .fractals import generate_fractal
 from .numbers import Infinitesimal, SurrealNumber, WaveNumber
@@ -73,6 +86,71 @@ class LucidiaShell(cmd.Cmd):
         test_properties(waves)
         self.history.append({"sine_test": "done"})
         print("Sine wave algebra tested; see contradiction log for issues.")
+
+    def do_connective(self, arg: str) -> None:
+        """Demonstrate the connective consciousness physics layers."""
+
+        mapper = ComplexQuaternionMapper()
+        quaternion = mapper.from_phase(math.pi / 2, axis=(0.0, 1.0, 0.0))
+
+        spin = SpinNetwork()
+        spin_step = spin.precess((0.0, 0.0, 1.0), (0.0, 0.0, 0.5), 1.0, 0.1)
+
+        measurement = MeasurementOperator(
+            positions=[-1.0, 0.0, 1.0],
+            amplitudes=[complex(0.3, 0.1), complex(0.6, -0.2), complex(0.1, 0.05)],
+        )
+        collapse = measurement.collapse()
+
+        fractal = FractalDynamics(1, 0, 0, 1)
+        orbit = fractal.iterate(0, -0.2 + 0.75j, steps=10)
+
+        analyzer = HilbertPhaseAnalyzer([0.0, 1.0, 0.0, -1.0])
+        phase = analyzer.instantaneous_phase()[1]
+
+        lagrangian = lambda q, dq, t: 0.5 * dq**2 - 0.5 * q**2  # Simple harmonic
+        noether = NoetherAnalyzer(lagrangian)
+        conserved = noether.conserved_quantity(0.1, 0.2, 0.0, delta_q=0.1)
+
+        category = CategoryTensorNetwork()
+        category.add_object("agent", 2)
+        category.add_object("field", 3)
+        tensor_name, tensor_dim = category.tensor_product("agent", "field")
+
+        entropy_bridge = EntropyInformationBridge()
+        info = entropy_bridge.information_balance([0.4, 0.6], [0.8, 0.2])
+
+        quantum_logic = QuantumLogicMapper()
+        transition = quantum_logic.map_transition(-1, 1)
+
+        scale = ScaleInvarianceAnalyzer([(1.0, 1.0), (2.0, 2.5), (4.0, 6.2)])
+        alpha = scale.estimate()["alpha"]
+
+        self.history.append({
+            "connective": {
+                "quaternion": quaternion.as_tuple(),
+                "spin": spin_step,
+                "collapse": collapse,
+                "orbit": len(orbit),
+                "phase": phase,
+                "noether": conserved,
+                "tensor_dim": tensor_dim,
+                "information_gain": info["information_gain"],
+                "transition": transition,
+                "alpha": alpha,
+            }
+        })
+
+        print("Quaternion from phase:", quaternion.as_tuple())
+        print("Spin step:", spin_step)
+        print("Measurement collapse:", collapse)
+        print("Orbit length:", len(orbit), "bounded:", fractal.is_bounded(orbit))
+        print("Hilbert phase sample:", phase)
+        print("Noether conserved quantity:", conserved)
+        print(f"Tensor product {tensor_name} dimension:", tensor_dim)
+        print("Information gain:", info["information_gain"])
+        print("Ternary transition Δθ, Δφ:", transition["delta_theta"], transition["delta_phi"])
+        print("Scale exponent alpha:", alpha)
 
     def do_save(self, arg: str) -> None:
         """Save session history to JSON: ``save <file>``."""
