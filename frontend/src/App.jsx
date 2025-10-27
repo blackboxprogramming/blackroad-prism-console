@@ -82,6 +82,7 @@ import PeriodicTableOfEquations from './pages/PeriodicTableOfEquations.jsx'
 import Resilience from './pages/Resilience.jsx'
 import AgentLineage from './pages/AgentLineage.jsx'
 import WebEngine from './pages/WebEngine.jsx'
+import DesktopOS from './pages/DesktopOS.jsx'
 import MusicApp from './pages/MusicApp.jsx'
 import SimplifiedOS from './pages/SimplifiedOS.jsx'
 
@@ -291,6 +292,7 @@ export default function App(){
     { key: 'roadview', to: '/roadview', text: 'RoadView', icon: <LayoutGrid size={18} /> },
     { key: 'web-engine', to: '/web-engine', text: 'Web Engine', icon: <span className="text-lg" aria-hidden="true">🌐</span> },
     { key: 'simplified-os', to: '/simplified-os', text: 'Simplified OS', icon: <span className="text-lg" aria-hidden="true">🖥️</span> },
+    { key: 'desktop-os', to: '/desktop-os', text: 'Desktop OS', icon: <span className="text-lg" aria-hidden="true">🖥️</span> },
     { key: 'autoheal', to: '/autoheal', text: 'Auto-Heal', icon: <HeartPulse size={18} /> },
     { key: 'security', to: '/security', text: 'Security Spotlights', icon: <Shield size={18} /> },
     { key: 'guardian', to: '/guardian', text: 'Guardian', icon: <ShieldCheck size={18} /> },
@@ -346,6 +348,7 @@ export default function App(){
               <Route path="/roadview" element={<Section><RoadView agents={agents} /></Section>} />
               <Route path="/web-engine" element={<WebEngine />} />
               <Route path="/simplified-os" element={<div className="col-span-12"><SimplifiedOS /></div>} />
+              <Route path="/desktop-os" element={<DesktopOS />} />
               <Route path="/autoheal" element={<Section><AutoHeal /></Section>} />
               <Route path="/security" element={<Section><SecuritySpotlights /></Section>} />
               <Route path="/guardian" element={<Guardian />} />
