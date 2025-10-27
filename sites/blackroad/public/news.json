@@ -1,10 +1,26 @@
 {
+  "updatedAt": "2025-10-27T17:10:53Z",
   "news": [
     {
-      "id": "example-draft",
-      "title": "Example draft item",
-      "body": "This is a draft news item.",
-      "published": false
+      "id": "2025-02-observability",
+      "title": "New observability console now live",
+      "body": "We refreshed the Prism console with consolidated CI, Lighthouse, and funnel views so ops can ship faster.",
+      "published": true,
+      "ts": "2025-02-20T15:00:00Z"
+    },
+    {
+      "id": "2025-02-mathlab-tour",
+      "title": "Guided MathLab tour enters experiment",
+      "body": "A/B test kicking off this week to measure completion lift from the new guided geodesic walkthrough.",
+      "published": true,
+      "ts": "2025-02-19T17:30:00Z"
+    },
+    {
+      "id": "2025-02-feb-release",
+      "title": "February release train ready for GA",
+      "body": "Release 2025.7 wraps compliance automation and network hardening\u2014pending green light from SRE.",
+      "published": false,
+      "ts": "2025-02-20T12:30:00Z"
     }
   ]
 }

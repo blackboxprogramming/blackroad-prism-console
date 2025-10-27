@@ -1,3 +1,47 @@
 {
-  "experiments": []
+  "updatedAt": "2025-10-27T17:10:23Z",
+  "experiments": [
+    {
+      "id": "homepage_hero_copy",
+      "desc": "Compare focused product copy vs. narrative story on hero headline.",
+      "active": true,
+      "segment": "all_visitors",
+      "createdAt": "2025-01-12T16:42:00Z",
+      "owners": [
+        "growth@blackroad.io"
+      ],
+      "weights": {
+        "A": 0.5,
+        "B": 0.5
+      }
+    },
+    {
+      "id": "mathlab_guided_tour",
+      "desc": "Test guided geodesic tutorial overlay vs. existing quick tips.",
+      "active": true,
+      "segment": "mathlab_new_users",
+      "createdAt": "2025-01-28T20:15:00Z",
+      "owners": [
+        "product@blackroad.io"
+      ],
+      "weights": {
+        "A": 0.4,
+        "B": 0.6
+      }
+    },
+    {
+      "id": "pricing_modal_offer",
+      "desc": "Experiment with annual upgrade prompt after third workflow run.",
+      "active": false,
+      "segment": "portal_power_users",
+      "createdAt": "2024-12-05T18:05:00Z",
+      "owners": [
+        "revops@blackroad.io"
+      ],
+      "weights": {
+        "A": 0.7,
+        "B": 0.3
+      }
+    }
+  ]
 }

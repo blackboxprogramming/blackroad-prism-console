@@ -1,23 +1,456 @@
 {
+  "updatedAt": "2025-10-27T17:10:13Z",
   "funnels": [
     {
+      "id": "signup",
       "name": "Signup",
-      "description": "Homepage CTA → Portal open → Account created",
+      "description": "Homepage CTA \u2192 Portal open \u2192 Account created",
       "windowDays": 14,
       "steps": [
-        { "id": "cta_click" },
-        { "id": "portal_open" },
-        { "id": "signup_success" }
+        {
+          "id": "cta_click",
+          "label": "Clicked primary CTA"
+        },
+        {
+          "id": "portal_open",
+          "label": "Opened Portal"
+        },
+        {
+          "id": "signup_success",
+          "label": "Completed signup"
+        }
+      ],
+      "history": [
+        {
+          "ts": "2025-02-20T00:00:00Z",
+          "counts": {
+            "cta_click": {
+              "count": 160,
+              "conversionRate": 1.0
+            },
+            "portal_open": {
+              "count": 148,
+              "conversionRate": 0.925
+            },
+            "signup_success": {
+              "count": 124,
+              "conversionRate": 0.775
+            }
+          }
+        },
+        {
+          "ts": "2025-02-18T00:00:00Z",
+          "counts": {
+            "cta_click": {
+              "count": 153,
+              "conversionRate": 0.987
+            },
+            "portal_open": {
+              "count": 139,
+              "conversionRate": 0.897
+            },
+            "signup_success": {
+              "count": 113,
+              "conversionRate": 0.729
+            }
+          }
+        },
+        {
+          "ts": "2025-02-16T00:00:00Z",
+          "counts": {
+            "cta_click": {
+              "count": 146,
+              "conversionRate": 0.973
+            },
+            "portal_open": {
+              "count": 130,
+              "conversionRate": 0.867
+            },
+            "signup_success": {
+              "count": 102,
+              "conversionRate": 0.68
+            }
+          }
+        },
+        {
+          "ts": "2025-02-14T00:00:00Z",
+          "counts": {
+            "cta_click": {
+              "count": 139,
+              "conversionRate": 0.959
+            },
+            "portal_open": {
+              "count": 121,
+              "conversionRate": 0.834
+            },
+            "signup_success": {
+              "count": 91,
+              "conversionRate": 0.628
+            }
+          }
+        },
+        {
+          "ts": "2025-02-12T00:00:00Z",
+          "counts": {
+            "cta_click": {
+              "count": 132,
+              "conversionRate": 0.943
+            },
+            "portal_open": {
+              "count": 112,
+              "conversionRate": 0.8
+            },
+            "signup_success": {
+              "count": 80,
+              "conversionRate": 0.571
+            }
+          }
+        },
+        {
+          "ts": "2025-02-10T00:00:00Z",
+          "counts": {
+            "cta_click": {
+              "count": 125,
+              "conversionRate": 0.926
+            },
+            "portal_open": {
+              "count": 103,
+              "conversionRate": 0.763
+            },
+            "signup_success": {
+              "count": 69,
+              "conversionRate": 0.511
+            }
+          }
+        },
+        {
+          "ts": "2025-02-08T00:00:00Z",
+          "counts": {
+            "cta_click": {
+              "count": 118,
+              "conversionRate": 0.908
+            },
+            "portal_open": {
+              "count": 94,
+              "conversionRate": 0.723
+            },
+            "signup_success": {
+              "count": 58,
+              "conversionRate": 0.446
+            }
+          }
+        },
+        {
+          "ts": "2025-02-06T00:00:00Z",
+          "counts": {
+            "cta_click": {
+              "count": 111,
+              "conversionRate": 0.888
+            },
+            "portal_open": {
+              "count": 85,
+              "conversionRate": 0.68
+            },
+            "signup_success": {
+              "count": 47,
+              "conversionRate": 0.376
+            }
+          }
+        },
+        {
+          "ts": "2025-02-04T00:00:00Z",
+          "counts": {
+            "cta_click": {
+              "count": 104,
+              "conversionRate": 0.867
+            },
+            "portal_open": {
+              "count": 76,
+              "conversionRate": 0.633
+            },
+            "signup_success": {
+              "count": 36,
+              "conversionRate": 0.3
+            }
+          }
+        },
+        {
+          "ts": "2025-02-02T00:00:00Z",
+          "counts": {
+            "cta_click": {
+              "count": 97,
+              "conversionRate": 0.843
+            },
+            "portal_open": {
+              "count": 67,
+              "conversionRate": 0.583
+            },
+            "signup_success": {
+              "count": 25,
+              "conversionRate": 0.217
+            }
+          }
+        },
+        {
+          "ts": "2025-01-31T00:00:00Z",
+          "counts": {
+            "cta_click": {
+              "count": 90,
+              "conversionRate": 0.818
+            },
+            "portal_open": {
+              "count": 58,
+              "conversionRate": 0.527
+            },
+            "signup_success": {
+              "count": 14,
+              "conversionRate": 0.127
+            }
+          }
+        },
+        {
+          "ts": "2025-01-29T00:00:00Z",
+          "counts": {
+            "cta_click": {
+              "count": 83,
+              "conversionRate": 0.79
+            },
+            "portal_open": {
+              "count": 49,
+              "conversionRate": 0.467
+            },
+            "signup_success": {
+              "count": 3,
+              "conversionRate": 0.029
+            }
+          }
+        }
       ]
     },
     {
+      "id": "mathlab",
       "name": "MathLab Explore",
-      "description": "Visited MathLab → Ran Geodesic → Saved Snapshot",
+      "description": "Visited MathLab \u2192 Ran Geodesic \u2192 Saved Snapshot",
       "windowDays": 7,
       "steps": [
-        { "id": "math_view" },
-        { "id": "geodesic_run" },
-        { "id": "snapshot_save" }
+        {
+          "id": "math_view",
+          "label": "Visited MathLab"
+        },
+        {
+          "id": "geodesic_run",
+          "label": "Ran Geodesic"
+        },
+        {
+          "id": "snapshot_save",
+          "label": "Saved Snapshot"
+        }
+      ],
+      "history": [
+        {
+          "ts": "2025-02-19T00:00:00Z",
+          "counts": {
+            "math_view": {
+              "count": 157,
+              "conversionRate": 1.0
+            },
+            "geodesic_run": {
+              "count": 145,
+              "conversionRate": 0.924
+            },
+            "snapshot_save": {
+              "count": 121,
+              "conversionRate": 0.771
+            }
+          }
+        },
+        {
+          "ts": "2025-02-17T00:00:00Z",
+          "counts": {
+            "math_view": {
+              "count": 150,
+              "conversionRate": 0.987
+            },
+            "geodesic_run": {
+              "count": 136,
+              "conversionRate": 0.895
+            },
+            "snapshot_save": {
+              "count": 110,
+              "conversionRate": 0.724
+            }
+          }
+        },
+        {
+          "ts": "2025-02-15T00:00:00Z",
+          "counts": {
+            "math_view": {
+              "count": 143,
+              "conversionRate": 0.973
+            },
+            "geodesic_run": {
+              "count": 127,
+              "conversionRate": 0.864
+            },
+            "snapshot_save": {
+              "count": 99,
+              "conversionRate": 0.673
+            }
+          }
+        },
+        {
+          "ts": "2025-02-13T00:00:00Z",
+          "counts": {
+            "math_view": {
+              "count": 136,
+              "conversionRate": 0.958
+            },
+            "geodesic_run": {
+              "count": 118,
+              "conversionRate": 0.831
+            },
+            "snapshot_save": {
+              "count": 88,
+              "conversionRate": 0.62
+            }
+          }
+        },
+        {
+          "ts": "2025-02-11T00:00:00Z",
+          "counts": {
+            "math_view": {
+              "count": 129,
+              "conversionRate": 0.942
+            },
+            "geodesic_run": {
+              "count": 109,
+              "conversionRate": 0.796
+            },
+            "snapshot_save": {
+              "count": 77,
+              "conversionRate": 0.562
+            }
+          }
+        },
+        {
+          "ts": "2025-02-09T00:00:00Z",
+          "counts": {
+            "math_view": {
+              "count": 122,
+              "conversionRate": 0.924
+            },
+            "geodesic_run": {
+              "count": 100,
+              "conversionRate": 0.758
+            },
+            "snapshot_save": {
+              "count": 66,
+              "conversionRate": 0.5
+            }
+          }
+        },
+        {
+          "ts": "2025-02-07T00:00:00Z",
+          "counts": {
+            "math_view": {
+              "count": 115,
+              "conversionRate": 0.906
+            },
+            "geodesic_run": {
+              "count": 91,
+              "conversionRate": 0.717
+            },
+            "snapshot_save": {
+              "count": 55,
+              "conversionRate": 0.433
+            }
+          }
+        },
+        {
+          "ts": "2025-02-05T00:00:00Z",
+          "counts": {
+            "math_view": {
+              "count": 108,
+              "conversionRate": 0.885
+            },
+            "geodesic_run": {
+              "count": 82,
+              "conversionRate": 0.672
+            },
+            "snapshot_save": {
+              "count": 44,
+              "conversionRate": 0.361
+            }
+          }
+        },
+        {
+          "ts": "2025-02-03T00:00:00Z",
+          "counts": {
+            "math_view": {
+              "count": 101,
+              "conversionRate": 0.863
+            },
+            "geodesic_run": {
+              "count": 73,
+              "conversionRate": 0.624
+            },
+            "snapshot_save": {
+              "count": 33,
+              "conversionRate": 0.282
+            }
+          }
+        },
+        {
+          "ts": "2025-02-01T00:00:00Z",
+          "counts": {
+            "math_view": {
+              "count": 94,
+              "conversionRate": 0.839
+            },
+            "geodesic_run": {
+              "count": 64,
+              "conversionRate": 0.571
+            },
+            "snapshot_save": {
+              "count": 22,
+              "conversionRate": 0.196
+            }
+          }
+        },
+        {
+          "ts": "2025-01-30T00:00:00Z",
+          "counts": {
+            "math_view": {
+              "count": 87,
+              "conversionRate": 0.813
+            },
+            "geodesic_run": {
+              "count": 55,
+              "conversionRate": 0.514
+            },
+            "snapshot_save": {
+              "count": 11,
+              "conversionRate": 0.103
+            }
+          }
+        },
+        {
+          "ts": "2025-01-28T00:00:00Z",
+          "counts": {
+            "math_view": {
+              "count": 80,
+              "conversionRate": 0.784
+            },
+            "geodesic_run": {
+              "count": 46,
+              "conversionRate": 0.451
+            },
+            "snapshot_save": {
+              "count": 0,
+              "conversionRate": 0.0
+            }
+          }
+        }
       ]
     }
   ]
