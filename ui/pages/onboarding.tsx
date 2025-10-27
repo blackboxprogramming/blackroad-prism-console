@@ -40,7 +40,10 @@ const STATUS_BADGE: Record<string, { label: string; tone: string }> = {
 };
 
 function fetchRegistry(): Promise<RegistrySnapshot> {
-  return fetch("/registry/platform_connections.json", { cache: "no-store" })
+  return fetch("/api/registry/platform_connections", {
+    cache: "no-store",
+    credentials: "include",
+  })
     .then(async (response) => {
       if (!response.ok) {
         throw new Error(`Failed to load registry (${response.status})`);

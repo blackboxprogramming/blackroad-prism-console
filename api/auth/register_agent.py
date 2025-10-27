@@ -3,18 +3,22 @@
 from __future__ import annotations
 
 import json
+import os
+import secrets
 from collections.abc import MutableMapping
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Cookie, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_PATH = ROOT / "registry" / "platform_connections.json"
 
 router = APIRouter()
+
+ONBOARDING_TOKEN_ENV = "ONBOARDING_REGISTRATION_TOKEN"
 
 
 class PlatformLink(BaseModel):
@@ -55,7 +59,9 @@ def _load_registry() -> Dict[str, Any]:
     with REGISTRY_PATH.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
     if not isinstance(data, MutableMapping):
-        raise ValueError("platform registry must be a JSON object")
+        raise ValueError(
+            f"Invalid registry format: expected JSON object, got {type(data).__name__}"
+        )
     registry: Dict[str, Any] = dict(data)
     registry.setdefault("agents", [])
     return registry
@@ -98,15 +104,66 @@ def register_agent(payload: AgentRegistrationRequest | Mapping[str, Any]) -> Dic
     return {"status": "registered", "agent": serialised}
 
 
-@router.post("/auth/register_agent", response_model=AgentRegistrationResponse)
+def _require_onboarding_token(
+    header_token: Optional[str] = Header(None, alias="X-Onboarding-Token"),
+    session_token: Optional[str] = Cookie(None, alias="onboarding_session"),
+) -> None:
+    expected = os.environ.get(ONBOARDING_TOKEN_ENV)
+    if not expected:
+        raise HTTPException(
+            status_code=503,
+            detail={"detail": "Onboarding token is not configured on the server"},
+        )
+
+    provided = header_token or session_token
+    if not provided:
+        raise HTTPException(
+            status_code=401,
+            detail={"detail": "Missing onboarding token"},
+        )
+
+    if not secrets.compare_digest(provided, expected):
+        raise HTTPException(
+            status_code=401,
+            detail={"detail": "Invalid onboarding token"},
+        )
+
+
+@router.post(
+    "/auth/register_agent",
+    response_model=AgentRegistrationResponse,
+    dependencies=[Depends(_require_onboarding_token)],
+)
 def register_agent_endpoint(request: AgentRegistrationRequest) -> AgentRegistrationResponse:
     """FastAPI endpoint used by automation to register agents."""
 
     if not request.platforms:
-        raise HTTPException(status_code=400, detail={"code": "missing_platforms"})
+        raise HTTPException(
+            status_code=400,
+            detail={"detail": "At least one platform integration is required"},
+        )
 
     response = register_agent(request)
     return AgentRegistrationResponse.model_validate(response)
+
+
+class AgentRegistrySnapshot(BaseModel):
+    """Snapshot of the current onboarding registry."""
+
+    generated_at: Optional[datetime] = None
+    agents: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+@router.get(
+    "/registry/platform_connections",
+    response_model=AgentRegistrySnapshot,
+    dependencies=[Depends(_require_onboarding_token)],
+)
+def get_registry_snapshot() -> AgentRegistrySnapshot:
+    """Return the current platform connection registry for authorised callers."""
+
+    registry = _load_registry()
+    return AgentRegistrySnapshot.model_validate(registry)
 
 
 __all__ = [
@@ -115,5 +172,6 @@ __all__ = [
     "PlatformLink",
     "register_agent",
     "register_agent_endpoint",
+    "get_registry_snapshot",
     "router",
 ]
