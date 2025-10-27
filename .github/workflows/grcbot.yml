@@ -1,0 +1,32 @@
+name: GRCBot Automation
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'grc/**'
+      - 'compliance/**'
+      - 'bots/grc.py'
+      - 'bots/GRCBot.md'
+      - 'scripts/grcbot_handler.py'
+      - '.github/workflows/grcbot.yml'
+
+jobs:
+  run-grcbot:
+    if: github.event.action != 'labeled' || github.event.label.name == 'bot:grc'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Execute GRCBot handler
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/grcbot_handler.py

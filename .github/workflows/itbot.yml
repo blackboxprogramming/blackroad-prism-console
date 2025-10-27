@@ -1,0 +1,32 @@
+name: ITBot Automation
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'it/**'
+      - 'infrastructure/it/**'
+      - 'bots/it.py'
+      - 'bots/ITBot.md'
+      - 'scripts/itbot_handler.py'
+      - '.github/workflows/itbot.yml'
+
+jobs:
+  run-itbot:
+    if: github.event.action != 'labeled' || github.event.label.name == 'bot:it'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Execute ITBot handler
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/itbot_handler.py

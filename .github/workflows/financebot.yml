@@ -1,0 +1,32 @@
+name: FinanceBot Automation
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'finance/**'
+      - 'treasury/**'
+      - 'bots/finance.py'
+      - 'bots/FinanceBot.md'
+      - 'scripts/financebot_handler.py'
+      - '.github/workflows/financebot.yml'
+
+jobs:
+  run-financebot:
+    if: github.event.action != 'labeled' || github.event.label.name == 'bot:finance'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Execute FinanceBot handler
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/financebot_handler.py

@@ -1,0 +1,32 @@
+name: PeopleBot Automation
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'people/**'
+      - 'hr/**'
+      - 'bots/people.py'
+      - 'bots/PeopleBot.md'
+      - 'scripts/peoplebot_handler.py'
+      - '.github/workflows/peoplebot.yml'
+
+jobs:
+  run-peoplebot:
+    if: github.event.action != 'labeled' || github.event.label.name == 'bot:people'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Execute PeopleBot handler
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/peoplebot_handler.py
