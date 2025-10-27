@@ -17,6 +17,15 @@ __all__ = [
     "available_backends",
     "backend_names",
     "select_backend",
+    "GaussianSignalAnalyzer",
+    "ArithmeticSymmetryEngine",
+    "ComplexMatrixMapper",
+    "QuaternionicRotationEngine",
+    "QuantumFieldManifold",
+    "FractalMobiusCoupler",
+    "NoetherAnalyzer",
+    "EntropyFieldMapper",
+    "HilbertPhaseAnalyzer",
 ]
 
 _MODULE_MAP: Dict[str, Tuple[str, str]] = {
@@ -33,6 +42,15 @@ _MODULE_MAP: Dict[str, Tuple[str, str]] = {
     "available_backends": ("frameworks", "available_backends"),
     "backend_names": ("frameworks", "backend_names"),
     "select_backend": ("frameworks", "select_backend"),
+    "GaussianSignalAnalyzer": ("unified_geometry_engine", "GaussianSignalAnalyzer"),
+    "ArithmeticSymmetryEngine": ("unified_geometry_engine", "ArithmeticSymmetryEngine"),
+    "ComplexMatrixMapper": ("unified_geometry_engine", "ComplexMatrixMapper"),
+    "QuaternionicRotationEngine": ("unified_geometry_engine", "QuaternionicRotationEngine"),
+    "QuantumFieldManifold": ("unified_geometry_engine", "QuantumFieldManifold"),
+    "FractalMobiusCoupler": ("unified_geometry_engine", "FractalMobiusCoupler"),
+    "NoetherAnalyzer": ("unified_geometry_engine", "NoetherAnalyzer"),
+    "EntropyFieldMapper": ("unified_geometry_engine", "EntropyFieldMapper"),
+    "HilbertPhaseAnalyzer": ("unified_geometry_engine", "HilbertPhaseAnalyzer"),
 }
 
 
