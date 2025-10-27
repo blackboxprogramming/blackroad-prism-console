@@ -1,0 +1,10 @@
+[Unit]
+Description=Run BlackRoad Sync every 10 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=10min
+Unit=blackroad-sync.service
+
+[Install]
+WantedBy=timers.target
