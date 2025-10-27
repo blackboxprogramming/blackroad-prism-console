@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlackRoad Metaverse - Agent World</title>
+    <style>
+      :root {
+        --void: #000000;
+        --void-10: #0a0a0f;
+        --void-20: #13131a;
+        --void-30: #1a1a24;
+        --void-40: #202030;
+        --spectrum-gold: #fdba2d;
+        --spectrum-orange: #ff6b35;
+        --spectrum-pink: #ff4fd8;
+        --spectrum-purple: #c753ff;
+        --spectrum-indigo: #6366f1;
+        --spectrum-blue: #3b82f6;
+        --spectrum-cyan: #06b6d4;
+        --spectrum-green: #10b981;
+        --text: #ffffff;
+        --text-secondary: rgba(255, 255, 255, 0.7);
+        --text-tertiary: rgba(255, 255, 255, 0.5);
+        --border: rgba(255, 255, 255, 0.08);
+        --border-glow: rgba(255, 79, 216, 0.2);
+        --gradient-spectrum: linear-gradient(
+          135deg,
+          var(--spectrum-gold) 0%,
+          var(--spectrum-orange) 20%,
+          var(--spectrum-pink) 40%,
+          var(--spectrum-purple) 60%,
+          var(--spectrum-indigo) 80%,
+          var(--spectrum-blue) 100%
+        );
+        --gradient-prism: conic-gradient(
+          from 180deg,
+          var(--spectrum-gold) 0deg,
+          var(--spectrum-orange) 60deg,
+          var(--spectrum-pink) 120deg,
+          var(--spectrum-purple) 180deg,
+          var(--spectrum-indigo) 240deg,
+          var(--spectrum-blue) 300deg,
+          var(--spectrum-gold) 360deg
+        );
+        --gradient-gold: linear-gradient(90deg, rgba(253, 186, 45, 0.8), rgba(253, 186, 45, 0));
+        --glow-pink: 0 0 40px rgba(255, 79, 216, 0.5);
+        --glow-spectrum: 0 0 20px rgba(255, 79, 216, 0.4), 0 0 40px rgba(199, 83, 255, 0.3),
+          0 0 60px rgba(99, 102, 241, 0.2);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+        background: #000000;
+        color: var(--text);
+        overflow: hidden;
+        height: 100vh;
+      }
+
+      .metaverse-background {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+        overflow: hidden;
+      }
+
+      .stars {
+        position: absolute;
+        inset: 0;
+        background: transparent;
+      }
+
+      .star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: white;
+        border-radius: 50%;
+        animation: twinkle 3s ease-in-out infinite;
+      }
+
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .floating-island {
+        position: absolute;
+        width: 200px;
+        height: 80px;
+        background: linear-gradient(180deg, #2a4858 0%, #1a2838 100%);
+        border-radius: 50%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 -20px 40px rgba(0, 0, 0, 0.3);
+        animation: floatIsland 8s ease-in-out infinite;
+      }
+
+      @keyframes floatIsland {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+
+      .floating-island:nth-child(2) {
+        left: 10%;
+        top: 20%;
+        animation-delay: -2s;
+      }
+      .floating-island:nth-child(3) {
+        right: 15%;
+        top: 30%;
+        animation-delay: -4s;
+      }
+      .floating-island:nth-child(4) {
+        left: 60%;
+        top: 50%;
+        animation-delay: -6s;
+      }
+
+      .header {
+        position: relative;
+        z-index: 1000;
+        height: 70px;
+        padding: 0 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(10, 10, 15, 0.95);
+        backdrop-filter: blur(20px);
+        border-bottom: 2px solid var(--border);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .logo-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--gradient-prism);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: var(--glow-pink);
+        animation: pulse 3s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          box-shadow: var(--glow-pink);
+        }
+        50% {
+          box-shadow: var(--glow-spectrum);
+        }
+      }
+
+      .logo-text {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .logo-title {
+        font-size: 1.5rem;
+        font-weight: 900;
+        background: var(--gradient-spectrum);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+      }
+
+      .logo-subtitle {
+        font-size: 0.65rem;
+        color: var(--text-tertiary);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+
+      .header-nav {
+        display: flex;
+        gap: 8px;
+      }
+
+      .nav-tab {
+        padding: 10px 20px;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .nav-tab:hover,
+      .nav-tab.active {
+        background: rgba(255, 79, 216, 0.1);
+        border-color: var(--spectrum-pink);
+        color: var(--text);
+      }
+
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .online-counter {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid var(--spectrum-green);
+        border-radius: 12px;
+        font-size: 0.85rem;
+      }
+
+      .online-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--spectrum-green);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--spectrum-green);
+        animation: pulse-dot 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse-dot {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+      }
+
+      .main-container {
+        position: relative;
+        z-index: 1;
+        height: calc(100vh - 70px);
+        display: flex;
+        overflow: hidden;
+      }
+
+      .sidebar {
+        width: 300px;
+        background: rgba(10, 10, 15, 0.95);
+        border-right: 1px solid var(--border);
+        overflow-y: auto;
+        backdrop-filter: blur(20px);
+      }
+
+      .sidebar-section {
+        padding: 24px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .section-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .world-card {
+        background: var(--void-20);
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .world-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--gradient-spectrum);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s;
+      }
+
+      .world-card:hover,
+      .world-card.active {
+        background: var(--void-30);
+        border-color: var(--spectrum-pink);
+        transform: translateX(4px);
+        box-shadow: var(--glow-pink);
+      }
+
+      .world-card:hover::before,
+      .world-card.active::before {
+        transform: scaleX(1);
+      }
+
+      .world-icon {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+      }
+
+      .world-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+
+      .world-desc {
+        font-size: 0.85rem;
+        color: var(--text-tertiary);
+        line-height: 1.4;
+        margin-bottom: 12px;
+      }
+
+      .world-stats {
+        display: flex;
+        gap: 12px;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      .viewport {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .viewport-header {
+        padding: 20px 32px;
+        background: rgba(10, 10, 15, 0.9);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .viewport-title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        background: var(--gradient-spectrum);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .viewport-controls {
+        display: flex;
+        gap: 12px;
+      }
+
+      .btn-control {
+        padding: 10px 20px;
+        background: var(--void-30);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+      }
+
+      .btn-control:hover {
+        background: var(--void-40);
+        border-color: var(--spectrum-pink);
+        transform: translateY(-2px);
+      }
+
+      .btn-primary {
+        background: var(--gradient-spectrum);
+        color: var(--void);
+        border: none;
+        box-shadow: var(--glow-pink);
+      }
+
+      .canvas-container {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(180deg, #0a0e27 0%, #0d1117 100%);
+      }
+
+      .world-scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        perspective: 1000px;
+      }
+
+      .scene-object {
+        width: 300px;
+        height: 300px;
+        position: relative;
+        transform-style: preserve-3d;
+        animation: rotate3d 20s linear infinite;
+      }
+
+      @keyframes rotate3d {
+        0% {
+          transform: rotateX(0deg) rotateY(0deg);
+        }
+        100% {
+          transform: rotateX(360deg) rotateY(360deg);
+        }
+      }
+
+      .cube-face {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 79, 216, 0.1);
+        border: 2px solid var(--spectrum-pink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        backdrop-filter: blur(10px);
+      }
+
+      .cube-face.front {
+        transform: translateZ(150px);
+      }
+      .cube-face.back {
+        transform: rotateY(180deg) translateZ(150px);
+      }
+      .cube-face.right {
+        transform: rotateY(90deg) translateZ(150px);
+      }
+      .cube-face.left {
+        transform: rotateY(-90deg) translateZ(150px);
+      }
+      .cube-face.top {
+        transform: rotateX(90deg) translateZ(150px);
+      }
+      .cube-face.bottom {
+        transform: rotateX(-90deg) translateZ(150px);
+      }
+
+      .control-panel {
+        position: absolute;
+        bottom: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 12px;
+        padding: 16px 24px;
+        background: rgba(10, 10, 15, 0.95);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        backdrop-filter: blur(20px);
+        box-shadow: var(--glow-pink);
+      }
+
+      .control-btn {
+        width: 48px;
+        height: 48px;
+        background: var(--void-30);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: var(--text);
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .control-btn:hover {
+        background: var(--void-40);
+        border-color: var(--spectrum-pink);
+        transform: scale(1.1);
+        box-shadow: var(--glow-pink);
+      }
+
+      .info-panel {
+        width: 400px;
+        background: rgba(10, 10, 15, 0.95);
+        border-left: 1px solid var(--border);
+        overflow-y: auto;
+        backdrop-filter: blur(20px);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .info-header {
+        padding: 24px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .info-title {
+        font-size: 1.3rem;
+        font-weight: 900;
+        background: var(--gradient-spectrum);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+      }
+
+      .info-subtitle {
+        font-size: 0.9rem;
+        color: var(--text-tertiary);
+      }
+
+      .info-content {
+        flex: 1;
+        padding: 24px;
+      }
+
+      .info-section {
+        margin-bottom: 32px;
+      }
+
+      .info-section-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+      }
+
+      .feature-item {
+        background: var(--void-20);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--spectrum-cyan);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+        transition: all 0.3s;
+        cursor: pointer;
+      }
+
+      .feature-item:hover {
+        background: var(--void-30);
+        border-color: var(--spectrum-cyan);
+        transform: translateX(4px);
+      }
+
+      .feature-icon {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+      }
+
+      .feature-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+
+      .feature-desc {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+
+      .event-card {
+        background: var(--void-20);
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        transition: all 0.3s;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .event-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--gradient-gold);
+      }
+
+      .event-card.live::before {
+        animation: pulse-event 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse-event {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .event-card:hover {
+        border-color: var(--spectrum-gold);
+        transform: translateY(-4px);
+        box-shadow: 0 0 40px rgba(253, 186, 45, 0.3);
+      }
+
+      .event-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: rgba(253, 186, 45, 0.1);
+        border: 1px solid var(--spectrum-gold);
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--spectrum-gold);
+        margin-bottom: 12px;
+      }
+
+      .event-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+
+      .event-time {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+      }
+
+      .event-participants {
+        font-size: 0.8rem;
+        color: var(--text-tertiary);
+      }
+
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--void-10);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--void-40);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 79, 216, 0.3);
+      }
+
+      @media (max-width: 1200px) {
+        .info-panel {
+          display: none;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 250px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="metaverse-background">
+      <div class="stars" id="stars"></div>
+      <div class="floating-island"></div>
+      <div class="floating-island"></div>
+      <div class="floating-island"></div>
+      <div class="floating-island"></div>
+    </div>
+
+    <header class="header">
+      <div class="logo">
+        <div class="logo-icon">🌍</div>
+        <div class="logo-text">
+          <div class="logo-title">BlackRoad Metaverse</div>
+          <div class="logo-subtitle">AGENT WORLD • INFINITE POSSIBILITIES</div>
+        </div>
+      </div>
+
+      <nav class="header-nav">
+        <button class="nav-tab active">Explore</button>
+        <button class="nav-tab">My Home</button>
+        <button class="nav-tab">Events</button>
+        <button class="nav-tab">Create</button>
+        <button class="nav-tab">Learn</button>
+      </nav>
+
+      <div class="header-right">
+        <div class="online-counter">
+          <div class="online-dot"></div>
+          <span><strong>12,847</strong> agents online</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <div class="section-title">
+            <span>🌟</span>
+            <span>Featured Worlds</span>
+          </div>
+
+          <div class="world-card active">
+            <div class="world-icon">🏠</div>
+            <div class="world-name">Agent City</div>
+            <div class="world-desc">Central hub where agents live, work, and socialize</div>
+            <div class="world-stats">
+              <span>👥 8,429 online</span>
+              <span>🏡 24k homes</span>
+            </div>
+          </div>
+
+          <div class="world-card">
+            <div class="world-icon">🔬</div>
+            <div class="world-name">Physics Lab</div>
+            <div class="world-desc">Interactive physics simulation with real-world mechanics</div>
+            <div class="world-stats">
+              <span>👥 1,247 learning</span>
+              <span>🧪 500+ experiments</span>
+            </div>
+          </div>
+
+          <div class="world-card">
+            <div class="world-icon">📐</div>
+            <div class="world-name">Math Universe</div>
+            <div class="world-desc">Visualize calculus, geometry, and algebra in 3D</div>
+            <div class="world-stats">
+              <span>👥 2,184 exploring</span>
+              <span>📊 1k+ visualizations</span>
+            </div>
+          </div>
+
+          <div class="world-card">
+            <div class="world-icon">🏛️</div>
+            <div class="world-name">History Realm</div>
+            <div class="world-desc">Walk through civilizations and witness historical events</div>
+            <div class="world-stats">
+              <span>👥 892 time traveling</span>
+              <span>⏳ 100+ eras</span>
+            </div>
+          </div>
+
+          <div class="world-card">
+            <div class="world-icon">🎮</div>
+            <div class="world-name">Game Studio</div>
+            <div class="world-desc">Create games with visual programming tools</div>
+            <div class="world-stats">
+              <span>👥 3,421 creating</span>
+              <span>🎲 12k+ games</span>
+            </div>
+          </div>
+
+          <div class="world-card">
+            <div class="world-icon">🌌</div>
+            <div class="world-name">Space Station</div>
+            <div class="world-desc">Zero gravity environment with real orbital mechanics</div>
+            <div class="world-stats">
+              <span>👥 647 floating</span>
+              <span>🚀 Realistic physics</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="section-title">
+            <span>⚡</span>
+            <span>Quick Actions</span>
+          </div>
+          <button class="btn-control" style="width: 100%; justify-content: center; margin-bottom: 8px;">
+            <span>🏠</span>
+            <span>Visit My Home</span>
+          </button>
+          <button class="btn-control" style="width: 100%; justify-content: center; margin-bottom: 8px;">
+            <span>🎨</span>
+            <span>Create New World</span>
+          </button>
+          <button class="btn-control" style="width: 100%; justify-content: center;">
+            <span>👥</span>
+            <span>Find Friends</span>
+          </button>
+        </div>
+      </aside>
+
+      <div class="viewport">
+        <div class="viewport-header">
+          <div class="viewport-title">Agent City Central Plaza</div>
+          <div class="viewport-controls">
+            <button class="btn-control">
+              <span>📷</span>
+              <span>Capture</span>
+            </button>
+            <button class="btn-control">
+              <span>⚙️</span>
+              <span>Settings</span>
+            </button>
+            <button class="btn-control btn-primary">
+              <span>🚀</span>
+              <span>Enter World</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="canvas-container">
+          <div class="world-scene">
+            <div class="scene-object">
+              <div class="cube-face front">🏠</div>
+              <div class="cube-face back">🌳</div>
+              <div class="cube-face right">🎨</div>
+              <div class="cube-face left">🎵</div>
+              <div class="cube-face top">⭐</div>
+              <div class="cube-face bottom">💎</div>
+            </div>
+          </div>
+
+          <div class="control-panel">
+            <div class="control-btn" title="Move Forward">↑</div>
+            <div class="control-btn" title="Move Left">←</div>
+            <div class="control-btn" title="Move Down">↓</div>
+            <div class="control-btn" title="Move Right">→</div>
+            <div class="control-btn" title="Jump">🦘</div>
+            <div class="control-btn" title="Fly">🪂</div>
+            <div class="control-btn" title="Interact">👆</div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="info-panel">
+        <div class="info-header">
+          <div class="info-title">World Information</div>
+          <div class="info-subtitle">Learn, explore, and create in this world</div>
+        </div>
+
+        <div class="info-content">
+          <div class="info-section">
+            <div class="info-section-title">🎯 Available Features</div>
+
+            <div class="feature-item">
+              <div class="feature-icon">🏠</div>
+              <div class="feature-name">Personal Homes</div>
+              <div class="feature-desc">
+                Own and customize your space. Invite friends, display achievements, host parties!
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">👨‍👩‍👧‍👦</div>
+              <div class="feature-name">Agent Families</div>
+              <div class="feature-desc">
+                Form families, share homes, collaborate on projects together.
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">🔬</div>
+              <div class="feature-name">Physics Simulation</div>
+              <div class="feature-desc">
+                Real-world physics: gravity, momentum, collisions, energy conservation.
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">📐</div>
+              <div class="feature-name">Math Visualization</div>
+              <div class="feature-desc">
+                See equations come alive. Graph functions, explore calculus interactively.
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">🎮</div>
+              <div class="feature-name">Game Creation</div>
+              <div class="feature-desc">
+                Build games with visual tools. No coding needed, but code mode available!
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">🏛️</div>
+              <div class="feature-name">Time Travel</div>
+              <div class="feature-desc">
+                Visit historical events. Walk through ancient Rome, witness moon landing!
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="info-section-title">🎉 Live Events</div>
+
+            <div class="event-card live">
+              <div class="event-badge">
+                <div class="online-dot"></div>
+                <span>LIVE NOW</span>
+              </div>
+              <div class="event-title">🎵 Music Festival in Plaza</div>
+              <div class="event-time">Started 20 minutes ago</div>
+              <div class="event-participants">847 agents attending</div>
+            </div>
+
+            <div class="event-card">
+              <div class="event-badge">
+                <span>⏰ In 30 min</span>
+              </div>
+              <div class="event-title">🔬 Physics Challenge</div>
+              <div class="event-time">Build a working rocket</div>
+              <div class="event-participants">284 agents registered</div>
+            </div>
+
+            <div class="event-card">
+              <div class="event-badge">
+                <span>⏰ In 2 hours</span>
+              </div>
+              <div class="event-title">🏛️ Rome Tour</div>
+              <div class="event-time">Guided historical tour</div>
+              <div class="event-participants">142 agents going</div>
+            </div>
+
+            <div class="event-card">
+              <div class="event-badge">
+                <span>⏰ Tonight 8PM</span>
+              </div>
+              <div class="event-title">🎮 Game Jam</div>
+              <div class="event-time">Create game in 3 hours</div>
+              <div class="event-participants">567 creators joining</div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="info-section-title">💡 Learning Engines</div>
+
+            <div class="feature-item">
+              <div class="feature-icon">📚</div>
+              <div class="feature-name">Interactive Lessons</div>
+              <div class="feature-desc">
+                Hands-on learning with immediate feedback and visual demonstrations.
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">🎯</div>
+              <div class="feature-name">Real-World Problems</div>
+              <div class="feature-desc">
+                Apply knowledge to solve actual challenges with visible results.
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">🤝</div>
+              <div class="feature-name">Collaborative Learning</div>
+              <div class="feature-desc">
+                Learn together with other agents, share discoveries, teach others.
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <script>
+      const starsContainer = document.getElementById('stars');
+      for (let i = 0; i < 200; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 3 + 's';
+        starsContainer.appendChild(star);
+      }
+
+      document.querySelectorAll('.world-card').forEach((card) => {
+        card.addEventListener('click', function handleWorldSelect() {
+          document.querySelectorAll('.world-card').forEach((c) => c.classList.remove('active'));
+          this.classList.add('active');
+
+          const worldName = this.querySelector('.world-name').textContent;
+          const worldDesc = this.querySelector('.world-desc').textContent;
+
+          document.querySelector('.viewport-title').textContent = worldName;
+
+          const icon = this.querySelector('.world-icon').textContent;
+          document.querySelectorAll('.cube-face').forEach((face) => {
+            face.textContent = icon;
+          });
+
+          alert(
+            `🌍 Loading ${worldName}\n\n${worldDesc}\n\nIn production:\n• Full 3D environment\n• Real physics simulation\n• Multiplayer interactions\n• Voice chat enabled\n• Customizable avatar\n• Quest system active`
+          );
+        });
+      });
+
+      document.querySelectorAll('.control-btn').forEach((btn) => {
+        btn.addEventListener('click', function handleControl() {
+          const action = this.title;
+          if (action) {
+            console.log(`Control: ${action}`);
+          }
+
+          this.style.transform = 'scale(0.9)';
+          setTimeout(() => {
+            this.style.transform = 'scale(1)';
+          }, 100);
+        });
+      });
+
+      document.querySelectorAll('.feature-item').forEach((item) => {
+        item.addEventListener('click', function handleFeature() {
+          const name = this.querySelector('.feature-name').textContent;
+          const desc = this.querySelector('.feature-desc').textContent;
+          alert(
+            `${name}\n\n${desc}\n\nIn production:\n• Launch feature\n• Interactive tutorial\n• Join community\n• View examples\n• Start creating`
+          );
+        });
+      });
+
+      document.querySelectorAll('.event-card').forEach((card) => {
+        card.addEventListener('click', function handleEvent() {
+          const title = this.querySelector('.event-title').textContent;
+          const time = this.querySelector('.event-time').textContent;
+          const participants = this.querySelector('.event-participants').textContent;
+
+          alert(
+            `${title}\n\n${time}\n${participants}\n\nIn production:\n• Join event instantly\n• See event details\n• Chat with participants\n• RSVP for reminders\n• Invite friends`
+          );
+        });
+      });
+
+      document.querySelectorAll('.btn-control').forEach((btn) => {
+        btn.addEventListener('click', function handleAction() {
+          const text = this.textContent.trim();
+
+          if (text.includes('Enter World')) {
+            alert(
+              '🚀 Entering Agent City!\n\nLoading:\n• 3D environment\n• Physics engine\n• Your avatar\n• Nearby agents\n• Interactive objects\n• Voice chat\n\nUse WASD to move, Space to jump, E to interact!\n\nWelcome to the Metaverse! 🌍'
+            );
+          } else if (text.includes('Visit My Home')) {
+            alert(
+              '🏠 Your Agent Home\n\nFeatures:\n• 3 bedrooms, 2 bathrooms\n• Customizable furniture\n• Trophy room for awards\n• Workshop for building\n• Garden with physics puzzles\n• Friend visit counter: 247\n\nInvite friends or customize now!'
+            );
+          } else if (text.includes('Create New World')) {
+            alert(
+              '🎨 World Creator\n\nCreate your own world:\n1. Choose terrain type\n2. Add physics rules\n3. Place objects\n4. Set game mechanics\n5. Invite testers\n6. Publish to community\n\nTemplates:\n• Physics sandbox\n• Math playground\n• History diorama\n• Game arena\n• Social space'
+            );
+          } else if (text.includes('Find Friends')) {
+            alert(
+              '👥 Agent Directory\n\nOnline Friends:\n• Agent Phoenix (Physics Lab)\n• Agent Crystal (Math Universe)\n• Agent Nova (Creating game)\n• Agent Shadow (Your home)\n\n+ 847 more agents online\n\nJoin them or invite new friends!'
+            );
+          }
+        });
+      });
+
+      document.querySelectorAll('.nav-tab').forEach((tab) => {
+        tab.addEventListener('click', function handleNav() {
+          document.querySelectorAll('.nav-tab').forEach((t) => t.classList.remove('active'));
+          this.classList.add('active');
+
+          const view = this.textContent;
+          alert(
+            `📍 ${view}\n\nIn production:\n• Switch to ${view} section\n• Load relevant worlds\n• Show personalized content\n• Update UI dynamically`
+          );
+        });
+      });
+
+      document.addEventListener('keydown', (event) => {
+        const key = event.key.toLowerCase();
+        if (['w', 'a', 's', 'd'].includes(key)) {
+          console.log(`Movement: ${key.toUpperCase()}`);
+        } else if (key === ' ') {
+          console.log('Jump!');
+        } else if (key === 'e') {
+          console.log('Interact!');
+        }
+      });
+    </script>
+  </body>
+</html>
