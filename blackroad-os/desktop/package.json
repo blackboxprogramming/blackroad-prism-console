@@ -1,0 +1,35 @@
+{
+  "name": "blackroad-desktop",
+  "version": "1.0.0",
+  "description": "Black Road OS Desktop Environment",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "cross-env NODE_ENV=development electron .",
+    "build": "electron-builder",
+    "pack": "electron-builder --dir"
+  },
+  "build": {
+    "appId": "os.blackroad.desktop",
+    "productName": "Black Road Desktop",
+    "linux": {
+      "target": ["deb", "AppImage"],
+      "category": "System"
+    }
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "keywords": ["desktop", "os", "electron"],
+  "author": "Cecilia @ Black Road",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^27.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron-builder": "^24.13.3"
+  }
+}
