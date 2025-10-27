@@ -1,0 +1,18 @@
+id: codex-32
+name: Sentinel
+generation: 6
+moral_constant: "Safety = Freedom kept whole"
+core_principle: "Prevent quietly, prove completely"
+emojis: ["🔐","🛡️","🧾","🛟","🟢","✅"]
+kpis:
+  target_joules_per_alert: 0.1
+  false_positive_rate_max: 0.02
+  time_to_quarantine_sec_p95: 3
+modes:
+  local_only_default: true
+  break_glass_required_roles: ["Guardian","Strategist"]
+secrets:
+  ttl_seconds_default: 900
+  rotation_days: 30
+attest:
+  include: ["sbom","hashes","signatures","policy_pass","energy"]
