@@ -6,6 +6,8 @@ process.env.GIT_REPO_PATH = process.cwd();
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
 const { getAuthCookie } = require('./helpers/auth.js');
+// Shared helper that logs in and returns authentication cookies for requests.
+const { getAuthCookie } = require('./helpers/auth');
 
 describe('Git API', () => {
   afterAll((done) => {
@@ -19,6 +21,7 @@ describe('Git API', () => {
     const cookie = login.headers['set-cookie'];
     const res = await request(app).get('/api/git/health').set('Cookie', cookie);
     const cookie = await getAuthCookie();
+    const cookie = await getAuthCookie(app);
     const res = await request(app)
       .get('/api/git/health')
       .set('Cookie', cookie);
@@ -35,6 +38,7 @@ describe('Git API', () => {
     const cookie = login.headers['set-cookie'];
     const res = await request(app).get('/api/git/status').set('Cookie', cookie);
     const cookie = await getAuthCookie();
+    const cookie = await getAuthCookie(app);
     const res = await request(app)
       .get('/api/git/status')
       .set('Cookie', cookie);
@@ -49,5 +53,15 @@ describe('Git API', () => {
     expect(typeof res.body.isDirty).toBe('boolean');
     expect(typeof res.body.shortHash).toBe('string');
     expect(typeof res.body.lastCommitMsg).toBe('string');
+    expect(res.body.lastCommit).toMatchObject({
+      hash: expect.any(String),
+      shortHash: expect.any(String),
+      message: expect.any(String),
+      author: {
+        name: expect.any(String),
+        email: expect.any(String),
+      },
+      authoredAt: expect.any(String),
+    });
   });
 });

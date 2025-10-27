@@ -64,6 +64,8 @@ const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
 const originHeaders = { 'X-BlackRoad-Key': 'test-origin-key' };
 const { getAuthCookie } = require('./helpers/auth.js');
+// Login helper reused across tests to obtain authenticated cookies.
+const { getAuthCookie } = require('./helpers/auth');
 
 describe('API security and health', () => {
   afterAll((done) => {
@@ -120,6 +122,7 @@ describe('API smoke tests', () => {
       .send({ username: 'root', password: 'Codex2025' });
     const cookie = login.headers['set-cookie'];
     const cookie = await getAuthCookie();
+    const cookie = await getAuthCookie(app);
     const res = await request(app)
       .get('/api/billing/entitlements/me')
       .set(originHeaders)

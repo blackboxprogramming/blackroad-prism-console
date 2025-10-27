@@ -104,6 +104,23 @@ router.get('/status', async (_req, res) => {
     const lastCommitMsg = (
       await runGit(['log', '-1', '--pretty=%s'])
     ).stdout.trim();
+    const lastCommitRaw = (
+      await runGit([
+        'log',
+        '-1',
+        '--pretty=%H%n%h%n%an%n%ae%n%ad%n%s',
+      ])
+    ).stdout
+      .trim()
+      .split('\n');
+    const [
+      lastCommitHash = '',
+      shortHash = '',
+      authorName = '',
+      authorEmail = '',
+      authoredAt = '',
+      lastCommitMsg = '',
+    ] = lastCommitRaw;
     res.json({
       ok,
       branch,
@@ -113,6 +130,16 @@ router.get('/status', async (_req, res) => {
       counts: { staged, unstaged, untracked },
       shortHash,
       lastCommitMsg,
+      lastCommit: {
+        hash: lastCommitHash,
+        shortHash,
+        message: lastCommitMsg,
+        author: {
+          name: authorName,
+          email: authorEmail,
+        },
+        authoredAt,
+      },
     });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
