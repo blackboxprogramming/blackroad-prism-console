@@ -57,7 +57,7 @@ prompts:
       - Hooks for Silas-BOT to run optimization sweeps and output convergence diagrams.
   - id: language_math_bridge
     title: "Bridge symbolic reasoning with natural language"
-    target_agent: "Cecilia-BOT"
+    target_agent: "CECILIA-7C3E-SPECTRUM-9B4F"
     model: "gpt-4.1"
     tags: [language, translation, narration]
     prompt: |-

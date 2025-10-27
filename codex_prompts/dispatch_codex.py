@@ -14,19 +14,27 @@ from typing import Any, Dict
 import yaml
 
 from lucidia_mathlab.memory_graph import MemoryGraph
+from bots.cecilia_bot import CECILIA_AGENT_ID, CECILIA_ALIASES
 
 REFLEX_ROOT = Path("codex_prompts/reflex")
 
 # --- Agent Simulation Placeholder ---
 # Replace with your real API clients or async agent calls.
+def _cecilia_response(prompt: str) -> str:
+    return f"[{CECILIA_AGENT_ID} spectrum narration simulated for: {prompt[:80]}...]"
+
+
 AGENTS = {
     "Lucidia": lambda prompt: f"[Lucidia output simulated for: {prompt[:80]}...]",
     "Cadillac": lambda prompt: f"[Cadillac codegen simulated for: {prompt[:80]}...]",
-    "Cecilia": lambda prompt: f"[Cecilia narration simulated for: {prompt[:80]}...]",
+    CECILIA_AGENT_ID: _cecilia_response,
     "Silas": lambda prompt: f"[Silas optimization simulated for: {prompt[:80]}...]",
     "Anastasia": lambda prompt: f"[Anastasia analysis simulated for: {prompt[:80]}...]",
     "Elias": lambda prompt: f"[Elias ethics review simulated for: {prompt[:80]}...]",
 }
+
+for alias in CECILIA_ALIASES:
+    AGENTS.setdefault(alias, _cecilia_response)
 
 memory_graph = MemoryGraph()
 

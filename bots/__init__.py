@@ -86,7 +86,12 @@ from .treasury_bot import TreasuryBot
 from .lucidia_bot import LucidiaBot
 from .cadillac_bot import CadillacBot
 from .alice_bot import AliceBot
-from .cecilia_bot import CeciliaBot
+from .cecilia_bot import (
+    CeciliaBot,
+    CECILIA_AGENT_ID,
+    CECILIA_ALIASES,
+    CECILIA_LEGACY_NAME,
+)
 from .silas_bot import SilasBot
 from .athena_bot import AthenaBot
 from .anastasia_bot import AnastasiaBot
@@ -97,6 +102,8 @@ from .orion_bot import OrionBot
 from .vera_bot import VeraBot
 from .eon_bot import EonBot
 from .myra_bot import MyraBot
+
+cecilia_bot = CeciliaBot()
 
 BOT_REGISTRY = {
     "Treasury-BOT": TreasuryBot(),
@@ -145,7 +152,8 @@ BOT_REGISTRY = {
     "Lucidia-BOT": LucidiaBot(),
     "Cadillac-BOT": CadillacBot(),
     "Alice-BOT": AliceBot(),
-    "Cecilia-BOT": CeciliaBot(),
+    CECILIA_AGENT_ID: cecilia_bot,
+    CECILIA_LEGACY_NAME: cecilia_bot,
     "Silas-BOT": SilasBot(),
     "Athena-BOT": AthenaBot(),
     "Anastasia-BOT": AnastasiaBot(),
@@ -180,3 +188,6 @@ BOT_REGISTRY = {
     "Industry-BOT": IndustryBot(),
     "GRC-Advisory-BOT": AdvisoryGRCBot(),
 }
+
+for alias in CECILIA_ALIASES:
+    BOT_REGISTRY.setdefault(alias, cecilia_bot)
