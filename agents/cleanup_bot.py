@@ -8,6 +8,7 @@ import subprocess
 from dataclasses import dataclass
 from subprocess import CalledProcessError
 <<<<<<< main
+<<<<<<< main
 from typing import List
 import sys
 from dataclasses import dataclass, field
@@ -32,6 +33,8 @@ from subprocess import CalledProcessError
 from typing import Dict, List
 >>>>>>> origin/codex/create-monorepo-structure-for-blackroad-foundation
 
+=======
+>>>>>>> origin/codex/fix-comments-54tl1o
 
 @dataclass
 class CleanupBot:
@@ -40,8 +43,9 @@ class CleanupBot:
     branches: Iterable[str]
     """Delete local and remote branches after merges.
 
-    Parameters
+    Attributes
     ----------
+<<<<<<< main
     branches:
         A list of branch names to remove.
     dry_run:
@@ -57,6 +61,12 @@ class CleanupBot:
         When ``True`` no commands are executed and planned actions are
         printed instead. This is helpful for verifying branch names before
         actual deletion.
+=======
+    branches : list[str]
+        Branch names to remove.
+    dry_run : bool, default=False
+        When True, commands are printed instead of executed.
+>>>>>>> origin/codex/fix-comments-54tl1o
     """
 
     branches: list[str]
@@ -106,6 +116,7 @@ class CleanupBot:
 
         return cls(branches=cls.merged_branches(base), dry_run=dry_run)
 
+<<<<<<< main
     def _run(self, *cmd: str) -> CompletedProcess | None:
         """Execute ``cmd`` unless running in dry-run mode."""
 
@@ -144,6 +155,8 @@ class CleanupBot:
         executing.
         """
         cmd = ["git", *args]
+=======
+>>>>>>> origin/codex/fix-comments-54tl1o
     def _run(self, *cmd: str) -> None:
         """Run a command unless in dry-run mode."""
         if self.dry_run:
@@ -168,15 +181,31 @@ class CleanupBot:
         Args:
             branch: The branch name to remove.
 
+<<<<<<< main
         Returns:
             True if the branch was deleted locally and remotely, False otherwise.
             ``True`` if the branch was deleted both locally and remotely,
             ``False`` otherwise.
+=======
+    def delete_branch(self, branch: str) -> bool:
+        """Delete a branch locally and remotely.
+
+        Parameters
+        ----------
+        branch : str
+            The branch name to remove.
+
+        Returns
+        -------
+        bool
+            ``True`` if the branch was deleted successfully, ``False`` otherwise.
+>>>>>>> origin/codex/fix-comments-54tl1o
         """
         if self.dry_run:
             print(f"Would delete branch '{branch}' locally and remotely")
             return True
         try:
+<<<<<<< main
             self._run_git("branch", "-D", branch)
         except CalledProcessError:
             local_deleted = not self._local_branch_exists(branch)
@@ -197,6 +226,8 @@ class CleanupBot:
 
         results: Dict[str, bool] = {}
         for branch in self._normalized_branches:
+=======
+>>>>>>> origin/codex/fix-comments-54tl1o
             self._run("git", "branch", "-D", branch)
             self._run("git", "push", "origin", "--delete", branch)
             return True
@@ -209,6 +240,7 @@ class CleanupBot:
         Returns
         -------
         dict[str, bool]
+<<<<<<< main
             Mapping of branch names to deletion success.
         """
         results: dict[str, bool] = {}
@@ -288,6 +320,14 @@ class CleanupBot:
 
         if not self.validate_environment():
             return {branch: False for branch in self.branches}
+=======
+            Mapping of branch names to success flags.
+        """
+        results: dict[str, bool] = {}
+        for branch in self.branches:
+            results[branch] = self.delete_branch(branch)
+        return results
+>>>>>>> origin/codex/fix-comments-54tl1o
 
         results: Dict[str, bool] = {}
         for branch in self.branches:
