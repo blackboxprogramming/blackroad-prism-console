@@ -507,6 +507,105 @@
         },
         {
             "id": "ev-0004",
+            "ts": "2025-10-23T08:00:19-05:00",
+            "actor": "system",
+            "kind": "birth",
+            "facet": "time",
+            "summary": "K-0004 born",
+            "ctx": {
+                "name": "Noa Sol 🌊-p5d"
+            }
+        },
+        {
+            "id": "ev-0005",
+            "ts": "2025-10-23T08:00:25-05:00",
+            "actor": "system",
+            "kind": "birth",
+            "facet": "time",
+            "summary": "K-0005 born",
+            "ctx": {
+                "name": "Rei Aria 🎨-z1n"
+            }
+        },
+        {
+            "id": "ev-0006",
+            "ts": "2025-10-23T08:00:31-05:00",
+            "actor": "system",
+            "kind": "birth",
+            "facet": "time",
+            "summary": "K-0006 born",
+            "ctx": {
+                "name": "Sumi Nova 📚-h8q"
+            }
+        },
+        {
+            "id": "ev-0007",
+            "ts": "2025-10-23T08:00:37-05:00",
+            "actor": "system",
+            "kind": "birth",
+            "facet": "time",
+            "summary": "K-0007 born",
+            "ctx": {
+                "name": "Zio Luma 🧭-m3v"
+            }
+        },
+        {
+            "id": "ev-0008",
+            "ts": "2025-10-23T08:00:43-05:00",
+            "actor": "system",
+            "kind": "birth",
+            "facet": "time",
+            "summary": "K-0008 born",
+            "ctx": {
+                "name": "Nila Echo 🌞-k9e"
+            }
+        },
+        {
+            "id": "ev-0009",
+            "ts": "2025-10-23T08:00:49-05:00",
+            "actor": "system",
+            "kind": "birth",
+            "facet": "time",
+            "summary": "K-0009 born",
+            "ctx": {
+                "name": "Riku Sol 🌊-c2x"
+            }
+        },
+        {
+            "id": "ev-0010",
+            "ts": "2025-10-23T08:00:55-05:00",
+            "actor": "system",
+            "kind": "birth",
+            "facet": "time",
+            "summary": "K-0010 born",
+            "ctx": {
+                "name": "Mira Luma 🌱-w7b"
+            }
+        },
+        {
+            "id": "ev-0011",
+            "ts": "2025-10-23T08:01:01-05:00",
+            "actor": "system",
+            "kind": "birth",
+            "facet": "time",
+            "summary": "K-0011 born",
+            "ctx": {
+                "name": "Elo Nova 📚-d4u"
+            }
+        },
+        {
+            "id": "ev-0012",
+            "ts": "2025-10-23T08:01:07-05:00",
+            "actor": "system",
+            "kind": "birth",
+            "facet": "time",
+            "summary": "K-0012 born",
+            "ctx": {
+                "name": "Zara Echo 🔭-q8p"
+            }
+        },
+        {
+            "id": "ev-0013",
             "ts": "2025-10-23T08:01:10-05:00",
             "actor": "teacher",
             "kind": "lesson",
