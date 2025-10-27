@@ -1,60 +1,107 @@
 <svg width="640" height="360" viewBox="0 0 640 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="640" height="360" rx="24" fill="url(#paint0_linear_3_1)"/>
-  <g filter="url(#filter0_d_3_1)">
-    <rect x="72" y="84" width="496" height="196" rx="24" fill="rgba(15,23,42,0.82)"/>
-    <rect x="108" y="120" width="160" height="112" rx="18" fill="rgba(125,211,252,0.18)" stroke="#38bdf8" stroke-width="2"/>
-    <rect x="250" y="120" width="132" height="112" rx="18" fill="rgba(99,102,241,0.18)" stroke="#6366f1" stroke-width="2"/>
-    <rect x="380" y="120" width="152" height="112" rx="18" fill="rgba(16,185,129,0.2)" stroke="#34d399" stroke-width="2"/>
-    <text x="136" y="210" fill="#bae6fd" font-size="13" font-family="'Inter',sans-serif">Sim Scene</text>
-    <text x="272" y="210" fill="#e0e7ff" font-size="13" font-family="'Inter',sans-serif">Render Queue</text>
-    <text x="412" y="210" fill="#bbf7d0" font-size="13" font-family="'Inter',sans-serif">Publish</text>
-    <path d="M268 176H306" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
-    <path d="M402 176H438" stroke="#34d399" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
-    <path d="M188 164C188 164 216 128 260 128C304 128 332 164 332 164" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 8" opacity="0.4"/>
-    <path d="M332 200C332 200 352 232 396 232C440 232 460 200 460 200" stroke="#a5b4fc" stroke-width="2" stroke-dasharray="6 8" opacity="0.4"/>
+  <rect width="640" height="360" rx="28" fill="url(#bg)"/>
+  <g filter="url(#gridShadow)">
+    <rect x="80" y="72" width="480" height="216" rx="24" fill="rgba(15,23,42,0.88)" stroke="rgba(148,163,184,0.35)"/>
+    <path d="M128 132h384" stroke="rgba(59,130,246,0.25)" stroke-width="1.5" stroke-dasharray="6 8"/>
+    <path d="M128 212h384" stroke="rgba(59,130,246,0.25)" stroke-width="1.5" stroke-dasharray="6 8"/>
+    <path d="M200 104v184" stroke="rgba(59,130,246,0.25)" stroke-width="1.5" stroke-dasharray="6 8"/>
+    <path d="M320 104v184" stroke="rgba(59,130,246,0.25)" stroke-width="1.5" stroke-dasharray="6 8"/>
+    <path d="M440 104v184" stroke="rgba(59,130,246,0.25)" stroke-width="1.5" stroke-dasharray="6 8"/>
   </g>
-  <g filter="url(#filter1_d_3_1)">
-    <rect x="104" y="60" width="224" height="48" rx="20" fill="rgba(56,189,248,0.9)"/>
-    <text x="128" y="90" fill="#0f172a" font-size="16" font-weight="600" font-family="'Inter',sans-serif">GPU burst render ready</text>
+  <g filter="url(#sceneShadow)">
+    <rect x="132" y="120" width="144" height="96" rx="18" fill="url(#scene)"/>
+    <path d="M156 192l28-52 28 40 28-36 20 48" stroke="#e0f2fe" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="228" cy="148" r="10" fill="#f8fafc"/>
   </g>
-  <g filter="url(#filter2_d_3_1)">
-    <rect x="160" y="268" width="320" height="44" rx="22" fill="rgba(59,130,246,0.85)"/>
-    <text x="188" y="294" fill="#dbeafe" font-size="16" font-weight="600" font-family="'Inter',sans-serif">Export video + interactive build</text>
+  <g filter="url(#midShadow)">
+    <rect x="252" y="148" width="152" height="120" rx="20" fill="rgba(8,47,73,0.88)" stroke="rgba(125,211,252,0.4)"/>
+    <rect x="276" y="168" width="104" height="12" rx="6" fill="#ecfeff"/>
+    <rect x="276" y="192" width="88" height="12" rx="6" fill="#bae6fd"/>
+    <rect x="276" y="216" width="120" height="12" rx="6" fill="#38bdf8"/>
+    <rect x="276" y="244" width="120" height="16" rx="8" fill="rgba(14,165,233,0.28)" stroke="#22d3ee" stroke-dasharray="8 6"/>
+    <text x="288" y="258" fill="#f8fafc" font-family="'Inter',sans-serif" font-size="12">GPU burst render · 02:41</text>
+  </g>
+  <g filter="url(#outputShadow)">
+    <rect x="396" y="116" width="148" height="104" rx="20" fill="rgba(12,74,110,0.9)" stroke="rgba(165,243,252,0.4)"/>
+    <rect x="416" y="140" width="108" height="12" rx="6" fill="#e0f2fe"/>
+    <rect x="416" y="164" width="92" height="12" rx="6" fill="#bae6fd"/>
+    <rect x="416" y="188" width="92" height="12" rx="6" fill="#38bdf8"/>
+    <rect x="416" y="216" width="108" height="28" rx="14" fill="#f0fdfa"/>
+    <text x="428" y="235" fill="#0f172a" font-family="'Inter',sans-serif" font-size="12" font-weight="600">Playable export</text>
+  </g>
+  <path d="M264 172c20-32 56-52 88-20" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-dasharray="8 10"/>
+  <path d="M352 236c28 26 80 30 112-6" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-dasharray="8 10"/>
+  <path d="M208 176c24 12 48 24 72 48" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-dasharray="8 10"/>
+  <g fill="#38bdf8">
+    <circle cx="264" cy="172" r="7"/>
+    <circle cx="352" cy="236" r="7"/>
+    <circle cx="280" cy="224" r="7"/>
+    <circle cx="440" cy="208" r="7"/>
+    <circle cx="488" cy="206" r="7"/>
+  </g>
+  <g filter="url(#footerShadow)">
+    <rect x="176" y="292" width="288" height="40" rx="20" fill="rgba(14,165,233,0.24)" stroke="rgba(125,211,252,0.4)"/>
+    <text x="196" y="317" fill="#e0f2fe" font-family="'Inter',sans-serif" font-size="15" font-weight="600">Sim-to-studio: scene → render → build</text>
   </g>
   <defs>
-    <linearGradient id="paint0_linear_3_1" x1="84" y1="36" x2="556" y2="324" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1e3a8a"/>
-      <stop offset="1" stop-color="#111827"/>
+    <linearGradient id="bg" x1="68" y1="24" x2="568" y2="336" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#020617"/>
+      <stop offset="0.45" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#1d293b"/>
     </linearGradient>
-    <filter id="filter0_d_3_1" x="52" y="68" width="536" height="240" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <linearGradient id="scene" x1="132" y1="120" x2="276" y2="216" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0ea5e9"/>
+      <stop offset="1" stop-color="#38bdf8"/>
+    </linearGradient>
+    <filter id="gridShadow" x="60" y="52" width="520" height="256" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-      <feOffset dy="10"/>
-      <feGaussianBlur stdDeviation="14"/>
+      <feOffset dy="8"/>
+      <feGaussianBlur stdDeviation="12"/>
       <feComposite in2="hardAlpha" operator="out"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.07 0 0 0 0 0.17 0 0 0 0 0.35 0 0 0 0.3 0"/>
-      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.04 0 0 0 0 0.31 0 0 0 0 0.46 0 0 0 0.32 0"/>
+      <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" mode="normal" result="shape"/>
     </filter>
-    <filter id="filter1_d_3_1" x="84" y="44" width="264" height="88" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <filter id="sceneShadow" x="112" y="100" width="184" height="136" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
       <feOffset dy="6"/>
       <feGaussianBlur stdDeviation="10"/>
       <feComposite in2="hardAlpha" operator="out"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.03 0 0 0 0 0.24 0 0 0 0 0.39 0 0 0 0.35 0"/>
-      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.06 0 0 0 0 0.32 0 0 0 0 0.4 0 0 0 0.35 0"/>
+      <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" mode="normal" result="shape"/>
     </filter>
-    <filter id="filter2_d_3_1" x="140" y="256" width="360" height="84" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <filter id="midShadow" x="232" y="128" width="192" height="160" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
       <feOffset dy="6"/>
       <feGaussianBlur stdDeviation="10"/>
       <feComposite in2="hardAlpha" operator="out"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.07 0 0 0 0 0.34 0 0 0 0 0.52 0 0 0 0.4 0"/>
-      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.06 0 0 0 0 0.26 0 0 0 0 0.43 0 0 0 0.35 0"/>
+      <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" mode="normal" result="shape"/>
+    </filter>
+    <filter id="outputShadow" x="380" y="100" width="180" height="148" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="6"/>
+      <feGaussianBlur stdDeviation="10"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.05 0 0 0 0 0.29 0 0 0 0 0.43 0 0 0 0.35 0"/>
+      <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" mode="normal" result="shape"/>
+    </filter>
+    <filter id="footerShadow" x="156" y="276" width="328" height="80" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="6"/>
+      <feGaussianBlur stdDeviation="10"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.05 0 0 0 0 0.3 0 0 0 0 0.45 0 0 0 0.35 0"/>
+      <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" mode="normal" result="shape"/>
     </filter>
   </defs>
 </svg>

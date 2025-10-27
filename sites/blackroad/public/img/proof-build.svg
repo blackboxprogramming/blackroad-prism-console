@@ -1,60 +1,80 @@
 <svg width="640" height="360" viewBox="0 0 640 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="640" height="360" rx="24" fill="url(#paint0_linear_1_1)"/>
-  <g filter="url(#filter0_d_1_1)">
-    <rect x="40" y="56" width="360" height="248" rx="16" fill="rgba(15,23,42,0.88)"/>
-    <rect x="56" y="96" width="200" height="16" rx="8" fill="#38bdf8" opacity="0.8"/>
-    <rect x="56" y="128" width="248" height="12" rx="6" fill="#f8fafc" opacity="0.9"/>
-    <rect x="56" y="152" width="220" height="12" rx="6" fill="#cbd5f5" opacity="0.8"/>
-    <rect x="56" y="176" width="180" height="12" rx="6" fill="#94a3b8" opacity="0.7"/>
-    <rect x="56" y="200" width="260" height="12" rx="6" fill="#f8fafc" opacity="0.85"/>
-    <rect x="56" y="232" width="280" height="28" rx="10" fill="#38bdf8" opacity="0.95"/>
-    <text x="70" y="250" fill="#0f172a" font-size="14" font-weight="600" font-family="'Inter',sans-serif">/ship creator-os build</text>
+  <rect width="640" height="360" rx="28" fill="url(#bg)"/>
+  <rect x="48" y="48" width="368" height="248" rx="20" fill="rgba(15,23,42,0.88)" stroke="rgba(148,163,184,0.25)" stroke-width="1.5"/>
+  <rect x="64" y="76" width="120" height="20" rx="10" fill="rgba(56,189,248,0.2)"/>
+  <circle cx="80" cy="86" r="4" fill="#38bdf8"/>
+  <circle cx="96" cy="86" r="4" fill="#a5f3fc"/>
+  <circle cx="112" cy="86" r="4" fill="#38bdf8"/>
+  <rect x="64" y="112" width="272" height="132" rx="12" fill="rgba(15,23,42,0.92)" stroke="rgba(148,163,184,0.25)"/>
+  <rect x="80" y="132" width="120" height="10" rx="5" fill="#f8fafc"/>
+  <rect x="80" y="152" width="180" height="8" rx="4" fill="#94a3b8"/>
+  <rect x="80" y="168" width="208" height="8" rx="4" fill="#38bdf8" opacity="0.65"/>
+  <rect x="80" y="184" width="150" height="8" rx="4" fill="#cbd5f5"/>
+  <rect x="80" y="200" width="220" height="8" rx="4" fill="#e2e8f0" opacity="0.8"/>
+  <rect x="80" y="216" width="164" height="8" rx="4" fill="#94a3b8" opacity="0.7"/>
+  <rect x="80" y="236" width="120" height="24" rx="12" fill="url(#btn)"/>
+  <text x="92" y="252" fill="#0f172a" font-family="'Inter',sans-serif" font-size="13" font-weight="600">run deploy-story</text>
+  <g filter="url(#chatShadow)">
+    <rect x="280" y="164" width="112" height="104" rx="16" fill="rgba(148,163,184,0.18)" stroke="rgba(226,232,240,0.4)"/>
+    <path d="M300 188h72" stroke="#e2e8f0" stroke-width="3" stroke-linecap="round"/>
+    <path d="M300 210h52" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+    <path d="M300 232h64" stroke="#cbd5f5" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="312" cy="256" r="8" fill="#38bdf8"/>
+    <circle cx="334" cy="256" r="8" fill="#f8fafc"/>
+    <circle cx="356" cy="256" r="8" fill="#38bdf8"/>
   </g>
-  <g filter="url(#filter1_d_1_1)">
-    <rect x="424" y="92" width="176" height="120" rx="18" fill="rgba(8,145,178,0.92)"/>
-    <rect x="440" y="120" width="144" height="12" rx="6" fill="#ecfeff"/>
-    <rect x="440" y="144" width="96" height="12" rx="6" fill="#cffafe"/>
-    <rect x="440" y="176" width="128" height="28" rx="14" fill="#ecfeff" opacity="0.9"/>
-    <text x="452" y="195" fill="#0f172a" font-size="13" font-weight="600" font-family="'Inter',sans-serif">Storyboard synced</text>
+  <g filter="url(#timelineShadow)">
+    <rect x="440" y="88" width="144" height="216" rx="18" fill="rgba(8,47,73,0.78)" stroke="rgba(125,211,252,0.4)"/>
+    <rect x="456" y="112" width="112" height="12" rx="6" fill="#ecfeff"/>
+    <rect x="456" y="140" width="96" height="12" rx="6" fill="#bae6fd"/>
+    <rect x="456" y="168" width="72" height="12" rx="6" fill="#38bdf8"/>
+    <rect x="456" y="196" width="112" height="48" rx="12" fill="rgba(14,165,233,0.25)" stroke="#38bdf8" stroke-dasharray="8 6"/>
+    <rect x="456" y="252" width="112" height="32" rx="16" fill="rgba(236,254,255,0.9)"/>
+    <text x="468" y="273" fill="#0f172a" font-family="'Inter',sans-serif" font-size="12" font-weight="600">Storyboard sync ✔</text>
   </g>
-  <g filter="url(#filter2_d_1_1)">
-    <rect x="80" y="280" width="480" height="40" rx="20" fill="rgba(15,118,110,0.85)"/>
-    <text x="100" y="305" fill="#ecfdf5" font-size="16" font-weight="600" font-family="'Inter',sans-serif">Chat: "Ship build + render preview"</text>
+  <g filter="url(#footerShadow)">
+    <rect x="120" y="280" width="400" height="44" rx="22" fill="rgba(14,165,233,0.2)" stroke="rgba(125,211,252,0.45)"/>
+    <text x="144" y="307" fill="#ecfeff" font-family="'Inter',sans-serif" font-size="16" font-weight="600">Chat: “Ship build + drop preview to timeline”</text>
   </g>
   <defs>
-    <linearGradient id="paint0_linear_1_1" x1="88" y1="32" x2="552" y2="344" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0f172a"/>
+    <linearGradient id="bg" x1="60" y1="36" x2="596" y2="324" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#020817"/>
+      <stop offset="0.5" stop-color="#0f172a"/>
       <stop offset="1" stop-color="#1e293b"/>
     </linearGradient>
-    <filter id="filter0_d_1_1" x="24" y="44" width="392" height="280" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <linearGradient id="btn" x1="80" y1="236" x2="200" y2="260" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <filter id="chatShadow" x="268" y="152" width="136" height="128" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
       <feOffset dy="4"/>
       <feGaussianBlur stdDeviation="8"/>
       <feComposite in2="hardAlpha" operator="out"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.05 0 0 0 0 0.12 0 0 0 0 0.3 0 0 0 0.35 0"/>
-      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.06 0 0 0 0 0.19 0 0 0 0 0.34 0 0 0 0.35 0"/>
+      <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" mode="normal" result="shape"/>
     </filter>
-    <filter id="filter1_d_1_1" x="404" y="80" width="216" height="176" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <filter id="timelineShadow" x="424" y="72" width="176" height="248" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
       <feOffset dy="6"/>
       <feGaussianBlur stdDeviation="10"/>
       <feComposite in2="hardAlpha" operator="out"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.02 0 0 0 0 0.17 0 0 0 0 0.24 0 0 0 0.25 0"/>
-      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.04 0 0 0 0 0.3 0 0 0 0 0.4 0 0 0 0.35 0"/>
+      <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" mode="normal" result="shape"/>
     </filter>
-    <filter id="filter2_d_1_1" x="60" y="268" width="520" height="80" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <filter id="footerShadow" x="100" y="268" width="440" height="84" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
       <feOffset dy="6"/>
       <feGaussianBlur stdDeviation="10"/>
       <feComposite in2="hardAlpha" operator="out"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.02 0 0 0 0 0.28 0 0 0 0 0.25 0 0 0 0.35 0"/>
-      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.06 0 0 0 0 0.29 0 0 0 0 0.36 0 0 0 0.35 0"/>
+      <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" mode="normal" result="shape"/>
     </filter>
   </defs>
 </svg>

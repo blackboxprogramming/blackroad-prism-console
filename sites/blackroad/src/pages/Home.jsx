@@ -10,7 +10,7 @@ const proofBlocks = [
     outcome:
       'Code and media flow in one workspace so teams can script features, frame scenes, and review inline in minutes.',
     image: '/img/proof-build.svg',
-    alt: 'BlackRoad editor with timeline and chat side-by-side',
+    alt: 'Creator-OS workspace showing code panel, storyboard timeline, and chat shipping a preview',
     receipts: [
       'Sub-200ms agent replies inside shared repos',
       'Branch-aware IDE, storyboard, and asset vault',
@@ -23,7 +23,7 @@ const proofBlocks = [
     outcome:
       'Roadie, Guardian, and Lucidia automate review, ops, and finance so you stay focused on shipping.',
     image: '/img/proof-agents.svg',
-    alt: 'Agents coordinating across review, ops, and finance dashboards',
+    alt: 'Roadie, Guardian, and Lucidia dashboards linked by workflow signals',
     receipts: [
       '24/7 code review, release, and compliance runs',
       'Guardian patches drift before it hits prod',
@@ -36,7 +36,7 @@ const proofBlocks = [
     outcome:
       'Spin up physics-grade scenes, iterate in real time, and export footage or interactive builds without leaving chat.',
     image: '/img/proof-simulation.svg',
-    alt: 'Simulation pipeline from 3D scene to rendered experience',
+    alt: 'Sim-to-studio pipeline from 3D scene capture to GPU render and export cards',
     receipts: [
       'Unity & Unreal pipelines pre-integrated',
       'GPU burst renders streamed under 3 seconds',
@@ -49,7 +49,7 @@ const proofBlocks = [
     outcome:
       'Creator Wallet handles tipping, revenue splits, and payouts so every project launches with a business model.',
     image: '/img/proof-money.svg',
-    alt: 'Wallet dashboard showing tips, splits, and payout schedule',
+    alt: 'Creator Wallet panels summarizing instant settlement, splits, and payout schedule',
     receipts: [
       'Self-custodied wallet with instant settlement',
       'Programmable revenue splits per asset bundle',
