@@ -1,61 +1,66 @@
 <svg width="640" height="360" viewBox="0 0 640 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="640" height="360" rx="24" fill="url(#paint0_linear_4_1)"/>
-  <g filter="url(#filter0_d_4_1)">
-    <rect x="80" y="88" width="480" height="216" rx="28" fill="rgba(15,23,42,0.85)"/>
-    <rect x="112" y="120" width="200" height="144" rx="20" fill="rgba(16,185,129,0.2)" stroke="#22c55e" stroke-width="2"/>
-    <rect x="336" y="120" width="192" height="64" rx="16" fill="rgba(20,184,166,0.3)" stroke="#14b8a6" stroke-width="2"/>
-    <rect x="336" y="200" width="192" height="64" rx="16" fill="rgba(56,189,248,0.3)" stroke="#38bdf8" stroke-width="2"/>
-    <text x="140" y="156" fill="#bbf7d0" font-size="14" font-family="'Inter',sans-serif">Creator Wallet</text>
-    <text x="356" y="156" fill="#5eead4" font-size="13" font-family="'Inter',sans-serif">Tips + One-time</text>
-    <text x="356" y="236" fill="#bae6fd" font-size="13" font-family="'Inter',sans-serif">Splits + Payouts</text>
-    <rect x="132" y="176" width="160" height="12" rx="6" fill="#22c55e" opacity="0.8"/>
-    <rect x="132" y="198" width="180" height="12" rx="6" fill="#34d399" opacity="0.7"/>
-    <rect x="132" y="220" width="120" height="12" rx="6" fill="#86efac" opacity="0.6"/>
-    <rect x="132" y="242" width="200" height="32" rx="10" fill="#ecfdf5"/>
-    <text x="150" y="264" fill="#047857" font-size="14" font-weight="600" font-family="'Inter',sans-serif">Next payout · 12:00 UTC</text>
+  <rect width="640" height="360" rx="28" fill="url(#bg)"/>
+  <g filter="url(#panelShadow)">
+    <rect x="80" y="72" width="480" height="224" rx="24" fill="rgba(15,23,42,0.9)" stroke="rgba(148,163,184,0.35)"/>
+    <rect x="112" y="104" width="160" height="120" rx="16" fill="rgba(6,95,70,0.82)" stroke="rgba(45,212,191,0.45)"/>
+    <text x="132" y="136" fill="#d1fae5" font-family="'Inter',sans-serif" font-size="14" font-weight="600">Creator Wallet</text>
+    <rect x="128" y="152" width="128" height="12" rx="6" fill="#d1fae5"/>
+    <rect x="128" y="176" width="112" height="12" rx="6" fill="#99f6e4"/>
+    <rect x="128" y="200" width="144" height="36" rx="12" fill="rgba(45,212,191,0.28)" stroke="#34d399" stroke-dasharray="8 6"/>
+    <text x="140" y="222" fill="#ecfdf5" font-family="'Inter',sans-serif" font-size="12">Instant settlement ✔</text>
+    <rect x="276" y="104" width="132" height="144" rx="18" fill="rgba(15,118,110,0.85)" stroke="rgba(45,212,191,0.45)"/>
+    <text x="296" y="138" fill="#ccfbf1" font-family="'Inter',sans-serif" font-size="14" font-weight="600">Revenue Split</text>
+    <rect x="292" y="154" width="104" height="12" rx="6" fill="#ccfbf1"/>
+    <rect x="292" y="178" width="96" height="12" rx="6" fill="#5eead4"/>
+    <rect x="292" y="202" width="72" height="12" rx="6" fill="#34d399"/>
+    <rect x="292" y="226" width="104" height="28" rx="14" fill="#f0fdfa"/>
+    <text x="306" y="245" fill="#0f172a" font-family="'Inter',sans-serif" font-size="12" font-weight="600">USD · USDC · CRT</text>
+    <rect x="432" y="104" width="112" height="160" rx="18" fill="rgba(4,120,87,0.85)" stroke="rgba(16,185,129,0.45)"/>
+    <text x="452" y="138" fill="#d1fae5" font-family="'Inter',sans-serif" font-size="14" font-weight="600">Payouts</text>
+    <rect x="444" y="154" width="88" height="12" rx="6" fill="#bbf7d0"/>
+    <rect x="444" y="178" width="88" height="12" rx="6" fill="#6ee7b7"/>
+    <rect x="444" y="202" width="88" height="12" rx="6" fill="#34d399"/>
+    <rect x="444" y="226" width="88" height="12" rx="6" fill="#0ea5e9"/>
+    <rect x="444" y="250" width="88" height="28" rx="14" fill="#ecfdf5"/>
+    <text x="452" y="269" fill="#0f172a" font-family="'Inter',sans-serif" font-size="12" font-weight="600">Next run · Fri</text>
   </g>
-  <g filter="url(#filter1_d_4_1)">
-    <rect x="120" y="64" width="220" height="44" rx="22" fill="rgba(16,185,129,0.85)"/>
-    <text x="146" y="90" fill="#ecfdf5" font-size="16" font-weight="600" font-family="'Inter',sans-serif">Live wallet balance: $48,920</text>
+  <path d="M256 184c56-40 124-40 176 0" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-dasharray="10 12"/>
+  <path d="M188 236c72 36 168 44 240 8" stroke="#2dd4bf" stroke-width="3" stroke-linecap="round" stroke-dasharray="10 12"/>
+  <g fill="#34d399">
+    <circle cx="256" cy="184" r="7"/>
+    <circle cx="432" cy="184" r="7"/>
+    <circle cx="188" cy="236" r="7"/>
+    <circle cx="428" cy="244" r="7"/>
   </g>
-  <g filter="url(#filter2_d_4_1)">
-    <rect x="160" y="296" width="320" height="40" rx="20" fill="rgba(56,189,248,0.9)"/>
-    <text x="186" y="322" fill="#0f172a" font-size="16" font-weight="600" font-family="'Inter',sans-serif">Automated split sent to 12 creators</text>
+  <g filter="url(#footerShadow)">
+    <rect x="192" y="300" width="256" height="40" rx="20" fill="rgba(16,185,129,0.24)" stroke="rgba(45,212,191,0.4)"/>
+    <text x="210" y="325" fill="#ecfdf5" font-family="'Inter',sans-serif" font-size="15" font-weight="600">Wallet → splits → payouts timeline</text>
   </g>
   <defs>
-    <linearGradient id="paint0_linear_4_1" x1="100" y1="40" x2="520" y2="320" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0f172a"/>
-      <stop offset="1" stop-color="#064e3b"/>
+    <linearGradient id="bg" x1="80" y1="36" x2="560" y2="328" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#022c22"/>
+      <stop offset="0.45" stop-color="#064e3b"/>
+      <stop offset="1" stop-color="#0f172a"/>
     </linearGradient>
-    <filter id="filter0_d_4_1" x="60" y="72" width="520" height="260" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <filter id="panelShadow" x="60" y="52" width="520" height="264" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-      <feOffset dy="10"/>
-      <feGaussianBlur stdDeviation="14"/>
+      <feOffset dy="8"/>
+      <feGaussianBlur stdDeviation="12"/>
       <feComposite in2="hardAlpha" operator="out"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.08 0 0 0 0 0.33 0 0 0 0 0.24 0 0 0 0.34 0"/>
-      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.02 0 0 0 0 0.34 0 0 0 0 0.29 0 0 0 0.32 0"/>
+      <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" mode="normal" result="shape"/>
     </filter>
-    <filter id="filter1_d_4_1" x="100" y="52" width="260" height="84" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <filter id="footerShadow" x="172" y="284" width="296" height="80" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
       <feOffset dy="6"/>
       <feGaussianBlur stdDeviation="10"/>
       <feComposite in2="hardAlpha" operator="out"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.02 0 0 0 0 0.21 0 0 0 0 0.17 0 0 0 0.28 0"/>
-      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
-    </filter>
-    <filter id="filter2_d_4_1" x="140" y="284" width="360" height="80" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-      <feOffset dy="6"/>
-      <feGaussianBlur stdDeviation="10"/>
-      <feComposite in2="hardAlpha" operator="out"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.05 0 0 0 0 0.31 0 0 0 0 0.44 0 0 0 0.36 0"/>
-      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.03 0 0 0 0 0.38 0 0 0 0 0.32 0 0 0 0.32 0"/>
+      <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" mode="normal" result="shape"/>
     </filter>
   </defs>
 </svg>

@@ -1,48 +1,72 @@
 <svg width="640" height="360" viewBox="0 0 640 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="640" height="360" rx="24" fill="url(#paint0_linear_2_1)"/>
-  <g filter="url(#filter0_d_2_1)">
-    <rect x="60" y="72" width="520" height="216" rx="28" fill="rgba(15,23,42,0.75)"/>
-    <rect x="92" y="104" width="120" height="120" rx="20" fill="rgba(56,189,248,0.25)" stroke="#38bdf8" stroke-width="2"/>
-    <rect x="260" y="104" width="120" height="120" rx="20" fill="rgba(16,185,129,0.25)" stroke="#34d399" stroke-width="2"/>
-    <rect x="428" y="104" width="120" height="120" rx="20" fill="rgba(244,114,182,0.25)" stroke="#f472b6" stroke-width="2"/>
-    <text x="120" y="142" fill="#38bdf8" font-size="14" font-weight="600" font-family="'Inter',sans-serif">Roadie</text>
-    <text x="290" y="142" fill="#34d399" font-size="14" font-weight="600" font-family="'Inter',sans-serif">Guardian</text>
-    <text x="456" y="142" fill="#f472b6" font-size="14" font-weight="600" font-family="'Inter',sans-serif">Lucidia</text>
-    <text x="100" y="194" fill="#e2e8f0" font-size="12" font-family="'Inter',sans-serif">Review · Pair · Ship</text>
-    <text x="274" y="194" fill="#dcfce7" font-size="12" font-family="'Inter',sans-serif">Ops · Alerts · Compliance</text>
-    <text x="444" y="194" fill="#fce7f3" font-size="12" font-family="'Inter',sans-serif">Finance · Splits · Treasury</text>
-    <path d="M212 164H244" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
-    <path d="M380 164H412" stroke="#34d399" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
-    <path d="M244 178C244 178 256 210 320 210C384 210 396 178 396 178" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="6 8" opacity="0.4"/>
+  <rect width="640" height="360" rx="28" fill="url(#bg)"/>
+  <g filter="url(#halo)">
+    <circle cx="320" cy="168" r="140" fill="url(#glow)"/>
   </g>
-  <g filter="url(#filter1_d_2_1)">
-    <rect x="96" y="260" width="448" height="44" rx="22" fill="rgba(8,145,178,0.85)"/>
-    <text x="120" y="286" fill="#ecfeff" font-size="16" font-weight="600" font-family="'Inter',sans-serif">Ops graph synced · Release window opens in 12m · Wallet audit clean</text>
+  <g filter="url(#panelShadow)">
+    <rect x="72" y="88" width="192" height="184" rx="20" fill="rgba(15,23,42,0.88)" stroke="rgba(148,163,184,0.35)"/>
+    <text x="104" y="128" fill="#bae6fd" font-family="'Inter',sans-serif" font-size="14" font-weight="600">Roadie</text>
+    <rect x="96" y="144" width="144" height="12" rx="6" fill="#38bdf8"/>
+    <rect x="96" y="168" width="120" height="10" rx="5" fill="#cbd5f5"/>
+    <rect x="96" y="188" width="128" height="10" rx="5" fill="#94a3b8"/>
+    <rect x="96" y="208" width="160" height="40" rx="12" fill="rgba(56,189,248,0.12)" stroke="#38bdf8" stroke-dasharray="10 6"/>
+    <text x="108" y="234" fill="#e2e8f0" font-family="'Inter',sans-serif" font-size="12">Pull request checks · pass</text>
+  </g>
+  <g filter="url(#panelShadow)">
+    <rect x="240" y="64" width="160" height="200" rx="20" fill="rgba(8,47,73,0.92)" stroke="rgba(125,211,252,0.45)"/>
+    <text x="272" y="108" fill="#f8fafc" font-family="'Inter',sans-serif" font-size="14" font-weight="600">Guardian</text>
+    <rect x="264" y="124" width="112" height="12" rx="6" fill="#ecfeff"/>
+    <rect x="264" y="148" width="96" height="12" rx="6" fill="#bae6fd"/>
+    <rect x="264" y="172" width="120" height="36" rx="12" fill="#0ea5e9" opacity="0.32"/>
+    <text x="276" y="194" fill="#ecfeff" font-family="'Inter',sans-serif" font-size="12">Prod drift patched</text>
+    <rect x="264" y="212" width="112" height="32" rx="16" fill="#f0fdfa"/>
+    <text x="282" y="233" fill="#0f172a" font-family="'Inter',sans-serif" font-size="12" font-weight="600">Compliance clean</text>
+  </g>
+  <g filter="url(#panelShadow)">
+    <rect x="416" y="96" width="168" height="192" rx="20" fill="rgba(12,74,110,0.88)" stroke="rgba(165,243,252,0.45)"/>
+    <text x="452" y="132" fill="#f0fdfa" font-family="'Inter',sans-serif" font-size="14" font-weight="600">Lucidia</text>
+    <rect x="440" y="148" width="128" height="12" rx="6" fill="#e0f2fe"/>
+    <rect x="440" y="172" width="120" height="12" rx="6" fill="#bae6fd"/>
+    <rect x="440" y="196" width="96" height="12" rx="6" fill="#38bdf8"/>
+    <rect x="440" y="224" width="128" height="36" rx="12" fill="rgba(14,165,233,0.28)" stroke="#22d3ee" stroke-dasharray="8 6"/>
+    <text x="452" y="246" fill="#ecfeff" font-family="'Inter',sans-serif" font-size="12">Tips + payouts reconciled</text>
+  </g>
+  <g stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="6 8" opacity="0.8">
+    <path d="M260 132C292 100 348 100 380 132"/>
+    <path d="M212 196C252 220 348 220 404 204"/>
+    <path d="M296 248C332 272 388 276 432 260"/>
+  </g>
+  <g fill="#38bdf8">
+    <circle cx="268" cy="128" r="6"/>
+    <circle cx="376" cy="128" r="6"/>
+    <circle cx="224" cy="196" r="6"/>
+    <circle cx="404" cy="204" r="6"/>
+    <circle cx="304" cy="248" r="6"/>
+    <circle cx="424" cy="260" r="6"/>
   </g>
   <defs>
-    <linearGradient id="paint0_linear_2_1" x1="120" y1="48" x2="520" y2="312" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="36" y1="32" x2="604" y2="328" gradientUnits="userSpaceOnUse">
       <stop stop-color="#020617"/>
+      <stop offset="0.45" stop-color="#082f49"/>
       <stop offset="1" stop-color="#0f172a"/>
     </linearGradient>
-    <filter id="filter0_d_2_1" x="36" y="52" width="568" height="264" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(320 168) rotate(90) scale(160)">
+      <stop stop-color="#0ea5e9" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#0ea5e9" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="halo" x="128" y="-24" width="384" height="384" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+    <filter id="panelShadow" x="56" y="48" width="544" height="264" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-      <feOffset dy="10"/>
+      <feOffset dy="8"/>
       <feGaussianBlur stdDeviation="14"/>
       <feComposite in2="hardAlpha" operator="out"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.07 0 0 0 0 0.24 0 0 0 0 0.36 0 0 0 0.32 0"/>
-      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
-    </filter>
-    <filter id="filter1_d_2_1" x="76" y="248" width="488" height="88" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-      <feOffset dy="6"/>
-      <feGaussianBlur stdDeviation="10"/>
-      <feComposite in2="hardAlpha" operator="out"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.05 0 0 0 0 0.27 0 0 0 0 0.39 0 0 0 0.34 0"/>
-      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.04 0 0 0 0 0.34 0 0 0 0 0.45 0 0 0 0.32 0"/>
+      <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" mode="normal" result="shape"/>
     </filter>
   </defs>
 </svg>
