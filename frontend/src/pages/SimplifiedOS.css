@@ -1,0 +1,586 @@
+.simplified-os {
+  --spectrum-gold: #fdba2d;
+  --spectrum-orange: #ff6b35;
+  --spectrum-pink: #ff4fd8;
+  --spectrum-purple: #c753ff;
+  --spectrum-indigo: #6366f1;
+  --spectrum-blue: #3b82f6;
+  --spectrum-cyan: #06b6d4;
+  --spectrum-green: #10b981;
+  --void: #000000;
+  --void-10: #0a0a0f;
+  --void-20: #13131a;
+  --void-30: #1a1a24;
+  --void-40: #202030;
+  --text: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-tertiary: rgba(255, 255, 255, 0.5);
+  --border: rgba(255, 255, 255, 0.08);
+  --gradient-spectrum: linear-gradient(
+    135deg,
+    var(--spectrum-gold) 0%,
+    var(--spectrum-orange) 20%,
+    var(--spectrum-pink) 40%,
+    var(--spectrum-purple) 60%,
+    var(--spectrum-indigo) 80%,
+    var(--spectrum-blue) 100%
+  );
+  position: relative;
+  min-height: 80vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  color: var(--text);
+}
+
+.simplified-os,
+.simplified-os * {
+  box-sizing: border-box;
+}
+
+.simplified-os .desktop {
+  position: relative;
+  min-height: 70vh;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(253, 186, 45, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(255, 79, 216, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+    linear-gradient(180deg, #0a0a0f 0%, #000000 100%);
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.simplified-os .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.3;
+  animation: simplified-os-float 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.simplified-os .orb1 {
+  width: 400px;
+  height: 400px;
+  background: var(--spectrum-pink);
+  top: 10%;
+  left: 10%;
+}
+
+.simplified-os .orb2 {
+  width: 300px;
+  height: 300px;
+  background: var(--spectrum-cyan);
+  bottom: 20%;
+  right: 15%;
+}
+
+.simplified-os .orb3 {
+  width: 350px;
+  height: 350px;
+  background: var(--spectrum-purple);
+  top: 45%;
+  left: 45%;
+}
+
+@keyframes simplified-os-float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+.simplified-os .top-bar {
+  height: 40px;
+  background: rgba(10, 10, 15, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 10;
+}
+
+.simplified-os .top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.simplified-os .logo-mini {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+  font-size: 0.9rem;
+  background: var(--gradient-spectrum);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.simplified-os .top-menu {
+  display: flex;
+  gap: 20px;
+  font-size: 0.85rem;
+}
+
+.simplified-os .top-menu-item {
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.simplified-os .top-menu-item:hover {
+  color: var(--text);
+}
+
+.simplified-os .top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.85rem;
+}
+
+.simplified-os .top-bar-icon {
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.simplified-os .top-bar-icon:hover {
+  color: var(--text);
+}
+
+.simplified-os .time-display {
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  min-width: 120px;
+  text-align: right;
+}
+
+.simplified-os .desktop-area {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+.simplified-os .sidebar {
+  width: 280px;
+  background: rgba(10, 10, 15, 0.95);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border);
+  padding: 24px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.simplified-os .sidebar-section {
+  margin-bottom: 32px;
+}
+
+.simplified-os .sidebar-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.simplified-os .stat-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--spectrum-cyan);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.simplified-os .stat-label {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+
+.simplified-os .stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.simplified-os .quick-action {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+}
+
+.simplified-os .quick-action:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--spectrum-pink);
+  transform: translateX(4px);
+}
+
+.simplified-os .center-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.simplified-os .welcome-message {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: simplified-os-fade-in 1s ease-out;
+}
+
+@keyframes simplified-os-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.simplified-os .welcome-title {
+  font-size: clamp(2.5rem, 4vw, 4rem);
+  font-weight: 900;
+  background: var(--gradient-spectrum);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+  line-height: 1.05;
+}
+
+.simplified-os .welcome-subtitle {
+  font-size: 1.3rem;
+  color: var(--text-secondary);
+}
+
+.simplified-os .app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 24px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  animation: simplified-os-fade-in 1s ease-out 0.3s backwards;
+}
+
+.simplified-os .app-icon {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid var(--border);
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.simplified-os .app-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-spectrum);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.simplified-os .app-icon:hover {
+  transform: translateY(-8px) scale(1.05);
+  border-color: var(--spectrum-pink);
+  box-shadow: 0 0 30px rgba(255, 79, 216, 0.4), 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.simplified-os .app-icon:hover::before {
+  opacity: 0.1;
+}
+
+.simplified-os .app-emoji {
+  font-size: 3rem;
+  z-index: 1;
+}
+
+.simplified-os .app-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  z-index: 1;
+  text-align: center;
+}
+
+.simplified-os .dock {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 10, 15, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 12px 20px;
+  display: flex;
+  gap: 8px;
+  box-shadow: 0 0 40px rgba(255, 79, 216, 0.2), 0 20px 60px rgba(0, 0, 0, 0.5);
+  z-index: 20;
+  animation: simplified-os-slide-up 0.5s ease-out 0.5s backwards;
+}
+
+@keyframes simplified-os-slide-up {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 100px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.simplified-os .dock-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid transparent;
+}
+
+.simplified-os .dock-icon:hover {
+  transform: translateY(-12px) scale(1.15);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--spectrum-cyan);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+}
+
+.simplified-os .dock-icon.active::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: var(--spectrum-pink);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--spectrum-pink);
+}
+
+.simplified-os .context-menu {
+  position: absolute;
+  background: rgba(10, 10, 15, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  min-width: 200px;
+  display: none;
+  z-index: 30;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.simplified-os .context-menu.show {
+  display: block;
+}
+
+.simplified-os .context-item {
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+}
+
+.simplified-os .context-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--spectrum-cyan);
+}
+
+.simplified-os .notification {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background: rgba(10, 10, 15, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--spectrum-green);
+  border-radius: 12px;
+  padding: 16px 20px;
+  min-width: 300px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  display: none;
+  z-index: 40;
+}
+
+.simplified-os .notification.show {
+  display: block;
+}
+
+.simplified-os .notification-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.simplified-os .notification-message {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.simplified-os .window {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: min(800px, 90vw);
+  height: min(600px, 80vh);
+  background: rgba(10, 10, 15, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+  display: none;
+  flex-direction: column;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.simplified-os .window.show {
+  display: flex;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.simplified-os .window-header {
+  height: 50px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.simplified-os .window-title {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.simplified-os .window-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.simplified-os .window-control {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.simplified-os .window-control.close {
+  background: #ff5f56;
+}
+
+.simplified-os .window-control.minimize {
+  background: #ffbd2e;
+}
+
+.simplified-os .window-control.maximize {
+  background: #27c93f;
+}
+
+.simplified-os .window-control:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 10px currentColor;
+}
+
+.simplified-os .window-content {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+  color: var(--text-secondary);
+}
+
+.simplified-os .desktop-area::-webkit-scrollbar,
+.simplified-os .window-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.simplified-os .desktop-area::-webkit-scrollbar-track,
+.simplified-os .window-content::-webkit-scrollbar-track {
+  background: var(--void-10);
+}
+
+.simplified-os .desktop-area::-webkit-scrollbar-thumb,
+.simplified-os .window-content::-webkit-scrollbar-thumb {
+  background: var(--void-40);
+  border-radius: 4px;
+}
+
+.simplified-os .desktop-area::-webkit-scrollbar-thumb:hover,
+.simplified-os .window-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 79, 216, 0.3);
+}
+
+@media (max-width: 1200px) {
+  .simplified-os .app-grid {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .simplified-os .sidebar {
+    display: none;
+  }
+
+  .simplified-os .welcome-title {
+    font-size: 2.5rem;
+  }
+
+  .simplified-os .dock {
+    flex-wrap: wrap;
+    max-width: 90%;
+  }
+}
