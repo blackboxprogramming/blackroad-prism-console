@@ -39,10 +39,10 @@ npm i -D prettier eslint eslint-config-prettier >/dev/null 2>&1 || true
 npx --yes prettier -w .  >/dev/null 2>&1 || true
 npx --yes eslint . --ext .js,.mjs,.cjs --fix >/dev/null 2>&1 || true
 
-# Stage any changes produced by formatters or linters
+# Step 4: Stage any changes produced by formatters or linters
 git diff --quiet || { git add -A && changed=true; }
 
-# Step 4: Commit if any files changed
+# Step 5: Commit if any files changed
 if $changed; then
   git commit -m "chore(auto-heal): baseline configs + prettier/eslint --fix" || true
   echo "committed=1" >> "$GITHUB_OUTPUT"
