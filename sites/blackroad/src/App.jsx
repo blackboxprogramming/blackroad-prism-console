@@ -10,6 +10,7 @@ import CodexPromptPage from "./pages/CodexPrompt.jsx";
 import CreatorLightpath from "./pages/CreatorLightpath.jsx";
 import Desktop from "./pages/Desktop.jsx";
 import Editor from "./pages/Editor.jsx";
+import BootSequence from "./pages/BootSequence.jsx";
 import InfinityMath from "./pages/InfinityMath.jsx";
 import Lucidia from "./pages/Lucidia.jsx";
 import Monitoring from "./pages/Monitoring.jsx";
@@ -102,6 +103,7 @@ const NAV_LINKS = [
   { to: "/canvas", label: "Canvas" },
   { to: "/editor", label: "Editor" },
   { to: "/terminal", label: "Terminal" },
+  { to: "/boot", label: "Boot Sequence" },
   { to: "/roadview", label: "RoadView" },
   { to: "/backroad", label: "Backroad" },
   { to: "/agents", label: "Agents" },
@@ -120,6 +122,7 @@ const PRIMARY_ROUTE_COMPONENTS = {
   chat: Chat,
   "creator-lightpath": CreatorLightpath,
   editor: Editor,
+  boot: BootSequence,
   lucidia: Lucidia,
   math: InfinityMath,
   monitoring: Monitoring,
@@ -202,6 +205,7 @@ const FEATURE_ROUTES = [
   { path: "canvas", label: "Canvas", component: Canvas },
   { path: "editor", label: "Editor", component: Editor },
   { path: "terminal", label: "Terminal", component: Terminal },
+  { path: "boot", label: "Boot Sequence", component: BootSequence },
   { path: "roadview", label: "RoadView", component: RoadView },
   { path: "backroad", label: "Backroad", component: Backroad },
   { path: "agents", label: "Agents", component: Agents },
