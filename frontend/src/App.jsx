@@ -24,6 +24,7 @@ import {
   FunctionSquare,
   GitCommit,
   LayoutGrid,
+  Music,
   Rocket,
   Shield,
   ShieldCheck,
@@ -81,6 +82,7 @@ import PeriodicTableOfEquations from './pages/PeriodicTableOfEquations.jsx'
 import Resilience from './pages/Resilience.jsx'
 import AgentLineage from './pages/AgentLineage.jsx'
 import WebEngine from './pages/WebEngine.jsx'
+import MusicApp from './pages/MusicApp.jsx'
 
 export default function App(){
   const location = useLocation()
@@ -299,6 +301,7 @@ export default function App(){
     { key: 'roadbook', to: '/roadbook', text: 'Roadbook', icon: <BookOpen size={18} /> },
     { key: 'manifesto', to: '/manifesto', text: 'Manifesto', icon: <BookOpen size={18} /> },
     { key: 'homework', to: '/homework', text: 'Homework', icon: <GraduationCap size={18} /> },
+    { key: 'sonic', to: '/sonic', text: 'BlackRoad Sonic', icon: <Music size={18} /> },
     { key: 'git', to: '/git', text: 'Git', icon: <GitCommit size={18} /> },
     { key: 'subscribe', href: '/subscribe', text: 'Subscribe', icon: <Rocket size={18} /> },
     { key: 'nexus', href: '/nexus', text: 'Nexus Console', icon: <LayoutGrid size={18} /> },
@@ -351,6 +354,7 @@ export default function App(){
               <Route path="/orchestrator" element={<Section><Orchestrator socket={socket} /></Section>} />
               <Route path="/roadbook" element={<Section><Roadbook /></Section>} />
               <Route path="/manifesto" element={<Section><Manifesto /></Section>} />
+              <Route path="/sonic" element={<Section><MusicApp /></Section>} />
               <Route path="/git" element={<Section><Git /></Section>} />
             </Routes>
               <NavItem icon={<Activity size={18} />} text="Dashboard" href="/dashboard" />
@@ -468,6 +472,7 @@ export default function App(){
               <Route path="/git" element={<GitPage />} />
               <Route path="/control" element={<ControlPanel />} />
               <Route path="/resilience" element={<Resilience />} />
+              <Route path="/sonic" element={<MusicApp />} />
             </Routes>
           </main>
         </>
