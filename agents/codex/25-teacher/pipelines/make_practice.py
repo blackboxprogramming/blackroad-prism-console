@@ -53,6 +53,11 @@ def next_practice_set(user: str, results: Dict[str, Any], *, now: Optional[datet
     questions = load_question_bank()
     candidates = _difficulty_filter(questions, target_difficulty) or questions
     selected = candidates[:DEFAULT_SET_SIZE]
+    sanitized_items: List[Dict[str, Any]] = []
+    for item in selected:
+        sanitized = dict(item)
+        sanitized.pop("answer", None)
+        sanitized_items.append(sanitized)
 
     due = now + timedelta(hours=6 if mastery >= 0.85 else 3)
     energy = 1.0 if mastery >= 0.85 else 0.7
@@ -60,7 +65,7 @@ def next_practice_set(user: str, results: Dict[str, Any], *, now: Optional[datet
     return {
         "user": user,
         "mastery": mastery,
-        "items": selected,
+        "items": sanitized_items,
         "energy_budget": energy,
         "review_at": due.isoformat() + "Z",
     }
