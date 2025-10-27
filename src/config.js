@@ -8,8 +8,6 @@ require('dotenv').config();
 const defaultRoadviewStorage = path.resolve(
   __dirname,
   '..',
-  'srv',
-  'blackroad-api',
   'storage',
   'roadview'
 );
