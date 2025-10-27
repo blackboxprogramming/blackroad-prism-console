@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Release Feed · Codex-33</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Release Notes</h1>
+      <p class="subtitle">Outcome, metrics, energy, lessons, and badges.</p>
+    </header>
+    <main>
+      <article data-bind="releases">
+        <header>
+          <h2 data-bind="version"></h2>
+          <p data-bind="date"></p>
+        </header>
+        <section>
+          <h3>Outcome</h3>
+          <p data-bind="outcome"></p>
+        </section>
+        <section>
+          <h3>Metrics</h3>
+          <p><strong>Primary:</strong> <span data-bind="metrics.primary"></span></p>
+          <ul data-bind="metrics.secondary">
+            <li data-bind="."></li>
+          </ul>
+        </section>
+        <section>
+          <h3>Energy</h3>
+          <p><strong>Target:</strong> <span data-bind="energy.target"></span>J</p>
+          <p><strong>Spent:</strong> <span data-bind="energy.joules_spent"></span>J</p>
+          <ul data-bind="energy.scope_changes">
+            <li data-bind="."></li>
+          </ul>
+        </section>
+        <section>
+          <h3>Lessons</h3>
+          <ul data-bind="lessons">
+            <li data-bind="."></li>
+          </ul>
+        </section>
+        <section>
+          <h3>Badges</h3>
+          <ul data-bind="badges">
+            <li data-bind="."></li>
+          </ul>
+        </section>
+        <footer>
+          <h3>Approvals</h3>
+          <ul>
+            <li>Teacher: <span data-bind="approvals.teacher"></span></li>
+            <li>Designer: <span data-bind="approvals.designer"></span></li>
+            <li>Auditor: <span data-bind="approvals.auditor"></span></li>
+            <li>Sentinel: <span data-bind="approvals.sentinel"></span></li>
+          </ul>
+        </footer>
+      </article>
+    </main>
+  </body>
+</html>

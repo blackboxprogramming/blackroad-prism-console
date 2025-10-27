@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Outcomes Board · Codex-33</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Outcome Tree</h1>
+      <p class="subtitle">Track outcomes, bets, and joules per outcome.</p>
+    </header>
+    <main>
+      <section id="goal">
+        <h2>Goal</h2>
+        <div data-bind="goal.title"></div>
+        <dl>
+          <dt>Metric</dt>
+          <dd data-bind="goal.metric"></dd>
+          <dt>Horizon</dt>
+          <dd data-bind="goal.horizon"></dd>
+        </dl>
+      </section>
+      <section id="outcomes">
+        <h2>Outcomes</h2>
+        <ul data-bind="outcomes">
+          <li>
+            <h3 data-bind="title"></h3>
+            <p><strong>Metric:</strong> <span data-bind="metric"></span></p>
+            <p><strong>Leading indicators:</strong></p>
+            <ul data-bind="leading_indicators">
+              <li data-bind="."></li>
+            </ul>
+            <p><strong>Active bets:</strong></p>
+            <ul data-bind="bets">
+              <li><span data-bind="title"></span> — <span data-bind="status"></span></li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

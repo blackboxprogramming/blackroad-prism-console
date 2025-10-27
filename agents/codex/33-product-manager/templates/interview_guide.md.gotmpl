@@ -1,0 +1,29 @@
+# Interview Guide · {{ .topic }}
+
+## Participants
+{{ range .participants -}}
+- {{ . }}
+{{ else }}
+- TBD
+{{ end }}
+
+## Objectives
+{{ range .objectives -}}
+- {{ . }}
+{{ else }}
+- Clarify primary outcome signals.
+{{ end }}
+
+## Key Questions
+{{ range .questions -}}
+1. {{ . }}
+{{ else }}
+1. Tell me about the last time you tried to achieve {{ .topic }}.
+2. What made it hard or easy?
+3. How do you measure success today?
+{{ end }}
+
+## Notes Template
+- Signal:
+- Quote:
+- Next action:

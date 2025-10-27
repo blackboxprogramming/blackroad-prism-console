@@ -1,0 +1,43 @@
+# Release {{ .version }} · {{ .date }}
+
+## Outcome
+{{ .outcome }}
+
+## Metrics
+- Primary: {{ .metrics.primary }}
+{{- if .metrics.secondary }}
+- Secondary:
+{{ range .metrics.secondary -}}
+  - {{ . }}
+{{ end }}
+{{- end }}
+
+## Energy
+- Target: {{ .energy.target }}J
+- Spent: {{ .energy.joules_spent }}J
+{{- if .energy.scope_changes }}
+- Scope Changes:
+{{ range .energy.scope_changes -}}
+  - {{ . }}
+{{ end }}
+{{- end }}
+
+## Lessons Learned
+{{ range .lessons -}}
+- {{ . }}
+{{ else }}
+- Pending postmortem
+{{ end }}
+
+## Badges
+{{ range .badges -}}
+- {{ . }}
+{{ else }}
+- None awarded
+{{ end }}
+
+## Approvals
+- Teacher: {{ .approvals.teacher }}
+- Designer: {{ .approvals.designer }}
+- Auditor: {{ .approvals.auditor }}
+- Sentinel: {{ .approvals.sentinel }}

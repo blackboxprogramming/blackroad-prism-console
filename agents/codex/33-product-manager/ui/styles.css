@@ -1,0 +1,68 @@
+:root {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: #1f2933;
+  background-color: #f8fafc;
+}
+
+body {
+  margin: 0;
+  padding: 2rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+}
+
+header {
+  margin-bottom: 2rem;
+}
+
+h1,
+ h2,
+ h3 {
+  color: #0b7285;
+}
+
+.subtitle {
+  color: #475569;
+  margin-top: 0.25rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+table th,
+table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+section,
+article {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+  margin-bottom: 1.5rem;
+}
+
+ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+
+ul[data-bind] {
+  list-style: none;
+  padding-left: 0;
+}
+
+ul[data-bind] li {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: #f1f5f9;
+  border-radius: 0.5rem;
+}

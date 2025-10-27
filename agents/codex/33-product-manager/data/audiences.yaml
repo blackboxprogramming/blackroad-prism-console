@@ -1,0 +1,10 @@
+audiences:
+  - name: Product Trio
+    needs:
+      - Clarity on target outcomes
+      - Fast discovery loops
+      - Low joules per shipped learning
+  - name: Leadership
+    needs:
+      - Evidence of value per joule
+      - Guardrails on risk and ethics

@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BetCard",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "hypothesis",
+    "for_user",
+    "expected_outcome",
+    "guardrails",
+    "joules_target",
+    "test",
+    "success",
+    "kill",
+    "status",
+    "owner",
+    "start_date"
+  ],
+  "properties": {
+    "id": {"type": "string"},
+    "title": {"type": "string"},
+    "emoji": {"type": "string"},
+    "hypothesis": {"type": "string"},
+    "for_user": {"type": "string"},
+    "expected_outcome": {"type": "string"},
+    "guardrails": {
+      "type": "object",
+      "required": ["ethics", "privacy"],
+      "properties": {
+        "ethics": {"type": "boolean"},
+        "privacy": {"type": "boolean"},
+        "notes": {"type": "string"}
+      }
+    },
+    "joules_target": {"type": "number", "minimum": 0},
+    "test": {
+      "type": "object",
+      "required": ["method", "sample_size", "timebox_days"],
+      "properties": {
+        "method": {"type": "string"},
+        "sample_size": {"type": "integer", "minimum": 1},
+        "timebox_days": {"type": "integer", "minimum": 1}
+      }
+    },
+    "success": {
+      "type": "object",
+      "required": ["metric", "threshold"],
+      "properties": {
+        "metric": {"type": "string"},
+        "threshold": {"type": "number"}
+      }
+    },
+    "kill": {
+      "type": "object",
+      "required": ["criteria"],
+      "properties": {
+        "criteria": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1
+        }
+      }
+    },
+    "receipts": {
+      "type": "array",
+      "items": {"type": "string", "format": "uri"}
+    },
+    "status": {"type": "string", "enum": ["open", "win", "pivot", "kill"]},
+    "owner": {"type": "string"},
+    "start_date": {"type": "string", "format": "date"},
+    "decision_date": {"type": "string", "format": "date"}
+  }
+}
