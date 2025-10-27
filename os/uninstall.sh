@@ -51,8 +51,19 @@ sudo systemctl daemon-reload
 sudo rm -f /usr/local/bin/brctl
 
 if [[ "${PURGE}" == true ]]; then
-  echo "Purging named Docker volumes"
-  docker volume prune -f
+  echo "Purging BlackRoad Docker volumes"
+  if command -v docker >/dev/null 2>&1; then
+    mapfile -t blackroad_volumes < <(docker volume ls --format '{{.Name}}' | awk '/^blackroad_/')
+    if [[ ${#blackroad_volumes[@]} -eq 0 ]]; then
+      echo "No BlackRoad Docker volumes found to purge."
+    else
+      for volume in "${blackroad_volumes[@]}"; do
+        docker volume rm -f "${volume}" || true
+      done
+    fi
+  else
+    echo "Docker not available; unable to purge volumes" >&2
+  fi
 fi
 
 echo "BlackRoad OS components removed. Application data in ${TARGET_DIR} retained."
