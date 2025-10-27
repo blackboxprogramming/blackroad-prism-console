@@ -1,4 +1,4 @@
-Codex Prompt — Phase 24 (offline Customer 360, determinist health scoring, churn & expansion signals, renewal forecaster, success playbooks, QBR generator)
+Codex Prompt — Phase 24 (offline Customer 360, deterministic health scoring, churn & expansion signals, renewal forecaster, success playbooks, QBR generator)
 
 Continue in blackboxprogramming/blackroad-prism-console. Build an offline Customer 360 & Renewals layer that stays deterministic and air-gapped: unified account views, rule-based health scores, churn/expansion signals, a renewal forecaster, success playbooks, and auto-generated QBR packs.
 
@@ -7,7 +7,7 @@ Objectives (acceptance criteria)
 1) Customer 360 Model
 •New: /customer/model.py
 •Entities: Account, Contact, Subscription, UsageWindow, SupportCase, NPSResponse, Invoice.
-•Loader load_customer_360(fixtures_dir)->dict merges fixture CSV/JSON from /fixtures/customer/{accounts,subs,usage,cases,nps,invoices}.
+•Loader `load_customer_360(fixtures_dir) -> dict` merges fixture CSV/JSON from `/fixtures/customer/{accounts.csv, subs.csv, usage.csv, cases.json, nps.json, invoices.json}`.
 •Writes normalized view to /artifacts/customer/360.json with counts and integrity checks.
 •CLI:
 •c360:load --dir fixtures/customer
@@ -23,7 +23,7 @@ Objectives (acceptance criteria)
 •Commercial (payment timeliness, credits, discounts)
 •Sentiment (NPS recent, trend)
 •Weights and thresholds in configs/customer/health.yaml.
-•Output per account: {score,total,components:{...},tier:{"red","amber","green"}}.
+•Output per account: `{"score": 87, "total": 100, "components": {...}, "tier": "green"}` (tier ∈ {"red", "amber", "green"}).
 •CLI:
 •c360:health --config configs/customer/health.yaml --out artifacts/customer/health.json
 •Metrics: c360_loaded, c360_health_calc.
