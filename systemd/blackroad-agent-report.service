@@ -1,0 +1,12 @@
+[Unit]
+Description=BlackRoad mesh heartbeat reporter
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/default/blackroad-agent-report
+ExecStart=/usr/local/bin/blackroad-agent-report.sh
+
+[Install]
+WantedBy=multi-user.target

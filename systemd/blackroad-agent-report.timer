@@ -1,0 +1,11 @@
+[Unit]
+Description=Run BlackRoad heartbeat reporter every 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30s
+Unit=blackroad-agent-report.service
+
+[Install]
+WantedBy=timers.target
