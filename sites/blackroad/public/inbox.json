@@ -1,1 +1,30 @@
-{ "messages": [] }
+{
+  "updatedAt": "2025-10-27T17:10:46Z",
+  "messages": [
+    {
+      "ts": "2025-02-20T14:00:00Z",
+      "from": "ops@blackroad.io",
+      "text": "Release 2025.7 is staged. Give the green light if dashboards look good."
+    },
+    {
+      "ts": "2025-02-20T09:00:00Z",
+      "from": "ceo@blackroad.io",
+      "text": "Shoutout to the observability crew\u2014the new CI board is \ud83d\udd25."
+    },
+    {
+      "ts": "2025-02-20T04:00:00Z",
+      "from": "support@blackroad.io",
+      "text": "Two enterprise trials asked for MathLab onboarding\u2014forwarding notes."
+    },
+    {
+      "ts": "2025-02-19T23:00:00Z",
+      "from": "growth@blackroad.io",
+      "text": "Funnels are tightening. Let's push the guided tour experiment next."
+    },
+    {
+      "ts": "2025-02-19T18:00:00Z",
+      "from": "infra@blackroad.io",
+      "text": "Edge cache purged after deploy 2025-02-19. Ping if anomalies pop up."
+    }
+  ]
+}

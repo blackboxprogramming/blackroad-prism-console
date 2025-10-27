@@ -1,10 +1,97 @@
 {
-  "history": [],
-  "channels": {}
+  "updatedAt": "2025-10-27T17:10:39Z",
+  "history": [
+    {
+      "ts": "2025-02-20T16:30:00Z",
+      "channel": "edge",
+      "sha": "abc123",
+      "actor": "deploy-bot",
+      "notes": "Full publish"
+    },
+    {
+      "ts": "2025-02-20T10:30:00Z",
+      "channel": "pages",
+      "sha": "abc134",
+      "actor": "deploy-bot",
+      "notes": "Scheduled daily release"
+    },
+    {
+      "ts": "2025-02-19T16:30:00Z",
+      "channel": "pages",
+      "sha": "abc145",
+      "actor": "deploy-bot",
+      "notes": "Scheduled daily release"
+    },
+    {
+      "ts": "2025-02-19T10:30:00Z",
+      "channel": "edge",
+      "sha": "abc156",
+      "actor": "deploy-bot",
+      "notes": "Full publish"
+    },
+    {
+      "ts": "2025-02-18T16:30:00Z",
+      "channel": "pages",
+      "sha": "abc167",
+      "actor": "deploy-bot",
+      "notes": "Scheduled daily release"
+    },
+    {
+      "ts": "2025-02-18T10:30:00Z",
+      "channel": "pages",
+      "sha": "abc178",
+      "actor": "deploy-bot",
+      "notes": "Scheduled daily release"
+    },
+    {
+      "ts": "2025-02-17T16:30:00Z",
+      "channel": "edge",
+      "sha": "abc189",
+      "actor": "deploy-bot",
+      "notes": "Full publish"
+    },
+    {
+      "ts": "2025-02-17T10:30:00Z",
+      "channel": "pages",
+      "sha": "abc19a",
+      "actor": "deploy-bot",
+      "notes": "Scheduled daily release"
+    },
+    {
+      "ts": "2025-02-16T16:30:00Z",
+      "channel": "pages",
+      "sha": "abc1ab",
+      "actor": "deploy-bot",
+      "notes": "Scheduled daily release"
+    },
+    {
+      "ts": "2025-02-16T10:30:00Z",
+      "channel": "edge",
+      "sha": "abc1bc",
+      "actor": "deploy-bot",
+      "notes": "Full publish"
+    },
+    {
+      "ts": "2025-02-15T16:30:00Z",
+      "channel": "pages",
+      "sha": "abc1cd",
+      "actor": "deploy-bot",
+      "notes": "Scheduled daily release"
+    },
+    {
+      "ts": "2025-02-15T10:30:00Z",
+      "channel": "pages",
+      "sha": "abc1de",
+      "actor": "deploy-bot",
+      "notes": "Scheduled daily release"
+    }
+  ],
+  "channels": {
+    "edge": {
+      "description": "Global edge deployment via Cloudflare"
+    },
+    "pages": {
+      "description": "Incremental content deploy via Vercel"
+    }
+  }
 }
-{ "history": [], "channels": {} }
-{
-  "history": [],
-  "channels": {}
-}
-{ "history": [], "channels": {} }
