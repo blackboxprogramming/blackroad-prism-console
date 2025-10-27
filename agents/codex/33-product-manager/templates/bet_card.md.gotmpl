@@ -1,0 +1,7 @@
+# Bet: {{ .title }}  {{ .emoji }}
+Hypothesis: {{ .hypothesis }} → {{ .for_user }} → {{ .expected_outcome }}
+Guardrails: ethics {{ if .guardrails.ethics }}✅{{ else }}⚠️{{ end }} | privacy {{ if .guardrails.privacy }}✅{{ else }}⚠️{{ end }} | energy target: {{ .joules_target }}J
+Test: {{ .test.method }} | Sample: {{ .test.sample_size }} | Timebox: {{ .test.timebox_days }} days
+Success: {{ .success.metric }} ≥ {{ .success.threshold }} | Kill: {{ range $i, $c := .kill.criteria }}{{ if $i }}, {{ end }}{{ $c }}{{ end }}
+Receipts: {{ range $i, $link := .receipts }}{{ if $i }}, {{ end }}{{ $link }}{{ else }}n/a{{ end }}
+Owner: {{ .owner }} | Start: {{ .start_date }} | Status: {{ .status | upper }}

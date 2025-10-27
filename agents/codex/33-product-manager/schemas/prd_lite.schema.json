@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PRDLite",
+  "type": "object",
+  "required": [
+    "problem",
+    "users",
+    "constraints",
+    "metrics",
+    "ux_sketch",
+    "risks",
+    "ethics"
+  ],
+  "properties": {
+    "problem": {"type": "string"},
+    "users": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "constraints": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["primary", "secondary"],
+      "properties": {
+        "primary": {"type": "string"},
+        "secondary": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "ux_sketch": {"type": "string"},
+    "risks": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "ethics": {
+      "type": "object",
+      "required": ["impact", "mitigations"],
+      "properties": {
+        "impact": {"type": "string"},
+        "mitigations": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  }
+}

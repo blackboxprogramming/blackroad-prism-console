@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Bets Ledger · Codex-33</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Bets Ledger</h1>
+      <p class="subtitle">Hypotheses, guardrails, and kill criteria.</p>
+    </header>
+    <main>
+      <table>
+        <thead>
+          <tr>
+            <th>Bet</th>
+            <th>Status</th>
+            <th>Joules Target</th>
+            <th>Success Metric</th>
+            <th>Kill Criteria</th>
+          </tr>
+        </thead>
+        <tbody data-bind="bets">
+          <tr>
+            <td>
+              <strong data-bind="title"></strong>
+              <p data-bind="hypothesis"></p>
+              <p>Guardrails: <span data-bind="guardrails"></span></p>
+            </td>
+            <td data-bind="status"></td>
+            <td data-bind="joules_target"></td>
+            <td data-bind="success"></td>
+            <td>
+              <ul data-bind="kill.criteria">
+                <li data-bind="."></li>
+              </ul>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+  </body>
+</html>

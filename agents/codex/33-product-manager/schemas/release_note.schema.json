@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ReleaseNote",
+  "type": "object",
+  "required": [
+    "version",
+    "date",
+    "outcome",
+    "metrics",
+    "energy",
+    "lessons",
+    "badges",
+    "approvals"
+  ],
+  "properties": {
+    "version": {"type": "string"},
+    "date": {"type": "string", "format": "date"},
+    "outcome": {"type": "string"},
+    "metrics": {
+      "type": "object",
+      "required": ["primary"],
+      "properties": {
+        "primary": {"type": "string"},
+        "secondary": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "energy": {
+      "type": "object",
+      "required": ["joules_spent", "target"],
+      "properties": {
+        "joules_spent": {"type": "number", "minimum": 0},
+        "target": {"type": "number", "minimum": 0},
+        "scope_changes": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "lessons": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "badges": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "approvals": {
+      "type": "object",
+      "required": ["teacher", "designer", "auditor", "sentinel"],
+      "properties": {
+        "teacher": {"type": "string"},
+        "designer": {"type": "string"},
+        "auditor": {"type": "string"},
+        "sentinel": {"type": "string"}
+      }
+    }
+  }
+}

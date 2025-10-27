@@ -1,0 +1,44 @@
+# PRD · {{ .title }}
+
+## Problem
+{{ .problem }}
+
+## Users & Needs
+{{ range .users -}}
+- {{ . }}
+{{ end }}
+
+## Constraints
+{{ range .constraints -}}
+- {{ . }}
+{{ else }}
+- None stated
+{{ end }}
+
+## Metrics
+- Primary: {{ .metrics.primary }}
+{{- if .metrics.secondary }}
+- Secondary:
+{{ range .metrics.secondary -}}
+  - {{ . }}
+{{ end }}
+{{- end }}
+
+## UX Sketch
+{{ .ux_sketch }}
+
+## Risks
+{{ range .risks -}}
+- {{ . }}
+{{ else }}
+- None captured
+{{ end }}
+
+## Ethics
+- Impact: {{ .ethics.impact }}
+{{- if .ethics.mitigations }}
+- Mitigations:
+{{ range .ethics.mitigations -}}
+  - {{ . }}
+{{ end }}
+{{- end }}
