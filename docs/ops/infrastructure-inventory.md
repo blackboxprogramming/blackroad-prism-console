@@ -22,6 +22,7 @@ This quick-reference note collects the assets that keep the BlackRoad stack onli
 
 - Working Copy automation is stubbed throughout the sync scripts (`docs/github-droplet-sync.md`, `scripts/blackroad_sync.sh`). Use these to refresh iOS mirrors after confirming the WebDAV endpoint.
 - WebDAV endpoint for manual sync: `http://192.168.4.55:8080/` (Working Copy server). Record the credential location alongside your password manager entry; this repo intentionally stores only the endpoint.
+- Combined WebDAV + device check: run `./scripts/webdav_device_check.sh` to confirm the Working Copy server responds **and** that the Jetson/Pi hosts still accept SSH.
 - If the iOS mirror falls behind, update `WORKING_COPY_PATH`/`WORKING_COPY_DEVICES` per the sync guide and rerun the refresh step to pull from GitHub and redeploy to the droplet.
 
 ## Raspberry Pi network
