@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BlackRoad Mesh Dashboard</title>
+  <style>
+    body { background: #000; color: #0ff; font-family: monospace; margin: 2rem; }
+    h1 { color: #ff00ff; text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 2rem; }
+    th, td { border: 1px solid #222; padding: 8px; text-align: center; }
+    tr:nth-child(even) { background-color: #111; }
+    .ok { color: #00ff99; }
+    .hot { color: #ff4444; }
+  </style>
+  <script>
+    async function loadData() {
+      const res = await fetch('registry.json');
+      const data = await res.json();
+      const tbody = document.getElementById('mesh');
+      tbody.innerHTML = '';
+
+      data.nodes.forEach(n => {
+        const tempClass = n.metrics.cpu_temp_c > 65 ? 'hot' : 'ok';
+        tbody.innerHTML += `
+          <tr>
+            <td>${n.id}</td>
+            <td>${n.role || ''}</td>
+            <td>${n.metrics.agents_active}</td>
+            <td class="${tempClass}">${n.metrics.cpu_temp_c.toFixed(1)}°C</td>
+            <td>${n.metrics.load_avg}</td>
+            <td>${n.metrics.uptime_min}m</td>
+            <td>${n.updated}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('updated').innerText = 'Last update: ' + data.updated;
+    }
+
+    setInterval(loadData, 5000);
+    window.onload = loadData;
+  </script>
+</head>
+<body>
+  <h1>🛰️ BlackRoad Mesh Network</h1>
+  <div id="updated" style="text-align:center;">Loading...</div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Role</th>
+        <th>Agents</th>
+        <th>Temp</th>
+        <th>Load</th>
+        <th>Uptime</th>
+        <th>Updated</th>
+      </tr>
+    </thead>
+    <tbody id="mesh"></tbody>
+  </table>
+</body>
+</html>
