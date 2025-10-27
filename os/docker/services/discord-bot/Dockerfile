@@ -1,6 +1,16 @@
 FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
 WORKDIR /app
-COPY services/discord-bot/src /app
-RUN pip install --no-cache-dir discord.py
-COPY os/docker/services/discord-bot/healthcheck.py /app/healthcheck.py
-CMD ["bash","-lc","python main.py"]
+
+COPY services/discord-bot/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY services/discord-bot/src/ ./
+COPY os/docker/services/discord-bot/start.sh ./start.sh
+COPY os/docker/services/discord-bot/healthcheck.py ./healthcheck.py
+RUN chmod +x ./start.sh
+
+CMD ["./start.sh"]
