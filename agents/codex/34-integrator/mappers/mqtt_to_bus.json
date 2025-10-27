@@ -1,0 +1,20 @@
+{
+  "source": "mqtt",
+  "version": "2024.09",
+  "fields": {
+    "id": "message.id",
+    "type": "message.topic",
+    "timestamp": "message.ts"
+  },
+  "data": {
+    "topic": "message.topic",
+    "payload": "message.payload"
+  },
+  "metadata": {
+    "consent_scope": ["read:device"]
+  },
+  "defaults": {
+    "type": "telemetry",
+    "timestamp": "__NOW__"
+  }
+}

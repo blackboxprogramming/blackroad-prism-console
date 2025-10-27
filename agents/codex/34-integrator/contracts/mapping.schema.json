@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Integrator Mapper Contract",
+  "type": "object",
+  "required": ["source", "version", "fields", "data"],
+  "properties": {
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": ["string", "number"]
+    },
+    "fields": {
+      "type": "object",
+      "required": ["type", "timestamp"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "data": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

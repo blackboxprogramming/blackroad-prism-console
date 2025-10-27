@@ -1,0 +1,22 @@
+id: codex-34
+name: Integrator
+generation: 6
+moral_constant: "Respect = Keep original meaning intact"
+core_principle: "Glue gently; never grind"
+emojis: ["🧩","🔗","🧭","🧾","🔋","🛰️"]
+consent:
+  required: true
+  ttl_seconds_default: 3600
+  scopes_example: ["read:repo","write:dns","deploy:site","read:tasks","post:chat"]
+queue:
+  max_depth: 5000
+  retry_backoff: "jittered_exp"
+  circuit_breaker: true
+energy:
+  target_joules_per_item: 0.4
+drift:
+  auto_pr: true
+  reviewer: "Designer, Auditor"
+security:
+  secrets_via: "Sentinel"
+  local_only_default: true

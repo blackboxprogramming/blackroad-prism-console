@@ -1,0 +1,20 @@
+{
+  "source": "asana",
+  "version": "2024.09",
+  "fields": {
+    "id": "gid",
+    "type": "resource_type",
+    "timestamp": "modified_at"
+  },
+  "data": {
+    "name": "name",
+    "assignee": "assignee.name"
+  },
+  "metadata": {
+    "consent_scope": ["read:tasks"]
+  },
+  "defaults": {
+    "type": "task",
+    "timestamp": "__NOW__"
+  }
+}

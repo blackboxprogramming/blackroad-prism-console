@@ -1,0 +1,52 @@
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 2rem;
+  background: #0b0f1a;
+  color: #f5f9ff;
+}
+
+header {
+  margin-bottom: 2rem;
+}
+
+h1 {
+  margin: 0;
+}
+
+main {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+th {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+article {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}

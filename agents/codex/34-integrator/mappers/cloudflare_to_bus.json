@@ -1,0 +1,20 @@
+{
+  "source": "cloudflare",
+  "version": "2024.09",
+  "fields": {
+    "id": "id",
+    "type": "event_type",
+    "timestamp": "occurred_at"
+  },
+  "data": {
+    "zone": "zone.name",
+    "action": "action"
+  },
+  "metadata": {
+    "consent_scope": ["write:dns"]
+  },
+  "defaults": {
+    "type": "dns",
+    "timestamp": "__NOW__"
+  }
+}

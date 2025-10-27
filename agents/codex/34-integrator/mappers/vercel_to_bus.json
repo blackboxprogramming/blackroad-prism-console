@@ -1,0 +1,20 @@
+{
+  "source": "vercel",
+  "version": "2024.09",
+  "fields": {
+    "id": "id",
+    "type": "type",
+    "timestamp": "createdAt"
+  },
+  "data": {
+    "project": "project.name",
+    "deployment": "deployment.url"
+  },
+  "metadata": {
+    "consent_scope": ["deploy:site"]
+  },
+  "defaults": {
+    "type": "deployment",
+    "timestamp": "__NOW__"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "source": "linear",
+  "version": "2024.09",
+  "fields": {
+    "id": "id",
+    "type": "type",
+    "timestamp": "updatedAt"
+  },
+  "data": {
+    "title": "title",
+    "state": "state.name"
+  },
+  "metadata": {
+    "consent_scope": ["read:tasks"]
+  },
+  "defaults": {
+    "type": "issue",
+    "timestamp": "__NOW__"
+  }
+}
