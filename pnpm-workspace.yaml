@@ -1,4 +1,11 @@
 packages:
+  - "apps/*"
+  - "apps/prism/*"
+  - "apps/prism/apps/*"
   - "apps/docs-portal"
+  - "services/*"
+  - "packages/*"
   - "packages/runbook-*"
   - "packages/runbook-types"
+  - "lucidia/autobox/apps/*"
+  - "lucidia/autobox/packages/*"

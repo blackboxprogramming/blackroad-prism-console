@@ -89,7 +89,7 @@ export function ExecuteDrawer({ runbook }: { runbook: RunbookRecord }) {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setState({ status: "pending" });
-    const gateway = process.env.GATEWAY_BASE_URL ?? "";
+    const gateway = process.env.NEXT_PUBLIC_GATEWAY_BASE_URL ?? "";
     if (!gateway) {
       setState({ status: "error", message: "Gateway base URL is not configured." });
       return;

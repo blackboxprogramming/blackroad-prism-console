@@ -9,7 +9,7 @@ const config = {
     ignoreDuringBuilds: true
   },
   env: {
-    GATEWAY_BASE_URL: process.env.GATEWAY_BASE_URL || ""
+    NEXT_PUBLIC_GATEWAY_BASE_URL: process.env.NEXT_PUBLIC_GATEWAY_BASE_URL || ""
   }
 };
 
