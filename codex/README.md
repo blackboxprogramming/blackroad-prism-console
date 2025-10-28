@@ -66,6 +66,12 @@ extension points for future integrations.
 | 009 | The Transparency Accord | Every operation is logged, explainable, visible. |
 | 048 | The Temporal Ethics    | Decisions honor past data, present consent, and future impact. |
 | 013 | The Community Oath     | Community safety through respect, consent, and care. |
+| ID  | Title                   | Description                                     |
+| --- | ----------------------- | ----------------------------------------------- |
+| 001 | The First Principle     | Lucidia exists to protect and empower everyone. |
+| 003 | The Workflow Circle     | Work runs in visible capture → adjust loops.    |
+| 004 | The Autonomy Manifest   | Data autonomy through consent, export, and wipe. |
+| 023 | The Dialogue Doctrine   | Conversations stay clear, attributed, and consensual. |
 
 ## BlackRoad Pipeline
 
