@@ -15,6 +15,7 @@
     "format": "prettier -w .",
     "format:check": "prettier package.json tests/api_health.test.js srv/lucidia-llm/test_app.py var/www/blackroad/.prettierrc.json .prettierrc.json RUNME.sh Makefile .github/workflows/ci.yml CLEANUP_PLAN.md CLEANUP_DECISIONS.md CLEANUP_RESULTS.md ROLLBACK.md CHANGELOG.md --check --ignore-unknown",
     "test": "node tests/smoke.test.mjs && jest",
+    "test": "jest --runInBand",
     "test:smoke": "node tests/smoke.test.mjs",
     "test-db": "node tests/test_db.js",
     "test-auth": "node tests/test_auth.js",
@@ -45,6 +46,12 @@
     "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true",
     "prism:test:intel": "pnpm -C prism/server test:intel",
     "prism:test:ui": "pnpm -C prism/apps/web test"
+    "test-agents-pack": "node tests/test_agents_mega.js",
+    "dev:site": "npm --prefix sites/blackroad run dev",
+    "build": "npm --prefix sites/blackroad run build",
+    "frontend:dev": "npm --prefix sites/blackroad run dev",
+    "frontend:build": "npm --prefix sites/blackroad run build",
+    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
   },
   "engines": {
     "node": ">=18.17"
@@ -112,5 +119,6 @@
       "prettier -w"
     ],
     "*": "prettier -w --ignore-unknown"
+    "eslint": "^8.57.0"
   }
 }

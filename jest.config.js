@@ -24,4 +24,7 @@ module.exports = {
     '^@blackroad/diffusion-gateway/(.*)$': '<rootDir>/packages/diffusion-gateway/src/$1'
   },
   extensionsToTreatAsEsm: ['.ts']
+  roots: ["<rootDir>/tests"],
+  testMatch: ["<rootDir>/tests/test_integration.js"],
+  setupFiles: ["<rootDir>/tests/jest.setup.js"],
 };
