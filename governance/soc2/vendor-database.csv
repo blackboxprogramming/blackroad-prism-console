@@ -1,0 +1,7 @@
+Vendor,Purpose,Data Types,Sub-processors,Security (SOC2/ISO link),Owner,Renewal,DPA link,Risk
+AWS,Infrastructure hosting,Customer data;Logs,None,https://aws.amazon.com/compliance/programs/,"Platform Engineering",2025-07-01,https://aws.amazon.com/agreement/,High
+Okta,Identity provider,Employee data,None,https://www.okta.com/sites/default/files/2023-10/Okta-SOC3.pdf,"IT Operations",2025-03-15,https://www.okta.com/agreements/,Medium
+GitHub,Source control,Source code,None,https://github.com/security,"Head of Engineering",2025-02-28,https://docs.github.com/site-policy,"Medium"
+1Password,Secrets management,Credentials,None,https://1password.com/security/,"Head of Security",2025-06-10,https://1password.com/legal/dpa/,High
+Stripe,Billing,Payment data,None,https://stripe.com/docs/security/stripe,Finance,2025-05-05,https://stripe.com/legal/dpa,High
+Notion,Documentation,Internal docs,None,https://www.notion.so/security,Operations,2025-09-20,https://www.notion.so/Notion-DPA-Template-2f26c1524d4948308a1f9872cc2b1fdf,Medium

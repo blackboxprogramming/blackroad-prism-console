@@ -1,0 +1,37 @@
+name: vendor-renewal-reminders
+
+on:
+  schedule:
+    - cron: "0 15 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate reminders
+        id: reminders
+        run: |
+          python3 .github/scripts/vendor_reminders.py > reminders.json
+          cat reminders.json
+      - name: Send Slack notification
+        if: ${{ always() }}
+        run: |
+          MSGS=$(jq -c '.messages' reminders.json)
+          if [ "$MSGS" = "[]" ]; then
+            echo "No reminders today"
+            exit 0
+          fi
+          jq -c '.messages[]' reminders.json | while read -r item; do
+            VENDOR=$(echo "$item" | jq -r '.vendor')
+            DAYS=$(echo "$item" | jq -r '.days')
+            OWNER=$(echo "$item" | jq -r '.owner')
+            RISK=$(echo "$item" | jq -r '.risk')
+            DPA=$(echo "$item" | jq -r '.dpa')
+            SECURITY=$(echo "$item" | jq -r '.security')
+            TEXT="Vendor reminder: ${VENDOR} renews in ${DAYS} days (risk: ${RISK}). Owner: ${OWNER}. DPA: ${DPA} Security: ${SECURITY}"
+            curl -X POST -H 'Content-type: application/json' --data "{\"text\": \"$TEXT\"}" "$SLACK_WEBHOOK_URL"
+          done
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
