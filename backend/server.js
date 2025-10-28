@@ -164,6 +164,24 @@ const app = http.createServer(async (req, res) => {
 
   if (req.method === 'POST' && url.pathname === '/api/tasks') {
     if (!ensureAuth(req, res)) return;
+
+const app = http.createServer(async (req, res) => {
+  if (req.method === 'POST' && req.url === '/api/auth/login') {
+    try {
+      const body = await parseBody(req);
+      if (body.username === VALID_USER.username && body.password === VALID_USER.password) {
+        return send(res, 200, { token: VALID_USER.token });
+      }
+      return send(res, 401, { error: 'invalid credentials' });
+    } catch {
+      return send(res, 400, { error: 'invalid json' });
+    }
+  }
+
+  if (req.method === 'POST' && req.url === '/api/tasks') {
+    if (req.headers.authorization !== `Bearer ${VALID_USER.token}`) {
+      return send(res, 401, { error: 'unauthorized' });
+    }
     try {
       const body = await parseBody(req);
       if (typeof body.title !== 'string' || !body.title.trim()) {
@@ -420,6 +438,7 @@ const app = http.createServer(async (req, res) => {
       return send(res, 401, { error: 'unauthorized' });
     }
     return send(res, 200, { tasks });
+    }
   }
 
   // invalid JSON catch-all
