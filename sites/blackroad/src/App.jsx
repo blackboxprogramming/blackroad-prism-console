@@ -350,6 +350,7 @@ import Agents from "./pages/Agents.jsx";
 import Desktop from "./pages/Desktop.jsx";
 import Atlas from "./pages/Atlas.jsx";
 import { isAdminLikeRole } from "./lib/access.js";
+import RoadGlitch from "./pages/RoadGlitch.jsx";
 
     return () => {
       cancelled = true;
@@ -570,6 +571,7 @@ function LegacyApp({session}){
           <NavLink className="nav-link" to="/terminal">Terminal</NavLink>
           <NavLink className="nav-link" to="/roadview">RoadView</NavLink>
           <NavLink className="nav-link" to="/backroad">BackRoad</NavLink>
+          <NavLink className="nav-link" to="/roadglitch">RoadGlitch</NavLink>
           <NavLink className="nav-link" to="/agents">Agents</NavLink>
           <NavLink className="nav-link" to="/subscribe">Subscribe</NavLink>
           <NavLink className="nav-link" to="/lucidia">Lucidia</NavLink>
@@ -685,6 +687,8 @@ function LegacyApp({session}){
             <Route path="/terminal" element={<Terminal/>} />
             <Route path="/roadview" element={<RoadView/>} />
             <Route path="/backroad" element={<Backroad/>} />
+            <Route path="/backroad" element={<BackRoad/>} />
+            <Route path="/roadglitch" element={<RoadGlitch/>} />
             <Route path="/agents" element={<Agents/>} />
             <Route path="/subscribe" element={<Subscribe/>} />
             <Route path="/lucidia" element={<Lucidia/>} />
@@ -715,6 +719,8 @@ function LegacyApp({session}){
             <Route path="terminal" element={<Terminal/>} />
             <Route path="roadview" element={<RoadView/>} />
             <Route path="backroad" element={<Backroad/>} />
+            <Route path="backroad" element={<BackRoad/>} />
+            <Route path="roadglitch" element={<RoadGlitch/>} />
             <Route path="subscribe" element={<Subscribe/>} />
             <Route path="lucidia" element={<Lucidia/>} />
             <Route path="atlas" element={atlasElement} />
