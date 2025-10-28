@@ -1,4 +1,14 @@
 """Post comments to GitHub issues and pull requests."""
+"""Post comments to GitHub issues and pull requests.
+
+This module provides a small helper class that uses the GitHub REST API to
+create issue or pull request comments. If a token is not supplied explicitly,
+the ``GITHUB_TOKEN`` environment variable is used.
+
+Example:
+    >>> bot = CommentBot(repo="octocat/hello-world")
+    >>> bot.comment(issue_number=1, body="Hello from CommentBot!")
+"""
 
 from __future__ import annotations
 

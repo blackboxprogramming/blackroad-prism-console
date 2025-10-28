@@ -27,11 +27,13 @@
     "gray-matter": "^4.0.3",
     "marked": "^10.0.0"
     "ollama-ai-provider-v2": "latest"
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "autoprefixer": "10.4.16",
-    "eslint": "9.9.0",
+    "eslint": "8.57.0",
     "eslint-config-next": "14.2.3",
+    "eslint-config-prettier": "9.1.0",
     "postcss": "8.4.31",
     "prettier": "3.3.3",
     "tailwindcss": "3.4.1",
