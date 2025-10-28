@@ -11,6 +11,11 @@ domains:
 infrastructure:
   cloud: aws
   region: us-west-2
+  availability_zones:
+    - us-west-2a
+    - us-west-2b
+  network:
+    vpc_cidr: 10.30.0.0/16
   terraform:
     root: br-infra-iac/envs/stg
     backend:
@@ -23,6 +28,10 @@ infrastructure:
       - modules/ecs-cluster
       - modules/ecr
       - modules/rds-postgres
+    variables:
+      rds_instance_class: db.t4g.small
+      rds_multi_az: false
+      rds_backup_retention_days: 14
     outputs:
       - vpc_id
       - private_subnets
@@ -75,6 +84,8 @@ automation:
         Optional load test that reuses the stage artifact to simulate user
         traffic before promoting a build downstream. Defaults to a no-op unless
         the STRESS input is set to "true".
+  notifications:
+    slack_channel: "#eng"
 deployments:
   - service: marketing-site
     type: static-site
@@ -95,10 +106,18 @@ deployments:
       key: stg/terraform.tfstate
       region: us-west-2
       lock_table: br-terraform-lock
+    module: modules/ecs-service-alb
     state: planned
     notes: >-
       Network, ECS, and RDS resources are defined; service wiring will follow the
       production module once ready.
+    image_repository: br-api-gateway
+    scaling:
+      desired_count: 1
+      min_capacity: 1
+      max_capacity: 2
+    environment:
+      NODE_ENV: staging
 change_management:
   approvals:
     - .github/workflows/change-approve.yml
@@ -230,3 +249,5 @@ checks:
   - npm run test:smoke -- --baseUrl=https://staging.blackroad.io
 notifications:
   slack_channel: "#deployments"
+  commands:
+    - aws ecs describe-services --cluster <cluster-arn> --services api-gateway --region us-west-2

@@ -8,6 +8,9 @@ Bridge runs on :4000; nginx routes `/api` and `/ws`. Static web artifacts publis
 | Preview (`pr`) | `https://dev.blackroad.io`, `https://pr-<n>.dev.blackroad.io` | `.github/workflows/preview.yml`, `.github/workflows/preview-containers.yml` | Spins up ephemeral ECS services + ALB rules per pull request and publishes GHCR preview images with SBOM + Grype reports. Terraform config lives in `infra/preview-env/`; see `environments/preview.yml` for the full manifest. |
 | Staging (`stg`) | `https://stage.blackroad.io` | `.github/workflows/pages-stage.yml` | Builds and archives the static site proof artifact. API wiring is planned; see `environments/staging.yml` for current status. |
 | Production (`prod`) | `https://blackroad.io`, `https://www.blackroad.io`, `https://api.blackroad.io` | `.github/workflows/blackroad-deploy.yml` | GitHub Pages publishes the marketing site; API gateway will promote via the same workflow once the ECS module is enabled. Full manifest: `environments/production.yml`. |
+| Preview (`pr`) | `https://dev.blackroad.io`, `https://pr-<n>.dev.blackroad.io` | `.github/workflows/preview.yml` | Spins up ephemeral ECS services + ALB rules per pull request. Terraform config lives in `infra/preview-env/` and the manifest is documented in `environments/preview.yml`. |
+| Staging (`stg`) | `https://stage.blackroad.io` | `.github/workflows/pages-stage.yml` | Builds and archives the static site proof artifact. AWS scaffolding (VPC `10.30.0.0/16`, `us-west-2a/2b`, single-task ECS scaling) is defined and ready for the API promotion path in `modules/ecs-service-alb`. See `environments/staging.yml` for the manifest. |
+| Production (`prod`) | `https://blackroad.io`, `https://www.blackroad.io`, `https://api.blackroad.io` | `.github/workflows/blackroad-deploy.yml` | GitHub Pages publishes the marketing site; the same workflow drives the webhook-based deploy and exposes a `workflow_dispatch` escape hatch (`target=legacy-ssh`) for the SSH fallback. Full manifest: `environments/production.yml`. |
 
 Reference the manifests whenever DNS, workflow, or Terraform parameters change so automation and runbooks stay aligned.
 
@@ -34,11 +37,13 @@ checks fail. Keep both runbooks handy during CAB reviews.
   **Stage Stress** workflow before promoting a build; it replays the generated
   artifact under controlled load.
 - Use the artifact for QA sign-off or handoff to downstream deploy automation.
+- AWS networking, RDS, and ECS cluster scaffolding already exist via `br-infra-iac/envs/stg`. When ready to promote the API, reuse `modules/ecs-service-alb` with `desired_count=1` and the staging ECR repository `br-api-gateway`.
 
 ### Production
 - `blackroad-deploy.yml` runs on every `main` push and exposes a `workflow_dispatch` entry for manual redeploys.
 - Builds the SPA, triggers the deploy webhook (`BR_DEPLOY_SECRET` / `BR_DEPLOY_URL`), then lets downstream infra promote the build.
 - API and NGINX remain accessible over SSH while we finish migrating to ECS; scripts live under `scripts/` for TLS + health.
+- The same workflow exposes `target=legacy-ssh` to package artifacts and ship them to the legacy hosts when required.
 
 ## Rollback and forward
 
@@ -65,6 +70,7 @@ Document every rollback/forward action in the incident log and update the corres
   scripts/nginx-ensure-and-health.sh
   scripts/nginx-enable-tls.sh   # optional TLS helper
   ```
+- ECS checks: `aws ecs describe-services --cluster <cluster-arn> --services api-gateway --region us-west-2`
 - Cleanup broom: `usr/local/sbin/br-cleanup.sh` audits API, Yjs, bridges, nginx, IPFS, etc. Modes:
   ```sh
   sudo br-cleanup.sh audit | tee /srv/ops/cleanup-audit.txt

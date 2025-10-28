@@ -17,6 +17,11 @@ domains:
 infrastructure:
   cloud: aws
   region: us-west-2
+  availability_zones:
+    - us-west-2a
+    - us-west-2b
+  network:
+    vpc_cidr: 10.40.0.0/16
   terraform:
     root: br-infra-iac/envs/prod
     backend:
@@ -29,6 +34,10 @@ infrastructure:
       - modules/ecs-cluster
       - modules/ecr
       - modules/rds-postgres
+    variables:
+      rds_instance_class: db.t4g.medium
+      rds_multi_az: true
+      rds_backup_retention_days: 30
     outputs:
       - ecs_cluster
       - private_subnets
@@ -129,6 +138,20 @@ automation:
         - optional HEALTH_ENDPOINTS list
         - ROLLBACK_STRATEGY
         - ROLLBACK_REF
+    - name: BlackRoad • Deploy (legacy SSH fallback)
+      file: .github/workflows/blackroad-deploy.yml
+      triggers:
+        - workflow_dispatch (target=legacy-ssh)
+      summary: >-
+        Provides a manual escape hatch that packages site and API bundles,
+        ships them over SSH, and restarts the legacy hosts while verifying
+        health endpoints.
+      secrets:
+        - DEPLOY_HOST
+        - DEPLOY_USER
+        - DEPLOY_KEY
+  notifications:
+    slack_channel: "#eng"
 deployments:
   - service: marketing-site
     type: static-site
@@ -155,6 +178,13 @@ deployments:
       behind an ALB-backed Fargate service.
     health_check: https://api.blackroad.io/health
     workflow: .github/workflows/blackroad-deploy.yml
+    image_repository: br-api-gateway
+    scaling:
+      desired_count: 2
+      min_capacity: 2
+      max_capacity: 6
+    environment:
+      NODE_ENV: production
 change_management:
   approvals:
     - .github/workflows/change-approve.yml
@@ -293,3 +323,5 @@ description: >-
   Primary customer-facing deployment managed by the CI & Deploy to Droplet workflow.
 workflows:
   - .github/workflows/deploy.yml
+  commands:
+    - aws ecs describe-services --cluster <cluster-arn> --services api-gateway --region us-west-2
