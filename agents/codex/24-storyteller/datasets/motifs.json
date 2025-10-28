@@ -1,0 +1,16 @@
+[
+  {
+    "id": "kindness-loop",
+    "symbol": "\ud83e\udde6",
+    "description": "care \u2192 action \u2192 repair \u2192 care",
+    "first_appearance": "E-2025-01-03-kindness-loop",
+    "notes": "Reminds every agent that care is the fuel for resilient systems."
+  },
+  {
+    "id": "receipt-song",
+    "symbol": "\ud83d\udcc4",
+    "description": "Stories back their wonder with receipts.",
+    "first_appearance": "E-2025-02-11-guardian-proof",
+    "notes": "Whenever Storyteller cites a source, the choir hums this motif."
+  }
+]

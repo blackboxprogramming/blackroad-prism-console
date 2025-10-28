@@ -61,6 +61,8 @@ benchmarks/
 # Lucidia artifacts
 secrets/*
 datasets/
+!agents/codex/24-storyteller/datasets/
+!agents/codex/24-storyteller/datasets/*.json
 models/
 !br-dbt/models/
 !br-dbt/models/**
