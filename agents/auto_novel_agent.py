@@ -1,5 +1,6 @@
 """Simple auto novel agent example with creative and coding abilities."""
 
+<<<<<<< main
 from __future__ import annotations
 
 import re
@@ -8,6 +9,9 @@ from typing import ClassVar, Iterable
 
 DEFAULT_SUPPORTED_ENGINES: tuple[str, ...] = ("unity", "unreal")
 from dataclasses import dataclass, field
+=======
+from dataclasses import dataclass
+>>>>>>> origin/codex/complete-next-project-step-0o96zy
 from typing import ClassVar
 
 
@@ -152,6 +156,7 @@ class AutoNovelAgent:
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
 
+<<<<<<< main
         message = self._build_creation_message(normalized)
         print(message)
         return message
@@ -173,6 +178,9 @@ class AutoNovelAgent:
             f"{normalized.capitalize()} where creativity reigns."
         )
     def list_supported_engines(self) -> List[str]:
+=======
+    def list_supported_engines(self) -> list[str]:
+>>>>>>> origin/codex/complete-next-project-step-0o96zy
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
