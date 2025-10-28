@@ -325,6 +325,8 @@ function useApiHealth() {
             info = "";
           }
         }
+import RandomMatrixLab from "./pages/RandomMatrixLab.jsx";
+import TdaMiniLab from "./pages/TdaMiniLab.jsx";
 
         return { ok, info };
       } catch {
@@ -654,6 +656,10 @@ function LegacyApp() {
               <Route path="/brushfire" element={<BrushfirePathLab/>} />
               <Route path="chat" element={<Chat/>} />
               <Route path="canvas" element={<Canvas/>} />
+            <Route path="/spectral" element={<RandomMatrixLab/>} />
+            <Route path="/tda" element={<TdaMiniLab/>} />
+            <Route path="chat" element={<Chat/>} />
+            <Route path="canvas" element={<Canvas/>} />
             <Route path="editor" element={<Editor/>} />
             <Route path="terminal" element={<Terminal/>} />
             <Route path="roadview" element={<RoadView/>} />
@@ -680,6 +686,8 @@ function LegacyApp() {
             <Route path="kalman" element={<Kalman1DLab />} />
             <Route path="pagerank" element={<PageRankLab />} />
             <Route path="newton" element={<NewtonFractalLab />} />
+            <Route path="spectral" element={<RandomMatrixLab/>} />
+            <Route path="tda" element={<TdaMiniLab/>} />
             <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
