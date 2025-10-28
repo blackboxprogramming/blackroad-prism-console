@@ -343,6 +343,10 @@ import TdaMiniLab from "./pages/TdaMiniLab.jsx";
         setState(result);
       }
     })();
+import Lucidia from "./pages/Lucidia.jsx";
+import InfinityMath from "./pages/InfinityMath.jsx";
+import Agents from "./pages/Agents.jsx";
+import Desktop from "./pages/Desktop.jsx";
 
     return () => {
       cancelled = true;
