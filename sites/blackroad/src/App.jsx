@@ -369,6 +369,24 @@ import JuliaFamilyLab from './pages/JuliaFamilyLab.jsx';
 import LorenzLab from './pages/LorenzLab.jsx';
 import GrayScottLab from './pages/GrayScottLab.jsx';
 
+import { NavLink, Routes, Route } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import Chat from './pages/Chat.jsx';
+import Canvas from './pages/Canvas.jsx';
+import Editor from './pages/Editor.jsx';
+import Terminal from './pages/Terminal.jsx';
+import RoadView from './pages/RoadView.jsx';
+import Backroad from './pages/Backroad.jsx';
+import Subscribe from './pages/Subscribe.jsx';
+import Lucidia from './pages/Lucidia.jsx';
+import InfinityMath from './pages/InfinityMath.jsx';
+import Agents from './pages/Agents.jsx';
+import Desktop from './pages/Desktop.jsx';
+import QuantumConsciousness from './pages/QuantumConsciousness.jsx';
+import Kalman1DLab from './pages/Kalman1DLab.jsx';
+import PageRankLab from './pages/PageRankLab.jsx';
+import NewtonFractalLab from './pages/NewtonFractalLab.jsx';
+
 function useApiHealth() {
   const [state, setState] = useState({ ok: null, info: '' });
   useEffect(() => {
@@ -588,6 +606,9 @@ function LegacyApp() {
             <Route path="/julia" element={<JuliaFamilyLab />} />
             <Route path="/lorenz" element={<LorenzLab />} />
             <Route path="/rd" element={<GrayScottLab />} />
+            <Route path="/kalman" element={<Kalman1DLab />} />
+            <Route path="/pagerank" element={<PageRankLab />} />
+            <Route path="/newton" element={<NewtonFractalLab />} />
             <Route path="chat" element={<Chat />} />
             <Route path="canvas" element={<Canvas />} />
             <Route path="editor" element={<Editor />} />
@@ -656,6 +677,10 @@ function LegacyApp() {
               <Route path="kpca" element={<KernelPCALab/>} />
               <Route path="brushfire" element={<BrushfirePathLab/>} />
               <Route path="*" element={<div>Not found</div>} />
+            <Route path="kalman" element={<Kalman1DLab />} />
+            <Route path="pagerank" element={<PageRankLab />} />
+            <Route path="newton" element={<NewtonFractalLab />} />
+            <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
       </main>
