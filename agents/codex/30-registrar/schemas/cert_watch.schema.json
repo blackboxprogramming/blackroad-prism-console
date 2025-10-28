@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blackroad.io/schemas/codex30/cert_watch.json",
+  "title": "Codex-30 Certificate Watch",
+  "type": "object",
+  "required": ["domain", "expires_on", "fingerprint"],
+  "additionalProperties": false,
+  "properties": {
+    "domain": {"type": "string", "pattern": "^[A-Za-z0-9.-]+$"},
+    "expires_on": {"type": "string", "format": "date"},
+    "fingerprint": {"type": "string", "pattern": "^[A-F0-9:]{47,95}$"},
+    "renewed_at": {"type": "string", "format": "date-time"},
+    "receipt": {
+      "type": "object",
+      "required": ["topic", "reference", "hash", "issued_at"],
+      "additionalProperties": false,
+      "properties": {
+        "topic": {"type": "string"},
+        "reference": {"type": "string"},
+        "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "issued_at": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

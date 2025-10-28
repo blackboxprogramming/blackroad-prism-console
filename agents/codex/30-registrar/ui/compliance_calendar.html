@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Registrar :: Compliance Calendar</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="panel">
+    <header>
+      <h1>🗓️ Compliance Calendar</h1>
+      <p class="subtitle">Soft reminders first, hard stops second.</p>
+    </header>
+    <section>
+      <h2>Upcoming Deadlines</h2>
+      <ul id="deadlines"></ul>
+    </section>
+    <footer>
+      <small>Receipts: every event links back to filing packets and encrypted contacts.</small>
+    </footer>
+    <script type="module">
+      const ICS_ENDPOINT = '../pipelines/calendar.ics';
+      async function loadCalendar() {
+        const res = await fetch(ICS_ENDPOINT).catch(() => null);
+        const list = document.querySelector('#deadlines');
+        if (!res || !res.ok) {
+          list.innerHTML = '<li class="hint">ICS feed not yet generated.</li>';
+          return;
+        }
+        const text = await res.text();
+        list.innerHTML = `<li><pre>${text}</pre></li>`;
+      }
+      loadCalendar();
+    </script>
+  </body>
+</html>

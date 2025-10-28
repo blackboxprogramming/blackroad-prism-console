@@ -1,0 +1,31 @@
+entities:
+  - id: ent-001
+    legal_name: BlackRoad Advisors LLC
+    type: RIA
+    jurisdiction: DE
+    formation_date: 2020-01-02
+    officer:
+      name: Alex Mercer
+      email: alex.mercer@example.com
+      phone: "+1-555-0100"
+      ssn: "111-22-3333"
+      dob: 1985-09-12
+      home_address: 123 Market St, Wilmington, DE 19801
+    registered_agent: Agent Smith LLC
+    address: 100 Riverfront Dr, Wilmington, DE 19801
+    calendar_overrides:
+      reminders: ["-21d", "-7d", "-1d"]
+  - id: ent-002
+    legal_name: BlackRoad Ventures Inc
+    type: C-Corp
+    jurisdiction: MN
+    formation_date: 2018-05-11
+    officer:
+      name: Taylor Singh
+      email: taylor.singh@example.com
+      phone: "+1-555-0101"
+      ssn: "222-33-4444"
+      dob: 1983-02-04
+      home_address: 55 Marquette Ave, Minneapolis, MN 55402
+    registered_agent: North Star Agents LLC
+    address: 55 Marquette Ave, Minneapolis, MN 55402

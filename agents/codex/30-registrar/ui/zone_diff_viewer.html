@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Registrar :: Zone Diff Viewer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="panel">
+    <header>
+      <h1>🛰️ DNS Diff Viewer</h1>
+      <p class="subtitle">No silent changes. Every diff earns a receipt.</p>
+    </header>
+    <section>
+      <textarea id="current" placeholder="Current zone JSON"></textarea>
+      <textarea id="desired" placeholder="Desired zone JSON"></textarea>
+      <button id="diff">Diff Zones</button>
+      <pre id="output" class="output"></pre>
+    </section>
+    <script type="module">
+      import { diffZone } from '../web/diff-zone.js';
+      document.querySelector('#diff').addEventListener('click', () => {
+        const current = document.querySelector('#current').value;
+        const desired = document.querySelector('#desired').value;
+        try {
+          const result = diffZone(JSON.parse(current || '{"records": []}'), JSON.parse(desired || '{"records": []}'));
+          document.querySelector('#output').textContent = JSON.stringify(result, null, 2);
+        } catch (err) {
+          document.querySelector('#output').textContent = err.message;
+        }
+      });
+    </script>
+  </body>
+</html>

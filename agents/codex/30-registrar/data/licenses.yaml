@@ -1,0 +1,34 @@
+licenses:
+  - id: lic-adv-de-001
+    entity_id: ent-001
+    jurisdiction: DE
+    license_type: RIA
+    renewal_cycle: annual
+    renewal_due: 2025-03-01
+    requirements:
+      - Pay franchise tax
+      - Submit annual report
+    fee: 225.00
+    currency: USD
+  - id: lic-adv-sec-001
+    entity_id: ent-001
+    jurisdiction: SEC
+    license_type: ADV
+    renewal_cycle: annual
+    renewal_due: 2025-03-31
+    requirements:
+      - Update Form ADV Part 1
+      - Deliver privacy notice
+    fee: 150.00
+    currency: USD
+  - id: lic-ventures-mn-001
+    entity_id: ent-002
+    jurisdiction: MN
+    license_type: Foreign Corp
+    renewal_cycle: annual
+    renewal_due: 2025-12-31
+    requirements:
+      - File annual renewal
+      - Confirm registered agent
+    fee: 155.00
+    currency: USD
