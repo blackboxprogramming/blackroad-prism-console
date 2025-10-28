@@ -237,3 +237,32 @@ child:
 >	@test -n "$(P2)" || (echo "P2=<parentB> is required" >&2 && exit 1)
 >	@test -n "$(CHILD)" || (echo "CHILD=<child_name> is required" >&2 && exit 1)
 >	python prism/reproduction/reproduce.py --consent $(CONSENT) --operator $(OPERATOR) --parent-a $(P1) --parent-b $(P2) --child $(CHILD)
+.RECIPEPREFIX = >
+.PHONY: install dev start format lint test health migrate clean
+
+install:
+>npm install
+
+dev:
+>npm run dev
+
+start:
+>npm start
+
+format:
+>npm run format
+
+lint:
+>npm run lint
+
+test:
+>npm test
+
+health:
+>npm run health
+
+migrate:
+>@echo "no migrations"
+
+clean:
+>rm -rf node_modules coverage

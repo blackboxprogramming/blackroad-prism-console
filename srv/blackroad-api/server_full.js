@@ -1,4 +1,5 @@
 <!-- FILE: /srv/blackroad-api/server_full.js -->
+// FILE: srv/blackroad-api/server_full.js
 /* BlackRoad API — Express + SQLite + Socket.IO + LLM bridge
    Runs behind Nginx on port 4000 with cookie-session auth.
    Env:
@@ -19,6 +20,10 @@ const express = require('express');
 let compression;
 try { compression = require('compression'); } catch { compression = () => (req,res,next)=>next(); }
 const morgan = require('morgan');
+const fs = require('fs');
+require('dotenv').config();
+
+const express = require('express');
 const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -82,6 +87,10 @@ const MATH_ENGINE_URL = process.env.MATH_ENGINE_URL || '';
 const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
+const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
+const BILLING_DISABLE =
+  String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
+const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
 const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
 const BRANCH_MAIN = process.env.BRANCH_MAIN || 'main';
 const BRANCH_STAGING = process.env.BRANCH_STAGING || 'staging';
@@ -116,6 +125,9 @@ const PRISM_PLACEHOLDER = {
     churnRate: 1.8,
   },
 };
+const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
+  ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
+  : [];
 
 ['SESSION_SECRET', 'INTERNAL_TOKEN', 'ALLOW_ORIGINS'].forEach((name) => {
   if (!process.env[name]) {
@@ -275,7 +287,14 @@ let jobSeq = 0;
 
 function addJob(type, payload, runner) {
   const id = String(++jobSeq);
-  const job = { id, type, payload, status: 'queued', created: Date.now(), logs: [] };
+  const job = {
+    id,
+    type,
+    payload,
+    status: 'queued',
+    created: Date.now(),
+    logs: [],
+  };
   jobs.set(id, job);
   process.nextTick(async () => {
     job.status = 'running';
@@ -329,7 +348,13 @@ app.use((req, res, next) => {
   req.id = id;
   const start = Date.now();
   res.on('finish', () => {
-    logger.info({ id, method: req.method, path: req.originalUrl, status: res.statusCode, duration: Date.now() - start });
+    logger.info({
+      id,
+      method: req.method,
+      path: req.originalUrl,
+      status: res.statusCode,
+      duration: Date.now() - start,
+    });
   });
   next();
 });
@@ -373,6 +398,7 @@ app.use(async (req, res, next) => {
   next();
 });
 app.use(compression());
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(morgan('tiny'));
@@ -500,6 +526,7 @@ app.post(
     ) {
     if ((username === 'root' && password === 'Codex2025') || process.env.BYPASS_LOGIN === 'true') {
       req.session.user = { username, role: 'dev', plan: 'free' };
+      req.session.user = { username, role: 'dev' };
       return res.json({ ok: true, user: req.session.user });
     }
     return res.status(401).json({ error: 'invalid_credentials' });
@@ -524,7 +551,7 @@ app.get('/api/billing/plans', (req, res) => {
       monthly,
       annual,
       features,
-    }))
+    })),
   );
 });
 
@@ -562,7 +589,7 @@ app.post('/api/billing/webhook', (req, res) => {
     event = stripeClient.webhooks.constructEvent(
       JSON.stringify(req.body),
       sig,
-      STRIPE_WEBHOOK_SECRET
+      STRIPE_WEBHOOK_SECRET,
     );
   } catch (e) {
     logger.error({ event: 'stripe_webhook_verify_failed', err: e });
@@ -591,6 +618,7 @@ for (const t of TABLES) {
       meta JSON
     )
   `
+  `,
   ).run();
 }
 
@@ -612,6 +640,10 @@ db.prepare(
   `
 `).run();
 db.prepare(`
+`,
+).run();
+db.prepare(
+  `
   CREATE TABLE IF NOT EXISTS subscriptions (
     id TEXT PRIMARY KEY,
     subscriber_id TEXT,
@@ -629,6 +661,10 @@ db.prepare(
   `
 `).run();
 db.prepare(`
+`,
+).run();
+db.prepare(
+  `
   CREATE TABLE IF NOT EXISTS payments (
     id TEXT PRIMARY KEY,
     subscription_id TEXT,
@@ -645,6 +681,10 @@ db.prepare(
   `
 `).run();
 db.prepare(`
+`,
+).run();
+db.prepare(
+  `
   CREATE TABLE IF NOT EXISTS logs_connectors (
     id TEXT PRIMARY KEY,
     subscriber_id TEXT,
@@ -661,9 +701,12 @@ db.prepare(`
 db.prepare(
   `
 `).run();
+`,
+).run();
 
 // Billing tables (minimal subset)
-db.prepare(`
+db.prepare(
+  `
   CREATE TABLE IF NOT EXISTS plans (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -675,6 +718,8 @@ db.prepare(`
 `
 ).run();
 `).run();
+`,
+).run();
 
 // Seed default plans if table empty
 const planCount = db.prepare('SELECT COUNT(*) as c FROM plans').get().c;
@@ -717,7 +762,9 @@ if (planCount === 0) {
     { id: 'pro', name: 'Pro', monthly: 4000, yearly: 40000, features: ['All builder features', 'Priority support'] },
     { id: 'enterprise', name: 'Enterprise', monthly: 0, yearly: 0, features: ['Custom pricing', 'Dedicated support'] },
   ];
-  const stmt = db.prepare('INSERT INTO plans (id, name, monthly_price_cents, yearly_price_cents, features, is_active) VALUES (?, ?, ?, ?, ?, 1)');
+  const stmt = db.prepare(
+    'INSERT INTO plans (id, name, monthly_price_cents, yearly_price_cents, features, is_active) VALUES (?, ?, ?, ?, ?, 1)',
+  );
   for (const p of defaultPlans) {
     stmt.run(p.id, p.name, p.monthly, p.yearly, JSON.stringify(p.features));
   }
@@ -775,12 +822,14 @@ function listRows(t) {
   return db
     .prepare(
       `SELECT id, name, updated_at, meta FROM ${t} ORDER BY datetime(updated_at) DESC`
+      `SELECT id, name, updated_at, meta FROM ${t} ORDER BY datetime(updated_at) DESC`,
     )
     .all();
 }
 function createRow(t, name, meta = null) {
   const stmt = db.prepare(
     `INSERT INTO ${t} (name, updated_at, meta) VALUES (?, datetime('now'), ?)`
+    `INSERT INTO ${t} (name, updated_at, meta) VALUES (?, datetime('now'), ?)`,
   );
   const info = stmt.run(name, meta ? JSON.stringify(meta) : null);
   return info.lastInsertRowid;
@@ -788,6 +837,7 @@ function createRow(t, name, meta = null) {
 function updateRow(t, id, name, meta = null) {
   const stmt = db.prepare(
     `UPDATE ${t} SET name = COALESCE(?, name), meta = COALESCE(?, meta), updated_at = datetime('now') WHERE id = ?`
+    `UPDATE ${t} SET name = COALESCE(?, name), meta = COALESCE(?, meta), updated_at = datetime('now') WHERE id = ?`,
   );
   stmt.run(name ?? null, meta ? JSON.stringify(meta) : null, id);
 }
@@ -1013,10 +1063,18 @@ const VALID_PLANS = ['free', 'builder', 'guardian'];
 const VALID_CYCLES = ['monthly', 'annual'];
 
 app.get('/api/connectors/status', (req, res) => {
-  const stripe = !!(process.env.STRIPE_PUBLIC_KEY && process.env.STRIPE_SECRET && process.env.STRIPE_WEBHOOK_SECRET);
+  const stripe = !!(
+    process.env.STRIPE_PUBLIC_KEY &&
+    process.env.STRIPE_SECRET &&
+    process.env.STRIPE_WEBHOOK_SECRET
+  );
   const mail = !!process.env.MAIL_PROVIDER;
-  const sheets = !!(process.env.GSHEETS_SA_JSON || process.env.SHEETS_CONNECTOR_TOKEN);
-  const calendar = !!(process.env.GOOGLE_CALENDAR_CREDENTIALS || process.env.ICS_URL);
+  const sheets = !!(
+    process.env.GSHEETS_SA_JSON || process.env.SHEETS_CONNECTOR_TOKEN
+  );
+  const calendar = !!(
+    process.env.GOOGLE_CALENDAR_CREDENTIALS || process.env.ICS_URL
+  );
   const discord = !!process.env.DISCORD_INVITE;
   const webhooks = stripe; // placeholder
   res.json({ stripe, mail, sheets, calendar, discord, webhooks });
@@ -1024,7 +1082,13 @@ app.get('/api/connectors/status', (req, res) => {
 
 // Basic health endpoint exposing provider mode
 app.get('/api/subscribe/health', (_req, res) => {
-  const mode = process.env.SUBSCRIBE_MODE || (process.env.STRIPE_SECRET ? 'stripe' : process.env.GUMROAD_TOKEN ? 'gumroad' : 'local');
+  const mode =
+    process.env.SUBSCRIBE_MODE ||
+    (process.env.STRIPE_SECRET
+      ? 'stripe'
+      : process.env.GUMROAD_TOKEN
+        ? 'gumroad'
+        : 'local');
   let providerReady = false;
   if (mode === 'stripe') providerReady = !!process.env.STRIPE_SECRET;
   else if (mode === 'gumroad') providerReady = !!process.env.GUMROAD_TOKEN;
@@ -1052,28 +1116,42 @@ app.post('/api/subscribe/invoice-intent', (req, res) => {
   let sub = db.prepare('SELECT id FROM subscribers WHERE email = ?').get(email);
   let subscriberId = sub ? sub.id : randomUUID();
   if (!sub) {
-    db.prepare('INSERT INTO subscribers (id, email, name, company, created_at, source) VALUES (?, ?, ?, ?, datetime("now"), ?)')
-      .run(subscriberId, email, name || null, company || null, 'invoice');
+    db.prepare(
+      'INSERT INTO subscribers (id, email, name, company, created_at, source) VALUES (?, ?, ?, ?, datetime("now"), ?)',
+    ).run(subscriberId, email, name || null, company || null, 'invoice');
   }
   const subscriptionId = randomUUID();
-  db.prepare('INSERT INTO subscriptions (id, subscriber_id, plan, cycle, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, datetime("now"), datetime("now"))')
-    .run(subscriptionId, subscriberId, plan, cycle, 'pending_invoice');
+  db.prepare(
+    'INSERT INTO subscriptions (id, subscriber_id, plan, cycle, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, datetime("now"), datetime("now"))',
+  ).run(subscriptionId, subscriberId, plan, cycle, 'pending_invoice');
   res.json({ ok: true, next: '/subscribe/thanks' });
 });
 
 app.get('/api/subscribe/status', (req, res) => {
   const { email } = req.query || {};
   if (!email) return res.status(400).json({ error: 'email_required' });
-  const row = db.prepare('SELECT s.plan, s.cycle, s.status FROM subscribers sub JOIN subscriptions s ON sub.id = s.subscriber_id WHERE sub.email = ? ORDER BY datetime(s.created_at) DESC LIMIT 1').get(email);
+  const row = db
+    .prepare(
+      'SELECT s.plan, s.cycle, s.status FROM subscribers sub JOIN subscriptions s ON sub.id = s.subscriber_id WHERE sub.email = ? ORDER BY datetime(s.created_at) DESC LIMIT 1',
+    )
+    .get(email);
   res.json(row || { status: 'none' });
 });
 
 // --- Billing: plans
 app.get('/api/subscribe/plans', requireAuth, (_req, res) => {
   try {
-    const rows = db.prepare('SELECT id, name, monthly_price_cents, yearly_price_cents, features, is_active FROM plans WHERE is_active = 1').all();
+    const rows = db
+      .prepare(
+        'SELECT id, name, monthly_price_cents, yearly_price_cents, features, is_active FROM plans WHERE is_active = 1',
+      )
+      .all();
     for (const r of rows) {
-      try { r.features = JSON.parse(r.features); } catch { r.features = []; }
+      try {
+        r.features = JSON.parse(r.features);
+      } catch {
+        r.features = [];
+      }
     }
     res.json(rows);
   } catch (e) {
@@ -1094,6 +1172,11 @@ app.post('/api/llm/chat', requireAuth, async (req, res) => {
       },
       { label: 'llm_chat', enabled: DEBUG_MODE, logger }
     );
+    const upstream = await fetch(LLM_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body || {}),
+    });
 
     // Stream if possible
     if (upstream.ok && upstream.body) {
@@ -1163,7 +1246,8 @@ app.post('/api/webhooks/github', async (req, res) => {
   if (event === 'ping') return res.json({ ok: true });
   if (event === 'push') {
     const branch = req.body.ref?.replace('refs/heads/', '');
-    if (!verify.branchAllowed(branch, [BRANCH_MAIN, BRANCH_STAGING])) return res.status(202).end();
+    if (!verify.branchAllowed(branch, [BRANCH_MAIN, BRANCH_STAGING]))
+      return res.status(202).end();
     const sha = req.body.after;
     const job = addJob('deploy', { branch, sha }, async (id, payload) => {
       logLine(id, 'git fetch');
@@ -1178,19 +1262,23 @@ app.post('/api/webhooks/github', async (req, res) => {
     return res.json({ ok: true, jobId: job.id });
   }
   if (event === 'pull_request') {
-    const job = addJob('ci', {}, async (id) => logLine(id, 'ci not implemented'));
+    const job = addJob('ci', {}, async (id) =>
+      logLine(id, 'ci not implemented'),
+    );
     return res.json({ ok: true, jobId: job.id });
   }
   res.json({ ok: true });
 });
 
 app.post('/api/deploy/plan', (req, res) => {
-  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN))
+    return res.status(401).end();
   res.json({ ok: true, steps: ['build', 'switch'] });
 });
 
 app.post('/api/deploy/execute', (req, res) => {
-  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN))
+    return res.status(401).end();
   const { branch = BRANCH_MAIN, sha } = req.body || {};
   const job = addJob('deploy_manual', { branch, sha }, async (id, payload) => {
     await git.fetch();
@@ -1203,7 +1291,8 @@ app.post('/api/deploy/execute', (req, res) => {
 });
 
 app.post('/api/git/sync', (req, res) => {
-  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN))
+    return res.status(401).end();
   const { branch = BRANCH_MAIN } = req.body || {};
   addJob('git_sync', { branch }, async (id, payload) => {
     await git.fetch();
@@ -1234,7 +1323,8 @@ app.get('/api/jobs/:id/log', (req, res) => {
 });
 
 app.post('/api/rollback/:releaseId', (req, res) => {
-  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN)) return res.status(401).end();
+  if (!verify.verifyToken(req.get('X-Internal-Token'), INTERNAL_TOKEN))
+    return res.status(401).end();
   const releaseId = req.params.releaseId;
   const job = addJob('rollback', { releaseId }, async (id, payload) => {
     await deploy.stageAndSwitch({ branch: 'rollback', sha: payload.releaseId });
@@ -1243,11 +1333,27 @@ app.post('/api/rollback/:releaseId', (req, res) => {
 });
 
 app.get('/api/connectors/status', async (_req, res) => {
-  const status = { slack: false, airtable: false, linear: false, salesforce: false };
-  try { if (process.env.SLACK_WEBHOOK_URL) { await notify.slack('status check'); status.slack = true; } } catch {}
-  try { if (process.env.AIRTABLE_API_KEY) status.airtable = true; } catch {}
-  try { if (process.env.LINEAR_API_KEY) status.linear = true; } catch {}
-  try { if (process.env.SF_USERNAME) status.salesforce = true; } catch {}
+  const status = {
+    slack: false,
+    airtable: false,
+    linear: false,
+    salesforce: false,
+  };
+  try {
+    if (process.env.SLACK_WEBHOOK_URL) {
+      await notify.slack('status check');
+      status.slack = true;
+    }
+  } catch {}
+  try {
+    if (process.env.AIRTABLE_API_KEY) status.airtable = true;
+  } catch {}
+  try {
+    if (process.env.LINEAR_API_KEY) status.linear = true;
+  } catch {}
+  try {
+    if (process.env.SF_USERNAME) status.salesforce = true;
+  } catch {}
   res.json(status);
 });
 
@@ -1321,6 +1427,9 @@ setInterval(() => {
     free = os.freemem();
 const metricsInterval = setInterval(() => {
   const total = os.totalmem(), free = os.freemem();
+const metricsInterval = setInterval(() => {
+  const total = os.totalmem(),
+    free = os.freemem();
   const payload = {
     t: Date.now(),
     load: os.loadavg()[0],
@@ -1337,6 +1446,17 @@ function shutdown(done) {
   return server.close(done);
 }
 
+server.on('close', () => {
+  clearInterval(metricsInterval);
+  io.close();
+  db.close();
+  for (const transport of logger.transports || []) {
+    if (typeof transport.close === 'function') {
+      transport.close();
+    }
+  }
+});
+
 // --- Start
 server.listen(PORT, () => {
   logger.info({
@@ -1347,6 +1467,9 @@ server.listen(PORT, () => {
     shell: ALLOW_SHELL,
     debug: DEBUG_MODE,
   });
+  console.log(
+    `[blackroad-api] listening on ${PORT} (db: ${DB_PATH}, llm: ${LLM_URL}, shell: ${ALLOW_SHELL})`,
+  );
 });
 
 // --- Safety

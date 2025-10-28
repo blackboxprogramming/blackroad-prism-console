@@ -1,4 +1,5 @@
 name: prism-console-ci
+name: CI
 
 on:
   workflow_call:
@@ -125,3 +126,13 @@ jobs:
           VERCEL_ORG_ID: ${{ inputs.vercel-org-id }}
           VERCEL_PROJECT_ID: ${{ inputs.vercel-project-id }}
         run: pnpm dlx vercel deploy --prebuilt
+          node-version: 20
+      - run: npm install
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm test
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install fastapi pydantic pytest httpx
+      - run: pytest srv/lucidia-llm/test_app.py

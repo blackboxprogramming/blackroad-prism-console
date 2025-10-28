@@ -29,6 +29,11 @@
     "guard:dev-mode": "node scripts/security/dev_mode_guard.js",
     "debug:scan-logs": "node scripts/guardrails/log_scan_stub.js",
     "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint srv/blackroad-api/server_full.js tests/api_health.test.js",
+    "format": "prettier . --write",
+    "format:check": "prettier package.json srv/lucidia-llm/test_app.py srv/blackroad-api/.prettierrc.json var/www/blackroad/.prettierrc.json .prettierrc.json RUNME.sh Makefile .github/workflows/ci.yml CLEANUP_PLAN.md CLEANUP_DECISIONS.md CLEANUP_RESULTS.md ROLLBACK.md CHANGELOG.md --check --ignore-unknown",
+    "test": "npx jest tests/api_health.test.js",
+    "typecheck": "echo 'no typecheck'",
     "health": "node scripts/health.js",
     "next:start": "next start",
     "next:dev": "next dev",
@@ -51,10 +56,11 @@
     "build": "npm --prefix sites/blackroad run build",
     "frontend:dev": "npm --prefix sites/blackroad run dev",
     "frontend:build": "npm --prefix sites/blackroad run build",
-    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
+    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true",
+    "format:site": "prettier var/www/blackroad --write"
   },
   "engines": {
-    "node": ">=18.17"
+    "node": ">=20"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "^3.907.0",
@@ -66,11 +72,13 @@
     "bcrypt": "^5.1.1",
     "better-sqlite3": "^9.4.3",
     "bs58": "^5.0.0",
+    "compression": "^1.7.4",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "ethers": "^6.10.0",
     "express": "^4.19.2",
+    "express-validator": "^7.2.1",
     "express-rate-limit": "^7.2.0",
     "express-validator": "^7.2.1",
     "graphql": "^16.9.0",
@@ -91,6 +99,9 @@
     "systeminformation": "^5.25.11",
     "uuid": "^9.0.1",
     "zustand": "^4.5.2"
+    "better-sqlite3": "^9.4.3",
+    "stripe": "^12.18.0",
+    "winston": "^3.13.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.12.0",
