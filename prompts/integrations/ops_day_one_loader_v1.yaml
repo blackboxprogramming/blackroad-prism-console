@@ -1,0 +1,37 @@
+# --- CODEx PROMPT ---
+id: ops_day_one_loader_v1
+name: Ops Day-One Loader
+owner: Ops
+systems_of_record: [Asana, Slack]
+triggers: [manual]
+secrets: [ASANA_TOKEN, SLACK_WEBHOOK_URL]
+risk_level: L1
+kpis: [tasks_seeded]
+# --------------------
+
+Goal
+----
+Seed the Asana HQ Ops project with the Day-One checklist and broadcast kickoff Slack messages across key channels.
+
+Inputs
+------
+- asana.project_id
+- slack.channels[]
+
+Outputs
+-------
+- Day-One tasks populated in Asana sections (Inbox → Done)
+- Slack posts to `#announcements`, `#security`, and `#products-prism`
+
+Steps
+-----
+1. Create Asana tasks from the standardized Day-One checklist, mapping each item into the correct project section and assigning owners.
+2. Avoid duplicates by checking for existing tasks with the same title and current date before creation.
+3. Post predefined Slack blocks for kickoff, security onboarding, and product briefings to the specified channels.
+4. Return a structured run log indicating tasks created, skipped, and Slack messages posted.
+
+Guardrails
+----------
+- Skip posting to channels marked private or not included in the provided list.
+- Do not include sensitive onboarding tokens or credentials in Slack messages or logs.
+- Ensure task creation failures are surfaced with actionable error messages.

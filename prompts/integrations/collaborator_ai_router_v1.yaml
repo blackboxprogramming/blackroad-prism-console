@@ -1,0 +1,40 @@
+# --- CODEx PROMPT ---
+id: collaborator_ai_router_v1
+name: Collaborator AI Router
+owner: Ops/Eng
+systems_of_record: [Slack, Asana, GitHub, Notion]
+triggers: [webhook:slack.message, manual]
+secrets: [OPENAI_API_KEY, ASANA_TOKEN]
+risk_level: L2
+kpis: [auto_routed_actions, escalation_rate]
+# --------------------
+
+Goal
+----
+Automatically classify inbound Slack queries and route them to the correct action: answer from docs, create an Asana task, open a GitHub issue, or summarize a thread to Notion.
+
+Inputs
+------
+- slack.text
+- channel
+- thread_ts
+
+Outputs
+-------
+- Slack reply or reaction acknowledging handling
+- Asana task, GitHub issue, or Notion summary depending on intent
+
+Steps
+-----
+1. Classify intent (`answer`, `task`, `issue`, `summary`) using the router model with context from recent messages.
+2. For `answer`, retrieve relevant content from `docs/prism/*` and Notion and respond with cited references in Slack.
+3. For `task`, create an Asana task with necessary context and link back to the originating Slack thread.
+4. For `issue`, open a GitHub issue using the standard template populated with Slack context and attachments.
+5. For `summary`, generate a Notion page capturing the thread and drop the link into the Slack conversation.
+6. Escalate to a human if confidence falls below the threshold or ambiguity persists.
+
+Guardrails
+----------
+- Always request clarification when intent confidence is low before taking action.
+- Block destructive or high-risk actions; only perform additive operations.
+- Store processing logs securely without copying message content to external systems unnecessarily.
