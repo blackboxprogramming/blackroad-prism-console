@@ -8,6 +8,29 @@ export default function Atlas() {
     const role = localStorage.getItem('role')
     if (role !== 'admin') nav('/')
   }, [nav])
+import { isAdminLikeRole } from '../lib/access.js'
+
+export default function Atlas({ sessionRole } = {}) {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (isAdminLikeRole(sessionRole)) {
+      return
+    }
+    ;(async () => {
+      try {
+        const res = await fetch('/api/session', { cache: 'no-store' })
+        if (!res.ok) throw new Error('session_lookup_failed')
+        const data = await res.json()
+        const role = data?.user?.role
+        if (!isAdminLikeRole(role)) {
+          navigate('/', { replace: true })
+        }
+      } catch {
+        navigate('/', { replace: true })
+      }
+    })()
+  }, [navigate, sessionRole])
 
   return (
     <div className="card">

@@ -1,3 +1,4 @@
+import { NavLink, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
 
@@ -347,6 +348,8 @@ import Lucidia from "./pages/Lucidia.jsx";
 import InfinityMath from "./pages/InfinityMath.jsx";
 import Agents from "./pages/Agents.jsx";
 import Desktop from "./pages/Desktop.jsx";
+import Atlas from "./pages/Atlas.jsx";
+import { isAdminLikeRole } from "./lib/access.js";
 
     return () => {
       cancelled = true;
@@ -468,11 +471,44 @@ export default function App() {
       <Route path="/" element={<Desktop />} />
       <Route path="/quantum-consciousness" element={<QuantumConsciousness />} />
       <Route path="/*" element={<LegacyApp />} />
+function useSessionRole(){
+  const [state,setState] = useState({ role:null, loading:true });
+  useEffect(()=>{
+    let cancelled=false;
+    (async()=>{
+      try{
+        const res = await fetch("/api/session",{cache:"no-store"});
+        if(!res.ok) throw new Error("session_lookup_failed");
+        const data = await res.json();
+        if(!cancelled) setState({ role:data?.user?.role ?? null, loading:false });
+      }catch{
+        if(!cancelled) setState({ role:null, loading:false });
+      }
+    })();
+    return ()=>{cancelled=true;};
+  },[]);
+  return state;
+}
+
+export default function App(){
+  const session = useSessionRole();
+  return (
+    <Routes>
+      <Route path="/" element={<Desktop/>} />
+      <Route path="/*" element={<LegacyApp session={session}/>} />
     </Routes>
   );
 }
 
 function LegacyApp() {
+function LegacyApp({session}){
+  const { role, loading } = session ?? { role:null, loading:true };
+  const canAccessAtlas = isAdminLikeRole(role);
+  const atlasElement = loading
+    ? <div className="p-4 text-sm opacity-80">Checking access…</div>
+    : canAccessAtlas
+      ? <Atlas sessionRole={role}/>
+      : <Navigate to="/" replace />;
   return (
     <div className="min-h-screen grid gap-4 p-4 md:grid-cols-[240px_1fr]">
       <aside className="sidebar rounded-xl bg-slate-900/60 p-4">
@@ -528,6 +564,16 @@ function LegacyApp() {
           <NavLink className="nav-link" to="/lucidia">
             Lucidia
           </NavLink>
+          <NavLink className="nav-link" to="/chat">Chat</NavLink>
+          <NavLink className="nav-link" to="/canvas">Canvas</NavLink>
+          <NavLink className="nav-link" to="/editor">Editor</NavLink>
+          <NavLink className="nav-link" to="/terminal">Terminal</NavLink>
+          <NavLink className="nav-link" to="/roadview">RoadView</NavLink>
+          <NavLink className="nav-link" to="/backroad">BackRoad</NavLink>
+          <NavLink className="nav-link" to="/agents">Agents</NavLink>
+          <NavLink className="nav-link" to="/subscribe">Subscribe</NavLink>
+          <NavLink className="nav-link" to="/lucidia">Lucidia</NavLink>
+          {canAccessAtlas && <NavLink className="nav-link" to="/atlas">Atlas</NavLink>}
           <NavLink className="nav-link" to="/math">
             <span
               style={{
@@ -642,6 +688,7 @@ function LegacyApp() {
             <Route path="/agents" element={<Agents/>} />
             <Route path="/subscribe" element={<Subscribe/>} />
             <Route path="/lucidia" element={<Lucidia/>} />
+            <Route path="/atlas" element={atlasElement} />
             <Route path="/math" element={<InfinityMath/>} />
             <Route path="/ot" element={<OptimalTransportLab/>} />
             <Route path="/bifurcate" element={<BifurcationLab/>} />
@@ -670,6 +717,7 @@ function LegacyApp() {
             <Route path="backroad" element={<Backroad/>} />
             <Route path="subscribe" element={<Subscribe/>} />
             <Route path="lucidia" element={<Lucidia/>} />
+            <Route path="atlas" element={atlasElement} />
             <Route path="math" element={<InfinityMath/>} />
             <Route path="ot" element={<OptimalTransportLab/>} />
             <Route path="bifurcate" element={<BifurcationLab/>} />
