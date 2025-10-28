@@ -608,6 +608,7 @@ echo "--- TEST REPORT (NDJSON) ---"
 4. Add Micro-Patronage once discovery feels good; keep fees boring and honest.
 5. Layer in RoadCoin Mint + Treasury with Codex CI guardrails before any public release.
 6. Wire the Native Web Engine + Genesis Studio as shared surfaces once wallets feel stable.
+5. Introduce Playful Ads only as opt-in surfaces inside creator spaces.
 
 Need starter scaffolds? Choose one to bootstrap next:
 - Minimal Identity + Handle FastAPI with the governor baked in.
