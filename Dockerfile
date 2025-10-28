@@ -1,5 +1,6 @@
 # --- base: python + node ---
 FROM mcr.microsoft.com/devcontainers/python:3.14 as base
+FROM mcr.microsoft.com/devcontainers/python:3.11 as base
 # Includes Debian, git, curl, common build tools
 
 # Node 20 (via NodeSource)
@@ -135,6 +136,22 @@ RUN apk add --no-cache \
 
 COPY package*.json ./
 RUN npm install
+
+WORKDIR /workspace
+COPY pyproject.toml ./
+RUN pip install -U pip && pip install -e . || true
+
+# --- website deps ---
+FROM base as webdeps
+COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+# Choose your PM; default to npm if lock missing
+RUN if [ -f package-lock.json ]; then npm ci; \
+    elif [ -f yarn.lock ]; then npm i -g yarn && yarn --frozen-lockfile; \
+    elif [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm i --frozen-lockfile; \
+    else npm init -y; fi
+
+# --- runtime ---
+FROM base as runtime
 COPY . .
 # Install Python test deps
 RUN pip install -U pytest jsonschema

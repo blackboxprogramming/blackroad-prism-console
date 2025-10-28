@@ -95,3 +95,21 @@ services:
 volumes:
   grafana-data:
   redis-data:
+services:
+  app:
+    build: .
+    image: blackroad/prism-console:dev
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    ports:
+      - "3000:3000"
+    command: bash -lc "npm run dev --if-present || bash"
+
+  tests:
+    build: .
+    image: blackroad/prism-console:test
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    command: bash -lc "pytest -q"

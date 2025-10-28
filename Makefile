@@ -7,6 +7,7 @@
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy mpm-core sweep
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy orchestrate
 .PHONY: setup test lint demo validate dc-up dc-test dc-shell build run deploy preview-destroy dummy genesis pysph mpm check view diag
+.PHONY: setup test lint demo validate dc-up dc-test dc-shell
 
 setup:
 >python -m venv .venv && . .venv/bin/activate && pip install -U pip pytest jsonschema ruff

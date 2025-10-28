@@ -91,8 +91,23 @@
         "[python]": {
           "editor.defaultFormatter": "ms-python.python"
         }
+  "name": "blackroad-prism-console",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspace",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
       },
       "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
         "ms-playwright.playwright"
@@ -102,13 +117,10 @@
         "GitHub.copilot-chat",
         "eamodio.gitlens",
         "ms-vscode.makefile-tools"
+        "dbaeumer.vscode-eslint"
       ]
     }
   },
-  "remoteEnv": {
-    "VITE_SITE_URL": "http://localhost:5173",
-    "VITE_TELEMETRY": "off"
-  },
-  "forwardPorts": [5173],
-  "remoteUser": "node"
+  "forwardPorts": [3000],
+  "postCreateCommand": "pip install -U pip pytest jsonschema && (npm ci || true)"
 }
