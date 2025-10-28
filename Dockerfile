@@ -178,12 +178,12 @@ LABEL org.opencontainers.image.revision="unknown" \
       sbom="/app/dist/SBOM.spdx.json"
 ENV PATH=/venv/bin:$PATH
 CMD ["python", "-m", "cli.console", "--help"]
-FROM python:3.11 as builder
+FROM python:3.14 as builder
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-FROM python:3.11-slim
+FROM python:3.14-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 WORKDIR /app
