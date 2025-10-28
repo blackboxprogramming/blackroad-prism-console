@@ -11,6 +11,8 @@ import yaml
 
 from orchestrator import metrics
 from tools import artifacts, storage
+from tools import storage, artifacts
+from orchestrator import metrics
 
 try:  # optional strict validation
     import jsonschema
@@ -26,6 +28,8 @@ from tools import storage
 
 ROOT = Path(__file__).resolve().parents[1]
 ART_DIR = ROOT / "artifacts" / "mfg"
+LAKE_DIR = ART_DIR / "lake"
+SCHEMA_DIR = ROOT / "contracts" / "schemas"
 
 
 @dataclass
@@ -81,6 +85,11 @@ def load_work_centers(file: str) -> Dict[str, WorkCenter]:
     storage.write(
         str(ART_DIR / "work_centers.json"),
         json.dumps([asdict(w) for w in wcs.values()], indent=2),
+    centers_payload = [asdict(w) for w in wcs.values()]
+    artifacts.validate_and_write(
+        str(ART_DIR / "work_centers.json"),
+        centers_payload,
+        str(SCHEMA_DIR / "mfg_work_centers.schema.json") if (SCHEMA_DIR / "mfg_work_centers.schema.json").exists() else None,
     )
     return wcs
 
@@ -129,6 +138,19 @@ def load_routings(directory: str) -> Dict[str, Routing]:
             indent=2,
         ),
     )
+    payload = [{"item_rev": r.item_rev, "steps": [asdict(s) for s in r.steps]} for r in rts.values()]
+    payload.sort(key=lambda r: r["item_rev"])
+    artifacts.validate_and_write(
+        str(ART_DIR / "routings.json"),
+        payload,
+        str(SCHEMA_DIR / "mfg_routings.schema.json"),
+    )
+    LAKE_DIR.mkdir(parents=True, exist_ok=True)
+    lake_path = LAKE_DIR / "mfg_routings.jsonl"
+    if lake_path.exists():
+        lake_path.unlink()
+    for row in payload:
+        storage.write(str(lake_path), row)
     return rts
 
 

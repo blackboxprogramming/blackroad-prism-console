@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
 from pathlib import Path
 from typing import Dict
 
@@ -41,6 +40,14 @@ def _read_table(path: str, key_field: str, value_field: str) -> Dict[str, float]
             table[key] = table.get(key, 0.0) + value
     return table
 
+from tools import storage, artifacts
+from plm import bom
+from orchestrator import metrics
+
+ROOT = Path(__file__).resolve().parents[1]
+ART_DIR = ROOT / "artifacts" / "mfg" / "mrp"
+LAKE_DIR = ROOT / "artifacts" / "mfg" / "lake"
+SCHEMA_DIR = ROOT / "contracts" / "schemas"
 
 def plan(demand_csv: str, inventory_csv: str, pos_csv: str) -> Dict[str, Dict[str, float]]:
     """Compute a minimal MRP plan.
@@ -82,3 +89,36 @@ def cli_mrp(argv: list[str] | None = None) -> Dict[str, Dict[str, float]]:
 
 
 __all__ = ["plan", "cli_mrp", "ART_DIR"]
+        plan[item] = plan.get(item, 0) + net
+        # explode components
+        for _, comp, comp_qty in bom.explode(item, d.get("rev", "A"), level=2):
+            plan[comp] = plan.get(comp, 0) + comp_qty * net
+    ART_DIR.mkdir(parents=True, exist_ok=True)
+    artifacts.validate_and_write(
+        str(ART_DIR / "plan.json"),
+        plan,
+        str(SCHEMA_DIR / "mfg_mrp.schema.json"),
+    )
+    # kitting lists
+    for d in demand:
+        item = d["item_id"]
+        rev = d.get("rev", "A")
+        lines = ["component,qty"]
+        for _, comp, comp_qty in bom.explode(item, rev, level=1):
+            lines.append(f"{comp},{comp_qty * float(d['qty'])}")
+        storage.write(str(ART_DIR / f"kitting_{item}.csv"), "\n".join(lines))
+    LAKE_DIR.mkdir(parents=True, exist_ok=True)
+    lake_path = LAKE_DIR / "mfg_mrp.jsonl"
+    if lake_path.exists():
+        lake_path.unlink()
+    storage.write(
+        str(lake_path),
+        {
+            "demand_file": demand_file,
+            "inventory_file": inventory_file,
+            "pos_file": pos_file,
+            "plan": plan,
+        },
+    )
+    metrics.inc("mrp_planned")
+    return plan

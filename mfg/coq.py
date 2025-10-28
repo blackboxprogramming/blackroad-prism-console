@@ -58,6 +58,14 @@ def compute(period: str) -> Dict[str, float]:
     monkeypatch ``ART_DIR`` and make assertions about the generated
     files without requiring fixtures.
     """
+from tools import storage, artifacts
+from orchestrator import metrics
+
+ROOT = Path(__file__).resolve().parents[1]
+ART_DIR = ROOT / "artifacts" / "mfg" / "coq"
+FIXTURES = ROOT / "fixtures" / "mfg"
+LAKE_DIR = ROOT / "artifacts" / "mfg" / "lake"
+SCHEMA_DIR = ROOT / "contracts" / "schemas"
 
     art_dir = _ensure_art_dir()
     totals = {row["bucket"]: row["amount"] for row in _DEFAULT_ROWS}
@@ -95,6 +103,17 @@ def build(period: str) -> Dict[str, float]:
     (art_dir / "coq.json").write_text(
         json.dumps({"period": period, "buckets": totals}, indent=2), encoding="utf-8"
     )
+    artifacts.validate_and_write(
+        str(ART_DIR / "coq.json"),
+        totals,
+        str(SCHEMA_DIR / "mfg_coq.schema.json"),
+    )
+    LAKE_DIR.mkdir(parents=True, exist_ok=True)
+    lake_path = LAKE_DIR / "mfg_coq.jsonl"
+    if lake_path.exists():
+        lake_path.unlink()
+    storage.write(str(lake_path), totals)
+    metrics.inc("coq_built")
     return totals
 
 

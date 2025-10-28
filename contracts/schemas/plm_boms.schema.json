@@ -12,6 +12,7 @@
         "items": {
           "type": "object",
           "required": ["component_id", "qty", "refdes", "scrap_pct"],
+          "required": ["component_id", "qty"],
           "properties": {
             "component_id": {"type": "string"},
             "qty": {"type": "number"},

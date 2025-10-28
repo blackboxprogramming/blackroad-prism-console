@@ -8,14 +8,27 @@ surface that the unit tests rely on.
 from __future__ import annotations
 
 import csv
-import json
+<<import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
 ART_DIR: Path = Path("artifacts/plm")
+>>>>>>>+main
+=====
+frfrom dataclasses import dataclass, asdict
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Tuple
 
+from tools import storage
+from tools import artifacts
+from orchestrator import metrics
 
+ROOT = Path(__file__).resolve().parents[1]
+ART_DIR = ROOT / "artifacts" / "plm"
+LAKE_DIR = ART_DIR / "lake"
+SCHEMA_DIR = ROOT / "contracts" / "schemas"
+>>>>>>>+origin/codex/co
 @dataclass(frozen=True)
 class Item:
     id: str
@@ -52,10 +65,22 @@ def _ensure_art_dir() -> Path:
     return path
 
 
-def _items_path() -> Path:
+<<def _items_path() -> Path:
     return _ensure_art_dir() / "items.json"
+>>>>>>>+main
+=====
+dedef _schema(name: str) -> str:
+    return str(SCHEMA_DIR / name)
 
 
+def _rewrite_jsonl(filename: str, rows: Iterable[Dict[str, Any]]) -> None:
+    LAKE_DIR.mkdir(parents=True, exist_ok=True)
+    path = LAKE_DIR / filename
+    if path.exists():
+        path.unlink()
+    for row in rows:
+        storage.write(str(path), row)
+>>>>>>>+origin/codex/co
 def _boms_path() -> Path:
     return _ensure_art_dir() / "boms.json"
 
@@ -80,13 +105,24 @@ def load_items(directory: str) -> List[Item]:
                     cost=float(row.get("cost", 0) or 0.0),
                     suppliers=suppliers,
                 )
-                items.append(item)
+<<                items.append(item)
     items.sort(key=lambda itm: (itm.id, itm.rev))
 
     global _ITEMS
     _ITEMS = items
     _serialize_and_write(_items_path(), (asdict(item) for item in _ITEMS))
-    return items
+>>>>>>>+main
+=====
+                  items[(itm.id, itm.rev)] = itm
+    global ITEMS
+    ITEMS = items
+    ART_DIR.mkdir(parents=True, exist_ok=True)
+    payload = sorted([asdict(i) for i in items.values()], key=lambda r: (r["id"], r["rev"]))
+    artifacts.validate_and_write(str(ART_DIR / "items.json"), payload, _schema("plm_items.schema.json"))
+    _rewrite_jsonl("plm_items.jsonl", payload)
+    metrics.inc("plm_items_written", len(payload))
+>>>>>>>+origin/codex/co
+  return items
 
 
 def load_boms(directory: str) -> List[BOM]:
@@ -104,7 +140,7 @@ def load_boms(directory: str) -> List[BOM]:
                         scrap_pct=float(row.get("scrap_pct", 0) or 0.0),
                     )
                 )
-    boms = [BOM(item_id=key[0], rev=key[1], lines=sorted(lines, key=lambda line: (line.component_id, line.refdes or ""))) for key, lines in sorted(grouped.items())]
+<<    boms = [BOM(item_id=key[0], rev=key[1], lines=sorted(lines, key=lambda line: (line.component_id, line.refdes or ""))) for key, lines in sorted(grouped.items())]
 
     global _BOMS
     _BOMS = boms
@@ -115,7 +151,41 @@ def load_boms(directory: str) -> List[BOM]:
             for bom in _BOMS
         ),
     )
-    return boms
+>>>>>>>+main
+=====
+      global BOMS
+    BOMS = boms
+    ART_DIR.mkdir(parents=True, exist_ok=True)
+    payload = [
+        {"item_id": b.item_id, "rev": b.rev, "lines": [asdict(l) for l in b.lines]}
+        for b in boms.values()
+    ]
+    payload.sort(key=lambda r: (r["item_id"], r["rev"]))
+    artifacts.validate_and_write(str(ART_DIR / "boms.json"), payload, _schema("plm_boms.schema.json"))
+    _rewrite_jsonl("plm_boms.jsonl", payload)
+
+    where_records = []
+    seen: set[Tuple[str, str, str]] = set()
+    for (parent_id, rev), bom_obj in boms.items():
+        for line in bom_obj.lines:
+            key = (line.component_id, parent_id, rev)
+            if key in seen:
+                continue
+            seen.add(key)
+            where_records.append({
+                "component_id": line.component_id,
+                "parent_id": parent_id,
+                "parent_rev": rev,
+            })
+    where_records.sort(key=lambda r: (r["component_id"], r["parent_id"], r["parent_rev"]))
+    artifacts.validate_and_write(
+        str(ART_DIR / "where_used.json"),
+        where_records,
+        _schema("plm_where_used.schema.json"),
+    )
+    _rewrite_jsonl("plm_where_used.jsonl", where_records)
+>>>>>>>+origin/codex/co
+  return boms
 
 
 def _bom_lookup() -> Dict[Tuple[str, str], BOM]:

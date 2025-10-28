@@ -19,6 +19,10 @@
       "uom": {"type": "string"},
       "lead_time_days": {"type": "integer", "minimum": 0},
       "cost": {"type": "number", "minimum": 0},
+      "type": {"type": "string", "enum": ["assembly", "component", "raw"]},
+      "uom": {"type": "string"},
+      "lead_time_days": {"type": "integer", "minimum": 0},
+      "cost": {"type": "number"},
       "suppliers": {
         "type": "array",
         "items": {"type": "string"}

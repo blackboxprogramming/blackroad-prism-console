@@ -2,12 +2,29 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "additionalProperties": {
+  "type": "array",
+  "items": {
     "type": "object",
     "required": ["item", "rev", "steps", "markdown", "html"],
     "properties": {
       "item": {"type": "string"},
       "rev": {"type": "string"},
       "steps": {"type": "integer", "minimum": 0},
+      "steps": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["wc", "op", "std_time_min", "yield_pct"],
+          "properties": {
+            "wc": {"type": "string"},
+            "op": {"type": "string"},
+            "std_time_min": {"type": "number"},
+            "yield_pct": {"type": "number"},
+            "instructions_path": {"type": ["string", "null"]}
+          },
+          "additionalProperties": false
+        }
+      },
       "markdown": {"type": "string"},
       "html": {"type": "string"}
     },

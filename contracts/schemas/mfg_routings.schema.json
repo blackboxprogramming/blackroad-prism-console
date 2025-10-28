@@ -15,6 +15,7 @@
             "wc": {"type": "string"},
             "op": {"type": "string"},
             "std_time_min": {"type": "number", "minimum": 0},
+            "std_time_min": {"type": "number"},
             "yield_pct": {"type": "number"},
             "instructions_path": {"type": ["string", "null"]}
           },

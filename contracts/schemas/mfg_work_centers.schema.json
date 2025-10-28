@@ -10,6 +10,7 @@
       "capacity_per_shift": {"type": "integer", "minimum": 0},
       "skills": {"type": "string"},
       "cost_rate": {"type": "number", "minimum": 0}
+      "cost_rate": {"type": "number"}
     },
     "additionalProperties": false
   }
