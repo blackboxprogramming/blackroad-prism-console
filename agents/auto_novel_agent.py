@@ -1,6 +1,5 @@
 """Simple auto novel agent example with creative and coding abilities."""
 
-<<<<<<< main
 from __future__ import annotations
 
 import re
@@ -9,9 +8,7 @@ from typing import ClassVar, Iterable
 
 DEFAULT_SUPPORTED_ENGINES: tuple[str, ...] = ("unity", "unreal")
 from dataclasses import dataclass, field
-=======
 from dataclasses import dataclass
->>>>>>> origin/codex/complete-next-project-step-0o96zy
 from typing import ClassVar
 
 
@@ -156,11 +153,11 @@ class AutoNovelAgent:
         if include_weapons:
             raise ValueError("Weapons are not allowed in generated games.")
 
-<<<<<<< main
         message = self._build_creation_message(normalized)
         print(message)
         return message
 
+<<<<<<< main
     def generate_game_idea(self, theme: str, engine: str) -> str:
         """Return a short description for a themed game."""
 
@@ -177,6 +174,21 @@ class AutoNovelAgent:
             f"Imagine a {theme_clean} adventure crafted with "
             f"{normalized.capitalize()} where creativity reigns."
         )
+        Engines are stored in lowercase to keep lookups case-insensitive.
+
+        Args:
+            engine: Name of the engine to allow.
+        """
+        self.SUPPORTED_ENGINES.add(engine.lower())
+
+    def remove_supported_engine(self, engine: str) -> None:
+        """Remove a game engine if it is currently supported.
+
+        Args:
+            engine: Name of the engine to remove.
+        """
+        self.SUPPORTED_ENGINES.discard(engine.lower())
+
     def list_supported_engines(self) -> List[str]:
 =======
     def list_supported_engines(self) -> list[str]:
