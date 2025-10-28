@@ -277,6 +277,10 @@ const QUICK_LINKS = [
   ...FEATURE_ROUTES,
   { path: "quantum-consciousness", label: "Quantum Consciousness", component: QuantumConsciousness }
 ];
+import PoissonBoltzmannLab from "./pages/PoissonBoltzmannLab.jsx";
+import RidgeRegressionLab from "./pages/RidgeRegressionLab.jsx";
+import KernelPCALab from "./pages/KernelPCALab.jsx";
+import BrushfirePathLab from "./pages/BrushfirePathLab.jsx";
 
 const navLinkClassName = ({ isActive }) =>
   [
@@ -601,6 +605,57 @@ function LegacyApp() {
             <Route path="lorenz" element={<LorenzLab />} />
             <Route path="rd" element={<GrayScottLab />} />
             <Route path="*" element={<div>Not found</div>} />
+            <Route path="/" element={<Chat/>} />
+            <Route path="/chat" element={<Chat/>} />
+            <Route path="/canvas" element={<Canvas/>} />
+            <Route path="/editor" element={<Editor/>} />
+            <Route path="/terminal" element={<Terminal/>} />
+            <Route path="/roadview" element={<RoadView/>} />
+            <Route path="/backroad" element={<Backroad/>} />
+            <Route path="/agents" element={<Agents/>} />
+            <Route path="/subscribe" element={<Subscribe/>} />
+            <Route path="/lucidia" element={<Lucidia/>} />
+            <Route path="/math" element={<InfinityMath/>} />
+            <Route path="/ot" element={<OptimalTransportLab/>} />
+            <Route path="/bifurcate" element={<BifurcationLab/>} />
+            <Route path="/cfrac" element={<ContinuedFractionsLab/>} />
+            <Route path="/qjulia" element={<QuatJuliaLab/>} />
+            <Route path="/fluids" element={<StableFluidsLab/>} />
+            <Route path="/autodiff" element={<AutoDiffLab/>} />
+            <Route path="/conformal" element={<ConformalGridLab/>} />
+            <Route path="/eikonal" element={<EikonalLab/>} />
+            <Route path="/poisson2" element={<PoissonDiskLab/>} />
+              <Route path="/lsys" element={<LSystemLab/>} />
+              <Route path="/minimal" element={<MinimalSurfaceLab/>} />
+              <Route path="/pb" element={<PoissonBoltzmannLab/>} />
+              <Route path="/ridge" element={<RidgeRegressionLab/>} />
+              <Route path="/kpca" element={<KernelPCALab/>} />
+              <Route path="/brushfire" element={<BrushfirePathLab/>} />
+              <Route path="chat" element={<Chat/>} />
+              <Route path="canvas" element={<Canvas/>} />
+            <Route path="editor" element={<Editor/>} />
+            <Route path="terminal" element={<Terminal/>} />
+            <Route path="roadview" element={<RoadView/>} />
+            <Route path="backroad" element={<Backroad/>} />
+            <Route path="subscribe" element={<Subscribe/>} />
+            <Route path="lucidia" element={<Lucidia/>} />
+            <Route path="math" element={<InfinityMath/>} />
+            <Route path="ot" element={<OptimalTransportLab/>} />
+            <Route path="bifurcate" element={<BifurcationLab/>} />
+            <Route path="cfrac" element={<ContinuedFractionsLab/>} />
+            <Route path="qjulia" element={<QuatJuliaLab/>} />
+            <Route path="fluids" element={<StableFluidsLab/>} />
+            <Route path="autodiff" element={<AutoDiffLab/>} />
+            <Route path="conformal" element={<ConformalGridLab/>} />
+            <Route path="eikonal" element={<EikonalLab/>} />
+            <Route path="poisson2" element={<PoissonDiskLab/>} />
+              <Route path="lsys" element={<LSystemLab/>} />
+              <Route path="minimal" element={<MinimalSurfaceLab/>} />
+              <Route path="pb" element={<PoissonBoltzmannLab/>} />
+              <Route path="ridge" element={<RidgeRegressionLab/>} />
+              <Route path="kpca" element={<KernelPCALab/>} />
+              <Route path="brushfire" element={<BrushfirePathLab/>} />
+              <Route path="*" element={<div>Not found</div>} />
           </Routes>
         </section>
       </main>
