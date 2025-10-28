@@ -1,0 +1,1 @@
+{"schema_version":"0.1","fields":{"step_id":"string","block":"string","title":"string","theme":"string","owner":"string","status":"string","outcome":"string","dependencies":"string[]","artifacts":"string[]","evidence":"object","updated_at":"datetime"}}
