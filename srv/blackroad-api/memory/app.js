@@ -1,28 +1,24 @@
-const express = require('express');
-const cors = require('cors');
-const { createMemoryStore, DEFAULT_MEMORY_DB_PATH } = require('./store');
-
-function createMemoryApp(options = {}) {
-  const store = options.store || createMemoryStore(options.dbPath || process.env.MEMORY_DB_PATH || DEFAULT_MEMORY_DB_PATH);
 'use strict';
 
 const express = require('express');
 const cors = require('cors');
 
 function normalizeTags(tags) {
-  if (!tags) {
+  if (tags == null) {
     return [];
   }
+
   if (!Array.isArray(tags)) {
     throw new Error('tags must be an array of strings');
   }
+
   return tags
     .map((tag) => (typeof tag === 'string' ? tag.trim() : ''))
     .filter(Boolean)
     .slice(0, 25);
 }
 
-function createMemoryApp({ store, persister, webdavClient = null, logger = console }) {
+function createMemoryApp({ store = null, persister, webdavClient = null, logger = console } = {}) {
   if (!persister) {
     throw new Error('persister is required to create the memory app');
   }
@@ -32,23 +28,21 @@ function createMemoryApp({ store, persister, webdavClient = null, logger = conso
   app.use(express.json({ limit: '1mb' }));
 
   function formatEntry(entry) {
-    if (!entry) return entry;
+    if (!entry) {
+      return entry;
+    }
+
     return {
       id: entry.id,
       text: entry.text,
-      source: entry.source,
+      source: entry.source || 'unknown',
       tags: Array.isArray(entry.tags) ? entry.tags : [],
       created_at: entry.created_at,
+      score: entry.score ?? null,
     };
   }
 
-  app.get('/health', async (_req, res) => {
-    try {
-      const info = await store.stats();
-      res.json({ ok: true, service: 'memory-api', db_path: info.path, total: info.count, ts: new Date().toISOString() });
-    } catch (err) {
-      res.status(500).json({ ok: false, error: err.message || 'Unable to read memory stats' });
-  app.get('/health', async (req, res) => {
+  app.get('/health', (_req, res) => {
     try {
       const stats = persister.getStats();
       res.json({ ok: true, stats });
@@ -60,11 +54,6 @@ function createMemoryApp({ store, persister, webdavClient = null, logger = conso
 
   app.post('/api/memory/index', async (req, res) => {
     try {
-      const { text, source, tags } = req.body || {};
-      const entry = await store.indexMemory({ text, source, tags });
-      res.status(201).json({ ok: true, entry: formatEntry(entry) });
-    } catch (err) {
-      res.status(400).json({ ok: false, error: err.message || 'Failed to index memory' });
       const { text, source = 'unknown', tags = [], join_code = null, metadata = null } = req.body || {};
 
       if (typeof text !== 'string' || !text.trim()) {
@@ -87,7 +76,7 @@ function createMemoryApp({ store, persister, webdavClient = null, logger = conso
       };
 
       const result = await persister.indexMemory(payload);
-      res.json({ ok: true, ...result });
+      res.status(201).json({ ok: true, ...result });
     } catch (error) {
       logger.error('[memory] failed to index memory', error);
       res.status(500).json({ ok: false, error: error.message });
@@ -96,26 +85,11 @@ function createMemoryApp({ store, persister, webdavClient = null, logger = conso
 
   app.post('/api/memory/search', async (req, res) => {
     try {
-      const { q, top_k: topK } = req.body || {};
-      const results = await store.searchMemory({ query: q || '', limit: topK });
-      res.json({ ok: true, results: results.map(formatEntry) });
-    } catch (err) {
-      res.status(500).json({ ok: false, error: err.message || 'Search failed' });
-    }
-  });
-
-  return { app, store };
-}
-
-module.exports = { createMemoryApp };
-      const { q, top_k = 10 } = req.body || {};
-
-      if (typeof q !== 'string' || !q.trim()) {
-        return res.status(400).json({ ok: false, error: 'q is required' });
-      }
-
+      const { q = '', top_k = 10 } = req.body || {};
+      const query = typeof q === 'string' ? q.trim() : '';
       const limit = Math.max(1, Math.min(50, parseInt(top_k, 10) || 10));
-      const results = persister.search(q.trim(), limit);
+
+      const results = persister.search(query, limit).map(formatEntry);
       res.json({ ok: true, results });
     } catch (error) {
       logger.error('[memory] search failed', error);
@@ -123,11 +97,11 @@ module.exports = { createMemoryApp };
     }
   });
 
-  app.get('/api/memory/stats', async (req, res) => {
+  app.get('/api/memory/stats', (_req, res) => {
     try {
       const stats = {
-        store: store ? store.getStats() : null,
-        webdav: webdavClient ? webdavClient.getStatus() : null,
+        store: store && typeof store.getStats === 'function' ? store.getStats() : null,
+        webdav: webdavClient && typeof webdavClient.getStatus === 'function' ? webdavClient.getStatus() : null,
       };
       res.json({ ok: true, stats });
     } catch (error) {
