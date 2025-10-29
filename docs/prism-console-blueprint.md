@@ -276,3 +276,15 @@ Standardize error payloads so the client can guide users toward resolution.
 5. Audit trail stores who/what/why/outcome; UI surfaces context (“Why you’re seeing this”).
 
 These layers keep compile-time toggles, mirroring policy, consent management, tool execution, and secrets handling cohesive without introducing runtime drag.
+
+## 10. Black Road Onboarding Sequence
+
+Codify the initial handshake for Prism Console invitees so the ceremony is replayable, auditable, and policy enforced.
+
+1. **Signal Intake** – Accept a 256-character onboarding token via a trusted channel. Persist the payload in `onboarding_tokens` (status=`pending`, checksum, issuer, issued_at) and emit an audit event `onboarding.token_received`.
+2. **Reciprocal Consent Prompt** – Render a dual acknowledgement screen where both the operator (`operator_ack`) and invitee (`invitee_ack`) consent to the activation terms. Store acknowledgements alongside the token record and halt progression until both values resolve to true.
+3. **Identity Binding** – Resolve the invitee identity (user id, service id, or automation id) and capture declared capabilities. Enforce `Runner.Reputation(tool) >= FloorByOrg(org)` before persisting capabilities. Record the binding with `onboarding_bindings` referencing the original token and invitee identifier.
+4. **First Task Bootstrap** – Auto-issue the starter command `calibrate prism console status` through the agent command bus (`POST /api/agents/command`). Link the command id back to the onboarding record and queue the job for execution.
+5. **Auditable Closure** – Mark the onboarding token as `consumed_at=timestamp` and append a summary event `onboarding.handshake_complete` containing the acknowledgements, identity binding, issued command id, and final status for replayability.
+
+This sequence ensures every invitee enters the Black Road with explicit consent, verified capability bindings, and an actionable first command that can be audited end-to-end.
