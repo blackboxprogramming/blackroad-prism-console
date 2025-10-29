@@ -1,0 +1,67 @@
+version: 1
+sprint:
+  name: Zero Trust Security Sprint
+  base_branch: main
+  shared_artifacts:
+    - security/logs
+    - metrics/reports
+    - docs
+  agents:
+    - name: TLS Guardian
+      task: Provision developer root CA and integrate mTLS bootstrap
+      branch: ops/tls/dev-ca
+      prompt: >-
+        Establish a developer-trust certificate authority, refresh the TLS playbooks,
+        and deliver automation to provision leaf certificates for services.
+      artifacts:
+        - security/tls
+        - security/certificates
+      commands:
+        - run:
+            - python
+            - agents/tls_guardian.py
+            - plan
+    - name: WAF Sentinel
+      task: Harden perimeter with ModSecurity v3 ruleset
+      branch: infra/waf/modsec
+      prompt: >-
+        Deploy a ModSecurity reverse proxy profile tuned for our threat models.
+        Capture regression tests for critical paths and export tuning notes.
+      artifacts:
+        - security/waf
+      commands:
+        - run:
+            - python
+            - agents/waf_sentinel.py
+            - build
+    - name: WebAuthn Custodian
+      task: Deliver WebAuthn demo with passkey enrollment
+      branch: auth/webauthn_demo
+      prompt: >-
+        Produce a developer experience sample showing WebAuthn registration and
+        authentication, bundled with UX notes and acceptance tests.
+      artifacts:
+        - docs/auth/webauthn
+        - frontend/screenshots
+      commands:
+        - run:
+            - npm
+            - run
+            - webauthn:generate
+          cwd: frontend
+    - name: AIOps Healer
+      task: Launch anomaly detection service with runbook
+      branch: aiops/anomaly_detector
+      prompt: >-
+        Stand up anomaly baselines for core SLOs, surface triage dashboards, and
+        commit runbooks outlining on-call interventions.
+      artifacts:
+        - metrics/aiops
+        - docs/runbooks
+      env:
+        DATA_SOURCE: metrics/live
+      commands:
+        - run:
+            - python
+            - agents/aiops_healer.py
+            - bootstrap
