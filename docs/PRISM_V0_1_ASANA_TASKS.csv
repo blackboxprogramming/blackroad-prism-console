@@ -1,0 +1,5 @@
+Task Name,Description,Assignee Email,Section,Due Date
+Magic link email template,Add HTML+text templates to br-prism-console; test with dev SMTP.,amundsonalexa@gmail.com,Today,2025-10-14
+Slack SSO setup,Create Slack App + configure OAuth callback; store secrets in 1Password.,amundsonalexa@gmail.com,This Week,2025-10-15
+Audit log MVP,Create audit_log table + record auth/source/dashboard events.,amundsonalexa@gmail.com,This Week,2025-10-15
+Review onboarding UX,Walkthrough end-to-end (email, Slack SSO, audit trail).,amundsonalexa@gmail.com,This Week,2025-10-16

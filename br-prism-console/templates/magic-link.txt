@@ -1,0 +1,6 @@
+Sign in to PRISM
+
+Click the link below to finish signing in (valid for 15 minutes):
+{{magic_link}}
+
+If you didn’t request this, you can safely ignore it.
