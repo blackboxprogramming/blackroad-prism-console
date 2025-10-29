@@ -1,0 +1,24 @@
+# Placeholder for bot registry with webhooks and commands
+# Populate each bot entry with the webhook endpoints, supported commands,
+# and the owning team. Use this as the single source of truth for
+# automation bots across environments.
+bots:
+  - name: example-deploy-bot            # TODO: replace with bot slug
+    description: "Coordinates deploy orchestration and status fan-out."
+    owner:
+      team: "Automation"               # TODO: owning team or squad
+      contacts:
+        - "automation-oncall@example.com"
+    commands:
+      - trigger: "/deploy"
+        description: "Kick off staged deployment pipeline."
+        handler: "scripts/deploy.sh"
+        permissions:
+          - role: "sre"
+          - role: "release-manager"
+    webhooks:
+      - event: "deployment.completed"
+        target: "https://hooks.example.com/deploy"
+        secret: "ENV:DEPLOY_WEBHOOK_SECRET"
+        notes: "Sent after production deploy completes."
+    runbook: "docs/runbooks/deploy.md"
