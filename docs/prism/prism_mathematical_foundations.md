@@ -197,6 +197,34 @@ where x = position, p = momentum.
 
 **Status:** Not yet proven. Requires quantum mechanics framework.
 
+#### Symmetric Completion of the Zeta Functional Equation
+
+To work directly on the critical strip it is helpful to adopt the completed zeta function
+
+```
+ξ(s) = ½ s(s-1) π^{-s/2} Γ(s/2) ζ(s).
+```
+
+**Lemma 2.2.1 (Functional symmetry).** ξ(s) = ξ(1 - s).
+
+**Proof sketch:** Expand ξ(1 - s), substitute the classical functional equation
+```
+ζ(1 - s) = 2^{1-s} π^{-s} cos(π s / 2) Γ(s) ζ(s),
+```
+and then combine the Γ-factors with the duplication identity
+```
+Γ(s) = 2^{s-1} π^{-1/2} Γ(s/2) Γ((s+1)/2)
+```
+and the reflection pairing
+```
+Γ((1-s)/2) Γ((1+s)/2) = π / cos(π s / 2).
+```
+The trigonometric and power factors cancel, leaving ξ(1 - s) = ξ(s).
+
+**Consequences:** The completion is entire, even under s → 1 - s, and its zeros are symmetric
+about the critical line Re(s) = ½. This symmetric structure is the entry point for
+counting arguments and spectral interpretations.
+
 #### Information Geometry of Zeta
 
 **Parameter Space:** θ = Re(s), parameterizing ζ(s).
@@ -223,6 +251,21 @@ W₂(μ_T, μ_uniform) → 0 as T → ∞ ?
 ```
 
 **Conjecture 2.2.3:** If zeros approach GUE statistics, then W₂ → 0 implies all zeros on critical line.
+
+#### Zero Counting Roadmap (Riemann–von Mangoldt)
+
+The symmetry of ξ feeds directly into the classical zero counting machinery:
+
+- **Hadamard factorization.** Treat ξ(s) as an entire, order-one, even function to expand it
+  as a product over its zeros with quadratic Weierstrass factors.
+- **Argument principle.** Integrate ξ′/ξ along a rectangle with vertical sides Re(s) = ½ ± ε
+  and horizontal edges at heights ±T, exploiting the functional equation to pair boundaries.
+- **Boundary estimates.** Use Stirling’s approximation for Γ(s/2) and the decay of ζ(s) off the
+  critical line to isolate the main term \(\tfrac{T}{2π}\log\frac{T}{2πe}\) and control the error.
+
+This roadmap yields the Riemann–von Mangoldt formula for N(T) and certifies infinitely many
+non-trivial zeros. Subsequent spectral or geometric approaches can refine each step but rely on
+this foundational count.
 
 ---
 
