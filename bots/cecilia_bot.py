@@ -11,15 +11,15 @@ CECILIA_LEGACY_NAME = "Cecilia-BOT"
 CECILIA_ALIASES = frozenset(
     {
         "@cecilia",
+        "CEC-SPECTRUM-7C3E9B4F",
         "Cecilia",
         CECILIA_LEGACY_NAME,
-        "cecilia@spectrum.blackroad.os",
+        "Cecilia::Spectrum::Creator",
         "cecilia-7c3e-spec-9b4f-blackroad",
-        "git://cecilia.spectrum/agent",
         "cecilia.spectrum.blackroad.local",
         "cecilia.spectrum.local:7C3E",
-        "CEC-SPECTRUM-7C3E9B4F",
-        "Cecilia::Spectrum::Creator",
+        "cecilia@spectrum.blackroad.os",
+        "git://cecilia.spectrum/agent",
         "spectrum://cecilia@9b4f",
     }
 )
