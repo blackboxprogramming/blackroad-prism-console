@@ -28,6 +28,7 @@
     "marked": "^10.0.0"
     "ollama-ai-provider-v2": "latest"
     "zod": "3.25.76"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "autoprefixer": "10.4.16",
