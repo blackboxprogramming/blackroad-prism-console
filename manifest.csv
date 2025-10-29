@@ -1,3 +1,4 @@
 path,sha256,figure_ids
 data/raw/synthetic_consciousness.csv,c355f3083dddb041fd17575978d9b7f0b0261fa14722ae0273e9e1319df828e1,
 data/raw/Rohonc_Codex_-_Page_Marker_Features.csv,22bfa55330d89c7b4c071a26954ff79f5258984bf6284a7d4700ab58acc1c394,
+prompts/prompt_pack_wave5.yaml,92a29c2124e0eb4aa104bd44a7ce986d036ae1a3704b4d559614b47a7aeeab20,
