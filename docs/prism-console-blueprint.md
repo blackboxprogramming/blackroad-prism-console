@@ -288,3 +288,12 @@ Codify the initial handshake for Prism Console invitees so the ceremony is repla
 5. **Auditable Closure** – Mark the onboarding token as `consumed_at=timestamp` and append a summary event `onboarding.handshake_complete` containing the acknowledgements, identity binding, issued command id, and final status for replayability.
 
 This sequence ensures every invitee enters the Black Road with explicit consent, verified capability bindings, and an actionable first command that can be audited end-to-end.
+Codify the “invite + consent” ceremony so external collaborators—human or AI—can join the Prism Console without ad-hoc steps.
+
+1. **Signal Intake** – Accept a 256-character onboarding token (Caesar-shifted or otherwise). Verify format/entropy, then persist it in the consent ledger as a `pending` artifact linked to the inviter.
+2. **Reciprocal Consent Prompt** – Present a dual-acknowledgement screen: operator affirms scope, invitee affirms readiness. Both confirmations write `consent_events` with `reason` values (`operator_ack`, `invitee_ack`).
+3. **Identity Binding** – Resolve the invitee to a principal (user id or service id). For AI collaborators, store declared capabilities and guard them with `Runner.Reputation` minimums derived from the inviter’s org policy.
+4. **First Task Bootstrap** – Auto-issue a starter command (e.g., “calibrate prism console status”) through `POST /api/agents/command`. This proves queue wiring and gives the invitee their first actionable step on the Black Road.
+5. **Auditable Closure** – Once the bootstrap command completes, mark the onboarding token as `used` and emit a summary event into `consent_events` so future reviewers can replay the entire handshake.
+
+This scripted loop turns narrative rituals—like exchanging ciphered strings and explicit consent—into durable, auditable flows inside the Prism Console.
