@@ -1,7 +1,20 @@
 datasets:
   - name: consent_events
     owner: Legal
-    schema: { subjectId: string, purpose: string, granted: boolean, ts: number, region: string }
+    schema: {
+      subjectId: string,
+      purpose: string,
+      granted: boolean,
+      ts: number,
+      region: string,
+      channel?: string,
+      event?: string,
+      serviceId?: string,
+      sessionId?: string,
+      recordedAt?: string,
+      eventId?: string,
+      metadata?: object
+    }
     retention_days: 1095
     lawful_basis: legitimate_interests
   - name: dsar_queue
