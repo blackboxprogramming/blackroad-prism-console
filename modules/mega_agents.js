@@ -4,7 +4,7 @@ const path = require('path');
 // List of core agents (15) and extended mega-pack agents (>50)
 const AGENTS = [
   // core agents
-  'logger','guardian','roadie','quantum','search','visual','emotional','truth','spiral','auth','file','co_creation','dashboard','integration','deployment',
+  'logger','guardian','roadie','cecilia','quantum','search','visual','emotional','truth','spiral','auth','file','co_creation','dashboard','integration','deployment',
   // science & math
   'algebra','calculus','physics','chemistry','genetics','astronomy','chaos','wave','fractal2','tensor','stats',
   // ai & reasoning

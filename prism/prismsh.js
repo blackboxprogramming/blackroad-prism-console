@@ -99,7 +99,7 @@ const path = require('path');
 const { AGENT_TABLE, registerAgent, unregisterAgent } = require('./agentTable');
 
 const agents = [
-  'logger','guardian','roadie','quantum','search','visual','emotional',
+  'logger','guardian','roadie','cecilia','quantum','search','visual','emotional',
   'truth','spiral','auth','file','co_creation','dashboard','integration','deployment'
 ];
 
