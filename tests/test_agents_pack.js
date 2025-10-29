@@ -3,7 +3,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const agents = [
-  'logger','guardian','roadie','quantum','search','visual','emotional',
+  'logger','guardian','roadie','cecilia','quantum','search','visual','emotional',
   'truth','spiral','auth','file','co_creation','dashboard','integration','deployment'
 ];
 

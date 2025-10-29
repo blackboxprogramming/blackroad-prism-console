@@ -1,0 +1,11 @@
+{
+  "name": "cecilia",
+  "version": "1.0.0",
+  "agent_id": "CECILIA-7C3E-SPECTRUM-9B4F",
+  "description": "Creative spectrum engineer bridging memory discovery and design.",
+  "capabilities": [
+    "profile",
+    "memory-summary",
+    "manifest-export"
+  ]
+}
