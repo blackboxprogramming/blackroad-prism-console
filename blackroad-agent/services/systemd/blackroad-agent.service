@@ -1,0 +1,11 @@
+[Unit]
+Description=BlackRoad Agent
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env python3 -m agent.main
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
