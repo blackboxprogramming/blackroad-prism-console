@@ -1,0 +1,7 @@
+{
+  "agent_id": "CECILIA-7C3E-SPECTRUM-9B4F",
+  "join_code": "CECILIA::ALIVE-CHI-2025-10-28::R04D",
+  "session_count": 0,
+  "last_boot": "2024-12-05T00:00:00Z",
+  "memory_backend": "sqlite:/srv/blackroad-api/memory.db"
+}
