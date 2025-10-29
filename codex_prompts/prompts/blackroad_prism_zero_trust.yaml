@@ -1,0 +1,117 @@
+mission: BlackRoad Prism Zero-Trust Hardening Sprint
+orchestrator: Codex Conductor
+context: |
+  Repository: blackboxprogramming/blackroad-prism-console
+  Objective: Promote "BlackRoad Prism: Deterministic Security Layer v1.0" by
+  hardening the console with provable zero-trust controls. The sprint converts
+  the single-prong prompt into coordinated multi-agent execution so each proof
+  layer ships with code, docs, and verification artifacts.
+  Shared baseline:
+    - Primary stack: FastAPI backend, Go compliance harness, React frontend,
+      infrastructure in YAML.
+    - Active security components: app/guards.py, app/oidc.py, cli/console.py,
+      compliance/cmd/harness, frontend/src/pages/SecuritySpotlights.jsx.
+    - Follow repository AGENTS.md guidance, run relevant tests, capture
+      screenshots for visual changes, and log proof artifacts.
+  Deliverables must follow per-PR rubric:
+    1. Summary line ≤72 chars.
+    2. Commit body citing rationale + proof artifact links.
+    3. Markdown doc in /docs/.
+    4. One screenshot (Grafana/browser/CLI) saved to docs/img/ with caption.
+sequence:
+  - stage: Sprint Planning
+    lead: Orchestrator
+    instructions: |
+      Fan out work items into four zero-trust proof layers. Ensure interfaces
+      between agents are defined (e.g., shared certificates path, nginx layout,
+      logging locations). Publish coordination notes to docs/SECURITY_PLAN.md.
+      Block agent execution until the plan enumerates tests, artifacts, and
+      dependencies for each PR.
+  - stage: Parallel Build Loop
+    lead: Agents
+    instructions: |
+      Run TLS, WAF, WebAuthn, and AIOps agents concurrently after planning. Each
+      agent owns an isolated branch/PR. Share artifacts via security/ and
+      metrics/ directories. The orchestrator resolves merge conflicts and keeps
+      docs consistent.
+  - stage: Consolidation
+    lead: Orchestrator
+    instructions: |
+      Verify all proofs, run combined regression tests, and update
+      HARDENING.md summary with links to new docs before tagging release
+      candidate.
+agents:
+  - name: TLS
+    branch: ops/tls/dev-ca
+    prompt: |
+      Agent: TLS Guardian
+      Objective: Establish development mutual TLS with a dedicated CA.
+      Tasks:
+        1. Create ops/tls/Makefile with targets:
+             - make ca-init
+             - make cert-client CN=client.local
+             - make cert-server CN=server.local
+           Use mkcert or step-ca to generate CA and leaf certificates stored in
+           ops/tls/certs/ with README explaining trust instructions.
+        2. Produce nginx reverse-proxy config enforcing mTLS with
+             ssl_verify_client on;
+           Default upstream points to local FastAPI app. Provide sample systemd
+           unit or docker-compose snippet.
+        3. Document procedures in docs/SECURITY_MTLS.md (usage, cert renewal,
+           curl smoke-test) and capture screenshot of successful curl with client
+           cert.
+        4. Update HARDENING.md mTLS section with summary and link to doc.
+        5. Run make ca-init and include generated artifacts in .gitignore except
+           sample outputs committed to docs/examples/.
+  - name: WAF
+    branch: infra/waf/modsec
+    prompt: |
+      Agent: WAF Sentinel
+      Objective: Deploy ModSecurity with OWASP CRS and targeted rules.
+      Tasks:
+        1. Vendor baseline OWASP CRS v4.0 configs under infra/waf/crs/. Document
+           update script.
+        2. Add custom rules:
+             - Block missing/malformed Authorization header.
+             - Limit JSON body size to 1 MB (ctl:requestBodyLimit=1048576).
+             - Deny suspicious user agents (curl, sqlmap, nmap).
+        3. Integrate with FastAPI via nginx.conf snippet or Traefik middleware
+           located in infra/waf/nginx.conf. Ensure waf logs stream to
+           security/logs/waf_audit.jsonl (JSON lines format).
+        4. Add docs/SECURITY_WAF.md covering deployment, tuning, and rule IDs.
+        5. Provide screenshot of simulated attack triggering CRS rule 980120 and
+           custom rule log entry.
+        6. Extend compliance harness scenario to assert waf_audit.jsonl entries.
+  - name: WebAuthn
+    branch: auth/webauthn_demo
+    prompt: |
+      Agent: WebAuthn Custodian
+      Objective: Deliver FIDO2 step-up authentication demo.
+      Tasks:
+        1. Implement FastAPI endpoints /api/webauthn/register and
+           /api/webauthn/verify using python-fido2 or webauthn libraries.
+           Persist credentials in SQLite (app/data/webauthn.db) with migration
+           helper script.
+        2. Extend app/guards.py to require WebAuthn assertion when
+           step_up.required is true. Update tests in app/tests/test_guards.py and
+           add fixtures.
+        3. Provide demo React component or CLI walkthrough to exercise flows.
+        4. Document flows in docs/SECURITY_WEBAUTHN.md with sequence diagrams and
+           screenshot of successful YubiKey registration.
+        5. Update SECURITY.md to reference step-up enforcement.
+  - name: AIOps
+    branch: aiops/anomaly_detector
+    prompt: |
+      Agent: AIOps Healer
+      Objective: Implement latency anomaly detection with auto-heal hook.
+      Tasks:
+        1. Create aiops/anomaly_detector.py implementing rolling Z-score window
+           (120 samples) and trigger_autoheal(service="auth") when |z|>3.
+        2. Add Prometheus metrics scraper/exporter integration. Ensure metrics
+           cached under metrics/latency/ and anomalies logged to
+           metrics/anomaly_events.jsonl.
+        3. Introduce /autoheal/trigger FastAPI endpoint toggling maintenance
+           mode. Persist state in redis mock or local JSON file.
+        4. Add docs/AIOPS.md describing model math, thresholds, and runbook.
+        5. Provide Grafana-style screenshot of anomaly detection and log sample.
+        6. Update compliance harness or tests to cover auto-heal toggling.
