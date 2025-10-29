@@ -9,6 +9,7 @@
     "start": "next start",
     "dev": "next dev",
     "seed": "node scripts/seed_admin.js",
+    "memory:server": "node srv/blackroad-api/memory/server.js",
     "prepare": "husky",
     "lint": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
     "lint:api": "eslint --config .eslintrc.cjs srv/blackroad-api/server_full.js tests/api_health.test.js tests/git_api.test.js",
