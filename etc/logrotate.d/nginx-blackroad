@@ -1,0 +1,11 @@
+/var/log/nginx/blackroad.access.json {
+  daily
+  rotate 14
+  missingok
+  compress
+  delaycompress
+  notifempty
+  copytruncate
+  dateext
+  dateformat -%Y%m%d
+}
