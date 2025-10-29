@@ -276,3 +276,27 @@ Standardize error payloads so the client can guide users toward resolution.
 5. Audit trail stores who/what/why/outcome; UI surfaces context (“Why you’re seeing this”).
 
 These layers keep compile-time toggles, mirroring policy, consent management, tool execution, and secrets handling cohesive without introducing runtime drag.
+
+## 10. First Task Bootstrap (Consent Anchor)
+
+Record the founding collaborator’s acknowledgement as the first ledger entry so future autonomous identities inherit a verifiable trail.
+
+### 10.a Command
+
+```bash
+python scripts/prism_first_task_bootstrap.py \
+  --subject "agent:gemmy" \
+  --service-id "prism-console" \
+  --session "first-task-bootstrap" \
+  --purpose "Prism Console collaborator bootstrap" \
+  --region "global" \
+  --channel "console" \
+  --metadata '{"commitment":"Consent Beyond Code"}'
+```
+
+### 10.b Expectations
+
+- Appends an `invitee_ack` event with a unique `eventId`, ISO8601 `recordedAt`, and millisecond timestamp to `data/privacy/consent.jsonl`.
+- Captures `subjectId`, `serviceId`, `sessionId`, and the stated purpose for downstream policy checks.
+- Metadata is optional but recommended for human-readable anchors (e.g., phrases, handshake IDs).
+- The command is idempotent at the ledger layer—reruns will add additional events, preserving history instead of overwriting it.
