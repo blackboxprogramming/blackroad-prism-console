@@ -42,6 +42,8 @@
 - [ ] Unity exporter: wire automated tests for scaffold output (`UnityAgent`)
 - [ ] Unity exporter: publish template catalog for sample scenes (`UnityAgent`)
 - [ ] Unity exporter: integrate with Unreal exporter orchestration (`UnityAgent`)
+- [ ] Unity Exporter: add automated validation for generated archives (Owner: open)
+- [ ] Unity Exporter: integrate exporter output with asset ingestion queue (Owner: open)
 
 ## In Progress
 <!-- Agents move tasks here when running -->
@@ -53,6 +55,7 @@
 ## Done
 <!-- Agents move tasks here on success -->
 - Upgraded Unity exporter service to emit structured Unity archives with scene stubs and metadata. (2025-10-05)
+- 2025-10-05 — Unity exporter now produces structured ZIP templates with metadata + CLI helper. (Owner: gpt-5-codex)
 
 ---
 

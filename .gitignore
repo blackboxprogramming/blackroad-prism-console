@@ -20,6 +20,8 @@ public/artifacts.sha256
 # Local data
 srv/blackroad-api/blackroad.db
 _trash/
+downloads/
+**/downloads/
 !tools/tools-adapter/.env
 artifacts.sha256
 public/artifacts.sha256
