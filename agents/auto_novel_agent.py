@@ -10,6 +10,7 @@ DEFAULT_SUPPORTED_ENGINES: tuple[str, ...] = ("unity", "unreal")
 from dataclasses import dataclass, field
 from dataclasses import dataclass
 from typing import ClassVar
+from typing import ClassVar, FrozenSet, List
 
 
 @dataclass
@@ -63,6 +64,8 @@ class AutoNovelAgent:
     def SUPPORTED_ENGINES(self) -> set[str]:
         """Return the set of engines supported by this agent instance."""
         return self._supported_engines
+    _DEFAULT_SUPPORTED_ENGINES: ClassVar[FrozenSet[str]] = frozenset({"unity", "unreal"})
+    SUPPORTED_ENGINES: ClassVar[set[str]] = set(_DEFAULT_SUPPORTED_ENGINES)
 
     def list_supported_engines(self) -> list[str]:
         """Return a sorted snapshot of supported engines."""
@@ -157,7 +160,6 @@ class AutoNovelAgent:
         print(message)
         return message
 
-<<<<<<< main
     def generate_game_idea(self, theme: str, engine: str) -> str:
         """Return a short description for a themed game."""
 
@@ -176,10 +178,19 @@ class AutoNovelAgent:
         )
         Engines are stored in lowercase to keep lookups case-insensitive.
 
+        Engines are stored in lowercase to keep lookups case-insensitive.
+
         Args:
             engine: Name of the engine to allow.
         """
         self.SUPPORTED_ENGINES.add(engine.lower())
+
+<<<<<<< main
+    @classmethod
+    def reset_supported_engines(cls) -> None:
+        """Restore the supported engines to their default set."""
+
+        cls.SUPPORTED_ENGINES = set(cls._DEFAULT_SUPPORTED_ENGINES)
 
     def remove_supported_engine(self, engine: str) -> None:
         """Remove a game engine if it is currently supported.

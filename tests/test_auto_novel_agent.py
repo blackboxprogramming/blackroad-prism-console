@@ -29,6 +29,7 @@ def reset_supported_engines():
 
 
 import pytest
+
 from agents.auto_novel_agent import AutoNovelAgent
 
 
@@ -50,6 +51,11 @@ def reset_engines():
     AutoNovelAgent.SUPPORTED_ENGINES = {"unity", "unreal"}
     yield
     AutoNovelAgent.SUPPORTED_ENGINES = {"unity", "unreal"}
+def reset_engines():
+    """Ensure tests do not leak engine changes to each other."""
+    AutoNovelAgent.reset_supported_engines()
+    yield
+    AutoNovelAgent.reset_supported_engines()
 
 
 def test_add_supported_engine_enables_creation():
@@ -523,4 +529,4 @@ def test_create_game_unknown_engine():
     with pytest.raises(ValueError):
         agent.create_game("unknown")
 =======
->>>>>>> origin/codex/complete-next-project-step-c6aazd
+>>>>>>> origin/codex/complete-next-project-step-yvhkme
