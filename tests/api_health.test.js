@@ -135,7 +135,40 @@ describe('API smoke tests', () => {
     );
     expect(res.headers['access-control-allow-origin']).toBe('https://example.com');
     expect(res.headers['x-request-id']).toBeTruthy();
+process.env.PORT = '0';
+
+const { once } = require('node:events');
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { server } = require('../srv/blackroad-api/server_full.js');
+
+async function getBaseUrl() {
+  if (!server.listening) {
+    await once(server, 'listening');
+  }
+  const address = server.address();
+  return `http://127.0.0.1:${address.port}`;
+}
+
+test.after(() => new Promise((resolve) => server.close(resolve)));
+
+test('responds to /health', async () => {
+  const baseUrl = await getBaseUrl();
+  const res = await fetch(`${baseUrl}/health`);
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.ok, true);
+});
+
+test('responds to /api/health with security headers', async () => {
+  const baseUrl = await getBaseUrl();
+  const res = await fetch(`${baseUrl}/api/health`, {
+    headers: { Origin: 'https://example.com' }
   });
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('x-dns-prefetch-control'), 'off');
+  assert.equal(res.headers.get('access-control-allow-origin'), 'https://example.com');
+});
 
   it('validates login payload', async () => {
     const res = await request(app)
@@ -253,5 +286,12 @@ describe('API smoke tests', () => {
     const res = await request(app).post('/api/math/eval').send({ expr: '2+2' });
     expect(res.status).toBe(503);
     expect(res.body).toEqual({ error: 'engine_unavailable' });
+test('validates login payload', async () => {
+  const baseUrl = await getBaseUrl();
+  const res = await fetch(`${baseUrl}/api/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({})
   });
+  assert.equal(res.status, 400);
 });
