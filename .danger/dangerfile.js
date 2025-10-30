@@ -8,6 +8,13 @@
 
 // PR quality checks executed by Danger.js
 const files = danger.git.modified_files.concat(danger.git.created_files);
+/* Dangerfile: comment on PRs with quick quality checks */
+/* eslint-env node */
+/* global danger, warn, message */
+
+// PR quality checks executed by Danger.js
+
+const files = [...danger.git.modified_files, ...danger.git.created_files];
 const big = files.filter((f) => f.endsWith('.html') || f.endsWith('.js'));
 
 if (big.length > 0) {
@@ -16,7 +23,9 @@ if (big.length > 0) {
 
 const added = danger.github.pr.additions || 0;
 if (added > 1500) {
-  warn(`PR is quite large (${added} additions). Consider splitting if possible.`);
+  warn(
+    `PR is quite large (${added} additions). Consider splitting if possible.`
+  );
 }
 
 if (!danger.github.pr.body || danger.github.pr.body.length < 20) {
@@ -27,4 +36,3 @@ const hasScreenshot = /!\[.*\]\(.*\)/.test(danger.github.pr.body || '');
 if (!hasScreenshot && files.some((f) => f.endsWith('.html'))) {
   warn('UI change detected, but no screenshot in the PR body.');
 }
-

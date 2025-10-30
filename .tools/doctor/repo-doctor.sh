@@ -27,17 +27,17 @@ fi
 # 3) JS quick syntax
 section "JavaScript Syntax"
 errs=0
-grep -RIl --include="*.js" . | while read -r f; do
+while IFS= read -r f; do
   node -c "$f" >/dev/null 2>&1 || { echo "❌ $f" >> "$OUT"; errs=$((errs+1)); }
-done
-[ "${errs:-0}" = "0" ] && line "✅ no syntax errors detected"
+done < <(git ls-files '*.js')
+[ "$errs" = "0" ] && line "✅ no syntax errors detected"
 
 # 4) License headers (sample check)
 section "License Headers (sample)"
 miss=0
-for f in $(git ls-files | grep -E '\.(js|yml|yaml|html)$'); do
+while IFS= read -r f; do
   grep -q "Copyright" "$f" || miss=$((miss+1))
-done
+done < <(git ls-files '*.js' '*.yml' '*.yaml' '*.html')
 line "Files without explicit copyright: ${miss}"
 
 # 5) Big files

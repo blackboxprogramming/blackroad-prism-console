@@ -48,3 +48,4 @@ repos:
         language: golang
         pass_filenames: false
         stages: [commit, push]
+        additional_dependencies: ['@eslint/js@9.12.0']
