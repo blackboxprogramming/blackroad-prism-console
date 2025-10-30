@@ -67,6 +67,7 @@ Health-check paths, CPU/memory sizing, and environment variables can be tuned in
 - Teardown typically completes within a minute of closing the pull request; any orphaned listener rules or target groups should be investigated immediately.
 - `infra/preview-env/README.md` documents manual usage when debugging apply/destroy issues locally.
 This repository now provisions short-lived preview environments for every pull request. The automation uses GitHub Actions with the AWS CLI to provision the ECS/Fargate service, ALB listener rule, target group, and Route53 DNS records, then tears everything back down when the PR closes.
+This repository now provisions short-lived preview environments for every pull request. The automation uses GitHub Actions with the AWS CLI to provision the ECS/Fargate service, ALB listener rule, target group, and Route53 DNS records, then tears everything back down when the PR closes. Operational details and required secrets live in [`environments/preview.yml`](../environments/preview.yml).
 
 ## Required repository configuration
 

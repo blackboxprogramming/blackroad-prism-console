@@ -325,3 +325,21 @@ workflows:
   - .github/workflows/deploy.yml
   commands:
     - aws ecs describe-services --cluster <cluster-arn> --services api-gateway --region us-west-2
+status: active
+kind: customer-facing
+chatops:
+  command: "/deploy blackroad pages"
+  workflow: .github/workflows/_backup_132_deploy-blackroad.yml
+  branch: main
+deploy:
+  description: >-
+    Main branch merges rebuild `sites/blackroad` and publish the artifact to GitHub Pages.
+    Optional providers (Vercel, Cloudflare, Netlify) are available through the channel workflow
+    for rollbacks or parallel canary deployments.
+verification:
+  checklist:
+    - curl -s https://blackroad.io/healthz
+    - curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403
+    - curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects
+notes:
+  - Use the channel workflow when you need to target canary, beta, or prod providers beyond GitHub Pages.
