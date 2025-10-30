@@ -48,6 +48,11 @@ import io from 'socket.io-client'
 import { Routes, Route, NavLink } from 'react-router-dom'
 import { API_BASE, setToken, login, me, fetchTimeline, fetchTasks, fetchCommits, fetchAgents, fetchWallet, fetchContradictions, getNotes, setNotes, action } from './api'
 import { Activity, Brain, Database, LayoutGrid, Rocket, Settings, ShieldCheck, SquareDashedMousePointer, Wallet } from 'lucide-react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
+import io from 'socket.io-client'
+import { Routes, Route, Link } from 'react-router-dom'
+import { API_BASE, setToken, login, me, fetchTimeline, fetchTasks, fetchCommits, fetchAgents, fetchWallet, fetchContradictions, getNotes, setNotes, action } from './api'
+import { Brain, Database, LayoutGrid, Rocket, Settings, ShieldCheck, SquareDashedMousePointer, Wallet } from 'lucide-react'
 import Timeline from './components/Timeline.jsx'
 import Tasks from './components/Tasks.jsx'
 import Commits from './components/Commits.jsx'
@@ -85,6 +90,7 @@ import WebEngine from './pages/WebEngine.jsx'
 import DesktopOS from './pages/DesktopOS.jsx'
 import MusicApp from './pages/MusicApp.jsx'
 import SimplifiedOS from './pages/SimplifiedOS.jsx'
+import RoadChain from './components/RoadChain.jsx'
 
 export default function App(){
   const location = useLocation()
@@ -193,6 +199,30 @@ export default function App(){
     else setContradictions({ issues: 0 })
     if(n.status === 'fulfilled') setNotesState(n.value || '')
     else setNotesState('')
+  const streamRef = useRef(true)
+
+  const resetState = useCallback(() => {
+    localStorage.removeItem('token')
+    setToken('')
+    setUser(null)
+    setTab('timeline')
+    setTimeline([])
+    setTasks([])
+    setCommits([])
+    setAgents([])
+    setWallet({ rc: 0 })
+    setContradictions({ issues: 0 })
+    setSystem({ cpu: 0, mem: 0, gpu: 0 })
+    setNotesState('')
+    setStream(true)
+    streamRef.current = true
+    setSocket(prev => {
+      if(prev) prev.disconnect()
+      return null
+    })
+  }, [])
+
+  const bootData = useCallback(async ()=>{
     const [tl, ts, cs, ag, w, c, n] = await Promise.all([
       fetchTimeline(), fetchTasks(), fetchCommits(), fetchAgents(), fetchRoadcoinWallet(), fetchContradictions(), getNotes()
     ])
@@ -253,6 +283,56 @@ export default function App(){
     setUser(nextUser)
     await bootData()
     connectSocket()
+    setTimeline(tl); setTasks(ts); setCommits(cs); setAgents(ag); setWallet(w); setContradictions(c); setNotesState(n || '')
+  }, [])
+
+  const connectSocket = useCallback(()=>{
+    const s = io(API_BASE, { transports: ['websocket'] })
+    s.on('system:update', d => { if(streamRef.current) setSystem(d) })
+    s.on('timeline:new', d => setTimeline(prev => [d.item, ...prev]))
+    s.on('wallet:update', w => setWallet(w))
+    s.on('notes:update', n => setNotesState(n || ''))
+    setSocket(s)
+  }, [])
+
+  useEffect(() => { streamRef.current = stream }, [stream])
+
+  // Restore auth token from local storage on load and reset when missing
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      // Clear any lingering state when no token exists
+      resetState()
+      return
+    }
+    setToken(token)
+    ;(async () => {
+      try {
+        const u = await me()
+        setUser(u)
+        await bootData()
+        connectSocket()
+      } catch (e) {
+        // Reset state on auth failure and log for debugging
+        resetState()
+        console.error('User not authenticated:', e)
+      }
+    })()
+  }, [bootData, connectSocket, resetState])
+
+  async function handleLogin(usr, pass){
+    try{
+      const { token, user } = await login(usr, pass)
+      localStorage.setItem('token', token)
+      setToken(token)
+      setUser(user)
+      await bootData()
+      connectSocket()
+    }catch(e){
+      resetState()
+      console.error('Login failed:', e)
+      throw e
+    }
   }
 
   async function handleAction(name){
@@ -389,6 +469,7 @@ export default function App(){
               <NavItem icon={<Rocket size={18} />} text="Orchestrator" to="/orchestrator" />
               <NavItem icon={<Rocket size={18} />} text="Manifesto" href="/manifesto" />
               <NavItem to="/resilience" icon={<ShieldCheck size={18} />} text="Resilience" />
+              <NavItem icon={<Rocket size={18} />} text="RoadChain" to="/roadchain" />
             </nav>
           </aside>
                 <NavItem to="/roadview" icon={<LayoutGrid size={18} />} text="RoadView" />
@@ -435,6 +516,29 @@ export default function App(){
               <Routes>
                 <Route path="/" element={<Dashboard tab={tab} setTab={setTab} timeline={timeline} tasks={tasks} commits={commits} onAction={onAction} />} />
                 <Route path="/orchestrator" element={<Orchestrator socket={socket} />} />
+              <Routes>
+                <Route path="/roadchain" element={<RoadChain />} />
+                <Route
+                  path="/"
+                  element={
+                    <>
+                      <header className="flex items-center gap-8 border-b border-slate-800 mb-4">
+                        <Tab onClick={()=>setTab('timeline')} active={tab==='timeline'}>Timeline</Tab>
+                        <Tab onClick={()=>setTab('tasks')} active={tab==='tasks'}>Tasks</Tab>
+                        <Tab onClick={()=>setTab('commits')} active={tab==='commits'}>Commits</Tab>
+                        <div className="ml-auto flex items-center gap-2 py-3">
+                          <button className="badge" onClick={()=>onAction('run')}>Run</button>
+                          <button className="badge" onClick={()=>onAction('revert')}>Revert</button>
+                          <button className="badge" onClick={()=>onAction('mint')}><Wallet size={14}/> Mint</button>
+                        </div>
+                      </header>
+
+                      {tab==='timeline' && <Timeline items={timeline} />}
+                      {tab==='tasks' && <Tasks items={tasks} />}
+                      {tab==='commits' && <Commits items={commits} />}
+                    </>
+                  }
+                />
               </Routes>
             </section>
             {route === '/guardian' ? (
@@ -530,6 +634,17 @@ function NavItem({ icon, text, to }){
 function NavItem({ icon, text, to }){
   return (
     <NavLink to={to} className={({isActive})=>`flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-900 ${isActive?'text-white':'text-slate-300'}`}>
+function NavItem({ icon, text, to }){
+  const className = "flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-900 cursor-pointer";
+  if (to) {
+    return (
+      <Link to={to} className={className}>
+        {icon}<span>{text}</span>
+      </Link>
+    )
+  }
+  return (
+    <div className={className}>
       {icon}<span>{text}</span>
     </NavLink>
   )

@@ -1,6 +1,7 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
 import Novelty from './pages/Novelty.jsx'
 import Nexus from './pages/Nexus.jsx'
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/roadchain" element={<RoadChain />} />
         <Route path="*" element={<App />} />
       </Routes>
+      <App />
     </BrowserRouter>
   </React.StrictMode>
 )

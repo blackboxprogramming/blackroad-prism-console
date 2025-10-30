@@ -132,6 +132,30 @@ const store = {
   projects: [
     { id: demoProjectId, name: 'Demo Project', status: 'active' }
     { id: randomUUID(), name: 'Demo Project', status: 'active' }
+  roadchainBlocks: [
+    {
+      height: 3,
+      hash: '0xabc123',
+      time: new Date().toISOString(),
+      txs: [
+        { hash: '0xtx1', from: 'alice', to: 'bob', amount: 5.2 },
+        { hash: '0xtx2', from: 'carol', to: 'dave', amount: 1.1 }
+      ]
+    },
+    {
+      height: 2,
+      hash: '0xdef456',
+      time: new Date(Date.now() - 60000).toISOString(),
+      txs: [
+        { hash: '0xtx3', from: 'eve', to: 'frank', amount: 0.7 }
+      ]
+    },
+    {
+      height: 1,
+      hash: '0xghi789',
+      time: new Date(Date.now() - 120000).toISOString(),
+      txs: []
+    }
   ],
   timeline: [
     { id: randomUUID(), type: 'agent', agent: 'Phi', text: "created a branch `main`", time: new Date().toISOString() },

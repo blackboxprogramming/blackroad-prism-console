@@ -333,6 +333,24 @@ const app = http.createServer(async (req, res) => {
     });
     return send(res, 201, created);
   }
+// ---- RoadChain ----
+app.get('/api/roadchain/blocks', (req, res) => {
+  res.json({ blocks: store.roadchainBlocks });
+});
+
+app.get('/api/roadchain/block/:id', (req, res) => {
+  const id = req.params.id;
+  const block = store.roadchainBlocks.find(b => b.hash === id || String(b.height) === id);
+  if (!block) return res.status(404).json({ error: 'not found' });
+  res.json({ block });
+});
+
+// Actions
+app.post('/api/actions/run', authMiddleware(JWT_SECRET), (req,res)=>{
+  const item = addTimeline({ type: 'action', text: 'Run triggered', by: req.user.username });
+  io.emit('timeline:new', { at: nowISO(), item });
+  res.json({ ok: true });
+});
 
   if (req.method === 'POST' && segments[0] === 'exceptions' && segments.length === 3) {
     const exceptionId = safeNumber(segments[1]);

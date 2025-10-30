@@ -255,6 +255,14 @@ export async function fetchRollbackLogs() {
 export async function fetchPiStatus(){
   const { data } = await axios.get(`${API_BASE}/api/pi/status`)
   return data
+export async function fetchBlocks(){
+  const { data } = await axios.get(`${API_BASE}/api/roadchain/blocks`)
+  return data.blocks
+}
+
+export async function fetchBlock(id){
+  const { data } = await axios.get(`${API_BASE}/api/roadchain/block/${id}`)
+  return data.block
 }
 
 export { API_BASE }
