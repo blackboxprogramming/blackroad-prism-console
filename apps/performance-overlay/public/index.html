@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Performance Overlay</title>
+  <style>
+    :root {
+      --fg: #eaeaea; --bg: rgba(0,0,0,0.35);
+      --glow: #6ee7ff; --accent: #8b5cf6;
+      --font: system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial;
+    }
+    html,body { margin:0; padding:0; width:100%; height:100%; background:transparent; overflow:hidden; }
+    .wrap { position:absolute; left:3%; bottom:6%; right:3%;
+            font-family:var(--font); color:var(--fg); }
+    .wrap.pulse { box-shadow:0 0 1.2rem var(--accent); transition:box-shadow 120ms ease; }
+    .cap {
+      display:inline-block; padding:.35rem .6rem; margin:.15rem;
+      background:var(--bg); border-radius:.6rem; transition:transform 80ms ease, box-shadow 80ms ease;
+    }
+    .cap.active { transform:scale(1.06); box-shadow:0 0 .6rem var(--glow); }
+    .gesture { position:absolute; right:3%; bottom:20%; opacity:0; transition:opacity 160ms ease; font-size:2.4rem; }
+    .gesture.show { opacity:1; }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="wrap"></div>
+  <div class="gesture" id="gesture">♪</div>
+
+<script>
+const wrap = document.getElementById('wrap');
+const gesture = document.getElementById('gesture');
+let theme = 'studio';
+let words = [];
+
+function renderCaption(word) {
+  words.push(word);
+  if (words.length > 12) words.shift();
+  wrap.innerHTML = words.map((w, i) =>
+    `<span class="cap ${i===words.length-1?'active':''}">${w}</span>`
+  ).join(' ');
+}
+
+function doGesture(name) {
+  gesture.textContent = name === 'browUp' ? '👀' :
+                        name === 'handBeat' ? '👏' :
+                        name === 'microZoom' ? '🎥' : '♪';
+  gesture.classList.add('show');
+  setTimeout(()=>gesture.classList.remove('show'), 240);
+}
+
+function patch(p) {
+  if (p.theme === 'neon-vapor') {
+    document.documentElement.style.setProperty('--glow', '#00f0ff');
+    document.documentElement.style.setProperty('--accent', '#ff4dff');
+    document.documentElement.style.setProperty('--bg', 'rgba(0,0,0,0.42)');
+  } else if (p.theme === 'warm') {
+    document.documentElement.style.setProperty('--glow', '#ffd089');
+    document.documentElement.style.setProperty('--accent', '#ff8b5e');
+    document.documentElement.style.setProperty('--bg', 'rgba(0,0,0,0.32)');
+  } else {
+    document.documentElement.style.setProperty('--glow', '#6ee7ff');
+    document.documentElement.style.setProperty('--accent', '#8b5cf6');
+    document.documentElement.style.setProperty('--bg', 'rgba(0,0,0,0.35)');
+  }
+  theme = p.theme || theme;
+}
+
+const ws = new WebSocket('ws://localhost:5051');
+ws.onopen = () => console.log('overlay connected');
+ws.onmessage = ev => {
+  const msg = JSON.parse(ev.data);
+  if (msg.type === 'caption') renderCaption(msg.word);
+  if (msg.type === 'gesture') doGesture(msg.name);
+  if (msg.type === 'patch')   patch(msg);
+  if (msg.type === 'overlay') {
+    if ((msg.spec||'').startsWith('cap:')) {
+      wrap.classList.add('pulse');
+      setTimeout(()=>wrap.classList.remove('pulse'), 200);
+    }
+  }
+};
+ws.onclose = () => console.warn('overlay disconnected from conductor');
+</script>
+</body>
+</html>
