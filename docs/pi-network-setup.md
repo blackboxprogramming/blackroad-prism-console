@@ -101,4 +101,28 @@ brew upgrade
 - Use `ssh -vvv user@host` to inspect authentication problems.
 - Verify time synchronization (install `chrony` on Linux or enable "Set time automatically" on macOS).
 
-Following this playbook ensures each device can reach the others over the network and has the toolchain required for collaborative development.
+## 8. Synchronize Repositories Between Machines
+
+Once SSH connectivity is working, push code updates between machines with the `pi_sync.sh` helper:
+
+```bash
+./scripts/pi_sync.sh
+```
+
+By default the script copies the current repository to `alice@raspberrypi:~/blackroad-prism-console`. Override the destination with the `-r` flag or by setting the `PI_REMOTE` environment variable:
+
+```bash
+PI_REMOTE="alice@raspberrypi:/srv/blackroad" ./scripts/pi_sync.sh
+```
+
+Useful flags:
+
+- `-n` performs a dry run to preview changes without copying files.
+- `-s` lets you sync a specific local subdirectory instead of the entire repo.
+- `-x` points to a custom exclude file. You can also set `PI_SYNC_EXCLUDE` for a persistent override.
+- `--pull` inverts the direction so you can fetch changes from the Raspberry Pi back to your workstation.
+- Arguments after `--` pass straight to `rsync` (for example `-- --progress`).
+
+The script skips common transient build artifacts via `scripts/pi_sync_exclude.txt`. Adjust that list—or point to your own with `-x`/`PI_SYNC_EXCLUDE`—if your workflow requires syncing additional paths.
+
+Following this playbook ensures each device can reach the others over the network, share the same codebase, and has the toolchain required for collaborative development.

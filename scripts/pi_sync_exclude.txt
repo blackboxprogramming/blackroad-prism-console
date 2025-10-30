@@ -1,0 +1,12 @@
+# Paths ignored during Raspberry Pi syncs
+.git/
+node_modules/
+logs/
+_tmp/
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.env.*
+dist/
+build/
