@@ -132,6 +132,8 @@ def refresh_working_copy(ctx: PipelineContext) -> bool:
     to allow custom integration with the Working Copy app (for example via
     x-callback-url).  Otherwise the function refreshes every configured mirror
     derived from ``WORKING_COPY_DEVICES``/``WORKING_COPY_HOST``/``WORKING_COPY_PATH``.
+    x-callback-url).  Otherwise the function falls back to running ``git pull``
+    in the configured ``WORKING_COPY_PATH``.
     """
     cmd = os.getenv("WORKING_COPY_CMD")
     if cmd:
