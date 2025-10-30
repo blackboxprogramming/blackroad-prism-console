@@ -1,6 +1,7 @@
 const pino = require('pino');
 const { buildPinoRedactPaths } = require('./redact');
 // FILE: srv/blackroad-api/lib/log.js
+// <!-- FILE: srv/blackroad-api/lib/log.js -->
 const { createLogger, format, transports } = require('winston');
 const path = require('path');
 const fs = require('fs');

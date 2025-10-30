@@ -104,6 +104,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Features
+<!-- FILE: CHANGELOG.md -->
+
+# Changelog
 
 * add CPQ catalog pricing and orders ([#1468](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1468)) ([21cf80a](https://github.com/blackboxprogramming/blackroad-prism-console/commit/21cf80a21f6a52d93a5b924bdfaa8dc906e1c6c0))
 * add enterprise admin controls ([#1459](https://github.com/blackboxprogramming/blackroad-prism-console/issues/1459)) ([9a64126](https://github.com/blackboxprogramming/blackroad-prism-console/commit/9a64126d95ba5df14eba9a726494ea754c17284f))
@@ -190,6 +193,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 2025-08-16
 
 - Cleanup: hardened API, added tests and CI tooling.
+
+- Cleanup: hardened API, added tests and CI tooling.
+- Add `scripts/blackroad_sync.py` CI/CD helper script.
+- Harden API security middleware and add health tests.
 
 ## 1.0.0 (2025-08-16)
 

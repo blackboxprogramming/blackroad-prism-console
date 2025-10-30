@@ -20,6 +20,7 @@
 - Added `.env.sample` with required vars and fail-fast checks.
 - Introduced Jest smoke tests for health and security headers.
 - Removed unused branding assets from the SPA and added a formatting script.
+- Archived obsolete root files (`index.html`, `interesting.html`, `.env.aider`) in `/_trash`.
 
 ### SPA Asset Changes
 

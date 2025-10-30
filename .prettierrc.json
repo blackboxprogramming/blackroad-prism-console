@@ -1,4 +1,5 @@
 {
+  "_comment": "<!-- FILE: .prettierrc.json -->",
   "printWidth": 80,
   "singleQuote": true,
   "semi": true,

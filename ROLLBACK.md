@@ -1,5 +1,7 @@
 <!-- FILE: ROLLBACK.md -->
 
+To revert this cleanup:
+
 # Rollback Guide
 
 1. Move any directories from `_trash/` back to their original locations, e.g.:

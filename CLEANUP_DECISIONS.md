@@ -2,6 +2,16 @@
 
 # Cleanup Decisions
 
+## Tooling
+
+- **JavaScript/Node:** Node 20.x using **CommonJS** modules.
+- **Formatting:** Prettier (single quotes, semicolons, 80‑column print width).
+- **Linting:** ESLint with recommended and security rules.
+- **Testing:** Jest for Node API; Pytest for Python `app.py`.
+- **Pre-commit:** Husky + lint-staged running format, lint, and tests.
+
+# Cleanup Decisions
+
 ## Security
 
 - Loaded environment variables via `dotenv` and require `SESSION_SECRET`, `INTERNAL_TOKEN`, and `ALLOW_ORIGINS` at startup.

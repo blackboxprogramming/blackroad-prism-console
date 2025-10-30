@@ -1,3 +1,4 @@
+// <!-- FILE: srv/blackroad-api/.eslintrc.cjs -->
 module.exports = {
   root: true,
   env: { node: true, es2022: true },

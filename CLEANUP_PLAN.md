@@ -2,6 +2,26 @@
 
 # Cleanup Plan
 
+## Directory Overview
+
+```
+/ (repo root)
+├── package.json                – Node project manifest for API
+├── srv/
+│   ├── blackroad-api/          – Express + Socket.IO backend
+│   │   ├── server_full.js      – primary API server (port 4000)
+│   │   ├── server.js           – legacy minimal server
+│   │   ├── routes/, controllers/, middleware/
+│   └── lucidia-llm/
+│       └── app.py              – FastAPI LLM stub
+└── var/
+    └── www/blackroad/          – frontend SPA (index.html and assets)
+```
+
+## Findings
+
+# Cleanup Plan
+
 ## Inventory
 
 - **API**: `srv/blackroad-api` (server_full.js, SQLite DB).

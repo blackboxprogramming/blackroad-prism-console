@@ -85,6 +85,10 @@ process.env.SESSION_SECRET = 'test-secret';
 process.env.INTERNAL_TOKEN = 'x';
 process.env.ALLOW_ORIGINS = 'https://example.com';
 global.fetch = jest.fn(() => Promise.resolve({ ok: true }));
+// <!-- FILE: tests/api_health.test.js -->
+process.env.SESSION_SECRET = 'test-secret';
+process.env.INTERNAL_TOKEN = 'x';
+process.env.ALLOW_ORIGINS = 'https://example.com';
 const request = require('supertest');
 const { app, server } = require('../srv/blackroad-api/server_full.js');
 const originHeaders = { 'X-BlackRoad-Key': 'test-origin-key' };
@@ -140,6 +144,12 @@ describe('API smoke tests', () => {
       .send({});
     const res = await request(app).post('/api/login').send({});
     expect(res.status).toBe(400);
+    const res = await request(app).get('/health');
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+  });
+
+  it('responds to /health', async () => {
     const res = await request(app).get('/health');
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);

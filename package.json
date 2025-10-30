@@ -1,5 +1,7 @@
 {
   "name": "blackroad-prism-console",
+  "_comment": "<!-- FILE: package.json -->",
+  "name": "blackroad-api",
   "version": "1.0.0",
   "private": true,
   "description": "BlackRoad.io backend API (Express + SQLite + Socket.IO)",
@@ -17,6 +19,23 @@
     "test:smoke": "node tests/smoke.test.mjs",
     "typecheck": "tsc -p tsconfig.json",
     "health": "node scripts/health.js"
+    "start": "node srv/blackroad-api/server_full.js",
+    "dev": "nodemon srv/blackroad-api/server_full.js",
+    "seed": "node scripts/seed_admin.js",
+    "prepare": "husky",
+    "lint": "eslint srv/blackroad-api/server_full.js tests/api_health.test.js",
+    "format": "prettier . --write",
+    "format:check": "prettier package.json srv/lucidia-llm/test_app.py srv/blackroad-api/.prettierrc.json var/www/blackroad/.prettierrc.json .prettierrc.json RUNME.sh Makefile .github/workflows/ci.yml CLEANUP_PLAN.md CLEANUP_DECISIONS.md CLEANUP_RESULTS.md ROLLBACK.md CHANGELOG.md --check --ignore-unknown",
+    "test": "jest tests/api_health.test.js",
+    "typecheck": "echo 'no typecheck'",
+    "health": "node scripts/health.js",
+    "dev:site": "npm --prefix sites/blackroad run dev",
+    "build": "npm --prefix sites/blackroad run build",
+    "test-agents-pack": "node tests/test_agents_mega.js",
+    "frontend:dev": "npm --prefix sites/blackroad run dev",
+    "frontend:build": "npm --prefix sites/blackroad run build",
+    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true",
+    "format:site": "prettier var/www/blackroad --write"
   },
   "engines": {
     "node": ">=20"
@@ -32,6 +51,7 @@
     "better-sqlite3": "^9.4.3",
     "bs58": "^5.0.0",
     "compression": "^1.7.4",
+    "compression": "^1.8.1",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -40,6 +60,7 @@
     "express-rate-limit": "^7.2.0",
     "express-validator": "^7.2.1",
     "graphql": "^16.9.0",
+    "express-validator": "^7.0.1",
     "helmet": "^7.1.0",
     "ipfs-http-client": "^60.0.1",
     "json-canonicalize": "^2.0.0",
@@ -65,6 +86,12 @@
     "@types/node-fetch": "^2.6.11",
     "@types/react": "^18.2.64",
     "@typescript-eslint/parser": "^8.8.0",
+    "stripe": "^12.18.0",
+    "systeminformation": "^5.25.11",
+    "uuid": "^9.0.1",
+    "winston": "^3.14.2"
+  },
+  "devDependencies": {
     "cross-env": "^7.0.3",
     "eslint": "^9.12.0",
     "husky": "^9.0.10",
@@ -81,6 +108,10 @@
     "@types/react": "^18.2.64",
     "typescript": "^5.6.3",
     "jest-junit": "^16.0.0"
+    "lint-staged": "^15.2.7",
+    "nodemon": "^3.0.2",
+    "prettier": "^3.3.3",
+    "supertest": "^6.3.4"
   },
   "lint-staged": {
     "*.{js,jsx,mjs,cjs,ts,tsx}": [

@@ -133,6 +133,13 @@ jobs:
       - run: npm test
       - uses: actions/setup-python@v5
         with:
+          node-version: 20
+      - run: npm install
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm test
+      - uses: actions/setup-python@v5
+        with:
           python-version: '3.11'
       - run: pip install fastapi pydantic pytest httpx
       - run: pytest srv/lucidia-llm/test_app.py

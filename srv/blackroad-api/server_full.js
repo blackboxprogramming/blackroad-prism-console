@@ -1,5 +1,6 @@
 <!-- FILE: /srv/blackroad-api/server_full.js -->
 // FILE: srv/blackroad-api/server_full.js
+// <!-- FILE: srv/blackroad-api/server_full.js -->
 /* BlackRoad API — Express + SQLite + Socket.IO + LLM bridge
    Runs behind Nginx on port 4000 with cookie-session auth.
    Env:
@@ -88,6 +89,7 @@ const MATH_ENGINE_URL = process.env.MATH_ENGINE_URL || '';
 const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
+const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
 const BILLING_DISABLE =
   String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
