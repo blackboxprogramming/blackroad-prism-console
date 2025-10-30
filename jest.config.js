@@ -28,4 +28,16 @@ module.exports = {
   roots: ["<rootDir>/tests"],
   testMatch: ["<rootDir>/tests/test_integration.js"],
   setupFiles: ["<rootDir>/tests/jest.setup.js"],
+  roots: ['<rootDir>/tests'],
+  testMatch: ['**/*.test.js'],
+  reporters: [
+    'default',
+    [
+      'jest-junit',
+      {
+        outputDirectory: 'reports',
+        outputName: 'junit.xml',
+      },
+    ],
+  ],
 };

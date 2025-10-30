@@ -1,0 +1,67 @@
+name: "🔁 Auto rerun"
+
+on:
+  workflow_run:
+    workflows:
+      - "🧪 Node CI"
+    types:
+      - completed
+
+permissions:
+  actions: write
+  pull-requests: read
+
+jobs:
+  rerun:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate rerun eligibility
+        id: evaluate
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const run = context.payload.workflow_run;
+            const core = require('@actions/core');
+            if (run.event !== 'pull_request') {
+              core.info('Workflow is not associated with a pull request. Skipping rerun.');
+              core.setOutput('should_rerun', 'false');
+              return;
+            }
+            if ((run.run_attempt || 1) > 1) {
+              core.info(`Workflow already rerun (attempt ${run.run_attempt}). Skipping.`);
+              core.setOutput('should_rerun', 'false');
+              return;
+            }
+            const pr = run.pull_requests && run.pull_requests[0];
+            if (!pr) {
+              core.info('Unable to determine pull request context. Skipping.');
+              core.setOutput('should_rerun', 'false');
+              return;
+            }
+            const labelsResponse = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+            });
+            const hasOptOut = labelsResponse.data.some(label => label.name.toLowerCase() === 'no-rerun');
+            if (hasOptOut) {
+              core.info('no-rerun label present. Respecting opt-out.');
+              core.setOutput('should_rerun', 'false');
+              return;
+            }
+            core.info(`Queueing rerun for workflow ${run.id} on PR #${pr.number}.`);
+            core.setOutput('should_rerun', 'true');
+
+      - name: Trigger rerun
+        if: ${{ steps.evaluate.outputs.should_rerun == 'true' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.reRunWorkflowFailedJobs({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.payload.workflow_run.id,
+            });
