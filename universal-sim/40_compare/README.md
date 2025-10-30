@@ -31,3 +31,39 @@ derived/
 
 Add notebooks or scripts here to aggregate metrics across runs. Document each notebook's
 purpose in its first cell.
+
+## Digital twin sandbox
+
+`universal_hamiltonian.py` provides a small, dependency-light Hamiltonian
+integrator that can emulate LC lattices, mechanical chains, or photonic
+waveguides.  It uses JAX for differentiable linear algebra and Matplotlib for
+visualisation.
+
+Quick start:
+
+```bash
+cd universal-sim/40_compare
+python - <<'PY'
+import jax.numpy as jnp
+from universal_hamiltonian import CoupledHamiltonian, simulate, plot_heatmap
+
+n = 4
+k = 1.0
+K = k * (2 * jnp.eye(n) - jnp.diag(jnp.ones(n - 1), 1) - jnp.diag(jnp.ones(n - 1), -1))
+K = K.at[0, 0].set(1.0)
+K = K.at[-1, -1].set(1.0)
+system = CoupledHamiltonian(K=K, omega=jnp.zeros(n))
+q0 = jnp.array([1.0, 0.0, 0.0, 0.0])
+p0 = jnp.zeros(n)
+times, qs, _ = simulate(system, q0, p0, dt=0.01, steps=1000)
+plot_heatmap(times, qs)
+PY
+```
+
+Extend the system by supplying:
+
+- `TimeModulation` to model time-varying couplings,
+- a `forcing` callable for driven lattices,
+- the `damping` parameter for lossy circuits,
+- diagonal `disorder` to probe fabrication tolerances, or
+- `topology_alternation` to toggle Su–Schrieffer–Heeger edge physics.
