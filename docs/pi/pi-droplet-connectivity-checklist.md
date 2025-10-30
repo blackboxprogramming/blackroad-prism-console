@@ -2,6 +2,8 @@
 
 Use this runbook when you need to confirm that a Raspberry Pi on your LAN can reach (and be reached from) a DigitalOcean droplet. Work through the sections in order; each one keeps the blast radius small and builds confidence before you expose anything to the public internet.
 
+> **Placeholder reminder:** Commands that show values inside angle brackets (for example, `<pi-public-ip>` or `<ssh-port>`) are placeholders. Replace them with your real addresses, hostnames, or ports and do **not** type the `<` and `>` characters. If it helps, assign an environment variable first (e.g., `PI_IP=192.168.4.42`) and run commands such as `curl -I http://$PI_IP/` or `ssh -vvv piuser@$PI_IP -p 2222`.
+
 > **Safety first:** Only run commands you understand. Redact private data before sharing outputs outside your environment.
 
 ## 1. Baseline checks on the Pi
