@@ -1,3 +1,5 @@
+<!-- FILE: CHANGELOG.md -->
+
 # Changelog
 All notable changes to this project will be documented in this file.
 
@@ -179,6 +181,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial release.
+## 2025-08-22
+
+- Hardened API security, added env checks, request ID logging, and body limits.
+- Removed committed logs and added ignore rules.
+- Expanded Jest tests and updated RUNME script.
+
 ## 2025-08-16
 
 - Cleanup: hardened API, added tests and CI tooling.

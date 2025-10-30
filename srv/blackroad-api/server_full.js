@@ -13,6 +13,7 @@
      ALLOW_SHELL=false
 */
 
+require('dotenv').config();
 const http = require('http');
 const os = require('os');
 const path = require('path');
@@ -346,6 +347,7 @@ app.use(rateLimit({ windowMs: 60_000, max: 100 }));
 app.use((req, res, next) => {
   const id = randomUUID();
   req.id = id;
+  res.setHeader('X-Request-Id', id);
   const start = Date.now();
   res.on('finish', () => {
     logger.info({
