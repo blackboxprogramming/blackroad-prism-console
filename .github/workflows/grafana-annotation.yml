@@ -1,0 +1,104 @@
+name: Grafana Annotation
+
+on:
+  workflow_call:
+    inputs:
+      message:
+        description: Annotation text to display in Grafana
+        required: true
+        type: string
+      tags:
+        description: Comma separated tag list
+        required: false
+        type: string
+      dashboard_uid:
+        description: Grafana dashboard UID to scope the annotation
+        required: false
+        type: string
+      panel_id:
+        description: Panel identifier to scope the annotation
+        required: false
+        type: string
+      time:
+        description: Override the annotation timestamp (ISO-8601)
+        required: false
+        type: string
+      url:
+        description: Grafana base URL (falls back to repository variable GRAFANA_URL)
+        required: false
+        type: string
+    secrets:
+      grafana_api_key:
+        required: true
+
+permissions: {}
+
+jobs:
+  annotate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          GRAFANA_API_KEY: ${{ secrets.grafana_api_key }}
+          GRAFANA_URL: ${{ inputs.url || vars.GRAFANA_URL }}
+          MESSAGE: ${{ inputs.message }}
+          TAGS: ${{ inputs.tags }}
+          DASHBOARD_UID: ${{ inputs.dashboard_uid }}
+          PANEL_ID: ${{ inputs.panel_id }}
+          EVENT_TIME: ${{ inputs.time }}
+        with:
+          script: |
+            const core = require('@actions/core');
+            const fetch = global.fetch;
+            const apiKey = process.env.GRAFANA_API_KEY;
+            if (!apiKey) {
+              core.setFailed('Grafana API key is not configured.');
+              return;
+            }
+            const baseUrl = (process.env.GRAFANA_URL || '').replace(/\/$/, '');
+            if (!baseUrl) {
+              core.setFailed('Grafana base URL is not configured.');
+              return;
+            }
+            const payload = {
+              text: process.env.MESSAGE,
+            };
+            if (!payload.text) {
+              core.setFailed('Annotation message is required.');
+              return;
+            }
+            if (process.env.TAGS) {
+              payload.tags = process.env.TAGS.split(',').map(tag => tag.trim()).filter(Boolean);
+            }
+            if (process.env.DASHBOARD_UID) {
+              payload.dashboardUID = process.env.DASHBOARD_UID;
+            }
+            if (process.env.PANEL_ID) {
+              const id = Number(process.env.PANEL_ID);
+              if (!Number.isNaN(id)) {
+                payload.panelId = id;
+              }
+            }
+            if (process.env.EVENT_TIME) {
+              const parsed = Date.parse(process.env.EVENT_TIME);
+              payload.time = Number.isNaN(parsed) ? Date.now() : parsed;
+            } else {
+              payload.time = Date.now();
+            }
+
+            const response = await fetch(`${baseUrl}/api/annotations`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+              },
+              body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+              const body = await response.text();
+              core.setFailed(`Grafana API responded with ${response.status}: ${body}`);
+              return;
+            }
+
+            core.info('Annotation created in Grafana.');

@@ -1,0 +1,114 @@
+name: Statuspage Update
+
+on:
+  workflow_call:
+    inputs:
+      page_id:
+        description: Statuspage page identifier (defaults to STATUSPAGE_PAGE_ID repository variable)
+        required: false
+        type: string
+      component_id:
+        description: Component identifier to update
+        required: false
+        type: string
+      component_status:
+        description: New component status (operational, degraded_performance, partial_outage, major_outage)
+        required: false
+        type: string
+      incident_name:
+        description: Create or update an incident with this name
+        required: false
+        type: string
+      incident_status:
+        description: Incident status (investigating, identified, monitoring, resolved)
+        required: false
+        type: string
+      incident_message:
+        description: Markdown message to attach to the incident timeline
+        required: false
+        type: string
+    secrets:
+      statuspage_api_key:
+        required: true
+
+permissions: {}
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          STATUSPAGE_API_KEY: ${{ secrets.statuspage_api_key }}
+          STATUSPAGE_PAGE_ID: ${{ inputs.page_id || vars.STATUSPAGE_PAGE_ID }}
+          COMPONENT_ID: ${{ inputs.component_id }}
+          COMPONENT_STATUS: ${{ inputs.component_status }}
+          INCIDENT_NAME: ${{ inputs.incident_name }}
+          INCIDENT_STATUS: ${{ inputs.incident_status }}
+          INCIDENT_MESSAGE: ${{ inputs.incident_message }}
+        with:
+          script: |
+            const core = require('@actions/core');
+            const fetch = global.fetch;
+            const apiKey = process.env.STATUSPAGE_API_KEY;
+            const pageId = process.env.STATUSPAGE_PAGE_ID;
+            if (!apiKey) {
+              core.setFailed('Statuspage API key is required.');
+              return;
+            }
+            if (!pageId) {
+              core.setFailed('Statuspage page ID is required.');
+              return;
+            }
+            const baseUrl = `https://api.statuspage.io/v1/pages/${pageId}`;
+            const headers = {
+              'Authorization': `OAuth ${apiKey}`,
+              'Content-Type': 'application/json',
+            };
+
+            if (process.env.COMPONENT_ID && process.env.COMPONENT_STATUS) {
+              const componentRes = await fetch(`${baseUrl}/components/${process.env.COMPONENT_ID}.json`, {
+                method: 'PATCH',
+                headers,
+                body: JSON.stringify({
+                  component: {
+                    status: process.env.COMPONENT_STATUS,
+                  },
+                }),
+              });
+              if (!componentRes.ok) {
+                const body = await componentRes.text();
+                core.setFailed(`Failed to update component: ${componentRes.status} ${body}`);
+                return;
+              }
+              core.info('Component status updated.');
+            }
+
+            if (process.env.INCIDENT_NAME && process.env.INCIDENT_MESSAGE) {
+              const status = process.env.INCIDENT_STATUS || 'investigating';
+              const incidentPayload = {
+                incident: {
+                  name: process.env.INCIDENT_NAME,
+                  status,
+                  body: process.env.INCIDENT_MESSAGE,
+                },
+              };
+              if (process.env.COMPONENT_ID) {
+                incidentPayload.incident.component_ids = [process.env.COMPONENT_ID];
+              }
+              const incidentRes = await fetch(`${baseUrl}/incidents.json`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(incidentPayload),
+              });
+              if (!incidentRes.ok) {
+                const body = await incidentRes.text();
+                core.setFailed(`Failed to create incident: ${incidentRes.status} ${body}`);
+                return;
+              }
+              core.info('Incident note published to Statuspage.');
+            }
+
+            if (!process.env.COMPONENT_ID && !process.env.INCIDENT_NAME) {
+              core.warning('Nothing to do. Provide component or incident inputs.');
+            }

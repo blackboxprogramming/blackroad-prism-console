@@ -1,0 +1,19 @@
+# List of HTTP checks executed by .github/workflows/uptime-checks.yml.
+# Update the endpoints, status codes, and optional response body assertions to
+# reflect the services that must stay healthy.
+checks:
+  - name: Prism Console API
+    url: https://example.com/api/health
+    method: GET
+    expected_status: 200
+    timeout: 10
+    retries: 2
+  - name: Prism Console Frontend
+    url: https://example.com/
+    method: GET
+    expected_status:
+      - 200
+      - 204
+    timeout: 10
+    retries: 1
+    contains: "<title>BlackRoad Prism</title>"
