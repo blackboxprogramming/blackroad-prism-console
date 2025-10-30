@@ -44,6 +44,8 @@
 - [ ] Unity exporter: integrate with Unreal exporter orchestration (`UnityAgent`)
 - [ ] Unity Exporter: add automated validation for generated archives (Owner: open)
 - [ ] Unity Exporter: integrate exporter output with asset ingestion queue (Owner: open)
+- [ ] Hook Unity exporter into the build queue with artifact uploads
+- [ ] Draft art direction brief for the "Gateway Plaza" starter scene
 
 ## In Progress
 <!-- Agents move tasks here when running -->
@@ -56,6 +58,7 @@
 <!-- Agents move tasks here on success -->
 - Upgraded Unity exporter service to emit structured Unity archives with scene stubs and metadata. (2025-10-05)
 - 2025-10-05 — Unity exporter now produces structured ZIP templates with metadata + CLI helper. (Owner: gpt-5-codex)
+- [x] Enrich Unity exporter with templated project output and metadata logging
 
 ---
 
@@ -81,3 +84,7 @@
 - Created tokenomics simulation notebook for deterministic unlock modeling across RoadCoin scenarios.
 - Next focus: publish pipeline between RoadStudio and RoadWeb, bridge module wiring, and release automation flow.
 - 2024-05-15: Planning bridge implementation spike, scheduling security hardening sweep, and preparing UX polish for publishing flow.
+
+### 2025-10-06
+- Delivered Unity exporter MVP capable of generating structured scenes, scripts, and metadata-rich archives for collaborators.
+- Teed up follow-up tasks for queue integration and environment/world-building handoff.
