@@ -8,6 +8,7 @@ from typing import List, Optional
 
 class JobBoard:
     """Read and manipulate tasks from ``AGENT_WORKBOARD.md``."""
+    """Read and provide tasks from ``AGENT_WORKBOARD.md``."""
 
     def __init__(self, path: Optional[Path] = None) -> None:
         self.path = path or Path(__file__).resolve().parents[1] / "AGENT_WORKBOARD.md"

@@ -27,6 +27,9 @@ class WorkerBot:
 
         board = JobBoard()
         task: Optional[str] = board.assign_next_task(self.name)
+        """Return the task the bot will work on or ``"idle"``."""
+        board = JobBoard()
+        task: Optional[str] = board.next_task()
         return task or "idle"
 
 
