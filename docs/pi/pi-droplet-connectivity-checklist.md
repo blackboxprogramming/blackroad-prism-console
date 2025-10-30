@@ -4,6 +4,14 @@ Use this runbook when you need to confirm that a Raspberry Pi on your LAN can re
 
 > **Safety first:** Only run commands you understand. Redact private data before sharing outputs outside your environment.
 
+> **macOS note:** The commands in this runbook target Linux systems (your Pi and the droplet). If you are collecting evidence from a
+> macOS workstation, substitute the appropriate tooling—e.g., use `ifconfig` / `netstat -an` / `lsof -i` instead of `ip` / `ss`,
+> and `log show --predicate 'process == "sshd"' --last 10m` for recent SSH events because `systemctl` and `journalctl` are not
+> available. Administrative SSH service management on macOS is handled through `sudo launchctl load -w`
+> `/System/Library/LaunchDaemons/ssh.plist` (enable) and `sudo launchctl unload -w ...` (disable). When you need to inspect or
+> restart the DigitalOcean droplet itself, SSH into the droplet first—run the droplet-side commands there rather than on your
+> laptop.
+
 ## 1. Baseline checks on the Pi
 Perform these steps from a terminal on the Pi (directly or over LAN SSH).
 
