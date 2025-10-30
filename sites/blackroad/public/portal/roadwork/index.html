@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Roadwork | BlackRoad.io</title>
+    <meta
+      name="description"
+      content="Roadwork coordinates delivery pods, work orders, and launch checklists for BlackRoad engagements."
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        background: #0b0b10;
+        color: #e8e8f0;
+        font:
+          14px/1.5 system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+      }
+      a {
+        color: #34d399;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .wrap {
+        max-width: 960px;
+        margin: 40px auto;
+        padding: 28px;
+        border-radius: 18px;
+        background: #14141d;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      }
+      .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+      }
+      .nav a {
+        font-weight: 600;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 24px;
+        letter-spacing: 0.4px;
+      }
+      h2 {
+        margin: 32px 0 12px;
+        font-size: 18px;
+      }
+      .muted {
+        color: #a3a3ad;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-top: 12px;
+      }
+      .card {
+        border: 1px solid #23232c;
+        border-radius: 12px;
+        padding: 16px;
+        background: #101018;
+      }
+      .card h3 {
+        margin: 0 0 6px;
+        font-size: 15px;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        background: #10b98120;
+        color: #34d399;
+        border: 1px solid #065f46;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      th,
+      td {
+        border: 1px solid #23232c;
+        padding: 8px 10px;
+        vertical-align: top;
+      }
+      th {
+        text-align: left;
+        background: #1c1c27;
+      }
+      .timeline {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .timeline li {
+        border-left: 2px solid #2f2f3a;
+        margin-left: 6px;
+        padding-left: 12px;
+        position: relative;
+      }
+      .timeline li::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #34d399;
+        position: absolute;
+        left: -5px;
+        top: 6px;
+      }
+      @media (max-width: 640px) {
+        .nav {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+        }
+        .wrap {
+          margin: 20px;
+          padding: 22px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap" role="main">
+      <div class="nav">
+        <strong><a href="/">BlackRoad.io</a></strong>
+        <a href="/portal">← All portals</a>
+      </div>
+      <h1>Roadwork</h1>
+      <p class="muted">
+        Start new engagements, allocate pods, and publish go-live checklists. Everything you need to take a BlackRoad idea from
+        spark to shipped.
+      </p>
+
+      <h2>Workstreams in motion</h2>
+      <div class="grid" id="workstreams"></div>
+
+      <h2>Launch timeline</h2>
+      <p class="muted">Major gates for the next 14 days.</p>
+      <ul class="timeline" id="timeline"></ul>
+
+      <h2>Pod assignments</h2>
+      <p class="muted">Weekly rotation of the delivery pods and accountable leads.</p>
+      <table>
+        <thead>
+          <tr><th>Pod</th><th>Lead</th><th>Focus</th><th>Status</th></tr>
+        </thead>
+        <tbody id="pods"></tbody>
+      </table>
+
+      <h2>Action queue</h2>
+      <p class="muted">Final blockers before we ship.</p>
+      <div class="grid" id="actions"></div>
+    </div>
+
+    <script>
+      const workstreams = [
+        {
+          name: 'Helios Console',
+          owner: 'Delivery Pod Vega',
+          stage: 'Sprint 2 / Build',
+          summary: 'UI hardening, auth handshake with Prism, staging deploy Friday.',
+        },
+        {
+          name: 'Aeros Ledger',
+          owner: 'Ops Automation',
+          stage: 'Handoff / Train',
+          summary: 'Bots calibrated for nightly reconciliation; audit trail exported.',
+        },
+        {
+          name: 'Quantum Metrics',
+          owner: 'Insights Guild',
+          stage: 'Discovery',
+          summary: 'Interview loop complete, modeling notebooks seeded with baseline data.',
+        },
+      ];
+
+      const timeline = [
+        { date: 'Mon 08', title: 'Sign-off service blueprint with client ops' },
+        { date: 'Thu 11', title: 'Cutover rehearsal (global)' },
+        { date: 'Fri 12', title: 'Roadwork launch sync + pager rotation' },
+        { date: 'Tue 16', title: 'Post-launch health review' },
+      ];
+
+      const pods = [
+        { pod: 'Vega', lead: 'Imani Cole', focus: 'Helios Console integration', status: 'Ready for QA' },
+        { pod: 'Sable', lead: 'Mika Rao', focus: 'Ledger automation + GL sync', status: 'Change window requested' },
+        { pod: 'Nova', lead: 'Victor Shaw', focus: 'Runtime observability kit', status: 'In flight' },
+      ];
+
+      const actions = [
+        { title: 'Provision staging credentials', owner: 'Security Desk', eta: 'Today 15:00 UTC' },
+        { title: 'Record runbook walkthrough', owner: 'Nova Pod', eta: 'Tomorrow 09:00 UTC' },
+        { title: 'Confirm failover checklist', owner: 'SRE Guild', eta: 'Tomorrow 18:00 UTC' },
+      ];
+
+      function renderWorkstreams() {
+        document.getElementById('workstreams').innerHTML = workstreams
+          .map(
+            (ws) => `
+              <article class="card">
+                <h3>${ws.name}</h3>
+                <p class="muted" style="margin:0 0 6px">${ws.summary}</p>
+                <p style="margin:0"><span class="pill">${ws.stage}</span></p>
+                <p class="muted" style="margin:6px 0 0">Owner: ${ws.owner}</p>
+              </article>
+            `,
+          )
+          .join('');
+      }
+
+      function renderTimeline() {
+        document.getElementById('timeline').innerHTML = timeline
+          .map((item) => `<li><strong>${item.date}</strong> — ${item.title}</li>`)
+          .join('');
+      }
+
+      function renderPods() {
+        document.getElementById('pods').innerHTML = pods
+          .map(
+            (pod) => `
+              <tr>
+                <td>${pod.pod}</td>
+                <td>${pod.lead}</td>
+                <td>${pod.focus}</td>
+                <td>${pod.status}</td>
+              </tr>
+            `,
+          )
+          .join('');
+      }
+
+      function renderActions() {
+        document.getElementById('actions').innerHTML = actions
+          .map(
+            (action) => `
+              <article class="card">
+                <h3>${action.title}</h3>
+                <p class="muted" style="margin:0 0 6px">${action.owner}</p>
+                <p style="margin:0"><span class="pill">ETA ${action.eta}</span></p>
+              </article>
+            `,
+          )
+          .join('');
+      }
+
+      renderWorkstreams();
+      renderTimeline();
+      renderPods();
+      renderActions();
+    </script>
+  </body>
+</html>
