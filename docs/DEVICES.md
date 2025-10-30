@@ -6,6 +6,7 @@ The device registry is stored in [`data/admin/devices.json`](../data/admin/devic
 | ------------- | ----------------- | ------------------ | ----- | -------- | ----- |
 | `pi-01`       | Raspberry Pi 5    | Emotion LED agent  | Ops   | ✅       | Hosts the LED ring and the local operator console account.
 | `alice-pi`    | Raspberry Pi 4    | Emotion LED dev rig  | Alice | ✅       | Personal Pi for Alice with LED and sensor prototyping tools.
+| `pi-ops`      | Raspberry Pi 4    | Bridge / broker    | Ops   | ✅       | Runs the MQTT broker, dashboard, and lucidia bridge stub.
 | `jetson-01`   | Jetson Orin Nano  | LLM / display GPU  | ML    | ✅       | Drives the main HDMI panel and coordinates inference jobs.
 | `display-mini`| Pi SPI display    | Status panel       | Ops   | ✅       | 2.8" SPI panel wired into `pi-01` for mini status readouts.
 | `display-main`| HDMI monitor      | Primary display    | Ops   | ✅       | Main wall display connected to `jetson-01`.
