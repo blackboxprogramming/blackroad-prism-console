@@ -10,7 +10,7 @@ services:
     stop_grace_period: 1m
     environment:
       BITCOIN_RPCUSER: ${BITCOIN_RPCUSER:-bitcoin}
-      BITCOIN_RPCPASSWORD: ${BITCOIN_RPCPASSWORD:-please_change_me}
+      BITCOIN_RPCPASSWORD: ${BITCOIN_RPCPASSWORD:?BITCOIN_RPCPASSWORD is required}
     command:
       - -server
       - -daemon=0
@@ -18,7 +18,7 @@ services:
       - -prune=550
       - -dbcache=300
       - -rpcuser=${BITCOIN_RPCUSER:-bitcoin}
-      - -rpcpassword=${BITCOIN_RPCPASSWORD:-please_change_me}
+      - -rpcpassword=${BITCOIN_RPCPASSWORD:?BITCOIN_RPCPASSWORD is required}
       - -rpcbind=0.0.0.0
       - -rpcallowip=127.0.0.1/32
       - -rpcallowip=172.0.0.0/8
@@ -27,7 +27,7 @@ services:
     volumes:
       - bitcoin:/home/bitcoin/.bitcoin
     healthcheck:
-      test: ["CMD", "bitcoin-cli", "-rpcconnect=127.0.0.1", "-rpcuser=${BITCOIN_RPCUSER:-bitcoin}", "-rpcpassword=${BITCOIN_RPCPASSWORD:-please_change_me}", "getblockchaininfo"]
+      test: ["CMD", "bitcoin-cli", "-rpcconnect=127.0.0.1", "-rpcuser=${BITCOIN_RPCUSER:-bitcoin}", "-rpcpassword=${BITCOIN_RPCPASSWORD:?BITCOIN_RPCPASSWORD is required}", "getblockchaininfo"]
       interval: 1m
       timeout: 30s
       retries: 10
@@ -44,7 +44,7 @@ services:
       --network=bitcoin
       --alias=BlackRoad-Pi
       --bitcoin-rpcuser=${BITCOIN_RPCUSER:-bitcoin}
-      --bitcoin-rpcpassword=${BITCOIN_RPCPASSWORD:-please_change_me}
+      --bitcoin-rpcpassword=${BITCOIN_RPCPASSWORD:?BITCOIN_RPCPASSWORD is required}
       --bitcoin-rpcconnect=bitcoind
       --bitcoin-rpcport=8332
       --log-level=info
