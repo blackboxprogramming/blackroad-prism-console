@@ -624,6 +624,9 @@ app.use('/api/hooks', hooks);
 app.use('/api/metrics', metrics);
 app.use('/api/auth/okta', okta);
 app.use('/api/csat', csat);
+app.use('/api/hooks', hooks);
+app.use('/api/metrics', metrics);
+app.use('/api/auth/okta', okta);
 
 const port = process.env.PORT || 4000;
 
