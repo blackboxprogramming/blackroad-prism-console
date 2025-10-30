@@ -9,3 +9,7 @@ This module provides a lightweight LMS for offline use:
 - Event calendar and feedback collection
 
 Use the CLI via `python -m cli.console` with commands beginning with `learn:`.
+
+## Template Library
+
+- [Template #7 — 🧠 Learning Loop & Mentorship Pulse](enablement-template-library.md)
