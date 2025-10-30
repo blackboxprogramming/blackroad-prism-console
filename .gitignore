@@ -60,6 +60,9 @@ codex/runtime/
 benchmarks/
 *.egg-info/
 
+# Python build artifacts
+**/*.egg-info/
+
 # Lucidia artifacts
 secrets/*
 datasets/
