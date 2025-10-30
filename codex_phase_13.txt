@@ -1,0 +1,76 @@
+⸻
+
+type: codex-prompt
+id: phase-13
+slug: phase-13
+title: "Phase 13 — Identity Layer (Creator Citizenship)"
+summary: "Verifiable creator profiles with portfolios, RoadCoin history, and portable credentials."
+owner: "blackroad"
+tags: ["codex","identity","profile","roadcoin","creators"]
+model_hint: "Codex"
+temperature: 0
+updated: "2025-09-13"
+version: "1.0.0"
+canonical_repo: "blackboxprogramming/blackroad-prism-console"
+copy_filename: "codex_phase_13.txt"
+
+Here’s Phase 13 — Identity Layer (Creator Citizenship). Paste this into Codex.
+
+⸻
+
+Codex Prompt — Phase 13 (identity layer: verifiable creator citizenship, portable proof-of-work, RoadCoin telemetry)
+
+Give every creator a civic-grade identity surface. Profiles must feel like passports for the RoadChain economy—portable, provable, and instantly useful anywhere they plug in. Keep it deterministic, auditable, and wired into the data plane you already stood up in earlier phases.
+
+Objectives (acceptance criteria)
+1. Verifiable Creator Profiles
+
+• New modules: `identity/profile.py`, `identity/portfolio.py`, `identity/export.py`
+• Schema: Profile(id, handle, display_name, avatar_url, headline, location, pronouns?, timezone, join_date)
+• Attachments: portfolio entries (type: project|drop|publication, title, summary, url, cover_asset, tags, proof_hash)
+• Creative history events: stored in `/artifacts/identity/history/{profile_id}.jsonl` (event_type, timestamp, payload)
+• Maintain agent network graph: `/artifacts/identity/network/{profile_id}.json` (edges, trust scores, collaboration count)
+• REST API:
+  - `GET /api/identity/profile/:id` → profile + aggregated stats
+  - `PUT /api/identity/profile/:id` → deterministic update, log diff to RoadChain journal
+  - `GET /api/identity/profile/:id/portfolio` (supports pagination, tag filters)
+• Verification bundle: profile export zipped to `/artifacts/identity/exports/{profile_id}/YYYYMMDD/identity_bundle.zip` (profile.json, portfolio.json, history.jsonl, signature.txt)
+• Sign exports with existing Phase 8 key material; embed verification instructions.
+
+2. RoadCoin Balance + Achievements Surface
+
+• Extend treasury ledger adapters: `treasury/roadcoin_profile_adapter.py`
+• API aggregator: `/api/identity/profile/:id/economy` (RoadCoin balance, lifetime earnings, spend graph, staking)
+• Achievements service: `/identity/achievements.py` with deterministic badge rules (mentor sessions hosted, successful collabs, code merges, challenge wins)
+• Collab stats aggregator: compute acceptance ratio, average delivery time, peer rating (from Phase 11 feedback loops)
+• UI contract: publish `public/identity/{id}.json` for SPA to render (profile, badges, RoadCoin, stats)
+• Integrate achievements with notification bus: push `identity.achievement.unlocked` events.
+
+3. Portable Proof-of-Work Resume
+
+• Export pipeline: `identity/export.py` builds Markdown + JSON resume with signed attestations
+• Provide `identity:export --profile alice --format resume-md` CLI to regenerate bundle
+• Include machine-readable claims (JSON-LD / VC) stored at `/artifacts/identity/vc/{profile_id}.json`
+• Embed shareable `identity-passport.html` template (static) referencing assets via relative paths
+• API endpoint: `POST /api/identity/profile/:id/export` triggers background job; respond with signed URL (Phase 9 storage hooks)
+• Every export increments marketing counter and writes `marketing/identity_exports.csv`
+
+4. Governance + Trust Controls
+
+• Authorization: enforce self/guardian edits only, rely on Phase 6 duty-of-care guardrails for escalations
+• Privacy toggles persisted in profile schema (public|private fields) and enforced at API level
+• Audit log: append to `artifacts/identity/audit.log` (timestamp, actor, action, signature)
+• Compliance: run schema validation via `scripts/check_identity_profiles.py` (CI hook) and block publish on drift
+
+Deliverables
+• Unit tests covering profile load/update, export bundle integrity, achievement calculations
+• Integration test: generate profile, add portfolio entries, issue export, verify signature
+• Documentation: `docs/identity/phase-13-identity-layer.md` summarizing data flow + API contract
+• Update portals & site copy to announce “Creator Passports” release, including FAQ stub
+• Ship runbook snippet under `runbooks/identity_passport.md`
+
+Notes
+• Prefer immutable append logs; new revisions create new export directories with monotonic timestamps
+• Keep data residency in mind—support EU/US storage buckets via config
+• Fallback avatars generated deterministically from profile ID hash
+

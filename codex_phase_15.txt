@@ -1,0 +1,67 @@
+⸻
+
+type: codex-prompt
+id: phase-15
+slug: phase-15
+title: "Phase 15 — Cultural Lock-In (Myth, Rituals, Spotlight)"
+summary: "Stage recurring cultural moments—awards, spotlights, symbols—to embed RoadChain in creator identity."
+owner: "blackroad"
+tags: ["codex","culture","community","marketing","roadchain"]
+model_hint: "Codex"
+temperature: 0
+updated: "2025-09-13"
+version: "1.0.0"
+canonical_repo: "blackboxprogramming/blackroad-prism-console"
+copy_filename: "codex_phase_15.txt"
+
+Here’s Phase 15 — Cultural Lock-In (Myth, Rituals, Spotlight). Paste this into Codex.
+
+⸻
+
+Codex Prompt — Phase 15 (cultural lock-in: RoadAwards, creator mythmaking, shared symbols)
+
+Turn the platform into lore. Produce rituals, symbols, and storytelling loops that make sticking with BlackRoad the obvious choice.
+
+Objectives (acceptance criteria)
+1. RoadAwards & Flagship Challenges
+
+• Program brief `marketing/roadawards/overview.md` outlining categories, judging rubric, prize pools (RoadCoin + fiat)
+• Workflow automation `ops/events/roadawards.py` to manage submissions, scoring, finalist notifications
+• Build judging console `frontend/src/pages/RoadAwards.jsx` pulling data from `artifacts/events/roadawards/{year}/submissions.json`
+• Stream kit: prepare OBS overlays and bumpers in `media/roadawards/2025/`
+• Ensure payout automation ties into Phase 14 hooks (winners auto-paid)
+
+2. Creator Spotlight Engine
+
+• Monthly editorial calendar `marketing/spotlight/calendar.csv`
+• Content pipeline `content/spotlight/` storing interview transcripts, b-roll metadata, release forms
+• Micro-doc template `media/templates/microdoc_storyboard.md`
+• Publishing automation `ops/content/spotlight_publish.py` → updates site sections, pushes to YouTube/Vimeo via API
+• Tie exposures back into identity profiles (Phase 13) with `identity/spotlight_badges.py`
+
+3. Shared Symbols & Tone
+
+• Formalize `brand/roadchain_symbol.svg`, `brand/roadchain_logo_usage.md`
+• Draft motto & tone-of-voice guide `brand/voice.md` with examples for social, docs, support replies
+• Add `frontend/src/components/BrandStamp.jsx` for consistent iconography inside app
+• Update assets in `sites/blackroad/public/brand/`
+• Launch merch stub `commerce/merch/roadchain_pack.json` for future drops
+
+4. Community Rituals & Memory
+
+• Calendar service `community/calendar.json` capturing recurring events (office hours, challenge launches)
+• Notion/API sync script `ops/community/memory_vault.py` archiving highlight reels, testimonials, lore timeline
+• Establish `docs/community/rituals.md` describing how to run key ceremonies (onboarding oath, release toasts)
+• Add prompt pack `prompts/community/roadchain_storyteller.md` for narrative consistency
+
+Deliverables
+• Content drop schedule with 12-month horizon committed in `marketing/roadawards/roadmap.xlsx`
+• Site updates: `sites/blackroad/content/codex/phase-15.md` + new `/culture` landing page stub linking to awards + spotlights
+• Analytics dashboards tracking cultural KPIs (retention uplift, NPS) stored at `analytics/dashboards/culture.json`
+• Runbook `runbooks/culture_programs.md` covering crisis comms if events slip
+
+Notes
+• Respect creator consent and attribution; embed license terms in all media packages
+• Rituals should be inclusive globally—support timezone rotation and localization of key assets
+• Track ROI: correlate participation with RoadCoin velocity and renewal rates
+
