@@ -117,6 +117,23 @@ Use Admin UI or API `POST /api/rollback/:releaseId` with the internal token.
 - Check `/var/log/blackroad-api/app.log` for server logs.
 - Verify systemd unit `blackroad-api` is active.
 
+## Realtime Collaboration Service (Yjs)
+
+The `yjs-websocket.service` unit runs from `/srv/yjs-server` and requires the
+`y-websocket` package to be installed locally. After deploying the
+`srv/yjs-server` directory to the host, install the dependencies before
+starting or restarting the service:
+
+```
+cd /srv/yjs-server
+npm install --omit=dev
+systemctl restart yjs-websocket.service
+```
+
+The `ExecStart` command uses the bundled
+`node_modules/y-websocket/bin/server.js`, so the install step must succeed for
+`systemctl start yjs-websocket.service` to work.
+
 ## Monitoring and Observability
 
 The Kubernetes manifest at `deploy/k8s/monitoring.yaml` provisions a full
