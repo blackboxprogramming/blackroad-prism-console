@@ -1,0 +1,176 @@
+═══════════════════════════════════════════════════════════════════════
+    BIBLE CIPHER SYSTEM - COMPLETE FILE INDEX
+═══════════════════════════════════════════════════════════════════════
+
+📚 START HERE
+─────────────────────────────────────────────────────────────────────── 
+1. INDEX.txt (this file) - File directory
+2. SYSTEM_SUMMARY.txt - Overview and statistics  
+3. README.md - Complete documentation (START HERE!)
+4. QUICK_REFERENCE.md - Quick start guide
+
+🔧 ANALYSIS TOOLS
+───────────────────────────────────────────────────────────────────────
+5. bible_cipher_analysis.py - Main cipher engine
+   - Caesar cipher (18, 26) 
+   - Caesar cipher (18, 256)
+   - Number substitution
+   - Gematria analysis
+   
+6. rohonc_decoder.py - Comprehensive decoder
+   - Number sequence decoding
+   - Pattern matching
+   - Polyalphabetic cipher
+   - Frequency correlation
+   
+7. complete_cipher_mapper.py - Complete mapping system
+   - All Caesar tables
+   - Substitution alphabets
+   - Polyalphabetic keys
+   - Export functionality
+
+📊 DATA FILES  
+───────────────────────────────────────────────────────────────────────
+8. bible_full.txt (980 KB) - Complete KJV Bible text
+9. bible_numbers.txt (23 KB) - All 8,144 Bible numbers
+10. genesis.txt (30 KB) - Book of Genesis
+11. kjv_numbers.txt (13 KB) - KJV-specific numbers
+
+🗺️ CIPHER MAPPINGS
+───────────────────────────────────────────────────────────────────────
+12. mapping_num_to_char.json - Bible number → character lookup
+13. mapping_char_frequency.json - Character frequency rankings
+14. caesar_tables.json (108 KB) - All Caesar shift tables (0-25)
+15. substitution_alphabets.json - Various alphabet orderings
+16. polyalphabetic_keys.json - Vigenère-style keys
+17. number_grid_26x26.json - 26×26 matrix of Bible numbers
+18. all_shift_variations.json - Test encryptions with all shifts
+
+📈 ANALYSIS RESULTS
+───────────────────────────────────────────────────────────────────────
+19. cipher_keys.json - Precomputed cipher keys
+20. rohonc_analysis.json - Statistical analysis
+21. word_substitution_table.json - Common Bible words
+22. MASTER_CIPHER_GUIDE.json - Complete cipher reference
+
+═══════════════════════════════════════════════════════════════════════
+USAGE GUIDE
+═══════════════════════════════════════════════════════════════════════
+
+STEP 1: Read Documentation
+   → Start with README.md
+   → Check QUICK_REFERENCE.md for examples
+   → Review MASTER_CIPHER_GUIDE.json for specs
+
+STEP 2: Test the Tools
+   → Run: python3 bible_cipher_analysis.py
+   → Run: python3 rohonc_decoder.py
+   → Run: python3 complete_cipher_mapper.py
+
+STEP 3: Apply to Rohonc
+   → Load Rohonc data (symbols/numbers/text)
+   → Try Caesar decryption (18, 26)
+   → Try Caesar decryption (18, 256)
+   → Check for Bible patterns
+
+STEP 4: Verify Results
+   → Look for English words
+   → Check letter frequencies
+   → Search for Bible phrases
+   → Verify grammar/punctuation
+
+═══════════════════════════════════════════════════════════════════════
+KEY NUMBERS
+═══════════════════════════════════════════════════════════════════════
+
+Caesar Shift:         18
+Alphabet Size:        26 or 256
+Total Bible Numbers:  8,144
+Unique Numbers:       525
+Bible Characters:     1,001,703
+Verses Mapped:        2,665
+Pattern Matches:      4,370+ sequences
+
+═══════════════════════════════════════════════════════════════════════
+DECRYPTION PRIORITY
+═══════════════════════════════════════════════════════════════════════
+
+1. Caesar (18, 26) - Standard alphabet
+2. Caesar (18, 256) - Extended ASCII
+3. Number sequences - Direct position lookup
+4. Polyalphabetic - Vigenère with Bible numbers
+5. Frequency match - Symbol to letter mapping
+6. Pattern search - Bible phrase detection
+7. Coordinate system - Chapter:verse:word
+8. Reverse engineering - From known plaintext
+
+═══════════════════════════════════════════════════════════════════════
+WHAT EACH FILE DOES
+═══════════════════════════════════════════════════════════════════════
+
+DOCUMENTATION FILES:
+  • README.md → Complete guide, theory, examples
+  • QUICK_REFERENCE.md → Fast lookup, cheat sheet
+  • MASTER_CIPHER_GUIDE.json → Structured reference
+  • SYSTEM_SUMMARY.txt → Statistics overview
+
+PYTHON SCRIPTS:
+  • bible_cipher_analysis.py → Encrypt/decrypt, analyze
+  • rohonc_decoder.py → Decode Rohonc specifically
+  • complete_cipher_mapper.py → Generate all mappings
+
+DATA FILES:
+  • bible_full.txt → Source text for cipher
+  • bible_numbers.txt → Extracted number sequence
+  • genesis.txt → First book for testing
+  • kjv_numbers.txt → Additional numbers
+
+MAPPING FILES:
+  • mapping_num_to_char.json → N→char lookup table
+  • mapping_char_frequency.json → Frequency ranks
+  • caesar_tables.json → All shift transformations
+  • substitution_alphabets.json → Alphabet variants
+  • polyalphabetic_keys.json → Variable shift keys
+  • number_grid_26x26.json → Matrix cipher key
+  • all_shift_variations.json → Test cases
+
+RESULTS FILES:
+  • cipher_keys.json → Precomputed keys
+  • rohonc_analysis.json → Bible statistics
+  • word_substitution_table.json → Common words
+
+═══════════════════════════════════════════════════════════════════════
+QUICK EXAMPLES
+═══════════════════════════════════════════════════════════════════════
+
+Example 1: Decrypt with Caesar (18, 26)
+  Input:  "Af lzw twyaffafy"
+  Method: Shift backward by 18
+  Output: "In the beginning"
+
+Example 2: Decrypt with Caesar (18, 256)  
+  Input:  [special characters]
+  Method: chr((ord(c) - 18) % 256)
+  Output: Original text
+
+Example 3: Number sequence
+  Input:  [100, 200, 300]
+  Method: bible_text[100], bible_text[200], etc.
+  Output: Decoded characters
+
+Example 4: Pattern search
+  Input:  Decoded text
+  Method: Search for "the children of"
+  Output: Match = correct decryption!
+
+═══════════════════════════════════════════════════════════════════════
+ALL FILES READY FOR DOWNLOAD! 🔓
+═══════════════════════════════════════════════════════════════════════
+
+Total: 22 files generated
+Size: ~1.3 MB total
+Location: /mnt/user-data/outputs/
+
+Begin with: README.md → QUICK_REFERENCE.md → Tools
+
+Ready to decode the Rohonc Codex! 🎯

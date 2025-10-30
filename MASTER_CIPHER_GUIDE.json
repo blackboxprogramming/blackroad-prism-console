@@ -1,0 +1,239 @@
+{
+  "metadata": {
+    "bible_length": 1001703,
+    "number_count": 8144,
+    "unique_numbers": 525,
+    "unique_chars": 49
+  },
+  "cipher_keys": {
+    "caesar_shift_18_26": "Standard alphabet, shift by 18",
+    "caesar_shift_18_256": "Extended ASCII, shift by 18",
+    "caesar_shift_26_256": "Extended ASCII, shift by 26",
+    "polyalphabetic": "Use Bible numbers as variable shift key",
+    "substitution": "Replace with Bible characters at number positions",
+    "position_based": "Use Bible numbers as direct text positions"
+  },
+  "number_statistics": {
+    "min": 1,
+    "max": 525,
+    "mean": 34.528978388998034,
+    "most_common": [
+      [
+        7,
+        257
+      ],
+      [
+        4,
+        256
+      ],
+      [
+        8,
+        255
+      ],
+      [
+        6,
+        254
+      ],
+      [
+        9,
+        254
+      ],
+      [
+        2,
+        253
+      ],
+      [
+        3,
+        253
+      ],
+      [
+        5,
+        253
+      ],
+      [
+        10,
+        251
+      ],
+      [
+        11,
+        251
+      ],
+      [
+        12,
+        249
+      ],
+      [
+        13,
+        249
+      ],
+      [
+        14,
+        247
+      ],
+      [
+        15,
+        243
+      ],
+      [
+        16,
+        239
+      ],
+      [
+        18,
+        229
+      ],
+      [
+        17,
+        228
+      ],
+      [
+        19,
+        221
+      ],
+      [
+        20,
+        215
+      ],
+      [
+        21,
+        209
+      ]
+    ]
+  },
+  "character_statistics": {
+    "most_common_letters": [
+      [
+        "e",
+        97486
+      ],
+      [
+        "t",
+        75279
+      ],
+      [
+        "a",
+        68092
+      ],
+      [
+        "h",
+        66979
+      ],
+      [
+        "o",
+        58949
+      ],
+      [
+        "n",
+        55575
+      ],
+      [
+        "s",
+        43915
+      ],
+      [
+        "i",
+        42549
+      ],
+      [
+        "r",
+        41247
+      ],
+      [
+        "d",
+        38856
+      ],
+      [
+        "l",
+        32323
+      ],
+      [
+        "f",
+        21649
+      ],
+      [
+        "u",
+        20045
+      ],
+      [
+        "m",
+        18145
+      ],
+      [
+        "c",
+        13345
+      ],
+      [
+        "w",
+        13327
+      ],
+      [
+        "y",
+        13259
+      ],
+      [
+        "g",
+        12576
+      ],
+      [
+        "b",
+        12428
+      ],
+      [
+        "p",
+        9899
+      ],
+      [
+        "v",
+        6560
+      ],
+      [
+        "k",
+        4762
+      ],
+      [
+        "j",
+        1711
+      ],
+      [
+        "z",
+        596
+      ],
+      [
+        "x",
+        440
+      ],
+      [
+        "q",
+        124
+      ]
+    ]
+  },
+  "recommended_decoding_strategies": [
+    "1. Try Caesar shift with key=18 on alphabet (26 chars)",
+    "2. Try Caesar shift with key=18 on ASCII (256 chars)",
+    "3. Use Bible numbers as polyalphabetic key (Vigen\u00e8re-style)",
+    "4. Map Rohonc symbols to Bible chars by frequency",
+    "5. Use Bible numbers as direct position indices",
+    "6. Try number sequences as chapter:verse:word coordinates",
+    "7. Look for repeating patterns matching Bible patterns",
+    "8. Use word-level substitution with common Bible words"
+  ],
+  "example_decodings": {
+    "HELLO": {
+      "caesar_18_26": "ZWDDG",
+      "caesar_18_256": "'ZW^^a'"
+    },
+    "ROHONC": {
+      "caesar_18_26": "JGZGFU",
+      "caesar_18_256": "'daZa`U'"
+    },
+    "BIBLE": {
+      "caesar_18_26": "TATDW",
+      "caesar_18_256": "'T[T^W'"
+    },
+    "GENESIS": {
+      "caesar_18_26": "YWFWKAK",
+      "caesar_18_256": "'YW`We[e'"
+    }
+  }
+}

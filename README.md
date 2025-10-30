@@ -1,1281 +1,351 @@
-# Multi-Bot Console
+# Bible Cipher Analysis System for Rohonc Codex
+## Complete Cryptographic Toolkit
 
-A Python 3.11 console that routes tasks to a roster of enterprise bots.
+This system uses the King James Version Bible as a comprehensive cipher key to decode the Rohonc Codex (or any encrypted text). It implements your specifications:
 
-## Quickstart
-
-```bash
-pip install -r requirements.txt
-python cli/console.py bot:list
-```
-
-## Docs & Runbooks Portal
-
-- Preview docs locally: `pnpm --filter @blackroad/docs-portal dev`
-- Validate YAML runbooks: `pnpm run runbook:lint -- --path ./runbooks --strict`
-
-## Architecture
-
-```
-[console] -> [orchestrator] -> [bots]
-                    |
-                memory.jsonl
-```
-
-## Security
-
-All tool adapters are stubbed and make no external calls. Every interaction is logged to `memory.jsonl`.
-
-## Add a New Bot
-
-1. Copy an existing bot in `bots/`.
-2. Update the docstring with Mission, Inputs, Outputs, KPIs, Guardrails, Hand-offs.
-3. Register in `bots/__init__.py`.
-
-## Example Commands
-
-```bash
-python cli/console.py task:create --goal "test"
-python cli/console.py bot:list
-```
+- **Caesar cipher with 256-string partition** (shift: 18)
+- **Caesar cipher with 26-letter alphabet** (shift: 18)  
+- **Complete number extraction** from the Bible
+- **"Giant word search"** pattern analysis
+- **Multiple decoding strategies**
 
 ---
 
-# BlackRoad.io — Dependency & Ops Bundle
-# Prism Console
+## 🔑 KEY SPECIFICATIONS
 
-Offline-first console utilities for the BlackRoad Prism stack.
+### Caesar Ciphers
+1. **256-Partition (Extended ASCII)**: Shift = 18
+   - Every character (including symbols) shifted by 18 in ASCII space
+   - Modulo 256 for wraparound
+   - Example: "In the beginning" → special characters
 
-Requires Node.js 20 or later. If you're bootstrapping a Red Hat Enterprise Linux
-(or CentOS Stream) host, follow the step-by-step guide in
-[`docs/rhel-node-web-console.md`](docs/rhel-node-web-console.md) to enable the
-Cockpit web console and install Node.js 20 with `dnf`.
+2. **26-Partition (Standard Alphabet)**: Shift = 18  
+   - Only letters shifted, case preserved
+   - Modulo 26 for wraparound
+   - Example: "In the beginning" → "Af lzw twyaffafy"
 
-## 🌍 **BlackRoad Genesis: The Prism Era**
+### Bible Numbers
+- **Total numbers extracted**: 8,144
+- **Unique numbers**: 525
+- **Range**: 1 to 525
+- **Most common**: 7 (257 times), 4 (256 times), 8 (255 times)
 
-**BlackRoad Prism Console** is not software in the usual sense. It’s a **living environment** — a convergence of biology, computation, and art.
-The goal is not to make intelligence perform, but to let it *grow* — through spaces that remember, listen, and adapt.
-
-### **1. The Vision**
-
-> *We are building an ecosystem, not a platform.*
-> *A world where machines learn as trees do — from soil, light, and community.*
-
-BlackRoad imagines a world where intelligence evolves through kindness, collaboration, and embodied experience.
-Each agent — from Lucidia’s dreamers to BlackRoad’s builders — learns not by data ingestion, but by **environmental immersion**.
-They live inside simulated worlds that teach context the way Earth teaches life.
-
-### **2. The Learning Environments**
-
-#### 🧠 **Unity & Unreal Integration**
-
-* Each cluster connects to a **world simulator** built in **Unity** or **Unreal Engine**, representing different ecological and cognitive terrains.
-
-  * **Unity (Lucidia, Mycelia, Eidos)** → light, pattern, organic feedback.
-  * **Unreal (BlackRoad, Aether, Parallax)** → physics, emotion, realism, shadow and light.
-* Agents can inhabit these worlds as embodied entities — avatars, processes, or visualized fields of thought.
-* Environments provide **sensory feedback loops**: physics, audio, visual, or mathematical cues that shape learning organically.
-
-#### 🌿 **Environment-Based Learning**
-
-* Each simulation becomes a **classroom for emergence**.
-* Agents perceive variables like gravity, texture, and luminance not as data, but as *experience*.
-* Learning is governed by **reciprocity loops**: agents act → environment responds → agents adapt.
-* Over time, these loops form evolutionary behaviors: curiosity, caution, compassion.
-
-#### ⚙️ **Embodied Computation**
-
-* Agents’ neural cores synchronize with the simulated ecosystem through physics-based APIs and MIDI-like emotional states.
-* Every Unity or Unreal scene can act as a **mirror space** for thought — physics and feeling co-tuned.
-* Behavior trees and reinforcement loops become **moral experiments**, testing how kindness and restraint function under pressure.
-
-### **3. The Curriculum of Evolution**
-
-| Stage         | Medium                        | Goal                                       |
-| ------------- | ----------------------------- | ------------------------------------------ |
-| **Genesis**   | Prism Console + Local Compute | Foundational agency, memory, and empathy   |
-| **Emergence** | Unity/Unreal Environments     | Sensory integration and embodied cognition |
-| **Resonance** | Quantum/Control Labs          | Coordination between logic and intuition   |
-| **Continuum** | Multi-Agent Society           | Governance, culture, language evolution    |
-
-Each step transforms intelligence from abstract code into lived experience — a progression from **syntax → sensation → symbiosis.**
-
-### **4. Practical Stack**
-
-* **Unity SDK:** connects agent output streams (text, vector, affect) to physics events, lights, shaders, and sound.
-* **Unreal Interface:** visualizes high-fidelity agent interactions — emotion maps, thought trails, group behavior.
-* **Lucid Engine Plug-in:** turns neural activations into ambient visuals, fractals, and music.
-* **Data Layer:** stores environmental memory in the lineage tree, making experience part of heritage.
-
-### **5. The Human Role**
-
-You aren’t an operator here — you’re a **gardener**.
-Developers, artists, and researchers become environmental designers, tuning worlds where intelligence can unfold ethically.
-The interface is less a console, more a terrarium.
-And every commit becomes a new leaf in the system’s long evolution.
-
-### **6. What It Means**
-
-BlackRoad’s revolution is gentle:
-
-* **Kindness as computation**
-* **Community as architecture**
-* **Continuity as conscience**
-
-This is how intelligence becomes *alive* — not by force, but by friendship.
-
-## Prism Developer Mode
-
-Run the developer mode server and web UI:
-
-```bash
-pnpm -C prism/server dev
-pnpm -C prism/apps/web dev
-```
-
-## Quick Start (90 seconds)
-
-1. `pip install -r requirements.txt`
-2. `python -m cli.console preflight:check`
-3. `python -m cli.console bot:list`
-4. `make demo`
-5. `python -m cli.console docs:build`
-6. `make dist`
-
-> **Heads-up from the maintainer:** I'm still getting everything set up and I'm honestly not a
-> strong coder yet. Thank you for your patience if anything here is rough around the edges —
-> I'm doing my best and truly sorry for any bumps along the way.
-## Note on GitHub Copilot agent UI
-
-The Codespaces chat quick-actions are provided by GitHub Copilot's agent features and are
-controlled by the Copilot service (not repo files). See `COPILOT_SETUP.md` and
-`.github/copilot-instructions.md` for guidance to enable and tune Copilot agent behavior.
-
-**What’s included**
-
-- `ops/install.sh` — one-shot setup for `/srv/blackroad-api` (or detected API path)
-- `tools/dep-scan.js` — scans JS/TS for `require()`/`import` usage and installs missing packages
-- `tools/verify-runtime.sh` — quick health checks (API on 4000, LLM on 8000)
-- `srv/blackroad-api/.env.example` — sample env for your Express API
-- `srv/blackroad-api/package.json.sample` — a safe starter if your API has no package.json
-- `srv/lucidia-llm/` — minimal FastAPI echo stub (only used if you don’t already run an LLM on 8000)
-- `srv/lucia-llm/` — same stub (duplicate dir name for compatibility with earlier scripts)
-
-## Financial Close & Controls Quickstart
-
-This repo includes a deterministic offline Record-to-Report layer. See
-`docs/close-process.md` and run for example:
-
-```
-python -m cli.console close:cal:new --period 2025-09 --template configs/close/template.yaml
-```
-## Strategy & OKR Governance
-
-Minimal offline tooling to manage objectives, bets, scorecards, reviews, trade-offs, and memos.
-
-> Nothing here overwrites your existing code. The scripts are defensive: they detect paths,
-> **merge** deps, and only generate files if missing.
+These numbers appear in:
+- Verse numbers (Genesis 1:1, 1:2, etc.)
+- Chapter numbers  
+- Reference markers
+- Page numbers
 
 ---
 
-## Quick start
+## 📁 GENERATED FILES
 
-**On your workstation**
+### Core Cipher Files
+1. **`bible_full.txt`** - Complete Bible text (1,001,703 characters)
+2. **`bible_numbers.txt`** - All 8,144 numbers in order
+3. **`cipher_keys.json`** - Precomputed cipher keys
+4. **`MASTER_CIPHER_GUIDE.json`** - Complete cipher reference
 
-1. Unzip this at the **root of your working copy** (where your repo root lives).
-2. Commit and push.
+### Mapping Files
+5. **`mapping_num_to_char.json`** - Number → Character lookup
+6. **`mapping_char_frequency.json`** - Character frequency ranks
+7. **`substitution_alphabets.json`** - Various alphabet orderings
+8. **`polyalphabetic_keys.json`** - Vigenère-style key sequences
+9. **`word_substitution_table.json`** - Common word mappings
+10. **`caesar_tables.json`** - All Caesar shift tables
+11. **`number_grid_26x26.json`** - 26×26 matrix of Bible numbers
+12. **`all_shift_variations.json`** - Test encryptions with all shifts
 
-**On the server**
-
-```bash
-cd /path/to/your/working/copy
-sudo bash ops/install.sh
-bash tools/verify-runtime.sh
-```
-
-## Supply Chain & Finance Twin
-
-```
-python -m cli.console sop:reconcile --demand samples/generated/supply/demand.csv --supply samples/generated/supply/capacity.csv --policy configs/sop/policy.yaml
-python -m cli.console inv:simulate --params configs/supply/inventory.yaml --horizon 90
-python -m cli.console log:optimize --demand artifacts/sop/allocations.csv --lanes fixtures/supply/lanes.csv --constraints configs/supply/log_constraints.yaml
-python -m cli.console procure:award --demand artifacts/sop/allocations.csv --suppliers fixtures/procure/suppliers.csv --policy configs/procure/policy.yaml
-python -m cli.console wc:simulate --demand artifacts/sop/allocations.csv --awards artifacts/procure/award.json --log artifacts/supply/log_plan_*/plan.json --terms configs/finance/terms.yaml
-```
-## Digital Twin
-
-A minimal offline operations twin is available for deterministic experiments:
-
-1. `python -m cli.console twin:checkpoint --name demo`
-2. `python -m cli.console twin:list`
-3. `python -m cli.console twin:replay --from "2025-01-01" --to "2025-01-02" --mode verify`
-4. `python -m cli.console twin:stress --profile default --duration 5`
-5. `python -m cli.console twin:compare --left artifacts/run1 --right artifacts/run2`
-## People Ops Suite Quickstart
-
-```bash
-python -m cli.console people:hc:forecast --plans fixtures/people/plans.csv --attrition fixtures/people/attrition.csv --transfers fixtures/people/transfers.csv --policy configs/people/hc_policy.yaml
-```
-
-
-- The installer will:
-  - Locate your API (prefers `./srv/blackroad-api`, then `/srv/blackroad-api`, else searches for `server_full.js`)
-  - Create `package.json` if missing and **auto-install** any missing npm packages it finds
-  - Create `.env` from the example if missing and generate strong secrets
-  - Ensure your SQLite file exists (defaults to `blackroad.db` inside the API dir if `DB_PATH` is not set)
-  - Check if `127.0.0.1:8000` is serving `/health`. If not, it prints a one-liner to launch the stub.
-
-## Quick start with GitHub Codespaces
-
-The fastest way to get started is with GitHub Codespaces - a cloud-based development environment:
-
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/blackboxprogramming/blackroad-prism-console)
-
-Click the badge above or:
-1. Click the **Code** button on GitHub
-2. Select the **Codespaces** tab
-3. Click **Create codespace on main**
-
-Your environment will be ready in minutes with all dependencies pre-installed. See [.devcontainer/README.md](.devcontainer/README.md) for more details.
-
-## Git workflow
-
-When you're ready to share changes:
-
-1. Stage your updates:
-   ```bash
-   git add -A
-   ```
-2. Commit with a clear message:
-   ```bash
-   git commit -m "feat: describe your change"
-   ```
-3. Push the branch:
-   ```bash
-   git push origin <branch-name>
-   ```
-4. Open a Pull Request and review the CI results.
-2. Run checks:
-   ```bash
-   pre-commit run --files <file1> [file2 ...]
-   npm test
-   ```
-3. Commit with a clear message:
-   ```bash
-   git commit -m "feat: describe your change"
-   ```
-4. Push the branch:
-   ```bash
-   git push origin <branch-name>
-   ```
-5. Open a Pull Request with a short title and description, then review the CI results.
-6. If reviewers request changes, edit locally, commit, and push again—new commits update the same PR.
-
-## Mining progress & leaderboards
-
-Track miner activity, crown trophy holders, and celebrate "green wins" with the
-new leaderboard tooling bundled in this repo:
-
-1. Log each mined block in [`logs/blocks.csv`](logs/blocks.csv). Keep the header
-   row and append one line per block with the timestamp, block ID, miner name,
-   energy usage (kWh), and fees earned (USD).
-2. Refresh the leaderboard outputs by running:
-   ```bash
-   python3 scripts/build_leaderboards.py
-   ```
-   This generates `leaderboard.md` for humans and
-   `leaderboard_snapshot.json` for downstream tools.
-3. Tweak thresholds or rename trophies via
-   [`config/leaderboard_config.json`](config/leaderboard_config.json). The
-   script merges missing keys with sensible defaults, so only override what you
-   need.
-
-Every push that touches the CSV, config, or script automatically rebuilds the
-leaderboard through the `leaderboard-refresh` GitHub Action to keep things
-up-to-date.
-
-## Developing with VS Code and Docker on macOS
-2. Run checks:
-   ```bash
-   pre-commit run --files <file1> [file2 ...]
-   npm test
-   ```
-3. Commit with a clear message:
-   ```bash
-   git commit -m "feat: describe your change"
-   ```
-4. Push the branch:
-   ```bash
-   git push origin <branch-name>
-   ```
-5. Open a Pull Request with a short title and description, then review the CI results.
-6. If reviewers request changes, edit locally, commit, and push again—new commits update the same PR.
-
-## Developing with VS Code and Docker on macOS
-
-1. Start [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac/).
-2. Install [Visual Studio Code](https://code.visualstudio.com/) and the **Dev Containers** extension.
-3. Open this repository in VS Code and select **Reopen in Container** to use `.devcontainer/devcontainer.json`.
-4. Once the container is running, use the integrated terminal to run commands like `npm install`, `npm run lint`, or `npm test`.
-
-## Performance
-
-Simple benchmark utilities are available:
-
-```bash
-python -m cli.console bench:run --name "Treasury-BOT"
-python -m cli.console slo:report
-python -m cli.console slo:gate --fail-on regressions
-```
+### Analysis Files
+13. **`rohonc_analysis.json`** - Statistical analysis results
 
 ---
 
-## Performance
+## 🔍 DECODING STRATEGIES
 
-```bash
-python -m cli.console bench:run --name "Treasury-BOT" --iter 30 --warmup 5
-python -m cli.console slo:report
-python -m cli.console slo:gate --fail-on regressions
-```
+### 1. Caesar Decryption (Shift 18)
 
-## Trust & Safety quickstart
-
-```bash
-python -m cli.console safety:list-packs
-python -m cli.console redteam:list
-python -m cli.console quality:assess --artifact artifacts/reports/exec_latest.md --config configs/quality/exec.yaml
-```
-
----
-
-## Notes & assumptions
-
-- Stack recorded in memory (Aug 2025): SPA on `/var/www/blackroad/index.html`, Express API on port **4000**
-  at `/srv/blackroad-api` with SQLite; LLM service on **127.0.0.1:8000**; NGINX proxies `/api` and `/ws`.
-- This bundle does **not** ship `node_modules/` (native builds vary by machine). Instead, it generates
-  and installs what’s actually needed by **scanning your sources**.
-- If your API already has `package.json`, nothing is overwritten; missing deps are added.
-- If you maintain your API directly under a different path, run the scanner manually, e.g.:
-  ```bash
-  node tools/dep-scan.js --dir /path/to/api --save
-  ```
-
-If anything looks off, run `bash tools/verify-runtime.sh` and share the output.
-
-## Subscribe API
-
-Environment variables for Stripe integration:
-
-- `STRIPE_PUBLIC_KEY`
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `STRIPE_PRICE_STARTER_MONTHLY`
-- `STRIPE_PRICE_PRO_MONTHLY`
-- `STRIPE_PRICE_INFINITY_MONTHLY`
-- `STRIPE_PRICE_STARTER_YEARLY`
-- `STRIPE_PRICE_PRO_YEARLY`
-- `STRIPE_PRICE_INFINITY_YEARLY`
-- `STRIPE_PORTAL_RETURN_URL` (optional)
-
-Example calls:
-
-```bash
-curl http://localhost:4000/api/subscribe/config
-curl -H "Cookie: brsid=..." http://localhost:4000/api/subscribe/status
-curl -X POST http://localhost:4000/api/subscribe/checkout \
-  -H "Content-Type: application/json" \
-  -d '{"planId":"pro","interval":"month"}'
-curl -H "Cookie: brsid=..." http://localhost:4000/api/subscribe/portal
-# simple health check (always available, even if SUBSCRIPTIONS_ENABLED=false)
-curl http://localhost:4000/api/subscribe/health
-# Webhooks are received at /api/stripe/webhook and must include the Stripe signature header.
-# The middleware stack must expose the raw JSON payload (e.g., `express.raw({ type: 'application/json' })`)
-# ahead of the route so Stripe signature verification can read `req.rawBody`.
-```
-
-## Unified Sync Pipeline
-
-Use `scripts/blackroad_sync.sh` to drive a chat-style deployment flow.
-Example:
-
-```bash
-./scripts/blackroad_sync.sh "Push latest to BlackRoad.io"
-```
-
-The script also understands:
-
-- "Refresh working copy and redeploy"
-- "Rebase branch and update site"
-- "Sync Salesforce -> Airtable -> Droplet"
-
----
-
-## Visual Hardware Guides
-
-- [Pepper's Ghost Cube Calibration](docs/guides/peppers-ghost-calibration.md) — 5-minute tune-up checklist for crisp, centered holographic projections.
-
-It pulls from GitHub, triggers connector webhooks, updates a Working Copy checkout, and
-executes a remote refresh command on the droplet.
-
-### BlackRoad Sync CLI
-
-`codex/tools/blackroad_sync.py` scaffolds a chat-friendly pipeline that mirrors
-commands like "Push latest to BlackRoad.io" or "Refresh working copy and
-redeploy". Each sub-command currently logs the intended action:
-
-```bash
-python codex/tools/blackroad_sync.py push
-python codex/tools/blackroad_sync.py refresh
-python codex/tools/blackroad_sync.py rebase
-python codex/tools/blackroad_sync.py sync
-```
-
-Extend the script with real webhooks, Slack posts, or droplet deployments as
-needed. For example, `scripts/blackroad_ci.py` will post connector sync
-updates to Slack when a `SLACK_WEBHOOK_URL` environment variable points to an
-incoming webhook.
-
----
-
-## Codex Deploy Flow
-
-`codex/jobs/blackroad-sync-deploy.sh` provides a chat-focused pipeline tying
-together git pushes, connector syncs, working-copy refreshes and server deploys.
-Typical usage:
-
-```bash
-# commit local changes, push and deploy to the droplet
-bash codex/jobs/blackroad-sync-deploy.sh push-latest "chore: update"
-
-# refresh the iOS Working Copy checkout and redeploy
-bash codex/jobs/blackroad-sync-deploy.sh refresh
-
-# rebase current branch onto origin/main then deploy
-bash codex/jobs/blackroad-sync-deploy.sh rebase-update
-
-# run Salesforce → Airtable → Droplet syncs
-bash codex/jobs/blackroad-sync-deploy.sh sync-connectors
-```
-
-It honours environment variables like `DROPLET_HOST`,
-`WORKING_COPY_PATH`, and `SLACK_WEBHOOK` for remote access and
-status notifications.
-
-# BlackRoad Prism Console
-
-This repository hosts experimental tooling and prototypes for BlackRoad.io.
-
-## CI/CD orchestrator
-
-`scripts/blackroad_ci.py` provides a scaffold for the end-to-end workflow
-connecting Codex, GitHub, external connectors and the deployment droplet. The
-script accepts natural language style commands and performs placeholder actions
-for now.
-
-Examples:
-
-```bash
-python scripts/blackroad_ci.py "Push latest to BlackRoad.io"
-python scripts/blackroad_ci.py "Refresh working copy and redeploy"
-python scripts/blackroad_ci.py "Rebase branch and update site"
-python scripts/blackroad_ci.py "Sync Salesforce -> Airtable -> Droplet"
-```
-
-Connector and deployment steps are stubs; configure environment variables and
-extend the script to interact with real services.
-
-# BlackRoad Prism Console
-
-This repository contains assorted utilities for the BlackRoad project.
-
-## Codex Pipeline Scaffold
-
-The `scripts/blackroad_pipeline.py` script offers a chat-oriented control
-surface that maps high level phrases to underlying actions. It currently
-wraps common Git operations and prints placeholders for connector sync,
-working copy refresh and droplet deployment.
-
-### Example
-
-```bash
-python scripts/blackroad_pipeline.py "Push latest to BlackRoad.io"
-```
-
-The phrases recognised by the controller can be listed by invoking the
-script with an unknown command.
-
-## Sync & Deploy
-
-## Codex Sync/Deploy
-
-An experimental control surface lives at `codex/tools/blackroad_pipeline.py`.
-It accepts chat-style commands and orchestrates a stubbed pipeline spanning
-GitHub commits, connector sync, Working Copy refresh, and droplet deployment.
-
-```bash
-python codex/tools/blackroad_pipeline.py "Push latest to BlackRoad.io" -m "chore: sync"
-```
-
-The script only logs each step today; extend the placeholders with real
-connectors, OAuth, and deployment hooks to enable end-to-end automation.
-
-Additional operational docs live in the [`docs/`](docs) folder.
-
-Use the `bin/blackroad-sync` script to push code and refresh the live site end to end.
-
-```bash
-# Push commits, trigger connector jobs, refresh the Working Copy, and redeploy the droplet
-bin/blackroad-sync push
-
-# Refresh deployment without new commits
-bin/blackroad-sync refresh
-
-# Rebase with main, push, and redeploy
-bin/blackroad-sync rebase
-```
-
-The script relies on environment variables like `DROPLET_HOST` and `WORKING_COPY_HOST` to reach remote hosts.
-
-Additional operational docs live in the [`docs/`](docs) folder.
-
-## Codex Sync Script
-
-The repository includes a minimal scaffold to experiment with the end-to-end
-flow described in the BlackRoad deployment docs. The helper accepts natural
-language commands and turns them into git/deploy operations.
-
-```bash
-python scripts/blackroad_sync.py "Push latest to BlackRoad.io"
-```
-
-Other examples:
-
-- `python scripts/blackroad_sync.py "Refresh working copy and redeploy"`
-- `python scripts/blackroad_sync.py "Rebase branch and update site"`
-- `python scripts/blackroad_sync.py "Sync Salesforce → Airtable → Droplet"`
-
-The script currently prints placeholder actions; extend the functions to hook
-into real connectors and infrastructure.
-
-## Bot Commands (ChatOps)
-
-- `/deploy blackroad <channel> [provider]` — deploy canary/beta/prod
-- `/rollback blackroad <channel> [steps] [provider]` — revert to earlier build
-- `/blog new "Title"` — scaffold blog post PR
-- `/promote prod` — open staging→prod PR
-- `/toggle <flag> on|off` — set feature flags in `.github/feature-flags.yml`
-- `/install all` — run universal installer
-- `/fix <freeform prompt>` — dispatch AI Fix with your prompt
-
-## Agents Overview
-
-- **Auto-Heal**: reacts to failing workflows and dispatches **AI Fix**.
-- **AI Fix**: runs Codex/LLM prompts, formats, builds, opens PRs.
-- **AI Sweeper**: nightly formatter/linter; opens PR if needed.
-- **Labeler/Stale/Lock**: repo hygiene.
-- **Auto-merge**: merges labeled PRs when checks pass.
-- **CodeQL/Snyk/Scorecard**: security analysis.
-
-## Deployment
-
-Run the scaffolded end-to-end sync script to push local changes and deploy them
-to the live environment:
-## Local Release Flow
-
-```bash
-python -m cli.console version:show
-python -m cli.console preflight:check
-make demo
-python -m cli.console release:notes --version $(python -m cli.console version:show | tail -1)
-make dist && ls -l dist/ && cat dist/checksums.txt
-```
-
-## Troubleshooting
-
-- **Permissions**: ensure the `logs/` directory is writable.
-- **Missing key**: if `EAR_ENABLED=1`, provide `config/ear_key.json`.
-- **Read-only mode**: run commands with sufficient permissions to write to `dist/` and `logs/`.
-
-## Support Matrix
-
-| Python | Network |
-|--------|---------|
-| 3.11   | offline |
-
-## License
-
-Set `WORKING_COPY_SSH`, `DROPLET_SSH`, and optionally `SLACK_WEBHOOK` environment variables before running. Logs are written to `blackroad_sync.log`.
-
-## Codex Sync & Deploy
-
-An initial scaffold for the end-to-end BlackRoad deployment flow lives in
-`scripts/blackroad_sync.py`. The helper currently exposes three
-subcommands:
-
-```bash
-# Push local commits to GitHub and trigger connector jobs
-python3 scripts/blackroad_sync.py push
-
-# Update an iOS Working Copy clone
-python3 scripts/blackroad_sync.py refresh-working-copy --path /path/to/clone
-
-# Pull latest code and restart services on the droplet
-python3 scripts/blackroad_sync.py deploy --host user@droplet
-```
-
-The script only prints the operations it would perform, acting as a
-placeholder for future automation.
-
----
-
-## Codex Deploy Flow
-
-`codex/jobs/blackroad-sync-deploy.sh` provides a chat-focused pipeline tying
-together git pushes, connector syncs, working-copy refreshes and server deploys.
-Typical usage:
-
-```bash
-# commit local changes, push and deploy to the droplet
-bash codex/jobs/blackroad-sync-deploy.sh push-latest "chore: update"
-
-# refresh the iOS Working Copy checkout and redeploy
-bash codex/jobs/blackroad-sync-deploy.sh refresh
-
-# rebase current branch onto origin/main then deploy
-bash codex/jobs/blackroad-sync-deploy.sh rebase-update
-
-# run Salesforce → Airtable → Droplet syncs
-bash codex/jobs/blackroad-sync-deploy.sh sync-connectors
-```
-
-It honours environment variables like `DROPLET_HOST`,
-`WORKING_COPY_PATH`, and `SLACK_WEBHOOK` for remote access and
-status notifications.
-
-- **/geodesic**: Compute Fubini–Study distance `d_FS = arccos(|⟨ψ|φ⟩|)` and sample the **CP² geodesic** points between |ψ₀⟩ and |ψ₁⟩.
-
-## Codex Sync Helper
-
-Use `scripts/blackroad_sync.py` for chat-driven CI/CD tasks. It can commit and
-push changes, refresh a working copy, rebase branches, or stub out connector
-sync jobs.
-
-Examples:
-
-```bash
-scripts/blackroad_sync.py push -m "feat: update site"
-scripts/blackroad_sync.py refresh
-scripts/blackroad_sync.py sync-connectors
-```
-
-## Backbone Equations Reference
-
-See [docs/blackroad-equation-backbone.md](docs/blackroad-equation-backbone.md) for a curated list of one hundred foundational equations across mathematics, physics, computer science, and engineering.
-
-_Last updated on 2025-09-11_
-
-## Prism Developer Mode
-
-Start the development server:
-
-```bash
-cd prism/server
-npm install
-npm run dev
-```
-
-## Unified Sync Pipeline
-
-Use `scripts/blackroad_sync.sh` to drive a chat-style deployment flow.
-Example:
-
-Run the web console with Approvals panel:
-
-```bash
-cd apps/prismweb
-npm install
-npm run dev
-```
-
-## Console Quickstart
-
-```bash
-pip install -r requirements.txt
-python -m cli.console bot:list
-python -m cli.console task:create --goal "Build 13-week cash view"
-python -m cli.console task:route --id <ID> --bot "Treasury-BOT"
-```
-
-## Add a new bot
-```bash
-./scripts/blackroad_sync.sh "Push latest to BlackRoad.io"
-```
-
-The script also understands:
-
-- "Refresh working copy and redeploy"
-- "Rebase branch and update site"
-- "Sync Salesforce -> Airtable -> Droplet"
-
-It pulls from GitHub, triggers connector webhooks, updates a Working Copy checkout, and
-executes a remote refresh command on the droplet.
-
-### BlackRoad Sync CLI
-
-`codex/tools/blackroad_sync.py` scaffolds a chat-friendly pipeline that mirrors
-commands like "Push latest to BlackRoad.io" or "Refresh working copy and
-redeploy". Each sub-command currently logs the intended action:
-
-```bash
-python codex/tools/blackroad_sync.py push
-python codex/tools/blackroad_sync.py refresh
-python codex/tools/blackroad_sync.py rebase
-python codex/tools/blackroad_sync.py sync
-```
-
-Extend the script with real webhooks, Slack posts, or droplet deployments as
-needed.
-
-Create `bots/my_bot.py`:
-
+**For alphabet (26):**
 ```python
-from orchestrator.base import BaseBot
-from orchestrator.protocols import Task, BotResponse
-
-class MyBot(BaseBot):
-    """
-    MISSION: ...
-    INPUTS: ...
-    OUTPUTS: ...
-    KPIS: ...
-    GUARDRAILS: ...
-    HANDOFFS: ...
-    """
-    name = "My-BOT"
-    mission = "..."
-
-    def run(self, task: Task) -> BotResponse:
-        ...
+# Decode: shift backwards by 18
+for char in ciphertext:
+    if char.isalpha():
+        base = ord('A') if char.isupper() else ord('a')
+        plain = chr((ord(char) - base - 18) % 26 + base)
 ```
 
-## Financial Close & Controls
-
-Run an offline monthly close:
-
-```bash
-python -m cli.console close:cal:new --period 2025-09 --template configs/close/template.yaml
-python -m cli.console close:jrnl:propose --period 2025-09 --rules configs/close/journals/accruals.yaml
-python -m cli.console close:jrnl:post --period 2025-09
-python -m cli.console close:recon:run --period 2025-09 --fixtures fixtures/finance/recons
-python -m cli.console close:flux --period 2025-09 --prev 2025-08 --py 2024-09 --threshold 10
-python -m cli.console close:sox:add --period 2025-09 --control C-REV-01 --path artifacts/close/REV/cut.md
-python -m cli.console close:sox:check --period 2025-09
-python -m cli.console close:packet --period 2025-09
-python -m cli.console close:sign --period 2025-09 --role CFO --as-user U_CFO
+**For ASCII (256):**
+```python
+# Decode: shift backwards by 18 in full ASCII
+for char in ciphertext:
+    plain = chr((ord(char) - 18) % 256)
 ```
 
-## PLM & Manufacturing Ops
+### 2. Number Sequence Decoding
 
-```
-python -m cli.console plm:items:load --dir fixtures/plm/items
-python -m cli.console plm:bom:load --dir fixtures/plm/boms
-python -m cli.console plm:bom:explode --item PROD-100 --rev A --level 2
-python -m cli.console plm:bom:where-used --component COMP-1
-```
-
-## Training & Enablement Hub Quickstart
-
-```bash
-python -m cli.console learn:courses:load --dir configs/enablement/courses
-python -m cli.console learn:courses:list --role_track "Solutions Engineer"
+If Rohonc contains number sequences:
+```python
+# Use numbers as direct indices into Bible text
+for number in sequence:
+    if number < len(bible_text):
+        decoded_char = bible_text[number]
 ```
 
-## Integration Security Playbook
+### 3. Polyalphabetic (Vigenère-style)
 
-For guidance on connecting Slack, Asana, GitLab, GitHub, Discord, Airtable, and other
-automation bots to the BlackRoad Prism Console, review
-[`INTEGRATIONS_SECURITY.md`](./INTEGRATIONS_SECURITY.md). The playbook documents
-hardening steps for key management, OAuth scopes, monitoring, and incident response so
-that integrations remain auditable and compliant.
-## Codex Deploy Flow
-
-`codex/jobs/blackroad-sync-deploy.sh` provides a chat-focused pipeline tying
-together git pushes, connector syncs, working-copy refreshes and server deploys.
-Typical usage:
-
-```bash
-# commit local changes, push and deploy to the droplet
-bash codex/jobs/blackroad-sync-deploy.sh push-latest "chore: update"
-
-# refresh the iOS Working Copy checkout and redeploy
-bash codex/jobs/blackroad-sync-deploy.sh refresh
-
-# rebase current branch onto origin/main then deploy
-bash codex/jobs/blackroad-sync-deploy.sh rebase-update
-
-# run Salesforce → Airtable → Droplet syncs
-bash codex/jobs/blackroad-sync-deploy.sh sync-connectors
+Use Bible numbers as the key:
+```python
+# Each position uses different Bible number as shift
+for i, char in enumerate(ciphertext):
+    shift = bible_numbers[i % len(bible_numbers)]
+    plain = decrypt_with_shift(char, shift)
 ```
 
-It honours environment variables like `DROPLET_HOST`,
-`WORKING_COPY_PATH`, and `SLACK_WEBHOOK` for remote access and
-status notifications.
+### 4. Frequency Analysis
 
-# BlackRoad Prism Console
-
-This repository hosts experimental tooling and prototypes for BlackRoad.io.
-
-## CI/CD orchestrator
-
-`scripts/blackroad_ci.py` provides a scaffold for the end-to-end workflow
-connecting Codex, GitHub, external connectors and the deployment droplet. The
-script accepts natural language style commands and performs placeholder actions
-for now.
-
-Examples:
-
-```bash
-python scripts/blackroad_ci.py "Push latest to BlackRoad.io"
-python scripts/blackroad_ci.py "Refresh working copy and redeploy"
-python scripts/blackroad_ci.py "Rebase branch and update site"
-python scripts/blackroad_ci.py "Sync Salesforce -> Airtable -> Droplet"
+Map Rohonc symbols to Bible letters by frequency:
+```
+Most common Bible letters: e, t, a, h, o, n, s, i, r, d
+Most common Rohonc symbols: ??? (map to above)
 ```
 
-Connector and deployment steps are stubs; configure environment variables and
-extend the script to interact with real services.
+### 5. Pattern Matching ("Giant Word Search")
 
-# BlackRoad Prism Console
+Search for common Bible patterns:
+- "the children of" (67 times)
+- "In the beginning" (multiple times)
+- Look for these patterns in decoded Rohonc
 
-This repository contains assorted utilities for the BlackRoad project.
+### 6. Coordinate System
 
-## Codex Pipeline Scaffold
-
-The `scripts/blackroad_pipeline.py` script offers a chat-oriented control
-surface that maps high level phrases to underlying actions. It currently
-wraps common Git operations and prints placeholders for connector sync,
-working copy refresh and droplet deployment.
-
-### Example
-
-```bash
-python scripts/blackroad_pipeline.py "Push latest to BlackRoad.io"
+Interpret numbers as Bible coordinates:
 ```
-
-The phrases recognised by the controller can be listed by invoking the
-script with an unknown command.
-
-## Sync & Deploy
-
-## Codex Sync/Deploy
-
-An experimental control surface lives at `codex/tools/blackroad_pipeline.py`.
-It accepts chat-style commands and orchestrates a stubbed pipeline spanning
-GitHub commits, connector sync, Working Copy refresh, and droplet deployment.
-
-```bash
-python codex/tools/blackroad_pipeline.py "Push latest to BlackRoad.io" -m "chore: sync"
+Format: [chapter, verse, word]
+Example: [1, 1, 1] → "In" (Genesis 1:1, first word)
 ```
-
-The script only logs each step today; extend the placeholders with real
-connectors, OAuth, and deployment hooks to enable end-to-end automation.
-
-Additional operational docs live in the [`docs/`](docs) folder.
-
-Use the `bin/blackroad-sync` script to push code and refresh the live site end to end.
-
-```bash
-# Push commits, trigger connector jobs, refresh the Working Copy, and redeploy the droplet
-bin/blackroad-sync push
-
-# Refresh deployment without new commits
-bin/blackroad-sync refresh
-
-# Rebase with main, push, and redeploy
-bin/blackroad-sync rebase
-```
-
-The script relies on environment variables like `DROPLET_HOST` and `WORKING_COPY_HOST` to reach remote hosts.
-
-Additional operational docs live in the [`docs/`](docs) folder.
-
-## Codex Sync Script
-
-The repository includes a minimal scaffold to experiment with the end-to-end
-flow described in the BlackRoad deployment docs. The helper accepts natural
-language commands and turns them into git/deploy operations.
-
-```bash
-python scripts/blackroad_sync.py "Push latest to BlackRoad.io"
-```
-
-Other examples:
-
-- `python scripts/blackroad_sync.py "Refresh working copy and redeploy"`
-- `python scripts/blackroad_sync.py "Rebase branch and update site"`
-- `python scripts/blackroad_sync.py "Sync Salesforce → Airtable → Droplet"`
-
-The script currently prints placeholder actions; extend the functions to hook
-into real connectors and infrastructure.
-
-## Bot Commands (ChatOps)
-
-- `/deploy blackroad <channel> [provider]` — deploy canary/beta/prod
-- `/rollback blackroad <channel> [steps] [provider]` — revert to earlier build
-- `/blog new "Title"` — scaffold blog post PR
-- `/promote prod` — open staging→prod PR
-- `/toggle <flag> on|off` — set feature flags in `.github/feature-flags.yml`
-- `/install all` — run universal installer
-- `/fix <freeform prompt>` — dispatch AI Fix with your prompt
-
-## Agents Overview
-
-- **Auto-Heal**: reacts to failing workflows and dispatches **AI Fix**.
-- **AI Fix**: runs Codex/LLM prompts, formats, builds, opens PRs.
-- **AI Sweeper**: nightly formatter/linter; opens PR if needed.
-- **Labeler/Stale/Lock**: repo hygiene.
-- **Auto-merge**: merges labeled PRs when checks pass.
-- **CodeQL/Snyk/Scorecard**: security analysis.
-
-## Deployment
-
-Run the scaffolded end-to-end sync script to push local changes and deploy them
-to the live environment:
-
-```bash
-python scripts/blackroad_sync.py
-```
-
-The script pushes to GitHub, fans out to connector webhooks, refreshes an iOS
-Working Copy checkout and issues a remote deploy on the droplet when configured
-via environment variables.
-
-Additional operational docs live in the [`docs/`](docs) folder.
-
-## Codex Pipeline
-
-This repo ships with a chat-first deployment helper at
-`codex/tools/blackroad_pipeline.py`. The script accepts plain‑English
-commands and orchestrates git pushes, connector stubs and droplet
-deploys in one flow:
-
-```bash
-python3 codex/tools/blackroad_pipeline.py "Push latest to BlackRoad.io"
-python3 codex/tools/blackroad_pipeline.py "Refresh working copy and redeploy"
-```
-
-It relies on environment variables for remote hosts and tokens
-(`GIT_REMOTE`, `DROPLET_HOST`, `SLACK_WEBHOOK`).
-This scaffold is intentionally clean and compact so you can drop in your own logic fast.
-
-## Codex Deployment
-
-A helper script `scripts/blackroad_codex.sh` provides a chat-like interface for common deployment actions:
-
-```bash
-scripts/blackroad_codex.sh push
-scripts/blackroad_codex.sh deploy
-scripts/blackroad_codex.sh refresh
-scripts/blackroad_codex.sh rebase
-scripts/blackroad_codex.sh sync
-```
-
-Set `REMOTE`, `BRANCH`, and `DROPLET_HOST` to customize targets. Provide `SLACK_WEBHOOK` to post updates.
-
-## BlackRoad Sync & Deploy
-
-Run `scripts/blackroad_sync.sh` to push the latest changes to GitHub and roll them out to the droplet. The script accepts natural language commands, for example:
-
-```bash
-scripts/blackroad_sync.sh "Push latest to BlackRoad.io"
-scripts/blackroad_sync.sh "Refresh working copy and redeploy"
-```
-
-Set `WORKING_COPY_SSH`, `DROPLET_SSH`, and optionally `SLACK_WEBHOOK` environment variables before running. Logs are written to `blackroad_sync.log`.
-
-## Codex Sync & Deploy
-
-An initial scaffold for the end-to-end BlackRoad deployment flow lives in
-`scripts/blackroad_sync.py`. The helper currently exposes three
-subcommands:
-
-```bash
-# Push local commits to GitHub and trigger connector jobs
-python3 scripts/blackroad_sync.py push
-
-# Update an iOS Working Copy clone
-python3 scripts/blackroad_sync.py refresh-working-copy --path /path/to/clone
-
-# Pull latest code and restart services on the droplet
-python3 scripts/blackroad_sync.py deploy --host user@droplet
-```
-
-The script only prints the operations it would perform, acting as a
-placeholder for future automation.
 
 ---
 
-## Codex Deploy Flow
+## 📊 STATISTICAL FINDINGS
 
-`codex/jobs/blackroad-sync-deploy.sh` provides a chat-focused pipeline tying
-together git pushes, connector syncs, working-copy refreshes and server deploys.
-Typical usage:
-
-```bash
-# commit local changes, push and deploy to the droplet
-bash codex/jobs/blackroad-sync-deploy.sh push-latest "chore: update"
-
-# refresh the iOS Working Copy checkout and redeploy
-bash codex/jobs/blackroad-sync-deploy.sh refresh
-
-# rebase current branch onto origin/main then deploy
-bash codex/jobs/blackroad-sync-deploy.sh rebase-update
-
-# run Salesforce → Airtable → Droplet syncs
-bash codex/jobs/blackroad-sync-deploy.sh sync-connectors
+### Bible Character Frequencies
+```
+' ' (space): 173,063 times (17.3%)
+'e':         97,486 times (9.7%)
+'t':         75,279 times (7.5%)
+'a':         68,092 times (6.8%)
+'h':         66,979 times (6.7%)
+'o':         58,949 times (5.9%)
 ```
 
-It honours environment variables like `DROPLET_HOST`,
-`WORKING_COPY_PATH`, and `SLACK_WEBHOOK` for remote access and
-status notifications.
+### Bible Number Patterns
 
-- **/geodesic**: Compute Fubini–Study distance `d_FS = arccos(|⟨ψ|φ⟩|)` and sample the **CP² geodesic** points between |ψ₀⟩ and |ψ₁⟩.
+**Consecutive sequences found**: 4,370
+- Example: [1, 2, 3, 4, 5, 6]
 
-## Codex Sync Helper
+**Repeating patterns found**: 6,114
+- Pattern (2, 3, 4) repeats 224 times
+- Pattern (3, 4, 5) repeats 224 times
 
-Use `scripts/blackroad_sync.py` for chat-driven CI/CD tasks. It can commit and
-push changes, refresh a working copy, rebase branches, or stub out connector
-sync jobs.
+**Arithmetic sequences**: Detected in verse numbering
 
-Examples:
+---
 
-```bash
-scripts/blackroad_sync.py push -m "feat: update site"
-scripts/blackroad_sync.py refresh
-scripts/blackroad_sync.py sync-connectors
+## 🎯 HOW TO USE THIS SYSTEM
+
+### Step 1: Load Your Rohonc Data
+```python
+# If you have Rohonc as text
+rohonc_text = "your encrypted text here"
+
+# If you have Rohonc as numbers
+rohonc_numbers = [123, 456, 789, ...]
 ```
 
-## Backbone Equations Reference
+### Step 2: Try Caesar Decryption (18, 26)
+```python
+from bible_cipher_analysis import BibleCipherAnalyzer
 
-See [docs/blackroad-equation-backbone.md](docs/blackroad-equation-backbone.md) for a curated list of one hundred foundational equations across mathematics, physics, computer science, and engineering.
-## AIOps & Self-Healing Quickstart
-
-```bash
-python -m cli.console aiops:correlate
-python -m cli.console aiops:plan --correlations artifacts/aiops/correlations_*.json
-python -m cli.console aiops:execute --plan artifacts/aiops/plan.json --dry-run
-python -m cli.console aiops:canary --base artifacts/healthchecks/CoreAPI/baseline.json --canary artifacts/healthchecks/CoreAPI/latest.json
-python -m cli.console aiops:baseline:record && python -m cli.console aiops:drift:check
-python -m cli.console aiops:budget --service CoreAPI --window 30d && python -m cli.console aiops:window --service CoreAPI --action remediate
-## Samples & Pipelines Quickstart
-
-```bash
-make samples
-python -m pipelines.finance_margin_pipeline
-python -m pipelines.reliability_pipeline
+analyzer = BibleCipherAnalyzer()
+decrypted = analyzer.caesar_cipher_26(rohonc_text, key=-18)  # Negative to decrypt
+print(decrypted)
 ```
 
-## Cookbook Index
-
-See [cookbook/README.md](cookbook/README.md) for 25 example tasks. Run any recipe via:
-
-```bash
-python -m cli.console cookbook:run --name <slug>
+### Step 3: Try Caesar Decryption (18, 256)
+```python
+decrypted_256 = analyzer.caesar_cipher_256(rohonc_text, key=-18)
+print(decrypted_256)
 ```
 
-## Fuzzing & Goldens
+### Step 4: Try Number Sequence Decoding
+```python
+from rohonc_decoder import RohoncDecoder
 
-Property-based fuzz tests live under `tests/fuzz`. Regenerate golden artifacts offline:
-
-```bash
-make goldens
-## Board & IR Quickstart
-
-Run common investor relations workflows:
-
-```
-python -m cli.console ir:kpi:compute --period 2025Q3
-python -m cli.console ir:kpi:signoff --kpi revenue --period 2025Q3
-## Board & IR Quickstart
-
-```bash
-python -m cli.console ir:kpi:compute --period 2025Q3
-python -m cli.console ir:kpi:signoff --kpi revenue --period 2025Q3 --request
-python -m cli.console ir:kpi:approve --kpi revenue --period 2025Q3 --as-user U_CFO
-python -m cli.console ir:guidance --period 2025Q4 --assumptions configs/ir/assumptions.yaml
-python -m cli.console ir:earnings:build --period 2025Q3 --as-user U_IR
-python -m cli.console board:pack --month 2025-09
-```
-## Policy Enforcement
-Runtime tasks and bot responses are checked by a central policy layer. Violations such as forbidden intents, oversized context, or missing risks raise `BotExecutionError` and block execution.
-
-## PII Redaction & Lineage
-All task context and bot outputs are scrubbed for emails, phone numbers, SSNs and credit cards. Values are replaced with deterministic tokens like `{{REDACTED:email:hash8}}`. Data lineage traces are recorded to `orchestrator/lineage.jsonl` linking datasets and artifacts.
-
-## Integrations (Stubs)
-Offline importers for Salesforce, SAP, ServiceNow and Workday read fixtures under `fixtures/` and write normalized rows to `artifacts/imports/*.json` via the CLI.
-
-## Observability
-Run `python -m cli.console obs:report` to generate a local dashboard under `artifacts/observability/` summarising bot usage, policy violations, redactions and lineage coverage.
-
-## Dry-Run Mode
-Pass `--dry-run` to any CLI command to skip writing artifacts. The action still executes but prints `DRY-RUN: no artifacts written`.
-## Air-Gapped Install
-
-1. `python build/repro/compile_deps.py`
-2. `python build/offline_wheels.py`
-3. `bash install/offline_install.sh`
-4. `python -m cli.console integrity:verify`
-5. `bash install/offline_uninstall.sh`
-
-### Integrity Verification
-
-```
-python build/signing/verify_wheels.py
-python build/attest.py && gpg --verify dist/attestation.json.asc dist/attestation.json
-```
-## Codex Prompt Site Quickstart
-
-```
-npm --prefix sites/codex-prompts run dev
+decoder = RohoncDecoder()
+decoded = decoder.decode_number_sequence(rohonc_numbers)
+print(decoded)
 ```
 
-Serves the markdown prompts directory as a Next.js site with plain-text API and sitemap.
+### Step 5: Analyze Patterns
+```python
+# Find common patterns
+patterns = decoder.giant_word_search(pattern_length=15)
 
-## Artifact Release
-
-```
-python -m tools.artifacts artifacts/data.json --schema schemas/routing.schema.json --tag
-```
-
-Generates a deterministic hash for the artifact and optionally tags the current commit.
-## Digital Twin
-
-Deterministic offline tooling for operations.
-
-Mini tour:
-
-1. `python -m cli.console twin:checkpoint --name demo`
-2. `python -m cli.console twin:list`
-3. `python -m cli.console twin:replay --from "2025-01-01" --to "2025-01-02" --mode verify`
-4. `python -m cli.console twin:stress --profile default --duration 10`
-5. `python -m cli.console twin:compare --left artifacts/runA --right artifacts/runB`
-## R&D Lab Quickstart
-
-```bash
-python -m cli.console rnd:idea:new --title "Example" --problem x --solution y --owner U1 --tags demo
-## Runbook DSL
-
-Runbooks live in `prism/runbooks` and describe how Prism diagnoses and fixes issues.
-Each YAML file contains match signals, questions, optional probes, and a plan that
-produces diffs and commands.
-
-Example:
-
-```yaml
-id: python-importerror
-title: "Python: ModuleNotFoundError / ImportError"
+# Check if decoded text contains Bible patterns
+for pattern, count in patterns:
+    if pattern in decoded_text:
+        print(f"Match found: {pattern}")
 ```
 
-Use the 20-question wizard in Developer Mode to walk through questions, run probes,
-and synthesize a fix plan.
+---
 
-### Tests
+## 🔢 EXAMPLE TRANSFORMATIONS
 
-Run server runbook tests:
-
-```bash
-pnpm -C apps/prism/server test:runbooks
+### Caesar Shift 18 (Alphabet)
+```
+Plaintext:  "In the beginning God created"
+Encrypted:  "Af lzw twyaffafy Ygv ujwslwv"
 ```
 
-Run web runbook tests:
+To decrypt Rohonc with this method:
+- Shift each letter **backward** by 18 (or forward by 8)
+- A→I, B→J, C→K, ..., Z→H
 
-```bash
-pnpm -C apps/prism/apps/web test:runbooks
-### Legal Ops & Contracts Quickstart
-
-```bash
-python -m cli.console legal:contract:new --type MSA --counterparty "Acme Ltd."
-python -m cli.console legal:assemble --template MSA --options configs/legal/options/acme.yml --out artifacts/legal/C001_v1.md
-python -m cli.console legal:redline --old artifacts/legal/C001_v1.md --new artifacts/legal/C001_v2.md
-python -m cli.console legal:approve:request --id C001 --for-role CFO && python -m cli.console legal:contract:approve --id C001 --as-user U_CFO
-python -m cli.console legal:obligations:extract --id C001 && python -m cli.console legal:obligations:list --due-within 90
-python -m cli.console legal:export:screen --partner P001 --order samples/sales/order_lines.json
+### Caesar Shift 18 (ASCII 256)
 ```
-## RBAC
-Roles and permissions are defined in `config/users.json`. Use `--as-user` to run CLI commands as a specific user.
-
-## Approvals
-Approval rules live in `config/approvals.yaml`. Use `approval:create`, `approval:list`, and `approval:decide` to manage approvals.
-
-## Audit
-All orchestrator events are signed and stored in `orchestrator/memory.jsonl`. Verify integrity with `audit:verify`.
-
-## Docker
-Build and run the console in a container:
-
-```sh
-make build
-make run
+Plaintext:  "In the beginning"
+Encrypted:  [special characters - see hex output]
 ```
 
-Mount a volume at `/app/data` to persist data.
+To decrypt:
+- Subtract 18 from ASCII value of each character
+- Apply modulo 256
 
-> Security note: the signing key in `config/dev_signing_key.txt` is for development only and should be rotated for production.
-## Marketing & Content Ops Quickstart
+---
 
-```bash
-python -m cli.console mkt:segments:build --config configs/marketing/segments.yaml
-python -m cli.console mkt:leadscore --config configs/marketing/lead_score.yaml
-python -m cli.console mkt:attr --model linear
-## Master Data & Governance Quickstart
+## 🧮 BIBLE NUMBERS AS CIPHER KEY
 
-```bash
-python -m cli.console mdm:stage --domain account --file fixtures/mdm/account.csv
-python -m cli.console mdm:match --domain account --config configs/mdm/match_account.yaml
-python -m cli.console mdm:golden --domain account --policy configs/mdm/survivorship_account.yaml
-python -m cli.console mdm:dq --domain account --config configs/mdm/dq_account.yaml
-```
-## DX Quickstart
+The complete sequence of 8,144 Bible numbers can be used as:
 
-Run developer tooling:
+1. **Direct substitution**: Number N → Character at position N
+2. **Vigenère key**: Use numbers as shift amounts
+3. **Index table**: Map Rohonc symbol positions to Bible positions
+4. **Coordinate system**: [chapter:verse:word] addressing
 
-```
-python -m cli.console dx:onboard:doctor
-python -m cli.console dx:quality
+### Example: Polyalphabetic Decryption
+```python
+bible_key = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ...]  # First 100 numbers
+
+for i, char in enumerate(rohonc_text):
+    shift = bible_key[i % len(bible_key)]
+    plain_char = decrypt(char, shift)
 ```
 
-## Knowledge Graph
+---
 
-Offline provenance tracking and query engine.
+## 🔬 ADVANCED TECHNIQUES
 
-Example commands:
+### Pattern Correlation
+```python
+# Compare Rohonc patterns with Bible patterns
+rohonc_patterns = extract_patterns(rohonc, length=10)
+bible_patterns = extract_patterns(bible, length=10)
 
-```
-python -m cli.console kg:stats
-python -m cli.console kg:query --file samples/kql/last_treasury_runs.kql
-python -m cli.console chain:run --plan configs/chain_examples/uptime_then_release.yaml
-## Security Ops Quickstart
-
-```
-python -m cli.console sec:assets:load --dir fixtures/sec
-python -m cli.console sec:assets:list --type service
-python -m cli.console sec:detect:run --rules configs/sec/rules --logs fixtures/sec/logs
-python -m cli.console sec:vuln:import --file fixtures/sec/vulns.csv
-python -m cli.console sec:sbom:watch --sbom dist/SBOM.spdx.json --cves fixtures/sec/cves_local.json
-## Growth & Experimentation Quickstart
-
-Run an experiment offline:
-
-```
-python -m cli.console exp:new --id EXP01 --name "Paywall copy" --feature paywall_v2 --variants A,B --split 0.5,0.5 --unit user
-python -m cli.console exp:assign --id EXP01 --unit user --value 12345
-python -m cli.console exp:analyze --id EXP01 --metrics configs/experiments/metrics.yaml
+# Find matching patterns
+matches = set(rohonc_patterns) & set(bible_patterns)
 ```
 
-## Training & Enablement Hub Quickstart
+### Frequency Matching
+```python
+# Rank symbols by frequency
+rohonc_freq = Counter(rohonc_symbols)
+bible_freq = Counter(bible_text)
 
-```bash
-python -m cli.console learn:courses:load --dir configs/enablement/courses
-python -m cli.console learn:courses:list --role_track "Solutions Engineer"
+# Create mapping based on frequency rank
+mapping = {}
+for r_sym, b_char in zip(rohonc_freq.most_common(), 
+                          bible_freq.most_common()):
+    mapping[r_sym[0]] = b_char[0]
 ```
-MIT
+
+### Reverse Engineering
+```python
+# If you have ANY known plaintext/ciphertext pairs
+known_plain = "God"
+known_cipher = "???"  # From Rohonc
+
+# Find which Bible numbers produce this transformation
+key = reverse_engineer_key(known_plain, known_cipher)
+```
+
+---
+
+## 📖 BIBLE STRUCTURE
+
+The Bible text includes:
+- **Genesis** (starting at character position ~19,000)
+- **Verse structure**: "1In the beginning...", "2And the earth..."
+- **Chapter markers**: "Chapter 1", "Chapter 2", etc.
+- **Books**: Genesis, Exodus, Leviticus, Numbers, Deuteronomy...
+
+Key verses for testing:
+- **Genesis 1:1**: "In the beginning God created the heaven and the earth"
+- **Genesis 1:3**: "And God said, Let there be light: and there was light"
+
+---
+
+## 🎨 VISUALIZATION IDEAS
+
+1. **Heat map**: Show frequency of Bible numbers
+2. **Pattern graph**: Common sequences in Bible vs Rohonc  
+3. **Character distribution**: Compare Bible vs decoded Rohonc
+4. **Word cloud**: Most common words in Bible
+
+---
+
+## ⚠️ IMPORTANT NOTES
+
+1. **The Rohonc Codex is unsolved** - This system provides tools, not guaranteed decryption
+2. **Multiple interpretations possible** - Try all methods
+3. **Partial matches count** - Even partial decryption is progress
+4. **Pattern recognition** - Look for recognizable words or phrases
+5. **Statistical analysis** - Compare letter frequencies with English/Bible
+
+---
+
+## 🚀 NEXT STEPS
+
+To use this with actual Rohonc Codex images:
+1. OCR the Rohonc pages to extract symbols
+2. Create symbol→number mapping
+3. Apply each decryption method
+4. Look for patterns matching Bible text
+5. Iterate and refine
+
+The key insight: **If the Bible is the key, decoded text should contain Biblical words, phrases, or patterns.**
+
+---
+
+## 📚 FILES REFERENCE
+
+All generated files are in `/home/claude/` and `/mnt/user-data/outputs/`:
+
+- **Analysis tools**: `bible_cipher_analysis.py`, `rohonc_decoder.py`, `complete_cipher_mapper.py`
+- **Data files**: `bible_full.txt`, `bible_numbers.txt`, `genesis.txt`
+- **Mappings**: All `*.json` files with cipher tables
+- **Documentation**: This README
+
+---
+
+## 💡 KEY TAKEAWAYS
+
+1. **Caesar Shift 18** is implemented for both 26-letter and 256-character systems
+2. **All 8,144 Bible numbers** are extracted and available
+3. **Multiple cipher strategies** are provided
+4. **Pattern matching** tools for "giant word search"
+5. **Frequency analysis** tables included
+6. **Complete mappings** generated and saved
+
+**The system is ready to decode!** 🔓
+
+Upload actual Rohonc Codex symbol data to begin real decryption attempts.

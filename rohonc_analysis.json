@@ -1,0 +1,341 @@
+{
+  "total_bible_characters": 1001703,
+  "total_bible_numbers": 8144,
+  "unique_bible_numbers": 525,
+  "verse_count": 2665,
+  "word_count": 6568,
+  "most_common_words": [
+    {
+      "word": "the",
+      "count": 16043
+    },
+    {
+      "word": "and",
+      "count": 9739
+    },
+    {
+      "word": "of",
+      "count": 8775
+    },
+    {
+      "word": "shall",
+      "count": 2954
+    },
+    {
+      "word": "unto",
+      "count": 2838
+    },
+    {
+      "word": "to",
+      "count": 2697
+    },
+    {
+      "word": "that",
+      "count": 2623
+    },
+    {
+      "word": "in",
+      "count": 2550
+    },
+    {
+      "word": "he",
+      "count": 2259
+    },
+    {
+      "word": "Lord",
+      "count": 2213
+    },
+    {
+      "word": "his",
+      "count": 2116
+    },
+    {
+      "word": "a",
+      "count": 1709
+    },
+    {
+      "word": "it",
+      "count": 1638
+    },
+    {
+      "word": "for",
+      "count": 1621
+    },
+    {
+      "word": "them",
+      "count": 1544
+    },
+    {
+      "word": "thou",
+      "count": 1477
+    },
+    {
+      "word": "be",
+      "count": 1429
+    },
+    {
+      "word": "all",
+      "count": 1398
+    },
+    {
+      "word": "I",
+      "count": 1376
+    },
+    {
+      "word": "with",
+      "count": 1367
+    },
+    {
+      "word": "they",
+      "count": 1347
+    },
+    {
+      "word": "thy",
+      "count": 1252
+    },
+    {
+      "word": "him",
+      "count": 1245
+    },
+    {
+      "word": "not",
+      "count": 1170
+    },
+    {
+      "word": "which",
+      "count": 1137
+    },
+    {
+      "word": "said",
+      "count": 1080
+    },
+    {
+      "word": "their",
+      "count": 1055
+    },
+    {
+      "word": "thee",
+      "count": 1035
+    },
+    {
+      "word": "shalt",
+      "count": 918
+    },
+    {
+      "word": "ye",
+      "count": 896
+    },
+    {
+      "word": "God",
+      "count": 884
+    },
+    {
+      "word": "children",
+      "count": 871
+    },
+    {
+      "word": "Israel",
+      "count": 855
+    },
+    {
+      "word": "from",
+      "count": 846
+    },
+    {
+      "word": "was",
+      "count": 821
+    },
+    {
+      "word": "land",
+      "count": 802
+    },
+    {
+      "word": "out",
+      "count": 789
+    },
+    {
+      "word": "upon",
+      "count": 749
+    },
+    {
+      "word": "you",
+      "count": 716
+    },
+    {
+      "word": "Moses",
+      "count": 709
+    },
+    {
+      "word": "will",
+      "count": 692
+    },
+    {
+      "word": "were",
+      "count": 651
+    },
+    {
+      "word": "me",
+      "count": 630
+    },
+    {
+      "word": "have",
+      "count": 625
+    },
+    {
+      "word": "your",
+      "count": 622
+    },
+    {
+      "word": "s",
+      "count": 608
+    },
+    {
+      "word": "her",
+      "count": 585
+    },
+    {
+      "word": "as",
+      "count": 582
+    },
+    {
+      "word": "before",
+      "count": 568
+    },
+    {
+      "word": "people",
+      "count": 564
+    }
+  ],
+  "number_range": [
+    1,
+    525
+  ],
+  "cipher_keys": {
+    "caesar_shift_18_alphabet_26": "Standard Caesar with shift 18",
+    "caesar_shift_18_ascii_256": "Extended ASCII Caesar with shift 18",
+    "polyalphabetic": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "position_based": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99
+    ]
+  }
+}

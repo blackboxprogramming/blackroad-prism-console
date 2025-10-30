@@ -1,0 +1,237 @@
+{
+  "rohonc_facts": {
+    "total_pages": 227,
+    "symbols": "~170 unique symbols estimated",
+    "writing_direction": "Right to left (like Hungarian runic)",
+    "illustrations": "87 illustrations",
+    "language_theories": [
+      "Hungarian",
+      "Vlach (Romanian)",
+      "Hindi/Sanskrit",
+      "Sumerian",
+      "Old Turkic",
+      "Invented language"
+    ],
+    "religious_content": "Many Christian symbols in illustrations",
+    "date": "Unknown, possibly 16th-19th century"
+  },
+  "symbol_estimates": {
+    "estimated_unique_symbols": 170,
+    "writing_system": "Unknown (possibly syllabary or alphabet)",
+    "symbol_frequency": "Not yet determined"
+  },
+  "caesar_hypothesis": {
+    "hypothesis": "Rohonc symbols map to Caesar-encrypted letters",
+    "method_1_alphabet_26": {
+      "description": "If 26 Rohonc symbols = 26 letters, shift=18",
+      "expected_result": "Bible text or Hungarian text",
+      "verification": "Look for common words: \"God\", \"isten\" (Hungarian for God)"
+    },
+    "method_2_extended_170": {
+      "description": "If ~170 symbols represent syllables or extended alphabet",
+      "approach": "Map to extended character set with shift=18",
+      "challenge": "Need symbol-to-character mapping table"
+    }
+  },
+  "frequency_strategy": {
+    "step_1": "Count frequency of each Rohonc symbol",
+    "step_2": "Rank Rohonc symbols by frequency",
+    "step_3": "Map most frequent Rohonc symbol to most frequent Bible letter",
+    "bible_letter_ranking": [
+      "e",
+      "t",
+      "a",
+      "h",
+      "o",
+      "n",
+      "s",
+      "i",
+      "r",
+      "d",
+      "l",
+      "f",
+      "u",
+      "m",
+      "c",
+      "w",
+      "y",
+      "g",
+      "b",
+      "p",
+      "v",
+      "k",
+      "j",
+      "z",
+      "x",
+      "q"
+    ],
+    "expected_top_3_bible": [
+      "e",
+      "t",
+      "a"
+    ],
+    "expected_top_3_hungarian": [
+      "e",
+      "a",
+      "t"
+    ],
+    "verification": "Check if decoded text makes sense"
+  },
+  "number_hypothesis": {
+    "theory": "Rohonc symbols encode Bible verse references",
+    "example": "Symbol sequence might mean Genesis 1:1",
+    "bible_verses": 6509,
+    "approach": [
+      "1. Identify number-like symbols in Rohonc",
+      "2. Map to Bible numbers (1-8144)",
+      "3. Look up corresponding Bible text",
+      "4. Check for coherent narrative"
+    ],
+    "test_numbers": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      1,
+      26,
+      1,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      27,
+      1,
+      2,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ]
+  },
+  "pattern_strategy": {
+    "step_1": "Identify repeating symbol sequences in Rohonc",
+    "step_2": "Count frequency of each pattern",
+    "step_3": "Match to common Bible phrases by frequency",
+    "common_bible_phrases": [
+      "the children of",
+      "In the beginning",
+      "And God said",
+      "the Lord",
+      "Israel"
+    ],
+    "verification": "If pattern matches, decode surrounding context"
+  },
+  "illustration_analysis": {
+    "total_illustrations": 87,
+    "known_themes": [
+      "Religious scenes",
+      "Christian symbols (crosses)",
+      "Human figures",
+      "Battles/military scenes",
+      "Architectural elements"
+    ],
+    "hypothesis": "Illustrations depict Bible stories",
+    "verification_approach": [
+      "1. Identify which Bible stories match illustrations",
+      "2. Read text on those pages",
+      "3. Look for matching patterns/words",
+      "4. Use as Rosetta Stone for symbol decoding"
+    ],
+    "example": "If illustration shows crucifixion \u2192 text might be Gospel passages"
+  },
+  "decoding_workflow": {
+    "phase_1_preparation": [
+      "1. Extract all Rohonc pages as images \u2713",
+      "2. Identify unique symbols (OCR or manual)",
+      "3. Create symbol inventory (estimated 170 symbols)",
+      "4. Count frequency of each symbol"
+    ],
+    "phase_2_frequency_analysis": [
+      "1. Rank symbols by frequency",
+      "2. Compare to Bible letter frequencies",
+      "3. Create initial symbol\u2192letter mapping",
+      "4. Test mapping with Caesar shift (18, 26)"
+    ],
+    "phase_3_pattern_matching": [
+      "1. Find repeating symbol sequences",
+      "2. Match to common Bible phrases",
+      "3. Use matched phrases as anchor points",
+      "4. Expand decoding from anchors"
+    ],
+    "phase_4_number_hypothesis": [
+      "1. Look for number-like symbols",
+      "2. Test if they map to Bible verse numbers",
+      "3. Look up corresponding verses",
+      "4. Check narrative coherence"
+    ],
+    "phase_5_illustration_verification": [
+      "1. Match illustrations to Bible stories",
+      "2. Decode text on those pages",
+      "3. Verify text matches story",
+      "4. Use as known plaintext for cipher breaking"
+    ],
+    "phase_6_full_decode": [
+      "1. Apply verified mappings to all pages",
+      "2. Check for consistent grammar/language",
+      "3. Verify with scholars",
+      "4. Publish results!"
+    ]
+  },
+  "symbol_mapping_template": {
+    "symbol_mapping": {
+      "basic_alphabet": {
+        "a-z": "First 26 most common symbols",
+        "A-Z": "Capitalized variants (if exist)"
+      },
+      "extended_characters": {
+        "syllables": "If Rohonc is syllabary (like Japanese kana)",
+        "diacritics": "Hungarian has \u00e1, \u00e9, \u00ed, \u00f3, \u00f6, \u0151, \u00fa, \u00fc, \u0171",
+        "punctuation": "Spaces, periods, commas"
+      },
+      "cipher_application": {
+        "caesar_18_26": "After mapping, shift by 18",
+        "bible_numbers": "Or use as indices into Bible"
+      }
+    },
+    "priority_symbols": "Start with 20 most frequent symbols"
+  },
+  "next_steps": [
+    "1. Manually identify top 20 most frequent Rohonc symbols",
+    "2. Map to top 20 Bible letters: e,t,a,h,o,n,s,i,r,d,...",
+    "3. Apply Caesar shift (18) to mapped letters",
+    "4. Check if decoded text is readable",
+    "5. Iterate and refine mapping"
+  ]
+}
