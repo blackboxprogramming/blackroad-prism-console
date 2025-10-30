@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.ai/agents/schemas/agent-request.schema.json",
+  "title": "Agent Orchestration Request",
+  "type": "object",
+  "required": [
+    "request_id",
+    "timestamp",
+    "agent",
+    "conversation",
+    "tools"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9-]{10,128}$",
+      "description": "Deterministic identifier for correlating responses."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when the request was created."
+    },
+    "agent": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+].+)?$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "expected_latency_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "conversation": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/message"
+      }
+    },
+    "tools": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://blackroad.ai/agents/schemas/tool.schema.json"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "message": {
+      "type": "object",
+      "required": ["role", "content"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["system", "user", "assistant", "tool"]
+        },
+        "content": {
+          "type": "string"
+        },
+        "tool_call_id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "const": "tool"
+              }
+            }
+          },
+          "then": {
+            "required": ["tool_call_id"]
+          }
+        }
+      ]
+    }
+  }
+}

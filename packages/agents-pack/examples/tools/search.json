@@ -1,0 +1,89 @@
+{
+  "name": "web_search",
+  "description": "Searches the public web using the BlackRoad search appliance and returns ranked results.",
+  "summary": "Perform a web search",
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": [
+      "query"
+    ],
+    "properties": {
+      "query": {
+        "type": "string",
+        "minLength": 3,
+        "description": "Natural language query to execute."
+      },
+      "freshness": {
+        "type": "string",
+        "enum": [
+          "auto",
+          "day",
+          "week",
+          "month"
+        ],
+        "default": "auto"
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10,
+        "default": 5
+      }
+    },
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": [
+      "results"
+    ],
+    "properties": {
+      "results": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "title",
+            "url"
+          ],
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "snippet": {
+              "type": "string"
+            },
+            "score": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+  "examples": [
+    {
+      "name": "basic",
+      "input": {
+        "query": "latest prism console release"
+      },
+      "output": {
+        "results": [
+          {
+            "title": "Prism Console 2.3 Launch",
+            "url": "https://blackroad.io/blog/prism-console-2-3",
+            "snippet": "Highlights from the Prism Console 2.3 launch event."
+          }
+        ]
+      }
+    }
+  ]
+}
