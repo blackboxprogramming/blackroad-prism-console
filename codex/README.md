@@ -73,6 +73,7 @@ extension points for future integrations.
 | 004 | The Autonomy Manifest   | Data autonomy through consent, export, and wipe. |
 | 023 | The Dialogue Doctrine   | Conversations stay clear, attributed, and consensual. |
 | 016 | The Simplicity Mandate | Simplicity is safety; keep workflows lean.      |
+| 044 | The Translational Tier | Pipeline of prompts that convert ideas into testable assets. |
 
 ## BlackRoad Pipeline
 
