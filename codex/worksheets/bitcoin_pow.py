@@ -20,6 +20,7 @@ here—pay close attention to the docstrings for required behaviour.
 from __future__ import annotations
 
 from decimal import Decimal, ROUND_FLOOR, getcontext
+from decimal import Decimal, getcontext
 
 getcontext().prec = 50
 
@@ -75,6 +76,7 @@ def bits_to_target(nbits: int) -> int:
         target = coefficient << shift
 
     return target
+    raise NotImplementedError("Step 1A: bits_to_target")
 
 
 def target_to_bits(target: int) -> int:
@@ -107,6 +109,7 @@ def target_to_bits(target: int) -> int:
         coefficient <<= 8 * (3 - exponent)
 
     return (exponent << 24) | coefficient
+    raise NotImplementedError("Step 1B: target_to_bits")
 
 
 def target_to_difficulty(target: int) -> Decimal:
@@ -116,6 +119,7 @@ def target_to_difficulty(target: int) -> Decimal:
         raise ValueError("target must be positive")
 
     return Decimal(T1) / Decimal(target)
+    raise NotImplementedError("Step 1C: target_to_difficulty")
 
 
 def difficulty_to_target(difficulty: Decimal) -> int:
@@ -127,6 +131,7 @@ def difficulty_to_target(difficulty: Decimal) -> int:
     quotient = Decimal(T1) / Decimal(difficulty)
     target = int(quotient.to_integral_value(rounding=ROUND_FLOOR))
     return max(1, target)
+    raise NotImplementedError("Step 1D: difficulty_to_target")
 
 
 def le_hex_to_bytes(hex_string: str) -> bytes:
@@ -137,6 +142,7 @@ def le_hex_to_bytes(hex_string: str) -> bytes:
 
     be_bytes = bytes.fromhex(hex_string)
     return be_bytes[::-1]
+    raise NotImplementedError("Step 2A: le_hex_to_bytes")
 
 
 def dsha256(payload: bytes) -> bytes:
@@ -146,6 +152,7 @@ def dsha256(payload: bytes) -> bytes:
 
     first = hashlib.sha256(payload).digest()
     return hashlib.sha256(first).digest()
+    raise NotImplementedError("Step 2B: dsha256")
 
 
 def serialize_header(
@@ -183,6 +190,7 @@ def serialize_header(
         raise ValueError("header must be exactly 80 bytes")
 
     return header
+    raise NotImplementedError("Step 2C: serialize_header")
 
 
 def header_hash(
@@ -203,12 +211,14 @@ def header_hash(
     hash_hex = hash_le.hex()
     hash_int = int.from_bytes(hash_le, byteorder="big")
     return hash_int, hash_hex
+    raise NotImplementedError("Step 2D: header_hash")
 
 
 def is_valid_pow(hash_value: int, target: int) -> bool:
     """Step 2E – return ``True`` when ``hash_value <= target``."""
 
     return hash_value <= target
+    raise NotImplementedError("Step 2E: is_valid_pow")
 
 
 def merkle_root(txids_hex: list[str]) -> tuple[str, str]:
@@ -237,6 +247,7 @@ def merkle_root(txids_hex: list[str]) -> tuple[str, str]:
     root_le = level[0]
     root_be = root_le[::-1]
     return root_be.hex(), root_le.hex()
+    raise NotImplementedError("Step 3: merkle_root")
 
 
 def success_prob_per_hash(target: int) -> Decimal:
@@ -246,6 +257,7 @@ def success_prob_per_hash(target: int) -> Decimal:
         return Decimal(0)
 
     return Decimal(target) / TWO_256
+    raise NotImplementedError("Step 4A: success_prob_per_hash")
 
 
 def expected_hashes(target: int) -> Decimal:
@@ -256,6 +268,7 @@ def expected_hashes(target: int) -> Decimal:
         return Decimal("Infinity")
 
     return Decimal(1) / probability
+    raise NotImplementedError("Step 4B: expected_hashes")
 
 
 def expected_time_seconds(target: int, hashrate_hs: Decimal) -> Decimal:
@@ -265,12 +278,14 @@ def expected_time_seconds(target: int, hashrate_hs: Decimal) -> Decimal:
         raise ValueError("hashrate_hs must be positive")
 
     return expected_hashes(target) / Decimal(hashrate_hs)
+    raise NotImplementedError("Step 4C: expected_time_seconds")
 
 
 def is_share_valid(hash_value: int, share_target: int) -> bool:
     """Step 4D – helper for pool share validation checks."""
 
     return hash_value <= share_target
+    raise NotImplementedError("Step 4D: is_share_valid")
 
 
 def clamp_retarget_timespan(actual_timespan: int, target_timespan: int = TARGET_TIMESPAN) -> int:
@@ -279,6 +294,7 @@ def clamp_retarget_timespan(actual_timespan: int, target_timespan: int = TARGET_
     minimum = target_timespan // 4
     maximum = target_timespan * 4
     return max(minimum, min(actual_timespan, maximum))
+    raise NotImplementedError("Step 5A: clamp_retarget_timespan")
 
 
 def compute_retarget(
@@ -296,3 +312,4 @@ def compute_retarget(
     new_target = min(new_target, T1)
     new_bits = target_to_bits(new_target)
     return new_target, new_bits
+    raise NotImplementedError("Step 5B: compute_retarget")
