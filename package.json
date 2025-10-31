@@ -33,6 +33,13 @@
     "test": "node --test tests/api_health.test.js tests/backend-validation.test.js",
     "typecheck": "echo 'no typecheck'",
     "health": "node scripts/health.js",
+    "lint": "eslint . --ext .js,.jsx,.mjs,.cjs || true",
+    "format": "prettier -w .",
+    "test:jest": "cross-env NODE_ENV=test jest --runInBand",
+    "test-db": "node tests/test_db.js",
+    "test-auth": "node tests/test_auth.js",
+    "test-projects-tasks": "node tests/test_projects_tasks.js",
+    "test-logs-contradictions": "node tests/test_logs_contradictions.js",
     "dev:site": "npm --prefix sites/blackroad run dev",
     "build": "npm --prefix sites/blackroad run build",
     "test-agents-pack": "node tests/test_agents_mega.js",
@@ -40,6 +47,7 @@
     "frontend:build": "npm --prefix sites/blackroad run build",
     "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true",
     "format:site": "prettier var/www/blackroad --write"
+    "fix-anything": "node .github/tools/codex-apply.js .github/prompts/codex-fix-anything.md || true"
   },
   "engines": {
     "node": ">=20"

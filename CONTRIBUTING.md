@@ -10,6 +10,7 @@
   ```bash
   npm test
   npm run test:smoke
+  npm run test:jest
   ```
 - Follow the [Code of Conduct](CODE_OF_CONDUCT.md) in all interactions.
 
@@ -48,6 +49,11 @@ Thank you for your interest in contributing to this project!
    pytest
    ```
 3. Use conventional commits (`feat:`, `fix:`).
+  ```sh
+  pre-commit run --files CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md
+  npm test
+  npm run test:jest
+  ```
 
 ## Submitting Changes
 
