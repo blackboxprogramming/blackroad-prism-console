@@ -1,13 +1,14 @@
 name: staging
 slug: stg
-state: provisioning
+state: active
 description: >-
-  Pre-production environment for QA. Static assets publish to stage.blackroad.io
-  while AWS infrastructure scaffolding mirrors production.
+  Pre-production environment that mirrors production wiring for QA, release
+  rehearsals, and policy validation before promoting to main.
+branch: staging
 contacts:
   slack: "#eng"
 domains:
-  marketing: https://stage.blackroad.io
+  primary: https://stage.blackroad.io
 infrastructure:
   cloud: aws
   region: us-west-2
@@ -28,72 +29,48 @@ infrastructure:
       - modules/ecs-cluster
       - modules/ecr
       - modules/rds-postgres
-    variables:
-      rds_instance_class: db.t4g.small
-      rds_multi_az: false
-      rds_backup_retention_days: 14
-    outputs:
-      - vpc_id
-      - private_subnets
-      - ecs_cluster
-      - db_endpoint
-    repositories:
-      - br-api-gateway
-      - br-products-site
 automation:
+  required_checks:
+    push:
+      staging:
+        - Stage Proof Artifact
+        - stage-stress (when STRESS=true)
   workflows:
     - name: Stage Proof Artifact
       file: .github/workflows/pages-stage.yml
       triggers:
-        - push (main, blackroad-stage/**)
+        - push (staging, paths: blackroad-stage/**, sites/blackroad/**)
         - schedule (daily 06:05 UTC)
         - workflow_dispatch
       summary: >-
-        Generates a proof payload, bakes stage assets, and archives the build
-        without publishing DNS changes.
-      secrets:
+        Generates the static proof artifact for stage.blackroad.io and archives
+        it as a required check before production promotion.
+      secrets_required:
         - AWAKEN_SEED
-    - name: AWS ECS deploy (reusable)
-      file: .github/workflows/reusable-aws-ecs-deploy.yml
-      triggers:
-        - workflow_call
-      summary: >-
-        Registers a new task definition revision and forces an ECS deployment
-        for staging services when invoked by API or bridge pipelines.
-      secrets:
-        - AWS_STAGING_DEPLOY_ROLE_ARN
-        - AWS_STAGING_EXTERNAL_ID
-    - name: Stage Stress (safe)
-      file: .github/workflows/stage-stress.yml
-      triggers:
-        - workflow_dispatch (with STRESS toggle)
-        - push (stage, paths: blackroad-stage/**)
-      summary: >-
-        Runs guarded load tests against stage.blackroad.io using autocannon to
-        validate that recent deploys and infrastructure wiring hold up under
-        concurrent traffic.
-      notes: >-
-        Requires operators to explicitly opt in via the STRESS input so casual
-        pushes do not overload the environment.
     - name: Stage Stress (safe)
       file: .github/workflows/stage-stress.yml
       triggers:
         - workflow_dispatch (STRESS input)
-        - push (stage, blackroad-stage/**)
+        - push (staging, paths: blackroad-stage/**)
       summary: >-
-        Optional load test that reuses the stage artifact to simulate user
-        traffic before promoting a build downstream. Defaults to a no-op unless
-        the STRESS input is set to "true".
-  notifications:
-    slack_channel: "#eng"
+        Optional load test harness gated behind the STRESS input for release
+        rehearsals.
+      notes: Requires explicit opt-in; defaults to a no-op.
+    - name: Reusable AWS ECS deploy
+      file: .github/workflows/reusable-aws-ecs-deploy.yml
+      triggers:
+        - workflow_call
+      summary: Shared harness that registers a task definition revision and
+        deploys staging ECS services.
+      secrets_required:
+        - AWS_STAGING_DEPLOY_ROLE_ARN
+        - AWS_STAGING_EXTERNAL_ID
 deployments:
   - service: marketing-site
     type: static-site
     provider: github-pages
-    repo: blackboxprogramming/blackroad-prism-console
     workflow: .github/workflows/pages-stage.yml
-    artifacts:
-      path: blackroad-stage
+    artifact_path: blackroad-stage
     domain: https://stage.blackroad.io
     health_check: https://stage.blackroad.io/health.json
     state: active
@@ -109,8 +86,8 @@ deployments:
     module: modules/ecs-service-alb
     state: planned
     notes: >-
-      Network, ECS, and RDS resources are defined; service wiring will follow the
-      production module once ready.
+      Cluster, subnets, and RDS resources exist; wiring mirrors production once
+      the API promotion is enabled.
     image_repository: br-api-gateway
     scaling:
       desired_count: 1
@@ -123,151 +100,12 @@ change_management:
     - .github/workflows/change-approve.yml
   policy_gates:
     - name: release-runbook
-      description: Run the infra release policy to coordinate verification and fast rollback while staging matures.
+      description: Run the infra release policy before cutting over to prod.
       runbook: runbooks/examples/infra_release_policy.yaml
 observability:
   health_checks:
-    - name: static-health
-      url: https://stage.blackroad.io/health.json
-branch: staging
-description: >-
-  Pre-production stack that mirrors production for integration testing, release
-  rehearsals, and data verification before a mainline cutover.
-urls:
-  primary: https://staging.blackroad.io
-  preview_route: https://staging.blackroad.io/prism
-reviewers:
-  - platform-ops
-  - qa-team
-  - security-reviewers
-deploy_targets:
-  - surface: marketing-site
-    provider: cloudflare_pages
-    artifact_path: sites/blackroad
-    workflow: .github/workflows/pages-stage.yml
-  - surface: customer-app
-    provider: fly_io
-    app: blackroad-app-staging
-    release_channel: staging
-    regions: [iad]
-    workflow: .github/workflows/canary.yml
-    secrets:
-      - FLY_STAGING_API_TOKEN
-  - surface: api
-    provider: aws_ecs
-    cluster: blackroad-staging
-    service: prism-console-api-staging
-    workflow: .github/workflows/_backup_132_deploy.yml
-    container:
-      port: 4010
-      healthcheck: /api/llm/health
-    load_balancer:
-      host: api.staging.blackroad.io
-      https_listener_secret: AWS_STAGING_HTTPS_LISTENER_ARN
-    iam:
-      deploy_role_secret: AWS_STAGING_DEPLOY_ROLE
-qa:
-  regression_suite:
-    command: make test ENV=staging
-    location: tools/lucidia-autotester
-  smoke_tests:
-    - curl -fsS https://staging.blackroad.io/healthz
+    - https://stage.blackroad.io/health.json
     - curl -fsS https://api.staging.blackroad.io/api/llm/health
-approvals:
-  required_roles:
-    - platform
-    - qa
-  change_windows:
-    - name: daily-promotion
-      schedule: 16:00-18:00 UTC
-observability:
-  grafana: https://blackroad.io/monitoring
-  notes: Mirrors production dashboards with staging data source wiring.
 notes:
-  - >-
-    Exercise the autopal environment access workflow for staging when dual
-    control is required.
-slug: stage
-status: ready
-description: >-
-  Pre-production validation footprint for release candidates and smoke tests.
-branch: staging
-urls:
-  primary: https://staging.blackroad.io
-  aliases:
-    - https://dev.blackroadinc.us
-governance:
-  approvals_required: false
-  reviewers:
-    - handle: blackboxprogramming
-  contacts:
-    owner: amundsonalexa@gmail.com
-    slack_channels:
-      - channel: ops-monitor
-        purpose: Track lead time, deployment frequency, change fail rate, and MTTR once instrumentation is wired up.
-runbooks:
-  release: DEPLOYMENT.md
-  rollback: DEPLOYMENT.md#rollback
-  operations: RUNBOOK.md
-deployment:
-  branch_policy:
-    auto_deploy_from: staging
-  workflows:
-    - .github/workflows/pages-stage.yml
-    - .github/workflows/blackroad-deploy.yml
-observability:
-  dashboards:
-    - deploy/k8s/monitoring.yaml
-notes:
-  - Staging smoke tests target https://staging.blackroad.io in the CI examples.
-  - dev.blackroadinc.us should CNAME to this staging surface for internal routing.
-  - Pull requests publish preview hosts at pr-###.dev.blackroad.io prior to promotion.
-  - Next initiative: hook CI/CD outputs into Fly.io and AWS ECS targets via reusable workflows.
-  verification:
-    - curl -fsS https://stage.blackroad.io/ >/dev/null
-    - curl -fsS https://stage.blackroad.io/health.json >/dev/null
-    - aws ecs describe-clusters --cluster $(terraform output -raw ecs_cluster) \
-        --region us-west-2
-url: https://staging.blackroad.io
-reviewers:
-  - blackboxprogramming
-  - platform-duty
-notes:
-  - Primary integration environment for release candidates.
-  - Deploys via Fly.io for the web tier and AWS ECS for APIs.
-  verification:
-    - curl -fsS https://stage.blackroad.io/ >/dev/null
-    - gh workflow run stage-stress.yml -f STRESS=true
-url: https://staging.blackroad.io
-reviewers:
-  - blackboxprogramming
-description: >-
-  Pre-production environment used for regression checks before promoting releases.
-workflows:
-  - .github/workflows/_backup_132_lucidia-ci.yml
-checks:
-  - npm run test:smoke -- --baseUrl=https://staging.blackroad.io
-notifications:
-  slack_channel: "#deployments"
-  commands:
-    - aws ecs describe-services --cluster <cluster-arn> --services api-gateway --region us-west-2
-url: https://staging.blackroad.io
-reviewers:
-  - blackboxprogramming
-status: planned
-kind: persistent
-chatops:
-  command: "/deploy blackroad staging"
-  workflow: .github/workflows/_backup_132_deploy-blackroad-staging.yml
-  branch: staging
-deploy:
-  description: >-
-    GitHub Actions builds `sites/blackroad` from the `staging` branch and publishes it to the
-    GitHub Pages staging environment for QA sign-off before production pushes.
-verification:
-  checklist:
-    - Confirm the GitHub Pages environment named "staging" is green before approving.
-    - Once DNS is wired, curl https://staging.blackroad.io/healthz and confirm HTTP 200.
-notes:
-  - DNS for `staging.blackroad.io` has not been delegated yet; rely on the Pages preview URL until the cutover completes.
-  - Feature flags and config overrides should be staged here before `main` merges trigger production deploys.
+  - Exercise the autopal environment access workflow when dual control is
+    required.

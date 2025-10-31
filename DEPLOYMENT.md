@@ -1,216 +1,123 @@
-# BlackRoad Deployment
-
-## Quick Start: DigitalOcean Droplet Deployment
-
-### Prerequisites
-- Docker and Docker Compose installed on droplet
-- Git installed
-- SSH access configured
-
-### Initial Droplet Setup
-```bash
-# Install Docker
-curl -fsSL https://get.docker.com -o get-docker.sh
-sh get-docker.sh
-apt-get update && apt-get install -y docker-compose-plugin
-
-# Clone repository
-cd /root
-git clone https://github.com/blackboxprogramming/blackroad-prism-console.git
-cd blackroad-prism-console
-
-# Create production environment file
-cp .env.production .env
-# IMPORTANT: Edit .env and update SESSION_SECRET and INTERNAL_TOKEN
-# Use: openssl rand -hex 32
-```
-
-### GitHub Secrets Configuration
-Set in your repository settings:
-- `DROPLET_IP`: Your droplet's IP address
-- `DROPLET_SSH_KEY`: Private SSH key for root access
-
-### Manual Deployment
-```bash
-cd /root/blackroad-prism-console
-git pull origin main
-docker-compose -f docker-compose.prod.yml down
-docker-compose -f docker-compose.prod.yml build --no-cache
-docker-compose -f docker-compose.prod.yml up -d
-docker-compose -f docker-compose.prod.yml ps
-```
-
-### Monitoring
-```bash
-# View logs
-docker-compose -f docker-compose.prod.yml logs -f
-
-# Check status
-docker-compose -f docker-compose.prod.yml ps
-```
-
-### Services
-- **api**: Backend API service (port 4000, internal)
-- **web**: Main application (port 8000, internal)
-- **caddy**: Reverse proxy with automatic HTTPS (ports 80, 443)
-
----
-
-## Environment
-
-1. Copy `srv/blackroad-api/.env.example` to `.env` and fill secrets.
-2. `INTERNAL_TOKEN` is used for privileged API calls.
-3. `GITHUB_WEBHOOK_SECRET` verifies GitHub webhooks.
-
-## GitHub App
-
-1. Visit GitHub → Settings → Developer settings → GitHub Apps → New GitHub App.
-2. Use `srv/blackroad-api/github_app_manifest.json` as a template.
-3. Set webhook URL to `https://blackroad.io/api/webhooks/github` and secret to `GITHUB_WEBHOOK_SECRET`.
-4. Install the app on repositories under `blackboxprogramming`.
-
-## Fallback Webhook
-
-If not using a GitHub App, create a classic webhook pointing to `/api/webhooks/github` with the same secret.
-
-## Branch Policy
-
-- `main` → production
-- `staging` → staging
-
-## CI/CD workflows
-
-Release automation now leans on reusable GitHub workflows so service-specific
-pipelines stay small while still targeting the managed infrastructure footprint:
-
-- `.github/workflows/reusable-aws-ecs-deploy.yml` registers a fresh task
-  definition revision and forces an ECS deployment. Supply the ECS cluster,
-  service, and image along with credentials (preferably an IAM role) to push new
-  backend builds.
-- `.github/workflows/reusable-fly-deploy.yml` handles Fly.io rollouts. Provide
-  the Fly app name plus an image reference (or rely on `fly.toml`) and the
-  workflow will stage secrets and kick off the deploy.
-
-These workflows are referenced from the environment manifests in
-`environments/` so bots and humans alike know which automation path owns each
-target.
-
-## Admin UI
-
-Serve `var/www/blackroad/admin/index.html` and access it. Enter the internal token to use deployment actions.
-
-## Backups
-
-Nightly cron:
-```
-0 3 * * * /usr/local/bin/blackroad-backup-sqlite.sh
-```
-Backups stored under `/var/backups/blackroad/sqlite/`.
-
-## Rollback
-
-Use Admin UI or API `POST /api/rollback/:releaseId` with the internal token.
-
-## Troubleshooting
-
-- Ensure `/srv/blackroad-api` has required dependencies.
-- Check `/var/log/blackroad-api/app.log` for server logs.
-- Verify systemd unit `blackroad-api` is active.
-
-## Monitoring and Observability
-
-The Kubernetes manifest at `deploy/k8s/monitoring.yaml` provisions a full
-monitoring stack in the `prism-monitoring` namespace.
-
-- **Prometheus** scrapes `blackroad-api`, `lucidia-llm`, `lucidia-math`, and the
-  NGINX ingress metrics endpoint with retention set to 15 days.
-- **Grafana** persists dashboards and preloads panels for API latency, LLM
-  response times, math contradictions, and system resource usage. Grafana is
-  exposed at `/monitoring` via NGINX ingress and secured with basic auth.
-- **Loki** and **Promtail** collect pod logs so dashboards can query centralized
-  logs.
-- **Alertmanager** notifies configured Slack or Discord webhooks when services
-  go down, 5xx errors spike, database writes fail, or more than 10 contradictions
-  occur within 10 minutes.
-
-Apply the manifest with `kubectl apply -f deploy/k8s/monitoring.yaml` to enable
-observability for the Prism stack.
 # BlackRoad deployment playbook
 
-This guide explains how the Prism console promotes builds across preview, staging,
-and production. It focuses on the automation already codified in the repository
-so operators can follow the same source of truth that bots rely on.
+This playbook documents the fully automated release flow for the Prism console
+and captures the handful of manual escape hatches that remain. It mirrors the
+`environments/*.yml` manifests so humans and bots follow the same source of
+truth when promoting changes.
+
+## Branch model & merge queue
+
+- `main` is the only production source of truth. `staging` mirrors production
+  for pre-production testing and is promoted via pull requests from `main`.
+- Every change must enter the merge queue by applying the `automerge` label.
+  The `🤖 Auto-merge` workflow flips GitHub’s native auto-merge toggle so the
+  queue serialises incompatible work.
+- The scheduled **Branch Hygiene** workflow (`.github/workflows/branch-hygiene.yml`)
+  runs weekly (or on demand) and deletes merged branches automatically using the
+  updated `cleanup-dead-branches.sh` script. Provide
+  `BRANCH_CLEANUP_TOKEN` when a dedicated bot token is required.
+- Avoid long-lived feature branches—rebase them frequently or close them once
+  the preview environment catches regressions.
+
+## Preview gating (per pull request)
+
+- `.github/workflows/preview.yml` provisions an isolated ECS/Fargate stack for
+  each pull request, wiring ALB listener rules and Route53 aliases under
+  `pr-<n>.dev.blackroad.io`.
+- `.github/workflows/preview-containers.yml` builds a GHCR image per PR,
+  publishes SBOM and Grype scan artifacts, and posts docker run instructions on
+  the pull request.
+- `.github/workflows/preview-containers-cleanup.yml` and
+  `preview-frontend-host.yml` remove registry tags and optional frontend-only
+  preview services on close.
+- These jobs are required checks for every pull request; do not merge without a
+  green preview stack.
+
+## Staging handshake
+
+- The staging branch (`staging`) represents the pre-production environment.
+- `.github/workflows/pages-stage.yml` rebuilds the stage proof artifact whenever
+  `staging` updates or on a daily cron. The workflow now targets the staging
+  branch instead of `main` so pre-production approvals gate the release.
+- `.github/workflows/stage-stress.yml` remains an opt-in load test that operators
+  can trigger with `STRESS=true` before promoting to production.
+- Staging automation, Terraform roots, and health checks are captured in
+  `environments/staging.yml`.
+
+## Production promotion
+
+- `.github/workflows/blackroad-deploy.yml` runs on every push to `main` (modern
+  path) and exposes `workflow_dispatch` inputs for legacy SSH deploys. It builds
+  the SPA, calls the deploy webhook, verifies `/healthz` + `/api/version`, and
+  purges Cloudflare when necessary before posting Slack notifications.
+- `deploy-canary.yml` and `deploy-canary-ladder.yml` provide progressive
+  delivery options before flipping all traffic. Reference
+  `environments/production.yml` for required variables and secrets.
+- Change management continues to run through `.github/workflows/change-approve.yml`
+  with CAB approval documented in the production manifest. Execute
+  `runbooks/examples/infra_release_policy.yaml` during releases so rollback and
+  comms stay coordinated.
 
 ## Environment manifests
 
-Authoritative definitions for each footprint live in `environments/*.yml`:
+Authoritative configuration lives under `environments/`:
 
-- **Preview (`preview.yml`)** — ephemeral per-PR stacks on AWS ECS Fargate
-  under `dev.blackroad.io`. Includes Terraform backend metadata, required
-  secrets, and the GitHub workflow that provisions and tears down previews.
-- **Staging (`staging.yml`)** — mirrors production infrastructure for QA. Tracks
-  the GitHub Pages proof artifact job today and documents the planned ECS
-  gateway wiring.
-- **Production (`production.yml`)** — customer-facing domains, deploy workflows,
-  Terraform backends, and approval requirements for blackroad.io.
+- `preview.yml` — preview automation inputs, Terraform backends, and required
+  pull-request checks.
+- `staging.yml` — staging branch triggers, proof artifact workflow, and planned
+  ECS wiring.
+- `production.yml` — production workflows, change management gates, and health
+  checks.
 
-Update these manifests whenever domains, Terraform roots, secrets, or approval
-flows change. Release tooling, runbooks, and dashboards should link back to the
-manifests so humans and automation stay aligned.
+Update the manifests whenever domains, Terraform state, workflows, or approval
+paths change. Release tooling consumes these files directly.
 
-## Automation & workflows
+## Observability & health
 
-GitHub Actions is the canonical deployment surface. Key workflows:
+- `/healthz`, `/health.json`, and `/api/version` endpoints are validated as part
+  of the production workflow.
+- Grafana, Prometheus, and Alertmanager definitions live in
+  `deploy/k8s/monitoring.yaml`. Apply the manifest via `kubectl` for full-stack
+  telemetry.
+- Preview jobs hit `/healthz/ui` automatically; staging smoke tests (`curl -fsS
+  https://stage.blackroad.io/health.json`) are linked from the manifest.
 
-- `.github/workflows/preview.yml` — builds a PR-specific container image,
-  applies the preview Terraform stack, creates load balancer rules, and comments
-  with the preview URL.
-- `.github/workflows/pages-stage.yml` — generates the staged proof artifact and
-  uploads it for QA sign-off. Future ECS wiring for staging will reuse this
-  manifest for additional services.
-- `.github/workflows/blackroad-deploy.yml` — runs on pushes to `main` (or manual
-  dispatch) to build the SPA, call the deploy webhook, verify health, and notify
-  Slack when configured.
+## Legacy fallbacks
 
-Secrets, variables, and health checks referenced by these workflows are
-captured in the environment manifests above. When adding a new service, extend
-both the manifest and the relevant workflow so deploy metadata stays in sync.
+Automation should cover the vast majority of releases. When manual access is
+required, fall back to the documented scripts:
 
-## Change management & approvals
+- Legacy webhook configuration and GitHub App manifests live in
+  `srv/blackroad-api/`. Keep `BR_DEPLOY_SECRET`, `BR_DEPLOY_URL`, and the GitHub
+  App webhook secret in sync.
+- `.github/workflows/blackroad-deploy.yml` exposes `target=legacy-ssh` for SSH
+  hosts. Supply `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_KEY`, and optional
+  `DEPLOY_PORT` secrets when invoking the manual path.
+- `cleanup-dead-branches.sh` can still be run locally. Set `AUTO_APPROVE=true`
+  to bypass prompts when running in automation or pass a different base branch
+  with `BASE_BRANCH=origin/staging`.
 
-Infrastructure-affecting intents (deploy, schema migrations, secret rotation)
-require an approval token via `.github/workflows/change-approve.yml`. Each
-manifest’s `change_management` section documents which runbooks and workflows
-must be satisfied before promoting changes. Store the resulting token artifact
-with the release so auditors can trace who approved the operation.
+### Fallback: DigitalOcean droplet quickstart
 
-## GitHub App & webhook integration
+For one-off experiments without touching the automated pipeline, provision a
+droplet and follow these steps:
 
-The API accepts deploy commands from either the GitHub App or a bearer-secured
-webhook:
+```bash
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+apt-get update && apt-get install -y docker-compose-plugin git
 
-1. Create or update the GitHub App using
-   `srv/blackroad-api/github_app_manifest.json` as a template. Point the webhook
-   to `https://blackroad.io/api/webhooks/github` using the shared secret in
-   `srv/blackroad-api/.env.example`.
-2. For the webhook path used by the modern workflow, supply `BR_DEPLOY_SECRET`
-   and `BR_DEPLOY_URL` secrets so `blackroad-deploy.yml` can trigger
-   `/api/deploy/hook`.
-3. Keep `README-DEPLOY.md` updated with any additional secrets or verification
-   logic so operators know which credentials are required.
+git clone https://github.com/blackboxprogramming/blackroad-prism-console.git
+cd blackroad-prism-console
+cp .env.production .env
+# Generate new secrets: openssl rand -hex 32
 
-## Rollback & manual operations
+docker-compose -f docker-compose.prod.yml build --no-cache
+docker-compose -f docker-compose.prod.yml up -d
+docker-compose -f docker-compose.prod.yml logs -f
+```
 
-`README-OPS.md` contains the canonical rollback/forward matrix, health endpoints,
-and scripts (e.g., `scripts/nginx-ensure-and-health.sh`) for manual recovery.
-When automation fails or legacy hosts need attention:
-
-- Dispatch `blackroad-deploy.yml` with `target=legacy-ssh` to use the SSH
-  fallback path.
-- Refer to environment manifests for Terraform backends and AWS resources before
-  running manual CLI operations.
-- Document the action in the incident log and append any new requirements to the
-  corresponding manifest.
-
-Following this playbook ensures GitHub workflows, manifests, and runbooks stay
-coordinated as infrastructure evolves.
+Expose `/healthz` through the bundled Caddy configuration or install Nginx per
+the historical instructions if you need HTTPS quickly. Treat this path as a
+temporary escape hatch; the automated workflows remain the source of truth for
+production.

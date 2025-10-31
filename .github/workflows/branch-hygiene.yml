@@ -1,0 +1,49 @@
+name: Branch Hygiene
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve cleanup token
+        id: token
+        env:
+          TOKEN: ${{ secrets.BRANCH_CLEANUP_TOKEN || github.token }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "available=true" >> "$GITHUB_OUTPUT"
+          printf 'TOKEN=%s\n' "$TOKEN" >> "$GITHUB_ENV"
+
+      - name: Configure authenticated remote
+        if: steps.token.outputs.available == 'true'
+        env:
+          TOKEN: ${{ env.TOKEN }}
+        run: |
+          set -euo pipefail
+          git remote set-url origin "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}"
+
+      - name: Delete merged branches
+        if: steps.token.outputs.available == 'true'
+        env:
+          AUTO_APPROVE: "true"
+          PROTECTED_BRANCHES: "main staging production release/* hotfix/*"
+        run: bash cleanup-dead-branches.sh
+
+      - name: Skip summary
+        if: steps.token.outputs.available != 'true'
+        run: echo "No branch cleanup token configured; skipping run."
