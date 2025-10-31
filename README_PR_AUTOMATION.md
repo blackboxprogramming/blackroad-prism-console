@@ -165,6 +165,7 @@ Track the Slack, Asana Auth Bot, and GitLab mirroring setup in
 matrix in this file once each service is configured in the target environment. When you are ready to
 validate the live wiring, follow the runbook in
 [`docs/VALIDATION_SPRINT.md`](docs/VALIDATION_SPRINT.md) to exercise every workflow end to end.
+matrix in this file once each service is configured in the target environment.
 
 For the broader operations rollout—including the `blackroad.io` product surface, the
 `blackroadinc.us` operations hub, and the multi-system integration backlog—work from the
