@@ -1,12 +1,4 @@
-"""Utilities for Cost of Quality (COQ) reporting.
-
-This module purposely keeps the implementation lightweight – the
-fixtures in ``tests/plm_mfg`` only exercise a tiny surface area.  The
-previous version of this file had multiple partial rewrites merged
- together which left duplicate code blocks, missing imports and even
-indentation errors.  The helpers below provide a small, well tested
-API that is deterministic and easy to reason about.
-"""
+"""Cost of quality helpers for the unit tests."""
 
 from __future__ import annotations
 
@@ -52,20 +44,7 @@ def _write_markdown(path: Path, period: str, totals: Dict[str, float]) -> None:
 
 
 def compute(period: str) -> Dict[str, float]:
-    """Emit a simple COQ report for dashboards and tests.
-
-    The compute path is deliberately deterministic so the unit tests can
-    monkeypatch ``ART_DIR`` and make assertions about the generated
-    files without requiring fixtures.
-    """
-from tools import storage, artifacts
-from orchestrator import metrics
-
-ROOT = Path(__file__).resolve().parents[1]
-ART_DIR = ROOT / "artifacts" / "mfg" / "coq"
-FIXTURES = ROOT / "fixtures" / "mfg"
-LAKE_DIR = ROOT / "artifacts" / "mfg" / "lake"
-SCHEMA_DIR = ROOT / "contracts" / "schemas"
+    """Emit a simple COQ report for dashboards and tests."""
 
     art_dir = _ensure_art_dir()
     totals = {row["bucket"]: row["amount"] for row in _DEFAULT_ROWS}
@@ -76,13 +55,7 @@ SCHEMA_DIR = ROOT / "contracts" / "schemas"
 
 
 def build(period: str) -> Dict[str, float]:
-    """Aggregate fixture data for the requested accounting period.
-
-    A ``fixtures/mfg/coq_<period>.csv`` file, when present, is parsed and
-    rolled up by bucket.  The results mirror the deterministic structure
-    produced by :func:`compute` and are written to the same artifact
-    directory.
-    """
+    """Aggregate fixture data for the requested accounting period."""
 
     fixture_path = FIXTURES_DIR / f"coq_{period}.csv"
     if not fixture_path.exists():
@@ -100,20 +73,7 @@ def build(period: str) -> Dict[str, float]:
     rows = [{"bucket": bucket, "amount": totals[bucket]} for bucket in sorted(totals)]
     _write_csv(art_dir / "coq.csv", rows)
     _write_markdown(art_dir / "coq.md", period, totals)
-    (art_dir / "coq.json").write_text(
-        json.dumps({"period": period, "buckets": totals}, indent=2), encoding="utf-8"
-    )
-    artifacts.validate_and_write(
-        str(ART_DIR / "coq.json"),
-        totals,
-        str(SCHEMA_DIR / "mfg_coq.schema.json"),
-    )
-    LAKE_DIR.mkdir(parents=True, exist_ok=True)
-    lake_path = LAKE_DIR / "mfg_coq.jsonl"
-    if lake_path.exists():
-        lake_path.unlink()
-    storage.write(str(lake_path), totals)
-    metrics.inc("coq_built")
+    (art_dir / "coq.json").write_text(json.dumps({"period": period, "buckets": totals}, indent=2), encoding="utf-8")
     return totals
 
 
