@@ -116,6 +116,7 @@ where γ ∈ Π(μ, ν)
 - **Fisher metric** on zeta function parameter space
 - **Hamiltonian flow** of zeros
 - **Optimal transport** of zero distribution
+- **Zero counting** — see `docs/prism/riemann_zero_counting/lemma_pack_02.md` for the Hadamard product to Riemann–von Mangoldt pipeline.
 
 ---
 
