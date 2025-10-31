@@ -52,5 +52,30 @@ header, .sidebar, .panel{ background:var(--bg-panel); border-radius:1rem; box-sh
   -webkit-text-fill-color:transparent;
 }
 
+/* Hero + glass surfaces */
+.hero-surface{
+  box-shadow:0 30px 70px rgba(8,15,35,.55);
+}
+
+.glass-panel{
+  position:relative;
+  padding:clamp(1.5rem,5vw,2.75rem);
+  border-radius:1.75rem;
+  border:1px solid rgba(148,163,184,.25);
+  background:linear-gradient(135deg,rgba(15,23,42,.72),rgba(12,74,110,.4));
+  backdrop-filter:blur(28px);
+  box-shadow:0 25px 60px rgba(14,165,233,.18);
+}
+
+.glass-panel::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  border:1px solid rgba(94,234,212,.15);
+  opacity:.6;
+  pointer-events:none;
+}
+
 /* Focus ring */
 :focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(0,150,255,.35); }
