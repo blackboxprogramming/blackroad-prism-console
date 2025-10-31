@@ -74,7 +74,7 @@ import SecuritySpotlights from './pages/SecuritySpotlights.jsx'
 import io from 'socket.io-client'
 import { Routes, Route, NavLink } from 'react-router-dom'
 import { API_BASE, setToken, login, me, fetchTimeline, fetchTasks, fetchCommits, fetchAgents, fetchWallet, fetchContradictions, getNotes, setNotes, action } from './api'
-import { Activity, Brain, Database, LayoutGrid, Settings, ShieldCheck, SquareDashedMousePointer, HeartPulse, Sparkles } from 'lucide-react'
+import { Activity, Brain, Database, LayoutGrid, Settings, ShieldCheck, SquareDashedMousePointer, HeartPulse, Sparkles, Music3 } from 'lucide-react'
 import Login from './components/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import RoadView from './pages/RoadView.jsx'
@@ -91,6 +91,8 @@ import DesktopOS from './pages/DesktopOS.jsx'
 import MusicApp from './pages/MusicApp.jsx'
 import SimplifiedOS from './pages/SimplifiedOS.jsx'
 import RoadChain from './components/RoadChain.jsx'
+import Git from './pages/Git.jsx'
+import MusicStudio from './pages/MusicStudio.jsx'
 
 export default function App(){
   const location = useLocation()
@@ -466,6 +468,7 @@ export default function App(){
               <NavItem to="/autoheal" icon={<HeartPulse size={18} />} text="Auto-Heal" />
               <NavItem to="/git" icon={<GitCommit size={18} />} text="Git" />
               <NavItem to="/novelty" icon={<Sparkles size={18} />} text="Novelty Dashboard" />
+              <NavItem to="/music" icon={<Music3 size={18} />} text="Music Studio" />
               <NavItem icon={<Rocket size={18} />} text="Orchestrator" to="/orchestrator" />
               <NavItem icon={<Rocket size={18} />} text="Manifesto" href="/manifesto" />
               <NavItem to="/resilience" icon={<ShieldCheck size={18} />} text="Resilience" />
@@ -583,6 +586,8 @@ export default function App(){
               <Route path="/control" element={<ControlPanel />} />
               <Route path="/resilience" element={<Resilience />} />
               <Route path="/sonic" element={<MusicApp />} />
+              <Route path="/git" element={<Git />} />
+              <Route path="/music" element={<MusicStudio />} />
             </Routes>
           </main>
         </>
