@@ -1,0 +1,34 @@
+id: rubric-researcher-v1
+role: researcher
+summary: "Replication, citations, and evidence quality."
+criteria:
+  - name: Experimental Clarity
+    description: "Can another researcher reproduce the study quickly?"
+    levels:
+      - label: Emerging
+        evidence: "Setup steps missing or energy usage untracked."
+      - label: Ready
+        evidence: "Setup documented with energy budget per run."
+      - label: Teaching
+        evidence: "Automated notebook exports include mastery deltas."
+        energy_hint: "Keep baselines under 2J with caching."
+  - name: Citation Discipline
+    description: "Quality and completeness of citations in lesson outputs."
+    levels:
+      - label: Emerging
+        evidence: "Claims lack references or link to stale lessons."
+      - label: Ready
+        evidence: "Each claim cites a lesson, rubric, or dataset entry."
+      - label: Teaching
+        evidence: "Contradictions flagged with repair steps and timestamped."
+        energy_hint: "Reuse canonical teaching cards to lower effort."
+  - name: Mastery Insight
+    description: "How the research translates into actionable teaching updates."
+    levels:
+      - label: Emerging
+        evidence: "No proposed change to tracks or hint trees."
+      - label: Ready
+        evidence: "Recommends module updates with metrics."
+      - label: Teaching
+        evidence: "Implements spaced repetition adjustments with telemetry."
+        energy_hint: "Target +0.05 mastery per joule consumed."

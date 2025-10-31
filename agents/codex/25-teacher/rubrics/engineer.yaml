@@ -1,0 +1,34 @@
+id: rubric-engineer-v1
+role: engineer
+summary: "Maintainability and tolerances for learning systems."
+criteria:
+  - name: Observability
+    description: "Can another engineer trace mastery metrics end-to-end?"
+    levels:
+      - label: Emerging
+        evidence: "Logs missing or not correlated with cohorts."
+      - label: Ready
+        evidence: "Dashboards identify cohorts and hint usage."
+      - label: Teaching
+        evidence: "Alerts include energy cost projections and remedies."
+        energy_hint: "Automate a <0.5J smoke check per deploy."
+  - name: Tolerance Windows
+    description: "How resilient the system is to delayed lessons or spikes."
+    levels:
+      - label: Emerging
+        evidence: "No defined SLA for lesson latency."
+      - label: Ready
+        evidence: "Lesson latency target set at 3 minutes and monitored."
+      - label: Teaching
+        evidence: "Adaptive throttles adjust workloads based on energy usage."
+        energy_hint: "Document fallback when metrics degrade."
+  - name: Repair Pathing
+    description: "Processes that turn failures into lessons."
+    levels:
+      - label: Emerging
+        evidence: "Incidents patched without learning artifact."
+      - label: Ready
+        evidence: "Guardian contradictions route to teaching cards."
+      - label: Teaching
+        evidence: "Repair cards loop into practice sets automatically."
+        energy_hint: "Keep human review time under 1 joule equivalent."

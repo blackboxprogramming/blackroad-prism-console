@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.ai/schemas/hint_tree.schema.json",
+  "title": "HintTree",
+  "type": "object",
+  "required": ["id", "root"],
+  "properties": {
+    "id": {"type": "string"},
+    "root": {
+      "type": "object",
+      "$ref": "#/definitions/hint_node"
+    },
+    "telemetry": {
+      "type": "object",
+      "properties": {
+        "tracks_energy": {"type": "boolean"},
+        "logs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["timestamp", "user", "level"],
+            "properties": {
+              "timestamp": {"type": "string", "format": "date-time"},
+              "user": {"type": "string"},
+              "level": {"type": "integer", "minimum": 0},
+              "outcome": {"type": "string"}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "definitions": {
+    "hint_node": {
+      "type": "object",
+      "required": ["level", "prompt"],
+      "properties": {
+        "level": {"type": "integer", "minimum": 0},
+        "prompt": {"type": "string"},
+        "children": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/hint_node"}
+        },
+        "action": {
+          "type": "object",
+          "properties": {
+            "type": {"type": "string", "enum": ["question", "link", "code", "check"]},
+            "value": {"type": "string"}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

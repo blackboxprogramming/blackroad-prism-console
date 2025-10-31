@@ -70,6 +70,8 @@ benchmarks/
 # Lucidia artifacts
 secrets/*
 datasets/
+!agents/codex/25-teacher/datasets/
+!agents/codex/25-teacher/datasets/*
 models/
 !br-dbt/models/
 !br-dbt/models/**

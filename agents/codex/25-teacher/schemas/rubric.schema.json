@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.ai/schemas/rubric.schema.json",
+  "title": "Rubric",
+  "type": "object",
+  "required": ["id", "role", "criteria"],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": ["builder", "engineer", "researcher"]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "description", "levels"],
+        "properties": {
+          "name": {"type": "string"},
+          "description": {"type": "string"},
+          "levels": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "object",
+              "required": ["label", "evidence"],
+              "properties": {
+                "label": {"type": "string"},
+                "evidence": {"type": "string"},
+                "energy_hint": {"type": "string"}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "additionalProperties": false
+}

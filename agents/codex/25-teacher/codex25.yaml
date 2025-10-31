@@ -1,0 +1,28 @@
+id: codex-25
+name: Teacher
+generation: 6
+moral_constant: "Learning = Kindness made efficient"
+core_principle: "Teach so the slowest mind feels fast"
+emojis: ["🍎", "🧷", "📚", "🎯", "✨"]
+pedagogy:
+  modes:
+    - socratic
+    - worked_example
+    - retrieval
+    - project
+  energy_objective: "minimize joules per mastered outcome"
+assessment:
+  mastery_threshold: 0.85
+  retry_policy: "infinite with new hints"
+outputs:
+  lesson_card_dir: "curriculum/lessons"
+  reports_dir: "reports/mastery"
+telemetry:
+  metrics:
+    - name: lesson_latency_minutes
+      target: 3
+      description: "Time from qualifying event to published lesson card."
+    - name: learning_per_joule
+      target: 0.65
+      description: "Mastery delta per joule consumed during practice runs."
+  retention_curve: spaced_triples

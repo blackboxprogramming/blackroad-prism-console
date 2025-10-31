@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blackroad.ai/schemas/lesson_card.schema.json",
+  "title": "LessonCard",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "audience",
+    "level",
+    "context_links",
+    "goals",
+    "steps",
+    "exit_ticket"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^L-[A-Z0-9\\-]+$",
+      "description": "Stable lesson identifier derived from source artifact."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "audience": {
+      "type": "string",
+      "enum": ["builders", "engineers", "researchers", "general"]
+    },
+    "level": {
+      "type": "string",
+      "enum": ["intro", "intermediate", "advanced", "clinic"]
+    },
+    "context_links": {
+      "type": "array",
+      "items": {"type": "string", "format": "uri-reference"},
+      "minItems": 1
+    },
+    "goals": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1,
+      "maxItems": 5
+    },
+    "energy_hint": {
+      "type": "string",
+      "description": "Short reminder describing energy target or throttle."
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["type", "content"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["read", "code", "check", "reflect", "discuss"]
+          },
+          "content": {
+            "type": "string"
+          },
+          "snippet": {
+            "type": "string"
+          },
+          "command": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "hints": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Ordered from lightest nudge to most direct help."
+    },
+    "exit_ticket": {
+      "type": "string",
+      "minLength": 5
+    }
+  },
+  "additionalProperties": false
+}

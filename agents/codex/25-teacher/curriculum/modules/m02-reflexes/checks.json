@@ -1,0 +1,14 @@
+[
+  {
+    "id": "CHK-M02-01",
+    "prompt": "What topic does the quiz submission reflex emit after computing the next set?",
+    "expected": "teacher:practice.next",
+    "evidence": "hooks/on_quiz_submitted.reflex.py"
+  },
+  {
+    "id": "CHK-M02-02",
+    "prompt": "Which function validates lesson cards before publication?",
+    "expected": "pipelines.make_lessons.validate_card",
+    "evidence": "pipelines/make_lessons.py"
+  }
+]

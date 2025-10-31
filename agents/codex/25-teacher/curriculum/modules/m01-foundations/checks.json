@@ -1,0 +1,14 @@
+[
+  {
+    "id": "CHK-M01-01",
+    "prompt": "List two event sources Teacher listens to by default.",
+    "expected": ["git:pr_merged", "codex:episode.published"],
+    "evidence": "hooks/on_pr_merged.reflex.py"
+  },
+  {
+    "id": "CHK-M01-02",
+    "prompt": "Explain how hint usage is recorded for later analysis.",
+    "expected": "Telemetry logs level and timestamp in hint trees.",
+    "evidence": "schemas/hint_tree.schema.json"
+  }
+]
