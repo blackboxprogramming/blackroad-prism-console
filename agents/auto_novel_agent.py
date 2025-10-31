@@ -185,7 +185,6 @@ class AutoNovelAgent:
         """
         self.SUPPORTED_ENGINES.add(engine.lower())
 
-<<<<<<< main
     @classmethod
     def reset_supported_engines(cls) -> None:
         """Restore the supported engines to their default set."""
@@ -201,9 +200,7 @@ class AutoNovelAgent:
         self.SUPPORTED_ENGINES.discard(engine.lower())
 
     def list_supported_engines(self) -> List[str]:
-=======
     def list_supported_engines(self) -> list[str]:
->>>>>>> origin/codex/complete-next-project-step-0o96zy
         """Return a list of supported game engines."""
         return sorted(self.SUPPORTED_ENGINES)
 
@@ -397,6 +394,21 @@ class AutoNovelAgent:
     def list_supported_engines(self) -> list[str]:
         """Return a list of supported game engines."""
         return sorted(self._supported_engines)
+    def write_short_story(self, theme: str) -> str:
+        """Generate a short, two-sentence story for the given theme.
+
+        Args:
+            theme: The central theme of the story.
+
+        Returns:
+            A short story featuring the theme.
+        """
+        clean_theme = " ".join(theme.split())
+        if not clean_theme:
+            raise ValueError("Theme must be provided.")
+        return (
+            f"A tale of {clean_theme} begins with hope. In the end, {clean_theme} prevails."
+        )
 
 
 if __name__ == "__main__":
@@ -416,3 +428,5 @@ if __name__ == "__main__":
             "friendship", setting="a bustling spaceport", protagonist="Rin"
         )
     )
+    agent.create_game("unity")
+    print(agent.write_short_story("friendship"))
