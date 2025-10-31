@@ -1,110 +1,69 @@
 # Ops quickstart
-Bridge runs on :4000; nginx routes `/api` and `/ws`. Static web artifacts publish through GitHub Pages while containerised services land on AWS ECS Fargate.
+
+BlackRoad relies on an automated preview → staging → production flow. This
+quickstart highlights how to operate the system without stepping outside the
+guardrails defined in `environments/*.yml` and `DEPLOYMENT.md`.
 
 ## Environment map
 
-| Environment | Domains | Primary workflow | Notes |
-| --- | --- | --- | --- |
-| Preview (`pr`) | `https://dev.blackroad.io`, `https://pr-<n>.dev.blackroad.io` | `.github/workflows/preview.yml`, `.github/workflows/preview-containers.yml` | Spins up ephemeral ECS services + ALB rules per pull request and publishes GHCR preview images with SBOM + Grype reports. Terraform config lives in `infra/preview-env/`; see `environments/preview.yml` for the full manifest. |
-| Staging (`stg`) | `https://stage.blackroad.io` | `.github/workflows/pages-stage.yml` | Builds and archives the static site proof artifact. API wiring is planned; see `environments/staging.yml` for current status. |
-| Production (`prod`) | `https://blackroad.io`, `https://www.blackroad.io`, `https://api.blackroad.io` | `.github/workflows/blackroad-deploy.yml` | GitHub Pages publishes the marketing site; API gateway will promote via the same workflow once the ECS module is enabled. Full manifest: `environments/production.yml`. |
-| Preview (`pr`) | `https://dev.blackroad.io`, `https://pr-<n>.dev.blackroad.io` | `.github/workflows/preview.yml` | Spins up ephemeral ECS services + ALB rules per pull request. Terraform config lives in `infra/preview-env/` and the manifest is documented in `environments/preview.yml`. |
-| Staging (`stg`) | `https://stage.blackroad.io` | `.github/workflows/pages-stage.yml` | Builds and archives the static site proof artifact. AWS scaffolding (VPC `10.30.0.0/16`, `us-west-2a/2b`, single-task ECS scaling) is defined and ready for the API promotion path in `modules/ecs-service-alb`. See `environments/staging.yml` for the manifest. |
-| Production (`prod`) | `https://blackroad.io`, `https://www.blackroad.io`, `https://api.blackroad.io` | `.github/workflows/blackroad-deploy.yml` | GitHub Pages publishes the marketing site; the same workflow drives the webhook-based deploy and exposes a `workflow_dispatch` escape hatch (`target=legacy-ssh`) for the SSH fallback. Full manifest: `environments/production.yml`. |
+| Environment | Branch | Domains | Required workflows | Notes |
+| --- | --- | --- | --- | --- |
+| Preview (`pr`) | PR heads | `https://dev.blackroad.io`, `https://pr-<n>.dev.blackroad.io` | `preview.yml`, `preview-containers.yml`, `preview-frontend-host.yml` | Spins up isolated ECS/Fargate stacks per pull request, publishes GHCR images with SBOM + Grype scans, and tears down automatically on close. |
+| Staging (`stg`) | `staging` | `https://stage.blackroad.io` | `pages-stage.yml`, `stage-stress.yml` (opt-in) | Rebuilds the proof artifact on every staging push and daily cron; optional load test gated behind `STRESS=true`. Mirrors production infra in `br-infra-iac/envs/stg`. |
+| Production (`prod`) | `main` | `https://blackroad.io`, `https://www.blackroad.io`, `https://api.blackroad.io` | `blackroad-deploy.yml`, `deploy-canary.yml`, `deploy-canary-ladder.yml`, `change-approve.yml` | Modern webhook deploy on push; progressive delivery and CAB approval guard the release. Legacy SSH path remains as a manual fallback. |
 
-Reference the manifests whenever DNS, workflow, or Terraform parameters change so automation and runbooks stay aligned.
+Refer to `environments/preview.yml`, `environments/staging.yml`, and
+`environments/production.yml` for the authoritative source of domains, secrets,
+Terraform backends, and change-management requirements.
 
-Infrastructure pushes now run through the codified policy gate in
-`runbooks/examples/infra_release_policy.yaml`. The runbook checks that the
-Change Advisory Board workflow has approved the change, triggers the
-`.github/workflows/blackroad-deploy.yml` release, and falls back to
-`infra_release_rollback` so `scripts/rollback.sh` is exercised when health
-checks fail. Keep both runbooks handy during CAB reviews.
+## Release flow
 
-## Deployment workflows
+1. **Pull request** — Apply the `automerge` label so the queue serialises the
+   change. Preview workflows must pass before merge.
+2. **Staging branch** — Promotion to staging triggers `pages-stage.yml`, building
+   the proof artifact. Run `stage-stress.yml` with `STRESS=true` when load
+   validation is required.
+3. **Production** — A green staging run plus CAB approval unlocks
+   `blackroad-deploy.yml`. The workflow builds the SPA, calls the deploy webhook,
+   verifies `/healthz` and `/api/version`, and posts Slack status updates.
+4. **Progressive rollout (optional)** — Use `deploy-canary.yml` for single-step
+   canaries or `deploy-canary-ladder.yml` for laddered rollouts prior to full
+   traffic shifts.
 
-### Preview (per PR)
-- Triggered automatically on pull request open/update via `preview.yml` and `preview-containers.yml`.
-- Container pipeline builds and pushes a GHCR image, uploads an SPDX SBOM, runs Anchore Grype (Code Scanning), and posts docker run instructions on the PR.
-- Infrastructure pipeline applies Terraform (`infra/preview-env`), creates ALB rules + ECS services, and comments with the preview URL.
-- Closing the PR or re-running the `destroy` job removes ALB rules, target groups, ECS services, Route53 aliases, and deletes the GHCR preview tags.
-- Smoke test: `curl -sSfL https://pr-<n>.dev.blackroad.io/healthz/ui` (already executed in the workflow).
+## Branch hygiene
 
-### Staging
-- Pushes to `main` touching `blackroad-stage/**` or manual dispatch run `pages-stage.yml`.
-- Generates a daily proof + `health.json` for `stage.blackroad.io` and uploads the artifact (no automatic publish step yet).
-- Run `gh workflow run stage-stress.yml -f STRESS=true` to execute the optional
-  **Stage Stress** workflow before promoting a build; it replays the generated
-  artifact under controlled load.
-- Use the artifact for QA sign-off or handoff to downstream deploy automation.
-- AWS networking, RDS, and ECS cluster scaffolding already exist via `br-infra-iac/envs/stg`. When ready to promote the API, reuse `modules/ecs-service-alb` with `desired_count=1` and the staging ECR repository `br-api-gateway`.
+- Keep development trunk-based. Long-running branches should be rebased or
+  closed once preview automation surfaces issues.
+- `cleanup-dead-branches.sh` now supports non-interactive runs via
+  `AUTO_APPROVE=true`. The weekly **Branch Hygiene** GitHub Action invokes it to
+  delete merged branches automatically. Override the base with
+  `BASE_BRANCH=origin/staging` when pruning staging-specific branches.
 
-### Production
-- `blackroad-deploy.yml` runs on every `main` push and exposes a `workflow_dispatch` entry for manual redeploys.
-- Builds the SPA, triggers the deploy webhook (`BR_DEPLOY_SECRET` / `BR_DEPLOY_URL`), then lets downstream infra promote the build.
-- API and NGINX remain accessible over SSH while we finish migrating to ECS; scripts live under `scripts/` for TLS + health.
-- The same workflow exposes `target=legacy-ssh` to package artifacts and ship them to the legacy hosts when required.
+## Health & verification
 
-## Rollback and forward
+- Preview: `curl -fsS https://pr-<n>.dev.blackroad.io/healthz/ui` (already run in
+  CI but handy for local smoke tests).
+- Staging: `curl -fsS https://stage.blackroad.io/health.json` and
+  `curl -fsS https://api.staging.blackroad.io/api/llm/health`.
+- Production: `https://blackroad.io/healthz`, `https://blackroad.io/api/version`,
+  and `https://api.blackroad.io/health` (automated in the deploy workflow).
+- Grafana/Prometheus/Alertmanager definitions live under
+  `deploy/k8s/monitoring.yaml`.
 
-| Scope | Rollback | Forward fix |
-| --- | --- | --- |
-| Preview env | Re-run the workflow with the prior commit (Actions → `preview-env` → `Run workflow` with old SHA) or close the PR to tear everything down. | Push a new commit or dispatch the workflow with the hotfix branch; Terraform will update in place. |
-| Staging site | Download the previous `blackroad-stage` artifact from Actions and republish manually if needed. | Re-run `pages-stage.yml` after merging the fix or push a corrective commit to `blackroad-stage/**`. |
-| Production site/API | Trigger `BlackRoad • Deploy` with `workflow_dispatch`, selecting the last known-good `main` commit. For API hosts still on SSH, run `.github/workflows/prism-ssh-deploy.yml` or `scripts/nginx-ensure-and-health.sh` from the bastion. | Merge the fix and re-run `BlackRoad • Deploy`; ECS workloads will follow once the production module is switched on. |
+## Manual escape hatches
 
-Document every rollback/forward action in the incident log and update the corresponding manifest to reflect configuration changes.
-
-## Routine health & cleanup
-## Environment manifests
-
-- `environments/production.yml` documents the GitHub Environment that drives the main deploy workflow.
-- `environments/staging.yml` captures pre-production checks (smoke tests and Slack alerts) used before promoting builds.
-- `environments/preview.yml` maps the per-PR AWS ECS Fargate previews under `dev.blackroad.io` managed by Terraform.
-
-
-- API health checks: `https://api.blackroad.io/health` (prod) and `http://127.0.0.1:4000/api/health` (bridge).
-- Static site health endpoints: `https://blackroad.io/healthz`, `https://stage.blackroad.io/health.json`.
-- Server helpers:
-  ```sh
-  scripts/nginx-ensure-and-health.sh
-  scripts/nginx-enable-tls.sh   # optional TLS helper
-  ```
-- ECS checks: `aws ecs describe-services --cluster <cluster-arn> --services api-gateway --region us-west-2`
-- Cleanup broom: `usr/local/sbin/br-cleanup.sh` audits API, Yjs, bridges, nginx, IPFS, etc. Modes:
-  ```sh
-  sudo br-cleanup.sh audit | tee /srv/ops/cleanup-audit.txt
-  sudo br-cleanup.sh fix   | tee /srv/ops/cleanup-fix.txt
-  sudo br-cleanup.sh prune | tee /srv/ops/cleanup-prune.txt
-  ```
-  Install the systemd service + timer from `etc/systemd/system/` and enable `br-cleanup-nightly.timer` for scheduled runs. Optional sudoers entry: `etc/sudoers.d/br-cleanup`.
+- **Legacy deploy** — Run `.github/workflows/blackroad-deploy.yml` with
+  `target=legacy-ssh` and provide `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_KEY`, and
+  optional `DEPLOY_PORT` when the webhook path is unavailable.
+- **DigitalOcean droplet** — For temporary static hosting, follow the quickstart
+  in `DEPLOYMENT.md` (Docker Compose build + Caddy/Nginx health endpoints).
+- **Rollback** — Use `POST /api/rollback/:releaseId` with the internal token or
+  re-run `blackroad-deploy.yml` against a known-good commit.
 
 ## References
 
-- Environment manifests: `environments/*.yml`
-- Preview Terraform stack: `infra/preview-env/`
-- Reusable module: `modules/preview-env/`
-- Deployment workflows: `.github/workflows/preview.yml`, `pages-stage.yml`, `blackroad-deploy.yml`, `prism-ssh-deploy.yml`
-
-_Last updated on 2025-10-06_
-## PD↔Jira sandbox smoke
-
-- Configure the sandbox credentials (see `.env` or Secrets Manager) including `PD_*_SANDBOX`, `JIRA_*_SANDBOX`, `SMOKE_SYSTEM_KEY`, and `RUNBOOK_URL_SANDBOX`.
-- Ops Portal exposes a **Run PD+Jira Smoke** button on `/ops` once your ops identity is stored locally. The button calls `/api/smoke/pd-jira?sandbox=1`, which opens and resolves a PagerDuty + Jira pair in under 90 seconds.
-- The smoke flow also lives in GitHub Actions as `.github/workflows/pd-jira-smoke.yml`. Trigger it manually with the service identity (`vars.SMOKE_ACTOR_EMAIL` and `vars.SMOKE_ACTOR_GROUPS`).
-- A one-hour throttle prevents repeated sandbox pages. Results surface in the heatmap snapshot as system `sandbox`, including PD and Jira links.
-
-
-_Last updated on 2025-10-31_
-```sh
-scripts/nginx-ensure-and-health.sh
-scripts/nginx-enable-tls.sh   # optional TLS helper
-```
-
-## Post-merge checklist
-
-- [ ] Rebuild local `.env` files and verify agent manifests have the minimal scopes required for their tasking.
-- [ ] Run `npm run lint` and `npm test -- --runInBand` locally to confirm the API package scripts still pass.
-- [ ] Confirm GitHub Actions (`ci.yml`, deploy workflows) completed successfully for the merge commit.
-- [ ] Review dependency diffs for unexpected upgrades; freeze minors if the CI image diverges from prod.
-- [ ] Double-check secrets and telemetry destinations for the release to ensure no credentials leaked in logs.
+- Deployment playbook: `DEPLOYMENT.md`
+- Environment manifests: `environments/`
+- Change management: `.github/workflows/change-approve.yml`,
+  `runbooks/examples/infra_release_policy.yaml`
+- Monitoring stack: `deploy/k8s/monitoring.yaml`

@@ -2,13 +2,14 @@ name: preview
 slug: pr
 state: active
 description: >-
-  Ephemeral review environments created per pull request on AWS ECS Fargate.
-  Each PR receives a dedicated hostname under dev.blackroad.io and tears down
-  automatically when the PR closes.
+  Ephemeral review environments provisioned per pull request. Builds and tests
+  run on AWS ECS Fargate behind dev.blackroad.io and are destroyed as soon as
+  the pull request closes.
+branch: pr/*
 contacts:
   slack: "#eng"
 domains:
-  root: https://dev.blackroad.io
+  base: https://dev.blackroad.io
   pattern: https://pr-<pr-number>.dev.blackroad.io
 infrastructure:
   cloud: aws
@@ -18,71 +19,27 @@ infrastructure:
     module: modules/preview-env
     backend:
       bucket_secret: PREVIEW_ENV_TF_STATE_BUCKET
-      key_pattern: preview/pr-<pr-number>.tfstate
       lock_table_secret: PREVIEW_ENV_TF_LOCK_TABLE
-      region: us-east-1
+      key_template: preview/pr-<pr-number>.tfstate
     outputs:
       - preview_url
       - service_name
 automation:
+  required_checks:
+    pull_request:
+      - preview.yml (preview job)
+      - preview-containers.yml (metadata, build-image, sbom, scan)
   workflows:
-    - name: preview-environment
-      file: .github/workflows/preview-env.yml
+    - name: Preview environment
+      file: .github/workflows/preview.yml
       triggers:
         - pull_request (opened, reopened, synchronize, closed)
       summary: >-
-        Builds a PR-specific image, applies the preview Terraform stack, posts
-        the URL to GitHub and Slack, and tears the stack down on close.
-      secrets:
-        - PREVIEW_ENV_AWS_ROLE
-        - PREVIEW_ENV_ECR_REGISTRY
-        - PREVIEW_ENV_ECR_REPOSITORY
-        - PREVIEW_ENV_CLUSTER_ARN
-        - PREVIEW_ENV_EXECUTION_ROLE_ARN
-        - PREVIEW_ENV_TASK_ROLE_ARN
-        - PREVIEW_ENV_PRIVATE_SUBNET_IDS
-        - PREVIEW_ENV_PUBLIC_SUBNET_IDS
-        - PREVIEW_ENV_VPC_ID
-        - PREVIEW_ENV_HOSTED_ZONE_ID
-        - PREVIEW_ENV_VARS_JSON
-        - PREVIEW_ENV_SECRETS_JSON
-        - PREVIEW_ENV_TF_STATE_BUCKET
-        - PREVIEW_ENV_TF_LOCK_TABLE
-        - SLACK_PREVIEW_CHANNEL
-        - SLACK_BOT_TOKEN
-    - name: preview-container-image
-    - name: PR Preview Containers
-      file: .github/workflows/preview-containers.yml
-      triggers:
-        - pull_request (opened, reopened, synchronize, ready_for_review)
-      summary: >-
-        Builds and pushes a PR-scoped container image to GHCR, publishes an
-        SBOM and Grype scan, and comments usage instructions on the PR.
-      secrets:
-        - GHCR_PAT (optional when a fine-grained token is required)
-        - SLACK_BOT_TOKEN (optional for downstream notification jobs)
-        Builds and publishes GHCR container images for each PR, generating SBOMs
-        and vulnerability reports plus a sticky comment with pull instructions.
-        Builds GHCR preview images, uploads SBOM artifacts, runs Grype
-        vulnerability scans, and posts docker run instructions on the PR.
-      secrets: []
-    - name: Cleanup Preview Containers
-      file: .github/workflows/preview-containers-cleanup.yml
-      triggers:
-        - pull_request (closed)
-      summary: >-
-        Removes the GHCR image tags created for preview containers once the pull
-        request closes to avoid stale registries and unnecessary storage costs.
-    - name: preview-frontend-host
-      file: .github/workflows/preview-frontend-host.yml
-      triggers:
-        - pull_request (opened, reopened, synchronize, closed)
-      summary: >-
-        Provisions or tears down ECS services behind the dev.blackroad.io ALB for
-        frontend-only previews, wiring Route53 records and listener rules per PR.
-      secrets:
+        Builds a PR-specific image, wires ECS + ALB resources, publishes the
+        preview hostname, and destroys the stack when the pull request closes.
+      secrets_required:
         - AWS_ROLE_TO_ASSUME
-      variables:
+      variables_required:
         - AWS_REGION
         - ECR_REPO
         - ECS_CLUSTER
@@ -95,37 +52,48 @@ automation:
         - ALB_DNS
         - HOSTED_ZONE_ID
         - CONTAINER_PORT
-      summary: Deletes the PR-specific GHCR tags once the pull request closes
-        to keep the registry tidy.
-      secrets: []
-    - name: Reusable Docker Preview Build
-      file: .github/workflows/reusable-docker-preview-build.yml
+        - TASK_EXECUTION_ROLE_ARN
+        - TASK_ROLE_ARN
+    - name: Preview container image
+      file: .github/workflows/preview-containers.yml
       triggers:
-        - workflow_call
-      summary: Parameterised image builder leveraged by preview pipelines to
-        publish container tags and surface build digests.
-      secrets:
-        - registry-username (optional)
-        - registry-password (optional)
+        - pull_request (opened, reopened, synchronize, ready_for_review)
+      summary: >-
+        Publishes a GHCR image per PR along with SPDX SBOM and Grype scanning
+        results; posts docker run instructions back to the pull request.
+      secrets_required: []
+    - name: Preview container cleanup
+      file: .github/workflows/preview-containers-cleanup.yml
+      triggers:
+        - pull_request (closed)
+      summary: Deletes GHCR preview tags once a pull request closes.
+    - name: Preview frontend host
+      file: .github/workflows/preview-frontend-host.yml
+      triggers:
+        - pull_request (opened, reopened, synchronize, closed)
+      summary: >-
+        Lightweight frontend-only previews that reuse the shared ALB listener
+        and Route53 rules for UI smoke testing.
+      secrets_required:
+        - AWS_ROLE_TO_ASSUME
 deployments:
   - service: web-console
     type: container-service
     provider: aws-ecs-fargate
-    workflow: .github/workflows/preview-env.yml
+    workflow: .github/workflows/preview.yml
     terraform_directory: infra/preview-env
     terraform_backend:
       bucket_secret: PREVIEW_ENV_TF_STATE_BUCKET
       lock_table_secret: PREVIEW_ENV_TF_LOCK_TABLE
       key_template: preview/pr-<pr-number>.tfstate
     domain_pattern: https://pr-<pr-number>.dev.blackroad.io
-    health_check: https://pr-<pr-number>.dev.blackroad.io/health
+    health_check: https://pr-<pr-number>.dev.blackroad.io/healthz/ui
     images:
-      registry: ghcr.io
-      repository: ghcr.io/blackboxprogramming/blackroad-prism-console
+      registry: ghcr.io/blackboxprogramming/blackroad-prism-console
       tag_pattern: pr-<pr-number>-<short-sha>
       sbom_artifact: pr-<pr-number>-sbom
       vulnerability_scans:
-        - anchore/grype → code scanning (SARIF)
+        - anchore/grype → GitHub code scanning
     environment:
       AWS_REGION: us-east-1
       PREVIEW_DOMAIN: dev.blackroad.io
@@ -144,189 +112,10 @@ deployments:
       - PREVIEW_ENV_SECRETS_JSON
       - SLACK_PREVIEW_CHANNEL
       - SLACK_BOT_TOKEN
-    notifications:
-      slack:
-        channel_secret: SLACK_PREVIEW_CHANNEL
-        token_secret: SLACK_BOT_TOKEN
-  - service: web-console-preview-image
-    type: container-image
-    registry: ghcr.io/<owner>/blackroad-prism-console
-    workflow: .github/workflows/preview-containers.yml
-    description: Container image artifact attached to each PR for local smoke testing.
-    outputs:
-      - image: ghcr.io/<owner>/blackroad-prism-console:pr-<pr-number>-<short-sha>
-      - sbom_artifact: pr-<pr-number>-sbom
-      - vulnerability_scan: Code scanning SARIF upload
-    health_check: docker run --rm ghcr.io/<owner>/blackroad-prism-console:pr-<pr-number>-<short-sha>
 change_management:
   approvals: []
 observability:
   verification:
     - terraform output -raw preview_url
     - aws ecs describe-services --cluster <cluster-arn> --services pr-<pr-number> --region us-east-1
-    - docker pull ghcr.io/<owner>/blackroad-prism-console:pr-<pr-number>-<short-sha>
-    - docker run --rm ghcr.io/<owner>/blackroad-prism-console:pr-<pr-number>-<short-sha>
-branch: pr/*
-description: >-
-  Ephemeral ECS/Fargate environments spun up per pull request for validation and
-  stakeholder review.
-url_template: https://pr-<pr-number>.dev.blackroad.io
-reviewers:
-  - devx-team
-  - platform-ops
-deploy_targets:
-  - surface: application
-    provider: aws_ecs
-    cluster_variable: ECS_CLUSTER
-    service_family: prism-console-preview
-    container:
-      image_repository_variable: ECR_REPO
-      port_variable: CONTAINER_PORT
-    load_balancer:
-      arn_variable: ALB_ARN
-      https_listener_variable: HTTPS_LISTENER_ARN
-      host_template: pr-<pr-number>.dev.blackroad.io
-    route53:
-      hosted_zone_variable: HOSTED_ZONE_ID
-      dns_name_variable: ALB_DNS
-    iam:
-      execution_role_variable: TASK_EXECUTION_ROLE_ARN
-      task_role_variable: TASK_ROLE_ARN
-    network:
-      vpc_variable: VPC_ID
-      subnet_variable: SUBNETS
-      security_group_variable: SERVICE_SG
-workflow: .github/workflows/preview.yml
-lifecycle:
-  create_on: [opened, reopened, synchronize]
-  destroy_on: [closed]
-inputs:
-  required_repository_variables:
-    - AWS_REGION
-    - ECS_CLUSTER
-    - VPC_ID
-    - SUBNETS
-    - SERVICE_SG
-    - ALB_ARN
-    - HTTPS_LISTENER_ARN
-    - ALB_ZONE_ID
-    - ALB_DNS
-    - HOSTED_ZONE_ID
-    - CONTAINER_PORT
-    - ECR_REPO
-    - TASK_EXECUTION_ROLE_ARN
-    - TASK_ROLE_ARN
-  required_secrets:
-    - AWS_ROLE_TO_ASSUME
-notifications:
-  slack_channel: #eng
-  pr_comment: true
-smoke_tests:
-  - curl -fsS $PREVIEW_URL/health
-notes:
-  - >-
-    Workflow provisions target groups, listener rules, Route53 alias records,
-    and the ECS service, then tears them down when the PR closes.
-slug: pr-preview
-status: live
-description: >-
-  Ephemeral per-pull-request environment provisioned on AWS ECS Fargate.
-branch: pull_request
-urls:
-  pattern: https://pr-<pr-number>.dev.blackroad.io
-governance:
-  approvals_required: false
-  reviewers:
-    - handle: blackboxprogramming
-  contacts:
-    owner: amundsonalexa@gmail.com
-    slack_channels:
-      - channel: eng
-        purpose: Preview announcements for reviewers.
-runbooks:
-  operations: docs/preview-environments.md
-  developer_notes: docs/devx/preview-environments.md
-deployment:
-  branch_policy:
-    auto_deploy_from: pull_requests
-  workflows:
-    - .github/workflows/preview.yml
-    - .github/workflows/preview-env.yml
-observability:
-  healthcheck_path: /health
-notes:
-  - Workflow provisions ECS services, ALB rules, and Route53 aliases per PR before teardown on close.
-  - Repository variables and secrets cover the AWS region, cluster, listener, hosted zone, and IAM roles needed for previews.
-  - Preview URLs are broadcast to #eng alongside PR comments during deployments.
-  - Next initiative: integrate preview rollouts with shared Fly.io and AWS ECS deployment targets.
-url: https://dev.blackroad.io
-url_template: https://pr-<number>.dev.blackroad.io
-reviewers:
-  - blackboxprogramming
-  - devx-duty
-notes:
-  - Ephemeral environment spun up per pull request via .github/workflows/preview.yml.
-  - Routes traffic through AWS ALB with per-PR listener rules.
-url: https://pr-<number>.dev.blackroad.io
-reviewers:
-  - blackboxprogramming
-description: >-
-  Ephemeral per-pull-request environment built on AWS ECS Fargate via Terraform.
-workflows:
-  - .github/workflows/preview-env.yml
-infrastructure:
-  provider: aws-ecs-fargate
-  region: us-east-1
-  domain: dev.blackroad.io
-  terraform_directory: infra/preview-env
-  image_registry_secret: PREVIEW_ENV_ECR_REGISTRY
-  cluster_secret: PREVIEW_ENV_CLUSTER_ARN
-  task_role_secret: PREVIEW_ENV_TASK_ROLE_ARN
-  execution_role_secret: PREVIEW_ENV_EXECUTION_ROLE_ARN
-  subnet_secrets:
-    private: PREVIEW_ENV_PRIVATE_SUBNET_IDS
-    public: PREVIEW_ENV_PUBLIC_SUBNET_IDS
-  vpc_secret: PREVIEW_ENV_VPC_ID
-  state_backend_bucket_secret: PREVIEW_ENV_TF_STATE_BUCKET
-  state_lock_table_secret: PREVIEW_ENV_TF_LOCK_TABLE
-  environment_variables_secret: PREVIEW_ENV_VARS_JSON
-  secrets_payload: PREVIEW_ENV_SECRETS_JSON
-  teardown_on_close: true
-notifications:
-  slack_channel_secret: SLACK_PREVIEW_CHANNEL
-host_pattern: https://pr-<pr>.dev.blackroad.io
-status: active
-kind: ephemeral
-provisioning:
-  workflow: .github/workflows/preview.yml
-  module: infra/preview-env
-  terraform_workspace: preview
-  description: >-
-    Every pull request builds a container image, registers an ECS task definition, and wires the
-    load balancer + Route53 alias under `pr-<number>.dev.blackroad.io`. Closing the PR tears the
-    stack back down automatically.
-reviewers:
-  - blackboxprogramming
-operations:
-  secrets:
-    - PREVIEW_ENV_AWS_ROLE
-    - PREVIEW_ENV_ECR_REGISTRY
-    - PREVIEW_ENV_ECR_REPOSITORY
-    - PREVIEW_ENV_TF_STATE_BUCKET
-    - PREVIEW_ENV_TF_LOCK_TABLE
-    - PREVIEW_ENV_CLUSTER_ARN
-    - PREVIEW_ENV_EXECUTION_ROLE_ARN
-    - PREVIEW_ENV_TASK_ROLE_ARN
-    - PREVIEW_ENV_PRIVATE_SUBNET_IDS
-    - PREVIEW_ENV_PUBLIC_SUBNET_IDS
-    - PREVIEW_ENV_VPC_ID
-    - PREVIEW_ENV_HOSTED_ZONE_ID
-    - PREVIEW_ENV_VARS_JSON
-    - PREVIEW_ENV_SECRETS_JSON
-    - SLACK_BOT_TOKEN
-    - SLACK_PREVIEW_CHANNEL
-  health_checks:
-    - https://pr-<pr>.dev.blackroad.io/healthz/ui
-notes:
-  - Use `PR=<number> make deploy` from `infra/preview-env` for manual smoke tests when debugging the workflow.
-  - Listener rule priorities default to `5000 + PR % 4000`; adjust if the ALB approaches the priority limit.
+    - curl -fsS https://pr-<pr-number>.dev.blackroad.io/healthz/ui

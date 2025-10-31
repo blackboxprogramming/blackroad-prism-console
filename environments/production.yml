@@ -2,9 +2,10 @@ name: production
 slug: prod
 state: active
 description: >-
-  Primary public environment exposed to customers via blackroad.io. Static
-  assets publish through GitHub Pages while the API gateway deploys via the
-  `BlackRoad • Deploy` workflow.
+  Customer-facing footprint serving blackroad.io. GitHub Pages delivers the
+  marketing site while container workloads deploy through the BlackRoad • Deploy
+  workflow and reusable ECS/Fly harnesses.
+branch: main
 contacts:
   reviewers:
     - blackboxprogramming
@@ -34,50 +35,41 @@ infrastructure:
       - modules/ecs-cluster
       - modules/ecr
       - modules/rds-postgres
-    variables:
-      rds_instance_class: db.t4g.medium
-      rds_multi_az: true
-      rds_backup_retention_days: 30
-    outputs:
-      - ecs_cluster
-      - private_subnets
-      - db_endpoint
-    repositories:
-      - br-api-gateway
-      - br-products-site
 automation:
+  required_checks:
+    push:
+      main:
+        - BlackRoad • Deploy
+        - change-approve (CAB gate)
   workflows:
     - name: BlackRoad • Deploy
       file: .github/workflows/blackroad-deploy.yml
       triggers:
         - push (main)
-        - workflow_dispatch
+        - workflow_dispatch (target: modern | legacy-ssh)
       summary: >-
-        Builds the SPA, packages the API, triggers the deploy webhook, verifies
-        health, and posts Slack status updates.
-      secrets:
+        Builds the SPA, triggers the deploy webhook, verifies health endpoints,
+        purges Cloudflare if necessary, and posts Slack notifications.
+      secrets_required:
         - BR_DEPLOY_SECRET
         - BR_DEPLOY_URL
         - CF_ZONE_ID
         - CF_API_TOKEN
         - SLACK_WEBHOOK_URL
-    - name: Fly.io deploy (reusable)
+    - name: Reusable Fly.io deploy
       file: .github/workflows/reusable-fly-deploy.yml
       triggers:
         - workflow_call
-      summary: >-
-        Provides a shared Fly.io deploy harness so edge and bridge services can
-        push fresh images or configs using the same release guardrails.
-      secrets:
+      summary: Shared Fly.io deploy harness for ancillary services.
+      secrets_required:
         - FLY_API_TOKEN
-    - name: AWS ECS deploy (reusable)
+    - name: Reusable AWS ECS deploy
       file: .github/workflows/reusable-aws-ecs-deploy.yml
       triggers:
         - workflow_call
-      summary: >-
-        Registers a new task definition revision and forces an ECS deployment
-        for production services when invoked by release workflows.
-      secrets:
+      summary: Registers a new task definition revision and rolls ECS services
+        in production.
+      secrets_required:
         - AWS_PROD_DEPLOY_ROLE_ARN
         - AWS_PROD_EXTERNAL_ID
     - name: deploy-canary
@@ -85,13 +77,9 @@ automation:
       triggers:
         - push (main)
         - workflow_dispatch (canary percent input)
-      summary: >-
-        Builds a fresh container image, pushes to ECR, updates the ECS service,
-        and shifts a configurable percentage of traffic through the green target
-        group while watching CloudWatch metrics for regression.
-      secrets:
-        - AWS_ROLE_TO_ASSUME
-      variables:
+      summary: Canary promotion that gradually shifts traffic while watching
+        CloudWatch metrics.
+      variables_required:
         - AWS_REGION
         - ECR_REPO
         - ECS_CLUSTER
@@ -105,13 +93,9 @@ automation:
       file: .github/workflows/deploy-canary-ladder.yml
       triggers:
         - workflow_dispatch (steps + soak configuration)
-      summary: >-
-        Automates a progressive promotion through multiple canary percentages,
-        running health and CloudWatch checks at each step and rolling back to
-        blue on failure.
-      secrets:
-        - AWS_ROLE_TO_ASSUME
-      variables:
+      summary: Multi-step promotion that increases canary traffic in stages with
+        automated rollback.
+      variables_required:
         - AWS_REGION
         - ECR_REPO
         - ECS_CLUSTER
@@ -126,37 +110,16 @@ automation:
       file: .github/workflows/deploy-self-heal.yml
       triggers:
         - push (main)
-      summary: >-
-        Rsyncs the repo to long-lived hosts, runs the legacy deploy script, and
-        executes the self-heal routine that can roll back via git or Docker when
-        the health probes fail.
-      secrets:
+      summary: Legacy SSH fallback that rsyncs artifacts to long-lived hosts and
+        rolls back automatically when health probes fail.
+      secrets_required:
         - BR_HOST
         - BR_USER
         - BR_SSH_KEY
-      variables:
-        - optional HEALTH_ENDPOINTS list
-        - ROLLBACK_STRATEGY
-        - ROLLBACK_REF
-    - name: BlackRoad • Deploy (legacy SSH fallback)
-      file: .github/workflows/blackroad-deploy.yml
-      triggers:
-        - workflow_dispatch (target=legacy-ssh)
-      summary: >-
-        Provides a manual escape hatch that packages site and API bundles,
-        ships them over SSH, and restarts the legacy hosts while verifying
-        health endpoints.
-      secrets:
-        - DEPLOY_HOST
-        - DEPLOY_USER
-        - DEPLOY_KEY
-  notifications:
-    slack_channel: "#eng"
 deployments:
   - service: marketing-site
     type: static-site
     provider: github-pages
-    repo: blackboxprogramming/blackroad-prism-console
     workflow: .github/workflows/blackroad-deploy.yml
     artifacts:
       path: sites/blackroad
@@ -166,18 +129,16 @@ deployments:
     type: container-service
     provider: aws-ecs-fargate
     terraform_directory: br-infra-iac/envs/prod
-    module: modules/ecs-service-alb
     terraform_backend:
       bucket: br-tfstate-<unique>
       key: prod/terraform.tfstate
       region: us-west-2
       lock_table: br-terraform-lock
+    module: modules/ecs-service-alb
     state: planned
-    notes: >-
-      Production wiring follows the dev module that provisions api.blackroad.io
-      behind an ALB-backed Fargate service.
+    notes: Production wiring follows the dev module once traffic moves fully to
+      ECS.
     health_check: https://api.blackroad.io/health
-    workflow: .github/workflows/blackroad-deploy.yml
     image_repository: br-api-gateway
     scaling:
       desired_count: 2
@@ -190,156 +151,18 @@ change_management:
     - .github/workflows/change-approve.yml
   policy_gates:
     - name: cab-approval
-      description: Change Advisory Board approval must clear via the change-approve workflow before promoting builds.
+      description: CAB approval must clear via change-approve.yml before
+        promoting builds.
       workflow: .github/workflows/change-approve.yml
     - name: release-runbook
-      description: Execute the infra release runbook so rollbacks and notifications stay coordinated across teams.
+      description: Execute the infra release policy so rollback and comms stay
+        coordinated.
       runbook: runbooks/examples/infra_release_policy.yaml
   runbooks:
     - README-DEPLOY.md
     - README-OPS.md
-    - runbooks/examples/infra_release_policy.yaml
-    - runbooks/examples/infra_release_rollback.yaml
-    - docs/ops/rollback-forward.md
 observability:
   health_checks:
-    - name: frontend
-      url: https://blackroad.io/healthz
-    - name: api
-      url: https://api.blackroad.io/health
-  scripts:
-    - scripts/blackroad-autoheal.sh
-branch: main
-description: >-
-  Primary customer-facing deployment served from blackroad.io with the marketing
-  surface, application, and API footprint.
-urls:
-  marketing: https://blackroad.io
-  app: https://app.blackroad.io
-  api: https://api.blackroad.io
-  status: https://status.blackroad.io
-reviewers:
-  - blackboxprogramming
-  - platform-ops
-  - security-reviewers
-deploy_targets:
-  - surface: marketing-site
-    provider: cloudflare_pages
-    artifact_path: sites/blackroad
-    workflow: .github/workflows/pages-landing.yml
-    notes: >-
-      BuildBlackRoadSiteAgent builds the static site and WebsiteBot deploys it to
-      Cloudflare Pages.
-  - surface: customer-app
-    provider: fly_io
-    app: blackroad-app
-    release_channel: stable
-    regions: [iad, ord]
-    workflow: .github/workflows/canary.yml
-    secrets:
-      - FLY_API_TOKEN
-  - surface: api
-    provider: aws_ecs
-    cluster: blackroad-prod
-    service: prism-console-api
-    workflow: .github/workflows/_backup_132_deploy.yml
-    container:
-      port: 4010
-      healthcheck: /api/llm/health
-    load_balancer:
-      host: api.blackroad.io
-      https_listener_secret: AWS_PROD_HTTPS_LISTENER_ARN
-    iam:
-      deploy_role_secret: AWS_PROD_DEPLOY_ROLE
-observability:
-  grafana: https://blackroad.io/monitoring
-  alerting_channel: https://blackroad.io/monitoring
-  healthchecks:
     - https://blackroad.io/healthz
-    - https://blackroad.io/api/llm/health
-runbooks:
-  - DEPLOYMENT.md
-  - RUNBOOK.md
-  - ROLLBACK.md
-approvals:
-  change_windows:
-    - name: weekly_release
-      schedule: Tuesday 02:00-05:00 UTC
-  required_roles:
-    - platform
-    - security
-backups:
-  schedule: "0 3 * * *"
-  script: /usr/local/bin/blackroad-backup-sqlite.sh
-  location: /var/backups/blackroad/sqlite/
-notes:
-  - >-
-    Use the autopal dual-approval environment access workflow before making
-    production changes.
-status: live
-description: >-
-  Customer-facing BlackRoad Prism Console footprint.
-branch: main
-urls:
-  primary: https://blackroad.io
-  health: https://blackroad.io/healthz
-  status: https://status.blackroad.io
-governance:
-  approvals_required: true
-  reviewers:
-    - handle: blackboxprogramming
-  contacts:
-    owner: amundsonalexa@gmail.com
-    slack_channels:
-      - channel: ops-monitor
-        purpose: Track lead time, deployment frequency, change fail rate, and MTTR once instrumentation is wired up.
-runbooks:
-  release: DEPLOYMENT.md
-  rollback: DEPLOYMENT.md#rollback
-  operations: RUNBOOK.md
-deployment:
-  branch_policy:
-    auto_deploy_from: main
-  workflows:
-    - .github/workflows/blackroad-deploy.yml
-    - .github/workflows/release.yml
-observability:
-  dashboards:
-    - deploy/k8s/monitoring.yaml
-notes:
-  - Next initiative: hook CI/CD outputs into Fly.io and AWS ECS targets via reusable workflows.
-  verification:
-    - curl -fsS https://blackroad.io/healthz >/dev/null
-    - curl -fsS https://api.blackroad.io/health >/dev/null
-    - aws ecs describe-services --cluster "$ECS_CLUSTER" --services "$ECS_SERVICE" \
-        --region us-west-2
-    - aws cloudwatch get-metric-statistics --namespace AWS/ApplicationELB \
-        --metric-name HTTPCode_ELB_5XX_Count --dimensions Name=LoadBalancer,Value=$ALB_ARN_SUFFIX \
-        --start-time "$(date -u -d '15 minutes ago' +%Y-%m-%dT%H:%M:%SZ)" \
-        --end-time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --period 300 --statistics Sum
-notes:
-  - Public site served via GitHub Pages; API and relay live on AWS ECS.
-description: >-
-  Primary customer-facing deployment managed by the CI & Deploy to Droplet workflow.
-workflows:
-  - .github/workflows/deploy.yml
-  commands:
-    - aws ecs describe-services --cluster <cluster-arn> --services api-gateway --region us-west-2
-status: active
-kind: customer-facing
-chatops:
-  command: "/deploy blackroad pages"
-  workflow: .github/workflows/_backup_132_deploy-blackroad.yml
-  branch: main
-deploy:
-  description: >-
-    Main branch merges rebuild `sites/blackroad` and publish the artifact to GitHub Pages.
-    Optional providers (Vercel, Cloudflare, Netlify) are available through the channel workflow
-    for rollbacks or parallel canary deployments.
-verification:
-  checklist:
-    - curl -s https://blackroad.io/healthz
-    - curl -s -o /dev/null -w '%{http_code}' https://blackroad.io/relay | grep 403
-    - curl -s -H 'X-BlackRoad-Key: $BLACKROAD_KEY' https://blackroad.io/api/projects
-notes:
-  - Use the channel workflow when you need to target canary, beta, or prod providers beyond GitHub Pages.
+    - https://blackroad.io/api/version
+    - https://api.blackroad.io/health
