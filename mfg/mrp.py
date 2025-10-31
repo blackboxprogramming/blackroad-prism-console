@@ -1,15 +1,10 @@
-"""Material requirements planning helpers.
-
-This rewrite keeps the surface area tiny – we only need to support the
-unit tests under ``tests/plm_mfg`` while producing deterministic JSON
-artifacts.  The historical file mixed several implementations together,
-which made reasoning about behaviour impossible.
-"""
+"""Lightweight MRP planner used by the unit tests."""
 
 from __future__ import annotations
 
 import argparse
 import csv
+import json
 from pathlib import Path
 from typing import Dict
 
@@ -30,7 +25,7 @@ def _read_table(path: str, key_field: str, value_field: str) -> Dict[str, float]
     with csv_path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
         for row in reader:
-            key = row.get(key_field)
+            key = (row.get(key_field) or "").strip()
             if not key:
                 continue
             try:
@@ -40,22 +35,14 @@ def _read_table(path: str, key_field: str, value_field: str) -> Dict[str, float]
             table[key] = table.get(key, 0.0) + value
     return table
 
-from tools import storage, artifacts
-from plm import bom
-from orchestrator import metrics
-
-ROOT = Path(__file__).resolve().parents[1]
-ART_DIR = ROOT / "artifacts" / "mfg" / "mrp"
-LAKE_DIR = ROOT / "artifacts" / "mfg" / "lake"
-SCHEMA_DIR = ROOT / "contracts" / "schemas"
 
 def plan(demand_csv: str, inventory_csv: str, pos_csv: str) -> Dict[str, Dict[str, float]]:
     """Compute a minimal MRP plan.
 
-    The planner simply nets demand against on-hand inventory and open
-    purchase orders.  Only positive net requirements generate planned
-    orders.  The resulting structure matches what the tests assert on and
-    is persisted to ``plan.json`` under ``ART_DIR``.
+    Demand is netted against on-hand inventory and open purchase orders.
+    Only positive net requirements result in a planned order.  The result
+    structure is intentionally small and deterministic so the tests can
+    assert on its contents and on the JSON artifact that is written.
     """
 
     demand = _read_table(demand_csv, "item_id", "qty")
@@ -89,36 +76,3 @@ def cli_mrp(argv: list[str] | None = None) -> Dict[str, Dict[str, float]]:
 
 
 __all__ = ["plan", "cli_mrp", "ART_DIR"]
-        plan[item] = plan.get(item, 0) + net
-        # explode components
-        for _, comp, comp_qty in bom.explode(item, d.get("rev", "A"), level=2):
-            plan[comp] = plan.get(comp, 0) + comp_qty * net
-    ART_DIR.mkdir(parents=True, exist_ok=True)
-    artifacts.validate_and_write(
-        str(ART_DIR / "plan.json"),
-        plan,
-        str(SCHEMA_DIR / "mfg_mrp.schema.json"),
-    )
-    # kitting lists
-    for d in demand:
-        item = d["item_id"]
-        rev = d.get("rev", "A")
-        lines = ["component,qty"]
-        for _, comp, comp_qty in bom.explode(item, rev, level=1):
-            lines.append(f"{comp},{comp_qty * float(d['qty'])}")
-        storage.write(str(ART_DIR / f"kitting_{item}.csv"), "\n".join(lines))
-    LAKE_DIR.mkdir(parents=True, exist_ok=True)
-    lake_path = LAKE_DIR / "mfg_mrp.jsonl"
-    if lake_path.exists():
-        lake_path.unlink()
-    storage.write(
-        str(lake_path),
-        {
-            "demand_file": demand_file,
-            "inventory_file": inventory_file,
-            "pos_file": pos_file,
-            "plan": plan,
-        },
-    )
-    metrics.inc("mrp_planned")
-    return plan
