@@ -1,19 +1,15 @@
-import os
-import asyncio
 import io
-import json
+import os
 import struct
-from fastapi import FastAPI, Request
-from fastapi.responses import (
-    StreamingResponse,
-    JSONResponse,
-    PlainTextResponse,
-)
+
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
 from pydantic import BaseModel
 from runtime.ollama_client import chat as ollama_chat
 
 LUCIDIA_MODEL = os.getenv("LUCIDIA_MODEL", "lucidia")
 app = FastAPI()
+
 
 class ChatBody(BaseModel):
     messages: list
@@ -27,9 +23,18 @@ class VideoBody(BaseModel):
     prompt: str
     frame_delay: int | None = 20
 
-@app.get("/health")
-async def health():
-    return {"ok": True, "model": LUCIDIA_MODEL}
+
+class HealthResponse(BaseModel):
+    """Response model for service health."""
+
+    ok: bool
+    model: str
+
+
+@app.get("/health", response_model=HealthResponse)
+async def health() -> HealthResponse:
+    """Basic service health."""
+    return HealthResponse(ok=True, model=LUCIDIA_MODEL)
 
 @app.post("/chat")
 async def chat(body: ChatBody):
