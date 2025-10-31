@@ -199,6 +199,31 @@ for pattern, count in patterns:
 
 ---
 
+## ⚙️ COMMAND-LINE SHORTCUTS
+
+Run `rohonc_toolkit_cli.py` to access the most common workflows without writing Python code:
+
+```bash
+# Apply a Caesar shift (use --decrypt to reverse the direction)
+python rohonc_toolkit_cli.py caesar "Af lzw twyaffafy" --alphabet 26 --decrypt
+
+# Peek at the Bible number stream
+python rohonc_toolkit_cli.py numbers --limit 15 --offset 100
+
+# Decode a numeric Rohonc sequence
+python rohonc_toolkit_cli.py decode-numbers --sequence "100, 200, 300, 400"
+
+# Inspect high-frequency Bible words to map symbols
+python rohonc_toolkit_cli.py frequencies --limit 20 --min-length 3
+
+# Regenerate JSON artifacts (quietly skip progress logs)
+python rohonc_toolkit_cli.py export --master-guide --quiet
+```
+
+Each sub-command prints focused output and reuses cached Bible data, so repeated calls stay fast.
+
+---
+
 ## 🔢 EXAMPLE TRANSFORMATIONS
 
 ### Caesar Shift 18 (Alphabet)

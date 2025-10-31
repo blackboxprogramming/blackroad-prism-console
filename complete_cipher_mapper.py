@@ -7,10 +7,23 @@ Generates all possible cipher interpretations for Rohonc Codex
 import json
 from collections import defaultdict, Counter
 
+
+def _make_logger(verbose: bool):
+    """Return a callable that prints only when verbose is True."""
+
+    def _log(message=""):
+        if verbose:
+            print(message)
+
+    return _log
+
+
 class CompleteCipherMapper:
-    def __init__(self):
+    def __init__(self, *, verbose=True):
         """Initialize mapper with all Bible data"""
-        
+        self.verbose = verbose
+        self._log = _make_logger(verbose)
+
         # Load Bible text
         with open('bible_full.txt', 'r', encoding='utf-8') as f:
             self.bible = f.read()
@@ -19,7 +32,7 @@ class CompleteCipherMapper:
         with open('bible_numbers.txt', 'r') as f:
             self.numbers = [int(line.strip()) for line in f if line.strip()]
         
-        print(f"Loaded Bible: {len(self.bible)} chars, {len(self.numbers)} numbers")
+        self._log(f"Loaded Bible: {len(self.bible)} chars, {len(self.numbers)} numbers")
         
         # Build all mappings
         self.build_all_mappings()
@@ -27,7 +40,7 @@ class CompleteCipherMapper:
     def build_all_mappings(self):
         """Build every possible cipher mapping"""
         
-        print("\nBuilding cipher mappings...")
+        self._log("\nBuilding cipher mappings...")
         
         # 1. Number to Character mapping (position-based)
         self.num_to_char = {}
@@ -68,9 +81,9 @@ class CompleteCipherMapper:
         for shift in [18, 26]:  # Focus on specified shifts
             self.caesar_256_tables[shift] = self.build_caesar_256_table(shift)
         
-        print(f"Built {len(self.num_to_char)} number-to-character mappings")
-        print(f"Built {len(self.char_to_pos)} character-to-position mappings")
-        print(f"Built {len(self.caesar_tables)} Caesar tables")
+        self._log(f"Built {len(self.num_to_char)} number-to-character mappings")
+        self._log(f"Built {len(self.char_to_pos)} character-to-position mappings")
+        self._log(f"Built {len(self.caesar_tables)} Caesar tables")
     
     def build_caesar_table(self, shift):
         """Build Caesar cipher table for given shift"""
@@ -207,8 +220,8 @@ class CompleteCipherMapper:
     
     def export_all_mappings(self):
         """Export all cipher mappings to files"""
-        
-        print("\nExporting cipher mappings...")
+
+        self._log("\nExporting cipher mappings...")
         
         # 1. Number to Character mapping
         with open('mapping_num_to_char.json', 'w') as f:
@@ -257,8 +270,8 @@ class CompleteCipherMapper:
         shifts = self.generate_all_shift_variations()
         with open('all_shift_variations.json', 'w') as f:
             json.dump(shifts, f, indent=2)
-        
-        print("Exported 8 mapping files")
+
+        self._log("Exported 8 mapping files")
     
     def create_master_cipher_document(self):
         """Create master document with all cipher information"""
@@ -321,8 +334,8 @@ class CompleteCipherMapper:
         
         with open('MASTER_CIPHER_GUIDE.json', 'w') as f:
             json.dump(doc, f, indent=2)
-        
-        print("\nCreated MASTER_CIPHER_GUIDE.json")
+
+        self._log("\nCreated MASTER_CIPHER_GUIDE.json")
         
         return doc
     

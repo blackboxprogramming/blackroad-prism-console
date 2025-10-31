@@ -8,12 +8,25 @@ import re
 from collections import defaultdict, Counter
 import json
 
+
+def _make_logger(verbose: bool):
+    """Return a callable that prints only when verbose is True."""
+
+    def _logger(message=""):
+        if verbose:
+            print(message)
+
+    return _logger
+
+
 class BibleCipherAnalyzer:
-    def __init__(self, bible_text_file='bible_full.txt'):
+    def __init__(self, bible_text_file='bible_full.txt', *, verbose=True):
         """Initialize with Bible text"""
+        self.verbose = verbose
+        self._log = _make_logger(verbose)
         with open(bible_text_file, 'r', encoding='utf-8') as f:
             self.bible_text = f.read()
-        
+
         self.prepare_cipher_keys()
     
     def prepare_cipher_keys(self):
@@ -21,7 +34,7 @@ class BibleCipherAnalyzer:
         
         # Extract all numbers
         self.all_numbers = [int(n) for n in re.findall(r'\d+', self.bible_text) if n]
-        print(f"Total numbers extracted: {len(self.all_numbers)}")
+        self._log(f"Total numbers extracted: {len(self.all_numbers)}")
         
         # Extract verse numbers (format: number at start of line or after whitespace)
         self.verse_numbers = []
@@ -30,7 +43,7 @@ class BibleCipherAnalyzer:
             if match:
                 self.verse_numbers.append(int(match.group(1)))
         
-        print(f"Verse numbers: {len(self.verse_numbers)}")
+        self._log(f"Verse numbers: {len(self.verse_numbers)}")
         
         # Create chapter:verse mapping
         self.chapter_verse_pairs = re.findall(r'Chapter (\d+)|^(\d+)And', self.bible_text, re.MULTILINE)
@@ -40,8 +53,8 @@ class BibleCipherAnalyzer:
         self.unique_words = list(set(words))
         self.word_frequency = Counter(words)
         
-        print(f"Unique words: {len(self.unique_words)}")
-        print(f"Total words: {len(words)}")
+        self._log(f"Unique words: {len(self.unique_words)}")
+        self._log(f"Total words: {len(words)}")
         
     def caesar_cipher_256(self, text, key=18):
         """

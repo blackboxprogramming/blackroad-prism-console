@@ -10,19 +10,31 @@ import json
 from collections import defaultdict, Counter
 import itertools
 
+
+def _make_logger(verbose: bool):
+    """Return a callable that prints conditionally."""
+
+    def _log(message=""):
+        if verbose:
+            print(message)
+
+    return _log
+
 class RohoncDecoder:
-    def __init__(self, bible_file='bible_full.txt', numbers_file='bible_numbers.txt'):
+    def __init__(self, bible_file='bible_full.txt', numbers_file='bible_numbers.txt', *, verbose=True):
         """Initialize decoder with Bible text and numbers"""
-        
+        self.verbose = verbose
+        self._log = _make_logger(verbose)
+
         # Load Bible text
         with open(bible_file, 'r', encoding='utf-8') as f:
             self.bible_text = f.read()
-        
+
         # Load Bible numbers
         with open(numbers_file, 'r') as f:
             self.bible_numbers = [int(line.strip()) for line in f if line.strip()]
         
-        print(f"Loaded {len(self.bible_text)} chars and {len(self.bible_numbers)} numbers")
+        self._log(f"Loaded {len(self.bible_text)} chars and {len(self.bible_numbers)} numbers")
         
         # Build lookup tables
         self.build_lookup_tables()
@@ -51,7 +63,7 @@ class RohoncDecoder:
         for word in set(words):
             self.words_by_length[len(word)].append(word)
         
-        print(f"Built lookup tables: {len(self.verse_map)} verses, {len(self.word_freq)} unique words")
+        self._log(f"Built lookup tables: {len(self.verse_map)} verses, {len(self.word_freq)} unique words")
     
     def extract_verses(self):
         """Extract verse structure from Bible"""
