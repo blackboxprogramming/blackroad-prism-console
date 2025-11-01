@@ -1,0 +1,44 @@
+{
+  "type": "blackroad.deploy.attestation/v1",
+  "action": "deploy",
+  "env": "prod",
+  "decision": {
+    "allow": true,
+    "policy_package": "deploy.authz",
+    "policy_digest_sha256": "<sha256-of-policy.rego>",
+    "deny_reason": null
+  },
+  "inputs": {
+    "commit_sha": "<git-sha>",
+    "commit_signer": "<cosign.pub or gpg keyid>",
+    "ci_system": "<github_actions>",
+    "ci_runner": "<org/self-hosted-prod>",
+    "workflow": "<deploy.yml>",
+    "checks": {
+      "tests": "pass",
+      "coverage": 0.86,
+      "coverage_min": 0.80,
+      "lint": "pass",
+      "sast": "pass"
+    },
+    "changed_paths": [
+      "services/payments/api/handler.go",
+      "infra/k8s/payments.yaml"
+    ],
+    "approvals": {
+      "count": 2,
+      "required": 2,
+      "roles_required": ["owner", "security"],
+      "roles_present": ["owner", "security"]
+    }
+  },
+  "provenance": {
+    "policy_repo": "git@github.com:blackroad/policy.git",
+    "policy_ref": "refs/heads/main@<sha>",
+    "runner_claims": {
+      "runner_id": "<id>",
+      "timestamp": "2025-10-30T12:34:56Z",
+      "actor": "Alexa Amundson"
+    }
+  }
+}
