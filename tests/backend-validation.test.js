@@ -1,77 +1,67 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-process.env.JWT_SECRET = 'test-secret';
-const { app } = require('../backend/server');
+const { createServer } = require('../srv/blackroad-api/server_full.js');
+const { getAuthCookie } = require('./helpers/auth.js');
 
-function getPort(server) {
-  return server.address().port;
+async function withServer(options, callback) {
+  const { server } = createServer(options);
+  await new Promise((resolve) => server.listen(0, resolve));
+  const address = server.address();
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  try {
+    await callback({ baseUrl });
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
 }
 
-test('rejects malformed json and missing fields', async () => {
-  const server = app.listen(0);
-  const port = getPort(server);
-  try {
-    // login to get token
-    const loginRes = await fetch(`http://127.0.0.1:${port}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: 'root', password: 'Codex2025' })
-    });
-    const loginJson = await loginRes.json();
-    const token = loginJson.token;
+test('rejects malformed json payloads', async () => {
+  await withServer({ sessionSecret: 'validation-secret' }, async ({ baseUrl }) => {
+    const cookie = await getAuthCookie(baseUrl);
 
-    // malformed json
-    const badRes = await fetch(`http://127.0.0.1:${port}/api/tasks`, {
+    const response = await fetch(`${baseUrl}/api/tasks`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        Cookie: cookie.join('; '),
       },
-      body: '{"title": "bad"' // missing closing brace
+      body: '{"title": "missing brace"',
     });
-    assert.equal(badRes.status, 400);
 
-    // missing title field
-    const missRes = await fetch(`http://127.0.0.1:${port}/api/tasks`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({})
-    });
-    assert.equal(missRes.status, 400);
-  } finally {
-    server.close();
-  }
+    assert.equal(response.status, 400);
+    const body = await response.json();
+    assert.equal(body.error, 'invalid json');
+  });
 });
 
-test('returns json for not found routes', async () => {
-  const server = app.listen(0);
-  const port = getPort(server);
-  try {
-    const res = await fetch(`http://127.0.0.1:${port}/nope`);
-    assert.equal(res.status, 404);
-    const contentType = res.headers.get('content-type') || '';
-    assert.ok(contentType.includes('application/json'));
-    const body = await res.json();
+test('requires a non-empty title field', async () => {
+  await withServer({ sessionSecret: 'validation-secret' }, async ({ baseUrl }) => {
+    const cookie = await getAuthCookie(baseUrl);
+
+    const response = await fetch(`${baseUrl}/api/tasks`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: cookie.join('; '),
+      },
+      body: JSON.stringify({ title: '' }),
+    });
+
+    assert.equal(response.status, 400);
+    const body = await response.json();
+    assert.equal(body.error, 'invalid task');
+  });
+});
+
+test('returns json for unknown routes', async () => {
+  await withServer({ sessionSecret: 'validation-secret' }, async ({ baseUrl }) => {
+    const response = await fetch(`${baseUrl}/nope`);
+
+    assert.equal(response.status, 404);
+    assert.equal(response.headers.get('content-type'), 'application/json; charset=utf-8');
+    const body = await response.json();
     assert.equal(body.error, 'not found');
-  } finally {
-    server.close();
-  }
+  });
 });
-
-test('returns json for not found routes', async () => {
-  const server = app.listen(0);
-  const port = getPort(server);
-
-  const res = await fetch(`http://127.0.0.1:${port}/nope`);
-  assert.equal(res.status, 404);
-  assert.equal(res.headers.get('content-type'), 'application/json');
-  const body = await res.json();
-  assert.equal(body.error, 'not found');
-
-  server.close();
-});
-
