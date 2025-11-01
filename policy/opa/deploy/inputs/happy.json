@@ -1,0 +1,17 @@
+{
+  "action": "deploy",
+  "env": "prod",
+  "commit": {"sha": "abc123", "verified": true, "signer": "cosign.pub"},
+  "ci": {"system": "github_actions", "runner": "org/self-hosted-prod", "workflow": "deploy.yml"},
+  "checks": {"tests": "pass", "coverage": 0.86, "coverage_min": 0.80, "lint": "pass", "sast": "pass"},
+  "review": {"approvals": 2, "required": 2, "roles": ["owner", "security"], "present": ["owner", "security"]},
+  "change": {"paths": ["services/payments/api/handler.go", "infra/k8s/payments.yaml"]},
+  "policy": {
+    "allowed_paths": ["services/payments/", "infra/k8s/"],
+    "trusted_runners": ["org/self-hosted-prod"],
+    "trusted_workflows": ["deploy.yml"],
+    "trusted_ci": ["github_actions"]
+  },
+  "timestamp": "2025-10-30T12:34:56Z",
+  "actor": {"id": "U123", "name": "Alexa Amundson"}
+}
