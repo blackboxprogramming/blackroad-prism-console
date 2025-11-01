@@ -11,6 +11,8 @@ services/*/node_modules/
 dist/
 .cache/
 .env
+.env.local
+.env.*.local
 *.egg-info/
 *.egg-info
 !tools/tools-adapter/.env
