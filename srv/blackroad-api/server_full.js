@@ -1,29 +1,16 @@
-<!-- FILE: /srv/blackroad-api/server_full.js -->
-// FILE: srv/blackroad-api/server_full.js
-// <!-- FILE: srv/blackroad-api/server_full.js -->
-/* BlackRoad API — Express + SQLite + Socket.IO + LLM bridge
-   Runs behind Nginx on port 4000 with cookie-session auth.
-   Env:
-     PORT=4000
-     SESSION_SECRET=
-     INTERNAL_TOKEN=
-     ALLOW_ORIGINS=
-     DB_PATH=/srv/blackroad-api/blackroad.db
-     LLM_URL=http://127.0.0.1:8000/chat
-     MATH_ENGINE_URL=http://127.0.0.1:8100
-     ALLOW_SHELL=false
-*/
+'use strict';
+
+/**
+ * BlackRoad API — Express + SQLite + Socket.IO + LLM bridge
+ * Runs behind Nginx on port 4000 with cookie-session auth.
+ */
 
 require('dotenv').config();
+
 const http = require('http');
 const os = require('os');
 const path = require('path');
-const express = require('express');
-let compression;
-try { compression = require('compression'); } catch { compression = () => (req,res,next)=>next(); }
-const morgan = require('morgan');
 const fs = require('fs');
-require('dotenv').config();
 
 const express = require('express');
 const compression = require('compression');
@@ -31,81 +18,173 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const cookieSession = require('cookie-session');
+const morgan = require('morgan');
 const { body, validationResult } = require('express-validator');
 const { Server: SocketIOServer } = require('socket.io');
 const { exec } = require('child_process');
 const { randomUUID } = require('crypto');
+const EventEmitter = require('events');
 const Stripe = require('stripe');
+
 const verify = require('./lib/verify');
 const notify = require('./lib/notify');
 const logger = require('./lib/log');
+const git = require('./lib/git');
+const deploy = require('./lib/deploy');
+const { fetchWithProbe } = require('./lib/fetch_probe');
+const { db, DB_PATH: libraryDbPath } = require('./lib/db');
+const { TernaryError } = require('./lib/ternaryError');
 const attachDebugProbes = require('./modules/debug_probes');
 const maintenanceGuard = require('./modules/maintenanceGuard');
 const attachLlmRoutes = require('./routes/admin_llm');
 const gitRouter = require('./routes/git');
 const providersRouter = require('./routes/providers');
 const attachSlackExceptions = require('./modules/slack_exceptions');
-const EventEmitter = require('events');
-const Stripe = require('stripe');
-const verify = require('./lib/verify');
-const git = require('./lib/git');
-const deploy = require('./lib/deploy');
-const notify = require('./lib/notify');
-const logger = require('./lib/log');
-const { fetchWithProbe } = require('./lib/fetch_probe');
-const { db, DB_PATH } = require('./lib/db');
-const { TernaryError } = require('./lib/ternaryError');
-const attachLlmRoutes = require('./routes/admin_llm');
-const gitRouter = require('./routes/git');
-const providersRouter = require('./routes/providers');
-const { db, DB_PATH } = require('./lib/db');
-const { TernaryError } = require('./lib/ternaryError');
-const attachLlmRoutes = require('./routes/admin_llm');
-const gitRouter = require('./routes/git');
-const providersRouter = require('./routes/providers');
 const contradictionRoutes = require('./routes/contradictions');
 const { contradictionLogger } = require('./middleware/contradictionLogger');
 const { loadFlags } = require('../../packages/flags/store');
 const { isOn } = require('../../packages/flags/eval');
 
-// --- Config
-const PORT = parseInt(process.env.PORT || '4000', 10);
-const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-change-me';
-const DB_PATH = process.env.DB_PATH || '/srv/blackroad-api/blackroad.db';
-const LLM_URL = process.env.LLM_URL || 'http://127.0.0.1:8000/chat';
-const ALLOW_SHELL =
-  String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
-const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
-const BILLING_DISABLE =
-  String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
-const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
-const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
-const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
-const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
-const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
-  ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
-  : [];
-const MATH_ENGINE_URL = process.env.MATH_ENGINE_URL || '';
-const ALLOW_SHELL = String(process.env.ALLOW_SHELL || 'false').toLowerCase() === 'true';
-const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
-const BILLING_DISABLE = String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
-const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
-const WEB_ROOT = process.env.WEB_ROOT || '/var/www/blackroad';
-const BILLING_DISABLE =
-  String(process.env.BILLING_DISABLE || 'false').toLowerCase() === 'true';
-const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || 'change-me';
-const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
-const BRANCH_MAIN = process.env.BRANCH_MAIN || 'main';
-const BRANCH_STAGING = process.env.BRANCH_STAGING || 'staging';
-const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
-const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
-const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
-const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim()) : [];
-const DEBUG_MODE =
-  String(process.env.DEBUG_MODE || process.env.DEBUG_PROBES || 'false').toLowerCase() ===
-  'true';
-const FLAGS_PARAM = process.env.FLAGS_PARAM || '/blackroad/dev/flags';
-const FLAGS_MAX_AGE_MS = Number(process.env.FLAGS_MAX_AGE_MS || '30000');
+const CRITICAL_ENV = {
+  SESSION_SECRET: 'Session secret used to encrypt cookies',
+  INTERNAL_TOKEN: 'Internal API token used for inter-service auth',
+  ALLOW_ORIGINS: 'Comma separated list of allowed origins for CORS',
+};
+
+const OPTIONAL_DEFAULTS = {
+  PORT: 4000,
+  DB_PATH: libraryDbPath || '/srv/blackroad-api/blackroad.db',
+  LLM_URL: 'http://127.0.0.1:8000/chat',
+  MATH_ENGINE_URL: '',
+  WEB_ROOT: '/var/www/blackroad',
+  BILLING_DISABLE: false,
+  BRANCH_MAIN: 'main',
+  BRANCH_STAGING: 'staging',
+  FLAGS_PARAM: '/blackroad/dev/flags',
+  FLAGS_MAX_AGE_MS: 30000,
+};
+
+function parseBoolean(name, fallback = false) {
+  const raw = process.env[name];
+  if (raw === undefined || raw === null || raw === '') return fallback;
+  return /^(1|true|yes)$/i.test(String(raw).trim());
+}
+
+function parseNumber(name, fallback) {
+  const raw = process.env[name];
+  if (raw === undefined || raw === null || raw === '') return fallback;
+  const value = Number.parseInt(String(raw), 10);
+  if (Number.isNaN(value)) {
+    logger.warn({ event: 'invalid_env_number', name, value: raw, fallback });
+    return fallback;
+  }
+  return value;
+}
+
+const missingCritical = Object.entries(CRITICAL_ENV)
+  .filter(([name]) => !process.env[name] || !String(process.env[name]).trim())
+  .map(([name, description]) => ({ name, description }));
+
+if (missingCritical.length) {
+  missingCritical.forEach(({ name, description }) => {
+    logger.fatal({ event: 'missing_env', name, description });
+  });
+  process.exit(1);
+}
+
+const resolvedEnv = {
+  PORT: parseNumber('PORT', OPTIONAL_DEFAULTS.PORT),
+  SESSION_SECRET: String(process.env.SESSION_SECRET).trim(),
+  INTERNAL_TOKEN: String(process.env.INTERNAL_TOKEN).trim(),
+  ALLOW_ORIGINS: String(process.env.ALLOW_ORIGINS)
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+  DB_PATH: process.env.DB_PATH || OPTIONAL_DEFAULTS.DB_PATH,
+  LLM_URL: process.env.LLM_URL || OPTIONAL_DEFAULTS.LLM_URL,
+  MATH_ENGINE_URL: process.env.MATH_ENGINE_URL || OPTIONAL_DEFAULTS.MATH_ENGINE_URL,
+  ALLOW_SHELL: parseBoolean('ALLOW_SHELL', false),
+  WEB_ROOT: process.env.WEB_ROOT || OPTIONAL_DEFAULTS.WEB_ROOT,
+  BILLING_DISABLE: parseBoolean('BILLING_DISABLE', OPTIONAL_DEFAULTS.BILLING_DISABLE),
+  BRANCH_MAIN: process.env.BRANCH_MAIN || OPTIONAL_DEFAULTS.BRANCH_MAIN,
+  BRANCH_STAGING: process.env.BRANCH_STAGING || OPTIONAL_DEFAULTS.BRANCH_STAGING,
+  FLAGS_PARAM: process.env.FLAGS_PARAM || OPTIONAL_DEFAULTS.FLAGS_PARAM,
+  FLAGS_MAX_AGE_MS: parseNumber('FLAGS_MAX_AGE_MS', OPTIONAL_DEFAULTS.FLAGS_MAX_AGE_MS),
+  DEBUG_MODE: parseBoolean('DEBUG_MODE', parseBoolean('DEBUG_PROBES', false)),
+  BYPASS_LOGIN: parseBoolean('BYPASS_LOGIN', false),
+  PRICE_BUILDER_MONTH_CENTS: parseNumber('PRICE_BUILDER_MONTH_CENTS', 0),
+  PRICE_BUILDER_YEAR_CENTS: parseNumber('PRICE_BUILDER_YEAR_CENTS', 0),
+  PRICE_PRO_MONTH_CENTS: parseNumber('PRICE_PRO_MONTH_CENTS', 0),
+  PRICE_PRO_YEAR_CENTS: parseNumber('PRICE_PRO_YEAR_CENTS', 0),
+  PRICE_ENTERPRISE_MONTH_CENTS: parseNumber('PRICE_ENTERPRISE_MONTH_CENTS', 0),
+  PRICE_ENTERPRISE_YEAR_CENTS: parseNumber('PRICE_ENTERPRISE_YEAR_CENTS', 0),
+  STRIPE_SECRET: process.env.STRIPE_SECRET || '',
+  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || '',
+  STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY || '',
+  GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET || '',
+  AIRTABLE_API_KEY: process.env.AIRTABLE_API_KEY || '',
+  DISCORD_INVITE: process.env.DISCORD_INVITE || '',
+  GOOGLE_CALENDAR_CREDENTIALS: process.env.GOOGLE_CALENDAR_CREDENTIALS || '',
+  GSHEETS_SA_JSON: process.env.GSHEETS_SA_JSON || '',
+  GUMROAD_TOKEN: process.env.GUMROAD_TOKEN || '',
+  ICS_URL: process.env.ICS_URL || '',
+  LINEAR_API_KEY: process.env.LINEAR_API_KEY || '',
+  MAIL_PROVIDER: process.env.MAIL_PROVIDER || '',
+  SF_USERNAME: process.env.SF_USERNAME || '',
+  SHEETS_CONNECTOR_TOKEN: process.env.SHEETS_CONNECTOR_TOKEN || '',
+  SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL || '',
+  SUBSCRIBE_MODE: process.env.SUBSCRIBE_MODE || '',
+};
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
+if (!resolvedEnv.ALLOW_ORIGINS.length) {
+  logger.fatal({ event: 'missing_env', name: 'ALLOW_ORIGINS', description: 'At least one origin must be allowed' });
+  process.exit(1);
+}
+
+const optionalMissing = Object.entries({
+  STRIPE_SECRET: resolvedEnv.STRIPE_SECRET,
+  STRIPE_WEBHOOK_SECRET: resolvedEnv.STRIPE_WEBHOOK_SECRET,
+  STRIPE_PUBLIC_KEY: resolvedEnv.STRIPE_PUBLIC_KEY,
+  SLACK_WEBHOOK_URL: resolvedEnv.SLACK_WEBHOOK_URL,
+  AIRTABLE_API_KEY: resolvedEnv.AIRTABLE_API_KEY,
+  LINEAR_API_KEY: resolvedEnv.LINEAR_API_KEY,
+  GOOGLE_CALENDAR_CREDENTIALS: resolvedEnv.GOOGLE_CALENDAR_CREDENTIALS,
+  GSHEETS_SA_JSON: resolvedEnv.GSHEETS_SA_JSON,
+  SHEETS_CONNECTOR_TOKEN: resolvedEnv.SHEETS_CONNECTOR_TOKEN,
+  GUMROAD_TOKEN: resolvedEnv.GUMROAD_TOKEN,
+  MAIL_PROVIDER: resolvedEnv.MAIL_PROVIDER,
+}).filter(([, value]) => !value);
+
+if (optionalMissing.length) {
+  logger.warn({
+    event: 'optional_env_missing',
+    variables: optionalMissing.map(([name]) => name),
+  });
+}
+
+const PORT = resolvedEnv.PORT;
+const SESSION_SECRET = resolvedEnv.SESSION_SECRET;
+const INTERNAL_TOKEN = resolvedEnv.INTERNAL_TOKEN;
+const ALLOW_ORIGINS = resolvedEnv.ALLOW_ORIGINS;
+const DB_PATH = resolvedEnv.DB_PATH;
+const LLM_URL = resolvedEnv.LLM_URL;
+const MATH_ENGINE_URL = resolvedEnv.MATH_ENGINE_URL;
+const ALLOW_SHELL = resolvedEnv.ALLOW_SHELL;
+const WEB_ROOT = resolvedEnv.WEB_ROOT;
+const BILLING_DISABLE = resolvedEnv.BILLING_DISABLE;
+const BRANCH_MAIN = resolvedEnv.BRANCH_MAIN;
+const BRANCH_STAGING = resolvedEnv.BRANCH_STAGING;
+const FLAGS_PARAM = resolvedEnv.FLAGS_PARAM;
+const FLAGS_MAX_AGE_MS = resolvedEnv.FLAGS_MAX_AGE_MS;
+const DEBUG_MODE = resolvedEnv.DEBUG_MODE;
+const BYPASS_LOGIN = resolvedEnv.BYPASS_LOGIN;
+const GITHUB_WEBHOOK_SECRET = resolvedEnv.GITHUB_WEBHOOK_SECRET;
+const STRIPE_SECRET = resolvedEnv.STRIPE_SECRET;
+const STRIPE_WEBHOOK_SECRET = resolvedEnv.STRIPE_WEBHOOK_SECRET;
+const STRIPE_PUBLIC_KEY = resolvedEnv.STRIPE_PUBLIC_KEY;
+
 const PRISM_PLACEHOLDER = {
   github: [
     { label: 'Mon', value: 32 },
@@ -128,29 +207,50 @@ const PRISM_PLACEHOLDER = {
     churnRate: 1.8,
   },
 };
-const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS
-  ? process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim())
-  : [];
 
-['SESSION_SECRET', 'INTERNAL_TOKEN', 'ALLOW_ORIGINS'].forEach((name) => {
-  if (!process.env[name]) {
-    logger.fatal({ event: 'missing_env', name });
-    process.exit(1);
-  }
-});
+const {
+  PRICE_BUILDER_MONTH_CENTS,
+  PRICE_BUILDER_YEAR_CENTS,
+  PRICE_PRO_MONTH_CENTS,
+  PRICE_PRO_YEAR_CENTS,
+  PRICE_ENTERPRISE_MONTH_CENTS,
+  PRICE_ENTERPRISE_YEAR_CENTS,
+  AIRTABLE_API_KEY,
+  DISCORD_INVITE,
+  GOOGLE_CALENDAR_CREDENTIALS,
+  GSHEETS_SA_JSON,
+  GUMROAD_TOKEN,
+  ICS_URL,
+  LINEAR_API_KEY,
+  MAIL_PROVIDER,
+  SF_USERNAME,
+  SHEETS_CONNECTOR_TOKEN,
+  SLACK_WEBHOOK_URL,
+  SUBSCRIBE_MODE,
+} = resolvedEnv;
 
-const SESSION_SECRET = process.env.SESSION_SECRET;
-const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN;
-const ALLOW_ORIGINS = process.env.ALLOW_ORIGINS.split(',').map((s) => s.trim());
 const stripeClient = STRIPE_SECRET ? new Stripe(STRIPE_SECRET) : null;
+const BILLING_ENABLED = Boolean(stripeClient && STRIPE_WEBHOOK_SECRET && !BILLING_DISABLE);
+if (!stripeClient) {
+  logger.info({ event: 'stripe_disabled', reason: 'missing_secret' });
+} else {
+  if (!STRIPE_WEBHOOK_SECRET) {
+    logger.warn({ event: 'stripe_webhook_disabled', reason: 'missing STRIPE_WEBHOOK_SECRET' });
+  }
+  if (BILLING_DISABLE) {
+    logger.warn({ event: 'billing_disabled_flag', enabled: false, via: 'BILLING_DISABLE' });
+  } else if (BILLING_ENABLED) {
+    logger.info({ event: 'billing_ready', provider: 'stripe' });
+  }
+}
 
 const PLANS = [
   {
     id: 'builder',
     name: 'Builder',
     slug: 'builder',
-    monthly: Number(process.env.PRICE_BUILDER_MONTH_CENTS || 0),
-    annual: Number(process.env.PRICE_BUILDER_YEAR_CENTS || 0),
+    monthly: PRICE_BUILDER_MONTH_CENTS,
+    annual: PRICE_BUILDER_YEAR_CENTS,
     features: [
       'Portal access',
       'Agent Stack (basic)',
@@ -162,8 +262,8 @@ const PLANS = [
     id: 'pro',
     name: 'Pro',
     slug: 'pro',
-    monthly: Number(process.env.PRICE_PRO_MONTH_CENTS || 0),
-    annual: Number(process.env.PRICE_PRO_YEAR_CENTS || 0),
+    monthly: PRICE_PRO_MONTH_CENTS,
+    annual: PRICE_PRO_YEAR_CENTS,
     features: [
       'Portal access',
       'Agent Stack (basic)',
@@ -178,8 +278,8 @@ const PLANS = [
     id: 'enterprise',
     name: 'Enterprise',
     slug: 'enterprise',
-    monthly: Number(process.env.PRICE_ENTERPRISE_MONTH_CENTS || 0),
-    annual: Number(process.env.PRICE_ENTERPRISE_YEAR_CENTS || 0),
+    monthly: PRICE_ENTERPRISE_MONTH_CENTS,
+    annual: PRICE_ENTERPRISE_YEAR_CENTS,
     features: [
       'Portal access',
       'Agent Stack (basic)',
@@ -414,7 +514,7 @@ app.use(
     keys: [SESSION_SECRET],
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: NODE_ENV === 'production',
     maxAge: 1000 * 60 * 60 * 8, // 8h
   })
 );
@@ -526,9 +626,9 @@ app.post(
     // dev defaults: root / Codex2025 (can be replaced with real auth)
     if (
       (username === 'root' && password === 'Codex2025') ||
-      process.env.BYPASS_LOGIN === 'true'
+      BYPASS_LOGIN
     ) {
-    if ((username === 'root' && password === 'Codex2025') || process.env.BYPASS_LOGIN === 'true') {
+    if ((username === 'root' && password === 'Codex2025') || BYPASS_LOGIN) {
       req.session.user = { username, role: 'dev', plan: 'free' };
       req.session.user = { username, role: 'dev' };
       return res.json({ ok: true, user: req.session.user });
@@ -903,18 +1003,18 @@ const VALID_CYCLES = ['monthly', 'annual'];
 app.get('/api/connectors/status', async (_req, res) => {
   const config = {
     stripe: !!(
-      process.env.STRIPE_PUBLIC_KEY &&
-      process.env.STRIPE_SECRET &&
-      process.env.STRIPE_WEBHOOK_SECRET
+      STRIPE_PUBLIC_KEY &&
+      STRIPE_SECRET &&
+      STRIPE_WEBHOOK_SECRET
     ),
-    mail: !!process.env.MAIL_PROVIDER,
+    mail: !!MAIL_PROVIDER,
     sheets: !!(
-      process.env.GSHEETS_SA_JSON || process.env.SHEETS_CONNECTOR_TOKEN
+      GSHEETS_SA_JSON || SHEETS_CONNECTOR_TOKEN
     ),
     calendar: !!(
-      process.env.GOOGLE_CALENDAR_CREDENTIALS || process.env.ICS_URL
+      GOOGLE_CALENDAR_CREDENTIALS || ICS_URL
     ),
-    discord: !!process.env.DISCORD_INVITE,
+    discord: !!DISCORD_INVITE,
     webhooks: false,
   };
 
@@ -926,22 +1026,22 @@ app.get('/api/connectors/status', async (_req, res) => {
   };
 
   try {
-    if (process.env.SLACK_WEBHOOK_URL) {
+    if (SLACK_WEBHOOK_URL) {
       await notify.slack('status check');
       live.slack = true;
     }
   } catch {}
 
   try {
-    if (process.env.AIRTABLE_API_KEY) live.airtable = true;
+    if (AIRTABLE_API_KEY) live.airtable = true;
   } catch {}
 
   try {
-    if (process.env.LINEAR_API_KEY) live.linear = true;
+    if (LINEAR_API_KEY) live.linear = true;
   } catch {}
 
   try {
-    if (process.env.SF_USERNAME) live.salesforce = true;
+    if (SF_USERNAME) live.salesforce = true;
   } catch {}
 
   config.webhooks = config.stripe;
@@ -952,15 +1052,15 @@ app.get('/api/connectors/status', async (_req, res) => {
 // Basic health endpoint exposing provider mode
 app.get('/api/subscribe/health', (_req, res) => {
   const mode =
-    process.env.SUBSCRIBE_MODE ||
-    (process.env.STRIPE_SECRET
+    SUBSCRIBE_MODE ||
+    (STRIPE_SECRET
       ? 'stripe'
-      : process.env.GUMROAD_TOKEN
+      : GUMROAD_TOKEN
         ? 'gumroad'
         : 'local');
   let providerReady = false;
-  if (mode === 'stripe') providerReady = !!process.env.STRIPE_SECRET;
-  else if (mode === 'gumroad') providerReady = !!process.env.GUMROAD_TOKEN;
+  if (mode === 'stripe') providerReady = !!STRIPE_SECRET;
+  else if (mode === 'gumroad') providerReady = !!GUMROAD_TOKEN;
   else providerReady = true;
   res.json({ ok: true, mode, providerReady });
 });
@@ -970,7 +1070,7 @@ app.post('/api/subscribe/checkout', (req, res) => {
   if (!VALID_PLANS.includes(plan) || !VALID_CYCLES.includes(cycle)) {
     return res.status(400).json({ error: 'invalid_input' });
   }
-  if (!process.env.STRIPE_SECRET) {
+  if (!STRIPE_SECRET) {
     return res.status(409).json({ mode: 'invoice' });
   }
   // Stripe integration would go here
@@ -1068,18 +1168,18 @@ const VALID_CYCLES = ['monthly', 'annual'];
 
 app.get('/api/connectors/status', (req, res) => {
   const stripe = !!(
-    process.env.STRIPE_PUBLIC_KEY &&
-    process.env.STRIPE_SECRET &&
-    process.env.STRIPE_WEBHOOK_SECRET
+    STRIPE_PUBLIC_KEY &&
+    STRIPE_SECRET &&
+    STRIPE_WEBHOOK_SECRET
   );
-  const mail = !!process.env.MAIL_PROVIDER;
+  const mail = !!MAIL_PROVIDER;
   const sheets = !!(
-    process.env.GSHEETS_SA_JSON || process.env.SHEETS_CONNECTOR_TOKEN
+    GSHEETS_SA_JSON || SHEETS_CONNECTOR_TOKEN
   );
   const calendar = !!(
-    process.env.GOOGLE_CALENDAR_CREDENTIALS || process.env.ICS_URL
+    GOOGLE_CALENDAR_CREDENTIALS || ICS_URL
   );
-  const discord = !!process.env.DISCORD_INVITE;
+  const discord = !!DISCORD_INVITE;
   const webhooks = stripe; // placeholder
   res.json({ stripe, mail, sheets, calendar, discord, webhooks });
 });
@@ -1087,15 +1187,15 @@ app.get('/api/connectors/status', (req, res) => {
 // Basic health endpoint exposing provider mode
 app.get('/api/subscribe/health', (_req, res) => {
   const mode =
-    process.env.SUBSCRIBE_MODE ||
-    (process.env.STRIPE_SECRET
+    SUBSCRIBE_MODE ||
+    (STRIPE_SECRET
       ? 'stripe'
-      : process.env.GUMROAD_TOKEN
+      : GUMROAD_TOKEN
         ? 'gumroad'
         : 'local');
   let providerReady = false;
-  if (mode === 'stripe') providerReady = !!process.env.STRIPE_SECRET;
-  else if (mode === 'gumroad') providerReady = !!process.env.GUMROAD_TOKEN;
+  if (mode === 'stripe') providerReady = !!STRIPE_SECRET;
+  else if (mode === 'gumroad') providerReady = !!GUMROAD_TOKEN;
   else providerReady = true;
   res.json({ ok: true, mode, providerReady });
 });
@@ -1105,7 +1205,7 @@ app.post('/api/subscribe/checkout', (req, res) => {
   if (!VALID_PLANS.includes(plan) || !VALID_CYCLES.includes(cycle)) {
     return res.status(400).json({ error: 'invalid_input' });
   }
-  if (!process.env.STRIPE_SECRET) {
+  if (!STRIPE_SECRET) {
     return res.status(409).json({ mode: 'invoice' });
   }
   // Stripe integration would go here
@@ -1344,19 +1444,19 @@ app.get('/api/connectors/status', async (_req, res) => {
     salesforce: false,
   };
   try {
-    if (process.env.SLACK_WEBHOOK_URL) {
+    if (SLACK_WEBHOOK_URL) {
       await notify.slack('status check');
       status.slack = true;
     }
   } catch {}
   try {
-    if (process.env.AIRTABLE_API_KEY) status.airtable = true;
+    if (AIRTABLE_API_KEY) status.airtable = true;
   } catch {}
   try {
-    if (process.env.LINEAR_API_KEY) status.linear = true;
+    if (LINEAR_API_KEY) status.linear = true;
   } catch {}
   try {
-    if (process.env.SF_USERNAME) status.salesforce = true;
+    if (SF_USERNAME) status.salesforce = true;
   } catch {}
   res.json(status);
 });
